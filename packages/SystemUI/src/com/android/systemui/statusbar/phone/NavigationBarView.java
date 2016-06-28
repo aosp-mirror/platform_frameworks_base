@@ -22,6 +22,7 @@ import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.app.ActivityManager;
+import android.annotation.DrawableRes;
 import android.app.StatusBarManager;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -34,6 +35,7 @@ import android.os.RemoteException;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.ContextThemeWrapper;
 import android.view.Display;
 import android.view.IDockedStackListener.Stub;
 import android.view.MotionEvent;
@@ -51,8 +53,10 @@ import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.statusbar.phone.NavGesture;
 import com.android.systemui.plugins.statusbar.phone.NavGesture.GestureHelper;
+import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.policy.DeadZone;
+import com.android.systemui.statusbar.policy.KeyButtonDrawable;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -78,14 +82,14 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     int mDisabledFlags = 0;
     int mNavigationIconHints = 0;
 
-    private Drawable mBackIcon, mBackLandIcon, mBackAltIcon, mBackAltLandIcon;
-    private Drawable mBackCarModeIcon, mBackLandCarModeIcon;
-    private Drawable mBackAltCarModeIcon, mBackAltLandCarModeIcon;
-    private Drawable mHomeDefaultIcon, mHomeCarModeIcon;
-    private Drawable mRecentIcon;
-    private Drawable mDockedIcon;
-    private Drawable mImeIcon;
-    private Drawable mMenuIcon;
+    private KeyButtonDrawable mBackIcon, mBackLandIcon, mBackAltIcon, mBackAltLandIcon;
+    private KeyButtonDrawable mBackCarModeIcon, mBackLandCarModeIcon;
+    private KeyButtonDrawable mBackAltCarModeIcon, mBackAltLandCarModeIcon;
+    private KeyButtonDrawable mHomeDefaultIcon, mHomeCarModeIcon;
+    private KeyButtonDrawable mRecentIcon;
+    private KeyButtonDrawable mDockedIcon;
+    private KeyButtonDrawable mImeIcon;
+    private KeyButtonDrawable mMenuIcon;
 
     private GestureHelper mGestureHelper;
     private DeadZone mDeadZone;
@@ -217,6 +221,10 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         return mBarTransitions;
     }
 
+    public LightBarTransitionsController getLightTransitionsController() {
+        return mBarTransitions.getLightTransitionsController();
+    }
+
     public void setComponents(RecentsComponent recentsComponent, Divider divider) {
         mRecentsComponent = recentsComponent;
         mDivider = divider;
@@ -281,34 +289,60 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         return mButtonDispatchers.get(R.id.ime_switcher);
     }
 
+    public SparseArray<ButtonDispatcher> getButtonDispatchers() {
+        return mButtonDispatchers;
+    }
+
     private void updateCarModeIcons(Context ctx) {
-        mBackCarModeIcon = ctx.getDrawable(R.drawable.ic_sysbar_back_carmode);
+        mBackCarModeIcon = getDrawable(ctx,
+                R.drawable.ic_sysbar_back_carmode, R.drawable.ic_sysbar_back_carmode);
         mBackLandCarModeIcon = mBackCarModeIcon;
-        mBackAltCarModeIcon = ctx.getDrawable(R.drawable.ic_sysbar_back_ime_carmode);
+        mBackAltCarModeIcon = getDrawable(ctx,
+                R.drawable.ic_sysbar_back_ime_carmode, R.drawable.ic_sysbar_back_ime_carmode);
         mBackAltLandCarModeIcon = mBackAltCarModeIcon;
-        mHomeCarModeIcon = ctx.getDrawable(R.drawable.ic_sysbar_home_carmode);
+        mHomeCarModeIcon = getDrawable(ctx,
+                R.drawable.ic_sysbar_home_carmode, R.drawable.ic_sysbar_home_carmode);
     }
 
     private void updateIcons(Context ctx, Configuration oldConfig, Configuration newConfig) {
         if (oldConfig.orientation != newConfig.orientation
                 || oldConfig.densityDpi != newConfig.densityDpi) {
-            mDockedIcon = ctx.getDrawable(R.drawable.ic_sysbar_docked);
+            mDockedIcon = getDrawable(ctx,
+                    R.drawable.ic_sysbar_docked, R.drawable.ic_sysbar_docked_dark);
         }
         if (oldConfig.densityDpi != newConfig.densityDpi) {
-            mBackIcon = ctx.getDrawable(R.drawable.ic_sysbar_back);
+            mBackIcon = getDrawable(ctx, R.drawable.ic_sysbar_back, R.drawable.ic_sysbar_back_dark);
             mBackLandIcon = mBackIcon;
-            mBackAltIcon = ctx.getDrawable(R.drawable.ic_sysbar_back_ime);
+            mBackAltIcon = getDrawable(ctx,
+                    R.drawable.ic_sysbar_back_ime, R.drawable.ic_sysbar_back_ime_dark);
             mBackAltLandIcon = mBackAltIcon;
 
-            mHomeDefaultIcon = ctx.getDrawable(R.drawable.ic_sysbar_home);
-            mRecentIcon = ctx.getDrawable(R.drawable.ic_sysbar_recent);
-            mMenuIcon = ctx.getDrawable(R.drawable.ic_sysbar_menu);
-            mImeIcon = ctx.getDrawable(R.drawable.ic_ime_switcher_default);
+            mHomeDefaultIcon = getDrawable(ctx,
+                    R.drawable.ic_sysbar_home, R.drawable.ic_sysbar_home_dark);
+            mRecentIcon = getDrawable(ctx,
+                    R.drawable.ic_sysbar_recent, R.drawable.ic_sysbar_recent_dark);
+            mMenuIcon = getDrawable(ctx, R.drawable.ic_sysbar_menu, R.drawable.ic_sysbar_menu_dark);
+
+            Context darkContext = new ContextThemeWrapper(ctx, R.style.DualToneDarkTheme);
+            Context lightContext = new ContextThemeWrapper(ctx, R.style.DualToneLightTheme);
+            mImeIcon = getDrawable(darkContext, lightContext,
+                    R.drawable.ic_ime_switcher_default, R.drawable.ic_ime_switcher_default);
 
             if (ALTERNATE_CAR_MODE_UI) {
                 updateCarModeIcons(ctx);
             }
         }
+    }
+
+    private KeyButtonDrawable getDrawable(Context ctx, @DrawableRes int lightIcon,
+            @DrawableRes int darkIcon) {
+        return getDrawable(ctx, ctx, lightIcon, darkIcon);
+    }
+
+    private KeyButtonDrawable getDrawable(Context darkContext, Context lightContext,
+            @DrawableRes int lightIcon, @DrawableRes int darkIcon) {
+        return KeyButtonDrawable.create(lightContext.getDrawable(lightIcon),
+                darkContext.getDrawable(darkIcon));
     }
 
     @Override
@@ -328,13 +362,13 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         setNavigationIconHints(hints, false);
     }
 
-    private Drawable getBackIconWithAlt(boolean carMode, boolean landscape) {
+    private KeyButtonDrawable getBackIconWithAlt(boolean carMode, boolean landscape) {
         return landscape
                 ? carMode ? mBackAltLandCarModeIcon : mBackAltLandIcon
                 : carMode ? mBackAltCarModeIcon : mBackAltIcon;
     }
 
-    private Drawable getBackIcon(boolean carMode, boolean landscape) {
+    private KeyButtonDrawable getBackIcon(boolean carMode, boolean landscape) {
         return landscape
                 ? carMode ? mBackLandCarModeIcon : mBackLandIcon
                 : carMode ? mBackCarModeIcon : mBackIcon;
@@ -357,7 +391,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         // We have to replace or restore the back and home button icons when exiting or entering
         // carmode, respectively. Recents are not available in CarMode in nav bar so change
         // to recent icon is not required.
-        Drawable backIcon = (backAlt)
+        KeyButtonDrawable backIcon = (backAlt)
                 ? getBackIconWithAlt(mUseCarModeUi, mVertical)
                 : getBackIcon(mUseCarModeUi, mVertical);
 
@@ -380,6 +414,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         getMenuButton().setImageDrawable(mMenuIcon);
 
         setDisabledFlags(mDisabledFlags, true);
+
+        mBarTransitions.reapplyDarkIntensity();
     }
 
     public void setDisabledFlags(int disabledFlags) {
@@ -565,6 +601,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     private void updateRecentsIcon() {
         getRecentsButton().setImageDrawable(mDockedStackExists ? mDockedIcon : mRecentIcon);
+        mBarTransitions.reapplyDarkIntensity();
     }
 
     public boolean isVertical() {

@@ -2912,6 +2912,30 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public static final int SYSTEM_UI_FLAG_LIGHT_STATUS_BAR = 0x00002000;
 
     /**
+     * This flag was previously used for a private API. DO NOT reuse it for a public API as it might
+     * trigger undefined behavior on older platforms with apps compiled against a new SDK.
+     */
+    private static final int SYSTEM_UI_RESERVED_LEGACY1 = 0x00004000;
+
+    /**
+     * This flag was previously used for a private API. DO NOT reuse it for a public API as it might
+     * trigger undefined behavior on older platforms with apps compiled against a new SDK.
+     */
+    private static final int SYSTEM_UI_RESERVED_LEGACY2 = 0x00010000;
+
+    /**
+     * Flag for {@link #setSystemUiVisibility(int)}: Requests the navigation bar to draw in a mode
+     * that is compatible with light navigation bar backgrounds.
+     *
+     * <p>For this to take effect, the window must request
+     * {@link android.view.WindowManager.LayoutParams#FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
+     *         FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS} but not
+     * {@link android.view.WindowManager.LayoutParams#FLAG_TRANSLUCENT_NAVIGATION
+     *         FLAG_TRANSLUCENT_NAVIGATION}.
+     */
+    public static final int SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR = 0x00000010;
+
+    /**
      * @deprecated Use {@link #SYSTEM_UI_FLAG_LOW_PROFILE} instead.
      */
     @Deprecated
@@ -3104,7 +3128,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * Makes status bar transparent (but not the navigation bar).
      */
-    public static final int STATUS_BAR_TRANSPARENT = 0x0000008;
+    public static final int STATUS_BAR_TRANSPARENT = 0x00000008;
 
     /**
      * @hide

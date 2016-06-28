@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.policy;
 
-import android.annotation.DrawableRes;
-import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -60,6 +58,7 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
     private boolean mGestureAborted;
     private boolean mLongClicked;
     private OnClickListener mOnClickListener;
+    private final KeyButtonRipple mRipple;
 
     private final Runnable mCheckLongPress = new Runnable() {
         public void run() {
@@ -99,11 +98,12 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
 
         a.recycle();
 
-
         setClickable(true);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-        setBackground(new KeyButtonRipple(context, this));
+
+        mRipple = new KeyButtonRipple(context, this);
+        setBackground(mRipple);
     }
 
     public void setCode(int code) {
@@ -265,13 +265,16 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
     }
 
     @Override
-    public void setImageResource(@DrawableRes int resId) {
-        super.setImageResource(resId);
-    }
+    public void setDarkIntensity(float darkIntensity) {
+        Drawable drawable = getDrawable();
+        if (drawable != null) {
+            ((KeyButtonDrawable) getDrawable()).setDarkIntensity(darkIntensity);
 
-    @Override
-    public void setImageDrawable(@Nullable Drawable drawable) {
-        super.setImageDrawable(drawable);
+            // Since we reuse the same drawable for multiple views, we need to invalidate the view
+            // manually.
+            invalidate();
+        }
+        mRipple.setDarkIntensity(darkIntensity);
     }
 
     @Override

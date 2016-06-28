@@ -513,6 +513,11 @@ public interface WindowManagerPolicy {
         void notifyShowingDreamChanged();
 
         /**
+         * @return The currently active input method window.
+         */
+        WindowState getInputMethodWindowLw();
+
+        /**
          * Notifies window manager that {@link #isKeyguardTrustedLw} has changed.
          */
         void notifyKeyguardTrustedChanged();

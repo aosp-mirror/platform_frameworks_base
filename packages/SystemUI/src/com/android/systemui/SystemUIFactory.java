@@ -30,6 +30,7 @@ import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
+import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LockscreenWallpaper;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
@@ -96,9 +97,10 @@ public class SystemUIFactory {
                 dismissCallbackRegistry);
     }
 
-    public ScrimController createScrimController(ScrimView scrimBehind, ScrimView scrimInFront,
-            View headsUpScrim, LockscreenWallpaper lockscreenWallpaper) {
-        return new ScrimController(scrimBehind, scrimInFront, headsUpScrim);
+    public ScrimController createScrimController(LightBarController lightBarController,
+            ScrimView scrimBehind, ScrimView scrimInFront, View headsUpScrim,
+            LockscreenWallpaper lockscreenWallpaper) {
+        return new ScrimController(lightBarController, scrimBehind, scrimInFront, headsUpScrim);
     }
 
     public VolumeDialogController createVolumeDialogController(Context context,

@@ -7600,6 +7600,32 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return vis;
     }
 
+    private int updateLightNavigationBarLw(int vis, WindowState opaque,
+            WindowState opaqueOrDimming) {
+        final WindowState imeWin = mWindowManagerFuncs.getInputMethodWindowLw();
+
+        final WindowState navColorWin;
+        if (imeWin != null && imeWin.isVisibleLw()) {
+            navColorWin = imeWin;
+        } else {
+            navColorWin = opaqueOrDimming;
+        }
+
+        if (navColorWin != null) {
+            if (navColorWin == opaque) {
+                // If the top fullscreen-or-dimming window is also the top fullscreen, respect
+                // its light flag.
+                vis &= ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+                vis |= PolicyControl.getSystemUiVisibility(navColorWin, null)
+                        & View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+            } else if (navColorWin.isDimming() || navColorWin == imeWin) {
+                // Otherwise if it's dimming or it's the IME window, clear the light flag.
+                vis &= ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+            }
+        }
+        return vis;
+    }
+
     private boolean drawsSystemBarBackground(WindowState win) {
         return win == null || (win.getAttrs().flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0;
     }
@@ -7729,6 +7755,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         vis = mNavigationBarController.updateVisibilityLw(transientNavBarAllowed, oldVis, vis);
+
+        vis = updateLightNavigationBarLw(vis, mTopFullscreenOpaqueWindowState,
+                mTopFullscreenOpaqueOrDimmingWindowState);
 
         return vis;
     }
