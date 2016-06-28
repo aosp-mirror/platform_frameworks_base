@@ -441,8 +441,10 @@ std::string utf16ToUtf8(const StringPiece16& utf16) {
     }
 
     std::string utf8;
+    // Make room for '\0' explicitly.
+    utf8.resize(utf8Length + 1);
+    utf16_to_utf8(utf16.data(), utf16.length(), &*utf8.begin(), utf8Length + 1);
     utf8.resize(utf8Length);
-    utf16_to_utf8(utf16.data(), utf16.length(), &*utf8.begin());
     return utf8;
 }
 
