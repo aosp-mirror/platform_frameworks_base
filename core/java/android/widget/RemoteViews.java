@@ -202,7 +202,7 @@ public class RemoteViews implements Parcelable, Filter {
             new MutablePair<String, Class<?>>(null, null);
 
     /**
-     * This annotation indicates that a subclass of View is alllowed to be used
+     * This annotation indicates that a subclass of View is allowed to be used
      * with the {@link RemoteViews} mechanism.
      */
     @Target({ ElementType.TYPE })
