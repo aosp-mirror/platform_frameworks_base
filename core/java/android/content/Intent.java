@@ -4314,6 +4314,14 @@ public class Intent implements Parcelable, Cloneable {
     public static final int FLAG_DEBUG_TRIAGED_MISSING = 0x00000100;
 
     /**
+     * Internal flag used to indicate ephemeral applications should not be
+     * considered when resolving the intent.
+     *
+     * @hide
+     */
+    public static final int FLAG_IGNORE_EPHEMERAL = 0x00000200;
+
+    /**
      * If set, the new activity is not kept in the history stack.  As soon as
      * the user navigates away from it, the activity is finished.  This may also
      * be set with the {@link android.R.styleable#AndroidManifestActivity_noHistory
