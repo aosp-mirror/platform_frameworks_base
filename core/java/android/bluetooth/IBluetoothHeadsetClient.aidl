@@ -47,14 +47,12 @@ interface IBluetoothHeadsetClient {
     boolean acceptCall(in BluetoothDevice device, int flag);
     boolean holdCall(in BluetoothDevice device);
     boolean rejectCall(in BluetoothDevice device);
-    boolean terminateCall(in BluetoothDevice device, int index);
+    boolean terminateCall(in BluetoothDevice device, in BluetoothHeadsetClientCall call);
 
     boolean enterPrivateMode(in BluetoothDevice device, int index);
     boolean explicitCallTransfer(in BluetoothDevice device);
 
-    boolean redial(in BluetoothDevice device);
-    boolean dial(in BluetoothDevice device, String number);
-    boolean dialMemory(in BluetoothDevice device, int location);
+    BluetoothHeadsetClientCall dial(in BluetoothDevice device, String number);
 
     boolean sendDTMF(in BluetoothDevice device, byte code);
     boolean getLastVoiceTagNumber(in BluetoothDevice device);
