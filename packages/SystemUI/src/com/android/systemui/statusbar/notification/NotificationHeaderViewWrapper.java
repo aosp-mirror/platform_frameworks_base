@@ -240,7 +240,11 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         // Also, the notification might have been modified during the animation, so background
         // might be null here.
         if (iconDrawable != null) {
-            iconDrawable.mutate().setColorFilter(mIconColorFilter);
+            Drawable d = iconDrawable.mutate();
+            // DrawableContainer ignores the color filter if it's already set, so clear it first to
+            // get it set and invalidated properly.
+            d.setColorFilter(null);
+            d.setColorFilter(mIconColorFilter);
         }
     }
 
