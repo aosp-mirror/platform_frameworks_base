@@ -3003,8 +3003,8 @@ public class WindowManagerService extends IWindowManager.Stub
         if (win.mAttrs.type == TYPE_APPLICATION_STARTING) {
             transit = WindowManagerPolicy.TRANSIT_PREVIEW_DONE;
         }
-        if (win.isWinVisibleLw() && !winAnimator.isAnimationSet()
-                && winAnimator.applyAnimationLocked(transit, false)) {
+        if (win.isWinVisibleLw() && (winAnimator.isAnimationSet() ||
+                winAnimator.applyAnimationLocked(transit, false))) {
             focusMayChange = isDefaultDisplay;
             win.mAnimatingExit = true;
             win.mWinAnimator.mAnimating = true;
@@ -3170,6 +3170,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // frozen, there is no reason to animate and it can cause strange
         // artifacts when we unfreeze the display if some different animation
         // is running.
+        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "WM#applyAnimationLocked");
         if (okToDisplay()) {
             DisplayInfo displayInfo = getDefaultDisplayInfoLocked();
             final int width = displayInfo.appWidth;
@@ -3221,6 +3222,7 @@ public class WindowManagerService extends IWindowManager.Stub
         } else {
             atoken.mAppAnimator.clearAnimation();
         }
+        Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
 
         return atoken.mAppAnimator.animation != null;
     }
