@@ -554,7 +554,9 @@ public final class MediaFormat {
     /**
      * A key describing the desired clockwise rotation on an output surface.
      * This key is only used when the codec is configured using an output surface.
-     * The associated value is an integer, representing degrees.
+     * The associated value is an integer, representing degrees. Supported values
+     * are 0, 90, 180 or 270. This is an optional field; if not specified, rotation
+     * defaults to 0.
      *
      * @see MediaCodecInfo.CodecCapabilities#profileLevels
      */
