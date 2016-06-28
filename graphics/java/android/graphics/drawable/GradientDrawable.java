@@ -699,7 +699,7 @@ public class GradientDrawable extends Drawable {
             float rad = mStrokePaint.getStrokeWidth();
             canvas.saveLayer(mRect.left - rad, mRect.top - rad,
                              mRect.right + rad, mRect.bottom + rad,
-                             mLayerPaint, Canvas.HAS_ALPHA_LAYER_SAVE_FLAG);
+                             mLayerPaint);
 
             // don't perform the filter in our individual paints
             // since the layer will do it for us
