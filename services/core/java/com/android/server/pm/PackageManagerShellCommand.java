@@ -30,6 +30,10 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageParser;
+import android.content.pm.PackageParser.ApkLite;
+import android.content.pm.PackageParser.PackageLite;
+import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
@@ -48,6 +52,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.PrintWriterPrinter;
+import com.android.internal.content.PackageHelper;
 import com.android.internal.util.SizedInputStream;
 
 import dalvik.system.DexFile;
@@ -137,11 +142,26 @@ class PackageManagerShellCommand extends ShellCommand {
     private int runInstall() throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
         final InstallParams params = makeInstallParams();
+        final String inPath = getNextArg();
+        if (params.sessionParams.sizeBytes < 0 && inPath != null) {
+            File file = new File(inPath);
+            if (file.isFile()) {
+                try {
+                    ApkLite baseApk = PackageParser.parseApkLite(file, 0);
+                    PackageLite pkgLite = new PackageLite(null, baseApk, null, null, null);
+                    params.sessionParams.setSize(
+                            PackageHelper.calculateInstalledSize(pkgLite,false, params.sessionParams.abiOverride));
+                } catch (PackageParserException | IOException e) {
+                    pw.println("Error: Failed to parse APK file : " + e);
+                    return 1;
+                }
+            }
+        }
+
         final int sessionId = doCreateSession(params.sessionParams,
                 params.installerPackageName, params.userId);
         boolean abandonSession = true;
         try {
-            final String inPath = getNextArg();
             if (inPath == null && params.sessionParams.sizeBytes == 0) {
                 pw.println("Error: must either specify a package size or an APK file");
                 return 1;
