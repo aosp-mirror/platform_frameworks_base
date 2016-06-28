@@ -27,7 +27,6 @@ import android.os.Bundle;
 import android.view.DisplayListCanvas;
 import android.view.ThreadedRenderer;
 import android.view.RenderNode;
-import android.view.ThreadedRenderer;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AbsoluteLayout;
@@ -120,7 +119,7 @@ public class MultiProducerActivity extends Activity implements OnClickListener {
             if (view == null) {
                 view.postDelayed(mSetup, 50);
             }
-            ThreadedRenderer renderer = view.getHardwareRenderer();
+            ThreadedRenderer renderer = view.getThreadedRenderer();
             if (renderer == null || view.getWidth() == 0) {
                 view.postDelayed(mSetup, 50);
             }

@@ -523,7 +523,7 @@ public final class WindowManagerGlobal {
             for (int i = mRoots.size() - 1; i >= 0; --i) {
                 final ViewRootImpl root = mRoots.get(i);
                 if (root.mView != null && root.getHostVisibility() == View.VISIBLE
-                        && root.mAttachInfo.mHardwareRenderer != null) {
+                        && root.mAttachInfo.mThreadedRenderer != null) {
                     hasVisibleWindows = true;
                 } else {
                     root.destroyHardwareResources();
@@ -551,7 +551,7 @@ public final class WindowManagerGlobal {
                     pw.printf("\n\t%s (visibility=%d)", name, root.getHostVisibility());
 
                     ThreadedRenderer renderer =
-                            root.getView().mAttachInfo.mHardwareRenderer;
+                            root.getView().mAttachInfo.mThreadedRenderer;
                     if (renderer != null) {
                         renderer.dumpGfxInfo(pw, fd, args);
                     }

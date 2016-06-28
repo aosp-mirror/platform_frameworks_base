@@ -25,9 +25,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.os.Binder;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -44,10 +42,9 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.HashSet;
 
 /**
- * Hardware renderer that proxies the rendering to a render thread. Most calls
+ * Threaded renderer that proxies the rendering to a render thread. Most calls
  * are currently synchronous.
  *
  * The UI thread can block on the RenderThread, but RenderThread must never
@@ -85,7 +82,7 @@ public final class ThreadedRenderer {
     static final String RENDER_DIRTY_REGIONS_PROPERTY = "debug.hwui.render_dirty_regions";
 
     /**
-     * System property used to enable or disable hardware rendering profiling.
+     * System property used to enable or disable threaded rendering profiling.
      * The default value of this property is assumed to be false.
      *
      * When profiling is enabled, the adb shell dumpsys gfxinfo command will
@@ -113,7 +110,7 @@ public final class ThreadedRenderer {
 
     /**
      * System property used to specify the number of frames to be used
-     * when doing hardware rendering profiling.
+     * when doing threaded rendering profiling.
      * The default value of this property is #PROFILE_MAX_FRAMES.
      *
      * When profiling is enabled, the adb shell dumpsys gfxinfo command will
@@ -191,7 +188,7 @@ public final class ThreadedRenderer {
             "debug.hwui.show_non_rect_clip";
 
     /**
-     * A process can set this flag to false to prevent the use of hardware
+     * A process can set this flag to false to prevent the use of threaded
      * rendering.
      *
      * @hide
@@ -199,14 +196,14 @@ public final class ThreadedRenderer {
     public static boolean sRendererDisabled = false;
 
     /**
-     * Further hardware renderer disabling for the system process.
+     * Further threaded renderer disabling for the system process.
      *
      * @hide
      */
     public static boolean sSystemRendererDisabled = false;
 
     /**
-     * Invoke this method to disable hardware rendering in the current process.
+     * Invoke this method to disable threaded rendering in the current process.
      *
      * @hide
      */
@@ -220,9 +217,9 @@ public final class ThreadedRenderer {
     public static boolean sTrimForeground = false;
 
     /**
-     * Controls whether or not the hardware renderer should aggressively
-     * trim memory. Note that this must not be set for any process that
-     * uses WebView! This should be only used by system_process or similar
+     * Controls whether or not the renderer should aggressively trim
+     * memory. Note that this must not be set for any process that uses
+     * WebView! This should be only used by system_process or similar
      * that do not go into the background.
      */
     public static void enableForegroundTrimming() {
@@ -230,10 +227,10 @@ public final class ThreadedRenderer {
     }
 
     /**
-     * Indicates whether hardware acceleration is available under any form for
+     * Indicates whether threaded rendering is available under any form for
      * the view hierarchy.
      *
-     * @return True if the view hierarchy can potentially be hardware accelerated,
+     * @return True if the view hierarchy can potentially be defer rendered,
      *         false otherwise
      */
     public static boolean isAvailable() {
@@ -241,7 +238,7 @@ public final class ThreadedRenderer {
     }
 
     /**
-     * Sets the directory to use as a persistent storage for hardware rendering
+     * Sets the directory to use as a persistent storage for threaded rendering
      * resources.
      *
      * @param cacheDir A directory the current process can write to
@@ -253,11 +250,11 @@ public final class ThreadedRenderer {
     }
 
     /**
-     * Creates a hardware renderer using OpenGL.
+     * Creates a threaded renderer using OpenGL.
      *
      * @param translucent True if the surface is translucent, false otherwise
      *
-     * @return A hardware renderer backed by OpenGL.
+     * @return A threaded renderer backed by OpenGL.
      */
     public static ThreadedRenderer create(Context context, boolean translucent) {
         ThreadedRenderer renderer = null;
@@ -366,7 +363,7 @@ public final class ThreadedRenderer {
     }
 
     /**
-     * Destroys the hardware rendering context.
+     * Destroys the threaded rendering context.
      */
     void destroy() {
         mInitialized = false;
@@ -375,25 +372,25 @@ public final class ThreadedRenderer {
     }
 
     /**
-     * Indicates whether hardware acceleration is currently enabled.
+     * Indicates whether threaded rendering is currently enabled.
      *
-     * @return True if hardware acceleration is in use, false otherwise.
+     * @return True if threaded rendering  is in use, false otherwise.
      */
     boolean isEnabled() {
         return mEnabled;
     }
 
     /**
-     * Indicates whether hardware acceleration is currently enabled.
+     * Indicates whether threaded rendering  is currently enabled.
      *
-     * @param enabled True if the hardware renderer is in use, false otherwise.
+     * @param enabled True if the threaded renderer is in use, false otherwise.
      */
     void setEnabled(boolean enabled) {
         mEnabled = enabled;
     }
 
     /**
-     * Indicates whether hardware acceleration is currently request but not
+     * Indicates whether threaded rendering is currently request but not
      * necessarily enabled yet.
      *
      * @return True if requested, false otherwise.
@@ -403,10 +400,10 @@ public final class ThreadedRenderer {
     }
 
     /**
-     * Indicates whether hardware acceleration is currently requested but not
+     * Indicates whether threaded rendering is currently requested but not
      * necessarily enabled yet.
      *
-     * @return True to request hardware acceleration, false otherwise.
+     * @return True to request threaded rendering, false otherwise.
      */
     void setRequested(boolean requested) {
         mRequested = requested;
@@ -421,9 +418,9 @@ public final class ThreadedRenderer {
     }
 
     /**
-     * Initializes the hardware renderer for the specified surface.
+     * Initializes the threaded renderer for the specified surface.
      *
-     * @param surface The surface to hardware accelerate
+     * @param surface The surface to render
      *
      * @return True if the initialization was successful, false otherwise.
      */
@@ -436,16 +433,16 @@ public final class ThreadedRenderer {
     }
 
     /**
-     * Initializes the hardware renderer for the specified surface and setup the
+     * Initializes the threaded renderer for the specified surface and setup the
      * renderer for drawing, if needed. This is invoked when the ViewAncestor has
-     * potentially lost the hardware renderer. The hardware renderer should be
+     * potentially lost the threaded renderer. The threaded renderer should be
      * reinitialized and setup when the render {@link #isRequested()} and
      * {@link #isEnabled()}.
      *
      * @param width The width of the drawing surface.
      * @param height The height of the drawing surface.
      * @param attachInfo Information about the window.
-     * @param surface The surface to hardware accelerate
+     * @param surface The surface to render
      * @param surfaceInsets The drawing surface insets to apply
      *
      * @return true if the surface was initialized, false otherwise. Returning
@@ -466,9 +463,9 @@ public final class ThreadedRenderer {
     }
 
     /**
-     * Updates the hardware renderer for the specified surface.
+     * Updates the threaded renderer for the specified surface.
      *
-     * @param surface The surface to hardware accelerate
+     * @param surface The surface to render
      */
     void updateSurface(Surface surface) throws OutOfResourcesException {
         updateEnabledState(surface);
@@ -477,7 +474,7 @@ public final class ThreadedRenderer {
 
     /**
      * Halts any current rendering into the surface. Use this if it is unclear whether
-     * or not the surface used by the HardwareRenderer will be changing. It
+     * or not the surface used by the ThreadedRenderer will be changing. It
      * Suspends any rendering into the surface, but will not do any destruction.
      *
      * Any subsequent draws will override the pause, resuming normal operation.
@@ -519,10 +516,10 @@ public final class ThreadedRenderer {
     }
 
     /**
-     * This method should be invoked whenever the current hardware renderer
+     * This method should be invoked whenever the current threaded renderer
      * context should be reset.
      *
-     * @param surface The surface to hardware accelerate
+     * @param surface The surface to render
      */
     void invalidate(Surface surface) {
         updateSurface(surface);
@@ -589,7 +586,7 @@ public final class ThreadedRenderer {
     }
 
     /**
-     * Change the HardwareRenderer's opacity
+     * Change the ThreadedRenderer's opacity
      */
     void setOpaque(boolean opaque) {
         nSetOpaque(mNativeProxy, opaque && !mHasInsets);
@@ -658,7 +655,7 @@ public final class ThreadedRenderer {
         view.mRecreateDisplayList = false;
     }
 
-    private void updateRootDisplayList(View view, HardwareDrawCallbacks callbacks) {
+    private void updateRootDisplayList(View view, DrawCallbacks callbacks) {
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "Record View#draw()");
         updateViewTreeDisplayList(view);
 
@@ -667,13 +664,13 @@ public final class ThreadedRenderer {
             try {
                 final int saveCount = canvas.save();
                 canvas.translate(mInsetLeft, mInsetTop);
-                callbacks.onHardwarePreDraw(canvas);
+                callbacks.onPreDraw(canvas);
 
                 canvas.insertReorderBarrier();
                 canvas.drawRenderNode(view.updateDisplayListIfDirty());
                 canvas.insertInorderBarrier();
 
-                callbacks.onHardwarePostDraw(canvas);
+                callbacks.onPostDraw(canvas);
                 canvas.restoreToCount(saveCount);
                 mRootNodeNeedsUpdate = false;
             } finally {
@@ -726,29 +723,29 @@ public final class ThreadedRenderer {
 
     /**
      * Interface used to receive callbacks whenever a view is drawn by
-     * a hardware renderer instance.
+     * a threaded renderer instance.
      */
-    interface HardwareDrawCallbacks {
+    interface DrawCallbacks {
         /**
-         * Invoked before a view is drawn by a hardware renderer.
+         * Invoked before a view is drawn by a threaded renderer.
          * This method can be used to apply transformations to the
          * canvas but no drawing command should be issued.
          *
          * @param canvas The Canvas used to render the view.
          */
-        void onHardwarePreDraw(DisplayListCanvas canvas);
+        void onPreDraw(DisplayListCanvas canvas);
 
         /**
-         * Invoked after a view is drawn by a hardware renderer.
+         * Invoked after a view is drawn by a threaded renderer.
          * It is safe to invoke drawing commands from this method.
          *
          * @param canvas The Canvas used to render the view.
          */
-        void onHardwarePostDraw(DisplayListCanvas canvas);
+        void onPostDraw(DisplayListCanvas canvas);
     }
 
     /**
-     *  Indicates that the content drawn by HardwareDrawCallbacks needs to
+     *  Indicates that the content drawn by DrawCallbacks needs to
      *  be updated, which will be done by the next call to draw()
      */
     void invalidateRoot() {
@@ -762,7 +759,7 @@ public final class ThreadedRenderer {
      * @param attachInfo AttachInfo tied to the specified view.
      * @param callbacks Callbacks invoked when drawing happens.
      */
-    void draw(View view, AttachInfo attachInfo, HardwareDrawCallbacks callbacks) {
+    void draw(View view, AttachInfo attachInfo, DrawCallbacks callbacks) {
         attachInfo.mIgnoreDirtyState = true;
 
         final Choreographer choreographer = attachInfo.mViewRootImpl.mChoreographer;

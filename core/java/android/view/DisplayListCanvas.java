@@ -25,7 +25,7 @@ import android.graphics.Paint;
 import android.util.Pools.SynchronizedPool;
 
 /**
- * An implementation of a GL canvas that records drawing operations.
+ * A Canvas implementation that records drawing operations for deferred rendering.
  * This is intended for use with a DisplayList. This class keeps a list of all the Paint and
  * Bitmap objects that it draws, preventing the backing memory of Bitmaps from being freed while
  * the DisplayList is still holding a native reference to the memory.
