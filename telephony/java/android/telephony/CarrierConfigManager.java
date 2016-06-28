@@ -824,6 +824,12 @@ public class CarrierConfigManager {
     public static final String KEY_ALLOW_MERGE_WIFI_CALLS_WHEN_VOWIFI_OFF_BOOL =
             "allow_merge_wifi_calls_when_vowifi_off_bool";
 
+    /**
+     * When true, indicates that adding a call is disabled when there is an ongoing video call.
+     */
+    public static final String KEY_ALLOW_ADD_CALL_DURING_VIDEO_CALL_BOOL =
+            "allow_add_call_during_video_call";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -978,6 +984,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_TREAT_DOWNGRADED_VIDEO_CALLS_AS_VIDEO_CALLS_BOOL, false);
         sDefaults.putBoolean(KEY_DROP_VIDEO_CALL_WHEN_ANSWERING_AUDIO_CALL_BOOL, false);
         sDefaults.putBoolean(KEY_ALLOW_MERGE_WIFI_CALLS_WHEN_VOWIFI_OFF_BOOL, true);
+        sDefaults.putBoolean(KEY_ALLOW_ADD_CALL_DURING_VIDEO_CALL_BOOL, true);
     }
 
     /**
