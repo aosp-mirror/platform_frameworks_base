@@ -61,7 +61,7 @@ import java.util.Map;
 
 class BluetoothManagerService extends IBluetoothManager.Stub {
     private static final String TAG = "BluetoothManagerService";
-    private static final boolean DBG = false;
+    private static final boolean DBG = true;
 
     private static final String BLUETOOTH_ADMIN_PERM = android.Manifest.permission.BLUETOOTH_ADMIN;
     private static final String BLUETOOTH_PERM = android.Manifest.permission.BLUETOOTH;
@@ -1512,7 +1512,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                         bluetoothStateChangeHandler(BluetoothAdapter.STATE_ON,
                                                     BluetoothAdapter.STATE_TURNING_OFF);
 
-                        waitForOnOff(false, true);
+                        boolean didDisableTimeout = !waitForOnOff(false, true);
 
                         bluetoothStateChangeHandler(BluetoothAdapter.STATE_TURNING_OFF,
                                                     BluetoothAdapter.STATE_OFF);
@@ -1530,7 +1530,16 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                             mBluetoothLock.writeLock().unlock();
                         }
 
-                        SystemClock.sleep(100);
+                        //
+                        // If disabling Bluetooth times out, wait for an
+                        // additional amount of time to ensure the process is
+                        // shut down completely before attempting to restart.
+                        //
+                        if (didDisableTimeout) {
+                            SystemClock.sleep(3000);
+                        } else {
+                            SystemClock.sleep(100);
+                        }
 
                         mHandler.removeMessages(MESSAGE_BLUETOOTH_STATE_CHANGE);
                         mState = BluetoothAdapter.STATE_OFF;
