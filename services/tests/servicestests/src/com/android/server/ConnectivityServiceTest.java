@@ -17,6 +17,7 @@
 package com.android.server;
 
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
+import static android.net.ConnectivityManager.TYPE_ETHERNET;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.ConnectivityManager.getNetworkTypeName;
@@ -101,6 +102,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
     private WrappedConnectivityManager mCm;
     private MockNetworkAgent mWiFiNetworkAgent;
     private MockNetworkAgent mCellNetworkAgent;
+    private MockNetworkAgent mEthernetNetworkAgent;
 
     // This class exists to test bindProcessToNetwork and getBoundNetworkForProcess. These methods
     // do not go through ConnectivityService but talk to netd directly, so they don't automatically
@@ -244,6 +246,9 @@ public class ConnectivityServiceTest extends AndroidTestCase {
             mNetworkCapabilities = new NetworkCapabilities();
             mNetworkCapabilities.addTransportType(transport);
             switch (transport) {
+                case TRANSPORT_ETHERNET:
+                    mScore = 70;
+                    break;
                 case TRANSPORT_WIFI:
                     mScore = 60;
                     break;
@@ -302,6 +307,11 @@ public class ConnectivityServiceTest extends AndroidTestCase {
 
         public void addCapability(int capability) {
             mNetworkCapabilities.addCapability(capability);
+            mNetworkAgent.sendNetworkCapabilities(mNetworkCapabilities);
+        }
+
+        public void removeCapability(int capability) {
+            mNetworkCapabilities.removeCapability(capability);
             mNetworkAgent.sendNetworkCapabilities(mNetworkCapabilities);
         }
 
@@ -704,12 +714,14 @@ public class ConnectivityServiceTest extends AndroidTestCase {
 
     private int transportToLegacyType(int transport) {
         switch (transport) {
+            case TRANSPORT_ETHERNET:
+                return TYPE_ETHERNET;
             case TRANSPORT_WIFI:
                 return TYPE_WIFI;
             case TRANSPORT_CELLULAR:
                 return TYPE_MOBILE;
             default:
-                throw new IllegalStateException("Unknown transport" + transport);
+                throw new IllegalStateException("Unknown transport " + transport);
         }
     }
 
@@ -1064,15 +1076,12 @@ public class ConnectivityServiceTest extends AndroidTestCase {
             CallbackInfo expected = new CallbackInfo(
                     state,
                     (mockAgent != null) ? mockAgent.getNetwork() : null);
-            CallbackInfo actual;
             try {
-                actual = mCallbacks.poll(TIMEOUT_MS, TimeUnit.MILLISECONDS);
+                assertEquals("Unexpected callback:",
+                        expected, mCallbacks.poll(TIMEOUT_MS, TimeUnit.MILLISECONDS));
             } catch (InterruptedException e) {
                 fail("Did not receive expected " + expected + " after " + TIMEOUT_MS + "ms");
-                actual = null;  // Or the compiler says it might be uninitialized.
             }
-
-            assertEquals("Unexpected callback:", expected, actual);
         }
 
         void assertNoCallback() {
@@ -1177,6 +1186,150 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         genericNetworkCallback.expectCallback(CallbackState.LOST, mCellNetworkAgent);
         cellNetworkCallback.expectCallback(CallbackState.LOST, mCellNetworkAgent);
         assertNoCallbacks(genericNetworkCallback, wifiNetworkCallback, cellNetworkCallback);
+    }
+
+    @SmallTest
+    public void testMultipleLingering() {
+        NetworkRequest request = new NetworkRequest.Builder()
+                .clearCapabilities().addCapability(NET_CAPABILITY_NOT_METERED)
+                .build();
+        TestNetworkCallback callback = new TestNetworkCallback();
+        mCm.registerNetworkCallback(request, callback);
+
+        TestNetworkCallback defaultCallback = new TestNetworkCallback();
+        mCm.registerDefaultNetworkCallback(defaultCallback);
+
+        mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
+        mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
+        mEthernetNetworkAgent = new MockNetworkAgent(TRANSPORT_ETHERNET);
+
+        mCellNetworkAgent.addCapability(NET_CAPABILITY_NOT_METERED);
+        mWiFiNetworkAgent.addCapability(NET_CAPABILITY_NOT_METERED);
+        mEthernetNetworkAgent.addCapability(NET_CAPABILITY_NOT_METERED);
+
+        mCellNetworkAgent.connect(true);
+        callback.expectCallback(CallbackState.AVAILABLE, mCellNetworkAgent);
+        defaultCallback.expectCallback(CallbackState.AVAILABLE, mCellNetworkAgent);
+        assertEquals(mCellNetworkAgent.getNetwork(), mCm.getActiveNetwork());
+
+        mWiFiNetworkAgent.connect(true);
+        // We get AVAILABLE on wifi when wifi connects and satisfies our unmetered request.
+        // We then get LOSING when wifi validates and cell is outscored.
+        callback.expectCallback(CallbackState.AVAILABLE, mWiFiNetworkAgent);
+        callback.expectCallback(CallbackState.LOSING, mCellNetworkAgent);
+        defaultCallback.expectCallback(CallbackState.AVAILABLE, mWiFiNetworkAgent);
+        assertEquals(mWiFiNetworkAgent.getNetwork(), mCm.getActiveNetwork());
+
+        mEthernetNetworkAgent.connect(true);
+        callback.expectCallback(CallbackState.AVAILABLE, mEthernetNetworkAgent);
+        callback.expectCallback(CallbackState.LOSING, mWiFiNetworkAgent);
+        defaultCallback.expectCallback(CallbackState.AVAILABLE, mEthernetNetworkAgent);
+        assertEquals(mEthernetNetworkAgent.getNetwork(), mCm.getActiveNetwork());
+
+        mEthernetNetworkAgent.disconnect();
+        callback.expectCallback(CallbackState.LOST, mEthernetNetworkAgent);
+        defaultCallback.expectCallback(CallbackState.LOST, mEthernetNetworkAgent);
+        defaultCallback.expectCallback(CallbackState.AVAILABLE, mWiFiNetworkAgent);
+
+        for (int i = 0; i < 4; i++) {
+            MockNetworkAgent oldNetwork, newNetwork;
+            if (i % 2 == 0) {
+                mWiFiNetworkAgent.adjustScore(-15);
+                oldNetwork = mWiFiNetworkAgent;
+                newNetwork = mCellNetworkAgent;
+            } else {
+                mWiFiNetworkAgent.adjustScore(15);
+                oldNetwork = mCellNetworkAgent;
+                newNetwork = mWiFiNetworkAgent;
+
+            }
+            callback.expectCallback(CallbackState.LOSING, oldNetwork);
+            defaultCallback.expectCallback(CallbackState.AVAILABLE, newNetwork);
+            assertEquals(newNetwork.getNetwork(), mCm.getActiveNetwork());
+        }
+        assertEquals(mWiFiNetworkAgent.getNetwork(), mCm.getActiveNetwork());
+
+        // Verify that if a network no longer satisfies a request, we send LOST and not LOSING, even
+        // if the network is still up.
+        mWiFiNetworkAgent.removeCapability(NET_CAPABILITY_NOT_METERED);
+        callback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
+
+        // Wifi no longer satisfies our listen, which is for an unmetered network.
+        // But because its score is 55, it's still up (and the default network).
+        defaultCallback.assertNoCallback();
+        assertEquals(mWiFiNetworkAgent.getNetwork(), mCm.getActiveNetwork());
+
+        // Disconnect our test networks.
+        mWiFiNetworkAgent.disconnect();
+        defaultCallback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
+        defaultCallback.expectCallback(CallbackState.AVAILABLE, mCellNetworkAgent);
+        mCellNetworkAgent.disconnect();
+        defaultCallback.expectCallback(CallbackState.LOST, mCellNetworkAgent);
+
+        mCm.unregisterNetworkCallback(callback);
+        mService.waitForIdle();
+
+        // Check that a network is only lingered or torn down if it would not satisfy a request even
+        // if it validated.
+        request = new NetworkRequest.Builder().clearCapabilities().build();
+        callback = new TestNetworkCallback();
+
+        mCm.registerNetworkCallback(request, callback);
+
+        mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
+        mCellNetworkAgent.connect(false);   // Score: 10
+        callback.expectCallback(CallbackState.AVAILABLE, mCellNetworkAgent);
+        defaultCallback.expectCallback(CallbackState.AVAILABLE, mCellNetworkAgent);
+        assertEquals(mCellNetworkAgent.getNetwork(), mCm.getActiveNetwork());
+
+        // Bring up wifi with a score of 20.
+        // Cell stays up because it would satisfy the default request if it validated.
+        mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
+        mWiFiNetworkAgent.connect(false);   // Score: 20
+        callback.expectCallback(CallbackState.AVAILABLE, mWiFiNetworkAgent);
+        defaultCallback.expectCallback(CallbackState.AVAILABLE, mWiFiNetworkAgent);
+        assertEquals(mWiFiNetworkAgent.getNetwork(), mCm.getActiveNetwork());
+
+        mWiFiNetworkAgent.disconnect();
+        callback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
+        defaultCallback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
+        defaultCallback.expectCallback(CallbackState.AVAILABLE, mCellNetworkAgent);
+        assertEquals(mCellNetworkAgent.getNetwork(), mCm.getActiveNetwork());
+
+        // Bring up wifi with a score of 70.
+        // Cell is lingered because it would not satisfy any reques, even if it validated.
+        mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
+        mWiFiNetworkAgent.adjustScore(50);
+        mWiFiNetworkAgent.connect(false);   // Score: 70
+        callback.expectCallback(CallbackState.LOSING, mCellNetworkAgent);
+        callback.expectCallback(CallbackState.AVAILABLE, mWiFiNetworkAgent);
+        defaultCallback.expectCallback(CallbackState.AVAILABLE, mWiFiNetworkAgent);
+        assertEquals(mWiFiNetworkAgent.getNetwork(), mCm.getActiveNetwork());
+
+        // Tear down wifi.
+        mWiFiNetworkAgent.disconnect();
+        callback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
+        defaultCallback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
+        defaultCallback.expectCallback(CallbackState.AVAILABLE, mCellNetworkAgent);
+        assertEquals(mCellNetworkAgent.getNetwork(), mCm.getActiveNetwork());
+
+        // Bring up wifi, then validate it. In this case we do not linger cell. What happens is that
+        // when wifi connects, we don't linger because cell could potentially become the default
+        // network if it validated. Then, when wifi validates, we re-evaluate cell, see it has no
+        // requests, and tear it down because it's unneeded.
+        // TODO: can we linger in this case?
+        mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
+        mWiFiNetworkAgent.connect(true);
+        callback.expectCallback(CallbackState.AVAILABLE, mWiFiNetworkAgent);
+        callback.expectCallback(CallbackState.LOST, mCellNetworkAgent);
+        defaultCallback.expectCallback(CallbackState.AVAILABLE, mWiFiNetworkAgent);
+        assertEquals(mWiFiNetworkAgent.getNetwork(), mCm.getActiveNetwork());
+
+        mWiFiNetworkAgent.disconnect();
+        callback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
+
+        mCm.unregisterNetworkCallback(callback);
+        mCm.unregisterNetworkCallback(defaultCallback);
     }
 
     private void tryNetworkFactoryRequests(int capability) throws Exception {
