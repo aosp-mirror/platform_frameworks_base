@@ -456,7 +456,6 @@ public class UserManagerService extends IUserManager.Stub {
             setUserRestriction(UserManager.DISALLOW_CONFIG_WIFI, true, currentGuestUser.id);
         }
 
-        maybeInitializeDemoMode(UserHandle.USER_SYSTEM);
         mContext.registerReceiver(mDisableQuietModeCallback,
                 new IntentFilter(ACTION_DISABLE_QUIET_MODE_AFTER_UNLOCK),
                 null, mHandler);
@@ -2901,7 +2900,7 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     private void maybeInitializeDemoMode(int userId) {
-        if (UserManager.isDeviceInDemoMode(mContext)) {
+        if (UserManager.isDeviceInDemoMode(mContext) && userId != UserHandle.USER_SYSTEM) {
             String demoLauncher =
                     mContext.getResources().getString(
                             com.android.internal.R.string.config_demoModeLauncherComponent);

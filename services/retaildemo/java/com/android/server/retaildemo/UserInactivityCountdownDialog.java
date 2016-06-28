@@ -20,8 +20,6 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.CountDownTimer;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
 
@@ -30,25 +28,23 @@ import com.android.internal.R;
 public class UserInactivityCountdownDialog extends AlertDialog {
 
     private OnCountDownExpiredListener mOnCountDownExpiredListener;
-    private View mDialogView;
     private CountDownTimer mCountDownTimer;
     private long mCountDownDuration;
     private long mRefreshInterval;
 
     UserInactivityCountdownDialog(Context context, long duration, long refreshInterval) {
         super(context);
-
         mCountDownDuration = duration;
         mRefreshInterval = refreshInterval;
-        mDialogView = LayoutInflater.from(context).inflate(R.layout.alert_dialog, null);
-        String msg = context.getString(R.string.demo_user_inactivity_timeout_countdown, duration);
-        getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+
+        getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ERROR);
         WindowManager.LayoutParams attrs = getWindow().getAttributes();
         attrs.privateFlags = WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
         getWindow().setAttributes(attrs);
+
         setTitle(R.string.demo_user_inactivity_timeout_title);
-        setView(mDialogView);
-        setMessage(msg);
+        setMessage(getContext().getString(R.string.demo_user_inactivity_timeout_countdown,
+                duration));
     }
 
     public void setOnCountDownExpiredListener(
@@ -58,30 +54,31 @@ public class UserInactivityCountdownDialog extends AlertDialog {
 
     public void setPositiveButtonClickListener(OnClickListener onClickListener) {
         setButton(Dialog.BUTTON_POSITIVE,
-                getContext().getString(R.string.demo_user_inactivity_timeout_left_button),
+                getContext().getString(R.string.demo_user_inactivity_timeout_right_button),
                 onClickListener);
     }
 
     public void setNegativeButtonClickListener(OnClickListener onClickListener) {
         setButton(Dialog.BUTTON_NEGATIVE,
-                getContext().getString(R.string.demo_user_inactivity_timeout_right_button),
+                getContext().getString(R.string.demo_user_inactivity_timeout_left_button),
                 onClickListener);
     }
 
     @Override
     public void show() {
         super.show();
-        mDialogView.post(new Runnable() {
+        final TextView messageView = (TextView) findViewById(R.id.message);
+        messageView.post(new Runnable() {
             @Override
             public void run() {
                 mCountDownTimer = new CountDownTimer(mCountDownDuration, mRefreshInterval) {
 
                     @Override
                     public void onTick(long millisUntilFinished) {
-                        String msg = getContext().getResources().getString(
+                        String msg = getContext().getString(
                                 R.string.demo_user_inactivity_timeout_countdown,
                                 millisUntilFinished / 1000);
-                        ((TextView) mDialogView.findViewById(R.id.message)).setText(msg);
+                        messageView.setText(msg);
                     }
 
                     @Override
@@ -96,8 +93,7 @@ public class UserInactivityCountdownDialog extends AlertDialog {
     }
 
     @Override
-    public void dismiss() {
-        super.dismiss();
+    public void onStop() {
         if (mCountDownTimer != null) {
             mCountDownTimer.cancel();
         }
