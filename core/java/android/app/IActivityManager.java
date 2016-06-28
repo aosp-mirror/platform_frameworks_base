@@ -658,6 +658,8 @@ public interface IActivityManager extends IInterface {
             IIntentReceiver finishedReceiver, String requiredPermission, Bundle options)
             throws RemoteException;
 
+    public void setVrThread(int tid) throws RemoteException;
+
     /*
      * Private non-Binder interfaces
      */
@@ -1044,4 +1046,5 @@ public interface IActivityManager extends IInterface {
     int START_CONFIRM_DEVICE_CREDENTIAL_INTENT = IBinder.FIRST_CALL_TRANSACTION + 374;
     int SEND_IDLE_JOB_TRIGGER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 375;
     int SEND_INTENT_SENDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 376;
+    int SET_VR_THREAD_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 377;
 }

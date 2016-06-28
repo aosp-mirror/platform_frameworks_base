@@ -2310,6 +2310,20 @@ public final class ActivityManagerService extends ActivityManagerNative
                     if (mInVrMode != vrMode) {
                         mInVrMode = vrMode;
                         mShowDialogs = shouldShowDialogs(mConfiguration, mInVrMode);
+                        if (r.app != null) {
+                            ProcessRecord proc = r.app;
+                            if (proc.vrThreadTid > 0) {
+                                if (proc.curSchedGroup == ProcessList.SCHED_GROUP_TOP_APP) {
+                                    if (mInVrMode == true) {
+                                        Process.setThreadScheduler(proc.vrThreadTid,
+                                            Process.SCHED_FIFO | Process.SCHED_RESET_ON_FORK, 1);
+                                    } else {
+                                        Process.setThreadScheduler(proc.vrThreadTid,
+                                            Process.SCHED_OTHER, 0);
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
                 vrService.setVrMode(vrMode, requestedPackage, userId, callingPackage);
@@ -12507,6 +12521,34 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    public void setVrThread(int tid) {
+        if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_VR_MODE)) {
+            throw new UnsupportedOperationException("VR mode not supported on this device!");
+        }
+
+        synchronized (this) {
+            ProcessRecord proc;
+            synchronized (mPidsSelfLocked) {
+                final int pid = Binder.getCallingPid();
+                proc = mPidsSelfLocked.get(pid);
+                if (proc != null && mInVrMode && tid >= 0) {
+                    // reset existing VR thread to CFS
+                    if (proc.vrThreadTid != 0) {
+                        Process.setThreadScheduler(proc.vrThreadTid, Process.SCHED_OTHER, 0);
+                    }
+                    // add check to guarantee that tid belongs to pid?
+                    proc.vrThreadTid = tid;
+                    // promote to FIFO now if the tid is non-zero
+                    if (proc.curSchedGroup == ProcessList.SCHED_GROUP_TOP_APP && proc.vrThreadTid > 0) {
+                        Process.setThreadScheduler(proc.vrThreadTid, Process.SCHED_FIFO | Process.SCHED_RESET_ON_FORK, 1);
+                    }
+                } else {
+                    //Slog.e("VR_FIFO", "Didn't set thread from setVrThread?");
+                }
+            }
+        }
+    }
+
     @Override
     public int setVrMode(IBinder token, boolean enabled, ComponentName packageName) {
         if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_VR_MODE)) {
@@ -20106,6 +20148,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         if (app.setSchedGroup != app.curSchedGroup) {
+            int oldSchedGroup = app.setSchedGroup;
             app.setSchedGroup = app.curSchedGroup;
             if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG_OOM_ADJ,
                     "Setting sched group of " + app.processName
@@ -20131,6 +20174,23 @@ public final class ActivityManagerService extends ActivityManagerNative
                     long oldId = Binder.clearCallingIdentity();
                     try {
                         Process.setProcessGroup(app.pid, processGroup);
+                        if (app.curSchedGroup == ProcessList.SCHED_GROUP_TOP_APP) {
+                            // do nothing if we already switched to RT
+                            if (oldSchedGroup != ProcessList.SCHED_GROUP_TOP_APP) {
+                                // Switch VR thread for app to SCHED_FIFO
+                                if (mInVrMode && app.vrThreadTid != 0) {
+                                    Process.setThreadScheduler(app.vrThreadTid,
+                                        Process.SCHED_FIFO | Process.SCHED_RESET_ON_FORK, 1);
+                                }
+                            }
+                        } else if (oldSchedGroup == ProcessList.SCHED_GROUP_TOP_APP &&
+                                   app.curSchedGroup != ProcessList.SCHED_GROUP_TOP_APP) {
+                            // Reset VR thread to SCHED_OTHER
+                            // Safe to do even if we're not in VR mode
+                            if (app.vrThreadTid != 0) {
+                                Process.setThreadScheduler(app.vrThreadTid, Process.SCHED_OTHER, 0);
+                            }
+                        }
                     } catch (Exception e) {
                         Slog.w(TAG, "Failed setting process group of " + app.pid
                                 + " to " + app.curSchedGroup);
