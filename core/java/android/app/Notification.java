@@ -39,6 +39,7 @@ import android.media.AudioManager;
 import android.media.session.MediaSession;
 import android.net.Uri;
 import android.os.BadParcelableException;
+import android.os.BaseBundle;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -53,6 +54,7 @@ import android.text.style.AbsoluteSizeSpan;
 import android.text.style.CharacterStyle;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.TextAppearanceSpan;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Gravity;
@@ -63,6 +65,7 @@ import android.widget.ProgressBar;
 import android.widget.RemoteViews;
 
 import com.android.internal.R;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.NotificationColorUtil;
 
 import java.lang.annotation.Retention;
@@ -70,6 +73,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -756,6 +760,16 @@ public class Notification implements Parcelable
      * detailed information from notification objects.
      */
     public Bundle extras = new Bundle();
+
+    /**
+     * All pending intents in the notification extras (notification extras, actions extras,
+     * and remote input extras) as the system needs to be able to access them but touching
+     * the extras bundle in the system process is not safe because the bundle may contain
+     * custom parcelable objects.
+     *
+     * @hide
+     */
+    public ArraySet<PendingIntent> extrasPendingIntents;
 
     /**
      * {@link #extras} key: this is the title of the notification,
@@ -1549,7 +1563,16 @@ public class Notification implements Parcelable
     /**
      * Unflatten the notification from a parcel.
      */
-    public Notification(Parcel parcel)
+    @SuppressWarnings("unchecked")
+    public Notification(Parcel parcel) {
+        // IMPORTANT: Add unmarshaling code in readFromParcel as the pending
+        // intents in extras are always written as the last entry.
+        readFromParcelImpl(parcel);
+        // Must be read last!
+        extrasPendingIntents = (ArraySet<PendingIntent>) parcel.readArraySet(null);
+    }
+
+    private void readFromParcelImpl(Parcel parcel)
     {
         int version = parcel.readInt();
 
@@ -1704,6 +1727,10 @@ public class Notification implements Parcelable
             }
         }
 
+        if (!ArrayUtils.isEmpty(extrasPendingIntents)) {
+            that.extrasPendingIntents = new ArraySet<>(extrasPendingIntents);
+        }
+
         if (this.actions != null) {
             that.actions = new Action[this.actions.length];
             for(int i=0; i<this.actions.length; i++) {
@@ -1819,8 +1846,40 @@ public class Notification implements Parcelable
     /**
      * Flatten this notification into a parcel.
      */
-    public void writeToParcel(Parcel parcel, int flags)
-    {
+    public void writeToParcel(Parcel parcel, int flags) {
+        // We need to mark all pending intents getting into the notification
+        // system as being put there to later allow the notification ranker
+        // to launch them and by doing so add the app to the battery saver white
+        // list for a short period of time. The problem is that the system
+        // cannot look into the extras as there may be parcelables there that
+        // the platform does not know how to handle. To go around that we have
+        // an explicit list of the pending intents in the extras bundle.
+        final boolean collectPendingIntents = (extrasPendingIntents == null);
+        if (collectPendingIntents) {
+            PendingIntent.setOnMarshaledListener(
+                    (PendingIntent intent, Parcel out, int outFlags) -> {
+                if (parcel == out) {
+                    if (extrasPendingIntents == null) {
+                        extrasPendingIntents = new ArraySet<>();
+                    }
+                    extrasPendingIntents.add(intent);
+                }
+            });
+        }
+        try {
+            // IMPORTANT: Add marshaling code in writeToParcelImpl as we
+            // want to intercept all pending events written to the pacel.
+            writeToParcelImpl(parcel, flags);
+            // Must be written last!
+            parcel.writeArraySet(extrasPendingIntents);
+        } finally {
+            if (collectPendingIntents) {
+                PendingIntent.setOnMarshaledListener(null);
+            }
+        }
+    }
+
+    private void writeToParcelImpl(Parcel parcel, int flags) {
         parcel.writeInt(1);
 
         parcel.writeLong(when);
