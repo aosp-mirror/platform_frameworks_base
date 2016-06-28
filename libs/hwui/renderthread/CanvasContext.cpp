@@ -783,6 +783,7 @@ void CanvasContext::enqueueFrameWork(std::function<void()>&& func) {
     }
     sp<FuncTask> task(new FuncTask());
     task->func = func;
+    mFrameFences.push_back(task);
     mFrameWorkProcessor->add(task);
 }
 
