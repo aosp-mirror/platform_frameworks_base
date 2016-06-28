@@ -54,6 +54,7 @@ import android.widget.ImageView;
 
 public class PlatLogoActivity extends Activity {
     public static final boolean REVEAL_THE_NAME = false;
+    public static final boolean FINISH = false;
 
     FrameLayout mLayout;
     int mTapCount;
@@ -138,7 +139,7 @@ public class PlatLogoActivity extends Activity {
                                 } catch (ActivityNotFoundException ex) {
                                     Log.e("PlatLogoActivity", "No more eggs.");
                                 }
-                                finish();
+                                if (FINISH) finish();
                             }
                         });
                         return true;
