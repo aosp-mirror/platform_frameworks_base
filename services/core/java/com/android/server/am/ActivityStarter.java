@@ -1095,7 +1095,11 @@ class ActivityStarter {
                 return START_RETURN_LOCK_TASK_MODE_VIOLATION;
             }
             if (!mMovedOtherTask) {
-                updateTaskReturnToType(mStartActivity.task, mLaunchFlags, topStack);
+                // If stack id is specified in activity options, usually it means that activity is
+                // launched not from currently focused stack (e.g. from SysUI or from shell) - in
+                // that case we check the target stack.
+                updateTaskReturnToType(mStartActivity.task, mLaunchFlags,
+                        preferredLaunchStackId != INVALID_STACK_ID ? mTargetStack : topStack);
             }
         } else if (mSourceRecord != null) {
             if (mSupervisor.isLockTaskModeViolation(mSourceRecord.task)) {

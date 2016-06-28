@@ -2587,11 +2587,14 @@ final class ActivityStack {
     }
 
     private void insertTaskAtTop(TaskRecord task, ActivityRecord newActivity) {
+        boolean isLastTaskOverHome = false;
         // If the moving task is over home stack, transfer its return type to next task
         if (task.isOverHomeStack()) {
             final TaskRecord nextTask = getNextTask(task);
             if (nextTask != null) {
                 nextTask.setTaskToReturnTo(task.getTaskToReturnTo());
+            } else {
+                isLastTaskOverHome = true;
             }
         }
 
@@ -2601,7 +2604,10 @@ final class ActivityStack {
             ActivityStack lastStack = mStackSupervisor.getLastStack();
             final boolean fromHome = lastStack.isHomeStack();
             if (!isHomeStack() && (fromHome || topTask() != task)) {
-                int returnToType = APPLICATION_ACTIVITY_TYPE;
+                // If it's a last task over home - we default to keep its return to type not to
+                // make underlying task focused when this one will be finished.
+                int returnToType = isLastTaskOverHome
+                        ? task.getTaskToReturnTo() : APPLICATION_ACTIVITY_TYPE;
                 if (fromHome && StackId.allowTopTaskToReturnHome(mStackId)) {
                     returnToType = lastStack.topTask() == null
                             ? HOME_ACTIVITY_TYPE : lastStack.topTask().taskType;
