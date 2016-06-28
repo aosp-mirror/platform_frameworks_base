@@ -18,8 +18,15 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.util.Log;
+import android.widget.Toast;
 
 public class NekoActivationActivity extends Activity {
+    private void toastUp(String s) {
+        Toast toast = Toast.makeText(this, s, Toast.LENGTH_SHORT);
+        toast.getView().setBackgroundDrawable(null);
+        toast.show();
+    }
+
     @Override
     public void onStart() {
         super.onStart();
@@ -30,12 +37,16 @@ public class NekoActivationActivity extends Activity {
             if (NekoLand.DEBUG) {
                 Log.v("Neko", "Disabling tile.");
             }
-            pm.setComponentEnabledSetting(cn, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, 0);
+            pm.setComponentEnabledSetting(cn, PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                    PackageManager.DONT_KILL_APP);
+            toastUp("\uD83D\uDEAB");
         } else {
             if (NekoLand.DEBUG) {
                 Log.v("Neko", "Enabling tile.");
             }
-            pm.setComponentEnabledSetting(cn, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 0);
+            pm.setComponentEnabledSetting(cn, PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                    PackageManager.DONT_KILL_APP);
+            toastUp("\uD83D\uDC31");
         }
         finish();
     }
