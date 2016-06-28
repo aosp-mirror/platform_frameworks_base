@@ -19,17 +19,23 @@ package com.android.server.am;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 
 import android.app.AppOpsManager;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.os.Process;
 import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.internal.R;
 import com.android.internal.util.ProgressReporter;
+import com.android.server.UiThread;
 
 import java.util.List;
 
@@ -61,16 +67,20 @@ public abstract class PreBootBroadcaster extends IIntentReceiver.Stub {
 
         mTargets = mService.mContext.getPackageManager().queryBroadcastReceiversAsUser(mIntent,
                 MATCH_SYSTEM_ONLY, UserHandle.of(userId));
+
+        mHandler.obtainMessage(MSG_SHOW).sendToTarget();
     }
 
     public void sendNext() {
         if (mIndex >= mTargets.size()) {
+            mHandler.obtainMessage(MSG_HIDE).sendToTarget();
             onFinished();
             return;
         }
 
         if (!mService.isUserRunning(mUserId, 0)) {
             Slog.i(TAG, "User " + mUserId + " is no longer running; skipping remaining receivers");
+            mHandler.obtainMessage(MSG_HIDE).sendToTarget();
             onFinished();
             return;
         }
@@ -99,6 +109,45 @@ public abstract class PreBootBroadcaster extends IIntentReceiver.Stub {
             boolean ordered, boolean sticky, int sendingUser) {
         sendNext();
     }
+
+    private static final int MSG_SHOW = 1;
+    private static final int MSG_HIDE = 2;
+
+    private Handler mHandler = new Handler(UiThread.get().getLooper(), null, true) {
+        @Override
+        public void handleMessage(Message msg) {
+            final Context context = mService.mContext;
+            final NotificationManager notifManager = context
+                    .getSystemService(NotificationManager.class);
+
+            switch (msg.what) {
+                case MSG_SHOW:
+                    final CharSequence title = context
+                            .getText(R.string.android_upgrading_notification_title);
+                    final CharSequence message = context
+                            .getText(R.string.android_upgrading_notification_body);
+                    final Notification notif = new Notification.Builder(mService.mContext)
+                            .setSmallIcon(R.drawable.stat_sys_adb)
+                            .setWhen(0)
+                            .setOngoing(true)
+                            .setTicker(title)
+                            .setDefaults(0)
+                            .setPriority(Notification.PRIORITY_MAX)
+                            .setColor(context.getColor(
+                                    com.android.internal.R.color.system_notification_accent_color))
+                            .setContentTitle(title)
+                            .setContentText(message)
+                            .setVisibility(Notification.VISIBILITY_PUBLIC)
+                            .build();
+                    notifManager.notifyAsUser(TAG, 0, notif, UserHandle.of(mUserId));
+                    break;
+
+                case MSG_HIDE:
+                    notifManager.cancelAsUser(TAG, 0, UserHandle.of(mUserId));
+                    break;
+            }
+        }
+    };
 
     public abstract void onFinished();
 }
