@@ -1877,7 +1877,7 @@ public class PackageParser {
                     sa = res.obtainAttributes(parser,
                             com.android.internal.R.styleable.AndroidManifestUsesSdk);
 
-                    int minVers = 0;
+                    int minVers = 1;
                     String minCode = null;
                     int targetVers = 0;
                     String targetCode = null;
@@ -1904,9 +1904,6 @@ public class PackageParser {
                         } else {
                             // If it's not a string, it's an integer.
                             targetVers = val.data;
-                            if (minVers == 0) {
-                                minVers = targetVers;
-                            }
                         }
                     }
 
