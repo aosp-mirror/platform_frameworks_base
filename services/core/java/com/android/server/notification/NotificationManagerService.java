@@ -2598,7 +2598,6 @@ public class NotificationManagerService extends SystemService {
         final long duration = LocalServices.getService(DeviceIdleController.LocalService.class)
                 .getNotificationWhitelistDuration();
 
-        int size = 0;
         if (notification.contentIntent != null) {
             am.setPendingIntentWhitelistDuration(notification.contentIntent.getTarget(), duration);
         }
@@ -2615,42 +2614,16 @@ public class NotificationManagerService extends SystemService {
                     continue;
                 }
                 am.setPendingIntentWhitelistDuration(action.actionIntent.getTarget(), duration);
-                setPendingIntentWhitelistDuration(am, duration, action.getExtras());
-                final RemoteInput[] remoteInputs = action.getRemoteInputs();
-                if (remoteInputs != null) {
-                    for (RemoteInput remoteInput : remoteInputs) {
-                        setPendingIntentWhitelistDuration(am, duration, remoteInput.getExtras());
-                    }
-                }
             }
         }
-    }
-
-    private static void setPendingIntentWhitelistDuration(ActivityManagerInternal am, long duration,
-            Bundle extras) {
-        for (String key : extras.keySet()) {
-            final Object value = extras.get(key);
-            if (value instanceof Parcelable) {
-                setPendingIntentWhitelistDuration(am, duration, (Parcelable) value);
-            } else if (value instanceof Parcelable[]) {
-                for (Parcelable parcelable : (Parcelable[]) value) {
-                    setPendingIntentWhitelistDuration(am, duration, parcelable);
-                }
-            } else if (value instanceof List) {
-                for (Object element : (List <?>) value) {
-                    if (element instanceof Parcelable) {
-                        setPendingIntentWhitelistDuration(am, duration, (Parcelable) element);
-                    }
+        if (notification.extrasPendingIntents != null) {
+            final int intentCount = notification.extrasPendingIntents.size();
+            for (int i = 0; i < intentCount; i++) {
+                PendingIntent pendingIntent = notification.extrasPendingIntents.valueAt(i);
+                if (pendingIntent != null) {
+                    am.setPendingIntentWhitelistDuration(pendingIntent.getTarget(), duration);
                 }
             }
-        }
-    }
-
-    private static void setPendingIntentWhitelistDuration(ActivityManagerInternal am, long duration,
-            Parcelable parcelable) {
-        if (parcelable instanceof PendingIntent) {
-            am.setPendingIntentWhitelistDuration(((PendingIntent) parcelable).getTarget(),
-                    duration);
         }
     }
 
