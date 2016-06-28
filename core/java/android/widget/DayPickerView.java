@@ -16,6 +16,8 @@
 
 package android.widget;
 
+import static android.os.Build.VERSION_CODES.N_MR1;
+
 import android.graphics.Rect;
 import com.android.internal.R;
 import com.android.internal.widget.ViewPager;
@@ -291,8 +293,21 @@ class DayPickerView extends ViewGroup {
      * @param timeInMillis the target day in milliseconds
      * @param animate whether to smooth scroll to the new position
      * @param setSelected whether to set the specified day as selected
+     *
+     * @throws IllegalArgumentException as of {@link android.os.Build.VERSION_CODES#N_MR1} if the
+     *         provided timeInMillis is before the range start or after the range end.
      */
     private void setDate(long timeInMillis, boolean animate, boolean setSelected) {
+        getTempCalendarForTime(timeInMillis);
+
+        final int targetSdkVersion = mContext.getApplicationInfo().targetSdkVersion;
+        if (targetSdkVersion >= N_MR1) {
+            if (mTempCalendar.before(mMinDate) || mTempCalendar.after(mMaxDate)) {
+                throw new IllegalArgumentException("timeInMillis must be between the values of "
+                        + "getMinDate() and getMaxDate()");
+            }
+        }
+
         if (setSelected) {
             mSelectedDay.setTimeInMillis(timeInMillis);
         }
@@ -302,7 +317,6 @@ class DayPickerView extends ViewGroup {
             mViewPager.setCurrentItem(position, animate);
         }
 
-        mTempCalendar.setTimeInMillis(timeInMillis);
         mAdapter.setSelectedDay(mTempCalendar);
     }
 

@@ -789,14 +789,14 @@ class CalendarViewLegacyDelegate extends CalendarView.AbstractCalendarViewDelega
      * @param forceScroll Whether to recenter even if the time is already
      *            visible.
      *
-     * @throws IllegalArgumentException of the provided date is before the
-     *        range start of after the range end.
+     * @throws IllegalArgumentException if the provided date is before the
+     *         range start or after the range end.
      */
     private void goTo(Calendar date, boolean animate, boolean setSelected,
             boolean forceScroll) {
         if (date.before(mMinDate) || date.after(mMaxDate)) {
-            throw new IllegalArgumentException("Time not between " + mMinDate.getTime()
-                    + " and " + mMaxDate.getTime());
+            throw new IllegalArgumentException("timeInMillis must be between the values of "
+                    + "getMinDate() and getMaxDate()");
         }
         // Find the first and last entirely visible weeks
         int firstFullyVisiblePosition = mListView.getFirstVisiblePosition();
