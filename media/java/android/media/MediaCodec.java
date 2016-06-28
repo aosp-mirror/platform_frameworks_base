@@ -613,6 +613,32 @@ import java.util.Map;
  Also since {@link android.os.Build.VERSION_CODES#M}, you can change the output Surface
  dynamically using {@link #setOutputSurface setOutputSurface}.
 
+ <h4>Transformations When Rendering onto Surface</h4>
+
+ If the codec is configured into Surface mode, any crop rectangle, {@linkplain
+ MediaFormat#KEY_ROTATION rotation} and {@linkplain #setVideoScalingMode video scaling
+ mode} will be automatically applied with one exception:
+ <p class=note>
+ Prior to the {@link android.os.Build.VERSION_CODES#M} release, software decoders may not
+ have applied the rotation when being rendered onto a Surface. Unfortunately, there is no way to
+ identify software decoders, or if they apply the rotation other than by trying it out.
+ <p>
+ There are also some caveats.
+ <p class=note>
+ Note that the pixel aspect ratio is not considered when displaying the output onto the
+ Surface. This means that if you are using {@link #VIDEO_SCALING_MODE_SCALE_TO_FIT} mode, you
+ must position the output Surface so that it has the proper final display aspect ratio. Conversely,
+ you can only use {@link #VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING} mode for content with
+ square pixels (pixel aspect ratio or 1:1).
+ <p class=note>
+ Note also that as of {@link android.os.Build.VERSION_CODES#N} release, {@link
+ #VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING} mode may not work correctly for videos rotated
+ by 90 or 270 degrees.
+ <p class=note>
+ When setting the video scaling mode, note that it must be reset after each time the output
+ buffers change. Since the {@link #INFO_OUTPUT_BUFFERS_CHANGED} event is deprecated, you can
+ do this after each time the output format changes.
+
  <h4>Using an Input Surface</h4>
  <p>
  When using an input Surface, there are no accessible input buffers, as buffers are automatically
@@ -3062,7 +3088,13 @@ final public class MediaCodec {
 
     /**
      * The content is scaled, maintaining its aspect ratio, the whole
-     * surface area is used, content may be cropped
+     * surface area is used, content may be cropped.
+     * <p class=note>
+     * This mode is only suitable for content with 1:1 pixel aspect ratio as you cannot
+     * configure the pixel aspect ratio for a {@link Surface}.
+     * <p class=note>
+     * As of {@link android.os.Build.VERSION_CODES#N} release, this mode may not work if
+     * the video is {@linkplain MediaFormat#KEY_ROTATION rotated} by 90 or 270 degrees.
      */
     public static final int VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING = 2;
 
@@ -3077,10 +3109,15 @@ final public class MediaCodec {
     /**
      * If a surface has been specified in a previous call to {@link #configure}
      * specifies the scaling mode to use. The default is "scale to fit".
-     * <p class=note>The scaling mode may be reset to the <strong>default</strong> each time an
+     * <p class=note>
+     * The scaling mode may be reset to the <strong>default</strong> each time an
      * {@link #INFO_OUTPUT_BUFFERS_CHANGED} event is received from the codec; therefore, the client
      * must call this method after every buffer change event (and before the first output buffer is
-     * released for rendering) to ensure consistent scaling mode.</p>
+     * released for rendering) to ensure consistent scaling mode.
+     * <p class=note>
+     * Since the {@link #INFO_OUTPUT_BUFFERS_CHANGED} event is deprecated, this can also be done
+     * after each {@link #INFO_OUTPUT_FORMAT_CHANGED} event.
+     *
      * @throws IllegalArgumentException if mode is not recognized.
      * @throws IllegalStateException if in the Released state.
      */
