@@ -1689,7 +1689,8 @@ public class Toolbar extends ViewGroup {
         collapsingMargins[0] = collapsingMargins[1] = 0;
 
         // Align views within the minimum toolbar height, if set.
-        final int alignmentHeight = getMinimumHeight();
+        final int minHeight = getMinimumHeight();
+        final int alignmentHeight = minHeight >= 0 ? Math.min(minHeight, b - t) : 0;
 
         if (shouldLayout(mNavButtonView)) {
             if (isRtl) {
