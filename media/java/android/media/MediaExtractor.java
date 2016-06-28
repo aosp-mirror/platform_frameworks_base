@@ -333,7 +333,113 @@ final public class MediaExtractor {
 
     /**
      * Get the track format at the specified index.
+     *
      * More detail on the representation can be found at {@link android.media.MediaCodec}
+     * <p>
+     * The following table summarizes support for format keys across android releases:
+     *
+     * <table style="width: 0%">
+     *  <thead>
+     *   <tr>
+     *    <th rowspan=2>OS Version(s)</th>
+     *    <td colspan=3>{@code MediaFormat} keys used for</th>
+     *   </tr><tr>
+     *    <th>All Tracks</th>
+     *    <th>Audio Tracks</th>
+     *    <th>Video Tracks</th>
+     *   </tr>
+     *  </thead>
+     *  <tbody>
+     *   <tr>
+     *    <td>{@link android.os.Build.VERSION_CODES#JELLY_BEAN}</td>
+     *    <td rowspan=8>{@link MediaFormat#KEY_MIME},<br>
+     *        {@link MediaFormat#KEY_DURATION},<br>
+     *        {@link MediaFormat#KEY_MAX_INPUT_SIZE}</td>
+     *    <td rowspan=5>{@link MediaFormat#KEY_SAMPLE_RATE},<br>
+     *        {@link MediaFormat#KEY_CHANNEL_COUNT},<br>
+     *        {@link MediaFormat#KEY_CHANNEL_MASK},<br>
+     *        gapless playback information<sup>.mp3, .mp4</sup>,<br>
+     *        {@link MediaFormat#KEY_IS_ADTS}<sup>AAC if streaming</sup>,<br>
+     *        codec-specific data<sup>AAC, Vorbis</sup></td>
+     *    <td rowspan=2>{@link MediaFormat#KEY_WIDTH},<br>
+     *        {@link MediaFormat#KEY_HEIGHT},<br>
+     *        codec-specific data<sup>AVC, MPEG4</sup></td>
+     *   </tr><tr>
+     *    <td>{@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}</td>
+     *   </tr><tr>
+     *    <td>{@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2}</td>
+     *    <td rowspan=3>as above, plus<br>
+     *        Pixel aspect ratio information<sup>AVC, *</sup></td>
+     *   </tr><tr>
+     *    <td>{@link android.os.Build.VERSION_CODES#KITKAT}</td>
+     *   </tr><tr>
+     *    <td>{@link android.os.Build.VERSION_CODES#KITKAT_WATCH}</td>
+     *   </tr><tr>
+     *    <td>{@link android.os.Build.VERSION_CODES#LOLLIPOP}</td>
+     *    <td rowspan=2>as above, plus<br>
+     *        {@link MediaFormat#KEY_BIT_RATE}<sup>AAC</sup>,<br>
+     *        codec-specific data<sup>Opus</sup></td>
+     *    <td rowspan=2>as above, plus<br>
+     *        {@link MediaFormat#KEY_ROTATION}<sup>.mp4</sup>,<br>
+     *        {@link MediaFormat#KEY_BIT_RATE}<sup>MPEG4</sup>,<br>
+     *        codec-specific data<sup>HEVC</sup></td>
+     *   </tr><tr>
+     *    <td>{@link android.os.Build.VERSION_CODES#LOLLIPOP_MR1}</td>
+     *   </tr><tr>
+     *    <td>{@link android.os.Build.VERSION_CODES#M}</td>
+     *    <td>as above, plus<br>
+     *        gapless playback information<sup>Opus</sup></td>
+     *    <td>as above, plus<br>
+     *        {@link MediaFormat#KEY_FRAME_RATE} (integer)</td>
+     *   </tr><tr>
+     *    <td>{@link android.os.Build.VERSION_CODES#N}</td>
+     *    <td>as above, plus<br>
+     *        {@link MediaFormat#KEY_TRACK_ID},<br>
+     *        <!-- {link MediaFormat#KEY_MAX_BIT_RATE}<sup>#, .mp4</sup>,<br> -->
+     *        {@link MediaFormat#KEY_BIT_RATE}<sup>#, .mp4</sup></td>
+     *    <td>as above, plus<br>
+     *        {@link MediaFormat#KEY_PCM_ENCODING},<br>
+     *        {@link MediaFormat#KEY_PROFILE}<sup>AAC</sup></td>
+     *    <td>as above, plus<br>
+     *        {@link MediaFormat#KEY_HDR_STATIC_INFO}<sup>#, .webm</sup>,<br>
+     *        {@link MediaFormat#KEY_COLOR_STANDARD}<sup>#</sup>,<br>
+     *        {@link MediaFormat#KEY_COLOR_TRANSFER}<sup>#</sup>,<br>
+     *        {@link MediaFormat#KEY_COLOR_RANGE}<sup>#</sup>,<br>
+     *        {@link MediaFormat#KEY_PROFILE}<sup>MPEG2, H.263, MPEG4, AVC, HEVC, VP9</sup>,<br>
+     *        {@link MediaFormat#KEY_LEVEL}<sup>H.263, MPEG4, AVC, HEVC, VP9</sup>,<br>
+     *        codec-specific data<sup>VP9</sup></td>
+     *   </tr>
+     *   <tr>
+     *    <td colspan=4>
+     *     <p class=note><strong>Notes:</strong><br>
+     *      #: container-specified value only.<br>
+     *      .mp4, .webm&hellip;: for listed containers<br>
+     *      MPEG4, AAC&hellip;: for listed codecs
+     *    </td>
+     *   </tr><tr>
+     *    <td colspan=4>
+     *     <p class=note>Note that that level information contained in the container many times
+     *     does not match the level of the actual bitstream. You may want to clear the level using
+     *     {@code MediaFormat.setString(KEY_LEVEL, null)} before using the track format to find a
+     *     decoder that can play back a particular track.
+     *    </td>
+     *   </tr><tr>
+     *    <td colspan=4>
+     *     <p class=note><strong>*Pixel (sample) aspect ratio</strong> is returned in the following
+     *     keys. The display width can be calculated for example as:
+     *     <p align=center>
+     *     display-width = display-height * crop-width / crop-height * sar-width / sar-height
+     *    </td>
+     *   </tr><tr>
+     *    <th>Format Key</th><th>Value Type</th><th colspan=2>Description</th>
+     *   </tr><tr>
+     *    <td>{@code "sar-width"}</td><td>Integer</td><td colspan=2>Pixel aspect ratio width</td>
+     *   </tr><tr>
+     *    <td>{@code "sar-height"}</td><td>Integer</td><td colspan=2>Pixel aspect ratio height</td>
+     *   </tr>
+     *  </tbody>
+     * </table>
+     *
      */
     @NonNull
     public MediaFormat getTrackFormat(int index) {
