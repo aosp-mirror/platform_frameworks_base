@@ -22,6 +22,8 @@ import android.util.Log;
 public class NekoActivationActivity extends Activity {
     @Override
     public void onStart() {
+        super.onStart();
+
         final PackageManager pm = getPackageManager();
         final ComponentName cn = new ComponentName(this, NekoTile.class);
         if (pm.getComponentEnabledSetting(cn) == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
