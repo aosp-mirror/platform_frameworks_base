@@ -220,7 +220,11 @@ in any area that can be obscured by the PIP window.</p>
 
 <p>When an activity is in PIP mode, by default it doesn't get input focus. To
 receive input events while in PIP mode, use
-<code>MediaSession.setMediaButtonReceiver()</code>.</p>
+{@link android.media.session.MediaSession#setCallback
+MediaSession.setCallback()}. For more information on using
+{@link android.media.session.MediaSession#setCallback setCallback()} see
+<a href="{@docRoot}training/tv/playback/now-playing.html">Displaying
+a Now Playing Card</a>.</p>
 
 <p>When your app is in PIP mode, video playback in the PIP window can cause
 audio interference with another app, such as a music player app or voice search
