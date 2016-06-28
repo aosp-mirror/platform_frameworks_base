@@ -390,6 +390,32 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
     }
 
     /**
+     * Special fast path for appending items to the end of the array without validation.
+     * The array must already be large enough to contain the item.
+     * @hide
+     */
+    public void append(E value) {
+        final int index = mSize;
+        final int hash = value == null ? 0
+                : (mIdentityHashCode ? System.identityHashCode(value) : value.hashCode());
+        if (index >= mHashes.length) {
+            throw new IllegalStateException("Array is full");
+        }
+        if (index > 0 && mHashes[index - 1] > hash) {
+            RuntimeException e = new RuntimeException("here");
+            e.fillInStackTrace();
+            Log.w(TAG, "New hash " + hash
+                    + " is before end of array hash " + mHashes[index - 1]
+                    + " at index " + index, e);
+            add(value);
+            return;
+        }
+        mSize = index + 1;
+        mHashes[index] = hash;
+        mArray[index] = value;
+    }
+
+    /**
      * Perform a {@link #add(Object)} of all values in <var>array</var>
      * @param array The array whose contents are to be retrieved.
      */
