@@ -764,14 +764,13 @@ public class Notification implements Parcelable
     public Bundle extras = new Bundle();
 
     /**
-     * All pending intents in the notification extras (notification extras, actions extras,
-     * and remote input extras) as the system needs to be able to access them but touching
-     * the extras bundle in the system process is not safe because the bundle may contain
+     * All pending intents in the notification as the system needs to be able to access them but
+     * touching the extras bundle in the system process is not safe because the bundle may contain
      * custom parcelable objects.
      *
      * @hide
      */
-    public ArraySet<PendingIntent> extrasPendingIntents;
+    public ArraySet<PendingIntent> allPendingIntents;
 
     /**
      * {@link #extras} key: this is the title of the notification,
@@ -1595,7 +1594,7 @@ public class Notification implements Parcelable
         // intents in extras are always written as the last entry.
         readFromParcelImpl(parcel);
         // Must be read last!
-        extrasPendingIntents = (ArraySet<PendingIntent>) parcel.readArraySet(null);
+        allPendingIntents = (ArraySet<PendingIntent>) parcel.readArraySet(null);
     }
 
     private void readFromParcelImpl(Parcel parcel)
@@ -1753,8 +1752,8 @@ public class Notification implements Parcelable
             }
         }
 
-        if (!ArrayUtils.isEmpty(extrasPendingIntents)) {
-            that.extrasPendingIntents = new ArraySet<>(extrasPendingIntents);
+        if (!ArrayUtils.isEmpty(allPendingIntents)) {
+            that.allPendingIntents = new ArraySet<>(allPendingIntents);
         }
 
         if (this.actions != null) {
@@ -1880,15 +1879,15 @@ public class Notification implements Parcelable
         // cannot look into the extras as there may be parcelables there that
         // the platform does not know how to handle. To go around that we have
         // an explicit list of the pending intents in the extras bundle.
-        final boolean collectPendingIntents = (extrasPendingIntents == null);
+        final boolean collectPendingIntents = (allPendingIntents == null);
         if (collectPendingIntents) {
             PendingIntent.setOnMarshaledListener(
                     (PendingIntent intent, Parcel out, int outFlags) -> {
                 if (parcel == out) {
-                    if (extrasPendingIntents == null) {
-                        extrasPendingIntents = new ArraySet<>();
+                    if (allPendingIntents == null) {
+                        allPendingIntents = new ArraySet<>();
                     }
-                    extrasPendingIntents.add(intent);
+                    allPendingIntents.add(intent);
                 }
             });
         }
@@ -1897,7 +1896,7 @@ public class Notification implements Parcelable
             // want to intercept all pending events written to the pacel.
             writeToParcelImpl(parcel, flags);
             // Must be written last!
-            parcel.writeArraySet(extrasPendingIntents);
+            parcel.writeArraySet(allPendingIntents);
         } finally {
             if (collectPendingIntents) {
                 PendingIntent.setOnMarshaledListener(null);
