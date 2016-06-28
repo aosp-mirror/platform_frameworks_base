@@ -297,8 +297,8 @@ import java.util.Map;
  Codec-specific data in the format is automatically submitted to the codec upon {@link #start};
  you <strong>MUST NOT</strong> submit this data explicitly. If the format did not contain codec
  specific data, you can choose to submit it using the specified number of buffers in the correct
- order, according to the format requirements. Alternately, you can concatenate all codec-specific
- data and submit it as a single codec-config buffer.
+ order, according to the format requirements. In case of H.264 AVC, you can also concatenate all
+ codec-specific data and submit it as a single codec-config buffer.
  <p>
  Android uses the following codec-specific data buffers. These are also required to be set in
  the track format for proper {@link MediaMuxer} track configuration. Each parameter set and the
@@ -352,6 +352,13 @@ import java.util.Map;
     <td>VPS (Video Parameter Sets<sup>*</sup>) +<br>
      SPS (Sequence Parameter Sets<sup>*</sup>) +<br>
      PPS (Picture Parameter Sets<sup>*</sup>)</td>
+    <td class=NA>Not Used</td>
+    <td class=NA>Not Used</td>
+   </tr>
+   <tr>
+    <td>VP9</td>
+    <td>VP9 <a href="http://wiki.webmproject.org/vp9-codecprivate">CodecPrivate</a> Data
+        (optional)</td>
     <td class=NA>Not Used</td>
     <td class=NA>Not Used</td>
    </tr>
