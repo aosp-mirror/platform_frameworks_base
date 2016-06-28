@@ -922,6 +922,8 @@ public final class Pm {
                 flags |= UserInfo.FLAG_EPHEMERAL;
             } else if ("--guest".equals(opt)) {
                 flags |= UserInfo.FLAG_GUEST;
+            } else if ("--demo".equals(opt)) {
+                flags |= UserInfo.FLAG_DEMO;
             } else {
                 System.err.println("Error: unknown option " + opt);
                 return showUsage();
