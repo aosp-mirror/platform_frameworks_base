@@ -5525,7 +5525,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             Window.OnFrameMetricsAvailableListener listener,
             Handler handler) {
         if (mAttachInfo != null) {
-            if (mAttachInfo.mHardwareRenderer != null) {
+            if (mAttachInfo.mThreadedRenderer != null) {
                 if (mFrameMetricsObservers == null) {
                     mFrameMetricsObservers = new ArrayList<>();
                 }
@@ -5533,7 +5533,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 FrameMetricsObserver fmo = new FrameMetricsObserver(window,
                         handler.getLooper(), listener);
                 mFrameMetricsObservers.add(fmo);
-                mAttachInfo.mHardwareRenderer.addFrameMetricsObserver(fmo);
+                mAttachInfo.mThreadedRenderer.addFrameMetricsObserver(fmo);
             } else {
                 Log.w(VIEW_LOG_TAG, "View not hardware-accelerated. Unable to observe frame stats");
             }
@@ -5555,7 +5555,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void removeFrameMetricsListener(
             Window.OnFrameMetricsAvailableListener listener) {
-        ThreadedRenderer renderer = getHardwareRenderer();
+        ThreadedRenderer renderer = getThreadedRenderer();
         FrameMetricsObserver fmo = findFrameMetricsObserver(listener);
         if (fmo == null) {
             throw new IllegalArgumentException(
@@ -5572,7 +5572,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     private void registerPendingFrameMetricsObservers() {
         if (mFrameMetricsObservers != null) {
-            ThreadedRenderer renderer = getHardwareRenderer();
+            ThreadedRenderer renderer = getThreadedRenderer();
             if (renderer != null) {
                 for (FrameMetricsObserver fmo : mFrameMetricsObservers) {
                     renderer.addFrameMetricsObserver(fmo);
@@ -13826,8 +13826,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * @hide
      */
-    public ThreadedRenderer getHardwareRenderer() {
-        return mAttachInfo != null ? mAttachInfo.mHardwareRenderer : null;
+    public ThreadedRenderer getThreadedRenderer() {
+        return mAttachInfo != null ? mAttachInfo.mThreadedRenderer : null;
     }
 
     /**
@@ -15870,8 +15870,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         switch (mLayerType) {
             case LAYER_TYPE_HARDWARE:
                 updateDisplayListIfDirty();
-                if (attachInfo.mHardwareRenderer != null && mRenderNode.isValid()) {
-                    attachInfo.mHardwareRenderer.buildLayer(mRenderNode);
+                if (attachInfo.mThreadedRenderer != null && mRenderNode.isValid()) {
+                    attachInfo.mThreadedRenderer.buildLayer(mRenderNode);
                 }
                 break;
             case LAYER_TYPE_SOFTWARE:
@@ -15989,7 +15989,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     public boolean canHaveDisplayList() {
-        return !(mAttachInfo == null || mAttachInfo.mHardwareRenderer == null);
+        return !(mAttachInfo == null || mAttachInfo.mThreadedRenderer == null);
     }
 
     /**
@@ -17246,7 +17246,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         // Attempt to use a display list if requested.
         if (canvas.isHardwareAccelerated() && mAttachInfo != null
-                && mAttachInfo.mHardwareRenderer != null) {
+                && mAttachInfo.mThreadedRenderer != null) {
             mBackgroundRenderNode = getDrawableRenderNode(background, mBackgroundRenderNode);
 
             final RenderNode renderNode = mBackgroundRenderNode;
@@ -22681,7 +22681,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         boolean mHardwareAccelerated;
         boolean mHardwareAccelerationRequested;
-        ThreadedRenderer mHardwareRenderer;
+        ThreadedRenderer mThreadedRenderer;
         List<RenderNode> mPendingAnimatingRenderNodes;
 
         /**

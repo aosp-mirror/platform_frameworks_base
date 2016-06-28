@@ -51,7 +51,7 @@ import android.graphics.drawable.AnimatedVectorDrawable;
  *
  * <h3>Creating a display list</h3>
  * <pre class="prettyprint">
- *     HardwareRenderer renderer = myView.getHardwareRenderer();
+ *     ThreadedRenderer renderer = myView.getThreadedRenderer();
  *     if (renderer != null) {
  *         DisplayList displayList = renderer.createDisplayList();
  *         DisplayListCanvas canvas = displayList.start(width, height);

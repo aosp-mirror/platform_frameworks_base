@@ -112,7 +112,7 @@ import java.util.concurrent.CountDownLatch;
  */
 @SuppressWarnings({"EmptyCatchBlock", "PointlessBooleanExpression"})
 public final class ViewRootImpl implements ViewParent,
-        View.AttachInfo.Callbacks, ThreadedRenderer.HardwareDrawCallbacks {
+        View.AttachInfo.Callbacks, ThreadedRenderer.DrawCallbacks {
     private static final String TAG = "ViewRootImpl";
     private static final boolean DBG = false;
     private static final boolean LOCAL_LOGV = false;
@@ -390,7 +390,7 @@ public final class ViewRootImpl implements ViewParent,
     /** Set to true once doDie() has been called. */
     private boolean mRemoved;
 
-    private boolean mNeedsHwRendererSetup;
+    private boolean mNeedsRendererSetup;
 
     /**
      * Consistency verifier for debugging purposes.
@@ -785,17 +785,17 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     void destroyHardwareResources() {
-        if (mAttachInfo.mHardwareRenderer != null) {
-            mAttachInfo.mHardwareRenderer.destroyHardwareResources(mView);
-            mAttachInfo.mHardwareRenderer.destroy();
+        if (mAttachInfo.mThreadedRenderer != null) {
+            mAttachInfo.mThreadedRenderer.destroyHardwareResources(mView);
+            mAttachInfo.mThreadedRenderer.destroy();
         }
     }
 
     public void detachFunctor(long functor) {
-        if (mAttachInfo.mHardwareRenderer != null) {
+        if (mAttachInfo.mThreadedRenderer != null) {
             // Fence so that any pending invokeFunctor() messages will be processed
             // before we return from detachFunctor.
-            mAttachInfo.mHardwareRenderer.stopDrawing();
+            mAttachInfo.mThreadedRenderer.stopDrawing();
         }
     }
 
@@ -813,8 +813,8 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     public void registerAnimatingRenderNode(RenderNode animator) {
-        if (mAttachInfo.mHardwareRenderer != null) {
-            mAttachInfo.mHardwareRenderer.registerAnimatingRenderNode(animator);
+        if (mAttachInfo.mThreadedRenderer != null) {
+            mAttachInfo.mThreadedRenderer.registerAnimatingRenderNode(animator);
         } else {
             if (mAttachInfo.mPendingAnimatingRenderNodes == null) {
                 mAttachInfo.mPendingAnimatingRenderNodes = new ArrayList<RenderNode>();
@@ -825,8 +825,8 @@ public final class ViewRootImpl implements ViewParent,
 
     public void registerVectorDrawableAnimator(
             AnimatedVectorDrawable.VectorDrawableAnimatorRT animator) {
-        if (mAttachInfo.mHardwareRenderer != null) {
-            mAttachInfo.mHardwareRenderer.registerVectorDrawableAnimator(animator);
+        if (mAttachInfo.mThreadedRenderer != null) {
+            mAttachInfo.mThreadedRenderer.registerVectorDrawableAnimator(animator);
         }
     }
 
@@ -867,17 +867,17 @@ public final class ViewRootImpl implements ViewParent,
                 mAttachInfo.mHardwareAccelerationRequested = true;
             } else if (!ThreadedRenderer.sRendererDisabled
                     || (ThreadedRenderer.sSystemRendererDisabled && forceHwAccelerated)) {
-                if (mAttachInfo.mHardwareRenderer != null) {
-                    mAttachInfo.mHardwareRenderer.destroy();
+                if (mAttachInfo.mThreadedRenderer != null) {
+                    mAttachInfo.mThreadedRenderer.destroy();
                 }
 
                 final Rect insets = attrs.surfaceInsets;
                 final boolean hasSurfaceInsets = insets.left != 0 || insets.right != 0
                         || insets.top != 0 || insets.bottom != 0;
                 final boolean translucent = attrs.format != PixelFormat.OPAQUE || hasSurfaceInsets;
-                mAttachInfo.mHardwareRenderer = ThreadedRenderer.create(mContext, translucent);
-                if (mAttachInfo.mHardwareRenderer != null) {
-                    mAttachInfo.mHardwareRenderer.setName(attrs.getTitle().toString());
+                mAttachInfo.mThreadedRenderer = ThreadedRenderer.create(mContext, translucent);
+                if (mAttachInfo.mThreadedRenderer != null) {
+                    mAttachInfo.mThreadedRenderer.setName(attrs.getTitle().toString());
                     mAttachInfo.mHardwareAccelerated =
                             mAttachInfo.mHardwareAccelerationRequested = true;
                 }
@@ -944,7 +944,7 @@ public final class ViewRootImpl implements ViewParent,
                     || mWindowAttributes.surfaceInsets.top != oldInsetTop
                     || mWindowAttributes.surfaceInsets.right != oldInsetRight
                     || mWindowAttributes.surfaceInsets.bottom != oldInsetBottom) {
-                mNeedsHwRendererSetup = true;
+                mNeedsRendererSetup = true;
             }
 
             applyKeepScreenOnFlag(mWindowAttributes);
@@ -1138,7 +1138,7 @@ public final class ViewRootImpl implements ViewParent,
     void setWindowStopped(boolean stopped) {
         if (mStopped != stopped) {
             mStopped = stopped;
-            final ThreadedRenderer renderer = mAttachInfo.mHardwareRenderer;
+            final ThreadedRenderer renderer = mAttachInfo.mThreadedRenderer;
             if (renderer != null) {
                 if (DEBUG_DRAW) Log.d(mTag, "WindowStopped on " + getTitle() + " set to " + mStopped);
                 renderer.setStopped(mStopped);
@@ -1214,8 +1214,8 @@ public final class ViewRootImpl implements ViewParent,
      * this knowledge to adjust the scheduling of off-thread animations
      */
     void notifyRendererOfFramePending() {
-        if (mAttachInfo.mHardwareRenderer != null) {
-            mAttachInfo.mHardwareRenderer.notifyFramePending();
+        if (mAttachInfo.mThreadedRenderer != null) {
+            mAttachInfo.mThreadedRenderer.notifyFramePending();
         }
     }
 
@@ -1740,11 +1740,11 @@ public final class ViewRootImpl implements ViewParent,
                             host.getMeasuredHeight() + ", params=" + params);
                 }
 
-                if (mAttachInfo.mHardwareRenderer != null) {
+                if (mAttachInfo.mThreadedRenderer != null) {
                     // relayoutWindow may decide to destroy mSurface. As that decision
                     // happens in WindowManager service, we need to be defensive here
                     // and stop using the surface in case it gets destroyed.
-                    if (mAttachInfo.mHardwareRenderer.pauseSurface(mSurface)) {
+                    if (mAttachInfo.mThreadedRenderer.pauseSurface(mSurface)) {
                         // Animations were running so we need to push a frame
                         // to resume them
                         mDirty.set(0, 0, mWidth, mHeight);
@@ -1850,9 +1850,9 @@ public final class ViewRootImpl implements ViewParent,
                         // Only initialize up-front if transparent regions are not
                         // requested, otherwise defer to see if the entire window
                         // will be transparent
-                        if (mAttachInfo.mHardwareRenderer != null) {
+                        if (mAttachInfo.mThreadedRenderer != null) {
                             try {
-                                hwInitialized = mAttachInfo.mHardwareRenderer.initialize(
+                                hwInitialized = mAttachInfo.mThreadedRenderer.initialize(
                                         mSurface);
                                 if (hwInitialized && (host.mPrivateFlags
                                         & View.PFLAG_REQUEST_TRANSPARENT_REGIONS) == 0) {
@@ -1880,14 +1880,14 @@ public final class ViewRootImpl implements ViewParent,
                         mScroller.abortAnimation();
                     }
                     // Our surface is gone
-                    if (mAttachInfo.mHardwareRenderer != null &&
-                            mAttachInfo.mHardwareRenderer.isEnabled()) {
-                        mAttachInfo.mHardwareRenderer.destroy();
+                    if (mAttachInfo.mThreadedRenderer != null &&
+                            mAttachInfo.mThreadedRenderer.isEnabled()) {
+                        mAttachInfo.mThreadedRenderer.destroy();
                     }
                 } else if ((surfaceGenerationId != mSurface.getGenerationId()
                         || surfaceSizeChanged)
                         && mSurfaceHolder == null
-                        && mAttachInfo.mHardwareRenderer != null) {
+                        && mAttachInfo.mThreadedRenderer != null) {
                     mFullRedrawNeeded = true;
                     try {
                         // Need to do updateSurface (which leads to CanvasContext::setSurface and
@@ -1898,7 +1898,7 @@ public final class ViewRootImpl implements ViewParent,
                         // Note that frame size change doesn't always imply surface size change (eg.
                         // drag resizing uses fullscreen surface), need to check surfaceSizeChanged
                         // flag from WindowManager.
-                        mAttachInfo.mHardwareRenderer.updateSurface(mSurface);
+                        mAttachInfo.mThreadedRenderer.updateSurface(mSurface);
                     } catch (OutOfResourcesException e) {
                         handleOutOfResourcesException(e);
                         return;
@@ -2001,15 +2001,15 @@ public final class ViewRootImpl implements ViewParent,
                 }
             }
 
-            final ThreadedRenderer hardwareRenderer = mAttachInfo.mHardwareRenderer;
-            if (hardwareRenderer != null && hardwareRenderer.isEnabled()) {
+            final ThreadedRenderer threadedRenderer = mAttachInfo.mThreadedRenderer;
+            if (threadedRenderer != null && threadedRenderer.isEnabled()) {
                 if (hwInitialized
-                        || mWidth != hardwareRenderer.getWidth()
-                        || mHeight != hardwareRenderer.getHeight()
-                        || mNeedsHwRendererSetup) {
-                    hardwareRenderer.setup(mWidth, mHeight, mAttachInfo,
+                        || mWidth != threadedRenderer.getWidth()
+                        || mHeight != threadedRenderer.getHeight()
+                        || mNeedsRendererSetup) {
+                    threadedRenderer.setup(mWidth, mHeight, mAttachInfo,
                             mWindowAttributes.surfaceInsets);
-                    mNeedsHwRendererSetup = false;
+                    mNeedsRendererSetup = false;
                 }
             }
 
@@ -2253,8 +2253,8 @@ public final class ViewRootImpl implements ViewParent,
         }
         if (windowMoved || mAttachInfo.mNeedsUpdateLightCenter) {
             // Update the light position for the new offsets.
-            if (mAttachInfo.mHardwareRenderer != null) {
-                mAttachInfo.mHardwareRenderer.setLightCenter(mAttachInfo);
+            if (mAttachInfo.mThreadedRenderer != null) {
+                mAttachInfo.mThreadedRenderer.setLightCenter(mAttachInfo);
             }
             mAttachInfo.mNeedsUpdateLightCenter = false;
         }
@@ -2520,12 +2520,12 @@ public final class ViewRootImpl implements ViewParent,
     int mHardwareYOffset;
 
     @Override
-    public void onHardwarePreDraw(DisplayListCanvas canvas) {
+    public void onPreDraw(DisplayListCanvas canvas) {
         canvas.translate(-mHardwareXOffset, -mHardwareYOffset);
     }
 
     @Override
-    public void onHardwarePostDraw(DisplayListCanvas canvas) {
+    public void onPostDraw(DisplayListCanvas canvas) {
         drawAccessibilityFocusedDrawableIfNeeded(canvas);
         for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {
             mWindowCallbacks.get(i).onPostDraw(canvas);
@@ -2537,8 +2537,8 @@ public final class ViewRootImpl implements ViewParent,
      */
     void outputDisplayList(View view) {
         view.mRenderNode.output();
-        if (mAttachInfo.mHardwareRenderer != null) {
-            ((ThreadedRenderer)mAttachInfo.mHardwareRenderer).serializeDisplayListTree();
+        if (mAttachInfo.mThreadedRenderer != null) {
+            ((ThreadedRenderer)mAttachInfo.mThreadedRenderer).serializeDisplayListTree();
         }
     }
 
@@ -2638,9 +2638,9 @@ public final class ViewRootImpl implements ViewParent,
                 mWindowDrawCountDown = null;
             }
 
-            if (mAttachInfo.mHardwareRenderer != null) {
-                mAttachInfo.mHardwareRenderer.fence();
-                mAttachInfo.mHardwareRenderer.setStopped(mStopped);
+            if (mAttachInfo.mThreadedRenderer != null) {
+                mAttachInfo.mThreadedRenderer.fence();
+                mAttachInfo.mThreadedRenderer.setStopped(mStopped);
             }
 
             if (LOCAL_LOGV) {
@@ -2766,7 +2766,7 @@ public final class ViewRootImpl implements ViewParent,
                 mChoreographer.getFrameTimeNanos() / TimeUtils.NANOS_PER_MS;
 
         if (!dirty.isEmpty() || mIsAnimating || accessibilityFocusDirty) {
-            if (mAttachInfo.mHardwareRenderer != null && mAttachInfo.mHardwareRenderer.isEnabled()) {
+            if (mAttachInfo.mThreadedRenderer != null && mAttachInfo.mThreadedRenderer.isEnabled()) {
                 // If accessibility focus moved, always invalidate the root.
                 boolean invalidateRoot = accessibilityFocusDirty || mInvalidateRootRequested;
                 mInvalidateRootRequested = false;
@@ -2781,7 +2781,7 @@ public final class ViewRootImpl implements ViewParent,
                 }
 
                 if (invalidateRoot) {
-                    mAttachInfo.mHardwareRenderer.invalidateRoot();
+                    mAttachInfo.mThreadedRenderer.invalidateRoot();
                 }
 
                 dirty.setEmpty();
@@ -2794,14 +2794,14 @@ public final class ViewRootImpl implements ViewParent,
                     // report next draw overrides setStopped()
                     // This value is re-sync'd to the value of mStopped
                     // in the handling of mReportNextDraw post-draw.
-                    mAttachInfo.mHardwareRenderer.setStopped(false);
+                    mAttachInfo.mThreadedRenderer.setStopped(false);
                 }
 
                 if (updated) {
                     requestDrawWindow();
                 }
 
-                mAttachInfo.mHardwareRenderer.draw(mView, mAttachInfo, this);
+                mAttachInfo.mThreadedRenderer.draw(mView, mAttachInfo, this);
             } else {
                 // If we get here with a disabled & requested hardware renderer, something went
                 // wrong (an invalidate posted right before we destroyed the hardware surface
@@ -2811,12 +2811,12 @@ public final class ViewRootImpl implements ViewParent,
                 // Before we request a new frame we must however attempt to reinitiliaze the
                 // hardware renderer if it's in requested state. This would happen after an
                 // eglTerminate() for instance.
-                if (mAttachInfo.mHardwareRenderer != null &&
-                        !mAttachInfo.mHardwareRenderer.isEnabled() &&
-                        mAttachInfo.mHardwareRenderer.isRequested()) {
+                if (mAttachInfo.mThreadedRenderer != null &&
+                        !mAttachInfo.mThreadedRenderer.isEnabled() &&
+                        mAttachInfo.mThreadedRenderer.isRequested()) {
 
                     try {
-                        mAttachInfo.mHardwareRenderer.initializeIfNeeded(
+                        mAttachInfo.mThreadedRenderer.initializeIfNeeded(
                                 mWidth, mHeight, mAttachInfo, mSurface, surfaceInsets);
                     } catch (OutOfResourcesException e) {
                         handleOutOfResourcesException(e);
@@ -3196,8 +3196,8 @@ public final class ViewRootImpl implements ViewParent,
         mAccessibilityFocusedHost = view;
         mAccessibilityFocusedVirtualView = node;
 
-        if (mAttachInfo.mHardwareRenderer != null) {
-            mAttachInfo.mHardwareRenderer.invalidateRoot();
+        if (mAttachInfo.mThreadedRenderer != null) {
+            mAttachInfo.mThreadedRenderer.invalidateRoot();
         }
     }
 
@@ -3571,12 +3571,12 @@ public final class ViewRootImpl implements ViewParent,
                         boolean inTouchMode = msg.arg2 != 0;
                         ensureTouchModeLocally(inTouchMode);
 
-                        if (mAttachInfo.mHardwareRenderer != null && mSurface.isValid()){
+                        if (mAttachInfo.mThreadedRenderer != null && mSurface.isValid()){
                             mFullRedrawNeeded = true;
                             try {
                                 final WindowManager.LayoutParams lp = mWindowAttributes;
                                 final Rect surfaceInsets = lp != null ? lp.surfaceInsets : null;
-                                mAttachInfo.mHardwareRenderer.initializeIfNeeded(
+                                mAttachInfo.mThreadedRenderer.initializeIfNeeded(
                                         mWidth, mHeight, mAttachInfo, mSurface, surfaceInsets);
                             } catch (OutOfResourcesException e) {
                                 Log.e(mTag, "OutOfResourcesException locking surface", e);
@@ -5931,8 +5931,8 @@ public final class ViewRootImpl implements ViewParent,
                 profileRendering(mAttachInfo.mHasWindowFocus);
 
                 // Hardware rendering
-                if (mAttachInfo.mHardwareRenderer != null) {
-                    if (mAttachInfo.mHardwareRenderer.loadSystemProperties()) {
+                if (mAttachInfo.mThreadedRenderer != null) {
+                    if (mAttachInfo.mThreadedRenderer.loadSystemProperties()) {
                         invalidate();
                     }
                 }
@@ -5950,7 +5950,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void destroyHardwareRenderer() {
-        ThreadedRenderer hardwareRenderer = mAttachInfo.mHardwareRenderer;
+        ThreadedRenderer hardwareRenderer = mAttachInfo.mThreadedRenderer;
 
         if (hardwareRenderer != null) {
             if (mView != null) {
@@ -5959,7 +5959,7 @@ public final class ViewRootImpl implements ViewParent,
             hardwareRenderer.destroy();
             hardwareRenderer.setRequested(false);
 
-            mAttachInfo.mHardwareRenderer = null;
+            mAttachInfo.mThreadedRenderer = null;
             mAttachInfo.mHardwareAccelerated = false;
         }
     }
@@ -6946,8 +6946,8 @@ public final class ViewRootImpl implements ViewParent,
 
     void changeCanvasOpacity(boolean opaque) {
         Log.d(mTag, "changeCanvasOpacity: opaque=" + opaque);
-        if (mAttachInfo.mHardwareRenderer != null) {
-            mAttachInfo.mHardwareRenderer.setOpaque(opaque);
+        if (mAttachInfo.mThreadedRenderer != null) {
+            mAttachInfo.mThreadedRenderer.setOpaque(opaque);
         }
     }
 
