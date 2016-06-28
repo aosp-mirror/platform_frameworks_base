@@ -2996,6 +2996,13 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reply.writeInt(result);
             return true;
         }
+        case SET_VR_THREAD_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            final int tid = data.readInt();
+            setVrThread(tid);
+            reply.writeNoException();
+            return true;
+        }
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -7029,6 +7036,20 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
         return res;
+    }
+
+    @Override
+    public void setVrThread(int tid)
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeInt(tid);
+        mRemote.transact(SET_VR_THREAD_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+        return;
     }
 
     private IBinder mRemote;

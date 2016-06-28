@@ -97,6 +97,7 @@ final class ProcessRecord {
     int verifiedAdj;            // The last adjustment that was verified as actually being set
     int curSchedGroup;          // Currently desired scheduling class
     int setSchedGroup;          // Last set to background scheduling class
+    int vrThreadTid;            // Thread currently set for VR scheduling
     int trimMemoryLevel;        // Last selected memory trimming level
     int curProcState = PROCESS_STATE_NONEXISTENT; // Currently computed process state
     int repProcState = PROCESS_STATE_NONEXISTENT; // Last reported process state
@@ -293,6 +294,7 @@ final class ProcessRecord {
                 pw.print(" setSchedGroup="); pw.print(setSchedGroup);
                 pw.print(" systemNoUi="); pw.print(systemNoUi);
                 pw.print(" trimMemoryLevel="); pw.println(trimMemoryLevel);
+        pw.print(prefix); pw.print("vrThreadTid="); pw.print(vrThreadTid);
         pw.print(prefix); pw.print("curProcState="); pw.print(curProcState);
                 pw.print(" repProcState="); pw.print(repProcState);
                 pw.print(" pssProcState="); pw.print(pssProcState);
