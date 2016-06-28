@@ -16,7 +16,6 @@ package com.android.egg.neko;
 
 import android.app.Notification;
 import android.app.PendingIntent;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -31,6 +30,8 @@ import java.util.concurrent.ThreadLocalRandom;
 import com.android.egg.R;
 
 public class Cat extends Drawable {
+    public static final long[] PURR = {0, 40, 20, 40, 20, 40, 20, 40, 20, 40, 20, 40};
+
     private Random mNotSoRandom;
     private Bitmap mBitmap;
     private long mSeed;
@@ -198,6 +199,7 @@ public class Cat extends Drawable {
                 .setContentText(getName())
                 .setContentIntent(PendingIntent.getActivity(context, 0, intent, 0))
                 .setAutoCancel(true)
+                .setVibrate(PURR)
                 .addExtras(extras);
     }
 
