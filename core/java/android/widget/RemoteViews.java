@@ -2659,8 +2659,8 @@ public class RemoteViews implements Parcelable, Filter {
      *
      * When setting the on-click action of items within collections (eg. {@link ListView},
      * {@link StackView} etc.), this method will not work. Instead, use {@link
-     * RemoteViews#setPendingIntentTemplate(int, PendingIntent) in conjunction with
-     * RemoteViews#setOnClickFillInIntent(int, Intent).
+     * RemoteViews#setPendingIntentTemplate(int, PendingIntent)} in conjunction with
+     * {@link RemoteViews#setOnClickFillInIntent(int, Intent)}.
      *
      * @param viewId The id of the view that will trigger the {@link PendingIntent} when clicked
      * @param pendingIntent The {@link PendingIntent} to send when user clicks
@@ -2694,9 +2694,7 @@ public class RemoteViews implements Parcelable, Filter {
      * fillInIntent is then combined with the PendingIntent template in order to determine the final
      * intent which will be executed when the item is clicked. This works as follows: any fields
      * which are left blank in the PendingIntent template, but are provided by the fillInIntent
-     * will be overwritten, and the resulting PendingIntent will be used.
-     *
-     *
+     * will be overwritten, and the resulting PendingIntent will be used. The rest
      * of the PendingIntent template will then be filled in with the associated fields that are
      * set in fillInIntent. See {@link Intent#fillIn(Intent, int)} for more details.
      *
