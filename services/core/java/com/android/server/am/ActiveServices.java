@@ -1148,9 +1148,7 @@ public final class ActiveServices {
 
                 if (r.binding.service.app != null) {
                     if (r.binding.service.app.whitelistManager) {
-                        // Must reset flag here because on computeOomAdjLocked() the service
-                        // connection will be gone...
-                        r.binding.service.app.whitelistManager = false;
+                        updateWhitelistManagerLocked(r.binding.service.app);
                     }
                     // This could have made the service less important.
                     if ((r.flags&Context.BIND_TREAT_LIKE_ACTIVITY) != 0) {
