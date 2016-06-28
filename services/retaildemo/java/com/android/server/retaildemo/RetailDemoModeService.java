@@ -55,6 +55,8 @@ import android.provider.Settings;
 import android.util.Slog;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.logging.MetricsLogger;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
@@ -86,8 +88,12 @@ public class RetailDemoModeService extends SystemService {
             AudioSystem.STREAM_MUSIC
     };
 
+    // Tron Vars
+    private static final String DEMO_SESSION_COUNT = "retail_demo_session_count";
+    private static final String DEMO_SESSION_DURATION = "retail_demo_session_duration";
+
     boolean mDeviceInDemoMode = false;
-    int mCurrentUserId;
+    int mCurrentUserId = UserHandle.USER_SYSTEM;
     private ActivityManagerService mAms;
     private ActivityManagerInternal mAmi;
     private AudioManager mAudioManager;
@@ -101,6 +107,15 @@ public class RetailDemoModeService extends SystemService {
     private CameraManager mCameraManager;
     private String[] mCameraIdsWithFlash;
     private Configuration mPrimaryUserConfiguration;
+
+    final Object mActivityLock = new Object();
+    // Whether the newly created demo user has interacted with the screen yet
+    @GuardedBy("mActivityLock")
+    boolean mUserUntouched;
+    @GuardedBy("mActivityLock")
+    long mFirstUserActivityTime;
+    @GuardedBy("mActivityLock")
+    long mLastUserActivityTime;
 
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -136,18 +151,7 @@ public class RetailDemoModeService extends SystemService {
                     mWakeLock.acquire();
                     break;
                 case MSG_INACTIVITY_TIME_OUT:
-                    final IPackageManager pm = AppGlobals.getPackageManager();
-                    int enabledState = PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
-                    String demoLauncherComponent = getContext().getResources()
-                            .getString(R.string.config_demoModeLauncherComponent);
-                    try {
-                        enabledState = pm.getComponentEnabledSetting(
-                                ComponentName.unflattenFromString(demoLauncherComponent),
-                                mCurrentUserId);
-                    } catch (RemoteException exc) {
-                        Slog.e(TAG, "Unable to talk to Package Manager", exc);
-                    }
-                    if (enabledState == PackageManager.COMPONENT_ENABLED_STATE_DISABLED) {
+                    if (isDemoLauncherDisabled()) {
                         Slog.i(TAG, "User inactivity timeout reached");
                         showInactivityCountdownDialog();
                     }
@@ -158,6 +162,9 @@ public class RetailDemoModeService extends SystemService {
                     }
                     removeMessages(MSG_START_NEW_SESSION);
                     removeMessages(MSG_INACTIVITY_TIME_OUT);
+                    if (mCurrentUserId != UserHandle.USER_SYSTEM) {
+                        logSessionDuration();
+                    }
                     final UserInfo demoUser = getUserManager().createUser(DEMO_USER_NAME,
                             UserInfo.FLAG_DEMO | UserInfo.FLAG_EPHEMERAL);
                     if (demoUser != null) {
@@ -190,6 +197,9 @@ public class RetailDemoModeService extends SystemService {
 
     public RetailDemoModeService(Context context) {
         super(context);
+        synchronized (mActivityLock) {
+            mFirstUserActivityTime = mLastUserActivityTime = SystemClock.uptimeMillis();
+        }
     }
 
     private Notification createResetNotification() {
@@ -213,6 +223,21 @@ public class RetailDemoModeService extends SystemService {
         return mResetDemoPendingIntent;
     }
 
+    boolean isDemoLauncherDisabled() {
+        IPackageManager pm = AppGlobals.getPackageManager();
+        int enabledState = PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
+        String demoLauncherComponent = getContext().getResources()
+                .getString(R.string.config_demoModeLauncherComponent);
+        try {
+            enabledState = pm.getComponentEnabledSetting(
+                    ComponentName.unflattenFromString(demoLauncherComponent),
+                    mCurrentUserId);
+        } catch (RemoteException exc) {
+            Slog.e(TAG, "Unable to talk to Package Manager", exc);
+        }
+        return enabledState == PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
+    }
+
     private void setupDemoUser(UserInfo userInfo) {
         UserManager um = getUserManager();
         UserHandle user = UserHandle.of(userInfo.id);
@@ -224,6 +249,14 @@ public class RetailDemoModeService extends SystemService {
         um.setUserRestriction(UserManager.DISALLOW_USB_FILE_TRANSFER, true, user);
         Settings.Secure.putIntForUser(getContext().getContentResolver(),
                 Settings.Secure.SKIP_FIRST_USE_HINTS, 1, userInfo.id);
+    }
+
+    void logSessionDuration() {
+        final int sessionDuration;
+        synchronized (mActivityLock) {
+            sessionDuration = (int) ((mLastUserActivityTime - mFirstUserActivityTime) / 1000);
+        }
+        MetricsLogger.count(getContext(), DEMO_SESSION_DURATION, sessionDuration);
     }
 
     private ActivityManagerService getActivityManager() {
@@ -395,11 +428,15 @@ public class RetailDemoModeService extends SystemService {
         turnOffAllFlashLights();
         muteVolumeStreams();
         mAmi.updatePersistentConfigurationForUser(getPrimaryUsersConfiguration(), userId);
+        synchronized (mActivityLock) {
+            mUserUntouched = true;
+        }
+        MetricsLogger.count(getContext(), DEMO_SESSION_COUNT, 1);
+        mHandler.removeMessages(MSG_INACTIVITY_TIME_OUT);
     }
 
     private RetailDemoModeServiceInternal mLocalService = new RetailDemoModeServiceInternal() {
         private static final long USER_ACTIVITY_DEBOUNCE_TIME = 2000;
-        private long mLastUserActivityTime = 0;
 
         @Override
         public void onUserActivity() {
@@ -407,10 +444,17 @@ public class RetailDemoModeService extends SystemService {
                 return;
             }
             long timeOfActivity = SystemClock.uptimeMillis();
-            if (timeOfActivity < mLastUserActivityTime + USER_ACTIVITY_DEBOUNCE_TIME) {
-                return;
+            synchronized (mActivityLock) {
+                if (timeOfActivity < mLastUserActivityTime + USER_ACTIVITY_DEBOUNCE_TIME) {
+                    return;
+                }
+                mLastUserActivityTime = timeOfActivity;
+                if (mUserUntouched && isDemoLauncherDisabled()) {
+                    Slog.d(TAG, "retail_demo first touch");
+                    mUserUntouched = false;
+                    mFirstUserActivityTime = timeOfActivity;
+                }
             }
-            mLastUserActivityTime = timeOfActivity;
             mHandler.removeMessages(MSG_INACTIVITY_TIME_OUT);
             mHandler.sendEmptyMessageDelayed(MSG_INACTIVITY_TIME_OUT, USER_INACTIVITY_TIMEOUT);
         }
