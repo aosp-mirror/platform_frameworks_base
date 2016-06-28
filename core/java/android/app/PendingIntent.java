@@ -242,6 +242,36 @@ public final class PendingIntent implements Parcelable {
     }
 
     /**
+     * Listener for observing when pending intents are written to a parcel.
+     *
+     * @hide
+     */
+    public interface OnMarshaledListener {
+        /**
+         * Called when a pending intent is written to a parcel.
+         *
+         * @param intent The pending intent.
+         * @param parcel The parcel to which it was written.
+         * @param flags The parcel flags when it was written.
+         */
+        void onMarshaled(PendingIntent intent, Parcel parcel, int flags);
+    }
+
+    private static final ThreadLocal<OnMarshaledListener> sOnMarshaledListener
+            = new ThreadLocal<>();
+
+    /**
+     * Registers an listener for pending intents being written to a parcel.
+     *
+     * @param listener The listener, null to clear.
+     *
+     * @hide
+     */
+    public static void setOnMarshaledListener(OnMarshaledListener listener) {
+        sOnMarshaledListener.set(listener);
+    }
+
+    /**
      * Retrieve a PendingIntent that will start a new activity, like calling
      * {@link Context#startActivity(Intent) Context.startActivity(Intent)}.
      * Note that the activity will be started outside of the context of an
@@ -1016,6 +1046,11 @@ public final class PendingIntent implements Parcelable {
 
     public void writeToParcel(Parcel out, int flags) {
         out.writeStrongBinder(mTarget.asBinder());
+        OnMarshaledListener listener = sOnMarshaledListener.get();
+        if (listener != null) {
+            listener.onMarshaled(this, out, flags);
+        }
+
     }
 
     public static final Parcelable.Creator<PendingIntent> CREATOR
