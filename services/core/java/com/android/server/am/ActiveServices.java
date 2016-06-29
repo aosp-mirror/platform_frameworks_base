@@ -1076,10 +1076,6 @@ public final class ActiveServices {
         return 1;
     }
 
-    private void foo() {
-
-    }
-
     void publishServiceLocked(ServiceRecord r, Intent intent, IBinder service) {
         final long origId = Binder.clearCallingIdentity();
         try {
