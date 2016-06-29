@@ -20,7 +20,6 @@ import static com.android.documentsui.StubProvider.ROOT_0_ID;
 import static com.android.documentsui.StubProvider.ROOT_1_ID;
 
 import android.support.test.filters.Suppress;
-import android.support.test.uiautomator.UiObjectNotFoundException;
 import android.support.v7.recyclerview.R;
 import android.test.suitebuilder.annotation.LargeTest;
 
@@ -38,16 +37,18 @@ public class SearchViewUiTest extends ActivityTest<FilesActivity> {
       // Drawer interferes with a lot of search action; going to try to close any opened ones
       bots.roots.closeDrawer();
 
-      openRoot(ROOT_0_ID);  // Even if this is the default root...it `wait`s for more better tests
+      // wait for a file to be present in default dir.
+      bots.directory.waitForDocument(fileName1);
     }
 
-    public void testSearchIconVisible_RootWithSearchSupport() throws Exception {
+    public void testSearchIconVisible() throws Exception {
+        // The default root (root 0) supports search
         bots.search.assertInputExists(false);
         bots.search.assertIconVisible(true);
     }
 
-    public void testSearchIconHidden_RootNoSearchSupport() throws Exception {
-        openRoot(ROOT_1_ID);
+    public void testSearchIconHidden() throws Exception {
+        bots.roots.openRoot(ROOT_1_ID);  // root 1 doesn't support search
 
         bots.search.assertIconVisible(false);
         bots.search.assertInputExists(false);
@@ -152,32 +153,13 @@ public class SearchViewUiTest extends ActivityTest<FilesActivity> {
 
         bots.keyboard.pressEnter();
 
-        openRoot(ROOT_1_ID);
+        bots.roots.openRoot(ROOT_1_ID);
         device.waitForIdle();
         assertDefaultContentOfTestDir1();
 
-        openRoot(ROOT_0_ID);
+        bots.roots.openRoot(ROOT_0_ID);
         device.waitForIdle();
 
         assertDefaultContentOfTestDir0();
-    }
-
-    void openRoot(String rootId) throws UiObjectNotFoundException {
-        bots.roots.openRoot(rootId);
-        // Open the named root and wait for a known file in it.
-        // You can find known files by looking in super.initTestFiles();
-        switch(rootId) {
-            case ROOT_0_ID:
-                bots.directory.waitForDocument(fileName1);
-                break;
-            case ROOT_1_ID:
-                bots.directory.waitForDocument(fileName3);
-                break;
-            case "Downloads":
-                device.waitForIdle();
-                break;
-            default:
-                throw new IllegalArgumentException("Unsupported root: " + rootId);
-        }
     }
 }

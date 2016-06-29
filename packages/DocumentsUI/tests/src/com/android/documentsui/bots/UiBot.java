@@ -19,16 +19,21 @@ package com.android.documentsui.bots;
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
+import static android.support.test.espresso.matcher.ViewMatchers.isAssignableFrom;
+import static android.support.test.espresso.matcher.ViewMatchers.withClassName;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
+import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.endsWith;
 
 import android.content.Context;
 import android.support.test.espresso.Espresso;
 import android.support.test.espresso.action.ViewActions;
 import android.support.test.espresso.matcher.BoundedMatcher;
+import android.support.test.espresso.matcher.ViewMatchers;
 import android.support.test.uiautomator.By;
 import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObject;
@@ -36,6 +41,7 @@ import android.support.test.uiautomator.UiObject2;
 import android.support.test.uiautomator.UiObjectNotFoundException;
 import android.support.test.uiautomator.UiSelector;
 import android.util.TypedValue;
+import android.view.View;
 import android.widget.Toolbar;
 
 import com.android.documentsui.R;
@@ -56,12 +62,35 @@ public class UiBot extends Bots.BaseBot {
 
     public static final String TARGET_PKG = "com.android.documentsui";
 
+    @SuppressWarnings("unchecked")
+    private static final Matcher<View> TOOLBAR = allOf(
+            isAssignableFrom(Toolbar.class),
+            withId(R.id.toolbar));
+
+    @SuppressWarnings("unchecked")
+    private static final Matcher<View> ACTIONBAR = allOf(
+            withClassName(endsWith("ActionBarContextView")));
+
+    @SuppressWarnings("unchecked")
+    private static final Matcher<View> TEXT_ENTRY = allOf(
+            withClassName(endsWith("EditText")));
+
+    @SuppressWarnings("unchecked")
+    private static final Matcher<View> TOOLBAR_OVERFLOW = allOf(
+            withClassName(endsWith("OverflowMenuButton")),
+            ViewMatchers.isDescendantOfA(TOOLBAR));
+
+    @SuppressWarnings("unchecked")
+    private static final Matcher<View> ACTIONBAR_OVERFLOW = allOf(
+            withClassName(endsWith("OverflowMenuButton")),
+            ViewMatchers.isDescendantOfA(ACTIONBAR));
+
     public UiBot(UiDevice device, Context context, int timeout) {
         super(device, context, timeout);
     }
 
     public void assertWindowTitle(String expected) {
-        onView(Matchers.TOOLBAR)
+        onView(TOOLBAR)
                 .check(matches(withToolbarTitle(is(expected))));
     }
 
@@ -84,7 +113,7 @@ public class UiBot extends Bots.BaseBot {
     }
 
     public void setDialogText(String text) throws UiObjectNotFoundException {
-        onView(Matchers.TEXT_ENTRY)
+        onView(TEXT_ENTRY)
                 .perform(ViewActions.replaceText(text));
     }
 
@@ -125,20 +154,20 @@ public class UiBot extends Bots.BaseBot {
     }
 
     public void clickNewFolder() {
-        onView(Matchers.ACTIONBAR_OVERFLOW).perform(click());
+        onView(ACTIONBAR_OVERFLOW).perform(click());
 
         // Click the item by label, since Espresso doesn't support lookup by id on overflow.
         onView(withText("New folder")).perform(click());
     }
 
     public void clickActionbarOverflowItem(String label) {
-        onView(Matchers.ACTIONBAR_OVERFLOW).perform(click());
+        onView(ACTIONBAR_OVERFLOW).perform(click());
         // Click the item by label, since Espresso doesn't support lookup by id on overflow.
         onView(withText(label)).perform(click());
     }
 
     public void clickToolbarOverflowItem(String label) {
-        onView(Matchers.TOOLBAR_OVERFLOW).perform(click());
+        onView(TOOLBAR_OVERFLOW).perform(click());
         // Click the item by label, since Espresso doesn't support lookup by id on overflow.
         onView(withText(label)).perform(click());
     }

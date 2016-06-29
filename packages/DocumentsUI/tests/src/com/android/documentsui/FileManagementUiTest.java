@@ -21,6 +21,7 @@ import static com.android.documentsui.StubProvider.ROOT_1_ID;
 
 import android.net.Uri;
 import android.os.RemoteException;
+import android.support.test.filters.Suppress;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.view.KeyEvent;
 
@@ -50,6 +51,7 @@ public class FileManagementUiTest extends ActivityTest<FilesActivity> {
         mDocsHelper.createDocument(rootDir1, "text/plain", "poodles.text");
     }
 
+    @Suppress
     public void testCreateDirectory() throws Exception {
         bots.main.openOverflowMenu();
         device.waitForIdle();
