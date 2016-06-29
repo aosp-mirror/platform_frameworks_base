@@ -18,6 +18,7 @@ package android.app.job;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 
 import java.util.List;
 
@@ -75,6 +76,7 @@ public abstract class JobScheduler {
      * @return {@link #RESULT_SUCCESS} or {@link #RESULT_FAILURE}
      * @hide
      */
+    @SystemApi
     public abstract int scheduleAsPackage(JobInfo job, String packageName, int userId, String tag);
 
     /**
