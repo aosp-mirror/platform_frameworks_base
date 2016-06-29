@@ -70,6 +70,7 @@ public class WordIterator implements Selection.PositionIterator {
     /** {@inheritDoc} */
     public int preceding(int offset) {
         int shiftedOffset = offset - mOffsetShift;
+        checkOffsetIsValid(shiftedOffset);
         do {
             shiftedOffset = mIterator.preceding(shiftedOffset);
             if (shiftedOffset == BreakIterator.DONE) {
@@ -84,6 +85,7 @@ public class WordIterator implements Selection.PositionIterator {
     /** {@inheritDoc} */
     public int following(int offset) {
         int shiftedOffset = offset - mOffsetShift;
+        checkOffsetIsValid(shiftedOffset);
         do {
             shiftedOffset = mIterator.following(shiftedOffset);
             if (shiftedOffset == BreakIterator.DONE) {
@@ -111,6 +113,7 @@ public class WordIterator implements Selection.PositionIterator {
      */
     public int nextBoundary(int offset) {
         int shiftedOffset = offset - mOffsetShift;
+        checkOffsetIsValid(shiftedOffset);
         shiftedOffset = mIterator.following(shiftedOffset);
         if (shiftedOffset == BreakIterator.DONE) {
             return BreakIterator.DONE;
@@ -127,6 +130,7 @@ public class WordIterator implements Selection.PositionIterator {
      */
     public int prevBoundary(int offset) {
         int shiftedOffset = offset - mOffsetShift;
+        checkOffsetIsValid(shiftedOffset);
         shiftedOffset = mIterator.preceding(shiftedOffset);
         if (shiftedOffset == BreakIterator.DONE) {
             return BreakIterator.DONE;
@@ -286,6 +290,7 @@ public class WordIterator implements Selection.PositionIterator {
      * @param offset the offset to search from.
      */
     public int getPunctuationBeginning(int offset) {
+        checkOffsetIsValid(offset - mOffsetShift);
         while (offset != BreakIterator.DONE && !isPunctuationStartBoundary(offset)) {
             offset = prevBoundary(offset);
         }
@@ -301,6 +306,7 @@ public class WordIterator implements Selection.PositionIterator {
      * @param offset the offset to search from.
      */
     public int getPunctuationEnd(int offset) {
+        checkOffsetIsValid(offset - mOffsetShift);
         while (offset != BreakIterator.DONE && !isPunctuationEndBoundary(offset)) {
             offset = nextBoundary(offset);
         }

@@ -17,6 +17,7 @@
 package android.text.method;
 
 import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.SmallTest;
 
 import java.text.BreakIterator;
 import java.util.Locale;
@@ -24,6 +25,7 @@ import java.util.Locale;
 // TODO(Bug: 24062099): Add more tests for non-ascii text.
 public class WordIteratorTest  extends AndroidTestCase {
 
+    @SmallTest
     public void testSetCharSequence() {
         final String text = "text";
         WordIterator wordIterator = new WordIterator(Locale.ENGLISH);
@@ -46,6 +48,7 @@ public class WordIteratorTest  extends AndroidTestCase {
         wordIterator.setCharSequence(text, text.length(), text.length());
     }
 
+    @SmallTest
     public void testPreceding() {
         final String text = "abc def-ghi. jkl";
         WordIterator wordIterator = new WordIterator(Locale.ENGLISH);
@@ -72,6 +75,7 @@ public class WordIteratorTest  extends AndroidTestCase {
         assertEquals(text.indexOf('j'), wordIterator.preceding(text.indexOf('l')));
     }
 
+    @SmallTest
     public void testFollowing() {
         final String text = "abc def-ghi. jkl";
         WordIterator wordIterator = new WordIterator(Locale.ENGLISH);
@@ -98,6 +102,7 @@ public class WordIteratorTest  extends AndroidTestCase {
         assertEquals(BreakIterator.DONE, wordIterator.following(text.length()));
     }
 
+    @SmallTest
     public void testIsBoundary() {
         final String text = "abc def-ghi. jkl";
         WordIterator wordIterator = new WordIterator(Locale.ENGLISH);
@@ -125,6 +130,7 @@ public class WordIteratorTest  extends AndroidTestCase {
         assertTrue(wordIterator.isBoundary(text.length()));
     }
 
+    @SmallTest
     public void testNextBoundary() {
         final String text = "abc def-ghi. jkl";
         WordIterator wordIterator = new WordIterator(Locale.ENGLISH);
@@ -171,6 +177,7 @@ public class WordIteratorTest  extends AndroidTestCase {
         assertEquals(BreakIterator.DONE, currentOffset);
     }
 
+    @SmallTest
     public void testPrevBoundary() {
         final String text = "abc def-ghi. jkl";
         WordIterator wordIterator = new WordIterator(Locale.ENGLISH);
@@ -216,6 +223,7 @@ public class WordIteratorTest  extends AndroidTestCase {
         assertEquals(BreakIterator.DONE, currentOffset);
     }
 
+    @SmallTest
     public void testGetBeginning() {
         {
             final String text = "abc def-ghi. jkl";
@@ -289,6 +297,7 @@ public class WordIteratorTest  extends AndroidTestCase {
         }
     }
 
+    @SmallTest
     public void testGetEnd() {
         {
             final String text = "abc def-ghi. jkl";
@@ -363,14 +372,18 @@ public class WordIteratorTest  extends AndroidTestCase {
         }
     }
 
+    @SmallTest
     public void testGetPunctuationBeginning() {
         final String text = "abc!? (^^;) def";
         WordIterator wordIterator = new WordIterator(Locale.ENGLISH);
         wordIterator.setCharSequence(text, 0, text.length());
 
-        // TODO: Shouldn't this throw an exception?
-        assertEquals(BreakIterator.DONE, wordIterator.getPunctuationBeginning(BreakIterator.DONE));
-
+        try {
+            wordIterator.getPunctuationBeginning(BreakIterator.DONE);
+            fail("getPunctuationBeginning with invalid offset should throw "
+                    + "IllegalArgumentException.");
+        } catch (IllegalArgumentException e) {
+        }
         try {
             wordIterator.getPunctuationBeginning(-2);
             fail("getPunctuationBeginning with invalid offset should throw "
@@ -394,14 +407,17 @@ public class WordIteratorTest  extends AndroidTestCase {
         assertEquals(text.indexOf(';'), wordIterator.getPunctuationBeginning(text.length()));
     }
 
+    @SmallTest
     public void testGetPunctuationEnd() {
         final String text = "abc!? (^^;) def";
         WordIterator wordIterator = new WordIterator(Locale.ENGLISH);
         wordIterator.setCharSequence(text, 0, text.length());
 
-        // TODO: Shouldn't this throw an exception?
-        assertEquals(BreakIterator.DONE, wordIterator.getPunctuationEnd(BreakIterator.DONE));
-
+        try {
+            wordIterator.getPunctuationEnd(BreakIterator.DONE);
+            fail("getPunctuationEnd with invalid offset should throw IllegalArgumentException.");
+        } catch (IllegalArgumentException e) {
+        }
         try {
             wordIterator.getPunctuationEnd(-2);
             fail("getPunctuationEnd with invalid offset should throw IllegalArgumentException.");
@@ -423,6 +439,7 @@ public class WordIteratorTest  extends AndroidTestCase {
         assertEquals(BreakIterator.DONE, wordIterator.getPunctuationEnd(text.length()));
     }
 
+    @SmallTest
     public void testIsAfterPunctuation() {
         final String text = "abc!? (^^;) def";
         WordIterator wordIterator = new WordIterator(Locale.ENGLISH);
@@ -438,6 +455,7 @@ public class WordIteratorTest  extends AndroidTestCase {
         assertFalse(wordIterator.isAfterPunctuation(text.length() + 1));
     }
 
+    @SmallTest
     public void testIsOnPunctuation() {
         final String text = "abc!? (^^;) def";
         WordIterator wordIterator = new WordIterator(Locale.ENGLISH);
