@@ -541,6 +541,8 @@ class PackageManagerShellCommand extends ShellCommand {
         boolean listDisabled = false, listEnabled = false;
         boolean listSystem = false, listThirdParty = false;
         boolean listInstaller = false;
+        boolean showUid = false;
+        int uid = -1;
         int userId = UserHandle.USER_SYSTEM;
         try {
             String opt;
@@ -561,11 +563,11 @@ class PackageManagerShellCommand extends ShellCommand {
                     case "-l":
                         // old compat
                         break;
-                    case "-lf":
-                        showSourceDir = true;
-                        break;
                     case "-s":
                         listSystem = true;
+                        break;
+                    case "-U":
+                        showUid = true;
                         break;
                     case "-u":
                         getFlags |= PackageManager.GET_UNINSTALLED_PACKAGES;
@@ -575,6 +577,10 @@ class PackageManagerShellCommand extends ShellCommand {
                         break;
                     case "--user":
                         userId = UserHandle.parseUserArg(getNextArgRequired());
+                        break;
+                    case "--uid":
+                        showUid = true;
+                        uid = Integer.parseInt(getNextArgRequired());
                         break;
                     default:
                         pw.println("Error: Unknown option: " + opt);
@@ -599,6 +605,9 @@ class PackageManagerShellCommand extends ShellCommand {
             if (filter != null && !info.packageName.contains(filter)) {
                 continue;
             }
+            if (uid != -1 && info.applicationInfo.uid != uid) {
+                continue;
+            }
             final boolean isSystem =
                     (info.applicationInfo.flags&ApplicationInfo.FLAG_SYSTEM) != 0;
             if ((!listDisabled || !info.applicationInfo.enabled) &&
@@ -614,6 +623,10 @@ class PackageManagerShellCommand extends ShellCommand {
                 if (listInstaller) {
                     pw.print("  installer=");
                     pw.print(mInterface.getInstallerPackageName(info.packageName));
+                }
+                if (showUid) {
+                    pw.print(" uid:");
+                    pw.print(info.applicationInfo.uid);
                 }
                 pw.println();
             }
@@ -1428,7 +1441,8 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("      -f: dump the name of the .apk file containing the test package");
         pw.println("  list libraries");
         pw.println("    Prints all system libraries.");
-        pw.println("  list packages [-f] [-d] [-e] [-s] [-3] [-i] [-u] [--user USER_ID] [FILTER]");
+        pw.println("  list packages [-f] [-d] [-e] [-s] [-3] [-i] [-l] [-u] [-U] "
+                + "[--uid UID] [--user USER_ID] [FILTER]");
         pw.println("    Prints all packages; optionally only those whose name contains");
         pw.println("    the text in FILTER.");
         pw.println("    Options:");
@@ -1438,7 +1452,11 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("      -s: filter to only show system packages");
         pw.println("      -3: filter to only show third party packages");
         pw.println("      -i: see the installer for the packages");
+        pw.println("      -l: ignored (used for compatibility with older releases)");
+        pw.println("      -U: also show the package UID");
         pw.println("      -u: also include uninstalled packages");
+        pw.println("      --uid UID: filter to only show packages with the given UID");
+        pw.println("      --user USER_ID: only list packages belonging to the given user");
         pw.println("  list permission-groups");
         pw.println("    Prints all known permission groups.");
         pw.println("  list permissions [-g] [-f] [-d] [-u] [GROUP]");
