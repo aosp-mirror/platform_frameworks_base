@@ -53,6 +53,37 @@ import java.util.concurrent.ConcurrentHashMap;
  * Implementations are then responsible for updating the state of the {@code Connection}, and
  * must call {@link #destroy()} to signal to the framework that the {@code Connection} is no
  * longer used and associated resources may be recovered.
+ * <p>
+ * Subclasses of {@code Connection} override the {@code on*} methods to provide the the
+ * {@link ConnectionService}'s implementation of calling functionality.  The {@code on*} methods are
+ * called by Telecom to inform an instance of a {@code Connection} of actions specific to that
+ * {@code Connection} instance.
+ * <p>
+ * Basic call support requires overriding the following methods: {@link #onAnswer()},
+ * {@link #onDisconnect()}, {@link #onReject()}, {@link #onAbort()}
+ * <p>
+ * Where a {@code Connection} has {@link #CAPABILITY_SUPPORT_HOLD}, the {@link #onHold()} and
+ * {@link #onUnhold()} methods should be overridden to provide hold support for the
+ * {@code Connection}.
+ * <p>
+ * Where a {@code Connection} supports a variation of video calling (e.g. the
+ * {@code CAPABILITY_SUPPORTS_VT_*} capability bits), {@link #onAnswer(int)} should be overridden
+ * to support answering a call as a video call.
+ * <p>
+ * Where a {@code Connection} has {@link #PROPERTY_IS_EXTERNAL_CALL} and
+ * {@link #CAPABILITY_CAN_PULL_CALL}, {@link #onPullExternalCall()} should be overridden to provide
+ * support for pulling the external call.
+ * <p>
+ * Where a {@code Connection} supports conference calling {@link #onSeparate()} should be
+ * overridden.
+ * <p>
+ * There are a number of other {@code on*} methods which a {@code Connection} can choose to
+ * implement, depending on whether it is concerned with the associated calls from Telecom.  If,
+ * for example, call events from a {@link InCallService} are handled,
+ * {@link #onCallEvent(String, Bundle)} should be overridden.  Another example is
+ * {@link #onExtrasChanged(Bundle)}, which should be overridden if the {@code Connection} wishes to
+ * make use of extra information provided via the {@link Call#putExtras(Bundle)} and
+ * {@link Call#removeExtras(String...)} methods.
  */
 public abstract class Connection extends Conferenceable {
 
@@ -385,7 +416,7 @@ public abstract class Connection extends Conferenceable {
     /**
      * Connection event used to inform Telecom that it should play the on hold tone.  This is used
      * to play a tone when the peer puts the current call on hold.  Sent to Telecom via
-     * {@link #sendConnectionEvent(String)}.
+     * {@link #sendConnectionEvent(String, Bundle)}.
      * @hide
      */
     public static final String EVENT_ON_HOLD_TONE_START =
@@ -394,7 +425,7 @@ public abstract class Connection extends Conferenceable {
     /**
      * Connection event used to inform Telecom that it should stop the on hold tone.  This is used
      * to stop a tone when the peer puts the current call on hold.  Sent to Telecom via
-     * {@link #sendConnectionEvent(String)}.
+     * {@link #sendConnectionEvent(String, Bundle)}.
      * @hide
      */
     public static final String EVENT_ON_HOLD_TONE_END =
@@ -409,12 +440,18 @@ public abstract class Connection extends Conferenceable {
      * {@link Call.Details#PROPERTY_IS_EXTERNAL_CALL} and
      * {@link Call.Details#CAPABILITY_CAN_PULL_CALL}, but the {@link ConnectionService} could not
      * pull the external call due to an error condition.
+     * <p>
+     * Sent via {@link #sendConnectionEvent(String, Bundle)}.  The {@link Bundle} parameter is
+     * expected to be null when this connection event is used.
      */
     public static final String EVENT_CALL_PULL_FAILED = "android.telecom.event.CALL_PULL_FAILED";
 
     /**
      * Connection event used to inform {@link InCallService}s when the merging of two calls has
      * failed. The User Interface should use this message to inform the user of the error.
+     * <p>
+     * Sent via {@link #sendConnectionEvent(String, Bundle)}.  The {@link Bundle} parameter is
+     * expected to be null when this connection event is used.
      */
     public static final String EVENT_CALL_MERGE_FAILED = "android.telecom.event.CALL_MERGE_FAILED";
 
@@ -464,7 +501,12 @@ public abstract class Connection extends Conferenceable {
         mConnectionCapabilities |= capability;
     }
 
-
+    /**
+     * Renders a set of capability bits ({@code CAPABILITY_*}) as a human readable string.
+     *
+     * @param capabilities A capability bit field.
+     * @return A human readable string representation.
+     */
     public static String capabilitiesToString(int capabilities) {
         StringBuilder builder = new StringBuilder();
         builder.append("[Capabilities:");
@@ -533,6 +575,12 @@ public abstract class Connection extends Conferenceable {
         return builder.toString();
     }
 
+    /**
+     * Renders a set of property bits ({@code PROPERTY_*}) as a human readable string.
+     *
+     * @param properties A property bit field.
+     * @return A human readable string representation.
+     */
     public static String propertiesToString(int properties) {
         StringBuilder builder = new StringBuilder();
         builder.append("[Properties:");
@@ -1909,12 +1957,13 @@ public abstract class Connection extends Conferenceable {
      * New or existing keys are replaced in the {@code Connection} extras.  Keys which are no longer
      * in the new extras, but were present the last time {@code setExtras} was called are removed.
      * <p>
+     * Alternatively you may use the {@link #putExtras(Bundle)}, and
+     * {@link #removeExtras(String...)} methods to modify the extras.
+     * <p>
      * No assumptions should be made as to how an In-Call UI or service will handle these extras.
      * Keys should be fully qualified (e.g., com.example.MY_EXTRA) to avoid conflicts.
      *
      * @param extras The extras associated with this {@code Connection}.
-     * @deprecated Use {@link #putExtras(Bundle)} to add extras.  Use {@link #removeExtras(List)}
-     * to remove extras.
      */
     public final void setExtras(@Nullable Bundle extras) {
         checkImmutable();
@@ -2175,6 +2224,12 @@ public abstract class Connection extends Conferenceable {
      * <p>
      * The {@link InCallService} issues a Call event via {@link Call#sendCallEvent(String, Bundle)}.
      * <p>
+     * Where possible, the Connection should make an attempt to handle {@link Call} events which
+     * are part of the {@code android.telecom.*} namespace.  The Connection should ignore any events
+     * it does not wish to handle.  Unexpected events should be handled gracefully, as it is
+     * possible that a {@link InCallService} has defined its own Call events which a Connection is
+     * not aware of.
+     * <p>
      * See also {@link Call#sendCallEvent(String, Bundle)}.
      *
      * @param event The call event.
@@ -2378,16 +2433,41 @@ public abstract class Connection extends Conferenceable {
     }
 
     /**
-     * Sends an event associated with this {@code Connection}, with associated event extras.
-     *
-     * Events are exposed to {@link InCallService} implementations via the
-     * {@link Call.Callback#onConnectionEvent(Call, String, Bundle)} API.
-     *
+     * Sends an event associated with this {@code Connection} with associated event extras to the
+     * {@link InCallService}.
+     * <p>
+     * Connection events are used to communicate point in time information from a
+     * {@link ConnectionService} to a {@link InCallService} implementations.  An example of a
+     * custom connection event includes notifying the UI when a WIFI call has been handed over to
+     * LTE, which the InCall UI might use to inform the user that billing charges may apply.  The
+     * Android Telephony framework will send the {@link #EVENT_CALL_MERGE_FAILED} connection event
+     * when a call to {@link Call#mergeConference()} has failed to complete successfully.  A
+     * connection event could also be used to trigger UI in the {@link InCallService} which prompts
+     * the user to make a choice (e.g. whether they want to incur roaming costs for making a call),
+     * which is communicated back via {@link Call#sendCallEvent(String, Bundle)}.
+     * <p>
+     * Events are exposed to {@link InCallService} implementations via
+     * {@link Call.Callback#onConnectionEvent(Call, String, Bundle)}.
+     * <p>
      * No assumptions should be made as to how an In-Call UI or service will handle these events.
-     * Events should be fully qualified (e.g., com.example.event.MY_EVENT) to avoid conflicts.
+     * The {@link ConnectionService} must assume that the In-Call UI could even chose to ignore
+     * some events altogether.
+     * <p>
+     * Events should be fully qualified (e.g. {@code com.example.event.MY_EVENT}) to avoid
+     * conflicts between {@link ConnectionService} implementations.  Further, custom
+     * {@link ConnectionService} implementations shall not re-purpose events in the
+     * {@code android.*} namespace, nor shall they define new event types in this namespace.  When
+     * defining a custom event type, ensure the contents of the extras {@link Bundle} is clearly
+     * defined.  Extra keys for this bundle should be named similar to the event type (e.g.
+     * {@code com.example.extra.MY_EXTRA}).
+     * <p>
+     *  When defining events and the associated extras, it is important to keep their behavior
+     * consistent when the associated {@link ConnectionService} is updated.  Support for deprecated
+     * events/extras should me maintained to ensure backwards compatibility with older
+     * {@link InCallService} implementations which were built to support the older behavior.
      *
      * @param event The connection event.
-     * @param extras Bundle containing extra information associated with the event.
+     * @param extras Optional bundle containing extra information associated with the event.
      */
     public void sendConnectionEvent(String event, Bundle extras) {
         for (Listener l : mListeners) {
