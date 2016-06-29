@@ -679,12 +679,6 @@ void CanvasContext::trimMemory(RenderThread& thread, int level) {
     }
 }
 
-void CanvasContext::runWithGlContext(RenderTask* task) {
-    LOG_ALWAYS_FATAL_IF(!mEglManager.hasEglContext(),
-            "GL context not initialized!");
-    task->run();
-}
-
 Layer* CanvasContext::createTextureLayer() {
     mEglManager.initialize();
     return LayerRenderer::createTextureLayer(mRenderThread.renderState());

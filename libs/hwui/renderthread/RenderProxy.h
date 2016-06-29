@@ -90,8 +90,6 @@ public:
 
     ANDROID_API static void invokeFunctor(Functor* functor, bool waitForCompletion);
 
-    ANDROID_API void runWithGlContext(RenderTask* task);
-
     ANDROID_API DeferredLayerUpdater* createTextureLayer();
     ANDROID_API void buildLayer(RenderNode* node, TreeObserver* observer);
     ANDROID_API bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap& bitmap);

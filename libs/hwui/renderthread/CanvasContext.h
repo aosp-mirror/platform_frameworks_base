@@ -108,8 +108,6 @@ public:
 
     static void invokeFunctor(RenderThread& thread, Functor* functor);
 
-    void runWithGlContext(RenderTask* task);
-
     Layer* createTextureLayer();
 
     ANDROID_API static void setTextureAtlas(RenderThread& thread,
