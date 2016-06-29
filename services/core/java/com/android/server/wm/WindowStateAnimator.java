@@ -55,6 +55,7 @@ import android.graphics.RectF;
 import android.graphics.Region;
 import android.os.Debug;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.util.Slog;
 import android.view.DisplayInfo;
 import android.view.MagnificationSpec;
@@ -1863,6 +1864,7 @@ class WindowStateAnimator {
         // frozen, there is no reason to animate and it can cause strange
         // artifacts when we unfreeze the display if some different animation
         // is running.
+        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "WSA#applyAnimationLocked");
         if (mService.okToDisplay()) {
             int anim = mPolicy.selectAnimationLw(mWin, transit);
             int attr = -1;
@@ -1902,6 +1904,8 @@ class WindowStateAnimator {
         } else {
             clearAnimation();
         }
+        Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+
         if (mWin.mAttrs.type == TYPE_INPUT_METHOD) {
             mService.adjustForImeIfNeeded(mWin.mDisplayContent);
             if (isEntrance) {
