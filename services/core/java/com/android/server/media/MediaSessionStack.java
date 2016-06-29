@@ -81,7 +81,7 @@ public class MediaSessionStack {
                             ActivityManager.RECENT_IGNORE_HOME_STACK_TASKS |
                             ActivityManager.RECENT_IGNORE_UNAVAILABLE |
                             ActivityManager.RECENT_INCLUDE_PROFILES |
-                            ActivityManager.RECENT_WITH_EXCLUDED, record.getUserId());
+                            ActivityManager.RECENT_WITH_EXCLUDED, record.getUserId()).getList();
             if (tasks != null && !tasks.isEmpty()) {
                 ActivityManager.RecentTaskInfo recentTask = tasks.get(0);
                 if (recentTask.baseIntent != null)
