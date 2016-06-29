@@ -723,10 +723,10 @@ public class Am extends BaseCommand {
                 System.out.println("Complete");
             }
             mRepeat--;
-            if (mRepeat > 1) {
+            if (mRepeat > 0) {
                 mAm.unhandledBack();
             }
-        } while (mRepeat > 1);
+        } while (mRepeat > 0);
     }
 
     private void runForceStop() throws Exception {
