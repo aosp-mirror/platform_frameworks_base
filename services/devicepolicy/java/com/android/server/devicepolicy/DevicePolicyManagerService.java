@@ -8250,6 +8250,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public SystemUpdatePolicy getSystemUpdatePolicy() {
+        if (UserManager.isDeviceInDemoMode(mContext)) {
+            // Pretending to have an automatic update policy when the device is in retail demo
+            // mode. This will allow the device to download and install an ota without
+            // any user interaction.
+            return SystemUpdatePolicy.createAutomaticInstallPolicy();
+        }
         synchronized (this) {
             SystemUpdatePolicy policy =  mOwners.getSystemUpdatePolicy();
             if (policy != null && !policy.isValid()) {

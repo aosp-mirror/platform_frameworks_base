@@ -4384,7 +4384,7 @@
     <!-- Title of the dialog shown when user inactivity times out in retail demo mode [CHAR LIMIT=40] -->
     <string name="demo_user_inactivity_timeout_title">Reset device?</string>
     <!-- Warning message shown when user inactivity times out in retail demo mode [CHAR LIMIT=none] -->
-    <string name="demo_user_inactivity_timeout_countdown">You\'ll lose any changes and the demo will start again in <xliff:g id="timeout" example="9">%1$s</xliff:g> seconds\u2026</string>
+    <string name="demo_user_inactivity_timeout_countdown">You\u2019ll lose any changes and the demo will start again in <xliff:g id="timeout" example="9">%1$s</xliff:g> seconds\u2026</string>
     <!-- Text of button to allow user to abort countdown and continue current session in retail demo mode [CHAR LIMIT=40] -->
     <string name="demo_user_inactivity_timeout_left_button">Cancel</string>
     <!-- Text of button to allow user to abort countdown and immediately start another session in retail demo mode [CHAR LIMIT=40] -->
