@@ -81,4 +81,5 @@ interface IUserManager {
     void clearSeedAccountData();
     boolean someUserHasSeedAccount(in String accountName, in String accountType);
     boolean isManagedProfile(int userId);
+    boolean isDemoUser(int userId);
 }
