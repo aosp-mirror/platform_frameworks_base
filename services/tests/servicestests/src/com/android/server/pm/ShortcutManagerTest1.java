@@ -1084,6 +1084,73 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         });
     }
 
+    public void testUpdateShortcuts_icons() {
+        runWithCaller(CALLING_PACKAGE_1, UserHandle.USER_SYSTEM, () -> {
+            assertTrue(mManager.setDynamicShortcuts(list(
+                    makeShortcut("s1")
+            )));
+
+            // Set resource icon
+            assertTrue(mManager.updateShortcuts(list(
+                    new ShortcutInfo.Builder(mClientContext, "s1")
+                    .setIcon(Icon.createWithResource(getTestContext(), R.drawable.black_32x32))
+                    .build()
+            )));
+
+            assertWith(getCallerShortcuts())
+                    .forShortcutWithId("s1", si -> {
+                        assertTrue(si.hasIconResource());
+                        assertEquals(R.drawable.black_32x32, si.getIconResourceId());
+                    });
+
+            // Set bitmap icon
+            assertTrue(mManager.updateShortcuts(list(
+                    new ShortcutInfo.Builder(mClientContext, "s1")
+                    .setIcon(Icon.createWithBitmap(BitmapFactory.decodeResource(
+                            getTestContext().getResources(), R.drawable.black_64x64)))
+                    .build()
+            )));
+
+            assertWith(getCallerShortcuts())
+                    .forShortcutWithId("s1", si -> {
+                        assertTrue(si.hasIconFile());
+                    });
+
+            mInjectedCurrentTimeMillis += INTERVAL; // reset throttling
+
+            // Do it again, with the reverse order (bitmap -> icon)
+            assertTrue(mManager.setDynamicShortcuts(list(
+                    makeShortcut("s1")
+            )));
+
+            // Set bitmap icon
+            assertTrue(mManager.updateShortcuts(list(
+                    new ShortcutInfo.Builder(mClientContext, "s1")
+                            .setIcon(Icon.createWithBitmap(BitmapFactory.decodeResource(
+                                    getTestContext().getResources(), R.drawable.black_64x64)))
+                            .build()
+            )));
+
+            assertWith(getCallerShortcuts())
+                    .forShortcutWithId("s1", si -> {
+                        assertTrue(si.hasIconFile());
+                    });
+
+            // Set resource icon
+            assertTrue(mManager.updateShortcuts(list(
+                    new ShortcutInfo.Builder(mClientContext, "s1")
+                            .setIcon(Icon.createWithResource(getTestContext(), R.drawable.black_32x32))
+                            .build()
+            )));
+
+            assertWith(getCallerShortcuts())
+                    .forShortcutWithId("s1", si -> {
+                        assertTrue(si.hasIconResource());
+                        assertEquals(R.drawable.black_32x32, si.getIconResourceId());
+                    });
+        });
+    }
+
     // === Test for launcher side APIs ===
 
     public void testGetShortcuts() {

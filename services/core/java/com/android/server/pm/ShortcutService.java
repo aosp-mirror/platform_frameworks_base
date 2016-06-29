@@ -1046,9 +1046,10 @@ public class ShortcutService extends IShortcutService.Stub {
             new File(shortcut.getBitmapPath()).delete();
 
             shortcut.setBitmapPath(null);
-            shortcut.setIconResourceId(0);
-            shortcut.clearFlags(ShortcutInfo.FLAG_HAS_ICON_FILE | ShortcutInfo.FLAG_HAS_ICON_RES);
         }
+        shortcut.setIconResourceId(0);
+        shortcut.setIconResName(null);
+        shortcut.clearFlags(ShortcutInfo.FLAG_HAS_ICON_FILE | ShortcutInfo.FLAG_HAS_ICON_RES);
     }
 
     public void cleanupBitmapsForPackage(@UserIdInt int userId, String packageName) {
@@ -1165,8 +1166,7 @@ public class ShortcutService extends IShortcutService.Stub {
         final long token = injectClearCallingIdentity();
         try {
             // Clear icon info on the shortcut.
-            shortcut.setIconResourceId(0);
-            shortcut.setBitmapPath(null);
+            removeIcon(userId, shortcut);
 
             final Icon icon = shortcut.getIcon();
             if (icon == null) {
