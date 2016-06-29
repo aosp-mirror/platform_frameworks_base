@@ -240,7 +240,9 @@ public class VectorDrawable extends Drawable {
      * constructors to set the state and initialize local properties.
      */
     private VectorDrawable(@NonNull VectorDrawableState state, @Nullable Resources res) {
-        mVectorState = state;
+        // Constant state sharing is disabled until we fix onStateChanged()
+        // affecting the shared bitmap.
+        mVectorState = new VectorDrawableState(state);
         updateLocalState(res);
     }
 
