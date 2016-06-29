@@ -199,6 +199,8 @@
     <string name="menu_rename">Rename</string>
     <!-- Toast shown when renaming document failed with an error [CHAR LIMIT=48] -->
     <string name="rename_error">Failed to rename document</string>
+    <!-- Context Menu item that ejects the root selected [CHAR LIMIT=24] -->
+    <string name="menu_eject_root">Eject</string>
     <!-- First line for notifications saying that some files were converted to a different format
          during a copy. [CHAR LIMIT=48] -->
     <string name="notification_copy_files_converted_title">Some files were converted</string>

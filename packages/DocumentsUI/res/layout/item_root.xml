@@ -46,7 +46,8 @@
         android:layout_height="wrap_content"
         android:paddingTop="8dp"
         android:paddingBottom="8dp"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:layout_weight="1">
 
         <TextView
             android:id="@android:id/title"
@@ -69,5 +70,20 @@
             android:textColor="@color/item_root_primary_text" />
 
     </LinearLayout>
+
+     <FrameLayout
+        android:layout_width="@dimen/icon_size"
+        android:layout_height="@dimen/icon_size"
+        android:duplicateParentState="true">
+
+        <ImageView
+            android:id="@+id/unmount_icon"
+            android:layout_width="@dimen/root_icon_size"
+            android:layout_height="match_parent"
+            android:scaleType="centerInside"
+            android:contentDescription="@string/menu_eject_root"
+            android:visibility="gone" />
+
+    </FrameLayout>
 
 </com.android.documentsui.RootItemView>

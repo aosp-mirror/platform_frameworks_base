@@ -233,6 +233,11 @@ public class DocumentsActivity extends BaseActivity {
     }
 
     @Override
+    void openRootSettings(RootInfo root) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     void refreshDirectory(int anim) {
         final FragmentManager fm = getFragmentManager();
         final RootInfo root = getCurrentRoot();

@@ -21,9 +21,11 @@ import static com.android.documentsui.State.ACTION_OPEN;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import android.provider.DocumentsContract.Root;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
+import com.android.documentsui.model.RootInfo;
 import com.android.documentsui.testing.TestDirectoryDetails;
 import com.android.documentsui.testing.TestMenu;
 import com.android.documentsui.testing.TestMenuItem;
@@ -54,11 +56,14 @@ public final class DocumentsMenuManagerTest {
     private TestMenuItem sort;
     private TestMenuItem sortSize;
     private TestMenuItem advanced;
+    private TestMenuItem settings;
+    private TestMenuItem eject;
 
     private TestSelectionDetails selectionDetails;
     private TestDirectoryDetails directoryDetails;
     private TestSearchViewManager testSearchManager;
     private State state = new State();
+    private RootInfo testRootInfo;
 
     @Before
     public void setUp() {
@@ -78,10 +83,13 @@ public final class DocumentsMenuManagerTest {
         sort = testMenu.findItem(R.id.menu_sort);
         sortSize = testMenu.findItem(R.id.menu_sort_size);
         advanced = testMenu.findItem(R.id.menu_advanced);
+        settings = testMenu.findItem(R.id.menu_settings);
+        eject = testMenu.findItem(R.id.menu_eject_root);
 
         selectionDetails = new TestSelectionDetails();
         directoryDetails = new TestDirectoryDetails();
         testSearchManager = new TestSearchViewManager();
+        testRootInfo = new RootInfo();
         state.action = ACTION_CREATE;
         state.allowMultiple = true;
     }
@@ -207,5 +215,35 @@ public final class DocumentsMenuManagerTest {
         rename.assertInvisible();
         createDir.assertVisible();
         delete.assertVisible();
+    }
+
+    @Test
+    public void testRootContextMenu() {
+        DocumentsMenuManager mgr = new DocumentsMenuManager(testSearchManager, state);
+        mgr.updateRootContextMenu(testMenu, testRootInfo);
+
+        eject.assertVisible();
+        eject.assertDisabled();
+
+        settings.assertVisible();
+        settings.assertDisabled();
+    }
+
+    @Test
+    public void testRootContextMenu_hasRootSettings() {
+        testRootInfo.flags = Root.FLAG_HAS_SETTINGS;
+        DocumentsMenuManager mgr = new DocumentsMenuManager(testSearchManager, state);
+        mgr.updateRootContextMenu(testMenu, testRootInfo);
+
+        settings.assertInvisible();
+    }
+
+    @Test
+    public void testRootContextMenu_canEject() {
+        testRootInfo.flags = Root.FLAG_SUPPORTS_EJECT;
+        DocumentsMenuManager mgr = new DocumentsMenuManager(testSearchManager, state);
+        mgr.updateRootContextMenu(testMenu, testRootInfo);
+
+        eject.assertInvisible();
     }
 }
