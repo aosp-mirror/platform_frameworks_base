@@ -28,23 +28,6 @@ import android.widget.TextView;
  * {@link ActionBar#newTab() ActionBar.newTab()} and
  * related APIs for placing tabs within their action bar area.</p>
  *
- * <p>A replacement for TabActivity can also be implemented by directly using
- * TabHost.  You will need to define a layout that correctly uses a TabHost
- * with a TabWidget as well as an area in which to display your tab content.
- * A typical example would be:</p>
- *
- * {@sample development/samples/Support4Demos/res/layout/fragment_tabs.xml complete}
- *
- * <p>The implementation needs to take over responsibility for switching
- * the shown content when the user switches between tabs.
- *
- * {@sample development/samples/Support4Demos/src/com/example/android/supportv4/app/FragmentTabs.java
- *      complete}
- *
- * <p>Also see the <a href="{@docRoot}resources/samples/Support4Demos/src/com/example/android/supportv4/app/FragmentTabsPager.html">
- * Fragment Tabs Pager</a> sample for an example of using the support library's ViewPager to
- * allow the user to swipe the content to switch between tabs.</p>
- *
  * @deprecated New applications should use Fragments instead of this class;
  * to continue to run on older devices, you can use the v4 support library
  * which provides a version of the Fragment API that is compatible down to
