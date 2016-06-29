@@ -5519,5 +5519,24 @@ public class TelephonyManager {
             Log.e(TAG, "Error calling ITelephony#carrierActionSetRadioEnabled", e);
         }
     }
+
+    /**
+     * Get aggregated video call data usage since boot.
+     * Permissions android.Manifest.permission.READ_NETWORK_USAGE_HISTORY is required.
+     * @return total data usage in bytes
+     * @hide
+     */
+    public long getVtDataUsage() {
+
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.getVtDataUsage();
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling getVtDataUsage", e);
+        }
+        return 0;
+    }
 }
 
