@@ -512,7 +512,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                     recentTask = ActivityManagerNative.getDefault().getRecentTasks(1,
                             ActivityManager.RECENT_WITH_EXCLUDED
                             | ActivityManager.RECENT_INCLUDE_PROFILES,
-                            mCurrentUserId);
+                            mCurrentUserId).getList();
                 } catch (RemoteException e) {
                     // Abandon hope activity manager not running.
                 }
