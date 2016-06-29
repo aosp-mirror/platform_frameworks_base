@@ -651,13 +651,11 @@ public class LauncherApps {
      * @param sourceBounds The Rect containing the source bounds of the clicked icon.
      * @param startActivityOptions Options to pass to startActivity.
      * @param user The UserHandle of the profile.
-     * @return {@code false} when the shortcut is no longer valid (e.g. the creator application
-     *   has been uninstalled). {@code true} when the shortcut is still valid.
      */
-    public boolean startShortcut(@NonNull String packageName, @NonNull String shortcutId,
+    public void startShortcut(@NonNull String packageName, @NonNull String shortcutId,
             @Nullable Rect sourceBounds, @Nullable Bundle startActivityOptions,
             @NonNull UserHandle user) {
-        return startShortcut(packageName, shortcutId, sourceBounds, startActivityOptions,
+        startShortcut(packageName, shortcutId, sourceBounds, startActivityOptions,
                 user.getIdentifier());
     }
 
@@ -670,21 +668,19 @@ public class LauncherApps {
      * @param shortcut The target shortcut.
      * @param sourceBounds The Rect containing the source bounds of the clicked icon.
      * @param startActivityOptions Options to pass to startActivity.
-     * @return {@code false} when the shortcut is no longer valid (e.g. the creator application
-     *   has been uninstalled). {@code true} when the shortcut is still valid.
      */
-    public boolean startShortcut(@NonNull ShortcutInfo shortcut,
+    public void startShortcut(@NonNull ShortcutInfo shortcut,
             @Nullable Rect sourceBounds, @Nullable Bundle startActivityOptions) {
-        return startShortcut(shortcut.getPackage(), shortcut.getId(),
+        startShortcut(shortcut.getPackage(), shortcut.getId(),
                 sourceBounds, startActivityOptions,
                 shortcut.getUserId());
     }
 
-    private boolean startShortcut(@NonNull String packageName, @NonNull String shortcutId,
+    private void startShortcut(@NonNull String packageName, @NonNull String shortcutId,
             @Nullable Rect sourceBounds, @Nullable Bundle startActivityOptions,
             int userId) {
         try {
-            return mService.startShortcut(mContext.getPackageName(), packageName, shortcutId,
+            mService.startShortcut(mContext.getPackageName(), packageName, shortcutId,
                     sourceBounds, startActivityOptions, userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
