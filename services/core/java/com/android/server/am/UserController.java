@@ -99,6 +99,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Helper class for {@link ActivityManagerService} responsible for multi-user functionality.
@@ -1057,6 +1058,7 @@ final class UserController {
                 uss.switching = true;
                 mCurWaitingUserSwitchCallbacks = curWaitingUserSwitchCallbacks;
             }
+            final AtomicInteger waitingCallbacksCount = new AtomicInteger(observerCount);
             for (int i = 0; i < observerCount; i++) {
                 try {
                     // Prepend with unique prefix to guarantee that keys are unique
@@ -1075,7 +1077,7 @@ final class UserController {
                                 }
                                 curWaitingUserSwitchCallbacks.remove(name);
                                 // Continue switching if all callbacks have been notified
-                                if (curWaitingUserSwitchCallbacks.isEmpty()) {
+                                if (waitingCallbacksCount.decrementAndGet() == 0) {
                                     sendContinueUserSwitchLocked(uss, oldUserId, newUserId);
                                 }
                             }
