@@ -106,7 +106,7 @@ public class RetailDemoModeService extends SystemService {
     private PendingIntent mResetDemoPendingIntent;
     private CameraManager mCameraManager;
     private String[] mCameraIdsWithFlash;
-    private Configuration mPrimaryUserConfiguration;
+    private Configuration mSystemUserConfiguration;
 
     final Object mActivityLock = new Object();
     // Whether the newly created demo user has interacted with the screen yet
@@ -179,8 +179,8 @@ public class RetailDemoModeService extends SystemService {
     private void showInactivityCountdownDialog() {
         UserInactivityCountdownDialog dialog = new UserInactivityCountdownDialog(getContext(),
                 WARNING_DIALOG_TIMEOUT, MILLIS_PER_SECOND);
-        dialog.setPositiveButtonClickListener(null);
-        dialog.setNegativeButtonClickListener(new DialogInterface.OnClickListener() {
+        dialog.setNegativeButtonClickListener(null);
+        dialog.setPositiveButtonClickListener(new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 mHandler.sendEmptyMessage(MSG_START_NEW_SESSION);
@@ -366,12 +366,12 @@ public class RetailDemoModeService extends SystemService {
         }
     }
 
-    private Configuration getPrimaryUsersConfiguration() {
-        if (mPrimaryUserConfiguration == null) {
+    private Configuration getSystemUsersConfiguration() {
+        if (mSystemUserConfiguration == null) {
             Settings.System.getConfiguration(getContext().getContentResolver(),
-                    mPrimaryUserConfiguration = new Configuration());
+                    mSystemUserConfiguration = new Configuration());
         }
-        return mPrimaryUserConfiguration;
+        return mSystemUserConfiguration;
     }
 
     @Override
@@ -424,10 +424,11 @@ public class RetailDemoModeService extends SystemService {
             mWakeLock.acquire();
         }
         mCurrentUserId = userId;
-        mNm.notifyAsUser(TAG, 1, createResetNotification(), UserHandle.of(userId));
+        mAmi.updatePersistentConfigurationForUser(getSystemUsersConfiguration(), userId);
         turnOffAllFlashLights();
         muteVolumeStreams();
-        mAmi.updatePersistentConfigurationForUser(getPrimaryUsersConfiguration(), userId);
+        mNm.notifyAsUser(TAG, 1, createResetNotification(), UserHandle.of(userId));
+
         synchronized (mActivityLock) {
             mUserUntouched = true;
         }
