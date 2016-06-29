@@ -1074,6 +1074,8 @@ class WindowSurfacePlacer {
         if (!transitionGoodToGo(appsCount)) {
             return 0;
         }
+        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "AppTransitionReady");
+
         if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "**** GOOD TO GO");
         int transit = mService.mAppTransition.getAppTransition();
         if (mService.mSkipAppTransitionAnimation) {
@@ -1207,6 +1209,9 @@ class WindowSurfacePlacer {
                 true /*updateInputWindows*/);
         mService.mFocusMayChange = false;
         mService.notifyActivityDrawnForKeyguard();
+
+        Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+
         return FINISH_LAYOUT_REDO_LAYOUT | FINISH_LAYOUT_REDO_CONFIG;
     }
 
