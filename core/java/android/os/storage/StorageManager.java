@@ -20,6 +20,7 @@ import static android.net.TrafficStats.MB_IN_BYTES;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SdkConstant;
 import android.app.ActivityThread;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -94,6 +95,19 @@ public class StorageManager {
     public static final String UUID_PRIVATE_INTERNAL = null;
     /** {@hide} */
     public static final String UUID_PRIMARY_PHYSICAL = "primary_physical";
+
+
+    /**
+     * Activity Action: Allows the user to manage their storage. This activity provides the ability
+     * to free up space on the device by deleting data such as apps.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MANAGE_STORAGE
+            = "android.os.storage.action.MANAGE_STORAGE";
 
     /** {@hide} */
     public static final int DEBUG_FORCE_ADOPTABLE = 1 << 0;
