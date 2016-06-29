@@ -23,10 +23,11 @@ import android.app.Notification;
 import android.app.Notification.Builder;
 import android.content.Context;
 
-import com.android.documentsui.ClipDetails;
+import com.android.documentsui.UrisSupplier;
 import com.android.documentsui.R;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
+import com.android.documentsui.services.FileOperationService.OpType;
 
 import java.text.NumberFormat;
 
@@ -38,9 +39,9 @@ public class TestJob extends Job {
     private int mNumOfNotifications = 0;
 
     TestJob(
-            Context service, Context appContext, Listener listener,
-            String id, DocumentStack stack, ClipDetails details, Runnable startRunnable) {
-        super(service, appContext, listener, id, stack, details);
+            Context service, Listener listener, String id,
+            @OpType int opType, DocumentStack stack, UrisSupplier srcs, Runnable startRunnable) {
+        super(service, listener, id, opType, stack, srcs);
 
         mStartRunnable = startRunnable;
     }

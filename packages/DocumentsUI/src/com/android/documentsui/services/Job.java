@@ -20,11 +20,8 @@ import static com.android.documentsui.DocumentsApplication.acquireUnstableProvid
 import static com.android.documentsui.services.FileOperationService.EXTRA_CANCEL;
 import static com.android.documentsui.services.FileOperationService.EXTRA_DIALOG_TYPE;
 import static com.android.documentsui.services.FileOperationService.EXTRA_JOB_ID;
-import static com.android.documentsui.services.FileOperationService.EXTRA_OPERATION;
+import static com.android.documentsui.services.FileOperationService.EXTRA_OPERATION_TYPE;
 import static com.android.documentsui.services.FileOperationService.EXTRA_SRC_LIST;
-import static com.android.documentsui.services.FileOperationService.OPERATION_COPY;
-import static com.android.documentsui.services.FileOperationService.OPERATION_DELETE;
-import static com.android.documentsui.services.FileOperationService.OPERATION_MOVE;
 import static com.android.documentsui.services.FileOperationService.OPERATION_UNKNOWN;
 
 import android.annotation.DrawableRes;
@@ -43,7 +40,7 @@ import android.os.RemoteException;
 import android.provider.DocumentsContract;
 import android.util.Log;
 
-import com.android.documentsui.ClipDetails;
+import com.android.documentsui.UrisSupplier;
 import com.android.documentsui.FilesActivity;
 import com.android.documentsui.Metrics;
 import com.android.documentsui.OperationDialogFragment;
@@ -91,7 +88,7 @@ abstract public class Job implements Runnable {
     final @OpType int operationType;
     final String id;
     final DocumentStack stack;
-    final ClipDetails details;
+    final UrisSupplier srcs;
 
     int failedFileCount = 0;
     final ArrayList<DocumentInfo> failedFiles = new ArrayList<>();
@@ -104,28 +101,26 @@ abstract public class Job implements Runnable {
      * A simple progressable job, much like an AsyncTask, but with support
      * for providing various related notification, progress and navigation information.
      * @param service The service context in which this job is running.
-     * @param appContext The context of the invoking application. This is usually
-     *     just {@code getApplicationContext()}.
      * @param listener
      * @param id Arbitrary string ID
      * @param stack The documents stack context relating to this request. This is the
      *     destination in the Files app where the user will be take when the
      *     navigation intent is invoked (presumably from notification).
-     * @param details details that contains {@link FileOperationService.OpType}
+     * @param srcs the list of docs to operate on
      */
-    Job(Context service, Context appContext, Listener listener,
-            String id, DocumentStack stack, ClipDetails details) {
+    Job(Context service, Listener listener, String id,
+            @OpType int opType, DocumentStack stack, UrisSupplier srcs) {
 
-        assert(details.getOpType() != OPERATION_UNKNOWN);
+        assert(opType != OPERATION_UNKNOWN);
 
         this.service = service;
-        this.appContext = appContext;
+        this.appContext = service.getApplicationContext();
         this.listener = listener;
-        this.operationType = details.getOpType();
+        this.operationType = opType;
 
         this.id = id;
         this.stack = stack;
-        this.details = details;
+        this.srcs = srcs;
 
         mProgressBuilder = createProgressBuilder();
     }
@@ -156,7 +151,7 @@ abstract public class Job implements Runnable {
 
             // NOTE: If this details is a JumboClipDetails, and it's still referred in primary clip
             // at this point, user won't be able to paste it to anywhere else because the underlying
-            details.dispose(appContext);
+            srcs.dispose(appContext);
         }
     }
 
@@ -255,7 +250,7 @@ abstract public class Job implements Runnable {
     Notification getFailureNotification(@PluralsRes int titleId, @DrawableRes int icon) {
         final Intent navigateIntent = buildNavigateIntent(INTENT_TAG_FAILURE);
         navigateIntent.putExtra(EXTRA_DIALOG_TYPE, OperationDialogFragment.DIALOG_TYPE_FAILURE);
-        navigateIntent.putExtra(EXTRA_OPERATION, operationType);
+        navigateIntent.putExtra(EXTRA_OPERATION_TYPE, operationType);
         navigateIntent.putParcelableArrayListExtra(EXTRA_SRC_LIST, failedFiles);
 
         final Notification.Builder errorBuilder = new Notification.Builder(service)
@@ -327,40 +322,6 @@ abstract public class Job implements Runnable {
                 .append("id=" + id)
                 .append("}")
                 .toString();
-    }
-
-    /**
-     * Factory class that facilitates our testing FileOperationService.
-     */
-    static class Factory {
-
-        static final Factory instance = new Factory();
-
-        Job createCopy(Context service, Context appContext, Listener listener,
-                String id, DocumentStack stack, ClipDetails details) {
-            assert(details.getOpType() == OPERATION_COPY);
-            assert(details.getItemCount() > 0);
-            assert(stack.peek().isCreateSupported());
-            return new CopyJob(service, appContext, listener, id, stack, details);
-        }
-
-        Job createMove(Context service, Context appContext, Listener listener,
-                String id, DocumentStack stack, ClipDetails details) {
-            assert(details.getOpType() == OPERATION_MOVE);
-            assert(details.getItemCount() > 0);
-            assert(stack.peek().isCreateSupported());
-            return new MoveJob(service, appContext, listener, id, stack, details);
-        }
-
-        Job createDelete(Context service, Context appContext, Listener listener,
-                String id, DocumentStack stack, ClipDetails details) {
-            assert(details.getOpType() == OPERATION_DELETE);
-            assert(details.getItemCount() > 0);
-            // stack is empty if we delete docs from recent.
-            // we can't currently delete from archives.
-            assert(stack.isEmpty() || stack.peek().isDirectory());
-            return new DeleteJob(service, appContext, listener, id, stack, details);
-        }
     }
 
     /**

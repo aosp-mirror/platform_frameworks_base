@@ -25,8 +25,6 @@ import android.provider.DocumentsContract;
 import android.support.test.filters.MediumTest;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.android.documentsui.services.FileOperationService;
-import com.android.documentsui.services.FileOperationService.OpType;
 import com.android.documentsui.testing.TestScheduledExecutorService;
 
 import org.junit.AfterClass;
@@ -42,12 +40,9 @@ import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
 @MediumTest
-public class ClipDetailsTest {
+public class UrisSupplierTest {
 
     private static final String AUTHORITY = "foo";
-    private static final @OpType int OP_TYPE = FileOperationService.OPERATION_COPY;
-    private static final Uri SRC_PARENT =
-            DocumentsContract.buildDocumentUri(AUTHORITY, Integer.toString(0));
     private static final List<Uri> SHORT_URI_LIST = createList(3);
     private static final List<Uri> LONG_URI_LIST = createList(Shared.MAX_DOCS_IN_INTENT + 5);
 
@@ -71,72 +66,58 @@ public class ClipDetailsTest {
     }
 
     @Test
-    public void testOpTypeEquals_shortList() {
-        ClipDetails details = createDetailsWithShortList();
-
-        assertEquals(OP_TYPE, details.getOpType());
-    }
-
-    @Test
-    public void testOpTypeEquals_longList() {
-        ClipDetails details = createDetailsWithLongList();
-
-        assertEquals(OP_TYPE, details.getOpType());
-    }
-
-    @Test
     public void testItemCountEquals_shortList() {
-        ClipDetails details = createDetailsWithShortList();
+        UrisSupplier uris = createWithShortList();
 
-        assertEquals(SHORT_URI_LIST.size(), details.getItemCount());
+        assertEquals(SHORT_URI_LIST.size(), uris.getItemCount());
     }
 
     @Test
     public void testItemCountEquals_longList() {
-        ClipDetails details = createDetailsWithLongList();
+        UrisSupplier uris = createWithLongList();
 
-        assertEquals(LONG_URI_LIST.size(), details.getItemCount());
+        assertEquals(LONG_URI_LIST.size(), uris.getItemCount());
     }
 
     @Test
     public void testGetDocsEquals_shortList() throws Exception {
-        ClipDetails details = createDetailsWithShortList();
+        UrisSupplier uris = createWithShortList();
 
-        assertIterableEquals(SHORT_URI_LIST, details.getDocs(mStorage));
+        assertIterableEquals(SHORT_URI_LIST, uris.getDocs(mStorage));
     }
 
     @Test
     public void testGetDocsEquals_longList() throws Exception {
-        ClipDetails details = createDetailsWithLongList();
+        UrisSupplier uris = createWithLongList();
 
-        assertIterableEquals(LONG_URI_LIST, details.getDocs(mStorage));
+        assertIterableEquals(LONG_URI_LIST, uris.getDocs(mStorage));
     }
 
     @Test
     public void testDispose_shortList() throws Exception {
-        ClipDetails details = createDetailsWithShortList();
+        UrisSupplier uris = createWithShortList();
 
-        details.dispose(mStorage);
+        uris.dispose(mStorage);
     }
 
     @Test
     public void testDispose_longList() throws Exception {
-        ClipDetails details = createDetailsWithLongList();
+        UrisSupplier uris = createWithLongList();
 
-        details.dispose(mStorage);
+        uris.dispose(mStorage);
     }
 
-    private ClipDetails createDetailsWithShortList() {
-        return ClipDetails.createClipDetails(OP_TYPE, SRC_PARENT, SHORT_URI_LIST, mStorage);
+    private UrisSupplier createWithShortList() {
+        return UrisSupplier.create(SHORT_URI_LIST, mStorage);
     }
 
-    private ClipDetails createDetailsWithLongList() {
-        ClipDetails details =
-                ClipDetails.createClipDetails(OP_TYPE, SRC_PARENT, LONG_URI_LIST, mStorage);
+    private UrisSupplier createWithLongList() {
+        UrisSupplier uris =
+                UrisSupplier.create(LONG_URI_LIST, mStorage);
 
         mExecutor.runAll();
 
-        return details;
+        return uris;
     }
 
     private void assertIterableEquals(Iterable<Uri> expected, Iterable<Uri> value) {

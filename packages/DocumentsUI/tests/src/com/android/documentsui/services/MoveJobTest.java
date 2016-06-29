@@ -16,17 +16,20 @@
 
 package com.android.documentsui.services;
 
+import static com.android.documentsui.services.FileOperationService.OPERATION_MOVE;
+
 import static com.google.common.collect.Lists.newArrayList;
 
 import android.net.Uri;
 import android.provider.DocumentsContract.Document;
 import android.test.suitebuilder.annotation.MediumTest;
 
-import com.android.documentsui.ClipDetails;
-import com.android.documentsui.model.DocumentStack;
-
 @MediumTest
 public class MoveJobTest extends AbstractCopyJobTest<MoveJob> {
+
+    public MoveJobTest() {
+        super(OPERATION_MOVE);
+    }
 
     public void testMoveFiles() throws Exception {
         runCopyFilesTest();
@@ -105,11 +108,4 @@ public class MoveJobTest extends AbstractCopyJobTest<MoveJob> {
     }
 
     // TODO: Add test cases for moving when multi-parented.
-
-    @Override
-    MoveJob createJob(ClipDetails details, DocumentStack stack)
-            throws Exception {
-        return new MoveJob(
-                mContext, mContext, mJobListener, FileOperations.createJobId(), stack, details);
-    }
 }

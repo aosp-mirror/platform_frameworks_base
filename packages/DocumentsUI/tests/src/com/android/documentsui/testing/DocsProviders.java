@@ -18,15 +18,14 @@ package com.android.documentsui.testing;
 
 import android.net.Uri;
 
-import com.android.documentsui.ClipDetails;
-import com.android.documentsui.services.FileOperationService.OpType;
+import com.android.documentsui.UrisSupplier;
 
 import java.util.List;
 
-public final class ClipDetailsFactory {
-    private ClipDetailsFactory() {}
+public final class DocsProviders {
+    private DocsProviders() {}
 
-    public static ClipDetails createClipDetails(@OpType int opType, Uri srcParent, List<Uri> docs) {
-        return new ClipDetails.StandardClipDetails(opType,  srcParent, docs);
+    public static UrisSupplier createDocsProvider(List<Uri> docs) {
+        return new UrisSupplier.StandardUrisSupplier(docs);
     }
 }

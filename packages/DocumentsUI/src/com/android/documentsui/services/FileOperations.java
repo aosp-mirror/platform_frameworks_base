@@ -19,21 +19,17 @@ package com.android.documentsui.services;
 import static android.os.SystemClock.elapsedRealtime;
 
 import static com.android.documentsui.Shared.DEBUG;
-import static com.android.documentsui.Shared.EXTRA_STACK;
 import static com.android.documentsui.services.FileOperationService.EXTRA_CANCEL;
 import static com.android.documentsui.services.FileOperationService.EXTRA_JOB_ID;
-import static com.android.documentsui.services.FileOperationService.EXTRA_CLIP_DETAILS;
+import static com.android.documentsui.services.FileOperationService.EXTRA_OPERATION;
 
 import android.annotation.IntDef;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Parcelable;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 
-import com.android.documentsui.ClipDetails;
-import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.services.FileOperationService.OpType;
 
 import java.lang.annotation.Retention;
@@ -57,16 +53,15 @@ public final class FileOperations {
     /**
      * Tries to start the activity. Returns the job id.
      */
-    public static String start(Context context, ClipDetails details,
-            DocumentStack stack, Callback callback) {
+    public static String start(Context context, FileOperation operation, Callback callback) {
 
         if (DEBUG) Log.d(TAG, "Handling generic 'start' call.");
 
         String jobId = createJobId();
-        Intent intent = createBaseIntent(context, jobId, details, stack);
+        Intent intent = createBaseIntent(context, jobId, operation);
 
-        callback.onOperationResult(
-                Callback.STATUS_ACCEPTED, details.getOpType(), details.getItemCount());
+        callback.onOperationResult(Callback.STATUS_ACCEPTED, operation.getOpType(),
+                operation.getSrc().getItemCount());
 
         context.startService(intent);
 
@@ -89,17 +84,14 @@ public final class FileOperations {
      *
      * @param jobId A unique jobid for this job.
      *     Use {@link #createJobId} if you don't have one handy.
-     * @param details the clip details that contains source files and their parent
      * @return Id of the job.
      */
     public static Intent createBaseIntent(
-            Context context, String jobId, ClipDetails details,
-            DocumentStack localeStack) {
+            Context context, String jobId, FileOperation operation) {
 
         Intent intent = new Intent(context, FileOperationService.class);
         intent.putExtra(EXTRA_JOB_ID, jobId);
-        intent.putExtra(EXTRA_CLIP_DETAILS, details);
-        intent.putExtra(EXTRA_STACK, (Parcelable) localeStack);
+        intent.putExtra(EXTRA_OPERATION, operation);
 
         return intent;
     }

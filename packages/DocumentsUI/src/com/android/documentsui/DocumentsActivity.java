@@ -41,7 +41,6 @@ import android.provider.DocumentsContract;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuItem;
 
 import com.android.documentsui.MenuManager.DirectoryDetails;
 import com.android.documentsui.RecentsProvider.RecentColumns;
@@ -156,7 +155,7 @@ public class DocumentsActivity extends BaseActivity {
             state.directoryCopy = intent.getBooleanExtra(
                     Shared.EXTRA_DIRECTORY_COPY, false);
             state.copyOperationSubType = intent.getIntExtra(
-                    FileOperationService.EXTRA_OPERATION,
+                    FileOperationService.EXTRA_OPERATION_TYPE,
                     FileOperationService.OPERATION_COPY);
         }
     }
@@ -386,7 +385,7 @@ public class DocumentsActivity extends BaseActivity {
             // Picking a copy destination is only used internally by us, so we
             // don't need to extend permissions to the caller.
             intent.putExtra(Shared.EXTRA_STACK, (Parcelable) mState.stack);
-            intent.putExtra(FileOperationService.EXTRA_OPERATION, mState.copyOperationSubType);
+            intent.putExtra(FileOperationService.EXTRA_OPERATION_TYPE, mState.copyOperationSubType);
         } else {
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
                     | Intent.FLAG_GRANT_WRITE_URI_PERMISSION

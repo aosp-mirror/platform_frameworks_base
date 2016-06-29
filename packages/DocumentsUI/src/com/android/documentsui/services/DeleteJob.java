@@ -17,6 +17,7 @@
 package com.android.documentsui.services;
 
 import static com.android.documentsui.Shared.DEBUG;
+import static com.android.documentsui.services.FileOperationService.OPERATION_DELETE;
 
 import android.app.Notification;
 import android.app.Notification.Builder;
@@ -25,7 +26,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 
-import com.android.documentsui.ClipDetails;
+import com.android.documentsui.UrisSupplier;
 import com.android.documentsui.Metrics;
 import com.android.documentsui.R;
 import com.android.documentsui.model.DocumentInfo;
@@ -41,18 +42,18 @@ final class DeleteJob extends Job {
 
     private volatile int mDocsProcessed = 0;
 
+    Uri mSrcParent;
     /**
      * Moves files to a destination identified by {@code destination}.
      * Performs most work by delegating to CopyJob, then deleting
      * a file after it has been copied.
      *
      * @see @link {@link Job} constructor for most param descriptions.
-     *
-     * @param details details that contains files to be deleted and their parent
      */
-    DeleteJob(Context service, Context appContext, Listener listener,
-            String id, DocumentStack stack, ClipDetails details) {
-        super(service, appContext, listener, id, stack, details);
+    DeleteJob(Context service, Listener listener, String id, Uri srcParent, DocumentStack stack,
+            UrisSupplier srcs) {
+        super(service, listener, id, OPERATION_DELETE, stack, srcs);
+        mSrcParent = srcParent;
     }
 
     @Override
@@ -71,9 +72,9 @@ final class DeleteJob extends Job {
 
     @Override
     public Notification getProgressNotification() {
-        mProgressBuilder.setProgress(details.getItemCount(), mDocsProcessed, false);
+        mProgressBuilder.setProgress(srcs.getItemCount(), mDocsProcessed, false);
         String format = service.getString(R.string.delete_progress);
-        mProgressBuilder.setSubText(String.format(format, mDocsProcessed, details.getItemCount()));
+        mProgressBuilder.setSubText(String.format(format, mDocsProcessed, srcs.getItemCount()));
 
         mProgressBuilder.setContentText(null);
 
@@ -94,12 +95,12 @@ final class DeleteJob extends Job {
     @Override
     void start() {
         try {
-            final List<DocumentInfo> srcs = new ArrayList<>(details.getItemCount());
+            final List<DocumentInfo> srcs = new ArrayList<>(this.srcs.getItemCount());
 
-            final Iterable<Uri> uris = details.getDocs(appContext);
+            final Iterable<Uri> uris = this.srcs.getDocs(appContext);
 
             final ContentResolver resolver = appContext.getContentResolver();
-            final DocumentInfo srcParent = DocumentInfo.fromUri(resolver, details.getSrcParent());
+            final DocumentInfo srcParent = DocumentInfo.fromUri(resolver, mSrcParent);
             for (Uri uri : uris) {
                 DocumentInfo doc = DocumentInfo.fromUri(resolver, uri);
                 srcs.add(doc);
@@ -122,7 +123,7 @@ final class DeleteJob extends Job {
             Metrics.logFileOperation(service, operationType, srcs, null);
         } catch(IOException e) {
             Log.e(TAG, "Failed to get list of docs or parent source.", e);
-            failedFileCount += details.getItemCount();
+            failedFileCount += srcs.getItemCount();
         }
     }
 
@@ -132,7 +133,8 @@ final class DeleteJob extends Job {
                 .append("DeleteJob")
                 .append("{")
                 .append("id=" + id)
-                .append(", details=" + details)
+                .append(", docs=" + srcs)
+                .append(", srcParent=" + mSrcParent)
                 .append(", location=" + stack)
                 .append("}")
                 .toString();

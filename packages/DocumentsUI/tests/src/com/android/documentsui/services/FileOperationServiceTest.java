@@ -18,6 +18,7 @@ package com.android.documentsui.services;
 
 import static com.android.documentsui.services.FileOperationService.OPERATION_COPY;
 import static com.android.documentsui.services.FileOperationService.OPERATION_DELETE;
+import static com.android.documentsui.services.FileOperationService.OpType;
 import static com.android.documentsui.services.FileOperations.createBaseIntent;
 import static com.android.documentsui.services.FileOperations.createJobId;
 
@@ -26,14 +27,15 @@ import static com.google.android.collect.Lists.newArrayList;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.test.ServiceTestCase;
 import android.test.suitebuilder.annotation.MediumTest;
 
-import com.android.documentsui.ClipDetails;
+import com.android.documentsui.UrisSupplier;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
-import com.android.documentsui.services.Job.Listener;
-import com.android.documentsui.testing.ClipDetailsFactory;
+import com.android.documentsui.testing.DocsProviders;
 import com.android.documentsui.testing.TestHandler;
 import com.android.documentsui.testing.TestScheduledExecutorService;
 
@@ -50,11 +52,13 @@ public class FileOperationServiceTest extends ServiceTestCase<FileOperationServi
     private static final DocumentInfo GAMMA_DOC = createDoc("gamma");
     private static final DocumentInfo DELTA_DOC = createDoc("delta");
 
+    private final List<TestJob> mCopyJobs = new ArrayList<>();
+    private final List<TestJob> mDeleteJobs = new ArrayList<>();
+
     private FileOperationService mService;
     private TestScheduledExecutorService mExecutor;
     private TestScheduledExecutorService mDeletionExecutor;
     private TestHandler mHandler;
-    private TestJobFactory mJobFactory;
 
     public FileOperationServiceTest() {
         super(FileOperationService.class);
@@ -68,7 +72,9 @@ public class FileOperationServiceTest extends ServiceTestCase<FileOperationServi
         mExecutor = new TestScheduledExecutorService();
         mDeletionExecutor = new TestScheduledExecutorService();
         mHandler = new TestHandler();
-        mJobFactory = new TestJobFactory();
+
+        mCopyJobs.clear();
+        mDeleteJobs.clear();
 
         // Install test doubles.
         mService = getService();
@@ -81,9 +87,13 @@ public class FileOperationServiceTest extends ServiceTestCase<FileOperationServi
 
         assertNull(mService.handler);
         mService.handler = mHandler;
+    }
 
-        assertNull(mService.jobFactory);
-        mService.jobFactory = mJobFactory;
+    @Override
+    protected void tearDown() {
+        // There are lots of progress notifications generated in this test case.
+        // Dismiss all of them here.
+        mHandler.dispatchAllMessages();
     }
 
     public void testRunsCopyJobs() throws Exception {
@@ -91,7 +101,7 @@ public class FileOperationServiceTest extends ServiceTestCase<FileOperationServi
         startService(createCopyIntent(newArrayList(GAMMA_DOC), DELTA_DOC));
 
         mExecutor.runAll();
-        mJobFactory.assertAllCopyJobsStarted();
+        assertAllCopyJobsStarted();
     }
 
     public void testRunsCopyJobs_AfterExceptionInJobCreation() throws Exception {
@@ -102,20 +112,20 @@ public class FileOperationServiceTest extends ServiceTestCase<FileOperationServi
         }
         startService(createCopyIntent(newArrayList(GAMMA_DOC), DELTA_DOC));
 
-        mJobFactory.assertJobsCreated(1);
+        assertJobsCreated(1);
 
         mExecutor.runAll();
-        mJobFactory.assertAllCopyJobsStarted();
+        assertAllCopyJobsStarted();
     }
 
     public void testRunsCopyJobs_AfterFailure() throws Exception {
         startService(createCopyIntent(newArrayList(ALPHA_DOC), BETA_DOC));
         startService(createCopyIntent(newArrayList(GAMMA_DOC), DELTA_DOC));
 
-        mJobFactory.copyJobs.get(0).fail(ALPHA_DOC);
+        mCopyJobs.get(0).fail(ALPHA_DOC);
 
         mExecutor.runAll();
-        mJobFactory.assertAllCopyJobsStarted();
+        assertAllCopyJobsStarted();
     }
 
     public void testRunsCopyJobs_notRunsDeleteJobs() throws Exception {
@@ -123,14 +133,14 @@ public class FileOperationServiceTest extends ServiceTestCase<FileOperationServi
         startService(createDeleteIntent(newArrayList(GAMMA_DOC)));
 
         mExecutor.runAll();
-        mJobFactory.assertNoDeleteJobsStarted();
+        assertNoDeleteJobsStarted();
     }
 
     public void testRunsDeleteJobs() throws Exception {
         startService(createDeleteIntent(newArrayList(ALPHA_DOC)));
 
         mDeletionExecutor.runAll();
-        mJobFactory.assertAllDeleteJobsStarted();
+        assertAllDeleteJobsStarted();
     }
 
     public void testRunsDeleteJobs_NotRunsCopyJobs() throws Exception {
@@ -138,7 +148,7 @@ public class FileOperationServiceTest extends ServiceTestCase<FileOperationServi
         startService(createDeleteIntent(newArrayList(GAMMA_DOC)));
 
         mDeletionExecutor.runAll();
-        mJobFactory.assertNoCopyJobsStarted();
+        assertNoCopyJobsStarted();
     }
 
     public void testUpdatesNotification() throws Exception {
@@ -148,7 +158,7 @@ public class FileOperationServiceTest extends ServiceTestCase<FileOperationServi
         // Assert monitoring continues until job is done
         assertTrue(mHandler.hasScheduledMessage());
         // Two notifications -- one for setup; one for progress
-        assertEquals(2, mJobFactory.copyJobs.get(0).getNumOfNotifications());
+        assertEquals(2, mCopyJobs.get(0).getNumOfNotifications());
     }
 
     public void testStopsUpdatingNotificationAfterFinished() throws Exception {
@@ -160,7 +170,7 @@ public class FileOperationServiceTest extends ServiceTestCase<FileOperationServi
         assertFalse(mHandler.hasScheduledMessage());
 
         // Assert no more notification is generated after finish.
-        assertEquals(2, mJobFactory.copyJobs.get(0).getNumOfNotifications());
+        assertEquals(2, mCopyJobs.get(0).getNumOfNotifications());
 
     }
 
@@ -202,7 +212,7 @@ public class FileOperationServiceTest extends ServiceTestCase<FileOperationServi
         startService(createCopyIntent(newArrayList(ALPHA_DOC), BETA_DOC));
         startService(createCopyIntent(newArrayList(GAMMA_DOC), DELTA_DOC));
 
-        mJobFactory.copyJobs.get(0).fail(ALPHA_DOC);
+        mCopyJobs.get(0).fail(ALPHA_DOC);
 
         mExecutor.runAll();
         shutdownService();
@@ -214,8 +224,8 @@ public class FileOperationServiceTest extends ServiceTestCase<FileOperationServi
         startService(createCopyIntent(newArrayList(ALPHA_DOC), BETA_DOC));
         startService(createCopyIntent(newArrayList(GAMMA_DOC), DELTA_DOC));
 
-        mJobFactory.copyJobs.get(0).fail(ALPHA_DOC);
-        mJobFactory.copyJobs.get(1).fail(GAMMA_DOC);
+        mCopyJobs.get(0).fail(ALPHA_DOC);
+        mCopyJobs.get(1).fail(GAMMA_DOC);
 
         mExecutor.runAll();
         shutdownService();
@@ -233,10 +243,10 @@ public class FileOperationServiceTest extends ServiceTestCase<FileOperationServi
             uris.add(file.derivedUri);
         }
 
-        ClipDetails details =
-                ClipDetailsFactory.createClipDetails(OPERATION_COPY, SRC_PARENT, uris);
+        UrisSupplier urisSupplier = DocsProviders.createDocsProvider(uris);
+        TestFileOperation operation = new TestFileOperation(OPERATION_COPY, urisSupplier, stack);
 
-        return createBaseIntent(getContext(), createJobId(), details, stack);
+        return createBaseIntent(getContext(), createJobId(), operation);
     }
 
     private Intent createDeleteIntent(ArrayList<DocumentInfo> files) {
@@ -247,10 +257,10 @@ public class FileOperationServiceTest extends ServiceTestCase<FileOperationServi
             uris.add(file.derivedUri);
         }
 
-        ClipDetails details =
-                ClipDetailsFactory.createClipDetails(OPERATION_DELETE, SRC_PARENT, uris);
+        UrisSupplier urisSupplier = DocsProviders.createDocsProvider(uris);
+        TestFileOperation operation = new TestFileOperation(OPERATION_DELETE, urisSupplier, stack);
 
-        return createBaseIntent(getContext(), createJobId(), details, stack);
+        return createBaseIntent(getContext(), createJobId(), operation);
     }
 
     private static DocumentInfo createDoc(String name) {
@@ -264,6 +274,33 @@ public class FileOperationServiceTest extends ServiceTestCase<FileOperationServi
         return createDoc(uri);
     }
 
+    void assertAllCopyJobsStarted() {
+        for (TestJob job : mCopyJobs) {
+            job.assertStarted();
+        }
+    }
+
+    void assertAllDeleteJobsStarted() {
+        for (TestJob job : mDeleteJobs) {
+            job.assertStarted();
+        }
+    }
+
+    void assertNoCopyJobsStarted() {
+        for (TestJob job : mCopyJobs) {
+            job.assertNotStarted();
+        }
+    }
+
+    void assertNoDeleteJobsStarted() {
+        for (TestJob job : mDeleteJobs) {
+            job.assertNotStarted();
+        }
+    }
+
+    void assertJobsCreated(int expected) {
+        assertEquals(expected, mCopyJobs.size() + mDeleteJobs.size());
+    }
     private static DocumentInfo createDoc(Uri destination) {
         DocumentInfo destDoc = new DocumentInfo();
         destDoc.derivedUri = destination;
@@ -275,72 +312,56 @@ public class FileOperationServiceTest extends ServiceTestCase<FileOperationServi
         mDeletionExecutor.assertShutdown();
     }
 
-    private final class TestJobFactory extends Job.Factory {
+    private final class TestFileOperation extends FileOperation {
 
-        private final List<TestJob> copyJobs = new ArrayList<>();
-        private final List<TestJob> deleteJobs = new ArrayList<>();
-
-        private Runnable mJobRunnable = () -> {
+        private final Runnable mJobRunnable = () -> {
             // The following statement is executed concurrently to Job.start() in real situation.
             // Call it in TestJob.start() to mimic this behavior.
             mHandler.dispatchNextMessage();
         };
+        private final @OpType int mOpType;
+        private final UrisSupplier mSrcs;
+        private final DocumentStack mDestination;
 
-        void assertAllCopyJobsStarted() {
-            for (TestJob job : copyJobs) {
-                job.assertStarted();
-            }
-        }
-
-        void assertAllDeleteJobsStarted() {
-            for (TestJob job : deleteJobs) {
-                job.assertStarted();
-            }
-        }
-
-        void assertNoCopyJobsStarted() {
-            for (TestJob job : copyJobs) {
-                job.assertNotStarted();
-            }
-        }
-
-        void assertNoDeleteJobsStarted() {
-            for (TestJob job : deleteJobs) {
-                job.assertNotStarted();
-            }
-        }
-
-        void assertJobsCreated(int expected) {
-            assertEquals(expected, copyJobs.size() + deleteJobs.size());
+        private TestFileOperation(
+                @OpType int opType, UrisSupplier srcs, DocumentStack destination) {
+            super(opType, srcs, destination);
+            mOpType = opType;
+            mSrcs = srcs;
+            mDestination = destination;
         }
 
         @Override
-        Job createCopy(Context service, Context appContext, Listener listener, String id,
-                DocumentStack stack, ClipDetails details) {
+        public Job createJob(Context service, Job.Listener listener, String id) {
+            TestJob job =
+                    new TestJob(service, listener, id, mOpType, mDestination, mSrcs, mJobRunnable);
 
-            if (details.getItemCount() == 0) {
-                throw new RuntimeException("Empty srcs not supported!");
+            if (mOpType == OPERATION_COPY) {
+                mCopyJobs.add(job);
             }
 
-            TestJob job = new TestJob(
-                    service, appContext, listener, id, stack, details, mJobRunnable);
-            copyJobs.add(job);
+            if (mOpType == OPERATION_DELETE) {
+                mDeleteJobs.add(job);
+            }
+
             return job;
         }
 
-        @Override
-        Job createDelete(Context service, Context appContext, Listener listener, String id,
-                DocumentStack stack, ClipDetails details) {
+        /**
+         * CREATOR is required for Parcelables, but we never pass this class via parcel.
+         */
+        public Parcelable.Creator<TestFileOperation> CREATOR =
+                new Parcelable.Creator<TestFileOperation>() {
 
-            if (details.getItemCount() == 0) {
-                throw new RuntimeException("Empty srcs not supported!");
+            @Override
+            public TestFileOperation createFromParcel(Parcel source) {
+                throw new UnsupportedOperationException("Can't create from a parcel.");
             }
 
-            TestJob job = new TestJob(
-                    service, appContext, listener, id, stack, details, mJobRunnable);
-            deleteJobs.add(job);
-
-            return job;
-        }
+            @Override
+            public TestFileOperation[] newArray(int size) {
+                throw new UnsupportedOperationException("Can't create a new array.");
+            }
+        };
     }
 }
