@@ -967,7 +967,7 @@
     <string name="whichApplicationNamed" msgid="8260158865936942783">"Եզրափակել գործողությունը՝ օգտագործելով %1$s"</string>
     <string name="whichApplicationLabel" msgid="7425855495383818784">"Ավարտել գործողությունը"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"Բացել հետևյալ ծրագրով՝"</string>
-    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Բացել հետևյալով՝ %1$s"</string>
+    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Բացել ծրագրով՝ %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Բացել"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Խմբագրել հետևյալ ծրագրով՝"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Խմբագրել հետևյալով՝ %1$s"</string>
