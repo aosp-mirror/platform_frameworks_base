@@ -315,8 +315,12 @@ public class SystemServicesProxy {
         if (includeFrontMostExcludedTask) {
             flags |= ActivityManager.RECENT_WITH_EXCLUDED;
         }
-        List<ActivityManager.RecentTaskInfo> tasks = mAm.getRecentTasksForUser(numTasksToQuery,
-                flags, userId);
+        List<ActivityManager.RecentTaskInfo> tasks = null;
+        try {
+            tasks = mAm.getRecentTasksForUser(numTasksToQuery, flags, userId);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to get recent tasks", e);
+        }
 
         // Break early if we can't get a valid set of tasks
         if (tasks == null) {

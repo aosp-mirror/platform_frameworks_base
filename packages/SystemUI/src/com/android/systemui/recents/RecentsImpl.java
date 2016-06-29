@@ -185,7 +185,9 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         mHeaderBar = (TaskViewHeader) inflater.inflate(R.layout.recents_task_view_header,
                 null, false);
         reloadResources();
+    }
 
+    public void onBootCompleted() {
         // When we start, preload the data associated with the previous recent tasks.
         // We can use a new plan since the caches will be the same.
         RecentsTaskLoader loader = Recents.getTaskLoader();
@@ -196,10 +198,6 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         launchOpts.numVisibleTaskThumbnails = loader.getThumbnailCacheSize();
         launchOpts.onlyLoadForCache = true;
         loader.loadTasks(mContext, plan, launchOpts);
-    }
-
-    public void onBootCompleted() {
-        // Do nothing
     }
 
     public void onConfigurationChanged() {
