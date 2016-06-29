@@ -9,6 +9,33 @@ toc:
   - title: System Permissions
     path: /guide/topics/security/permissions.html
 
+- title: Platform Architecture
+  path: /guide/platform/index.html
+  section:
+  - title: Use Java 8 Language Features
+    path: /guide/platform/j8-jack.html
+    path_attributes:
+    - name: es-lang
+      value: Funciones del lenguaje Java 8
+    - name: in-lang
+      value: Fitur Bahasa Java 8
+    - name: ja-lang
+      value: Java 8 の機能
+    - name: ko-lang
+      value: Java 8 언어 기능
+    - name: pt-br-lang
+      value: Recursos de linguagem do Java 8
+    - name: ru-lang
+      value: Возможности языка Java 8
+    - name: vi-lang
+      value: Tính năng của Ngôn ngữ Java 8
+    - name: zh-cn-lang
+      value: Java 8 语言功能
+    - name: zh-tw-lang
+      value: Java 8 語言功能
+  - title: Verifying App Behavior on the Android Runtime (ART)
+    path: /guide/practices/verifying-apps-art.html
+
 - title: App Components
   path: /guide/components/index.html
   section:
@@ -422,5 +449,3 @@ toc:
       path: /guide/practices/screen-compat-mode.html
   - title: Supporting Tablets and Handsets
     path: /guide/practices/tablets-and-handsets.html
-  - title: Verifying App Behavior on ART
-    path: /guide/practices/verifying-apps-art.html
