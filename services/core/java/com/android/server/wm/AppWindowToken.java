@@ -134,6 +134,9 @@ class AppWindowToken extends WindowToken {
     boolean mAppStopped;
     int mPendingRelaunchCount;
 
+    private ArrayList<WindowSurfaceController.SurfaceControlWithBackground> mSurfaceViewBackgrounds =
+        new ArrayList<WindowSurfaceController.SurfaceControlWithBackground>();
+
     ArrayDeque<Rect> mFrozenBounds = new ArrayDeque<>();
     ArrayDeque<Configuration> mFrozenMergedConfig = new ArrayDeque<>();
 
@@ -718,6 +721,36 @@ class AppWindowToken extends WindowToken {
             }
         }
         service.mWindowPlacerLocked.performSurfacePlacement();
+    }
+
+    void addSurfaceViewBackground(WindowSurfaceController.SurfaceControlWithBackground background) {
+        mSurfaceViewBackgrounds.add(background);
+    }
+
+    void removeSurfaceViewBackground(WindowSurfaceController.SurfaceControlWithBackground background) {
+        mSurfaceViewBackgrounds.remove(background);
+        updateSurfaceViewBackgroundVisibilities();
+    }
+
+    // We use DimLayers behind SurfaceViews to prevent holes while resizing and creating.
+    // However, we need to ensure one SurfaceView doesn't cover another when they are both placed
+    // below the main app window (as traditionally a SurfaceView which is never drawn
+    // to is totally translucent). So we look at all our SurfaceView backgrounds and only enable
+    // the background for the SurfaceView with lowest Z order
+    void updateSurfaceViewBackgroundVisibilities() {
+        WindowSurfaceController.SurfaceControlWithBackground bottom = null;
+        int bottomLayer = Integer.MAX_VALUE;
+        for (int i = 0; i < mSurfaceViewBackgrounds.size(); i++) {
+            WindowSurfaceController.SurfaceControlWithBackground sc = mSurfaceViewBackgrounds.get(i);
+            if (sc.mVisible && sc.mLayer < bottomLayer) {
+                bottomLayer = sc.mLayer;
+                bottom = sc;
+            }
+        }
+        for (int i = 0; i < mSurfaceViewBackgrounds.size(); i++) {
+            WindowSurfaceController.SurfaceControlWithBackground sc = mSurfaceViewBackgrounds.get(i);
+            sc.updateBackgroundVisibility(sc != bottom);
+        }
     }
 
     @Override
