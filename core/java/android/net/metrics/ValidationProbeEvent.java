@@ -27,7 +27,7 @@ import com.android.internal.util.MessageUtils;
  * {@hide}
  */
 @SystemApi
-public final class ValidationProbeEvent extends IpConnectivityEvent implements Parcelable {
+public final class ValidationProbeEvent implements Parcelable {
 
     public static final int PROBE_DNS   = 0;
     public static final int PROBE_HTTP  = 1;
@@ -42,7 +42,8 @@ public final class ValidationProbeEvent extends IpConnectivityEvent implements P
     public final int probeType;
     public final int returnCode;
 
-    private ValidationProbeEvent(int netId, long durationMs, int probeType, int returnCode) {
+    /** @hide */
+    public ValidationProbeEvent(int netId, long durationMs, int probeType, int returnCode) {
         this.netId = netId;
         this.durationMs = durationMs;
         this.probeType = probeType;
@@ -84,7 +85,6 @@ public final class ValidationProbeEvent extends IpConnectivityEvent implements P
     }
 
     public static void logEvent(int netId, long durationMs, int probeType, int returnCode) {
-        logEvent(new ValidationProbeEvent(netId, durationMs, probeType, returnCode));
     }
 
     @Override
@@ -97,4 +97,4 @@ public final class ValidationProbeEvent extends IpConnectivityEvent implements P
         static final SparseArray<String> constants = MessageUtils.findMessageNames(
                 new Class[]{ValidationProbeEvent.class}, new String[]{"PROBE_"});
     }
-};
+}

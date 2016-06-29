@@ -24,11 +24,12 @@ import android.os.Parcelable;
  * {@hide}
  */
 @SystemApi
-public final class DhcpClientEvent extends IpConnectivityEvent implements Parcelable {
+public final class DhcpClientEvent implements Parcelable {
     public final String ifName;
     public final String msg;
 
-    private DhcpClientEvent(String ifName, String msg) {
+    /** {@hide} */
+    public DhcpClientEvent(String ifName, String msg) {
         this.ifName = ifName;
         this.msg = msg;
     }
@@ -64,6 +65,5 @@ public final class DhcpClientEvent extends IpConnectivityEvent implements Parcel
     };
 
     public static void logStateEvent(String ifName, String state) {
-        logEvent(new DhcpClientEvent(ifName, state));
     }
-};
+}

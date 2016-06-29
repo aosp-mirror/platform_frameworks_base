@@ -25,7 +25,7 @@ import android.os.Parcelable;
  * {@hide}
  */
 @SystemApi
-public final class DefaultNetworkEvent extends IpConnectivityEvent implements Parcelable {
+public final class DefaultNetworkEvent implements Parcelable {
     // The ID of the network that has become the new default or NETID_UNSET if none.
     public final int netId;
     // The list of transport types of the new default network, for example TRANSPORT_WIFI, as
@@ -37,7 +37,8 @@ public final class DefaultNetworkEvent extends IpConnectivityEvent implements Pa
     public final boolean prevIPv4;
     public final boolean prevIPv6;
 
-    private DefaultNetworkEvent(int netId, int[] transportTypes,
+    /** {@hide} */
+    public DefaultNetworkEvent(int netId, int[] transportTypes,
                 int prevNetId, boolean prevIPv4, boolean prevIPv6) {
         this.netId = netId;
         this.transportTypes = transportTypes;
@@ -105,6 +106,5 @@ public final class DefaultNetworkEvent extends IpConnectivityEvent implements Pa
 
     public static void logEvent(
             int netId, int[] transports, int prevNetId, boolean hadIPv4, boolean hadIPv6) {
-        logEvent(new DefaultNetworkEvent(netId, transports, prevNetId, hadIPv4, hadIPv6));
     }
-};
+}

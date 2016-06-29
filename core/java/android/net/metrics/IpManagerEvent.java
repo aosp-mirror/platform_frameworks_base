@@ -27,7 +27,7 @@ import com.android.internal.util.MessageUtils;
  * {@hide}
  */
 @SystemApi
-public final class IpManagerEvent extends IpConnectivityEvent implements Parcelable {
+public final class IpManagerEvent implements Parcelable {
 
     public static final int PROVISIONING_OK    = 1;
     public static final int PROVISIONING_FAIL  = 2;
@@ -37,7 +37,8 @@ public final class IpManagerEvent extends IpConnectivityEvent implements Parcela
     public final int eventType;
     public final long durationMs;
 
-    private IpManagerEvent(String ifName, int eventType, long duration) {
+    /** {@hide} */
+    public IpManagerEvent(String ifName, int eventType, long duration) {
         this.ifName = ifName;
         this.eventType = eventType;
         this.durationMs = duration;
@@ -71,7 +72,6 @@ public final class IpManagerEvent extends IpConnectivityEvent implements Parcela
     };
 
     public static void logEvent(int eventType, String ifName, long durationMs) {
-        logEvent(new IpManagerEvent(ifName, eventType, durationMs));
     }
 
     @Override
@@ -84,4 +84,4 @@ public final class IpManagerEvent extends IpConnectivityEvent implements Parcela
         static final SparseArray<String> constants = MessageUtils.findMessageNames(
                 new Class[]{IpManagerEvent.class}, new String[]{"PROVISIONING_", "COMPLETE_"});
     }
-};
+}
