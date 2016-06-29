@@ -23206,7 +23206,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * </div>
      * <p>
      * A scenario in which a developer would like to use an accessibility delegate
-     * is overriding a method introduced in a later API version then the minimal API
+     * is overriding a method introduced in a later API version than the minimal API
      * version supported by the application. For example, the method
      * {@link View#onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo)} is not available
      * in API version 4 when the accessibility APIs were first introduced. If a
@@ -23215,7 +23215,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * of this method, instead of overriding the method which would break the application's
      * backwards compatibility, he can override the corresponding method in this
      * delegate and register the delegate in the target View if the API version of
-     * the system is high enough i.e. the API version is same or higher to the API
+     * the system is high enough, i.e. the API version is the same as or higher than the API
      * version that introduced
      * {@link View#onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo)}.
      * </p>
