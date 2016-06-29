@@ -14,35 +14,11 @@
      limitations under the License.
 -->
 <resources>
-    <color name="background_material_dark">@color/micro_blue_grey_b15</color>
-    <color name="background_floating_material_dark">@color/micro_blue_grey_b30</color>
+    <color name="background_material_dark">#ff232e33</color>
+    <color name="background_floating_material_dark">#ff3e5059</color>
 
-    <color name="primary_material_dark">@color/micro_blue_grey_b65</color>
-    <color name="primary_dark_material_dark">@color/micro_blue_grey_b40</color>
+    <color name="accent_material_dark">#ff5e97f6</color>
+    <color name="accent_material_light">#ff4285f4</color>
 
-    <color name="accent_material_dark">@color/micro_blue_grey_b100</color>
-    <color name="accent_material_light">@color/micro_blue_grey_500</color>
-
-    <!-- Primary & accent colors -->
-    <eat-comment />
-
-    <!-- App color -->
-    <color name="micro_blue_grey_500">#ff607d8b</color>
-    <!-- Accent -->
-    <color name="micro_blue_grey_b100">#ffb0e5ff</color>
-    <!-- Lighter UI element -->
-    <color name="micro_blue_grey_b65">#ff7295a6</color>
-    <!-- UI Element -->
-    <color name="micro_blue_grey_b40">#ff465b66</color>
-    <!-- Lighter background -->
-    <color name="micro_blue_grey_b30">#ff35454d</color>
-    <!-- Dark background -->
-    <color name="micro_blue_grey_b15">#ff1a2226</color>
-
-    <!-- Button colors -->
-    <eat-comment />
-
-    <color name="micro_confirm_green">#ff4fc0b0</color>
-    <color name="micro_button_gray">#ffc2c2c2</color>
-    <color name="micro_action_blue">#ff0288d1</color>
+    <color name="button_material_dark">#ff999999</color>
 </resources>
