@@ -18,6 +18,7 @@ package com.android.server.connectivity;
 
 import android.content.Context;
 import android.net.metrics.DnsEvent;
+import android.net.metrics.IpConnectivityLog;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.net.Network;
@@ -50,7 +51,7 @@ public class DnsEventListenerService extends IDnsEventListener.Stub {
     // Stores the results of a number of consecutive DNS lookups on the same network.
     // This class is not thread-safe and it is the responsibility of the service to call its methods
     // on one thread at a time.
-    private static class DnsEventBatch {
+    private class DnsEventBatch {
         private final int mNetId;
 
         private final byte[] mEventTypes = new byte[MAX_LOOKUPS_PER_DNS_EVENT];
@@ -82,7 +83,7 @@ public class DnsEventListenerService extends IDnsEventListener.Stub {
             byte[] eventTypes = Arrays.copyOf(mEventTypes, mEventCount);
             byte[] returnCodes = Arrays.copyOf(mReturnCodes, mEventCount);
             int[] latenciesMs = Arrays.copyOf(mLatenciesMs, mEventCount);
-            DnsEvent.logEvent(mNetId, eventTypes, returnCodes, latenciesMs);
+            mMetricsLog.log(new DnsEvent(mNetId, eventTypes, returnCodes, latenciesMs));
             maybeLog(String.format("Logging %d results for netId %d", mEventCount, mNetId));
             mEventCount = 0;
         }
@@ -103,6 +104,7 @@ public class DnsEventListenerService extends IDnsEventListener.Stub {
     // up to MAX_LOOKUPS_PER_DNS_EVENT lookup stats on each network when the system is shutting
     // down. We believe this to be sufficient for now.
     private final ConnectivityManager mCm;
+    private final IpConnectivityLog mMetricsLog = new IpConnectivityLog();
     private final NetworkCallback mNetworkCallback = new NetworkCallback() {
         @Override
         public void onLost(Network network) {

@@ -27,7 +27,7 @@ import com.android.internal.util.MessageUtils;
  * {@hide}
  */
 @SystemApi
-public final class IpReachabilityEvent extends IpConnectivityEvent implements Parcelable {
+public final class IpReachabilityEvent implements Parcelable {
 
     public static final int PROBE             = 1 << 8;
     public static final int NUD_FAILED        = 2 << 8;
@@ -41,7 +41,8 @@ public final class IpReachabilityEvent extends IpConnectivityEvent implements Pa
     // byte 3: kernel errno from RTNetlink or IpReachabilityMonitor
     public final int eventType;
 
-    private IpReachabilityEvent(String ifName, int eventType) {
+    /** {@hide} */
+    public IpReachabilityEvent(String ifName, int eventType) {
         this.ifName = ifName;
         this.eventType = eventType;
     }
@@ -72,15 +73,12 @@ public final class IpReachabilityEvent extends IpConnectivityEvent implements Pa
     };
 
     public static void logProbeEvent(String ifName, int nlErrorCode) {
-        logEvent(new IpReachabilityEvent(ifName, PROBE | (nlErrorCode & 0xFF)));
     }
 
     public static void logNudFailed(String ifName) {
-        logEvent(new IpReachabilityEvent(ifName, NUD_FAILED));
     }
 
     public static void logProvisioningLost(String ifName) {
-        logEvent(new IpReachabilityEvent(ifName, PROVISIONING_LOST));
     }
 
     @Override
@@ -94,4 +92,4 @@ public final class IpReachabilityEvent extends IpConnectivityEvent implements Pa
                 MessageUtils.findMessageNames(new Class[]{IpReachabilityEvent.class},
                 new String[]{"PROBE", "PROVISIONING_", "NUD_"});
     }
-};
+}

@@ -34,8 +34,9 @@ import android.net.NetworkRequest;
 import android.net.ProxyInfo;
 import android.net.TrafficStats;
 import android.net.Uri;
-import android.net.metrics.ValidationProbeEvent;
+import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.NetworkEvent;
+import android.net.metrics.ValidationProbeEvent;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.util.Stopwatch;
@@ -230,6 +231,7 @@ public class NetworkMonitor extends StateMachine {
     private final WifiManager mWifiManager;
     private final AlarmManager mAlarmManager;
     private final NetworkRequest mDefaultRequest;
+    private final IpConnectivityLog mMetricsLog = new IpConnectivityLog();
 
     private boolean mIsCaptivePortalCheckEnabled;
     private boolean mUseHttps;
@@ -311,11 +313,11 @@ public class NetworkMonitor extends StateMachine {
                     transitionTo(mLingeringState);
                     return HANDLED;
                 case CMD_NETWORK_CONNECTED:
-                    NetworkEvent.logEvent(mNetId, NetworkEvent.NETWORK_CONNECTED);
+                    logNetworkEvent(NetworkEvent.NETWORK_CONNECTED);
                     transitionTo(mEvaluatingState);
                     return HANDLED;
                 case CMD_NETWORK_DISCONNECTED:
-                    NetworkEvent.logEvent(mNetId, NetworkEvent.NETWORK_DISCONNECTED);
+                    logNetworkEvent(NetworkEvent.NETWORK_DISCONNECTED);
                     if (mLaunchCaptivePortalAppBroadcastReceiver != null) {
                         mContext.unregisterReceiver(mLaunchCaptivePortalAppBroadcastReceiver);
                         mLaunchCaptivePortalAppBroadcastReceiver = null;
@@ -380,10 +382,7 @@ public class NetworkMonitor extends StateMachine {
     private class ValidatedState extends State {
         @Override
         public void enter() {
-            if (mEvaluationTimer.isRunning()) {
-                NetworkEvent.logValidated(mNetId, mEvaluationTimer.stop());
-                mEvaluationTimer.reset();
-            }
+            maybeLogEvaluationResult(NetworkEvent.NETWORK_VALIDATED);
             mConnectivityServiceHandler.sendMessage(obtainMessage(EVENT_NETWORK_TESTED,
                     NETWORK_TEST_RESULT_VALID, mNetworkAgentInfo.network.netId, null));
         }
@@ -530,7 +529,7 @@ public class NetworkMonitor extends StateMachine {
                     } else {
                         final Message msg = obtainMessage(CMD_REEVALUATE, ++mReevaluateToken, 0);
                         sendMessageDelayed(msg, mReevaluateDelayMs);
-                        NetworkEvent.logEvent(mNetId, NetworkEvent.NETWORK_VALIDATION_FAILED);
+                        logNetworkEvent(NetworkEvent.NETWORK_VALIDATION_FAILED);
                         mConnectivityServiceHandler.sendMessage(obtainMessage(
                                 EVENT_NETWORK_TESTED, NETWORK_TEST_RESULT_INVALID, mNetId,
                                 probeResult.mRedirectUrl));
@@ -590,10 +589,7 @@ public class NetworkMonitor extends StateMachine {
 
         @Override
         public void enter() {
-            if (mEvaluationTimer.isRunning()) {
-                NetworkEvent.logCaptivePortalFound(mNetId, mEvaluationTimer.stop());
-                mEvaluationTimer.reset();
-            }
+            maybeLogEvaluationResult(NetworkEvent.NETWORK_CAPTIVE_PORTAL_FOUND);
             // Don't annoy user with sign-in notifications.
             if (mDontDisplaySigninNotification) return;
             // Create a CustomIntentReceiver that sends us a
@@ -758,11 +754,12 @@ public class NetworkMonitor extends StateMachine {
         if (!TextUtils.isEmpty(hostToResolve)) {
             String probeName = ValidationProbeEvent.getProbeName(ValidationProbeEvent.PROBE_DNS);
             final Stopwatch dnsTimer = new Stopwatch().start();
+            int dnsResult;
+            long dnsLatency;
             try {
                 InetAddress[] addresses = mNetworkAgentInfo.network.getAllByName(hostToResolve);
-                long dnsLatency = dnsTimer.stop();
-                ValidationProbeEvent.logEvent(mNetId, dnsLatency,
-                        ValidationProbeEvent.PROBE_DNS, ValidationProbeEvent.DNS_SUCCESS);
+                dnsResult = ValidationProbeEvent.DNS_SUCCESS;
+                dnsLatency = dnsTimer.stop();
                 final StringBuffer connectInfo = new StringBuffer(", " + hostToResolve + "=");
                 for (InetAddress address : addresses) {
                     connectInfo.append(address.getHostAddress());
@@ -770,11 +767,11 @@ public class NetworkMonitor extends StateMachine {
                 }
                 validationLog(probeName + " OK " + dnsLatency + "ms" + connectInfo);
             } catch (UnknownHostException e) {
-                long dnsLatency = dnsTimer.stop();
-                ValidationProbeEvent.logEvent(mNetId, dnsLatency,
-                        ValidationProbeEvent.PROBE_DNS, ValidationProbeEvent.DNS_FAILURE);
+                dnsResult = ValidationProbeEvent.DNS_FAILURE;
+                dnsLatency = dnsTimer.stop();
                 validationLog(probeName + " FAIL " + dnsLatency + "ms, " + hostToResolve);
             }
+            logValidationProbe(dnsLatency, ValidationProbeEvent.PROBE_DNS, dnsResult);
         }
 
         CaptivePortalProbeResult result;
@@ -855,7 +852,7 @@ public class NetworkMonitor extends StateMachine {
                 urlConnection.disconnect();
             }
         }
-        ValidationProbeEvent.logEvent(mNetId, probeTimer.stop(), probeType, httpResponseCode);
+        logValidationProbe(probeTimer.stop(), probeType, httpResponseCode);
         return new CaptivePortalProbeResult(httpResponseCode, redirectUrl);
     }
 
@@ -1011,5 +1008,20 @@ public class NetworkMonitor extends StateMachine {
     @VisibleForTesting
     protected WakeupMessage makeWakeupMessage(Context c, Handler h, String s, int i) {
         return new WakeupMessage(c, h, s, i);
+    }
+
+    private void logNetworkEvent(int evtype) {
+        mMetricsLog.log(new NetworkEvent(mNetId, evtype));
+    }
+
+    private void maybeLogEvaluationResult(int evtype) {
+        if (mEvaluationTimer.isRunning()) {
+            mMetricsLog.log(new NetworkEvent(mNetId, evtype, mEvaluationTimer.stop()));
+            mEvaluationTimer.reset();
+        }
+    }
+
+    private void logValidationProbe(long durationMs, int probeType, int probeResult) {
+        mMetricsLog.log(new ValidationProbeEvent(mNetId, durationMs, probeType, probeResult));
     }
 }

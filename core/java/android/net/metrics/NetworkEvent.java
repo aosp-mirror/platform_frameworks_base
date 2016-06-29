@@ -27,7 +27,7 @@ import com.android.internal.util.MessageUtils;
  * {@hide}
  */
 @SystemApi
-public final class NetworkEvent extends IpConnectivityEvent implements Parcelable {
+public final class NetworkEvent implements Parcelable {
 
     public static final int NETWORK_CONNECTED            = 1;
     public static final int NETWORK_VALIDATED            = 2;
@@ -41,10 +41,16 @@ public final class NetworkEvent extends IpConnectivityEvent implements Parcelabl
     public final int eventType;
     public final long durationMs;
 
-    private NetworkEvent(int netId, int eventType, long durationMs) {
+    /** {@hide} */
+    public NetworkEvent(int netId, int eventType, long durationMs) {
         this.netId = netId;
         this.eventType = eventType;
         this.durationMs = durationMs;
+    }
+
+    /** {@hide} */
+    public NetworkEvent(int netId, int eventType) {
+        this(netId, eventType, 0);
     }
 
     private NetworkEvent(Parcel in) {
@@ -75,15 +81,12 @@ public final class NetworkEvent extends IpConnectivityEvent implements Parcelabl
     };
 
     public static void logEvent(int netId, int eventType) {
-        logEvent(new NetworkEvent(netId, eventType, 0));
     }
 
     public static void logValidated(int netId, long durationMs) {
-        logEvent(new NetworkEvent(netId, NETWORK_VALIDATED, durationMs));
     }
 
     public static void logCaptivePortalFound(int netId, long durationMs) {
-        logEvent(new NetworkEvent(netId, NETWORK_CAPTIVE_PORTAL_FOUND, durationMs));
     }
 
     @Override
@@ -96,4 +99,4 @@ public final class NetworkEvent extends IpConnectivityEvent implements Parcelabl
         static final SparseArray<String> constants = MessageUtils.findMessageNames(
                 new Class[]{NetworkEvent.class}, new String[]{"NETWORK_"});
     }
-};
+}

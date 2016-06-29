@@ -27,7 +27,7 @@ import com.android.internal.util.MessageUtils;
  * {@hide} Event class used to record error events when parsing DHCP response packets.
  */
 @SystemApi
-public final class DhcpErrorEvent extends IpConnectivityEvent implements Parcelable {
+public final class DhcpErrorEvent implements Parcelable {
     public static final int L2_ERROR   = 1;
     public static final int L3_ERROR   = 2;
     public static final int L4_ERROR   = 3;
@@ -61,7 +61,8 @@ public final class DhcpErrorEvent extends IpConnectivityEvent implements Parcela
     // byte 3: optional code
     public final int errorCode;
 
-    private DhcpErrorEvent(String ifName, int errorCode) {
+    /** {@hide} */
+    public DhcpErrorEvent(String ifName, int errorCode) {
         this.ifName = ifName;
         this.errorCode = errorCode;
     }
@@ -92,11 +93,9 @@ public final class DhcpErrorEvent extends IpConnectivityEvent implements Parcela
     };
 
     public static void logParseError(String ifName, int errorCode) {
-        logEvent(new DhcpErrorEvent(ifName, errorCode));
     }
 
     public static void logReceiveError(String ifName) {
-        logEvent(new DhcpErrorEvent(ifName, RECEIVE_ERROR));
     }
 
     public static int errorCodeWithOption(int errorCode, int option) {

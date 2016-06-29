@@ -31,6 +31,7 @@ import android.net.ProxyInfo;
 import android.net.RouteInfo;
 import android.net.StaticIpConfiguration;
 import android.net.dhcp.DhcpClient;
+import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.IpManagerEvent;
 import android.os.INetworkManagementService;
 import android.os.Message;
@@ -393,6 +394,7 @@ public class IpManager extends StateMachine {
     private final WakeupMessage mProvisioningTimeoutAlarm;
     private final WakeupMessage mDhcpActionTimeoutAlarm;
     private final LocalLog mLocalLog;
+    private final IpConnectivityLog mMetricsLog = new IpConnectivityLog();
 
     private NetworkInterface mNetworkInterface;
 
@@ -634,8 +636,8 @@ public class IpManager extends StateMachine {
 
     private void recordMetric(final int type) {
         if (mStartTimeMillis <= 0) { Log.wtf(mTag, "Start time undefined!"); }
-        IpManagerEvent.logEvent(type, mInterfaceName,
-                SystemClock.elapsedRealtime() - mStartTimeMillis);
+        final long duration = SystemClock.elapsedRealtime() - mStartTimeMillis;
+        mMetricsLog.log(new IpManagerEvent(mInterfaceName, type, duration));
     }
 
     // For now: use WifiStateMachine's historical notion of provisioned.
