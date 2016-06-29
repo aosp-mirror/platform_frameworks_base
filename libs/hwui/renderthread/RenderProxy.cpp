@@ -265,18 +265,6 @@ void RenderProxy::invokeFunctor(Functor* functor, bool waitForCompletion) {
     }
 }
 
-CREATE_BRIDGE2(runWithGlContext, CanvasContext* context, RenderTask* task) {
-    args->context->runWithGlContext(args->task);
-    return nullptr;
-}
-
-void RenderProxy::runWithGlContext(RenderTask* gltask) {
-    SETUP_TASK(runWithGlContext);
-    args->context = mContext;
-    args->task = gltask;
-    postAndWait(task);
-}
-
 CREATE_BRIDGE1(createTextureLayer, CanvasContext* context) {
     Layer* layer = args->context->createTextureLayer();
     if (!layer) return nullptr;
