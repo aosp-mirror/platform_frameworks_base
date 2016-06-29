@@ -256,60 +256,63 @@ public abstract class Conference extends Conferenceable {
     }
 
     /**
-     * Invoked when the Conference and all it's {@link Connection}s should be disconnected.
+     * Notifies the {@link Conference} when the Conference and all it's {@link Connection}s should
+     * be disconnected.
      */
     public void onDisconnect() {}
 
     /**
-     * Invoked when the specified {@link Connection} should be separated from the conference call.
+     * Notifies the {@link Conference} when the specified {@link Connection} should be separated
+     * from the conference call.
      *
      * @param connection The connection to separate.
      */
     public void onSeparate(Connection connection) {}
 
     /**
-     * Invoked when the specified {@link Connection} should merged with the conference call.
+     * Notifies the {@link Conference} when the specified {@link Connection} should merged with the
+     * conference call.
      *
      * @param connection The {@code Connection} to merge.
      */
     public void onMerge(Connection connection) {}
 
     /**
-     * Invoked when the conference should be put on hold.
+     * Notifies the {@link Conference} when it should be put on hold.
      */
     public void onHold() {}
 
     /**
-     * Invoked when the conference should be moved from hold to active.
+     * Notifies the {@link Conference} when it should be moved from a held to active state.
      */
     public void onUnhold() {}
 
     /**
-     * Invoked when the child calls should be merged. Only invoked if the conference contains the
-     * capability {@link Connection#CAPABILITY_MERGE_CONFERENCE}.
+     * Notifies the {@link Conference} when the child calls should be merged.  Only invoked if the
+     * conference contains the capability {@link Connection#CAPABILITY_MERGE_CONFERENCE}.
      */
     public void onMerge() {}
 
     /**
-     * Invoked when the child calls should be swapped. Only invoked if the conference contains the
-     * capability {@link Connection#CAPABILITY_SWAP_CONFERENCE}.
+     * Notifies the {@link Conference} when the child calls should be swapped. Only invoked if the
+     * conference contains the capability {@link Connection#CAPABILITY_SWAP_CONFERENCE}.
      */
     public void onSwap() {}
 
     /**
-     * Notifies this conference of a request to play a DTMF tone.
+     * Notifies the {@link Conference} of a request to play a DTMF tone.
      *
      * @param c A DTMF character.
      */
     public void onPlayDtmfTone(char c) {}
 
     /**
-     * Notifies this conference of a request to stop any currently playing DTMF tones.
+     * Notifies the {@link Conference} of a request to stop any currently playing DTMF tones.
      */
     public void onStopDtmfTone() {}
 
     /**
-     * Notifies this conference that the {@link #getAudioState()} property has a new value.
+     * Notifies the {@link Conference} that the {@link #getAudioState()} property has a new value.
      *
      * @param state The new call audio state.
      * @deprecated Use {@link #onCallAudioStateChanged(CallAudioState)} instead.
@@ -320,14 +323,15 @@ public abstract class Conference extends Conferenceable {
     public void onAudioStateChanged(AudioState state) {}
 
     /**
-     * Notifies this conference that the {@link #getCallAudioState()} property has a new value.
+     * Notifies the {@link Conference} that the {@link #getCallAudioState()} property has a new
+     * value.
      *
      * @param state The new call audio state.
      */
     public void onCallAudioStateChanged(CallAudioState state) {}
 
     /**
-     * Notifies this conference that a connection has been added to it.
+     * Notifies the {@link Conference} that a {@link Connection} has been added to it.
      *
      * @param connection The newly added connection.
      */
@@ -680,12 +684,13 @@ public abstract class Conference extends Conferenceable {
      * New or existing keys are replaced in the {@code Conference} extras.  Keys which are no longer
      * in the new extras, but were present the last time {@code setExtras} was called are removed.
      * <p>
+     * Alternatively you may use the {@link #putExtras(Bundle)}, and
+     * {@link #removeExtras(String...)} methods to modify the extras.
+     * <p>
      * No assumptions should be made as to how an In-Call UI or service will handle these extras.
-     * Keys should be fully qualified (e.g., com.example.MY_EXTRA) to avoid conflicts.
+     * Keys should be fully qualified (e.g., com.example.extras.MY_EXTRA) to avoid conflicts.
      *
      * @param extras The extras associated with this {@code Conference}.
-     * @deprecated Use {@link #putExtras(Bundle)} to add extras.  Use {@link #removeExtras(List)}
-     * to remove extras.
      */
     public final void setExtras(@Nullable Bundle extras) {
         // Keeping putExtras and removeExtras in the same lock so that this operation happens as a
