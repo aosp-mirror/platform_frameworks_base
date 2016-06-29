@@ -2874,8 +2874,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 + mTopFullscreenOpaqueWindowState + " rotationAnimation="
                 + (mTopFullscreenOpaqueWindowState == null ?
                         "0" : mTopFullscreenOpaqueWindowState.getAttrs().rotationAnimation));
-        if (mTopFullscreenOpaqueWindowState != null && mTopIsFullscreen) {
-            switch (mTopFullscreenOpaqueWindowState.getAttrs().rotationAnimation) {
+        if (mTopFullscreenOpaqueWindowState != null) {
+            int animationHint = mTopFullscreenOpaqueWindowState.getRotationAnimationHint();
+            if (animationHint < 0 && mTopIsFullscreen) {
+                animationHint = mTopFullscreenOpaqueWindowState.getAttrs().rotationAnimation;
+            }
+            switch (animationHint) {
                 case ROTATION_ANIMATION_CROSSFADE:
                     anim[0] = R.anim.rotation_animation_xfade_exit;
                     anim[1] = R.anim.rotation_animation_enter;

@@ -3429,7 +3429,7 @@ public class WindowManagerService extends IWindowManager.Stub
             int requestedOrientation, boolean fullscreen, boolean showForAllUsers, int userId,
             int configChanges, boolean voiceInteraction, boolean launchTaskBehind,
             Rect taskBounds, Configuration config, int taskResizeMode, boolean alwaysFocusable,
-            boolean homeTask, int targetSdkVersion) {
+            boolean homeTask, int targetSdkVersion, int rotationAnimationHint) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "addAppToken()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
@@ -3467,6 +3467,7 @@ public class WindowManagerService extends IWindowManager.Stub
             atoken.mAlwaysFocusable = alwaysFocusable;
             if (DEBUG_TOKEN_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "addAppToken: " + atoken
                     + " to stack=" + stackId + " task=" + taskId + " at " + addPos);
+            atoken.mRotationAnimationHint = rotationAnimationHint;
 
             Task task = mTaskIdToTask.get(taskId);
             if (task == null) {

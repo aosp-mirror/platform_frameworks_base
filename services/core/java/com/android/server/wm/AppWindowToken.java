@@ -132,6 +132,7 @@ class AppWindowToken extends WindowToken {
     boolean mAlwaysFocusable;
 
     boolean mAppStopped;
+    int mRotationAnimationHint;
     int mPendingRelaunchCount;
 
     ArrayDeque<Rect> mFrozenBounds = new ArrayDeque<>();

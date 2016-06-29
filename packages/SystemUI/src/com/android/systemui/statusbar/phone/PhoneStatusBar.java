@@ -22,6 +22,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
+import android.app.ActivityOptions;
 import android.app.IActivityManager;
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -3322,13 +3323,26 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 intent.setFlags(
                         Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 int result = ActivityManager.START_CANCELED;
+                ActivityOptions options = new ActivityOptions(getActivityOptions());
+                if (intent == KeyguardBottomAreaView.INSECURE_CAMERA_INTENT) {
+                    // Normally an activity will set it's requested rotation
+                    // animation on its window. However when launching an activity
+                    // causes the orientation to change this is too late. In these cases
+                    // the default animation is used. This doesn't look good for
+                    // the camera (as it rotates the camera contents out of sync
+                    // with physical reality). So, we ask the WindowManager to
+                    // force the crossfade animation if an orientation change
+                    // happens to occur during the launch.
+                    options.setRotationAnimationHint(
+                            WindowManager.LayoutParams.ROTATION_ANIMATION_CROSSFADE);
+                }
                 try {
                     result = ActivityManagerNative.getDefault().startActivityAsUser(
                             null, mContext.getBasePackageName(),
                             intent,
                             intent.resolveTypeIfNeeded(mContext.getContentResolver()),
                             null, null, 0, Intent.FLAG_ACTIVITY_NEW_TASK, null,
-                            getActivityOptions(), UserHandle.CURRENT.getIdentifier());
+                            options.toBundle(), UserHandle.CURRENT.getIdentifier());
                 } catch (RemoteException e) {
                     Log.w(TAG, "Unable to start activity", e);
                 }

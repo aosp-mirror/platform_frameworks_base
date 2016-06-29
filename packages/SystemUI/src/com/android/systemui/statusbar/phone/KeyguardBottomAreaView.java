@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
+import android.app.ActivityOptions;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -44,6 +45,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 import android.widget.TextView;
@@ -448,12 +450,24 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                 @Override
                 public void run() {
                     int result = ActivityManager.START_CANCELED;
+
+                    // Normally an activity will set it's requested rotation
+                    // animation on its window. However when launching an activity
+                    // causes the orientation to change this is too late. In these cases
+                    // the default animation is used. This doesn't look good for
+                    // the camera (as it rotates the camera contents out of sync
+                    // with physical reality). So, we ask the WindowManager to
+                    // force the crossfade animation if an orientation change
+                    // happens to occur during the launch.
+                    ActivityOptions o = ActivityOptions.makeBasic();
+                    o.setRotationAnimationHint(
+                            WindowManager.LayoutParams.ROTATION_ANIMATION_CROSSFADE);
                     try {
                         result = ActivityManagerNative.getDefault().startActivityAsUser(
                                 null, getContext().getBasePackageName(),
                                 intent,
                                 intent.resolveTypeIfNeeded(getContext().getContentResolver()),
-                                null, null, 0, Intent.FLAG_ACTIVITY_NEW_TASK, null, null,
+                                null, null, 0, Intent.FLAG_ACTIVITY_NEW_TASK, null, o.toBundle(),
                                 UserHandle.CURRENT.getIdentifier());
                     } catch (RemoteException e) {
                         Log.w(TAG, "Unable to start camera activity", e);
