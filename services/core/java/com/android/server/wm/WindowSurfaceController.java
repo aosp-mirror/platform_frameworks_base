@@ -84,9 +84,10 @@ class WindowSurfaceController {
         // to a black-out layer placed one Z-layer below the surface.
         // This prevents holes to whatever app/wallpaper is underneath.
         if (animator.mWin.isChildWindow() &&
-                animator.mWin.mSubLayer < 0) {
+                animator.mWin.mSubLayer < 0 &&
+                animator.mWin.mAppToken != null) {
             mSurfaceControl = new SurfaceControlWithBackground(s,
-                    name, w, h, format, flags);
+                    name, w, h, format, flags, animator.mWin.mAppToken);
         } else if (DEBUG_SURFACE_TRACE) {
             mSurfaceControl = new SurfaceTrace(
                     s, name, w, h, format, flags);
@@ -754,18 +755,25 @@ class WindowSurfaceController {
         }
     }
 
-    private static class SurfaceControlWithBackground extends SurfaceControl {
+    class SurfaceControlWithBackground extends SurfaceControl {
         private SurfaceControl mBackgroundControl;
         private boolean mOpaque = true;
-        private boolean mVisible = false;
+        private boolean mAppForcedInvisible = false;
+        private AppWindowToken mAppToken;
+        public boolean mVisible = false;
+        public int mLayer = -1;
 
         public SurfaceControlWithBackground(SurfaceSession s,
-                       String name, int w, int h, int format, int flags)
+                        String name, int w, int h, int format, int flags,
+                        AppWindowToken token)
                    throws OutOfResourcesException {
             super(s, name, w, h, format, flags);
             mBackgroundControl = new SurfaceControl(s, name, w, h,
                     PixelFormat.OPAQUE, flags | SurfaceControl.FX_SURFACE_DIM);
             mOpaque = (flags & SurfaceControl.OPAQUE) != 0;
+            mAppToken = token;
+
+            mAppToken.addSurfaceViewBackground(this);
         }
 
         @Override
@@ -778,6 +786,10 @@ class WindowSurfaceController {
         public void setLayer(int zorder) {
             super.setLayer(zorder);
             mBackgroundControl.setLayer(zorder - 1);
+            if (mLayer != zorder) {
+                mLayer = zorder;
+                mAppToken.updateSurfaceViewBackgroundVisibilities();
+            }
         }
 
         @Override
@@ -814,7 +826,7 @@ class WindowSurfaceController {
         public void setOpaque(boolean isOpaque) {
             super.setOpaque(isOpaque);
             mOpaque = isOpaque;
-            updateBackgroundVisibility();
+            updateBackgroundVisibility(mAppForcedInvisible);
         }
 
         @Override
@@ -830,23 +842,28 @@ class WindowSurfaceController {
 
         @Override
         public void hide() {
-            mVisible = false;
             super.hide();
-            updateBackgroundVisibility();
+            if (mVisible) {
+                mVisible = false;
+                mAppToken.updateSurfaceViewBackgroundVisibilities();
+            }
         }
 
         @Override
         public void show() {
-            mVisible = true;
             super.show();
-            updateBackgroundVisibility();
+            if (!mVisible) {
+                mVisible = true;
+                mAppToken.updateSurfaceViewBackgroundVisibilities();
+            }
         }
 
         @Override
         public void destroy() {
             super.destroy();
             mBackgroundControl.destroy();
-        }
+            mAppToken.removeSurfaceViewBackground(this);
+         }
 
         @Override
         public void release() {
@@ -866,8 +883,9 @@ class WindowSurfaceController {
             mBackgroundControl.deferTransactionUntil(handle, frame);
         }
 
-        private void updateBackgroundVisibility() {
-            if (mOpaque && mVisible) {
+        void updateBackgroundVisibility(boolean forcedInvisible) {
+            mAppForcedInvisible = forcedInvisible;
+            if (mOpaque && mVisible && !mAppForcedInvisible) {
                 mBackgroundControl.show();
             } else {
                 mBackgroundControl.hide();
