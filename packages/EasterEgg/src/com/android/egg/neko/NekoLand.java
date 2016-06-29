@@ -44,6 +44,7 @@ import android.widget.TextView;
 
 import com.android.egg.R;
 import com.android.egg.neko.PrefState.PrefsListener;
+import com.android.internal.logging.MetricsLogger;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -79,7 +80,8 @@ public class NekoLand extends Activity implements PrefsListener {
         mAdapter = new CatAdapter();
         recyclerView.setAdapter(mAdapter);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
-        updateCats();
+        int numCats = updateCats();
+        MetricsLogger.histogram(this, "egg_neko_visit_gallery", numCats);
     }
 
     @Override
@@ -88,7 +90,7 @@ public class NekoLand extends Activity implements PrefsListener {
         mPrefs.setListener(null);
     }
 
-    private void updateCats() {
+    private int updateCats() {
         Cat[] cats;
         if (CAT_GEN) {
             cats = new Cat[50];
@@ -99,6 +101,7 @@ public class NekoLand extends Activity implements PrefsListener {
             cats = mPrefs.getCats().toArray(new Cat[0]);
         }
         mAdapter.setCats(cats);
+        return cats.length;
     }
 
     private void onCatClick(Cat cat) {
@@ -115,11 +118,12 @@ public class NekoLand extends Activity implements PrefsListener {
     }
 
     private void onCatRemove(Cat cat) {
+        cat.logRemove(this);
         mPrefs.removeCat(cat);
     }
 
     private void showNameDialog(final Cat cat) {
-        Context context = new ContextThemeWrapper(this,
+        final Context context = new ContextThemeWrapper(this,
                 android.R.style.Theme_Material_Light_Dialog_NoActionBar);
         // TODO: Move to XML, add correct margins.
         View view = LayoutInflater.from(context).inflate(R.layout.edit_text, null);
@@ -134,6 +138,7 @@ public class NekoLand extends Activity implements PrefsListener {
                 .setPositiveButton(android.R.string.ok, new OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        MetricsLogger.count(context, "egg_neko_rename_cat", 1);
                         cat.setName(text.getText().toString().trim());
                         mPrefs.addCat(cat);
                     }
@@ -244,6 +249,7 @@ public class NekoLand extends Activity implements PrefsListener {
                 intent.putExtra(Intent.EXTRA_SUBJECT, cat.getName());
                 intent.setType("image/png");
                 startActivity(Intent.createChooser(intent, null));
+                cat.logShare(this);
             } catch (IOException e) {
                 Log.e("NekoLand", "save: error: " + e);
             }
