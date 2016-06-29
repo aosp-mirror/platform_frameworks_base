@@ -17,16 +17,17 @@
 package com.android.server.connectivity;
 
 import android.content.Context;
-import android.net.metrics.DnsEvent;
-import android.net.metrics.IpConnectivityLog;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.net.Network;
 import android.net.NetworkRequest;
+import android.net.metrics.DnsEvent;
 import android.net.metrics.IDnsEventListener;
+import android.net.metrics.IpConnectivityLog;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
 
 import java.io.PrintWriter;
@@ -46,6 +47,7 @@ public class DnsEventListenerService extends IDnsEventListener.Stub {
     private static final boolean DBG = true;
     private static final boolean VDBG = false;
 
+    // TODO: read this constant from system property
     private static final int MAX_LOOKUPS_PER_DNS_EVENT = 100;
 
     // Stores the results of a number of consecutive DNS lookups on the same network.
@@ -97,14 +99,14 @@ public class DnsEventListenerService extends IDnsEventListener.Stub {
     // Only sorted for ease of debugging. Because we only typically have a handful of networks up
     // at any given time, performance is not a concern.
     @GuardedBy("this")
-    private SortedMap<Integer, DnsEventBatch> mEventBatches = new TreeMap<>();
+    private final SortedMap<Integer, DnsEventBatch> mEventBatches = new TreeMap<>();
 
     // We register a NetworkCallback to ensure that when a network disconnects, we flush the DNS
     // queries we've logged on that network. Because we do not do this periodically, we might lose
     // up to MAX_LOOKUPS_PER_DNS_EVENT lookup stats on each network when the system is shutting
     // down. We believe this to be sufficient for now.
     private final ConnectivityManager mCm;
-    private final IpConnectivityLog mMetricsLog = new IpConnectivityLog();
+    private final IpConnectivityLog mMetricsLog;
     private final NetworkCallback mNetworkCallback = new NetworkCallback() {
         @Override
         public void onLost(Network network) {
@@ -118,11 +120,15 @@ public class DnsEventListenerService extends IDnsEventListener.Stub {
     };
 
     public DnsEventListenerService(Context context) {
+        this(context.getSystemService(ConnectivityManager.class), new IpConnectivityLog());
+    }
+
+    @VisibleForTesting
+    public DnsEventListenerService(ConnectivityManager cm, IpConnectivityLog log) {
         // We are started when boot is complete, so ConnectivityService should already be running.
-        final NetworkRequest request = new NetworkRequest.Builder()
-            .clearCapabilities()
-            .build();
-        mCm = context.getSystemService(ConnectivityManager.class);
+        mCm = cm;
+        mMetricsLog = log;
+        final NetworkRequest request = new NetworkRequest.Builder().clearCapabilities().build();
         mCm.registerNetworkCallback(request, mNetworkCallback);
     }
 
