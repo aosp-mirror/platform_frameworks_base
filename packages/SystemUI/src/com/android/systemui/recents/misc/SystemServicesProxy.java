@@ -330,8 +330,9 @@ public class SystemServicesProxy {
             // NOTE: The order of these checks happens in the expected order of the traversal of the
             // tasks
 
-            // Remove the task if it is blacklisted
-            if (sRecentsBlacklist.contains(t.realActivity.getClassName())) {
+            // Remove the task if it or it's package are blacklsited
+            if (sRecentsBlacklist.contains(t.realActivity.getClassName()) ||
+                    sRecentsBlacklist.contains(t.realActivity.getPackageName())) {
                 iter.remove();
                 continue;
             }
