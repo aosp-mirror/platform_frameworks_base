@@ -1656,7 +1656,8 @@
     <string name="demo_starting_message" msgid="5268556852031489931">"正在啟動示範模式..."</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"正在重設裝置..."</string>
     <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"要重設裝置嗎？"</string>
-    <string name="demo_user_inactivity_timeout_countdown" msgid="1743456683091721620">"系統不會儲存您所做的變更，示範模式將於 <xliff:g id="TIMEOUT">%1$s</xliff:g> 秒後重新開始…"</string>
+    <!-- no translation found for demo_user_inactivity_timeout_countdown (5675588824402569506) -->
+    <skip />
     <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"取消"</string>
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"立即重設"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"恢復原廠設定即可正常使用這個裝置"</string>
