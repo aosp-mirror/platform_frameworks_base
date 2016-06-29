@@ -868,8 +868,21 @@ public class UserManagerService extends IUserManager.Stub {
             }
         }
         synchronized (mUsersLock) {
-            UserInfo userInfo =  getUserInfoLU(userId);
+            UserInfo userInfo = getUserInfoLU(userId);
             return userInfo != null && userInfo.isManagedProfile();
+        }
+    }
+
+    @Override
+    public boolean isDemoUser(int userId) {
+        int callingUserId = UserHandle.getCallingUserId();
+        if (callingUserId != userId && !hasManageUsersPermission()) {
+            throw new SecurityException("You need MANAGE_USERS permission to query if u=" + userId
+                    + " is a demo user");
+        }
+        synchronized (mUsersLock) {
+            UserInfo userInfo = getUserInfoLU(userId);
+            return userInfo != null && userInfo.isDemo();
         }
     }
 
