@@ -16,18 +16,15 @@
 
 package android.text;
 
-import static android.text.Layout.Alignment.*;
-
-import android.text.DynamicLayout;
-
 import junit.framework.TestCase;
+
+import static android.text.Layout.Alignment.ALIGN_NORMAL;
 
 /**
  * Tests DynamciLayout updateBlocks method.
  *
  * Requires disabling access checks in the vm since this calls package-private APIs.
  *
- * @Suppress
  */
 public class DynamicLayoutBlocksTest extends TestCase {
     private DynamicLayout dl = new DynamicLayout("", new TextPaint(), 0, ALIGN_NORMAL, 0, 0, false);

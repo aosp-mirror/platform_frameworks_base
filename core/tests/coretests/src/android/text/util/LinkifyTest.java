@@ -16,8 +16,8 @@
 
 package android.text.util;
 
+import android.support.test.filters.SmallTest;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.text.method.LinkMovementMethod;
 import android.widget.TextView;
 

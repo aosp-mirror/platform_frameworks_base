@@ -18,20 +18,20 @@ package android.text;
 
 import com.google.android.collect.Lists;
 
-import android.test.MoreAsserts;
 import android.os.Parcel;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.support.test.filters.LargeTest;
+import android.support.test.filters.SmallTest;
+import android.test.MoreAsserts;
 import android.text.style.StyleSpan;
 import android.text.util.Rfc822Token;
 import android.text.util.Rfc822Tokenizer;
 import android.view.View;
 
+import junit.framework.TestCase;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-
-import junit.framework.TestCase;
 
 /**
  * TextUtilsTest tests {@link TextUtils}.

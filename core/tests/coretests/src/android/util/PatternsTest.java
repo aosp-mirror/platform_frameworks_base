@@ -15,7 +15,7 @@
  */
 package android.util;
 
-import android.test.suitebuilder.annotation.SmallTest;
+import android.support.test.filters.SmallTest;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

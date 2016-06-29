@@ -18,8 +18,8 @@ package android.text.format;
 
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.support.test.filters.SmallTest;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.text.format.Formatter.BytesResult;
 
 import java.util.Locale;

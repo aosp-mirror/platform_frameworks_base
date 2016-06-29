@@ -18,10 +18,11 @@ package android.text;
 
 import android.graphics.Typeface;
 import android.os.Parcel;
-import android.test.suitebuilder.annotation.SmallTest;
-import android.text.*;
-import android.text.style.*;
-import android.util.Log;
+import android.support.test.filters.SmallTest;
+import android.text.style.CharacterStyle;
+import android.text.style.StyleSpan;
+import android.text.style.TextAppearanceSpan;
+import android.text.style.TypefaceSpan;
 
 import junit.framework.TestCase;
 
