@@ -1656,7 +1656,8 @@
     <string name="demo_starting_message" msgid="5268556852031489931">"Demo başlayır…"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"Cihaz sıfırlanır…"</string>
     <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"Cihaz sıfırlansın?"</string>
-    <string name="demo_user_inactivity_timeout_countdown" msgid="1743456683091721620">"Hər hansı dəyişikliyi itirəcəksiniz və demo <xliff:g id="TIMEOUT">%1$s</xliff:g> saniyəyə yenidən başlayacaq…"</string>
+    <!-- no translation found for demo_user_inactivity_timeout_countdown (5675588824402569506) -->
+    <skip />
     <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"Ləğv edin"</string>
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"İndi sıfırlayın"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Bu cihazı məhdudiyyətsiz istifadə etmək üçün zavod sıfırlaması edin"</string>

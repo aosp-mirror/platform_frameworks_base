@@ -1662,7 +1662,8 @@
     <string name="demo_starting_message" msgid="5268556852031489931">"डेमो सुरु गर्दै…"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"यन्त्रलाई रिसेट गर्दै…"</string>
     <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"यन्त्रलाई रिसेट गर्ने हो?"</string>
-    <string name="demo_user_inactivity_timeout_countdown" msgid="1743456683091721620">"तपाईँ सबै परिवर्तनहरू गुमाउनु हुनेछ र <xliff:g id="TIMEOUT">%1$s</xliff:g> सेकेन्डमा डेमो फेरि सुरु हुनेछ…"</string>
+    <!-- no translation found for demo_user_inactivity_timeout_countdown (5675588824402569506) -->
+    <skip />
     <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"रद्द गर्नुहोस्"</string>
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"अहिले रिसेट गर्नुहोस्"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"यस यन्त्रलाई सीमितताहरू बिना प्रयोग गर्नका लागि फ्याक्ट्री रिसेट गर्नुहोस्"</string>

@@ -1800,7 +1800,8 @@
     <string name="demo_starting_message" msgid="5268556852031489931">"جارٍ بدء العرض التوضيحي…"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"جارٍ إعادة تعيين الجهاز…"</string>
     <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"هل تريد إعادة تعيين الجهاز؟"</string>
-    <string name="demo_user_inactivity_timeout_countdown" msgid="1743456683091721620">"ستفقد أي تغييرات وسيبدأ العرض التوضيحي مرة أخرى خلال <xliff:g id="TIMEOUT">%1$s</xliff:g> ثانية…"</string>
+    <!-- no translation found for demo_user_inactivity_timeout_countdown (5675588824402569506) -->
+    <skip />
     <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"إلغاء"</string>
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"إعادة التعيين الآن"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"يمكنك إعادة تعيين بيانات المصنع لاستخدام هذا الجهاز بدون قيود"</string>
