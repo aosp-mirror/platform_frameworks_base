@@ -116,6 +116,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -263,6 +264,8 @@ public class AccountManagerService
     private final LinkedHashMap<String, Session> mSessions = new LinkedHashMap<String, Session>();
     private final AtomicInteger mNotificationIds = new AtomicInteger(1);
 
+    private static final String NEW_ACCOUNT_VISIBLE = "android.accounts.NEW_ACCOUNT_VISIBLE";
+
     static class UserAccounts {
         private final int userId;
         private final DeDatabaseHelper openHelper;
@@ -284,6 +287,21 @@ public class AccountManagerService
 
         /** protected by the {@link #cacheLock} */
         private final TokenCache accountTokenCaches = new TokenCache();
+
+        /** protected by the {@link #cacheLock} */
+        private final Map<String, ArrayList<Integer>> mApplicationAccountRequestMappings =
+                new HashMap<>();
+
+        /* Together the below two Sparse Arrays serve as visible list. One maps UID to account
+        number. Another maps Account number to Account.*/
+
+        /** protected by the {@link #cacheLock} */
+        private final SparseArray<ArrayList<Integer>> mVisibleListUidToMockAccountNumbers =
+                new SparseArray<>();
+
+        //TODO: Instead of using Mock Account IDs, use the actual account IDs.
+        /** protected by the {@link #cacheLock} */
+        private final SparseArray<Account> mMockAccountIdToAccount = new SparseArray<>();
 
         /**
          * protected by the {@link #cacheLock}
@@ -344,6 +362,8 @@ public class AccountManagerService
 
         sThis.set(this);
 
+        addRequestsForPreInstalledApplications();
+
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         intentFilter.addDataScheme("package");
@@ -366,12 +386,50 @@ public class AccountManagerService
                         @Override
                         public void run() {
                             purgeOldGrantsAll();
+
+                            /* clears application request's for account types supported */
+                            int uidOfUninstalledApplication =
+                                    intent.getIntExtra(Intent.EXTRA_UID, -1);
+                            if(uidOfUninstalledApplication != -1) {
+                                clearRequestedAccountVisibility(uidOfUninstalledApplication,
+                                        getUserAccounts(UserHandle.getUserId(
+                                        uidOfUninstalledApplication)));
+                            }
+
+                            /* removes visibility of previous UID of this uninstalled application*/
+                            removeAccountVisibilityAllAccounts(uidOfUninstalledApplication,
+                                        getUserAccounts(UserHandle.getUserId(
+                                        uidOfUninstalledApplication)));
                         }
                     };
                     new Thread(r).start();
                 }
+
             }
         }, intentFilter);
+
+        IntentFilter packageAddedOrChangedFilter = new IntentFilter();
+        intentFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
+        packageAddedOrChangedFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
+        packageAddedOrChangedFilter.addDataScheme("package");
+        mContext.registerReceiverAsUser(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context1, Intent intent) {
+                mMessageHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        int uidOfInstalledApplication =
+                                intent.getIntExtra(Intent.EXTRA_UID, -1);
+                        if(uidOfInstalledApplication != -1) {
+                            registerAccountTypesSupported(
+                                    uidOfInstalledApplication,
+                                    getUserAccounts(
+                                    UserHandle.getUserId(uidOfInstalledApplication)));
+                        }
+                    }
+                });
+            }
+        }, UserHandle.ALL, packageAddedOrChangedFilter, null, null);
 
         IntentFilter userFilter = new IntentFilter();
         userFilter.addAction(Intent.ACTION_USER_REMOVED);
@@ -384,6 +442,475 @@ public class AccountManagerService
                 }
             }
         }, UserHandle.ALL, userFilter, null, null);
+    }
+
+    @Override
+    public boolean addAccountExplicitlyWithUid(Account account, String password, Bundle extras,
+            int[] selectedUids) {
+        if(addAccountExplicitly(account,password,extras)) {
+            for(int thisUid : selectedUids) {
+                makeAccountVisible(account, thisUid);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public int[] getRequestingUidsForType(String accountType) {
+        int callingUid = Binder.getCallingUid();
+        if (!isAccountManagedByCaller(accountType, callingUid, UserHandle.getUserId(callingUid))) {
+            String msg = String.format(
+                    "uid %s cannot get secrets for accounts of type: %s",
+                    callingUid,
+                    accountType);
+            throw new SecurityException(msg);
+        }
+        return getRequestingUidsForType(accountType, getUserAccounts(
+                UserHandle.getUserId(callingUid)));
+    }
+
+    /**
+     * Returns all UIDs for applications that requested the account type. This method
+     * is called indirectly by the Authenticator and AccountManager
+     *
+     * @param accountType authenticator would like to know the requesting apps of
+     * @param ua UserAccount that currently hosts the account and application
+     *
+     * @return ArrayList of all UIDs that support accounts of this
+     * account type that seek approval (to be used to know which accounts for
+     * the authenticator to include in addAccountExplicitly). Null if none.
+     */
+    private int[] getRequestingUidsForType(String accountType, UserAccounts ua) {
+        synchronized(ua.cacheLock) {
+            Map<String, ArrayList<Integer>> userApplicationAccountRequestMappings =
+                    ua.mApplicationAccountRequestMappings;
+            ArrayList<Integer> allUidsForAccountType = userApplicationAccountRequestMappings.get(
+                    accountType);
+            if(allUidsForAccountType == null) {
+                return null;
+            }
+            int[] toReturn = new int[allUidsForAccountType.size()];
+            for(int i = 0 ; i < toReturn.length ; i++) {
+                toReturn[i] = allUidsForAccountType.get(i);
+            }
+            return toReturn;
+        }
+    }
+
+    @Override
+    public boolean isAccountVisible(Account a, int uid) {
+        int callingUid = Binder.getCallingUid();
+        if (!isAccountManagedByCaller(a.type, callingUid, UserHandle.getUserId(callingUid))) {
+            String msg = String.format(
+                    "uid %s cannot get secrets for accounts of type: %s",
+                    callingUid,
+                    a.type);
+            throw new SecurityException(msg);
+        }
+        return isAccountVisible(a, uid, getUserAccounts(UserHandle.getUserId(callingUid)));
+    }
+
+    /**
+     * Checks visibility of certain account of a process identified
+     * by a given UID. This is called by the Authenticator indirectly.
+     *
+     * @param a The account to check visibility of
+     * @param uid UID to check visibility of
+     * @param ua UserAccount that currently hosts the account and application
+     *
+     * @return True if application has access to the account
+     *
+     */
+    private boolean isAccountVisible(Account a, int uid, UserAccounts ua) {
+        int accountMapping = getMockAccountNumber(a, ua);
+        if(accountMapping < 0) {
+            return true;
+        }
+        synchronized(ua.cacheLock) {
+            SparseArray<ArrayList<Integer>> userWlUidToMockAccountNums =
+                    ua.mVisibleListUidToMockAccountNumbers;
+            ArrayList<Integer> linkedAccountsToUid = userWlUidToMockAccountNums.get(uid);
+            return linkedAccountsToUid != null && linkedAccountsToUid.contains(accountMapping);
+        }
+    }
+
+    @Override
+    public boolean makeAccountVisible(Account a, int uid) {
+        int callingUid = Binder.getCallingUid();
+        if (!isAccountManagedByCaller(a.type, callingUid, UserHandle.getUserId(callingUid))) {
+            String msg = String.format(
+                    "uid %s cannot get secrets for accounts of type: %s",
+                    callingUid,
+                    a.type);
+            throw new SecurityException(msg);
+        }
+        return makeAccountVisible(a, uid, getUserAccounts(UserHandle.getUserId(callingUid)));
+    }
+
+    /**
+     * Gives a certain UID, represented a application, access to an account. This method
+     * is called indirectly by the Authenticator.
+     *
+     * @param a Account to make visible
+     * @param uid to add visibility of the Account from
+     * @param ua UserAccount that currently hosts the account and application
+     *
+     * @return True if account made visible to application and was not previously visible.
+     */
+    private boolean makeAccountVisible(Account a, int uid, UserAccounts ua) {
+        int accountMapping = getMockAccountNumber(a, ua);
+        if(accountMapping < 0) {
+            accountMapping = makeAccountNumber(a, ua);
+        }
+
+        synchronized(ua.cacheLock) {
+            SparseArray<ArrayList<Integer>> userWlUidToMockAccountNums =
+                    ua.mVisibleListUidToMockAccountNumbers;
+            ArrayList<Integer> linkedAccountsToUid = userWlUidToMockAccountNums.get(uid);
+            if(linkedAccountsToUid == null) {
+                linkedAccountsToUid = new ArrayList<>();
+                linkedAccountsToUid.add(accountMapping);
+                userWlUidToMockAccountNums.put(uid, linkedAccountsToUid);
+            } else if(!linkedAccountsToUid.contains(accountMapping)) {
+                linkedAccountsToUid.add(accountMapping);
+            } else {
+                return false;
+            }
+        }
+
+        String[] subPackages = mPackageManager.getPackagesForUid(uid);
+        if(subPackages != null) {
+            for(String subPackage : subPackages) {
+                sendNotification(subPackage, a);
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public boolean removeAccountVisibility(Account a, int uid) {
+        int callingUid = Binder.getCallingUid();
+        if (!isAccountManagedByCaller(a.type, callingUid, UserHandle.getUserId(callingUid))) {
+            String msg = String.format(
+                    "uid %s cannot get secrets for accounts of type: %s",
+                    callingUid,
+                    a.type);
+            throw new SecurityException(msg);
+        }
+        return removeAccountVisibility(a, uid, getUserAccounts(UserHandle.getUserId(callingUid)));
+    }
+
+    /**
+     * Removes visibility of certain account of a process identified
+     * by a given UID to an application. This is called directly by the
+     * AccountManager and indirectly by the Authenticator.
+     *
+     * @param a Account to remove visibility from
+     * @param uid UID to remove visibility of the Account from
+     * @param ua UserAccount that hosts the account and application
+     *
+     * @return True if application access to account removed and was previously visible.
+     */
+    private boolean removeAccountVisibility(Account a, int uid, UserAccounts ua) {
+        int accountMapping = getMockAccountNumber(a, ua);
+        if(accountMapping < 0) {
+            return false;
+        }
+        synchronized(ua.cacheLock) {
+            SparseArray<ArrayList<Integer>> userWlUidToMockAccountNums =
+                    ua.mVisibleListUidToMockAccountNumbers;
+            ArrayList<Integer> linkedAccountsToUid = userWlUidToMockAccountNums.get(uid);
+            if(linkedAccountsToUid != null) {
+                boolean toReturn = linkedAccountsToUid.remove((Integer) accountMapping);
+                if(linkedAccountsToUid.size() == 0) {
+                    userWlUidToMockAccountNums.remove(uid);
+                }
+                return toReturn;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Registers an application's preferences for supported account types for login. This is
+     * a helper method of requestAccountVisibility and indirectly called by AccountManager.
+     *
+     * @param accountTypes account types third party app is willing to support
+     * @param uid of application requesting account visibility
+     * @param ua UserAccount that hosts the account and application
+     */
+    private void addRequestedAccountsVisibility(String[] accountTypes, int uid, UserAccounts ua) {
+        synchronized(ua.cacheLock) {
+            Map<String, ArrayList<Integer>> userApplicationAccountRequestMappings =
+                    ua.mApplicationAccountRequestMappings;
+            for(String accountType : accountTypes) {
+                ArrayList<Integer> accountUidAppList = userApplicationAccountRequestMappings
+                        .get(accountType);
+                if(accountUidAppList == null) {
+                    accountUidAppList = new ArrayList<>();
+                    accountUidAppList.add(uid);
+                    userApplicationAccountRequestMappings.put(accountType, accountUidAppList);
+                } else if (!accountUidAppList.contains(uid)) {
+                    accountUidAppList.add(uid);
+                }
+            }
+        }
+    }
+
+    /**
+     * Registers the requested login account types requested by all the applications already
+     * installed on the device.
+     */
+    private void addRequestsForPreInstalledApplications() {
+        List<PackageInfo> allInstalledPackages = mContext.getPackageManager().
+                getInstalledPackages(0);
+        for(PackageInfo pi : allInstalledPackages) {
+            int currentUid = pi.applicationInfo.uid;
+            if(currentUid != -1) {
+                registerAccountTypesSupported(currentUid,
+                        getUserAccounts(UserHandle.getUserId(currentUid)));
+            }
+        }
+    }
+
+    /**
+     * Clears all preferences an application had for login account types it offered
+     * support for. This method is used by AccountManager after application is
+     * uninstalled.
+     *
+     * @param uid Uid of the application to clear account type preferences
+     * @param ua UserAccount that hosted the account and application
+     *
+     * @return true if any previous settings were overridden.
+     */
+    private boolean clearRequestedAccountVisibility(int uid, UserAccounts ua) {
+        boolean accountsDeleted = false;
+        ArrayList<String> accountTypesToRemove = new ArrayList<>();
+        synchronized(ua.cacheLock) {
+            Map<String, ArrayList<Integer>> userApplicationAccountRequestMappings =
+                    ua.mApplicationAccountRequestMappings;
+            Set<Entry<String, ArrayList<Integer>>> accountTypeAppListEntries =
+                    userApplicationAccountRequestMappings.entrySet();
+
+            for(Entry<String, ArrayList<Integer>> entry : accountTypeAppListEntries) {
+                ArrayList<Integer> supportedApps = entry.getValue();
+                if(supportedApps.remove((Integer) uid)) {
+                    accountsDeleted = true;
+                }
+
+                if(supportedApps.isEmpty()) {
+                    accountTypesToRemove.add(entry.getKey());
+                }
+            }
+
+            for(String s : accountTypesToRemove) {
+                userApplicationAccountRequestMappings.remove(s);
+            }
+        }
+
+        return accountsDeleted;
+    }
+
+    /**
+     * Retrieves the mock account number associated with an Account in order to later retrieve
+     * the account from the Integer-Account Mapping. An account number is not the same as
+     * accountId in the database. This method can be indirectly called by AccountManager and
+     * indirectly by the Authenticator.
+     *
+     * @param a account to retrieve account number mapping
+     * @param ua UserAccount that currently hosts the account and application
+     *
+     * @return account number affiliated with the Account in question. Negative number if none.
+     */
+    private int getMockAccountNumber(Account a, UserAccounts ua) {
+    //TODO: Each account is linked to AccountId rather than generated mock account numbers
+        SparseArray<Account> userAcctIdToAcctMap =
+                ua.mMockAccountIdToAccount;
+            synchronized(ua.cacheLock) {
+                int indexOfAccount = userAcctIdToAcctMap.indexOfValueByValue(a);
+                if(indexOfAccount < 0) {
+                    return -1;
+                }
+                return userAcctIdToAcctMap.keyAt(indexOfAccount);
+            }
+    }
+
+    /**
+     * Returns a full list of accounts that a certain UID is allowed access
+     * based on the visible list entries.
+     *
+     * @param uid of application to retrieve visible listed accounts for
+     * @param ua UserAccount that currently hosts the account and application
+     *
+     * @return array of Account values that are accessible by the given uids
+     */
+    private Account[] getVisibleListedAccounts(int uid, UserAccounts ua) {
+        ArrayList<Account> visibleListedAccounts = new ArrayList<>();
+        synchronized(ua.cacheLock) {
+            SparseArray<Account> userAcctIdToAcctMap = ua.mMockAccountIdToAccount;
+            SparseArray<ArrayList<Integer>> userWlUidToMockAccountNums =
+                    ua.mVisibleListUidToMockAccountNumbers;
+            ArrayList<Integer> visibleListedUidAccountNumbers =
+                    userWlUidToMockAccountNums.get(uid);
+            if(visibleListedUidAccountNumbers != null) {
+                for(Integer accountNumber : visibleListedUidAccountNumbers) {
+                    Account currentAccount = userAcctIdToAcctMap.get(accountNumber);
+                    visibleListedAccounts.add(currentAccount);
+                }
+            }
+        }
+        Account[] arrVisibleListedAccounts = new Account[visibleListedAccounts.size()];
+        return visibleListedAccounts.toArray(arrVisibleListedAccounts);
+    }
+
+    /**
+     * Makes an account number for a given Account to be mapped to.
+     * This method is called by makeVisible if an Account does not have
+     * a mapping for the visible list. This method is thus indirectly
+     * called by the Authenticator.
+     *
+     * @param a account to make an account number mapping of
+     * @param ua UserAccount that currently hosts the account and application
+     *
+     * @return account number created to map to the given account
+     */
+    // TODO: Remove this method and use accountId from DB.
+    private int makeAccountNumber(Account a, UserAccounts ua) {
+        synchronized(ua.cacheLock) {
+            SparseArray<Account> userAcctIdToAcctMap = ua.mMockAccountIdToAccount;
+            int newAccountMapping = 0;
+            while(userAcctIdToAcctMap.get(newAccountMapping) != null) {
+                newAccountMapping++;
+            }
+            userAcctIdToAcctMap.put(newAccountMapping, a);
+            return newAccountMapping;
+        }
+    }
+
+
+
+    /**
+     * Registers an application, represented by a UID, to support account types detailed in
+     * the applications manifest as well as allowing it to opt for notifications.
+     *
+     * @param uid UID of application
+     * @param ua UserAccount that currently hosts the account and application
+     */
+    private void registerAccountTypesSupported(int uid, UserAccounts ua) {
+        /* Account types supported are drawn from the Android Manifest of the Application */
+        String interestedPackages = null;
+        try {
+            String[] allPackages = mPackageManager.getPackagesForUid(uid);
+            for(String aPackage : allPackages) {
+                ApplicationInfo ai = mPackageManager.getApplicationInfo(aPackage,
+                        PackageManager.GET_META_DATA);
+                Bundle b = ai.metaData;
+                if(b == null) {
+                    return;
+                }
+                interestedPackages = b.getString("android.accounts.SupportedLoginTypes");
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.d("NameNotFoundException", e.getMessage());
+        }
+        if(interestedPackages != null) {
+            /* request remote account types directly from here. Reads from Android Manifest */
+            requestAccountVisibility(interestedPackages.split(";"), uid, ua);
+        }
+    }
+
+    /**
+     * Allows AccountManager to register account types that an application has login
+     * support for. This method over-writes all of the application's previous settings
+     * for accounts it supported.
+     *
+     * @param accountTypes array of account types application wishes to support
+     * @param uid of application registering requested account types
+     * @param ua UserAccount that hosts the account and application
+     */
+    private void requestAccountVisibility(String[] accountTypes, int uid, UserAccounts ua) {
+        if(accountTypes.length > 0) {
+            clearRequestedAccountVisibility(uid, ua);
+            addRequestedAccountsVisibility(accountTypes, uid, ua);
+        }
+    }
+
+    /**
+     * Removes visibility of all Accounts to this particular UID. This is called when an
+     * application is uninstalled so another application that is installed with the same
+     * UID cannot access Accounts. This is called by AccountManager.
+     *
+     * @param uid of application to remove all Account visibility to
+     * @param ua UserAccount that hosts the current Account
+     */
+    private void removeAccountVisibilityAllAccounts(int uid, UserAccounts ua) {
+        synchronized(ua.cacheLock) {
+            SparseArray<ArrayList<Integer>> userWlUidToMockAccountNums =
+                    ua.mVisibleListUidToMockAccountNumbers;
+            SparseArray<Account> userAcctIdToAcctMap = ua.mMockAccountIdToAccount;
+            ArrayList<Integer> allAccountNumbersList = userWlUidToMockAccountNums.get(uid);
+            if(allAccountNumbersList != null) {
+                Integer[] allAccountNumbers = allAccountNumbersList.toArray(
+                        new Integer[allAccountNumbersList.size()]);
+                for(int accountNum : allAccountNumbers) {
+                    removeAccountVisibility(userAcctIdToAcctMap.get(accountNum), uid, ua);
+                }
+            }
+        }
+    }
+
+    /**
+     * Removes visible list functionality of a certain Account.
+     * This method is currently called by (1) addAccountExplicitly (as opposed to
+     * addAccountExplicitlyWithUid) and (2) removeAccountExplicitly.
+     *
+     * @param a the account to clear the visible list functionality for
+     * @param ua currently UserAccounts profile containing Account
+     *
+     * @return true if account previously had visible list functionality
+     */
+    private boolean removeVisibleListFunctionality(Account a, UserAccounts ua) {
+        int mockAccountNum = getMockAccountNumber(a, ua);
+        if(mockAccountNum < 0) {
+            return false;
+        }
+        synchronized(ua.cacheLock) {
+            SparseArray<ArrayList<Integer>> userWlUidToMockAccountNums =
+                    ua.mVisibleListUidToMockAccountNumbers;
+            SparseArray<Account> userAcctIdToAcctMap = ua.mMockAccountIdToAccount;
+
+            /* Removing mapping from account number to account removes visible list functionality*/
+            userAcctIdToAcctMap.remove(mockAccountNum);
+
+            for(int i = userWlUidToMockAccountNums.size() - 1 ; i >= 0  ; i--) {
+                int uidKey = userWlUidToMockAccountNums.keyAt(i);
+                ArrayList<Integer> allAccountNumbers = userWlUidToMockAccountNums.get(uidKey);
+                if(allAccountNumbers != null) {
+                    allAccountNumbers.remove(mockAccountNum);
+                    if(allAccountNumbers.isEmpty()) {
+                        userWlUidToMockAccountNums.remove(uidKey);
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Sends a direct intent to a package, notifying it of a visible account. This
+     * method is a helper method of makeAccountVisible.
+     *
+     * @param desiredPackage to send Account to
+     * @param visibleAccount to send to package
+     */
+    private void sendNotification(String desiredPackage, Account visibleAccount) {
+        Intent intent = new Intent();
+        intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+        intent.setAction(NEW_ACCOUNT_VISIBLE);
+        intent.setPackage(desiredPackage);
+        intent.putExtra("android.accounts.KEY_ACCOUNT", (Account) visibleAccount);
+        mContext.sendBroadcast(intent);
     }
 
     @Override
@@ -563,7 +1090,7 @@ public class AccountManagerService
                     } else {
                         ArrayList<String> accountNames = accountNamesByType.get(accountType);
                         if (accountNames == null) {
-                            accountNames = new ArrayList<String>();
+                            accountNames = new ArrayList<>();
                             accountNamesByType.put(accountType, accountNames);
                         }
                         accountNames.add(accountName);
@@ -968,6 +1495,9 @@ public class AccountManagerService
     @Override
     public boolean addAccountExplicitly(Account account, String password, Bundle extras) {
         Bundle.setDefusable(extras, true);
+        // clears the visible list functionality for this account because this method allows
+        // default account access to all applications for account.
+
         final int callingUid = Binder.getCallingUid();
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "addAccountExplicitly: " + account
@@ -983,6 +1513,7 @@ public class AccountManagerService
                     account.type);
             throw new SecurityException(msg);
         }
+        removeVisibleListFunctionality(account, getUserAccounts(UserHandle.getUserId(callingUid)));
         /*
          * Child users are not allowed to add accounts. Only the accounts that are
          * shared by the parent profile can be added to child profile.
@@ -1600,6 +2131,7 @@ public class AccountManagerService
                     account.type);
             throw new SecurityException(msg);
         }
+        removeVisibleListFunctionality(account, getUserAccounts(UserHandle.getUserId(callingUid)));
         UserAccounts accounts = getUserAccountsForCaller();
         SQLiteDatabase db = accounts.openHelper.getReadableDatabase();
         final long accountId = getAccountIdLocked(db, account);
@@ -3330,7 +3862,7 @@ public class AccountManagerService
                         null);
             }
             // check whether each account matches the requested features
-            mAccountsWithFeatures = new ArrayList<Account>(mAccountsOfType.length);
+            mAccountsWithFeatures = new ArrayList<>(mAccountsOfType.length);
             mCurrentAccount = 0;
 
             checkAccount();
@@ -3515,7 +4047,6 @@ public class AccountManagerService
             callingUid = packageUid;
             opPackageName = callingPackage;
         }
-
         List<String> visibleAccountTypes = getTypesVisibleToCaller(callingUid, userId,
                 opPackageName);
         if (visibleAccountTypes.isEmpty()
@@ -3666,7 +4197,23 @@ public class AccountManagerService
     @Override
     @NonNull
     public Account[] getAccounts(String type, String opPackageName) {
-        return getAccountsAsUser(type, UserHandle.getCallingUserId(), opPackageName);
+        Account[] accessibleAccounts =
+                getAccountsAsUser(type, UserHandle.getCallingUserId(), opPackageName);
+        /* Up until now, access to accounts is User Specific. With Push API, these accounts
+        can be filtered by application as well. Therefore, in this method specifically,
+        we will additionally add the visible listed accounts tied to the Application
+        specifically through visible listing, as approved by the AccountAuthenticator
+        for a specific application on a device. */
+        ArrayList<Account> allAccounts = new ArrayList<>(Arrays.asList(accessibleAccounts));
+        Account[] visibleListedAccounts = getVisibleListedAccounts(Binder.getCallingUid(),
+                getUserAccounts(UserHandle.getCallingUserId()));
+        for(Account visibleAccount : visibleListedAccounts) {
+            if(!allAccounts.contains(visibleAccount)) {
+                allAccounts.add(visibleAccount);
+            }
+        }
+        Account[] allAccountsArr = new Account[allAccounts.size()];
+        return allAccounts.toArray(allAccountsArr);
     }
 
     @Override
@@ -5374,7 +5921,7 @@ public class AccountManagerService
     private void removeAccountFromCacheLocked(UserAccounts accounts, Account account) {
         final Account[] oldAccountsForType = accounts.accountCache.get(account.type);
         if (oldAccountsForType != null) {
-            ArrayList<Account> newAccountsList = new ArrayList<Account>();
+            ArrayList<Account> newAccountsList = new ArrayList<>();
             for (Account curAccount : oldAccountsForType) {
                 if (!curAccount.equals(account)) {
                     newAccountsList.add(curAccount);
@@ -5416,17 +5963,17 @@ public class AccountManagerService
         UserInfo user = getUserManager().getUserInfo(userAccounts.userId);
         if (user != null && user.isRestricted()) {
             String[] packages = mPackageManager.getPackagesForUid(callingUid);
-            // If any of the packages is a white listed package, return the full set,
+            // If any of the packages is a visible listed package, return the full set,
             // otherwise return non-shared accounts only.
-            // This might be a temporary way to specify a whitelist
-            String whiteList = mContext.getResources().getString(
+            // This might be a temporary way to specify a visible list
+            String visibleList = mContext.getResources().getString(
                     com.android.internal.R.string.config_appsAuthorizedForSharedAccounts);
             for (String packageName : packages) {
-                if (whiteList.contains(";" + packageName + ";")) {
+                if (visibleList.contains(";" + packageName + ";")) {
                     return unfiltered;
                 }
             }
-            ArrayList<Account> allowed = new ArrayList<Account>();
+            ArrayList<Account> allowed = new ArrayList<>();
             Account[] sharedAccounts = getSharedAccountsAsUser(userAccounts.userId);
             if (sharedAccounts == null || sharedAccounts.length == 0) return unfiltered;
             String requiredAccountType = "";
