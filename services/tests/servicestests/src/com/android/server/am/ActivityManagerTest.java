@@ -43,7 +43,7 @@ public class ActivityManagerTest extends AndroidTestCase {
 
     private void testTaskIdsForUser(int userId) throws RemoteException {
         List<ActivityManager.RecentTaskInfo> recentTasks = service.getRecentTasks(
-                100, 0, userId);
+                100, 0, userId).getList();
         if(recentTasks != null) {
             for(ActivityManager.RecentTaskInfo recentTask : recentTasks) {
                 int taskId = recentTask.persistentId;

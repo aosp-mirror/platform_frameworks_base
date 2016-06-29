@@ -1507,7 +1507,7 @@ public class ActivityManager {
             throws SecurityException {
         try {
             return ActivityManagerNative.getDefault().getRecentTasks(maxNum,
-                    flags, UserHandle.myUserId());
+                    flags, UserHandle.myUserId()).getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1532,7 +1532,7 @@ public class ActivityManager {
             throws SecurityException {
         try {
             return ActivityManagerNative.getDefault().getRecentTasks(maxNum,
-                    flags, userId);
+                    flags, userId).getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -9078,7 +9078,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public List<ActivityManager.RecentTaskInfo> getRecentTasks(int maxNum, int flags, int userId) {
+    public ParceledListSlice<ActivityManager.RecentTaskInfo> getRecentTasks(int maxNum, int flags,
+            int userId) {
         final int callingUid = Binder.getCallingUid();
         userId = mUserController.handleIncomingUser(Binder.getCallingPid(), callingUid, userId,
                 false, ALLOW_FULL_ONLY, "getRecentTasks", null);
@@ -9094,7 +9095,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
             if (!isUserRunning(userId, ActivityManager.FLAG_AND_UNLOCKED)) {
                 Slog.i(TAG, "user " + userId + " is still locked. Cannot load recents");
-                return Collections.emptyList();
+                return ParceledListSlice.emptyList();
             }
             mRecentTasks.loadUserRecentsLocked(userId);
 
@@ -9193,7 +9194,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     maxNum--;
                 }
             }
-            return res;
+            return new ParceledListSlice<>(res);
         }
     }
 
