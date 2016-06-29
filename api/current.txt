@@ -48722,11 +48722,14 @@ package java.lang {
   public abstract class Process {
     ctor public Process();
     method public abstract void destroy();
+    method public java.lang.Process destroyForcibly();
     method public abstract int exitValue();
     method public abstract java.io.InputStream getErrorStream();
     method public abstract java.io.InputStream getInputStream();
     method public abstract java.io.OutputStream getOutputStream();
+    method public boolean isAlive();
     method public abstract int waitFor() throws java.lang.InterruptedException;
+    method public boolean waitFor(long, java.util.concurrent.TimeUnit) throws java.lang.InterruptedException;
   }
 
   public final class ProcessBuilder {
