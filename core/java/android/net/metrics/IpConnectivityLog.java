@@ -18,17 +18,28 @@ package android.net.metrics;
 
 import android.net.ConnectivityMetricsEvent;
 import android.net.ConnectivityMetricsLogger;
+import android.net.IConnectivityMetricsLogger;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.util.Log;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 /**
  * Specialization of the ConnectivityMetricsLogger class for recording IP connectivity events.
  * {@hide}
  */
-class IpConnectivityLog extends ConnectivityMetricsLogger {
+public class IpConnectivityLog extends ConnectivityMetricsLogger {
     private static String TAG = "IpConnectivityMetricsLogger";
     private static final boolean DBG = false;
+
+    public IpConnectivityLog() {
+    }
+
+    @VisibleForTesting
+    public IpConnectivityLog(IConnectivityMetricsLogger service) {
+        super(service);
+    }
 
     /**
      * Log an IpConnectivity event. Contrary to logEvent(), this method does not

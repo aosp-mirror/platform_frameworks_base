@@ -16,6 +16,7 @@
 
 package com.android.server.connectivity;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.SystemService;
 
 import android.app.PendingIntent;
@@ -60,17 +61,11 @@ public class MetricsLoggerService extends SystemService {
         }
     }
 
-    // TODO: read from system property
-    private final int MAX_NUMBER_OF_EVENTS = 1000;
-
-    // TODO: read from system property
-    private final int EVENTS_NOTIFICATION_THRESHOLD = 300;
-
-    // TODO: read from system property
-    private final int THROTTLING_TIME_INTERVAL_MILLIS = 60 * 60 * 1000; // 1 hour
-
-    // TODO: read from system property
+    // TODO: read these constants from system property
+    private final int EVENTS_NOTIFICATION_THRESHOLD                   = 300;
+    private final int MAX_NUMBER_OF_EVENTS                            = 1000;
     private final int THROTTLING_MAX_NUMBER_OF_MESSAGES_PER_COMPONENT = 1000;
+    private final long THROTTLING_TIME_INTERVAL_MILLIS                = DateUtils.HOUR_IN_MILLIS;
 
     private int mEventCounter = 0;
 
@@ -127,10 +122,13 @@ public class MetricsLoggerService extends SystemService {
         mEvents.addLast(e);
     }
 
+    @VisibleForTesting
+    final MetricsLoggerImpl mBinder = new MetricsLoggerImpl();
+
     /**
      * Implementation of the IConnectivityMetricsLogger interface.
      */
-    private final IConnectivityMetricsLogger.Stub mBinder = new IConnectivityMetricsLogger.Stub() {
+    final class MetricsLoggerImpl extends IConnectivityMetricsLogger.Stub {
 
         private final ArrayList<PendingIntent> mPendingIntents = new ArrayList<>();
 
@@ -223,7 +221,9 @@ public class MetricsLoggerService extends SystemService {
             }
 
             pw.println();
-            mDnsListener.dump(pw);
+            if (mDnsListener != null) {
+                mDnsListener.dump(pw);
+            }
         }
 
         public long logEvent(ConnectivityMetricsEvent event) {
