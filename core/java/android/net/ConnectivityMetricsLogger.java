@@ -23,6 +23,8 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 /** {@hide} */
 @SystemApi
 public class ConnectivityMetricsLogger {
@@ -49,8 +51,14 @@ public class ConnectivityMetricsLogger {
     private int mNumSkippedEvents;
 
     public ConnectivityMetricsLogger() {
-        mService = IConnectivityMetricsLogger.Stub.asInterface(ServiceManager.getService(
-                CONNECTIVITY_METRICS_LOGGER_SERVICE));
+        this(IConnectivityMetricsLogger.Stub.asInterface(
+                ServiceManager.getService(CONNECTIVITY_METRICS_LOGGER_SERVICE)));
+    }
+
+    /** {@hide} */
+    @VisibleForTesting
+    public ConnectivityMetricsLogger(IConnectivityMetricsLogger service) {
+        mService = service;
     }
 
     /**
@@ -153,11 +161,10 @@ public class ConnectivityMetricsLogger {
     public boolean unregister(PendingIntent newEventsIntent) {
         try {
             mService.unregister(newEventsIntent);
+            return true;
         } catch (RemoteException e) {
             Log.e(TAG, "IConnectivityMetricsLogger.unregister", e);
             return false;
         }
-
-        return true;
     }
 }
