@@ -42,7 +42,7 @@
                 android:popupTheme="?actionBarPopupTheme">
 
                 <com.android.documentsui.DropdownBreadcrumb
-                    android:id="@+id/breadcrumb"
+                    android:id="@+id/dropdown_breadcrumb"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="4dp"

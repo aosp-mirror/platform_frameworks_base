@@ -17,38 +17,32 @@
 package com.android.documentsui.bots;
 
 import static android.support.test.espresso.Espresso.onView;
-import static android.support.test.espresso.matcher.ViewMatchers.isAssignableFrom;
-import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.action.ViewActions.swipeLeft;
 import static android.support.test.espresso.action.ViewActions.swipeRight;
+import static android.support.test.espresso.matcher.ViewMatchers.withId;
 
 import android.content.Context;
-import android.support.test.espresso.UiController;
-import android.support.test.espresso.ViewAction;
 import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObject;
 import android.support.test.uiautomator.UiObjectNotFoundException;
 import android.support.test.uiautomator.UiScrollable;
 import android.support.test.uiautomator.UiSelector;
-import android.support.v4.view.GravityCompat;
 import android.util.Log;
-
 import android.view.View;
-import junit.framework.Assert;
+
+import com.android.documentsui.R;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.hamcrest.Matcher;
-
-import com.android.documentsui.R;
+import junit.framework.Assert;
 
 /**
  * A test helper class that provides support for controlling and asserting against
  * the roots list drawer.
  */
-public class RootsListBot extends BaseBot {
+public class RootsListBot extends Bots.BaseBot {
     private static final String ROOTS_LIST_ID = "com.android.documentsui:id/roots_list";
     private static final String TAG = "RootsListBot";
 

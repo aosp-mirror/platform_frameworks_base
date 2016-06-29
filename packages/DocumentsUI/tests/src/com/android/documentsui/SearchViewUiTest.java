@@ -16,16 +16,13 @@
 
 package com.android.documentsui;
 
-import static android.support.test.espresso.Espresso.onView;
-import static android.support.test.espresso.action.ViewActions.swipeLeft;
-import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static com.android.documentsui.StubProvider.ROOT_0_ID;
 import static com.android.documentsui.StubProvider.ROOT_1_ID;
 
-import android.content.res.Configuration;
+import android.support.test.filters.Suppress;
+import android.support.test.uiautomator.UiObjectNotFoundException;
 import android.support.v7.recyclerview.R;
 import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.Suppress;
 
 @LargeTest
 public class SearchViewUiTest extends ActivityTest<FilesActivity> {
@@ -37,168 +34,150 @@ public class SearchViewUiTest extends ActivityTest<FilesActivity> {
     @Override
     public void setUp() throws Exception {
       super.setUp();
+      initTestFiles();
       // Drawer interferes with a lot of search action; going to try to close any opened ones
       bots.roots.closeDrawer();
+
+      openRoot(ROOT_0_ID);  // Even if this is the default root...it `wait`s for more better tests
+    }
+
+    public void testSearchIconVisible_RootWithSearchSupport() throws Exception {
+        bots.search.assertInputExists(false);
+        bots.search.assertIconVisible(true);
+    }
+
+    public void testSearchIconHidden_RootNoSearchSupport() throws Exception {
+        openRoot(ROOT_1_ID);
+
+        bots.search.assertIconVisible(false);
+        bots.search.assertInputExists(false);
     }
 
     public void testSearchView_ExpandsOnClick() throws Exception {
-        bots.main.openSearchView();
-        bots.main.assertSearchTextFiledAndIcon(true, false);
+        bots.search.clickIcon();
+        device.waitForIdle();
+
+        bots.search.assertInputExists(true);
+        bots.search.assertInputFocused(true);
+
+        // FIXME: Matchers fail the not-present check if we've ever clicked this.
+        // bots.search.assertIconVisible(false);
     }
 
     public void testSearchView_CollapsesOnBack() throws Exception {
-        bots.main.openSearchView();
-
+        bots.search.clickIcon();
         device.pressBack();
 
-        bots.main.assertSearchTextFiledAndIcon(false, true);
+        bots.search.assertIconVisible(true);
+        bots.search.assertInputExists(false);
     }
 
     public void testSearchView_ClearsTextOnBack() throws Exception {
-        String query = "file2";
-        bots.main.openSearchView();
-        bots.main.setSearchQuery(query);
+        bots.search.clickIcon();
+        bots.search.setInputText("file2");
 
         device.pressBack();
 
-        bots.main.assertSearchTextFiledAndIcon(false, true);
+        // Wait for a file in the default directory to be listed.
+        bots.directory.waitForDocument(dirName1);
+
+        bots.search.assertIconVisible(true);
+        bots.search.assertInputExists(false);
+    }
+
+    public void testSearchView_StateAfterSearch() throws Exception {
+        bots.search.clickIcon();
+        bots.search.setInputText("file1");
+        bots.keyboard.pressEnter();
+        device.waitForIdle();
+
+        bots.search.assertInputEquals("file1");
+        bots.search.assertInputFocused(false);
     }
 
     public void testSearch_ResultsFound() throws Exception {
-        initTestFiles();
-        assertDefaultContentOfTestDir0();
-
-        String query = "file1";
-        bots.main.openSearchView();
-        bots.main.setSearchQuery(query);
-        bots.main.assertSearchTextField(true, query);
-
+        bots.search.clickIcon();
+        bots.search.setInputText("file1");
         bots.keyboard.pressEnter();
 
         bots.directory.assertDocumentsCountOnList(true, 2);
         bots.directory.assertDocumentsPresent(fileName1, fileName2);
-
-        bots.main.assertSearchTextField(false, query);
-    }
-
-    public void testSearchDownloads() throws Exception {
-        initTestFiles();
-        bots.roots.openRoot(ROOT_0_ID);
-
-        bots.directory.copyFilesToClipboard(fileName1, fileName2);
-        device.waitForIdle();
-
-        bots.roots.openRoot("Downloads");
-        bots.directory.pasteFilesFromClipboard();
-
-        //TODO: Why do we need to click on Downloads again so this will work?
-        bots.roots.openRoot(ROOT_0_ID);
-        bots.roots.openRoot("Downloads");
-        device.waitForIdle();
-
-        String query = "file12";
-        bots.main.openSearchView();
-        bots.main.setSearchQuery(query);
-
-        bots.keyboard.pressEnter();
-
-        bots.directory.assertDocumentsCountOnList(true, 1);
-        bots.directory.assertDocumentsPresent(fileName2);
-
-        device.pressBack();
-    }
-
-    public void testSearchResultsFound_ClearsOnBack() throws Exception {
-        initTestFiles();
-        assertDefaultContentOfTestDir0();
-
-        String query = fileName1;
-        bots.main.openSearchView();
-        bots.main.setSearchQuery(query);
-
-        bots.keyboard.pressEnter();
-        device.pressBack();
-
-        assertDefaultContentOfTestDir0();
     }
 
     public void testSearch_NoResults() throws Exception {
-        initTestFiles();
-        assertDefaultContentOfTestDir0();
-
-        String query = "chocolate";
-        bots.main.openSearchView();
-        bots.main.setSearchQuery(query);
+        bots.search.clickIcon();
+        bots.search.setInputText("chocolate");
 
         bots.keyboard.pressEnter();
 
         String msg = String.valueOf(context.getString(R.string.no_results));
         bots.directory.assertMessageTextView(String.format(msg, "TEST_ROOT_0"));
-
-        bots.main.assertSearchTextField(false, query);
     }
 
-    public void testSearchNoResults_ClearsOnBack() throws Exception {
-        initTestFiles();
-        assertDefaultContentOfTestDir0();
-
-        String query = "chocolate";
-        bots.main.openSearchView();
-        bots.main.setSearchQuery(query);
+    @Suppress
+    public void testSearchResultsFound_ClearsOnBack() throws Exception {
+        bots.search.clickIcon();
+        bots.search.setInputText(fileName1);
 
         bots.keyboard.pressEnter();
         device.pressBack();
-
         device.waitForIdle();
+
         assertDefaultContentOfTestDir0();
     }
 
+    @Suppress
+    public void testSearchNoResults_ClearsOnBack() throws Exception {
+        bots.search.clickIcon();
+        bots.search.setInputText("chocolate bunny");
 
-    public void testSearchResultsFound_ClearsOnDirectoryChange() throws Exception {
-         // Skipping this test for phones since currently there's no way to open the drawer on
-         // phones after doing a search (it's a back button instead of a hamburger button)
-         if (!bots.main.isTablet()) {
-           return;
-         }
+        bots.keyboard.pressEnter();
+        device.pressBack();
+        device.waitForIdle();
 
-        initTestFiles();
         assertDefaultContentOfTestDir0();
+    }
 
-        String query = fileName1;
-        bots.main.openSearchView();
-        bots.main.setSearchQuery(query);
+    @Suppress
+    public void testSearchResultsFound_ClearsOnDirectoryChange() throws Exception {
+        // Skipping this test for phones since currently there's no way to open the drawer on
+        // phones after doing a search (it's a back button instead of a hamburger button)
+        if (!bots.main.inFixedLayout()) {
+            return;
+        }
+
+        bots.search.clickIcon();
+
+        bots.search.setInputText(fileName1);
 
         bots.keyboard.pressEnter();
 
-        bots.roots.openRoot(ROOT_1_ID);
+        openRoot(ROOT_1_ID);
+        device.waitForIdle();
         assertDefaultContentOfTestDir1();
 
-        bots.roots.openRoot(ROOT_0_ID);
+        openRoot(ROOT_0_ID);
+        device.waitForIdle();
+
         assertDefaultContentOfTestDir0();
     }
 
-    public void testSearchIconVisible_RootWithSearchSupport() throws Exception {
-        bots.roots.openRoot(ROOT_0_ID);
-        bots.main.assertSearchTextFiledAndIcon(false, true);
-    }
-
-    public void testSearchIconHidden_RootNoSearchSupport() throws Exception {
-        bots.roots.openRoot(ROOT_1_ID);
-        bots.main.assertSearchTextFiledAndIcon(false, false);
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        try {
-            // Proper clean up of #testSearchDownloads
-            bots.directory.clickDocument(fileName1 + ".txt");
-            bots.directory.clickDocument(fileName2);
-            device.waitForIdle();
-            bots.main.menuDelete().click();
-            bots.main.clickDialogOkButton();
-        } catch (Exception e) {
-        } finally {
-            super.tearDown();
+    void openRoot(String rootId) throws UiObjectNotFoundException {
+        bots.roots.openRoot(rootId);
+        // Open the named root and wait for a known file in it.
+        // You can find known files by looking in super.initTestFiles();
+        switch(rootId) {
+            case ROOT_0_ID:
+                bots.directory.waitForDocument(fileName1);
+                break;
+            case ROOT_1_ID:
+                bots.directory.waitForDocument(fileName3);
+                break;
+            case "Downloads":
+                device.waitForIdle();
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported root: " + rootId);
         }
     }
 }

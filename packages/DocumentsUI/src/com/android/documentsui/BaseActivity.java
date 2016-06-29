@@ -141,8 +141,12 @@ public abstract class BaseActivity extends Activity
         mSearchManager = new SearchViewManager(this, icicle);
 
         DocumentsToolbar toolbar = (DocumentsToolbar) findViewById(R.id.toolbar);
-        Breadcrumb breadcrumb = (Breadcrumb) findViewById(R.id.breadcrumb);
         setActionBar(toolbar);
+
+        Breadcrumb breadcrumb =
+                Shared.findView(this, R.id.dropdown_breadcrumb, R.id.horizontal_breadcrumb);
+        assert(breadcrumb != null);
+
         mNavigator = new NavigationViewManager(mDrawer, toolbar, mState, this, breadcrumb);
 
         // Base classes must update result in their onCreate.

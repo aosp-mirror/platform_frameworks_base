@@ -33,6 +33,8 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 /** @hide */
 public final class Shared {
 
@@ -220,5 +222,16 @@ public final class Shared {
         if (Looper.getMainLooper() != Looper.myLooper()) {
             Log.e(TAG, "Calling from non-UI thread!");
         }
+    }
+
+    public static @Nullable <T> T findView(Activity activity, int... resources) {
+        for (int id : resources) {
+            @SuppressWarnings("unchecked")
+            T r = (T) activity.findViewById(id);
+            if (r != null) {
+                return r;
+            }
+        }
+        return null;
     }
 }

@@ -20,7 +20,6 @@ import static com.android.documentsui.StubProvider.DEFAULT_AUTHORITY;
 import static com.android.documentsui.StubProvider.ROOT_0_ID;
 import static com.android.documentsui.StubProvider.ROOT_1_ID;
 
-import android.annotation.Nullable;
 import android.app.Activity;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
@@ -32,16 +31,13 @@ import android.support.test.uiautomator.Configurator;
 import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObjectNotFoundException;
 import android.test.ActivityInstrumentationTestCase2;
-import android.util.Log;
 import android.view.MotionEvent;
 
-import com.android.documentsui.BaseActivity;
-import com.android.documentsui.EventListener;
-import com.android.documentsui.bots.DirectoryListBot;
-import com.android.documentsui.bots.KeyboardBot;
-import com.android.documentsui.bots.RootsListBot;
+import com.android.documentsui.bots.Bots;
 import com.android.documentsui.bots.UiBot;
 import com.android.documentsui.model.RootInfo;
+
+import javax.annotation.Nullable;
 
 /**
  * Provides basic test environment for UI tests:
@@ -55,6 +51,7 @@ public abstract class ActivityTest<T extends Activity> extends ActivityInstrumen
 
     // Testing files. For custom ones, override initTestFiles().
     public static final String dirName1 = "Dir1";
+    public static final String childDir1 = "ChildDir1";
     public static final String fileName1 = "file1.log";
     public static final String fileName2 = "file12.png";
     public static final String fileName3 = "anotherFile0.log";
@@ -81,8 +78,7 @@ public abstract class ActivityTest<T extends Activity> extends ActivityInstrumen
      * Override the method if you want to open different root on start.
      * @return Root that will be opened. Return null if you want to open activity's default root.
      */
-    @Nullable
-    protected RootInfo getInitialRoot() {
+    protected @Nullable RootInfo getInitialRoot() {
         return rootDir0;
     }
 
@@ -157,29 +153,16 @@ public abstract class ActivityTest<T extends Activity> extends ActivityInstrumen
     }
 
     void assertDefaultContentOfTestDir0() throws UiObjectNotFoundException {
+        bots.directory.waitForDocument(fileName1);
+        bots.directory.waitForDocument(fileName2);
+        bots.directory.waitForDocument(dirName1);
+        bots.directory.waitForDocument(fileNameNoRename);
         bots.directory.assertDocumentsCount(4);
-        bots.directory.assertDocumentsPresent(fileName1, fileName2, dirName1, fileNameNoRename);
     }
 
     void assertDefaultContentOfTestDir1() throws UiObjectNotFoundException {
+        bots.directory.waitForDocument(fileName3);
+        bots.directory.waitForDocument(fileName4);
         bots.directory.assertDocumentsCount(2);
-        bots.directory.assertDocumentsPresent(fileName3, fileName4);
-    }
-
-    /**
-     * Handy collection of bots for working with Files app.
-     */
-    public static final class Bots {
-        public final UiBot main;
-        public final RootsListBot roots;
-        public final DirectoryListBot directory;
-        public final KeyboardBot keyboard;
-
-        private Bots(UiDevice device, Context context, int timeout) {
-            this.main = new UiBot(device, context, TIMEOUT);
-            this.roots = new RootsListBot(device, context, TIMEOUT);
-            this.directory = new DirectoryListBot(device, context, TIMEOUT);
-            this.keyboard = new KeyboardBot(device, context, TIMEOUT);
-        }
     }
 }

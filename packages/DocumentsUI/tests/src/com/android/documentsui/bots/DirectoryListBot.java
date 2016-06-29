@@ -21,6 +21,8 @@ import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
 import android.content.Context;
+import android.support.test.espresso.Espresso;
+import android.support.test.espresso.matcher.ViewMatchers;
 import android.support.test.uiautomator.By;
 import android.support.test.uiautomator.BySelector;
 import android.support.test.uiautomator.Configurator;
@@ -30,8 +32,11 @@ import android.support.test.uiautomator.UiObject2;
 import android.support.test.uiautomator.UiObjectNotFoundException;
 import android.support.test.uiautomator.UiSelector;
 import android.support.test.uiautomator.Until;
+import android.support.v7.widget.RecyclerView;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+
+import com.android.documentsui.R;
 
 import junit.framework.Assert;
 
@@ -44,7 +49,7 @@ import java.util.regex.Pattern;
  * A test helper class that provides support for controlling directory list
  * and making assertions against the state of it.
  */
-public class DirectoryListBot extends BaseBot {
+public class DirectoryListBot extends Bots.BaseBot {
     private static final String DIR_LIST_ID = "com.android.documentsui:id/dir_list";
 
     private static final BySelector SNACK_DELETE =
@@ -125,6 +130,7 @@ public class DirectoryListBot extends BaseBot {
     }
 
     public UiObject selectDocument(String label) throws UiObjectNotFoundException {
+        waitForDocument(label);
         UiObject doc = findDocument(label);
         doc.longClick();
         return doc;

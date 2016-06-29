@@ -18,20 +18,16 @@ package com.android.documentsui.bots;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
-import static android.support.test.espresso.action.ViewActions.closeSoftKeyboard;
-import static android.support.test.espresso.action.ViewActions.typeText;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
-import static android.support.test.espresso.matcher.ViewMatchers.isAssignableFrom;
-import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
+import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertTrue;
 import static org.hamcrest.CoreMatchers.is;
 
 import android.content.Context;
-import android.content.res.Configuration;
+import android.support.test.espresso.Espresso;
+import android.support.test.espresso.action.ViewActions;
 import android.support.test.espresso.matcher.BoundedMatcher;
 import android.support.test.uiautomator.By;
 import android.support.test.uiautomator.UiDevice;
@@ -39,22 +35,16 @@ import android.support.test.uiautomator.UiObject;
 import android.support.test.uiautomator.UiObject2;
 import android.support.test.uiautomator.UiObjectNotFoundException;
 import android.support.test.uiautomator.UiSelector;
-import android.widget.Spinner;
+import android.util.TypedValue;
 import android.widget.Toolbar;
 
 import com.android.documentsui.R;
-import com.android.documentsui.model.DocumentInfo;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-
-import junit.framework.Assert;
-import junit.framework.AssertionFailedError;
 
 /**
  * A test helper class that provides support for controlling DocumentsUI activities
@@ -62,7 +52,7 @@ import junit.framework.AssertionFailedError;
  * <p>
  * Support for working directly with Roots and Directory view can be found in the respective bots.
  */
-public class UiBot extends BaseBot {
+public class UiBot extends Bots.BaseBot {
 
     public static final String TARGET_PKG = "com.android.documentsui";
 
@@ -75,52 +65,15 @@ public class UiBot extends BaseBot {
                 .check(matches(withToolbarTitle(is(expected))));
     }
 
-    public void assertBreadcrumbTitle(String expected) {
-        if (!isTablet()) {
-            onView(Matchers.BREADCRUMB)
-                    .check(matches(withBreadcrumbTitle(is(expected))));
-        }
-    }
-
     public void assertMenuEnabled(int id, boolean enabled) {
         UiObject2 menu = findMenuWithName(mContext.getString(id));
         assertNotNull(menu);
         assertEquals(enabled, menu.isEnabled());
     }
 
-    public void assertSearchTextField(boolean isFocused, String query)
-            throws UiObjectNotFoundException {
-        UiObject textField = findSearchViewTextField();
-        boolean searchIconVisible = isSearchIconVisible();
-
-        assertFalse(searchIconVisible);
-        assertTrue(textField.exists());
-        assertEquals(isFocused, textField.isFocused());
-        if (query != null) {
-            assertEquals(query, textField.getText());
-        }
-    }
-
-    public void assertSearchTextFiledAndIcon(
-            boolean searchTextFieldExists, boolean searchIconExists) {
-        assertEquals(searchTextFieldExists, findSearchViewTextField().exists());
-        boolean searchIconVisible = isSearchIconVisible();
-        assertEquals(searchIconExists, searchIconVisible);
-    }
-
     public void assertInActionMode(boolean inActionMode) {
         UiObject actionModeBar = findActionModeBar();
         assertEquals(inActionMode, actionModeBar.exists());
-    }
-
-    public void openSearchView() throws UiObjectNotFoundException {
-        UiObject searchView = findSearchView();
-        searchView.click();
-        assertTrue(searchView.exists());
-    }
-
-    public void setSearchQuery(String query) throws UiObjectNotFoundException {
-        onView(Matchers.SEARCH_MENU).perform(typeText(query));
     }
 
     public UiObject openOverflowMenu() throws UiObjectNotFoundException {
@@ -131,12 +84,21 @@ public class UiBot extends BaseBot {
     }
 
     public void setDialogText(String text) throws UiObjectNotFoundException {
-        findDialogEditText().setText(text);
+        onView(Matchers.TEXT_ENTRY)
+                .perform(ViewActions.replaceText(text));
     }
 
-    public boolean isTablet() {
-        return (mContext.getResources().getConfiguration().screenLayout &
-                Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_LARGE;
+    public boolean inFixedLayout() {
+        TypedValue val = new TypedValue();
+        // We alias files_activity to either fixed or drawer layouts based
+        // on screen dimensions. In order to determine which layout
+        // has been selected, we check the resolved value.
+        mContext.getResources().getValue(R.layout.files_activity, val, true);
+        return val.resourceId == R.layout.fixed_layout;
+    }
+
+    public boolean inDrawerLayout() {
+        return !inFixedLayout();
     }
 
     void switchViewMode() {
@@ -146,26 +108,6 @@ public class UiBot extends BaseBot {
         } else {
             menuListMode().click();
         }
-    }
-
-    boolean isSearchIconVisible() {
-        boolean searchIconVisible = true;
-        boolean isTablet = isTablet();
-        try {
-            if (isTablet) {
-                // Tablets use ImageView for its search icon, and has search_button as its res name
-                onView(Matchers.SEARCH_BUTTON)
-                        .check(matches(isDisplayed()));
-            } else {
-                // Phones use ActionMenuItemView for its search icon, and has menu_search as its res
-                // name
-                onView(Matchers.MENU_SEARCH)
-                        .check(matches(isDisplayed()));
-            }
-        } catch (Exception | AssertionFailedError e) {
-            searchIconVisible = false;
-        }
-        return searchIconVisible;
     }
 
     UiObject2 menuGridMode() {
@@ -178,79 +120,33 @@ public class UiBot extends BaseBot {
         return find(By.desc("List view"));
     }
 
-    public UiObject2 menuDelete() {
-        return find(By.res("com.android.documentsui:id/menu_delete"));
+    public void clickToolbarItem(int id) {
+        onView(withId(id)).perform(click());
     }
 
-    public UiObject2 menuShare() {
-        return find(By.res("com.android.documentsui:id/menu_share"));
+    public void clickNewFolder() {
+        onView(Matchers.ACTIONBAR_OVERFLOW).perform(click());
+
+        // Click the item by label, since Espresso doesn't support lookup by id on overflow.
+        onView(withText("New folder")).perform(click());
     }
 
-    public UiObject2 menuRename() {
-        return findMenuWithName(mContext.getString(R.string.menu_rename));
+    public void clickActionbarOverflowItem(String label) {
+        onView(Matchers.ACTIONBAR_OVERFLOW).perform(click());
+        // Click the item by label, since Espresso doesn't support lookup by id on overflow.
+        onView(withText(label)).perform(click());
     }
 
-    public UiObject2 menuNewFolder() {
-        return findMenuWithName(mContext.getString(R.string.menu_create_dir));
-    }
-
-    UiObject findSearchView() {
-        return findObject("com.android.documentsui:id/menu_search");
-    }
-
-    UiObject findSearchViewTextField() {
-        return findObject("com.android.documentsui:id/menu_search", "android:id/search_src_text");
-    }
-
-    UiObject findSearchViewIcon() {
-        return mContext.getResources().getBoolean(R.bool.full_bar_search_view)
-                ? findObject("com.android.documentsui:id/menu_search")
-                : findObject("com.android.documentsui:id/menu_search", "android:id/search_button");
-    }
-
-    public void clickBreadcrumbItem(String label) throws UiObjectNotFoundException {
-        if (isTablet()) {
-            findBreadcrumb(label).click();
-        } else {
-            findMenuWithName(label).click();
-        }
-    }
-
-    public void clickDropdownBreadcrumb() throws UiObjectNotFoundException {
-        assertFalse(isTablet());
-        onView(isAssignableFrom(Spinner.class)).perform(click());
-    }
-
-    public UiObject findBreadcrumb(String label) throws UiObjectNotFoundException {
-        final UiSelector breadcrumbList = new UiSelector().resourceId(
-                "com.android.documentsui:id/breadcrumb");
-
-        // Wait for the first list item to appear
-        new UiObject(breadcrumbList.childSelector(new UiSelector())).waitForExists(mTimeout);
-
-        return mDevice.findObject(breadcrumbList.childSelector(new UiSelector().text(label)));
-    }
-
-    public void assertBreadcrumbItemsPresent(String... labels) throws UiObjectNotFoundException {
-        List<String> absent = new ArrayList<>();
-        for (String label : labels) {
-            // For non-Tablet devices, a dropdown List menu is shown instead
-            if (isTablet() ? !findBreadcrumb(label).exists() : findMenuWithName(label) == null) {
-                absent.add(label);
-            }
-        }
-        if (!absent.isEmpty()) {
-            Assert.fail("Expected documents " + Arrays.asList(labels)
-                    + ", but missing " + absent);
-        }
+    public void clickToolbarOverflowItem(String label) {
+        onView(Matchers.TOOLBAR_OVERFLOW).perform(click());
+        // Click the item by label, since Espresso doesn't support lookup by id on overflow.
+        onView(withText(label)).perform(click());
     }
 
     UiObject findActionModeBar() {
-        return findObject("android:id/action_mode_bar");
-    }
-
-    public UiObject findDialogEditText() {
-        return findObject("android:id/content", "android:id/text1");
+        UiObject bar = findObject("android:id/action_mode_bar");
+        bar.waitForExists(mTimeout);
+        return bar;
     }
 
     public UiObject findDownloadRetryDialog() {
@@ -263,13 +159,15 @@ public class UiBot extends BaseBot {
     public void clickDialogOkButton() {
         // Espresso has flaky results when keyboard shows up, so hiding it for now
         // before trying to click on any dialog button
-        onView(withId(android.R.id.button1)).perform(closeSoftKeyboard(), click());
+        Espresso.closeSoftKeyboard();
+        onView(withId(android.R.id.button1)).perform(click());
     }
 
     public void clickDialogCancelButton() throws UiObjectNotFoundException {
         // Espresso has flaky results when keyboard shows up, so hiding it for now
         // before trying to click on any dialog button
-        onView(withId(android.R.id.button2)).perform(closeSoftKeyboard(), click());
+        Espresso.closeSoftKeyboard();
+        onView(withId(android.R.id.button2)).perform(click());
     }
 
     UiObject findMenuLabelWithName(String label) {
@@ -292,19 +190,15 @@ public class UiBot extends BaseBot {
         return menuItem;
     }
 
+    boolean hasMenuWithName(String label) {
+        return findMenuWithName(label) != null;
+    }
+
     UiObject findMenuMoreOptions() {
         UiSelector selector = new UiSelector().className("android.widget.ImageButton")
                 .descriptionContains("More options");
         // TODO: use the system string ? android.R.string.action_menu_overflow_description
         return mDevice.findObject(selector);
-    }
-
-    public void pressKey(int keyCode) {
-        mDevice.pressKeyCode(keyCode);
-    }
-
-    public void pressKey(int keyCode, int metaState) {
-        mDevice.pressKeyCode(keyCode, metaState);
     }
 
     private static Matcher<Object> withToolbarTitle(
@@ -318,23 +212,6 @@ public class UiBot extends BaseBot {
             @Override
             public void describeTo(Description description) {
                 description.appendText("with toolbar title: ");
-                textMatcher.describeTo(description);
-            }
-        };
-    }
-
-    private static Matcher<Object> withBreadcrumbTitle(
-            final Matcher<CharSequence> textMatcher) {
-        return new BoundedMatcher<Object, Spinner>(Spinner.class) {
-            @Override
-            public boolean matchesSafely(Spinner breadcrumb) {
-                DocumentInfo selectedDoc = (DocumentInfo) breadcrumb.getSelectedItem();
-                return textMatcher.matches(selectedDoc.displayName);
-            }
-
-            @Override
-            public void describeTo(Description description) {
-                description.appendText("with breadcrumb title: ");
                 textMatcher.describeTo(description);
             }
         };
