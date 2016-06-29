@@ -1652,7 +1652,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
     @Override
     public void disableShortcuts(String packageName, List shortcutIds,
-            String disabledMessage, int disabledMessageResId, @UserIdInt int userId) {
+            CharSequence disabledMessage, int disabledMessageResId, @UserIdInt int userId) {
         verifyCaller(packageName, userId);
         Preconditions.checkNotNull(shortcutIds, "shortcutIds must be provided");
 
@@ -1661,9 +1661,12 @@ public class ShortcutService extends IShortcutService.Stub {
 
             ps.ensureImmutableShortcutsNotIncludedWithIds((List<String>) shortcutIds);
 
+            final String disabledMessageString =
+                    (disabledMessage == null) ? null : disabledMessage.toString();
+
             for (int i = shortcutIds.size() - 1; i >= 0; i--) {
                 ps.disableWithId(Preconditions.checkStringNotEmpty((String) shortcutIds.get(i)),
-                        disabledMessage, disabledMessageResId,
+                        disabledMessageString, disabledMessageResId,
                         /* overrideImmutable=*/ false);
             }
 
@@ -1774,7 +1777,7 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     @Override
-    public int getMaxShortcutCountForActivity(String packageName, @UserIdInt int userId)
+    public int getMaxShortcutCountPerActivity(String packageName, @UserIdInt int userId)
             throws RemoteException {
         verifyCaller(packageName, userId);
 
