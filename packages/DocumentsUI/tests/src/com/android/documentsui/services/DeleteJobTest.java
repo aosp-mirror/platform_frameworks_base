@@ -24,9 +24,6 @@ import android.net.Uri;
 import android.provider.DocumentsContract;
 import android.test.suitebuilder.annotation.MediumTest;
 
-import com.android.documentsui.ClipDetails;
-import com.android.documentsui.model.DocumentStack;
-
 import java.util.List;
 
 @MediumTest
@@ -52,13 +49,5 @@ public class DeleteJobTest extends AbstractJobTest<DeleteJob> {
     private final DeleteJob createJob(List<Uri> srcs, Uri srcParent) throws Exception {
         Uri stack = DocumentsContract.buildDocumentUri(AUTHORITY, mSrcRoot.documentId);
         return createJob(OPERATION_DELETE, srcs, srcParent, stack);
-    }
-
-    // TODO: Remove inheritance, as stack is not used for deleting, nor srcParent.
-    @Override
-    DeleteJob createJob(ClipDetails details, DocumentStack stack)
-            throws Exception {
-        return new DeleteJob(
-                mContext, mContext, mJobListener, FileOperations.createJobId(), stack, details);
     }
 }

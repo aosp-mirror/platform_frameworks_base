@@ -27,8 +27,9 @@ import static com.android.documentsui.Shared.DEBUG;
 import static com.android.documentsui.model.DocumentInfo.getCursorLong;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
 import static com.android.documentsui.services.FileOperationService.EXTRA_DIALOG_TYPE;
-import static com.android.documentsui.services.FileOperationService.EXTRA_OPERATION;
+import static com.android.documentsui.services.FileOperationService.EXTRA_OPERATION_TYPE;
 import static com.android.documentsui.services.FileOperationService.EXTRA_SRC_LIST;
+import static com.android.documentsui.services.FileOperationService.OPERATION_COPY;
 
 import android.annotation.StringRes;
 import android.app.Notification;
@@ -50,12 +51,13 @@ import android.text.format.DateUtils;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
-import com.android.documentsui.ClipDetails;
+import com.android.documentsui.UrisSupplier;
 import com.android.documentsui.Metrics;
 import com.android.documentsui.R;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.RootInfo;
+import com.android.documentsui.services.FileOperationService.OpType;
 
 import libcore.io.IoUtils;
 
@@ -85,17 +87,20 @@ class CopyJob extends Job {
 
     /**
      * @see @link {@link Job} constructor for most param descriptions.
-     *
-     * @param details clip details containing source file list
      */
-    CopyJob(Context service, Context appContext, Listener listener,
-            String id, DocumentStack destination, ClipDetails details) {
-        super(service, appContext, listener, id, destination, details);
+    CopyJob(Context service, Listener listener, String id, DocumentStack destination,
+            UrisSupplier srcs) {
+        this(service, listener, id, OPERATION_COPY, destination, srcs);
+    }
 
-        assert(details.getItemCount() > 0);
+    CopyJob(Context service, Listener listener, String id, @OpType int opType,
+            DocumentStack destination, UrisSupplier srcs) {
+        super(service, listener, id, opType, destination, srcs);
+
+        assert(srcs.getItemCount() > 0);
 
         // delay the initialization of it to setUp() because it may be IO extensive.
-        mSrcs = new ArrayList<>(details.getItemCount());
+        mSrcs = new ArrayList<>(srcs.getItemCount());
     }
 
     @Override
@@ -184,7 +189,7 @@ class CopyJob extends Job {
     Notification getWarningNotification() {
         final Intent navigateIntent = buildNavigateIntent(INTENT_TAG_WARNING);
         navigateIntent.putExtra(EXTRA_DIALOG_TYPE, DIALOG_TYPE_CONVERTED);
-        navigateIntent.putExtra(EXTRA_OPERATION, operationType);
+        navigateIntent.putExtra(EXTRA_OPERATION_TYPE, operationType);
 
         navigateIntent.putParcelableArrayListExtra(EXTRA_SRC_LIST, convertedFiles);
 
@@ -257,7 +262,7 @@ class CopyJob extends Job {
     private void buildDocumentList() throws ResourceException {
         try {
             final ContentResolver resolver = appContext.getContentResolver();
-            final Iterable<Uri> uris = details.getDocs(appContext);
+            final Iterable<Uri> uris = srcs.getDocs(appContext);
             for (Uri uri : uris) {
                 DocumentInfo doc = DocumentInfo.fromUri(resolver, uri);
                 if (canCopy(doc, stack.root)) {
@@ -271,7 +276,7 @@ class CopyJob extends Job {
                 }
             }
         } catch(IOException e) {
-            failedFileCount += details.getItemCount();
+            failedFileCount += srcs.getItemCount();
             throw new ResourceException("Failed to open the list of docs to copy.", e);
         }
     }
@@ -659,7 +664,7 @@ class CopyJob extends Job {
                 .append("CopyJob")
                 .append("{")
                 .append("id=" + id)
-                .append(", details=" + details)
+                .append(", docs=" + srcs)
                 .append(", destination=" + stack)
                 .append("}")
                 .toString();

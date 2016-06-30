@@ -16,17 +16,20 @@
 
 package com.android.documentsui.services;
 
+import static com.android.documentsui.services.FileOperationService.OPERATION_COPY;
+
 import static com.google.common.collect.Lists.newArrayList;
 
 import android.net.Uri;
 import android.provider.DocumentsContract.Document;
 import android.test.suitebuilder.annotation.MediumTest;
 
-import com.android.documentsui.ClipDetails;
-import com.android.documentsui.model.DocumentStack;
-
 @MediumTest
 public class CopyJobTest extends AbstractCopyJobTest<CopyJob> {
+
+    public CopyJobTest() {
+        super(OPERATION_COPY);
+    }
 
     public void testCopyFiles() throws Exception {
         runCopyFilesTest();
@@ -73,12 +76,5 @@ public class CopyJobTest extends AbstractCopyJobTest<CopyJob> {
 
     public void testCopyFileWithReadErrors() throws Exception {
         runCopyFileWithReadErrorsTest();
-    }
-
-    @Override
-    CopyJob createJob(ClipDetails details, DocumentStack stack)
-            throws Exception {
-        return new CopyJob(
-                mContext, mContext, mJobListener, FileOperations.createJobId(), stack, details);
     }
 }

@@ -27,14 +27,14 @@ import android.os.RemoteException;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.MediumTest;
 
-import com.android.documentsui.ClipDetails;
+import com.android.documentsui.UrisSupplier;
 import com.android.documentsui.DocumentsProviderHelper;
 import com.android.documentsui.StubProvider;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.RootInfo;
 import com.android.documentsui.services.FileOperationService.OpType;
-import com.android.documentsui.testing.ClipDetailsFactory;
+import com.android.documentsui.testing.DocsProviders;
 
 import java.util.List;
 
@@ -91,10 +91,13 @@ public abstract class AbstractJobTest<T extends Job> extends AndroidTestCase {
         stack.push(DocumentInfo.fromUri(mResolver, destination));
         stack.root = mSrcRoot;
 
-        ClipDetails details = ClipDetailsFactory.createClipDetails(opType, srcParent, srcs);
-        return createJob(details, stack);
+        UrisSupplier urisSupplier = DocsProviders.createDocsProvider(srcs);
+        FileOperation operation = new FileOperation.Builder()
+                .withOpType(opType)
+                .withSrcs(urisSupplier)
+                .withDestination(stack)
+                .withSrcParent(srcParent)
+                .build();
+        return (T) operation.createJob(mContext, mJobListener, FileOperations.createJobId());
     }
-
-    abstract T createJob(ClipDetails details, DocumentStack destination)
-            throws Exception;
 }

@@ -139,7 +139,7 @@ public class FilesActivity extends BaseActivity {
         // Only show it manually for the first time (icicle is null).
         if (icicle == null && dialogType != DIALOG_TYPE_UNKNOWN) {
             final int opType = intent.getIntExtra(
-                    FileOperationService.EXTRA_OPERATION,
+                    FileOperationService.EXTRA_OPERATION_TYPE,
                     FileOperationService.OPERATION_COPY);
             final ArrayList<DocumentInfo> srcList =
                     intent.getParcelableArrayListExtra(FileOperationService.EXTRA_SRC_LIST);

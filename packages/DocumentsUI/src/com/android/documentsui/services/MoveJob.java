@@ -17,17 +17,19 @@
 package com.android.documentsui.services;
 
 import static com.android.documentsui.Shared.DEBUG;
+import static com.android.documentsui.services.FileOperationService.OPERATION_MOVE;
 
 import android.app.Notification;
 import android.app.Notification.Builder;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.net.Uri;
 import android.os.RemoteException;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.util.Log;
 
-import com.android.documentsui.ClipDetails;
+import com.android.documentsui.UrisSupplier;
 import com.android.documentsui.R;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
@@ -39,6 +41,7 @@ final class MoveJob extends CopyJob {
 
     private static final String TAG = "MoveJob";
 
+    Uri mSrcParentUri;
     DocumentInfo mSrcParent;
 
     /**
@@ -47,12 +50,11 @@ final class MoveJob extends CopyJob {
      * a file after it has been copied.
      *
      * @see @link {@link Job} constructor for most param descriptions.
-     *
-     * @param details {@link ClipDetails} that contains list of files to be moved and their parent
      */
-    MoveJob(Context service, Context appContext, Listener listener,
-            String id, DocumentStack destination, ClipDetails details) {
-        super(service, appContext, listener, id, destination, details);
+    MoveJob(Context service, Listener listener,
+            String id, Uri srcParent, DocumentStack destination, UrisSupplier srcs) {
+        super(service, listener, id, OPERATION_MOVE, destination, srcs);
+        mSrcParentUri = srcParent;
     }
 
     @Override
@@ -81,16 +83,21 @@ final class MoveJob extends CopyJob {
     }
 
     @Override
-    public void start() {
+    public boolean setUp() {
         final ContentResolver resolver = appContext.getContentResolver();
         try {
-            mSrcParent = DocumentInfo.fromUri(resolver, details.getSrcParent());
+            mSrcParent = DocumentInfo.fromUri(resolver, mSrcParentUri);
         } catch(FileNotFoundException e) {
             Log.e(TAG, "Failed to create srcParent.", e);
-            failedFileCount += details.getItemCount();
-            return;
+            failedFileCount += srcs.getItemCount();
+            return false;
         }
 
+        return super.setUp();
+    }
+
+    @Override
+    public void start() {
         super.start();
     }
 

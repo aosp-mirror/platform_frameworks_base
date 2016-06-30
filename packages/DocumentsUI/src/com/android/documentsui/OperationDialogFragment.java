@@ -60,7 +60,7 @@ public class OperationDialogFragment extends DialogFragment {
             @OpType int operationType) {
         final Bundle args = new Bundle();
         args.putInt(FileOperationService.EXTRA_DIALOG_TYPE, dialogType);
-        args.putInt(FileOperationService.EXTRA_OPERATION, operationType);
+        args.putInt(FileOperationService.EXTRA_OPERATION_TYPE, operationType);
         args.putParcelableArrayList(FileOperationService.EXTRA_SRC_LIST, failedSrcList);
 
         final FragmentTransaction ft = fm.beginTransaction();
@@ -78,7 +78,7 @@ public class OperationDialogFragment extends DialogFragment {
         final @DialogType int dialogType =
               getArguments().getInt(FileOperationService.EXTRA_DIALOG_TYPE);
         final @OpType int operationType =
-              getArguments().getInt(FileOperationService.EXTRA_OPERATION);
+              getArguments().getInt(FileOperationService.EXTRA_OPERATION_TYPE);
         final ArrayList<DocumentInfo> srcList = getArguments().getParcelableArrayList(
                 FileOperationService.EXTRA_SRC_LIST);
 

@@ -41,6 +41,12 @@ public class TestHandler extends Handler {
         mTimer.fastForwardToNextTask();
     }
 
+    public void dispatchAllMessages() {
+        while (hasScheduledMessage()) {
+            dispatchNextMessage();
+        }
+    }
+
     @Override
     public boolean sendMessageAtTime(Message msg, long uptimeMillis) {
         msg.setTarget(this);

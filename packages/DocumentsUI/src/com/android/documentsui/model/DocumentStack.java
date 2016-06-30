@@ -39,6 +39,24 @@ public class DocumentStack extends LinkedList<DocumentInfo> implements Durable, 
 
     public RootInfo root;
 
+    public DocumentStack() {};
+
+    /**
+     * Makes a new copy, and pushes all docs to the new copy in the same order as they're passed
+     * as parameters, i.e. the last document will be at the top of the stack.
+     *
+     * @param src
+     * @param docs
+     */
+    public DocumentStack(DocumentStack src, DocumentInfo... docs) {
+        super(src);
+        for (DocumentInfo doc : docs) {
+            push(doc);
+        }
+
+        root = src.root;
+    }
+
     public String getTitle() {
         if (size() == 1 && root != null) {
             return root.title;

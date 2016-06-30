@@ -32,6 +32,7 @@ import android.util.Log;
 import com.android.documentsui.dirlist.MultiSelectManager.Selection;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
+import com.android.documentsui.services.FileOperation;
 import com.android.documentsui.services.FileOperationService;
 import com.android.documentsui.services.FileOperationService.OpType;
 import com.android.documentsui.services.FileOperations;
@@ -349,28 +350,35 @@ public final class DocumentClipper implements ClipboardManager.OnPrimaryClipChan
             return;
         }
 
-        ClipDetails details = ClipDetails.createClipDetails(clipData);
+        PersistableBundle bundle = clipData.getDescription().getExtras();
+        @OpType int opType = getOpType(bundle);
+        UrisSupplier uris = UrisSupplier.create(clipData);
 
         if (!canCopy(destination)) {
             callback.onOperationResult(
-                    FileOperations.Callback.STATUS_REJECTED, details.getOpType(), 0);
+                    FileOperations.Callback.STATUS_REJECTED, opType, 0);
             return;
         }
 
-        if (details.getItemCount() == 0) {
+        if (uris.getItemCount() == 0) {
             callback.onOperationResult(
-                    FileOperations.Callback.STATUS_ACCEPTED, details.getOpType(), 0);
+                    FileOperations.Callback.STATUS_ACCEPTED, opType, 0);
             return;
         }
 
-        DocumentStack dstStack = new DocumentStack();
-        dstStack.push(destination);
-        dstStack.addAll(docStack);
+        DocumentStack dstStack = new DocumentStack(docStack, destination);
 
-        // Pass root here so that we can perform "download" root check when
-        dstStack.root = docStack.root;
+        String srcParentString = bundle.getString(SRC_PARENT_KEY);
+        Uri srcParent = srcParentString == null ? null : Uri.parse(srcParentString);
 
-        FileOperations.start(mContext, details, dstStack, callback);
+        FileOperation operation = new FileOperation.Builder()
+                .withOpType(opType)
+                .withSrcParent(srcParent)
+                .withDestination(dstStack)
+                .withSrcs(uris)
+                .build();
+
+        FileOperations.start(mContext, operation, callback);
     }
 
     /**
@@ -399,8 +407,24 @@ public final class DocumentClipper implements ClipboardManager.OnPrimaryClipChan
         }
 
         ClipDescription description = data.getDescription();
+        if (description == null) {
+            return ClipStorage.NO_SELECTION_TAG;
+        }
+
         BaseBundle bundle = description.getExtras();
+        if (bundle == null) {
+            return ClipStorage.NO_SELECTION_TAG;
+        }
+
         return bundle.getLong(OP_JUMBO_SELECTION_TAG, ClipStorage.NO_SELECTION_TAG);
     }
 
+    public static @OpType int getOpType(ClipData data) {
+        PersistableBundle bundle = data.getDescription().getExtras();
+        return getOpType(bundle);
+    }
+
+    private static @OpType int getOpType(PersistableBundle bundle) {
+        return bundle.getInt(OP_TYPE_KEY);
+    }
 }

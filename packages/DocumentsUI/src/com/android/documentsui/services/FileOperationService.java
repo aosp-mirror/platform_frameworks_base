@@ -25,14 +25,8 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
-import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
-
-import com.android.documentsui.ClipDetails;
-import com.android.documentsui.Shared;
-import com.android.documentsui.model.DocumentStack;
-import com.android.documentsui.services.Job.Factory;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -55,13 +49,17 @@ public class FileOperationService extends Service implements Job.Listener {
 
     public static final String TAG = "FileOperationService";
 
+    // Extra used for OperationDialogFragment, Notifications and picking copy destination.
+    public static final String EXTRA_OPERATION_TYPE = "com.android.documentsui.OPERATION_TYPE";
+
+    // Extras used for OperationDialogFragment...
+    public static final String EXTRA_DIALOG_TYPE = "com.android.documentsui.DIALOG_TYPE";
+    public static final String EXTRA_SRC_LIST = "com.android.documentsui.SRC_LIST";
+
+    // Extras used to start or cancel a file operation...
     public static final String EXTRA_JOB_ID = "com.android.documentsui.JOB_ID";
     public static final String EXTRA_OPERATION = "com.android.documentsui.OPERATION";
     public static final String EXTRA_CANCEL = "com.android.documentsui.CANCEL";
-    public static final String EXTRA_CLIP_DETAILS = "com.android.documentsui.SRC_CLIP_DETAIL";
-    public static final String EXTRA_DIALOG_TYPE = "com.android.documentsui.DIALOG_TYPE";
-
-    public static final String EXTRA_SRC_LIST = "com.android.documentsui.SRC_LIST";
 
     @IntDef(flag = true, value = {
             OPERATION_UNKNOWN,
@@ -86,7 +84,6 @@ public class FileOperationService extends Service implements Job.Listener {
 
     // Use a separate thread pool to prioritize deletions.
     @VisibleForTesting ExecutorService deletionExecutor;
-    @VisibleForTesting Factory jobFactory;
 
     // Use a handler to schedule monitor tasks.
     @VisibleForTesting Handler handler;
@@ -109,10 +106,6 @@ public class FileOperationService extends Service implements Job.Listener {
 
         if (deletionExecutor == null) {
             deletionExecutor = Executors.newCachedThreadPool();
-        }
-
-        if (jobFactory == null) {
-            jobFactory = Job.Factory.instance;
         }
 
         if (handler == null) {
@@ -159,9 +152,8 @@ public class FileOperationService extends Service implements Job.Listener {
         if (intent.hasExtra(EXTRA_CANCEL)) {
             handleCancel(intent);
         } else {
-            ClipDetails details = intent.getParcelableExtra(EXTRA_CLIP_DETAILS);
-            assert(details.getOpType() != OPERATION_UNKNOWN);
-            handleOperation(intent, jobId, details);
+            FileOperation operation = intent.getParcelableExtra(EXTRA_OPERATION);
+            handleOperation(jobId, operation);
         }
 
         // Track the service supplied id so we can stop the service once we're out of work to do.
@@ -170,15 +162,19 @@ public class FileOperationService extends Service implements Job.Listener {
         return START_NOT_STICKY;
     }
 
-    private void handleOperation(Intent intent, String jobId, ClipDetails details) {
+    private void handleOperation(String jobId, FileOperation operation) {
         synchronized (mRunning) {
             if (mWakeLock == null) {
                 mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
             }
 
-            DocumentStack stack = intent.getParcelableExtra(Shared.EXTRA_STACK);
+            if (mRunning.containsKey(jobId)) {
+                Log.w(TAG, "Duplicate job id: " + jobId
+                        + ". Ignoring job request for operation: " + operation + ".");
+                return;
+            }
 
-            Job job = createJob(jobId, details, stack);
+            Job job = operation.createJob(this, this, jobId);
 
             if (job == null) {
                 return;
@@ -188,7 +184,7 @@ public class FileOperationService extends Service implements Job.Listener {
 
             assert (job != null);
             if (DEBUG) Log.d(TAG, "Scheduling job " + job.id + ".");
-            Future<?> future = getExecutorService(details.getOpType()).submit(job);
+            Future<?> future = getExecutorService(operation.getOpType()).submit(job);
             mRunning.put(jobId, new JobRecord(job, future));
         }
     }
@@ -224,37 +220,6 @@ public class FileOperationService extends Service implements Job.Listener {
         mNotificationManager.cancel(jobId, NOTIFICATION_ID_PROGRESS);
 
         // TODO: Guarantee the job is being finalized
-    }
-
-    /**
-     * Creates a new job. Returns null if a job with {@code id} already exists.
-     * @return
-     */
-    @GuardedBy("mRunning")
-    private @Nullable Job createJob(
-            String id, ClipDetails details, DocumentStack stack) {
-
-        assert(details.getItemCount() > 0);
-
-        if (mRunning.containsKey(id)) {
-            Log.w(TAG, "Duplicate job id: " + id
-                    + ". Ignoring job request for details: " + details + ", stack: " + stack + ".");
-            return null;
-        }
-
-        switch (details.getOpType()) {
-            case OPERATION_COPY:
-                return jobFactory.createCopy(
-                        this, getApplicationContext(), this, id, stack, details);
-            case OPERATION_MOVE:
-                return jobFactory.createMove(
-                        this, getApplicationContext(), this, id, stack, details);
-            case OPERATION_DELETE:
-                return jobFactory.createDelete(
-                        this, getApplicationContext(), this, id, stack, details);
-            default:
-                throw new UnsupportedOperationException();
-        }
     }
 
     private ExecutorService getExecutorService(@OpType int operationType) {
