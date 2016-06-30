@@ -83,12 +83,9 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     protected MultiUserSwitch mMultiUserSwitch;
     private ImageView mMultiUserAvatar;
 
-    private float mDateScaleFactor;
-    protected float mGearTranslation;
 
     private TouchAnimator mSecondHalfAnimator;
     private TouchAnimator mFirstHalfAnimator;
-    private TouchAnimator mDateSizeAnimator;
     protected TouchAnimator mSettingsAlpha;
     private float mExpansionAmount;
     private QSTileHost mHost;
@@ -155,41 +152,23 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         FontSizeUtils.updateFontSize(mAlarmStatus, R.dimen.qs_date_collapsed_size);
         FontSizeUtils.updateFontSize(mEmergencyOnly, R.dimen.qs_emergency_calls_only_text_size);
 
-        mGearTranslation = mContext.getResources().getDimension(R.dimen.qs_header_gear_translation);
-
-        float dateCollapsedSize = mContext.getResources().getDimension(
-                R.dimen.qs_date_collapsed_text_size);
-        float dateExpandedSize = mContext.getResources().getDimension(
-                R.dimen.qs_date_text_size);
-        mDateScaleFactor = dateExpandedSize / dateCollapsedSize;
-
         mSecondHalfAnimator = new TouchAnimator.Builder()
                 .addFloat(mShowFullAlarm ? mAlarmStatus : findViewById(R.id.date), "alpha", 0, 1)
                 .addFloat(mEmergencyOnly, "alpha", 0, 1)
-                .setStartDelay(.5f)
                 .build();
         if (mShowFullAlarm) {
             mFirstHalfAnimator = new TouchAnimator.Builder()
                     .addFloat(mAlarmStatusCollapsed, "alpha", 1, 0)
-                    .setEndDelay(.5f)
                     .build();
         }
-        mDateSizeAnimator = new TouchAnimator.Builder()
-                .addFloat(mDateTimeGroup, "scaleX", 1, mDateScaleFactor)
-                .addFloat(mDateTimeGroup, "scaleY", 1, mDateScaleFactor)
-                .setStartDelay(.36f)
-                .build();
 
         updateSettingsAnimator();
     }
 
     protected void updateSettingsAnimator() {
         mSettingsAlpha = new TouchAnimator.Builder()
-                .addFloat(mEdit, "translationY", -mGearTranslation, 0)
-                .addFloat(mMultiUserSwitch, "translationY", -mGearTranslation, 0)
                 .addFloat(mEdit, "alpha", 0, 1)
                 .addFloat(mMultiUserSwitch, "alpha", 0, 1)
-                .setStartDelay(QSAnimator.EXPANDED_TILE_DELAY)
                 .build();
 
         final boolean isRtl = isLayoutRtl();
@@ -248,7 +227,6 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         if (mShowFullAlarm) {
             mFirstHalfAnimator.setPosition(headerExpansionFraction);
         }
-        mDateSizeAnimator.setPosition(headerExpansionFraction);
         mSettingsAlpha.setPosition(headerExpansionFraction);
 
         updateAlarmVisibilities();
