@@ -918,12 +918,6 @@ public class IpManager extends StateMachine {
             mDhcpClient = DhcpClient.makeDhcpClient(mContext, IpManager.this, mInterfaceName);
             mDhcpClient.registerForPreDhcpNotification();
             mDhcpClient.sendMessage(DhcpClient.CMD_START_DHCP);
-
-            if (mConfiguration.mProvisioningTimeoutMs > 0) {
-                final long alarmTime = SystemClock.elapsedRealtime() +
-                        mConfiguration.mProvisioningTimeoutMs;
-                mProvisioningTimeoutAlarm.schedule(alarmTime);
-            }
         }
 
         return true;
@@ -1043,9 +1037,22 @@ public class IpManager extends StateMachine {
                 mCallback.setFallbackMulticastFilter(mMulticastFiltering);
             }
 
+            if (mConfiguration.mProvisioningTimeoutMs > 0) {
+                final long alarmTime = SystemClock.elapsedRealtime() +
+                        mConfiguration.mProvisioningTimeoutMs;
+                mProvisioningTimeoutAlarm.schedule(alarmTime);
+            }
+
             if (mConfiguration.mEnableIPv6) {
                 // TODO: Consider transitionTo(mStoppingState) if this fails.
                 startIPv6();
+            }
+
+            if (mConfiguration.mEnableIPv4) {
+                if (!startIPv4()) {
+                    transitionTo(mStoppingState);
+                    return;
+                }
             }
 
             if (mConfiguration.mUsingIpReachabilityMonitor) {
@@ -1058,12 +1065,6 @@ public class IpManager extends StateMachine {
                                 mCallback.onReachabilityLost(logMsg);
                             }
                         });
-            }
-
-            if (mConfiguration.mEnableIPv4) {
-                if (!startIPv4()) {
-                    transitionTo(mStoppingState);
-                }
             }
         }
 
