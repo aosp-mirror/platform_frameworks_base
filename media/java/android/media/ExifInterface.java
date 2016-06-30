@@ -365,6 +365,7 @@ public class ExifInterface {
     private static final String TAG_THUMBNAIL_OFFSET = "ThumbnailOffset";
     private static final String TAG_THUMBNAIL_LENGTH = "ThumbnailLength";
     private static final String TAG_THUMBNAIL_DATA = "ThumbnailData";
+    private static final int MAX_THUMBNAIL_SIZE = 512;
 
     // Constants used for the Orientation Exif tag.
     public static final int ORIENTATION_UNDEFINED = 0;
@@ -1043,10 +1044,11 @@ public class ExifInterface {
     private static final int IFD_GPS_HINT = 2;
     private static final int IFD_INTEROPERABILITY_HINT = 3;
     private static final int IFD_THUMBNAIL_HINT = 4;
+    private static final int IFD_PREVIEW_HINT = 5;
     // List of Exif tag groups
     private static final ExifTag[][] EXIF_TAGS = new ExifTag[][] {
             IFD_TIFF_TAGS, IFD_EXIF_TAGS, IFD_GPS_TAGS, IFD_INTEROPERABILITY_TAGS,
-            IFD_THUMBNAIL_TAGS
+            IFD_THUMBNAIL_TAGS, IFD_TIFF_TAGS
     };
     // List of tags for pointing to the other image file directory offset.
     private static final ExifTag[] IFD_POINTER_TAGS = new ExifTag[] {
@@ -2038,7 +2040,19 @@ public class ExifInterface {
         parseTiffHeaders(dataInputStream, exifBytes.length);
 
         // Read TIFF image file directories. See JEITA CP-3451C Section 4.5.2. Figure 6.
-        readImageFileDirectory(dataInputStream, IFD_THUMBNAIL_HINT);
+        readImageFileDirectory(dataInputStream, IFD_PREVIEW_HINT);
+
+        // Check if the preview image data should be a thumbnail image data.
+        // In a RAW file, there may be a Preview image, which is smaller than a Primary image but
+        // larger than a Thumbnail image. Normally, the Preview image can be considered a thumbnail
+        // image if its size meets the requirements. Therefore, when a Thumbnail image has not yet
+        // been found, we should check if the Preview image can be one.
+        if (!mAttributes[IFD_PREVIEW_HINT].isEmpty() && mAttributes[IFD_THUMBNAIL_HINT].isEmpty()) {
+            if (isThumbnail(mAttributes[IFD_PREVIEW_HINT])) {
+                mAttributes[IFD_THUMBNAIL_HINT] = mAttributes[IFD_PREVIEW_HINT];
+                mAttributes[IFD_PREVIEW_HINT] = new HashMap();
+            }
+        }
 
         // Process thumbnail.
         processThumbnail(dataInputStream, bytesRead, exifBytes.length);
@@ -2452,6 +2466,22 @@ public class ExifInterface {
         }
     }
 
+    // Returns true if the image length and width values are <= 512.
+    // See Section 4.8 of http://standardsproposals.bsigroup.com/Home/getPDF/567
+    private boolean isThumbnail(HashMap map) throws IOException {
+        ExifAttribute imageLengthAttribute = (ExifAttribute) map.get(TAG_IMAGE_LENGTH);
+        ExifAttribute imageWidthAttribute = (ExifAttribute) map.get(TAG_IMAGE_WIDTH);
+
+        if (imageLengthAttribute != null && imageWidthAttribute != null) {
+            int imageLengthValue = imageLengthAttribute.getIntValue(mExifByteOrder);
+            int imageWidthValue = imageWidthAttribute.getIntValue(mExifByteOrder);
+            if (imageLengthValue <= MAX_THUMBNAIL_SIZE && imageWidthValue <= MAX_THUMBNAIL_SIZE) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Raw images often store extra pixels around the edges of the final image, which results in
      * larger values for TAG_IMAGE_WIDTH and TAG_IMAGE_LENGTH tags.
@@ -2734,7 +2764,7 @@ public class ExifInterface {
                     long numerator = Long.parseLong(rationalNumber[0]);
                     long denominator = Long.parseLong(rationalNumber[1]);
                     if (numerator < 0L || denominator < 0L) {
-                        return new Pair<>(IFD_FORMAT_SRATIONAL, - 1);
+                        return new Pair<>(IFD_FORMAT_SRATIONAL, -1);
                     }
                     if (numerator > Integer.MAX_VALUE || denominator > Integer.MAX_VALUE) {
                         return new Pair<>(IFD_FORMAT_URATIONAL, -1);
