@@ -25,6 +25,7 @@ import android.database.MatrixCursor;
 import android.database.MatrixCursor.RowBuilder;
 import android.graphics.Point;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Environment;
@@ -86,6 +87,7 @@ public class ExternalStorageProvider extends DocumentsProvider {
 
     private static class RootInfo {
         public String rootId;
+        public String volumeId;
         public int flags;
         public String title;
         public String docId;
@@ -182,6 +184,7 @@ public class ExternalStorageProvider extends DocumentsProvider {
             mRoots.put(rootId, root);
 
             root.rootId = rootId;
+            root.volumeId = volume.id;
             root.flags = Root.FLAG_LOCAL_ONLY
                     | Root.FLAG_SUPPORTS_SEARCH | Root.FLAG_SUPPORTS_IS_CHILD;
 
@@ -191,6 +194,10 @@ public class ExternalStorageProvider extends DocumentsProvider {
                 root.flags |= Root.FLAG_REMOVABLE_SD;
             } else if (disk != null && disk.isUsb()) {
                 root.flags |= Root.FLAG_REMOVABLE_USB;
+            }
+
+            if (!VolumeInfo.ID_EMULATED_INTERNAL.equals(volume.getId())) {
+                root.flags |= Root.FLAG_SUPPORTS_EJECT;
             }
 
             if (volume.isPrimary()) {
@@ -581,6 +588,24 @@ public class ExternalStorageProvider extends DocumentsProvider {
             }
         }
         return result;
+    }
+
+    @Override
+    public boolean ejectRoot(String rootId) {
+        final long token = Binder.clearCallingIdentity();
+        boolean ejected = false;
+        RootInfo root = mRoots.get(rootId);
+        if (root != null) {
+            try {
+                mStorageManager.unmount(root.volumeId);
+                ejected = true;
+            } catch (RuntimeException e) {
+                Log.w(TAG, "Root '" + root.title + "' could not be ejected");
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+        return ejected;
     }
 
     @Override
