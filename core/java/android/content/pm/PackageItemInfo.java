@@ -23,9 +23,6 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.text.TextUtils;
 import android.util.Printer;
-import android.text.BidiFormatter;
-import android.text.TextPaint;
-import android.text.Html;
 import java.text.Collator;
 import java.util.Comparator;
 
@@ -133,60 +130,6 @@ public class PackageItemInfo {
         return packageName;
     }
  
-    /**
-     * Same as {@link #loadLabel(PackageManager)} with the addition that
-     * the returned label is safe for being presented in the UI since it
-     * will not contain new lines and the length will be limited to a
-     * reasonable amount. This prevents a malicious party to influence UI
-     * layout via the app label misleading the user into performing a
-     * detrimental for them action. If the label is too long it will be
-     * truncated and ellipsized at the end.
-     *
-     * @param pm A PackageManager from which the label can be loaded; usually
-     * the PackageManager from which you originally retrieved this item
-     * @return Returns a CharSequence containing the item's label. If the
-     * item does not have a label, its name is returned.
-     *
-     * @hide
-     */
-    public CharSequence loadSafeLabel(PackageManager pm) {
-        // loadLabel() always returns non-null
-        String label = loadLabel(pm).toString();
-        // strip HTML tags to avoid <br> and other tags overwriting original message
-        String labelStr = Html.fromHtml(label).toString();
-
-        // If the label contains new line characters it may push the UI
-        // down to hide a part of it. Labels shouldn't have new line
-        // characters, so just truncate at the first time one is seen.
-        final int labelLength = labelStr.length();
-        int offset = 0;
-        while (offset < labelLength) {
-            final int codePoint = labelStr.codePointAt(offset);
-            final int type = Character.getType(codePoint);
-            if (type == Character.LINE_SEPARATOR
-                    || type == Character.CONTROL
-                    || type == Character.PARAGRAPH_SEPARATOR) {
-                labelStr = labelStr.substring(0, offset);
-                break;
-            }
-            // replace all non-break space to " " in order to be trimmed
-            if (type == Character.SPACE_SEPARATOR) {
-                labelStr = labelStr.substring(0, offset) + " " + labelStr.substring(offset +
-                        Character.charCount(codePoint));
-            }
-            offset += Character.charCount(codePoint);
-        }
-
-        labelStr = labelStr.trim();
-        if (labelStr.isEmpty()) {
-            return packageName;
-        }
-        TextPaint paint = new TextPaint();
-        paint.setTextSize(42);
-
-        return TextUtils.ellipsize(labelStr, paint, MAX_LABEL_SIZE_PX,
-                TextUtils.TruncateAt.END);
-    }   
     /**
      * Retrieve the current graphical icon associated with this item.  This
      * will call back on the given PackageManager to load the icon from
