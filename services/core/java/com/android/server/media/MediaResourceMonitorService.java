@@ -24,6 +24,7 @@ import android.media.IMediaResourceMonitor;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.Log;
 import android.util.Slog;
 import com.android.server.SystemService;
@@ -59,12 +60,20 @@ public class MediaResourceMonitorService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 String pkgNames[] = getPackageNamesFromPid(pid);
-                if (pkgNames != null) {
-                    Intent intent = new Intent(Intent.ACTION_MEDIA_RESOURCE_GRANTED);
-                    intent.putExtra(Intent.EXTRA_PACKAGES, pkgNames);
-                    intent.putExtra(Intent.EXTRA_MEDIA_RESOURCE_TYPE, type);
-                    getContext().sendBroadcastAsUser(intent,
-                            new UserHandle(ActivityManager.getCurrentUser()),
+                if (pkgNames == null) {
+                    return;
+                }
+                UserManager manager = (UserManager) getContext().getSystemService(
+                        Context.USER_SERVICE);
+                int[] userIds = manager.getEnabledProfileIds(ActivityManager.getCurrentUser());
+                if (userIds == null || userIds.length == 0) {
+                    return;
+                }
+                Intent intent = new Intent(Intent.ACTION_MEDIA_RESOURCE_GRANTED);
+                intent.putExtra(Intent.EXTRA_PACKAGES, pkgNames);
+                intent.putExtra(Intent.EXTRA_MEDIA_RESOURCE_TYPE, type);
+                for (int userId : userIds) {
+                    getContext().sendBroadcastAsUser(intent, UserHandle.of(userId),
                             android.Manifest.permission.RECEIVE_MEDIA_RESOURCE_USAGE);
                 }
             } finally {
