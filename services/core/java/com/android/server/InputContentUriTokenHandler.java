@@ -45,48 +45,40 @@ final class InputContentUriTokenHandler extends IInputContentUriToken.Stub {
     @GuardedBy("mLock")
     private IBinder mPermissionOwnerToken = null;
 
-    InputContentUriTokenHandler(@NonNull Uri contentUri, int sourceUid,
+    static InputContentUriTokenHandler create(@NonNull Uri contentUri, int sourceUid,
             @NonNull String targetPackage, @UserIdInt int sourceUserId,
             @UserIdInt int targetUserId) {
+        final IBinder permissionOwner;
+        try {
+            permissionOwner = ActivityManagerNative.getDefault()
+                    .newUriPermissionOwner("InputContentUriTokenHandler");
+        } catch (RemoteException e) {
+            return null;
+        }
+
+        long origId = Binder.clearCallingIdentity();
+        try {
+            ActivityManagerNative.getDefault().grantUriPermissionFromOwner(
+                    permissionOwner, sourceUserId, targetPackage, contentUri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION, sourceUserId, targetUserId);
+        } catch (RemoteException e) {
+            return null;
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+        return new InputContentUriTokenHandler(contentUri, sourceUid, targetPackage, sourceUserId,
+                targetUserId, permissionOwner);
+    }
+
+    private InputContentUriTokenHandler(@NonNull Uri contentUri, int sourceUid,
+            @NonNull String targetPackage, @UserIdInt int sourceUserId,
+            @UserIdInt int targetUserId, @NonNull IBinder permissionOwnerToken) {
         mUri = contentUri;
         mSourceUid = sourceUid;
         mTargetPackage = targetPackage;
         mSourceUserId = sourceUserId;
         mTargetUserId = targetUserId;
-    }
-
-    @Override
-    public void take() {
-        synchronized (mLock) {
-            if (mPermissionOwnerToken != null) {
-                // Permission is already granted.
-                return;
-            }
-
-            try {
-                mPermissionOwnerToken = ActivityManagerNative.getDefault()
-                        .newUriPermissionOwner("InputContentUriTokenHandler");
-            } catch (RemoteException e) {
-                e.rethrowFromSystemServer();
-            }
-
-            doTakeLocked(mPermissionOwnerToken);
-        }
-    }
-
-    private void doTakeLocked(@NonNull IBinder permissionOwner) {
-        long origId = Binder.clearCallingIdentity();
-        try {
-            try {
-                ActivityManagerNative.getDefault().grantUriPermissionFromOwner(
-                        permissionOwner, mSourceUid, mTargetPackage, mUri,
-                        Intent.FLAG_GRANT_READ_URI_PERMISSION, mSourceUserId, mTargetUserId);
-            } catch (RemoteException e) {
-                e.rethrowFromSystemServer();
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
+        mPermissionOwnerToken = permissionOwnerToken;
     }
 
     @Override

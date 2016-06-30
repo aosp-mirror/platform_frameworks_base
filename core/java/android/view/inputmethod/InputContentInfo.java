@@ -163,22 +163,6 @@ public final class InputContentInfo implements Parcelable {
     }
 
     /**
-     * Requests a temporary read-only access permission for content URI associated with this object.
-     *
-     * <p>Does nothing if the temporary permission is already granted.</p>
-     */
-    public void requestPermission() {
-        if (mUriToken == null) {
-            return;
-        }
-        try {
-            mUriToken.take();
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Releases a temporary read-only access permission for content URI associated with this object.
      *
      * <p>Does nothing if the temporary permission is not granted.</p>

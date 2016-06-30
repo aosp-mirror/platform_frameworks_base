@@ -3953,7 +3953,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
             final int imeUserId = UserHandle.getUserId(uid);
             final int appUserId = UserHandle.getUserId(mCurClient.uid);
-            return new InputContentUriTokenHandler(contentUri, uid, packageName, imeUserId,
+            return InputContentUriTokenHandler.create(contentUri, uid, packageName, imeUserId,
                     appUserId);
         }
     }
