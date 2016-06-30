@@ -177,6 +177,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     static final int MSG_HARD_KEYBOARD_SWITCH_CHANGED = 4000;
 
+    static final int MSG_SYSTEM_UNLOCK_USER = 5000;
+
     static final long TIME_TO_RECONNECT = 3 * 1000;
 
     static final int SECURE_SUGGESTION_SPANS_MAX_SIZE = 20;
@@ -800,14 +802,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         @Override
         public void onSwitchUser(@UserIdInt int userHandle) {
-            // Called on the system server's main looper thread.
+            // Called on ActivityManager thread.
             // TODO: Dispatch this to a worker thread as needed.
             mService.onSwitchUser(userHandle);
         }
 
         @Override
         public void onBootPhase(int phase) {
-            // Called on the system server's main looper thread.
+            // Called on ActivityManager thread.
             // TODO: Dispatch this to a worker thread as needed.
             if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
                 StatusBarManagerService statusBarService = (StatusBarManagerService) ServiceManager
@@ -817,10 +819,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         @Override
-        public void onUnlockUser(@UserIdInt int userHandle) {
-            // Called on the system server's main looper thread.
-            // TODO: Dispatch this to a worker thread as needed.
-            mService.onUnlockUser(userHandle);
+        public void onUnlockUser(final @UserIdInt int userHandle) {
+            // Called on ActivityManager thread.
+            mService.mHandler.sendMessage(mService.mHandler.obtainMessage(MSG_SYSTEM_UNLOCK_USER,
+                    userHandle));
         }
     }
 
@@ -2969,6 +2971,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             // --------------------------------------------------------------
             case MSG_HARD_KEYBOARD_SWITCH_CHANGED:
                 mHardKeyboardListener.handleHardKeyboardStatusChange(msg.arg1 == 1);
+                return true;
+            case MSG_SYSTEM_UNLOCK_USER:
+                final int userId = msg.arg1;
+                onUnlockUser(userId);
                 return true;
         }
         return false;
