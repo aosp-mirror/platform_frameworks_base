@@ -20,8 +20,10 @@ import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.isAssignableFrom;
+import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.CoreMatchers.is;
 
 import android.content.Context;
@@ -29,9 +31,11 @@ import android.support.test.espresso.ViewInteraction;
 import android.support.test.espresso.matcher.BoundedMatcher;
 import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObjectNotFoundException;
+import android.view.View;
 
 import com.android.documentsui.DragOverTextView;
 import com.android.documentsui.DropdownBreadcrumb;
+import com.android.documentsui.R;
 import com.android.documentsui.model.DocumentInfo;
 
 import org.hamcrest.Description;
@@ -53,6 +57,18 @@ import junit.framework.Assert;
 public class BreadBot extends Bots.BaseBot {
 
     public static final String TARGET_PKG = "com.android.documentsui";
+
+    private static final Matcher<View> DROPDOWN_BREADCRUMB = withId(
+            R.id.dropdown_breadcrumb);
+
+    private static final Matcher<View> HORIZONTAL_BREADCRUMB = withId(
+            R.id.horizontal_breadcrumb);
+
+    // When any 'ol breadcrumb will do. Could be dropdown or horizontal.
+    @SuppressWarnings("unchecked")
+    private static final Matcher<View> BREADCRUMB = anyOf(
+            DROPDOWN_BREADCRUMB, HORIZONTAL_BREADCRUMB);
+
     private UiBot mMain;
 
     public BreadBot(UiDevice device, Context context, int timeout, UiBot main) {
@@ -65,7 +81,7 @@ public class BreadBot extends Bots.BaseBot {
         // so we only test on dropdown.
         if (mMain.inDrawerLayout()) {
             Matcher<Object> titleMatcher = dropdownTitleMatcher(expected);
-            onView(Matchers.BREADCRUMB)
+            onView(BREADCRUMB)
                     .check(matches(titleMatcher));
         }
     }
@@ -76,7 +92,7 @@ public class BreadBot extends Bots.BaseBot {
      */
     public void revealAsNeeded() throws Exception {
         if (mMain.inDrawerLayout()) {
-            onView(Matchers.DROPDOWN_BREADCRUMB).perform(click());
+            onView(DROPDOWN_BREADCRUMB).perform(click());
         }
     }
 
@@ -115,7 +131,6 @@ public class BreadBot extends Bots.BaseBot {
 
     @SuppressWarnings("unchecked")
     public ViewInteraction findHorizontalEntry(String label) {
-        // Matchers.HORIZONTAL_BREADCRUMB
         return onView(allOf(isAssignableFrom(DragOverTextView.class), withText(label)));
     }
 

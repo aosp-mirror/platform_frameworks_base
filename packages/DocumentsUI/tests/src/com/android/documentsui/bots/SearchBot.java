@@ -18,15 +18,24 @@ package com.android.documentsui.bots;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.typeText;
+import static android.support.test.espresso.matcher.ViewMatchers.hasDescendant;
+import static android.support.test.espresso.matcher.ViewMatchers.isClickable;
+import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
+import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.CoreMatchers.anyOf;
 
 import android.content.Context;
 import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObject;
 import android.support.test.uiautomator.UiObjectNotFoundException;
 import android.support.v7.recyclerview.R;
+import android.view.View;
+
+import org.hamcrest.Matcher;
 
 /**
  * A test helper class that provides support for controlling the search UI
@@ -37,6 +46,20 @@ import android.support.v7.recyclerview.R;
 public class SearchBot extends Bots.BaseBot {
 
     public static final String TARGET_PKG = "com.android.documentsui";
+
+    // Dumb search layout changes substantially between Ryu and Angler.
+    @SuppressWarnings("unchecked")
+    private static final Matcher<View> SEARCH_WIDGET = allOf(
+            withId(R.id.menu_search),
+            anyOf(isClickable(), hasDescendant(isClickable())));
+
+    // Note that input is visible when the clicky button is not
+    // present. So to clearly qualify the two...we explicitly
+    // require this input be not clickable.
+    @SuppressWarnings("unchecked")
+    private static final Matcher<View> SEARCH_INPUT = allOf(
+            withId(R.id.menu_search),
+            isDisplayed());
 
     public SearchBot(UiDevice device, Context context, int timeout) {
         super(device, context, timeout);
@@ -49,18 +72,18 @@ public class SearchBot extends Bots.BaseBot {
     }
 
     public void setInputText(String query) throws UiObjectNotFoundException {
-        onView(Matchers.SEARCH_MENU).perform(typeText(query));
+        onView(SEARCH_INPUT).perform(typeText(query));
     }
 
     public void assertIconVisible(boolean visible) {
         if (visible) {
             assertTrue(
                     "Search icon should be visible.",
-                    Matchers.present(Matchers.SEARCH_BUTTON));
+                    Matchers.present(SEARCH_WIDGET));
         } else {
             assertFalse(
                     "Search icon should not be visible.",
-                    Matchers.present(Matchers.SEARCH_BUTTON));
+                    Matchers.present(SEARCH_WIDGET));
         }
     }
 
