@@ -6278,6 +6278,12 @@ public final class Settings {
         public static final String AUTOMATIC_STORAGE_MANAGER_LAST_RUN =
                 "automatic_storage_manager_last_run";
 
+        /**
+         * Whether Downloads folder backup is enabled and should run on the device.
+         *
+         * @hide
+         */
+        public static final String DOWNLOADS_BACKUP_ENABLED = "downloads_backup_enabled";
 
         /**
          * This are the settings to be backed up.
