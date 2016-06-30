@@ -16,10 +16,10 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="6271216747302322594">"MTP хосты"</string>
-    <string name="downloads_app_label" msgid="7120690641874849726">"Жүктеп алынғандар"</string>
+    <string name="app_label" msgid="6271216747302322594">"MTP 主机"</string>
+    <string name="downloads_app_label" msgid="7120690641874849726">"下载"</string>
     <string name="root_name" msgid="5819495383921089536">"<xliff:g id="DEVICE_MODEL">%1$s</xliff:g> <xliff:g id="STORAGE_NAME">%2$s</xliff:g>"</string>
-    <string name="accessing_notification_title" msgid="3030133609230917944">"Файлдарға <xliff:g id="DEVICE_MODEL">%1$s</xliff:g> құрылғысынан кіру"</string>
-    <string name="error_busy_device" msgid="3997316850357386589">"Екінші құрылғы бос емес. Ол босамайынша, файлдар тасымалданбайды."</string>
-    <string name="error_locked_device" msgid="7557872102188356147">"Ешқандай файл табылмады. Екінші құрылғы құлыптаулы болуы мүмкін. Құлыптаулы болса, құлпын ашып, қайталап көріңіз."</string>
+    <string name="accessing_notification_title" msgid="3030133609230917944">"正在访问 <xliff:g id="DEVICE_MODEL">%1$s</xliff:g> 的文件"</string>
+    <string name="error_busy_device" msgid="3997316850357386589">"另一台设备正忙。您必须等到该设备可用时才能传输文件。"</string>
+    <string name="error_locked_device" msgid="7557872102188356147">"未找到任何文件。另一台设备可能处于锁定状态；如果是这样，请解锁该设备并重试。"</string>
 </resources>
