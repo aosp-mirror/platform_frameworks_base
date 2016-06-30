@@ -1656,7 +1656,8 @@
     <string name="demo_starting_message" msgid="5268556852031489931">"သရုပ်ပြချက်ကို စတင်နေသည်…"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"စက်ပစ္စည်းကို ပြန်လည်သတ်မှတ်နေသည်…"</string>
     <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"စက်ပစ္စည်းကို ပြန်လည်သတ်မှတ်မလား။"</string>
-    <string name="demo_user_inactivity_timeout_countdown" msgid="1743456683091721620">"ပြောင်းလဲမှုများကို ဆုံးရှုံးသွားမည်ဖြစ်ပြီး သရုပ်ပြချက်သည် <xliff:g id="TIMEOUT">%1$s</xliff:g> စက္ကန့်အတွင်း စတင်ပါမည်…"</string>
+    <!-- no translation found for demo_user_inactivity_timeout_countdown (5675588824402569506) -->
+    <skip />
     <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"မလုပ်တော့"</string>
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"ယခုပြန်လည်သတ်မှတ်ပါ"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"ဤစက်ပစ္စည်းကို ကန့်သတ်ချက်များမပါဘဲ အသုံးပြုရန် စက်ရုံထုတ်ဆက်တင်အတိုင်း ပြန်လည်သတ်မှတ်ပါ"</string>

@@ -1651,22 +1651,15 @@
     <string name="unpin_target" msgid="3556545602439143442">"Soltar"</string>
     <string name="app_info" msgid="6856026610594615344">"Informações da aplicação"</string>
     <string name="negative_duration" msgid="5688706061127375131">"-<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for reset_retail_demo_mode_title (2370249087943803584) -->
+    <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"Pretende repor o dispositivo?"</string>
+    <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"Toque para repor o dispositivo"</string>
+    <string name="demo_starting_message" msgid="5268556852031489931">"A iniciar a demonstração…"</string>
+    <string name="demo_restarting_message" msgid="952118052531642451">"A repor o dispositivo…"</string>
+    <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"Pretende repor o dispositivo?"</string>
+    <!-- no translation found for demo_user_inactivity_timeout_countdown (5675588824402569506) -->
     <skip />
-    <!-- no translation found for reset_retail_demo_mode_text (5481925817590883246) -->
-    <skip />
-    <!-- no translation found for demo_starting_message (5268556852031489931) -->
-    <skip />
-    <!-- no translation found for demo_restarting_message (952118052531642451) -->
-    <skip />
-    <!-- no translation found for demo_user_inactivity_timeout_title (6596109959002331334) -->
-    <skip />
-    <!-- no translation found for demo_user_inactivity_timeout_countdown (1743456683091721620) -->
-    <skip />
-    <!-- no translation found for demo_user_inactivity_timeout_left_button (5314271347014802475) -->
-    <skip />
-    <!-- no translation found for demo_user_inactivity_timeout_right_button (5019306703066964808) -->
-    <skip />
+    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"Cancelar"</string>
+    <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Repor agora"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Repor os dados de fábrica para utilizar o dispositivo sem restrições"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Toque para saber mais."</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> desativado"</string>
