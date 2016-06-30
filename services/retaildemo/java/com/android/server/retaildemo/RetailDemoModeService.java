@@ -247,6 +247,7 @@ public class RetailDemoModeService extends SystemService {
         um.setUserRestriction(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, true, user);
         um.setUserRestriction(UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS, true, user);
         um.setUserRestriction(UserManager.DISALLOW_USB_FILE_TRANSFER, true, user);
+        um.setUserRestriction(UserManager.DISALLOW_MODIFY_ACCOUNTS, true, user);
         Settings.Secure.putIntForUser(getContext().getContentResolver(),
                 Settings.Secure.SKIP_FIRST_USE_HINTS, 1, userInfo.id);
     }
