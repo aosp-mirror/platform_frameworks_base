@@ -19,7 +19,9 @@ package android.app;
 import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.IIntentSender;
+import android.content.Intent;
 import android.content.res.Configuration;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.service.voice.IVoiceInteractionSession;
 
@@ -161,4 +163,11 @@ public abstract class ActivityManagerInternal {
      */
     public abstract void updatePersistentConfigurationForUser(@NonNull Configuration values,
             int userId);
+
+    /**
+     * Create an {@link IIntentSender} to start an activity, as if {@code packageName} on
+     * user {@code userId} created it.
+     */
+    public abstract IIntentSender getActivityIntentSenderAsPackage(String packageName,
+            int userId, int requestCode, Intent intent, int flags, Bundle bOptions);
 }

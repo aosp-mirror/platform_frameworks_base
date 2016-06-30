@@ -19,9 +19,13 @@ package com.android.server.pm;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.ActivityManagerInternal;
+import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -98,6 +102,7 @@ public class LauncherAppsService extends SystemService {
         private final Context mContext;
         private final PackageManager mPm;
         private final UserManager mUm;
+        private final ActivityManagerInternal mActivityManagerInternal;
         private final ShortcutServiceInternal mShortcutServiceInternal;
         private final PackageCallbackList<IOnAppsChangedListener> mListeners
                 = new PackageCallbackList<IOnAppsChangedListener>();
@@ -110,6 +115,8 @@ public class LauncherAppsService extends SystemService {
             mContext = context;
             mPm = mContext.getPackageManager();
             mUm = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+            mActivityManagerInternal = Preconditions.checkNotNull(
+                    LocalServices.getService(ActivityManagerInternal.class));
             mShortcutServiceInternal = Preconditions.checkNotNull(
                     LocalServices.getService(ShortcutServiceInternal.class));
             mShortcutServiceInternal.addListener(mPackageMonitor);
@@ -432,7 +439,7 @@ public class LauncherAppsService extends SystemService {
         }
 
         @Override
-        public boolean startShortcut(String callingPackage, String packageName, String shortcutId,
+        public void startShortcut(String callingPackage, String packageName, String shortcutId,
                 Rect sourceBounds, Bundle startActivityOptions, int userId) {
             verifyCallingPackage(callingPackage);
             ensureInUserProfiles(userId, "Cannot start activity for unrelated profile " + userId);
@@ -451,20 +458,40 @@ public class LauncherAppsService extends SystemService {
             final Intent intent = mShortcutServiceInternal.createShortcutIntent(getCallingUserId(),
                     callingPackage, packageName, shortcutId, userId);
             if (intent == null) {
-                return false;
+                return;
             }
             // Note the target activity doesn't have to be exported.
 
-            intent.setSourceBounds(sourceBounds);
             prepareIntentForLaunch(intent, sourceBounds);
 
-            final long ident = Binder.clearCallingIdentity();
+            startShortcutIntentAsPublisher(
+                    intent, packageName, startActivityOptions, userId);
+        }
+
+        @VisibleForTesting
+        protected void startShortcutIntentAsPublisher(@NonNull Intent intent,
+                @NonNull String publisherPackage, Bundle startActivityOptions, int userId) {
+
             try {
-                mContext.startActivityAsUser(intent, startActivityOptions, UserHandle.of(userId));
-            } finally {
-                Binder.restoreCallingIdentity(ident);
+                final IIntentSender intentSender;
+
+                final long ident = Binder.clearCallingIdentity();
+                try {
+                    intentSender = mActivityManagerInternal.getActivityIntentSenderAsPackage(
+                            publisherPackage, userId, /* requestCode= */ 0,
+                            intent, PendingIntent.FLAG_ONE_SHOT,
+                            /* options= */ startActivityOptions);
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
+
+                // Negative result means a failure.
+                ActivityManagerNative.getDefault().sendIntentSender(
+                        intentSender, 0, null, null, null, null, null);
+
+            } catch (RemoteException e) {
+                return;
             }
-            return true;
         }
 
         @Override
