@@ -21,6 +21,7 @@
 #include "io/File.h"
 #include "util/Util.h"
 
+#include <algorithm>
 #include <androidfw/ResourceTypes.h>
 #include <limits>
 
@@ -302,18 +303,42 @@ Attribute::Attribute(bool w, uint32_t t) :
     mWeak = w;
 }
 
+template <typename T>
+T* addPointer(T& val) {
+    return &val;
+}
+
 bool Attribute::equals(const Value* value) const {
     const Attribute* other = valueCast<Attribute>(value);
     if (!other) {
         return false;
     }
 
-    return this->typeMask == other->typeMask && this->minInt == other->minInt &&
-            this->maxInt == other->maxInt &&
-            std::equal(this->symbols.begin(), this->symbols.end(),
-                       other->symbols.begin(),
-                       [](const Symbol& a, const Symbol& b) -> bool {
-        return a.symbol.equals(&b.symbol) && a.value == b.value;
+    if (symbols.size() != other->symbols.size()) {
+        return false;
+    }
+
+    if (typeMask != other->typeMask || minInt != other->minInt || maxInt != other->maxInt) {
+        return false;
+    }
+
+    std::vector<const Symbol*> sortedA;
+    std::transform(symbols.begin(), symbols.end(),
+                   std::back_inserter(sortedA), addPointer<const Symbol>);
+    std::sort(sortedA.begin(), sortedA.end(), [](const Symbol* a, const Symbol* b) -> bool {
+        return a->symbol.name < b->symbol.name;
+    });
+
+    std::vector<const Symbol*> sortedB;
+    std::transform(other->symbols.begin(), other->symbols.end(),
+                   std::back_inserter(sortedB), addPointer<const Symbol>);
+    std::sort(sortedB.begin(), sortedB.end(), [](const Symbol* a, const Symbol* b) -> bool {
+        return a->symbol.name < b->symbol.name;
+    });
+
+    return std::equal(sortedA.begin(), sortedA.end(), sortedB.begin(),
+                      [](const Symbol* a, const Symbol* b) -> bool {
+        return a->symbol.equals(&b->symbol) && a->value == b->value;
     });
 }
 
@@ -526,9 +551,28 @@ bool Style::equals(const Value* value) const {
             (parent && other->parent && !parent.value().equals(&other->parent.value()))) {
         return false;
     }
-    return std::equal(entries.begin(), entries.end(), other->entries.begin(),
-                      [](const Entry& a, const Entry& b) -> bool {
-        return a.key.equals(&b.key) && a.value->equals(b.value.get());
+
+    if (entries.size() != other->entries.size()) {
+        return false;
+    }
+
+    std::vector<const Entry*> sortedA;
+    std::transform(entries.begin(), entries.end(),
+                   std::back_inserter(sortedA), addPointer<const Entry>);
+    std::sort(sortedA.begin(), sortedA.end(), [](const Entry* a, const Entry* b) -> bool {
+        return a->key.name < b->key.name;
+    });
+
+    std::vector<const Entry*> sortedB;
+    std::transform(other->entries.begin(), other->entries.end(),
+                   std::back_inserter(sortedB), addPointer<const Entry>);
+    std::sort(sortedB.begin(), sortedB.end(), [](const Entry* a, const Entry* b) -> bool {
+        return a->key.name < b->key.name;
+    });
+
+    return std::equal(sortedA.begin(), sortedA.end(), sortedB.begin(),
+                      [](const Entry* a, const Entry* b) -> bool {
+        return a->key.equals(&b->key) && a->value->equals(b->value.get());
     });
 }
 
@@ -563,6 +607,8 @@ void Style::print(std::ostream* out) const {
 static ::std::ostream& operator<<(::std::ostream& out, const Style::Entry& value) {
     if (value.key.name) {
         out << value.key.name.value();
+    } else if (value.key.id) {
+        out << value.key.id.value();
     } else {
         out << "???";
     }
@@ -574,6 +620,10 @@ static ::std::ostream& operator<<(::std::ostream& out, const Style::Entry& value
 bool Array::equals(const Value* value) const {
     const Array* other = valueCast<Array>(value);
     if (!other) {
+        return false;
+    }
+
+    if (items.size() != other->items.size()) {
         return false;
     }
 
@@ -602,6 +652,10 @@ void Array::print(std::ostream* out) const {
 bool Plural::equals(const Value* value) const {
     const Plural* other = valueCast<Plural>(value);
     if (!other) {
+        return false;
+    }
+
+    if (values.size() != other->values.size()) {
         return false;
     }
 
@@ -659,6 +713,11 @@ bool Styleable::equals(const Value* value) const {
     if (!other) {
         return false;
     }
+
+    if (entries.size() != other->entries.size()) {
+        return false;
+    }
+
     return std::equal(entries.begin(), entries.end(), other->entries.begin(),
                       [](const Reference& a, const Reference& b) -> bool {
         return a.equals(&b);

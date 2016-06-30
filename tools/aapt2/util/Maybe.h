@@ -88,6 +88,8 @@ public:
      */
     const T& value() const;
 
+    T valueOrDefault(const T& def) const;
+
 private:
     template <typename U>
     friend class Maybe;
@@ -263,6 +265,14 @@ const T& Maybe<T>::value() const {
 }
 
 template <typename T>
+T Maybe<T>::valueOrDefault(const T& def) const {
+    if (mNothing) {
+        return def;
+    }
+    return reinterpret_cast<const T&>(mStorage);
+}
+
+template <typename T>
 void Maybe<T>::destroy() {
     reinterpret_cast<T&>(mStorage).~T();
 }
@@ -304,6 +314,19 @@ typename std::enable_if<
         bool
 >::type operator!=(const Maybe<T>& a, const Maybe<U>& b) {
     return !(a == b);
+}
+
+template <typename T, typename U>
+typename std::enable_if<
+        has_lt_op<T, U>::value,
+        bool
+>::type operator<(const Maybe<T>& a, const Maybe<U>& b) {
+    if (a && b) {
+        return a.value() < b.value();
+    } else if (!a && !b) {
+        return false;
+    }
+    return !a;
 }
 
 } // namespace aapt

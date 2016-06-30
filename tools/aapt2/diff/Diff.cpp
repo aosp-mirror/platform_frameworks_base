@@ -16,6 +16,7 @@
 
 #include "Flags.h"
 #include "ResourceTable.h"
+#include "ValueVisitor.h"
 #include "io/ZipArchive.h"
 #include "process/IResourceTableConsumer.h"
 #include "process/SymbolTable.h"
@@ -385,6 +386,24 @@ static bool emitResourceTableDiff(IAaptContext* context, LoadedApk* apkA, Loaded
     return diff;
 }
 
+class ZeroingReferenceVisitor : public ValueVisitor {
+public:
+    using ValueVisitor::visit;
+
+    void visit(Reference* ref) override {
+        if (ref->name && ref->id) {
+            if (ref->id.value().packageId() == 0x7f) {
+                ref->id = {};
+            }
+        }
+    }
+};
+
+static void zeroOutAppReferences(ResourceTable* table) {
+    ZeroingReferenceVisitor visitor;
+    visitAllValuesInTable(table, &visitor);
+}
+
 int diff(const std::vector<StringPiece>& args) {
     DiffContext context;
 
@@ -404,6 +423,10 @@ int diff(const std::vector<StringPiece>& args) {
     if (!apkA || !apkB) {
         return 1;
     }
+
+    // Zero out Application IDs in references.
+    zeroOutAppReferences(apkA->getResourceTable());
+    zeroOutAppReferences(apkB->getResourceTable());
 
     if (emitResourceTableDiff(&context, apkA.get(), apkB.get())) {
         // We emitted a diff, so return 1 (failure).
