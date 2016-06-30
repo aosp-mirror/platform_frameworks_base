@@ -346,6 +346,8 @@ public class ExifInterface {
     public static final String TAG_THUMBNAIL_IMAGE_LENGTH = "ThumbnailImageLength";
     /** Type is int. */
     public static final String TAG_THUMBNAIL_IMAGE_WIDTH = "ThumbnailImageWidth";
+    /** Type is int. DNG Specification 1.4.0.0. Section 4 */
+    public static final String TAG_DEFAULT_CROP_SIZE = "DefaultCropSize";
 
     /**
      * Private tags used for pointing the other IFD offsets.
@@ -438,6 +440,13 @@ public class ExifInterface {
     private static final int DATA_DEFLATE_ZIP = 8;
     private static final int DATA_PACK_BITS_COMPRESSED = 32773;
     private static final int DATA_LOSSY_JPEG = 34892;
+
+    /**
+     * Constants used for NewSubfileType tag.
+     * See TIFF 6.0 Spec Section 8
+     * */
+    private static final int ORIGINAL_RESOLUTION_IMAGE = 0;
+    private static final int REDUCED_RESOLUTION_IMAGE = 1;
 
     // A class for indicating EXIF rational type.
     private static class Rational {
@@ -881,7 +890,7 @@ public class ExifInterface {
             new ExifTag(TAG_REFERENCE_BLACK_WHITE, 532, IFD_FORMAT_URATIONAL),
             new ExifTag(TAG_COPYRIGHT, 33432, IFD_FORMAT_STRING),
             new ExifTag(TAG_EXIF_IFD_POINTER, 34665, IFD_FORMAT_ULONG),
-            new ExifTag(TAG_GPS_INFO_IFD_POINTER, 34853, IFD_FORMAT_ULONG),
+            new ExifTag(TAG_GPS_INFO_IFD_POINTER, 34853, IFD_FORMAT_ULONG)
     };
 
     // Primary image IFD Exif Private tags (See JEITA CP-3451C Section 4.6.8 Tag Support Levels)
@@ -943,6 +952,7 @@ public class ExifInterface {
             new ExifTag(TAG_DEVICE_SETTING_DESCRIPTION, 41995, IFD_FORMAT_UNDEFINED),
             new ExifTag(TAG_SUBJECT_DISTANCE_RANGE, 41996, IFD_FORMAT_USHORT),
             new ExifTag(TAG_IMAGE_UNIQUE_ID, 42016, IFD_FORMAT_STRING),
+            new ExifTag(TAG_DEFAULT_CROP_SIZE, 50720, IFD_FORMAT_USHORT, IFD_FORMAT_ULONG)
     };
 
     // Primary image IFD GPS Info tags (See JEITA CP-3451C Section 4.6.8 Tag Support Levels)
@@ -977,11 +987,11 @@ public class ExifInterface {
             new ExifTag(TAG_GPS_PROCESSING_METHOD, 27, IFD_FORMAT_UNDEFINED),
             new ExifTag(TAG_GPS_AREA_INFORMATION, 28, IFD_FORMAT_UNDEFINED),
             new ExifTag(TAG_GPS_DATESTAMP, 29, IFD_FORMAT_STRING),
-            new ExifTag(TAG_GPS_DIFFERENTIAL, 30, IFD_FORMAT_USHORT),
+            new ExifTag(TAG_GPS_DIFFERENTIAL, 30, IFD_FORMAT_USHORT)
     };
     // Primary image IFD Interoperability tag (See JEITA CP-3451C Section 4.6.8 Tag Support Levels)
     private static final ExifTag[] IFD_INTEROPERABILITY_TAGS = new ExifTag[] {
-            new ExifTag(TAG_INTEROPERABILITY_INDEX, 1, IFD_FORMAT_STRING),
+            new ExifTag(TAG_INTEROPERABILITY_INDEX, 1, IFD_FORMAT_STRING)
     };
     // IFD Thumbnail tags (See JEITA CP-3451C Section 4.6.8 Tag Support Levels)
     private static final ExifTag[] IFD_THUMBNAIL_TAGS = new ExifTag[] {
@@ -1021,7 +1031,7 @@ public class ExifInterface {
             new ExifTag(TAG_REFERENCE_BLACK_WHITE, 532, IFD_FORMAT_URATIONAL),
             new ExifTag(TAG_COPYRIGHT, 33432, IFD_FORMAT_STRING),
             new ExifTag(TAG_EXIF_IFD_POINTER, 34665, IFD_FORMAT_ULONG),
-            new ExifTag(TAG_GPS_INFO_IFD_POINTER, 34853, IFD_FORMAT_ULONG),
+            new ExifTag(TAG_GPS_INFO_IFD_POINTER, 34853, IFD_FORMAT_ULONG)
     };
 
     // See JEITA CP-3451C Section 4.6.3: Exif-specific IFD.
@@ -2032,6 +2042,9 @@ public class ExifInterface {
 
         // Process thumbnail.
         processThumbnail(dataInputStream, bytesRead, exifBytes.length);
+
+        // Update TAG_IMAGE_WIDTH and TAG_IMAGE_LENGTH.
+        updateImageSizeValues();
     }
 
     // Stores a new JPEG image with EXIF attributes into a given output stream.
@@ -2436,6 +2449,56 @@ public class ExifInterface {
                             + bitmap.getHeight());
                 }
             }
+        }
+    }
+
+    /**
+     * Raw images often store extra pixels around the edges of the final image, which results in
+     * larger values for TAG_IMAGE_WIDTH and TAG_IMAGE_LENGTH tags.
+     * This method corrects those tag values by checking first the values of TAG_DEFAULT_CROP_SIZE
+     * and then TAG_PIXEL_X_DIMENSION & TAG_PIXEL_Y_DIMENSION.
+     * See DNG Specification 1.4.0.0. Section 4 (DefaultCropSize) & JEITA CP-3451 p26.
+     * */
+    private void updateImageSizeValues() throws IOException {
+        // Checks for the NewSubfileType tag and returns if the image is not original resolution.
+        ExifAttribute newSubfileTypeAttribute =
+                (ExifAttribute) mAttributes[IFD_TIFF_HINT].get(TAG_NEW_SUBFILE_TYPE);
+        if (newSubfileTypeAttribute != null) {
+            int newSubfileTypeValue = newSubfileTypeAttribute.getIntValue(mExifByteOrder);
+            if (newSubfileTypeValue != ORIGINAL_RESOLUTION_IMAGE) {
+                // TODO: Need to address case when NewSubFile value is REDUCED_RESOLUTION_IMAGE.
+                return;
+            }
+        }
+
+        ExifAttribute defaultCropSizeAttribute =
+                (ExifAttribute) mAttributes[IFD_TIFF_HINT].get(TAG_DEFAULT_CROP_SIZE);
+        ExifAttribute pixelXDimAttribute =
+                (ExifAttribute) mAttributes[IFD_EXIF_HINT].get(TAG_PIXEL_X_DIMENSION);
+        ExifAttribute pixelYDimAttribute =
+                (ExifAttribute) mAttributes[IFD_EXIF_HINT].get(TAG_PIXEL_Y_DIMENSION);
+        if (defaultCropSizeAttribute != null) {
+            ExifAttribute defaultCropSizeXAttribute, defaultCropSizeYAttribute;
+            if (defaultCropSizeAttribute.format == IFD_FORMAT_URATIONAL) {
+                Rational[] defaultCropSizeValue =
+                        (Rational[]) defaultCropSizeAttribute.getValue(mExifByteOrder);
+                defaultCropSizeXAttribute =
+                        ExifAttribute.createURational(defaultCropSizeValue[0], mExifByteOrder);
+                defaultCropSizeYAttribute =
+                        ExifAttribute.createURational(defaultCropSizeValue[1], mExifByteOrder);
+            } else {
+                int[] defaultCropSizeValue =
+                        (int[]) defaultCropSizeAttribute.getValue(mExifByteOrder);
+                defaultCropSizeXAttribute =
+                        ExifAttribute.createUShort(defaultCropSizeValue[0], mExifByteOrder);
+                defaultCropSizeYAttribute =
+                        ExifAttribute.createUShort(defaultCropSizeValue[1], mExifByteOrder);
+            }
+            mAttributes[IFD_TIFF_HINT].put(TAG_IMAGE_WIDTH, defaultCropSizeXAttribute);
+            mAttributes[IFD_TIFF_HINT].put(TAG_IMAGE_LENGTH, defaultCropSizeYAttribute);
+        } else if (pixelXDimAttribute != null && pixelYDimAttribute != null) {
+            mAttributes[IFD_TIFF_HINT].put(TAG_IMAGE_WIDTH, pixelXDimAttribute);
+            mAttributes[IFD_TIFF_HINT].put(TAG_IMAGE_LENGTH, pixelYDimAttribute);
         }
     }
 
