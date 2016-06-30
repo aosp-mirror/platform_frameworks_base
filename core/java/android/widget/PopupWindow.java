@@ -1396,7 +1396,7 @@ public class PopupWindow {
     private int computeGravity() {
         int gravity = Gravity.START | Gravity.TOP;
         if (mClipToScreen || mClippingEnabled) {
-            gravity |= Gravity.DISPLAY_CLIP_VERTICAL | Gravity.DISPLAY_CLIP_HORIZONTAL;
+            gravity |= Gravity.DISPLAY_CLIP_VERTICAL;
         }
         return gravity;
     }
