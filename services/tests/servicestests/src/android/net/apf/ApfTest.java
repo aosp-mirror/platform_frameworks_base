@@ -652,7 +652,7 @@ public class ApfTest extends AndroidTestCase {
     private static final int DHCP_CLIENT_PORT = 68;
     private static final int DHCP_CLIENT_MAC_OFFSET = ETH_HEADER_LEN + UDP_HEADER_LEN + 48;
 
-    private static int ARP_HEADER_OFFSET = ETH_HEADER_LEN;
+    private static final int ARP_HEADER_OFFSET = ETH_HEADER_LEN;
     private static final byte[] ARP_IPV4_REQUEST_HEADER = new byte[]{
             0, 1, // Hardware type: Ethernet (1)
             8, 0, // Protocol type: IP (0x0800)
@@ -660,9 +660,9 @@ public class ApfTest extends AndroidTestCase {
             4,    // Protocol size: 4
             0, 1  // Opcode: request (1)
     };
-    private static int ARP_TARGET_IP_ADDRESS_OFFSET = ETH_HEADER_LEN + 24;
+    private static final int ARP_TARGET_IP_ADDRESS_OFFSET = ETH_HEADER_LEN + 24;
 
-    private static byte[] MOCK_IPV4_ADDR = new byte[]{10, 0, 0, 1};
+    private static final byte[] MOCK_IPV4_ADDR = new byte[]{10, 0, 0, 1};
 
     @LargeTest
     public void testApfFilterIPv4() throws Exception {
