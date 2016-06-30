@@ -405,6 +405,9 @@
     <protected-broadcast android:name="android.os.action.DISCHARGING" />
     <protected-broadcast android:name="android.search.action.SEARCHABLES_CHANGED" />
     <protected-broadcast android:name="android.security.STORAGE_CHANGED" />
+    <protected-broadcast android:name="android.security.action.TRUST_STORE_CHANGED" />
+    <protected-broadcast android:name="android.security.action.KEYCHAIN_CHANGED" />
+    <protected-broadcast android:name="android.security.action.KEY_PERMISSION_CHANGED" />
     <protected-broadcast android:name="android.telecom.action.PHONE_ACCOUNT_REGISTERED" />
     <protected-broadcast android:name="android.telecom.action.PHONE_ACCOUNT_UNREGISTERED" />
     <protected-broadcast android:name="android.telecom.action.SHOW_MISSED_CALLS_NOTIFICATION" />

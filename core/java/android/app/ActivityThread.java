@@ -81,6 +81,7 @@ import android.os.Trace;
 import android.os.TransactionTooLargeException;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.security.NetworkSecurityPolicy;
 import android.security.net.config.NetworkSecurityConfigProvider;
 import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
@@ -1323,6 +1324,11 @@ public final class ActivityThread {
             args.arg1 = token;
             args.arg2 = voiceInteractor;
             sendMessage(H.LOCAL_VOICE_INTERACTION_STARTED, args);
+        }
+
+        @Override
+        public void handleTrustStorageUpdate() {
+            NetworkSecurityPolicy.getInstance().handleTrustStorageUpdate();
         }
     }
 

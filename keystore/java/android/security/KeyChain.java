@@ -179,7 +179,6 @@ public final class KeyChain {
     // Compatible with old android.security.Credentials.PKCS12
     public static final String EXTRA_PKCS12 = "PKCS12";
 
-
     /**
      * Broadcast Action: Indicates the trusted storage has changed. Sent when
      * one of this happens:
@@ -191,8 +190,48 @@ public final class KeyChain {
      * <li>trusted storage is reset (all user certs are cleared),
      * <li>when permission to access a private key is changed.
      * </ul>
+     *
+     * @deprecated Use {@link #ACTION_KEYCHAIN_CHANGED}, {@link #ACTION_STORAGE_CHANGED} or
+     * {@link #ACTION_KEY_ACCESS_CHANGED}.
      */
     public static final String ACTION_STORAGE_CHANGED = "android.security.STORAGE_CHANGED";
+
+    /**
+     * Broadcast Action: Indicates the contents of the keychain has changed. Sent when a KeyChain
+     * entry is added, modified or removed.
+     */
+    public static final String ACTION_KEYCHAIN_CHANGED = "android.security.action.KEYCHAIN_CHANGED";
+
+    /**
+     * Broadcast Action: Indicates the contents of the trusted certificate store has changed. Sent
+     * when one the following occurs:
+     *
+     * <ul>
+     * <li>A pre-installed CA is disabled or re-enabled</li>
+     * <li>A CA is added or removed from the trust store</li>
+     * </ul>
+     */
+    public static final String ACTION_TRUST_STORE_CHANGED =
+            "android.security.action.TRUST_STORE_CHANGED";
+
+    /**
+     * Broadcast Action: Indicates that the access permissions for a private key have changed.
+     *
+     */
+    public static final String ACTION_KEY_ACCESS_CHANGED =
+            "android.security.action.KEY_ACCESS_CHANGED";
+
+    /**
+     * Used as a String extra field in {@link #ACTION_KEY_ACCESS_CHANGED} to supply the alias of
+     * the key.
+     */
+    public static final String EXTRA_KEY_ALIAS = "android.security.extra.KEY_ALIAS";
+
+    /**
+     * Used as a boolean extra field in {@link #ACTION_KEY_ACCESS_CHANGED} to supply if the key is
+     * accessible to the application.
+     */
+    public static final String EXTRA_KEY_ACCESSIBLE = "android.security.extra.KEY_ACCESSIBLE";
 
     /**
      * Returns an {@code Intent} that can be used for credential

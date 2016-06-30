@@ -286,6 +286,7 @@ import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RTL;
 import static android.provider.Settings.Global.LENIENT_BACKGROUND_CHECK;
 import static android.provider.Settings.Global.WAIT_FOR_DEBUGGER;
 import static android.provider.Settings.System.FONT_SCALE;
+import static android.security.KeyChain.ACTION_TRUST_STORE_CHANGED;
 import static com.android.internal.util.XmlUtils.readBooleanAttribute;
 import static com.android.internal.util.XmlUtils.readIntAttribute;
 import static com.android.internal.util.XmlUtils.readLongAttribute;
@@ -1522,6 +1523,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int NOTIFY_ACTIVITY_DISMISSING_DOCKED_STACK_MSG = 68;
     static final int VR_MODE_APPLY_IF_NEEDED_MSG = 69;
     static final int SHOW_UNSUPPORTED_DISPLAY_SIZE_DIALOG_MSG = 70;
+    static final int HANDLE_TRUST_STORAGE_UPDATE_MSG = 71;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -2334,6 +2336,21 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (needsVrMode) {
                     applyVrMode(msg.arg1 == 1, r.requestedVrComponent, r.userId,
                             r.info.getComponentName(), false);
+                }
+            } break;
+            case HANDLE_TRUST_STORAGE_UPDATE_MSG: {
+                synchronized (ActivityManagerService.this) {
+                    for (int i = mLruProcesses.size() - 1 ; i >= 0 ; i--) {
+                        ProcessRecord r = mLruProcesses.get(i);
+                        if (r.thread != null) {
+                            try {
+                                r.thread.handleTrustStorageUpdate();
+                            } catch (RemoteException ex) {
+                                Slog.w(TAG, "Failed to handle trust storage update for: " +
+                                        r.info.processName);
+                            }
+                        }
+                    }
                 }
             } break;
             }
@@ -18002,6 +18019,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                     // Lie; we don't want to crash the app.
                     return ActivityManager.BROADCAST_SUCCESS;
+                case android.security.KeyChain.ACTION_TRUST_STORE_CHANGED:
+                    mHandler.sendEmptyMessage(HANDLE_TRUST_STORAGE_UPDATE_MSG);
+                    break;
             }
         }
 

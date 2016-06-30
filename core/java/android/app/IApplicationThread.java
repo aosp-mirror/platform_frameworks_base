@@ -161,6 +161,7 @@ public interface IApplicationThread extends IInterface {
     void scheduleMultiWindowModeChanged(IBinder token, boolean isInMultiWindowMode) throws RemoteException;
     void schedulePictureInPictureModeChanged(IBinder token, boolean isInPictureInPictureMode) throws RemoteException;
     void scheduleLocalVoiceInteractionStarted(IBinder token, IVoiceInteractor voiceInteractor) throws RemoteException;
+    void handleTrustStorageUpdate() throws RemoteException;
 
     String descriptor = "android.app.IApplicationThread";
 
@@ -224,4 +225,5 @@ public interface IApplicationThread extends IInterface {
     int SCHEDULE_MULTI_WINDOW_CHANGED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+58;
     int SCHEDULE_PICTURE_IN_PICTURE_CHANGED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+59;
     int SCHEDULE_LOCAL_VOICE_INTERACTION_STARTED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+60;
+    int HANDLE_TRUST_STORAGE_UPDATE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+61;
 }

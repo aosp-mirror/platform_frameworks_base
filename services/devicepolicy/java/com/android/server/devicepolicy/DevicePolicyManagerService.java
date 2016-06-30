@@ -486,7 +486,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             if (Intent.ACTION_USER_UNLOCKED.equals(action)
                     || Intent.ACTION_USER_STARTED.equals(action)
-                    || KeyChain.ACTION_STORAGE_CHANGED.equals(action)) {
+                    || KeyChain.ACTION_TRUST_STORE_CHANGED.equals(action)) {
                 int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_ALL);
                 new MonitoringCertNotificationTask().execute(userId);
             }
@@ -1585,7 +1585,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         filter.addAction(Intent.ACTION_USER_REMOVED);
         filter.addAction(Intent.ACTION_USER_STARTED);
         filter.addAction(Intent.ACTION_USER_UNLOCKED);
-        filter.addAction(KeyChain.ACTION_STORAGE_CHANGED);
+        filter.addAction(KeyChain.ACTION_TRUST_STORE_CHANGED);
         filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
         mContext.registerReceiverAsUser(mReceiver, UserHandle.ALL, filter, null, mHandler);
         filter = new IntentFilter();
