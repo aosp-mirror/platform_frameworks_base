@@ -293,7 +293,7 @@
     <style name="TextAppearance.Volume.ZenDetail">
         <item name="android:textSize">14sp</item>
         <item name="android:fontFamily">sans-serif</item>
-        <item name="android:textColor">#ffb0b3c5</item>
+        <item name="android:textColor">@*android:color/quaternary_device_default_settings</item>
     </style>
 
     <style name="VolumeButtons" parent="@android:style/Widget.Material.Button.Borderless">
