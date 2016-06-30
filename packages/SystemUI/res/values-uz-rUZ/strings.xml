@@ -143,8 +143,7 @@
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
-    <!-- no translation found for accessibility_data_connection_4g_plus (3032226872470658661) -->
-    <skip />
+    <string name="accessibility_data_connection_4g_plus" msgid="3032226872470658661">"4G+"</string>
     <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"LTE"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"Rouming"</string>
@@ -214,7 +213,7 @@
     <string name="accessibility_quick_settings_location_on" msgid="5809937096590102036">"Joylashuv ma’lumotini yuborish yoqilgan."</string>
     <string name="accessibility_quick_settings_location_changed_off" msgid="8526845571503387376">"Joylashuv ma’lumotini yuborish o‘chirildi."</string>
     <string name="accessibility_quick_settings_location_changed_on" msgid="339403053079338468">"Joylashuv ma’lumotini yuborish yoqildi."</string>
-    <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"Uyg‘otkich signali <xliff:g id="TIME">%s</xliff:g> da chalinadi."</string>
+    <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"Signal <xliff:g id="TIME">%s</xliff:g> da chalinadi."</string>
     <string name="accessibility_quick_settings_close" msgid="3115847794692516306">"Panelni yopish."</string>
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"Ko‘proq vaqt."</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"Kamroq vaqt."</string>
@@ -266,7 +265,7 @@
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Bezovta qilinmasin"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Faqat muhimlari"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Faqat signallar"</string>
-    <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"Tinchlik saqlansin"</string>
+    <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"Jimjitlik"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g>ta qurilma)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth o‘chirilgan"</string>
@@ -341,7 +340,7 @@
     <string name="description_target_search" msgid="3091587249776033139">"Qidirish"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> uchun yuqoriga suring."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> uchun chapga suring."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"Turli ovoz va tebranishlar endi sizni bezovta qilmaydi. Biroq uyg‘otkich signallari, eslatmalar, tadbirlar haqidagi bildirishnomalar va siz tanlagan abonentlardan kelgan qo‘ng‘iroqlar bundan mustasno."</string>
+    <string name="zen_priority_introduction" msgid="3070506961866919502">"Turli ovoz va tebranishlar endi sizni bezovta qilmaydi. Biroq signallar, eslatmalar, tadbirlar haqidagi bildirishnomalar va siz tanlagan abonentlardan kelgan qo‘ng‘iroqlar bundan mustasno."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Sozlash"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Bu BARCHA, jumladan signallar, musiqa, videolar va o‘yinlardan keladigan tovush va tebranishlarni to‘sib qo‘yadi. Siz telefon qo‘ng‘iroqlarini bemalol amalga oshirishingiz mumkin."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Bu BARCHA, jumladan, signallar, musiqa, videolar va o‘yinlardan keladigan tovush va tebranishlarni to‘sib qo‘yadi."</string>
@@ -352,8 +351,8 @@
     <string name="phone_hint" msgid="4872890986869209950">"Telefonni ochish uchun suring"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Ovozli yordam: belgidan boshlab suring"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Kamerani ochish uchun suring"</string>
-    <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Tinchlik saqlansin. Ekrandan o‘qish dasturlari ham ishlamaydi."</string>
-    <string name="interruption_level_none" msgid="6000083681244492992">"Tinchlik saqlansin"</string>
+    <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Jimjitlik – tinchlik saqlanadi. Ekrandan o‘qish dasturlari ham ishlamaydi."</string>
+    <string name="interruption_level_none" msgid="6000083681244492992">"Jimjitlik"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Faqat muhimlari"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Faqat signallar"</string>
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Tinchlik\nsaqlansin"</string>
@@ -437,12 +436,18 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> ovoz balandligini boshqaradi"</string>
     <string name="volumeui_notification_text" msgid="8819536904234337445">"Aslini tiklash uchun bosing."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Siz ishchi profildan foydalanmoqdasiz"</string>
-    <!-- no translation found for volume_stream_titles:0 (5841843895402729630) -->
-    <!-- no translation found for volume_stream_titles:1 (5997713001067658559) -->
-    <!-- no translation found for volume_stream_titles:2 (7858983209929864160) -->
-    <!-- no translation found for volume_stream_titles:3 (1850038478268896762) -->
-    <!-- no translation found for volume_stream_titles:4 (8265110906352372092) -->
-    <!-- no translation found for volume_stream_titles:6 (2951313578278086204) -->
+  <string-array name="volume_stream_titles">
+    <item msgid="5841843895402729630">"Qo‘ng‘iroq"</item>
+    <item msgid="5997713001067658559">"Tizim"</item>
+    <item msgid="7858983209929864160">"Jiringlatish"</item>
+    <item msgid="1850038478268896762">"Multimedia"</item>
+    <item msgid="8265110906352372092">"Signal"</item>
+    <item msgid="5339394737636839168"></item>
+    <item msgid="2951313578278086204">"Bluetooth"</item>
+    <item msgid="2919807739709798970"></item>
+    <item msgid="150349973435223405"></item>
+    <item msgid="6761963760295549099"></item>
+  </string-array>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Ovozini yoqish uchun ustiga bosing."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Tebranishni yoqish uchun ustiga bosing. Maxsus imkoniyatlar ishlamasligi mumkin."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Ovozini o‘chirish uchun ustiga bosing. Maxsus imkoniyatlar ishlamasligi mumkin."</string>
@@ -649,7 +654,7 @@
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Sozlamalarni ochish."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Tezkor sozlamalarni ochish."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Tezkor sozlamalarni yopish."</string>
-    <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"Uyg‘otkich o‘rnatildi."</string>
+    <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"Signal o‘rnatildi."</string>
     <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"<xliff:g id="ID_1">%s</xliff:g> sifatida kirgansiz"</string>
     <string name="accessibility_quick_settings_no_internet" msgid="31890692343084075">"Internet yo‘q."</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"Tafsilotlarini ko‘rsatish."</string>
