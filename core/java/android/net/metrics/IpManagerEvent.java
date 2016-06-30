@@ -29,6 +29,7 @@ import com.android.internal.util.MessageUtils;
 @SystemApi
 public final class IpManagerEvent implements Parcelable {
 
+    // TODO: use @IntDef
     public static final int PROVISIONING_OK    = 1;
     public static final int PROVISIONING_FAIL  = 2;
     public static final int COMPLETE_LIFECYCLE = 3;
