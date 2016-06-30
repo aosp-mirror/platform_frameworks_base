@@ -79,6 +79,10 @@ private:
         struct Frame {
             String8 name;
             FileMap* map;
+            int trimX;
+            int trimY;
+            int trimWidth;
+            int trimHeight;
             mutable GLuint tid;
             bool operator < (const Frame& rhs) const {
                 return name < rhs.name;
@@ -90,6 +94,7 @@ private:
             int clockPosY;  // The y position of the clock, in pixels, from the bottom of the
                             // display (the clock is centred horizontally). -1 to disable the clock
             String8 path;
+            String8 trimData;
             SortedVector<Frame> frames;
             bool playUntilComplete;
             float backgroundColor[3];

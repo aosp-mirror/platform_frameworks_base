@@ -596,15 +596,15 @@ bool BootAnimation::preloadZip(Animation& animation)
     // read all the data structures
     const size_t pcount = animation.parts.size();
     void *cookie = NULL;
-    ZipFileRO* mZip = animation.zip;
-    if (!mZip->startIteration(&cookie)) {
+    ZipFileRO* zip = animation.zip;
+    if (!zip->startIteration(&cookie)) {
         return false;
     }
 
     ZipEntryRO entry;
     char name[ANIM_ENTRY_NAME_MAX];
-    while ((entry = mZip->nextEntry(cookie)) != NULL) {
-        const int foundEntryName = mZip->getEntryFileName(entry, name, ANIM_ENTRY_NAME_MAX);
+    while ((entry = zip->nextEntry(cookie)) != NULL) {
+        const int foundEntryName = zip->getEntryFileName(entry, name, ANIM_ENTRY_NAME_MAX);
         if (foundEntryName > ANIM_ENTRY_NAME_MAX || foundEntryName == -1) {
             ALOGE("Error fetching entry file name");
             continue;
@@ -614,22 +614,29 @@ bool BootAnimation::preloadZip(Animation& animation)
         const String8 path(entryName.getPathDir());
         const String8 leaf(entryName.getPathLeaf());
         if (leaf.size() > 0) {
-            for (size_t j=0 ; j<pcount ; j++) {
+            for (size_t j = 0; j < pcount; j++) {
                 if (path == animation.parts[j].path) {
                     uint16_t method;
                     // supports only stored png files
-                    if (mZip->getEntryInfo(entry, &method, NULL, NULL, NULL, NULL, NULL)) {
+                    if (zip->getEntryInfo(entry, &method, NULL, NULL, NULL, NULL, NULL)) {
                         if (method == ZipFileRO::kCompressStored) {
-                            FileMap* map = mZip->createEntryFileMap(entry);
+                            FileMap* map = zip->createEntryFileMap(entry);
                             if (map) {
                                 Animation::Part& part(animation.parts.editItemAt(j));
                                 if (leaf == "audio.wav") {
                                     // a part may have at most one audio file
                                     part.audioFile = map;
+                                } else if (leaf == "trim.txt") {
+                                    part.trimData.setTo((char const*)map->getDataPtr(),
+                                                        map->getDataLength());
                                 } else {
                                     Animation::Frame frame;
                                     frame.name = leaf;
                                     frame.map = map;
+                                    frame.trimWidth = animation.width;
+                                    frame.trimHeight = animation.height;
+                                    frame.trimX = 0;
+                                    frame.trimY = 0;
                                     part.frames.add(frame);
                                 }
                             }
@@ -640,7 +647,33 @@ bool BootAnimation::preloadZip(Animation& animation)
         }
     }
 
-    mZip->endIteration(cookie);
+    // If there is trimData present, override the positioning defaults.
+    for (Animation::Part& part : animation.parts) {
+        const char* trimDataStr = part.trimData.string();
+        for (size_t frameIdx = 0; frameIdx < part.frames.size(); frameIdx++) {
+            const char* endl = strstr(trimDataStr, "\n");
+            // No more trimData for this part.
+            if (endl == NULL) {
+                break;
+            }
+            String8 line(trimDataStr, endl - trimDataStr);
+            const char* lineStr = line.string();
+            trimDataStr = ++endl;
+            int width = 0, height = 0, x = 0, y = 0;
+            if (sscanf(lineStr, "%dx%d+%d+%d", &width, &height, &x, &y) == 4) {
+                Animation::Frame& frame(part.frames.editItemAt(frameIdx));
+                frame.trimWidth = width;
+                frame.trimHeight = height;
+                frame.trimX = x;
+                frame.trimY = y;
+            } else {
+                ALOGE("Error parsing trim.txt, line: %s", lineStr);
+                break;
+            }
+        }
+    }
+
+    zip->endIteration(cookie);
 
     return true;
 }
@@ -707,12 +740,9 @@ bool BootAnimation::movie()
 bool BootAnimation::playAnimation(const Animation& animation)
 {
     const size_t pcount = animation.parts.size();
-    const int xc = (mWidth - animation.width) / 2;
-    const int yc = ((mHeight - animation.height) / 2);
     nsecs_t frameDuration = s2ns(1) / animation.fps;
-
-    Region clearReg(Rect(mWidth, mHeight));
-    clearReg.subtractSelf(Rect(xc, yc, xc+animation.width, yc+animation.height));
+    const int animationX = (mWidth - animation.width) / 2;
+    const int animationY = (mHeight - animation.height) / 2;
 
     for (size_t i=0 ; i<pcount ; i++) {
         const Animation::Part& part(animation.parts[i]);
@@ -759,22 +789,25 @@ bool BootAnimation::playAnimation(const Animation& animation)
                     initTexture(frame);
                 }
 
+                const int xc = animationX + frame.trimX;
+                const int yc = animationY + frame.trimY;
+                Region clearReg(Rect(mWidth, mHeight));
+                clearReg.subtractSelf(Rect(xc, yc, xc+frame.trimWidth, yc+frame.trimHeight));
                 if (!clearReg.isEmpty()) {
                     Region::const_iterator head(clearReg.begin());
                     Region::const_iterator tail(clearReg.end());
                     glEnable(GL_SCISSOR_TEST);
                     while (head != tail) {
                         const Rect& r2(*head++);
-                        glScissor(r2.left, mHeight - r2.bottom,
-                                r2.width(), r2.height());
+                        glScissor(r2.left, mHeight - r2.bottom, r2.width(), r2.height());
                         glClear(GL_COLOR_BUFFER_BIT);
                     }
                     glDisable(GL_SCISSOR_TEST);
                 }
-                // specify the y center as ceiling((mHeight - animation.height) / 2)
-                // which is equivalent to mHeight - (yc + animation.height)
-                glDrawTexiOES(xc, mHeight - (yc + animation.height),
-                              0, animation.width, animation.height);
+                // specify the y center as ceiling((mHeight - frame.trimHeight) / 2)
+                // which is equivalent to mHeight - (yc + frame.trimHeight)
+                glDrawTexiOES(xc, mHeight - (yc + frame.trimHeight),
+                              0, frame.trimWidth, frame.trimHeight);
                 if (mClockEnabled && mTimeIsAccurate && part.clockPosY >= 0) {
                     drawTime(mClock, part.clockPosY);
                 }
