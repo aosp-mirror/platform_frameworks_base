@@ -162,11 +162,13 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     private static final int MAXIMUM_NETWORK_SCORE = 100;
 
     // The list of NetworkRequests being satisfied by this Network.
-    public final SparseArray<NetworkRequest> networkRequests = new SparseArray<NetworkRequest>();
+    private final SparseArray<NetworkRequest> mNetworkRequests = new SparseArray<>();
     // The list of NetworkRequests that this Network previously satisfied with the highest
     // score.  A non-empty list indicates that if this Network was validated it is lingered.
     // NOTE: This list is only used for debugging.
     public final ArrayList<NetworkRequest> networkLingered = new ArrayList<NetworkRequest>();
+    // How many of the satisfied requests are actual requests and not listens.
+    private int mNumRequestNetworkRequests = 0;
 
     public final Messenger messenger;
     public final AsyncChannel asyncChannel;
@@ -188,16 +190,61 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         networkMisc = misc;
     }
 
+    // Functions for manipulating the requests satisfied by this network.
+    //
+    // These functions must only called on ConnectivityService's main thread.
+
     /**
      * Add {@code networkRequest} to this network as it's satisfied by this network.
-     * NOTE: This function must only be called on ConnectivityService's main thread.
      * @return true if {@code networkRequest} was added or false if {@code networkRequest} was
      *         already present.
      */
     public boolean addRequest(NetworkRequest networkRequest) {
-        if (networkRequests.get(networkRequest.requestId) == networkRequest) return false;
-        networkRequests.put(networkRequest.requestId, networkRequest);
+        NetworkRequest existing = mNetworkRequests.get(networkRequest.requestId);
+        if (existing == networkRequest) return false;
+        if (existing != null && existing.isRequest()) mNumRequestNetworkRequests--;
+        mNetworkRequests.put(networkRequest.requestId, networkRequest);
+        if (networkRequest.isRequest()) mNumRequestNetworkRequests++;
         return true;
+    }
+
+    /**
+     * Remove the specified request from this network.
+     */
+    public void removeRequest(int requestId) {
+        NetworkRequest existing = mNetworkRequests.get(requestId);
+        if (existing != null && existing.isRequest()) mNumRequestNetworkRequests--;
+        mNetworkRequests.remove(requestId);
+    }
+
+    /**
+     * Returns whether this network is currently satisfying the request with the specified ID.
+     */
+    public boolean isSatisfyingRequest(int id) {
+        return mNetworkRequests.get(id) != null;
+    }
+
+    /**
+     * Returns the request at the specified position in the list of requests satisfied by this
+     * network.
+     */
+    public NetworkRequest requestAt(int index) {
+        return mNetworkRequests.valueAt(index);
+    }
+
+    /**
+     * Returns the number of requests currently satisfied by this network for which
+     * {@link android.net.NetworkRequest#isRequest} returns {@code true}.
+     */
+    public int numRequestNetworkRequests() {
+        return mNumRequestNetworkRequests;
+    }
+
+    /**
+     * Returns the number of requests of any type currently satisfied by this network.
+     */
+    public int numNetworkRequests() {
+        return mNetworkRequests.size();
     }
 
     // Does this network satisfy request?
