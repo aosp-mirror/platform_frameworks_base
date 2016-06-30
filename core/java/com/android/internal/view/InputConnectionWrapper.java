@@ -517,22 +517,20 @@ public class InputConnectionWrapper implements InputConnection {
 
     public boolean commitContent(InputContentInfo inputContentInfo, int flags, Bundle opts) {
         boolean result = false;
-        final boolean grantUriPermission =
-                (flags & InputConnection.INPUT_CONTENT_GRANT_READ_URI_PERMISSION) != 0;
         if (isMethodMissing(MissingMethodFlags.COMMIT_CONTENT)) {
             // This method is not implemented.
             return false;
         }
         try {
-            if (grantUriPermission) {
+            if ((flags & InputConnection.INPUT_CONTENT_GRANT_READ_URI_PERMISSION) != 0) {
                 final AbstractInputMethodService inputMethodService = mInputMethodService.get();
                 if (inputMethodService == null) {
                     // This basically should not happen, because it's the the caller of this method.
                     return false;
                 }
-                // Temporarily grant URI permission.
                 inputMethodService.exposeContent(inputContentInfo, this);
             }
+
             InputContextCallback callback = InputContextCallback.getInstance();
             mIInputContext.commitContent(inputContentInfo, flags, opts, callback.mSeq, callback);
             synchronized (callback) {
@@ -542,10 +540,6 @@ public class InputConnectionWrapper implements InputConnection {
                 }
             }
             callback.dispose();
-            // If this request is not handled, then there is no reason to keep the URI permission.
-            if (grantUriPermission && !result) {
-                inputContentInfo.releasePermission();
-            }
         } catch (RemoteException e) {
             return false;
         }
