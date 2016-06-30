@@ -914,7 +914,9 @@ public class LinearLayout extends ViewGroup {
                     remainingWeightSum -= childWeight;
 
                     final int childHeight;
-                    if (lp.height == 0 && (!mAllowInconsistentMeasurement
+                    if (mUseLargestChild && heightMode != MeasureSpec.EXACTLY) {
+                        childHeight = largestChildHeight;
+                    } else if (lp.height == 0 && (!mAllowInconsistentMeasurement
                             || heightMode == MeasureSpec.EXACTLY)) {
                         // This child needs to be laid out from scratch using
                         // only its share of excess space.
@@ -1299,7 +1301,9 @@ public class LinearLayout extends ViewGroup {
                     remainingWeightSum -= childWeight;
 
                     final int childWidth;
-                    if (lp.width == 0 && (!mAllowInconsistentMeasurement
+                    if (mUseLargestChild && widthMode != MeasureSpec.EXACTLY) {
+                        childWidth = largestChildWidth;
+                    } else if (lp.width == 0 && (!mAllowInconsistentMeasurement
                             || widthMode == MeasureSpec.EXACTLY)) {
                         // This child needs to be laid out from scratch using
                         // only its share of excess space.
