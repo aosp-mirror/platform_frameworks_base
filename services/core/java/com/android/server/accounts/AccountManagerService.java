@@ -3899,7 +3899,12 @@ public class AccountManagerService
                 ResolveInfo resolveInfo = pm.resolveActivityAsUser(intent, 0, mAccounts.userId);
                 ActivityInfo targetActivityInfo = resolveInfo.activityInfo;
                 int targetUid = targetActivityInfo.applicationInfo.uid;
-                if (PackageManager.SIGNATURE_MATCH != pm.checkSignatures(authUid, targetUid)) {
+                if (!GrantCredentialsPermissionActivity.class.getName().equals(
+                        targetActivityInfo.getClass().getName())
+                        && !CantAddAccountActivity.class
+                                .equals(targetActivityInfo.getClass().getName())
+                        && PackageManager.SIGNATURE_MATCH != pm.checkSignatures(authUid,
+                                targetUid)) {
                     String pkgName = targetActivityInfo.packageName;
                     String activityName = targetActivityInfo.name;
                     String tmpl = "KEY_INTENT resolved to an Activity (%s) in a package (%s) that "
