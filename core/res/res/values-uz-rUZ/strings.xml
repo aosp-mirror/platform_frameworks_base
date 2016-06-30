@@ -1132,7 +1132,7 @@
     <string name="usb_charging_notification_title" msgid="6895185153353640787">"USB orqali quvvatlash"</string>
     <string name="usb_supplying_notification_title" msgid="5310642257296510271">"USB orqali ulangan qurilma quvvatlanmoqda"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB orqali fayl o‘tkazish"</string>
-    <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB orqali rasm o‘tkazish"</string>
+    <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB orqali surat o‘tkazish"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB orqali MIDI"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB jihozga ulangan"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Boshqa parametrlarini ko‘rish uchun bosing."</string>

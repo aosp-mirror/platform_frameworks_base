@@ -429,7 +429,7 @@
     <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Permet que l\'aplicació consulti la configuració de Bluetooth del televisor i estableixi i accepti connexions amb dispositius vinculats ."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Permet que una aplicació visualitzi la configuració de Bluetooth del telèfon i que estableixi i accepti connexions amb els dispositius sincronitzats."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"controlar Comunicació de camp proper (NFC)"</string>
-    <string name="permdesc_nfc" msgid="7120611819401789907">"Permet que l\'aplicació es comuniqui amb les etiquetes, les targetes i els lectors de Near Field Communication (NFC)."</string>
+    <string name="permdesc_nfc" msgid="7120611819401789907">"Permet que l\'aplicació es comuniqui amb les etiquetes, les targetes i els lectors de Comunicació de camp proper (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"desactivació del bloqueig de pantalla"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Permet que l\'aplicació desactivi el bloqueig del teclat i qualsevol element de seguretat de contrasenyes associat. Per exemple, el telèfon desactiva el bloqueig del teclat en rebre una trucada telefònica entrant i, a continuació, reactiva el bloqueig del teclat quan finalitza la trucada."</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"Gestionar el maquinari d\'empremtes digitals"</string>
@@ -1316,7 +1316,7 @@
     <string name="storage_usb" msgid="3017954059538517278">"Emmagatzematge USB"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Edita"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Advertiment d\'ús de dades"</string>
-    <string name="data_usage_warning_body" msgid="6660692274311972007">"Toca per veure ús i configuració."</string>
+    <string name="data_usage_warning_body" msgid="6660692274311972007">"Toca per veure l\'ús i la configuració."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Límit de dades 2G-3G assolit"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Límit de dades 4G assolit"</string>
     <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Límit de dades mòbils assolit"</string>
