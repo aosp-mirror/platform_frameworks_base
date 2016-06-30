@@ -22,5 +22,6 @@ import android.os.IBinder;
  * {@hide}
  */
 interface IInputContentUriToken {
+    void take();
     void release();
 }
