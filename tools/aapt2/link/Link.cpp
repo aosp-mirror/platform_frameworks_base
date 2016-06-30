@@ -123,6 +123,14 @@ public:
         mVerbose = val;
     }
 
+    int getMinSdkVersion() override {
+        return mMinSdkVersion;
+    }
+
+    void setMinSdkVersion(int minSdk) {
+        mMinSdkVersion = minSdk;
+    }
+
 private:
     StdErrDiagnostics mDiagnostics;
     NameMangler mNameMangler;
@@ -130,6 +138,7 @@ private:
     uint8_t mPackageId = 0x0;
     SymbolTable mSymbols;
     bool mVerbose = false;
+    int mMinSdkVersion = 0;
 };
 
 static bool copyFileToArchive(io::IFile* file, const std::string& outPath,
@@ -578,14 +587,33 @@ public:
         return true;
     }
 
-    Maybe<AppInfo> extractAppInfoFromManifest(xml::XmlResource* xmlRes) {
+    Maybe<AppInfo> extractAppInfoFromManifest(xml::XmlResource* xmlRes, IDiagnostics* diag) {
         // Make sure the first element is <manifest> with package attribute.
         if (xml::Element* manifestEl = xml::findRootElement(xmlRes->root.get())) {
-            if (manifestEl->namespaceUri.empty() && manifestEl->name == u"manifest") {
-                if (xml::Attribute* packageAttr = manifestEl->findAttribute({}, u"package")) {
-                    return AppInfo{ packageAttr->value };
+            AppInfo appInfo;
+
+            if (!manifestEl->namespaceUri.empty() || manifestEl->name != u"manifest") {
+                diag->error(DiagMessage(xmlRes->file.source) << "root tag must be <manifest>");
+                return {};
+            }
+
+            xml::Attribute* packageAttr = manifestEl->findAttribute({}, u"package");
+            if (!packageAttr) {
+                diag->error(DiagMessage(xmlRes->file.source)
+                            << "<manifest> must have a 'package' attribute");
+                return {};
+            }
+
+            appInfo.package = packageAttr->value;
+
+            if (xml::Element* usesSdkEl = manifestEl->findChild({}, u"uses-sdk")) {
+                if (xml::Attribute* minSdk =
+                        usesSdkEl->findAttribute(xml::kSchemaAndroid, u"minSdkVersion")) {
+                    appInfo.minSdkVersion = minSdk->value;
                 }
             }
+
+            return appInfo;
         }
         return {};
     }
@@ -1089,11 +1117,11 @@ public:
             return 1;
         }
 
-        if (Maybe<AppInfo> maybeAppInfo = extractAppInfoFromManifest(manifestXml.get())) {
-            mContext->setCompilationPackage(maybeAppInfo.value().package);
+        if (Maybe<AppInfo> maybeAppInfo = extractAppInfoFromManifest(manifestXml.get(),
+                                                                     mContext->getDiagnostics())) {
+            AppInfo& appInfo = maybeAppInfo.value();
+            mContext->setCompilationPackage(appInfo.package);
         } else {
-            mContext->getDiagnostics()->error(DiagMessage(mOptions.manifestPath)
-                                             << "no package specified in <manifest> tag");
             return 1;
         }
 
@@ -1293,6 +1321,28 @@ public:
             AutoVersioner versioner;
             if (!versioner.consume(mContext, &mFinalTable)) {
                 mContext->getDiagnostics()->error(DiagMessage() << "failed versioning styles");
+                return 1;
+            }
+        }
+
+        Maybe<AppInfo> maybeAppInfo = extractAppInfoFromManifest(manifestXml.get(),
+                                                                 mContext->getDiagnostics());
+        if (maybeAppInfo && maybeAppInfo.value().minSdkVersion) {
+            if (Maybe<int> maybeMinSdkVersion =
+                    ResourceUtils::tryParseSdkVersion(maybeAppInfo.value().minSdkVersion.value())) {
+                mContext->setMinSdkVersion(maybeMinSdkVersion.value());
+            }
+        }
+
+        if (!mOptions.staticLib && mContext->getMinSdkVersion() > 0) {
+            if (mContext->verbose()) {
+                mContext->getDiagnostics()->note(
+                        DiagMessage() << "collapsing resource versions for minimum SDK "
+                        << mContext->getMinSdkVersion());
+            }
+
+            VersionCollapser collapser;
+            if (!collapser.consume(mContext, &mFinalTable)) {
                 return 1;
             }
         }

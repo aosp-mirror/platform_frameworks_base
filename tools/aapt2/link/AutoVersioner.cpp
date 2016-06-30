@@ -27,7 +27,9 @@ namespace aapt {
 
 bool shouldGenerateVersionedResource(const ResourceEntry* entry, const ConfigDescription& config,
                                      const int sdkVersionToGenerate) {
+    // We assume the caller is trying to generate a version greater than the current configuration.
     assert(sdkVersionToGenerate > config.sdkVersion);
+
     const auto endIter = entry->values.end();
     auto iter = entry->values.begin();
     for (; iter != endIter; ++iter) {

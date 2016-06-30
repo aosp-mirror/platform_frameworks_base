@@ -19,6 +19,8 @@
 
 #include "Resource.h"
 
+#include <utility>
+
 namespace aapt {
 
 enum {
@@ -47,6 +49,7 @@ enum {
 
 size_t findAttributeSdkLevel(ResourceId id);
 size_t findAttributeSdkLevel(const ResourceName& name);
+std::pair<StringPiece16, int> getDevelopmentSdkCodeNameAndVersion();
 
 } // namespace aapt
 

@@ -16,10 +16,7 @@
 
 #include "ConfigDescription.h"
 #include "link/Linkers.h"
-#include "test/Builders.h"
-#include "test/Context.h"
-
-#include <gtest/gtest.h>
+#include "test/Test.h"
 
 namespace aapt {
 
@@ -54,7 +51,7 @@ TEST(AutoVersionerTest, GenerateVersionedResourceWhenHigherVersionExists) {
 TEST(AutoVersionerTest, VersionStylesForTable) {
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
             .setPackageId(u"app", 0x7f)
-            .addValue(u"@app:style/Foo", ResourceId(0x7f020000), test::parseConfigOrDie("v4"),
+            .addValue(u"@app:style/Foo", test::parseConfigOrDie("v4"), ResourceId(0x7f020000),
                       test::StyleBuilder()
                             .addItem(u"@android:attr/onClick", ResourceId(0x0101026f),
                                      util::make_unique<Id>())
@@ -65,7 +62,7 @@ TEST(AutoVersionerTest, VersionStylesForTable) {
                             .addItem(u"@android:attr/colorAccent", ResourceId(0x01010435),
                                      util::make_unique<Id>())
                             .build())
-            .addValue(u"@app:style/Foo", ResourceId(0x7f020000), test::parseConfigOrDie("v21"),
+            .addValue(u"@app:style/Foo", test::parseConfigOrDie("v21"), ResourceId(0x7f020000),
                       test::StyleBuilder()
                             .addItem(u"@android:attr/paddingEnd", ResourceId(0x010103b4),
                                      util::make_unique<Id>())

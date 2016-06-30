@@ -51,6 +51,10 @@ public:
         return false;
     }
 
+    int getMinSdkVersion() override {
+        return 0;
+    }
+
 private:
     std::u16string mEmpty;
     StdErrDiagnostics mDiagnostics;

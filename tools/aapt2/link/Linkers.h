@@ -44,12 +44,19 @@ struct CallSite {
 bool shouldGenerateVersionedResource(const ResourceEntry* entry, const ConfigDescription& config,
                                      const int sdkVersionToGenerate);
 
-struct AutoVersioner : public IResourceTableConsumer {
+class AutoVersioner : public IResourceTableConsumer {
+public:
     bool consume(IAaptContext* context, ResourceTable* table) override;
 };
 
-struct XmlAutoVersioner : public IXmlResourceConsumer {
+class XmlAutoVersioner : public IXmlResourceConsumer {
+public:
     bool consume(IAaptContext* context, xml::XmlResource* resource) override;
+};
+
+class VersionCollapser : public IResourceTableConsumer {
+public:
+    bool consume(IAaptContext* context, ResourceTable* table) override;
 };
 
 /**

@@ -23,6 +23,9 @@
 
 namespace aapt {
 
+static const char16_t* sDevelopmentSdkCodeName = u"O";
+static int sDevelopmentSdkLevel = 26;
+
 static const std::vector<std::pair<uint16_t, size_t>> sAttrIdMap = {
     { 0x021c, 1 },
     { 0x021d, 2 },
@@ -733,6 +736,10 @@ size_t findAttributeSdkLevel(const ResourceName& name) {
         return iter->second;
     }
     return SDK_LOLLIPOP_MR1;
+}
+
+std::pair<StringPiece16, int> getDevelopmentSdkCodeNameAndVersion() {
+    return std::make_pair(StringPiece16(sDevelopmentSdkCodeName), sDevelopmentSdkLevel);
 }
 
 } // namespace aapt

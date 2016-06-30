@@ -79,6 +79,11 @@ bool isAttributeReference(const StringPiece16& str);
  */
 bool tryParseBool(const StringPiece16& str, bool* outValue);
 
+/**
+ * Parses an SDK version, which can be an integer, or a letter from A-Z.
+ */
+Maybe<int> tryParseSdkVersion(const StringPiece16& str);
+
 /*
  * Returns a Reference, or None Maybe instance if the string `str` was parsed as a
  * valid reference to a style.

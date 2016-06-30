@@ -142,6 +142,10 @@ public:
         mVerbose = val;
     }
 
+    int getMinSdkVersion() override {
+        return 0;
+    }
+
 private:
     StdErrDiagnostics mDiagnostics;
     bool mVerbose = false;

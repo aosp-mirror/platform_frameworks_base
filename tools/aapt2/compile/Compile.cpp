@@ -454,6 +454,10 @@ public:
        return nullptr;
     }
 
+    int getMinSdkVersion() override {
+        return 0;
+    }
+
 private:
     StdErrDiagnostics mDiagnostics;
     bool mVerbose = false;

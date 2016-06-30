@@ -41,6 +41,7 @@ struct IAaptContext {
     virtual uint8_t getPackageId() = 0;
     virtual NameMangler* getNameMangler() = 0;
     virtual bool verbose() = 0;
+    virtual int getMinSdkVersion() = 0;
 };
 
 struct IResourceTableConsumer {

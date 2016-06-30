@@ -15,13 +15,9 @@
  */
 
 #include "flatten/TableFlattener.h"
-#include "test/Builders.h"
-#include "test/Context.h"
+#include "test/Test.h"
 #include "unflatten/BinaryResourceParser.h"
 #include "util/Util.h"
-
-
-#include <gtest/gtest.h>
 
 using namespace android;
 
@@ -150,8 +146,8 @@ TEST_F(TableFlattenerTest, FlattenFullyLinkedTable) {
                       test::buildReference(u"@com.app.test:id/one", ResourceId(0x7f020000)))
             .addValue(u"@com.app.test:integer/one", ResourceId(0x7f030000),
                       util::make_unique<BinaryPrimitive>(uint8_t(Res_value::TYPE_INT_DEC), 1u))
-            .addValue(u"@com.app.test:integer/one", ResourceId(0x7f030000),
-                      test::parseConfigOrDie("v1"),
+            .addValue(u"@com.app.test:integer/one", test::parseConfigOrDie("v1"),
+                      ResourceId(0x7f030000),
                       util::make_unique<BinaryPrimitive>(uint8_t(Res_value::TYPE_INT_DEC), 2u))
             .addString(u"@com.app.test:string/test", ResourceId(0x7f040000), u"foo")
             .addString(u"@com.app.test:layout/bar", ResourceId(0x7f050000), u"res/layout/bar.xml")
