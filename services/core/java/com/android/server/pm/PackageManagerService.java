@@ -3217,10 +3217,11 @@ public class PackageManagerService extends IPackageManager.Stub {
         final PermissionsState permissionsState = ps.getPermissionsState();
 
         // Compute GIDs only if requested
-        final int[] gids = (flags & PackageManager.GET_GIDS) != 0
-                ? permissionsState.computeGids(userId) : EMPTY_INT_ARRAY;
-        // TODO b/29879962 Calculate granted permissions only if needed in generatePackageInfo
-        final Set<String> permissions = permissionsState.getPermissions(userId);
+        final int[] gids = (flags & PackageManager.GET_GIDS) == 0
+                ? EMPTY_INT_ARRAY : permissionsState.computeGids(userId);
+        // Compute granted permissions only if package has requested permissions
+        final Set<String> permissions = ArrayUtils.isEmpty(p.requestedPermissions)
+                ? Collections.<String>emptySet() : permissionsState.getPermissions(userId);
         final PackageUserState state = ps.readUserState(userId);
 
         return PackageParser.generatePackageInfo(p, gids, flags,
