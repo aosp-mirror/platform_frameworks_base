@@ -809,7 +809,9 @@ public final class CachedBluetoothDevice implements Comparable<CachedBluetoothDe
             // No separate prompt is displayed after pairing.
             if (getPhonebookPermissionChoice() == CachedBluetoothDevice.ACCESS_UNKNOWN) {
                 if (mDevice.getBluetoothClass().getDeviceClass()
-                        == BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE) {
+                        == BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE ||
+                    mDevice.getBluetoothClass().getDeviceClass()
+                        == BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET) {
                     setPhonebookPermissionChoice(CachedBluetoothDevice.ACCESS_ALLOWED);
                 } else {
                     setPhonebookPermissionChoice(CachedBluetoothDevice.ACCESS_REJECTED);
