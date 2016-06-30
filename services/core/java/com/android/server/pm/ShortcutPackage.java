@@ -1450,6 +1450,16 @@ class ShortcutPackage extends ShortcutPackageItem {
                 Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
                         + " is floating, but has rank=" + si.getRank());
             }
+            if (si.getIcon() != null) {
+                failed = true;
+                Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
+                        + " still has an icon");
+            }
+            if (si.hasIconFile() && si.hasIconResource()) {
+                failed = true;
+                Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
+                        + " has both resource and bitmap icons");
+            }
         }
 
         if (failed) {
