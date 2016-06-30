@@ -1672,6 +1672,16 @@ public abstract class Connection extends Conferenceable {
     }
 
     /**
+     * Sets state to pulling (e.g. the connection is being pulled to the local device from another
+     * device).  Only applicable for {@link Connection}s with
+     * {@link Connection#PROPERTY_IS_EXTERNAL_CALL} and {@link Connection#CAPABILITY_CAN_PULL_CALL}.
+     */
+    public final void setPulling() {
+        checkImmutable();
+        setState(STATE_PULLING_CALL);
+    }
+
+    /**
      * Sets state to be on hold.
      */
     public final void setOnHold() {
