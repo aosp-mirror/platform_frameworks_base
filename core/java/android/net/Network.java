@@ -34,9 +34,13 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 import javax.net.SocketFactory;
 
 import com.android.okhttp.ConnectionPool;
+import com.android.okhttp.Dns;
 import com.android.okhttp.HttpHandler;
 import com.android.okhttp.HttpsHandler;
 import com.android.okhttp.OkHttpClient;
@@ -62,10 +66,10 @@ public class Network implements Parcelable {
     // Objects used to perform per-network operations such as getSocketFactory
     // and openConnection, and a lock to protect access to them.
     private volatile NetworkBoundSocketFactory mNetworkBoundSocketFactory = null;
-    // mLock should be used to control write access to mConnectionPool and mNetwork.
+    // mLock should be used to control write access to mConnectionPool and mDns.
     // maybeInitHttpClient() must be called prior to reading either variable.
     private volatile ConnectionPool mConnectionPool = null;
-    private volatile com.android.okhttp.internal.Network mNetwork = null;
+    private volatile Dns mDns = null;
     private final Object mLock = new Object();
 
     // Default connection pool values. These are evaluated at startup, just
@@ -219,17 +223,17 @@ public class Network implements Parcelable {
     // out) ConnectionPools.
     private void maybeInitHttpClient() {
         synchronized (mLock) {
-            if (mNetwork == null) {
-                mNetwork = new com.android.okhttp.internal.Network() {
+            if (mDns == null) {
+                mDns = new Dns() {
                     @Override
-                    public InetAddress[] resolveInetAddresses(String host) throws UnknownHostException {
-                        return Network.this.getAllByName(host);
+                    public List<InetAddress> lookup(String hostname) throws UnknownHostException {
+                        return Arrays.asList(Network.this.getAllByName(hostname));
                     }
                 };
             }
             if (mConnectionPool == null) {
                 mConnectionPool = new ConnectionPool(httpMaxConnections,
-                        httpKeepAliveDurationMs);
+                        httpKeepAliveDurationMs, TimeUnit.MILLISECONDS);
             }
         }
     }
@@ -288,9 +292,8 @@ public class Network implements Parcelable {
         }
         OkHttpClient client = okUrlFactory.client();
         client.setSocketFactory(getSocketFactory()).setConnectionPool(mConnectionPool);
-
-        // Use internal APIs to change the Network.
-        Internal.instance.setNetwork(client, mNetwork);
+        // Let network traffic go via mDns
+        client.setDns(mDns);
 
         return okUrlFactory.open(url);
     }
