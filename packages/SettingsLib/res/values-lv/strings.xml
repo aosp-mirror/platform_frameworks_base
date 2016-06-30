@@ -180,7 +180,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Atļaut neīstas vietas"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Atļaut neīstas vietas"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Iespējot atribūtu pārbaudi"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"Lietot DHCP klientu no operētājsistēmas Lollipop, nevis jauno Android DHCP klientu."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Mobilo datu savienojums būs vienmēr aktīvs, pat ja būs aktīvs Wi-Fi savienojums (ātrai ierīces pārslēgšanai uz citu tīklu)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Vai atļaut USB atkļūdošanu?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB atkļūdošana ir paredzēta tikai ar izstrādi saistītām darbībām. Izmantojiet to datu kopēšanai no datora uz ierīci un pretēji, lietotņu instalēšanai ierīcē bez paziņojumiem un žurnāla datu lasīšanai."</string>

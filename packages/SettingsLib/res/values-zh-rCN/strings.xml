@@ -180,7 +180,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"允许模拟位置"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"允许模拟位置"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"启用视图属性检查功能"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"使用 Lollipop 的 DHCP 客户端，而不是新的 Android DHCP 客户端。"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"始终开启移动数据网络，即使 WLAN 网络已开启（便于快速切换网络）。"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"是否允许USB调试？"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB调试仅适用于开发工作。该功能可用于在您的计算机和设备之间复制数据、在您的设备上安装应用而不发送通知以及读取日志数据。"</string>

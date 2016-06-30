@@ -180,7 +180,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"允許模擬位置"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"允許模擬位置"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"啟用檢視屬性檢查"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"使用 Lollipop 的 DHCP 用戶端，而不是新的 Android DHCP 用戶端。"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"即使 Wi‑Fi 已啟用，仍永遠啟用流動數據 (可快速切換網絡)。"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"允許 USB 偵錯嗎？"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB 偵錯是針對應用程式開發而設計的功能，可讓您在電腦與裝置間複製資料、不用通知即可在裝置上安裝應用程式，以及讀取記錄資料。"</string>

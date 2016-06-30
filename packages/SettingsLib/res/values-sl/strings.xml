@@ -180,7 +180,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Dovoli lažne lokacije"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Dovoli lažne lokacije"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Omogoči pregled atributa pogleda"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"Uporaba odjemalca DHCP za Lollipop namesto novega odjemalca DHCP za Android."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Prenos podatkov v mobilnih omrežjih je vedno aktiven – tudi ko je aktivna povezava Wi-Fi (za hiter preklop med omrežji)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Ali dovolite odpravljanje težav s povezavo USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Odpravljanje težav s povezavo USB je namenjeno samo za razvoj. Lahko ga uporabljate za kopiranje podatkov med računalnikom in napravo, nameščanje aplikacij v napravo brez obveščanja in branje podatkov v dnevniku."</string>
