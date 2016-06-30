@@ -180,7 +180,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Pozorowanie lokalizacji"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Zezwalaj na pozorowanie lokalizacji"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Inspekcja wyświetlania atrybutu"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"Użyj klienta DHCP z Lollipop zamiast nowego klienta DHCP Androida"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Nie wyłączaj transmisji danych przez sieć komórkową, nawet gdy aktywne jest połączenie Wi-Fi (aby szybko przełączać sieci)"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Czy zezwalać na debugowanie USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Debugowanie USB jest przeznaczone wyłącznie do celów programistycznych. Może służyć do kopiowania danych między komputerem a urządzeniem, instalowania aplikacji na urządzeniu bez powiadamiania, a także odczytu danych dziennika."</string>

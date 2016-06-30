@@ -180,7 +180,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Leyfa gervistaðsetningar"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Leyfa gervistaðsetningar"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Virkja yfirlit skoðunar eiginda"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"Nota gamla DHCP-biðlarann úr Lollipop í staðinn fyrir nýja Android DHCP-biðlarann."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Hafa alltaf kveikt á farsímagögnum, líka þegar kveikt er á Wi-Fi (til að skipta megi hratt milli kerfa)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Leyfa USB-villuleit?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB-villuleit er aðeins ætluð til nota í þróunarskyni. Hana má nota til að afrita gögn á milli tölvu og tækis, setja forrit upp í tækinu án tilkynninga og lesa annálagögn."</string>

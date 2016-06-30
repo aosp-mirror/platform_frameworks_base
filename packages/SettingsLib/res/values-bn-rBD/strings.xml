@@ -180,7 +180,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"নকল অবস্থানের অনুমতি দিন"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"মক অবস্থানগুলি মঞ্জুর করুন"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"অ্যাট্রিবিউট পরিদর্শন দেখা সক্ষম করুন"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"নতুন Android DHCP ক্লায়েন্টের পরিবর্তে Lollipop এর থেকে DHCP ক্লায়েন্ট ব্যবহার করুন৷"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"ওয়াই-ফাই সক্রিয় থাকার সময়েও (দ্রুত নেটওয়ার্কে পাল্টানোর জন্য) সর্বদা মোবাইল ডেটা সক্রিয় রাখুন।"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB ডিবাগিং মঞ্জুর করবেন?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB ডিবাগিং কেবলমাত্র বিকাশ করার উদ্দেশ্যে। আপনার কম্পিউটার এবং আপনার ডিভাইসের মধ্যে ডেটা অনুলিপি করতে এটি ব্যবহার করুন, বিজ্ঞপ্তি ছাড়া আপনার ডিভাইসে অ্যাপ্লিকেশানগুলি ইনস্টল করুন এবং ডেটা লগ পড়ুন।"</string>

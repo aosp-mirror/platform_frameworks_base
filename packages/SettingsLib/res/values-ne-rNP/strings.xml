@@ -180,7 +180,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"नक्कली स्थानहरूलाई अनुमति दिनुहोस्"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"नक्कली स्थानहरूलाई अनुमति दिनुहोस्"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"दृष्टिकोण विशेषता निरीक्षण सक्षम पार्नुहोस्"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"नयाँ Android DHCP ग्राहकको सट्टा Lollipop बाट DHCP ग्राहक प्रयोग गर्नुहोस्।"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Wi-Fi सक्रिय हुँदा पनि मोबाइल डेटा सधैँ सक्रिय राख्नुहोस् (द्रूत नेटवर्क स्विच गर्नको लागि)।"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB डिबग गर्न लागि अनुमति दिने हो?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"युएसबी डिबगिङ विकास प्रयोजनका लागि मात्र निर्मित हुन्छ। यसलाई तपाईँको कम्प्युटर र तपाईँको उपकरणका बीच डेटा प्रतिलिपि गर्न, बिना सूचना तपाईँको उपकरणमा अनुप्रयोगहरू स्थापना गर्न र लग डेटा पढ्नका लागि प्रयोग गर्नुहोस्।"</string>

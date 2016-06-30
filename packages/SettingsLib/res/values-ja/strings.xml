@@ -180,7 +180,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"擬似ロケーションを許可"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"擬似ロケーションを許可する"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"表示属性検査を有効にする"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"新しいAndroid DHCPクライアントの代わりにLollipopのDHCPクライアントを使用します。"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Wi‑Fiが（ネットワークの自動切り替えで）ONのときでもモバイルデータが常にONになります。"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USBデバッグを許可しますか？"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USBデバッグは開発専用に設計されています。パソコンと端末の間でデータをコピーする場合や、アプリを通知なしで端末にインストールする場合、ログデータを読み取る場合に使用できます。"</string>

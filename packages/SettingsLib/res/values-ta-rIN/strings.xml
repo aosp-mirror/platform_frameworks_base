@@ -180,7 +180,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"போலி இருப்பிடங்களை அனுமதி"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"போலி இருப்பிடங்களை அனுமதி"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"காட்சி பண்புக்கூறு சோதனையை இயக்கு"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"புதிய Android DHCP க்ளையன்ட்டிற்குப் பதிலாக, Lollipop இலிருந்து DHCP க்ளையன்ட்டைப் பயன்படுத்தவும்."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"வைஃபை இயங்கும் போதும் (வேகமான நெட்வொர்க் மாற்றத்திற்கு), மொபைல் தரவை எப்போதும் இயக்கத்தில் வைக்கும்."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB பிழைத்திருத்தத்தை அனுமதிக்கவா?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB பிழைத்திருத்தம் மேம்படுத்தல் நோக்கங்களுக்காக மட்டுமே. அதை உங்கள் கணினி மற்றும் சாதனத்திற்கு இடையில் தரவை நகலெடுக்கவும், அறிவிப்பு இல்லாமல் உங்கள் சாதனத்தில் பயன்பாடுகளை நிறுவவும், பதிவு தரவைப் படிக்கவும் பயன்படுத்தவும்."</string>

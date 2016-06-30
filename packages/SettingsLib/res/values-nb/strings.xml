@@ -98,7 +98,7 @@
     <string name="launch_defaults_some" msgid="313159469856372621">"Noen standardvalg er angitt"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Ingen standardvalg er angitt"</string>
     <string name="tts_settings" msgid="8186971894801348327">"Talesyntese-kontroller"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"Tekst-til-tale"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"Tekst til tale"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Talehastighet"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Hvor raskt teksten leses"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"Stemmeleie"</string>
@@ -180,7 +180,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Tillat simulert posisjon"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Tillat bruk av simulerte GPS-koordinater"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Slå på inspeksjon av visningsattributt"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"Bruk DHCP-klienten fra Lollipop i stedet for den nye DHCP-klienten for Android."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Ha alltid mobildata slått på, selv når Wi-Fi er aktiv (for hurtig nettverksbytting)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Tillate USB-feilsøking?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB-feilsøking er bare ment for utviklingsformål. Bruk det til å kopiere data mellom datamaskinen og enheten, installere apper på enheten uten varsel og lese loggdata."</string>

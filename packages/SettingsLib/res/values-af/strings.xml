@@ -180,7 +180,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Laat skynliggings toe"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Laat skynliggings toe"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Aktiveer aansigkenmerkinspeksie"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"Gebruik eerder die DHCP-kliënt van Lollipop af as die nuwe Android DHCP-kliënt."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Hou mobiele data altyd aktief, selfs wanneer Wi‑Fi aktief is (vir vinnige netwerkwisseling)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Laat USB-ontfouting toe?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB-ontfouting is net vir ontwikkelingsdoeleindes bedoel. Gebruik dit om data te kopieer tussen jou rekenaar en jou toestel, programme op jou toestel te installeer sonder kennisgewing en om loglêerdata te lees."</string>

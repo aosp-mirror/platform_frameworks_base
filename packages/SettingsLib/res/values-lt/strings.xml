@@ -180,7 +180,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Leisti imituoti vietas"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Leisti imituoti vietas"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Įgalinti peržiūros atributų tikrinimą"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"DHCP kliento programos iš „Lollipop“ versijos naudojimas vietoje naujos „Android“ DHCP kliento programos."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Visada suaktyvinti mobiliojo ryšio duomenis, net kai aktyvus „Wi‑Fi“ ryšys (kad būtų galima greitai perjungti tinklą)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Leisti USB perkrovimą?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB derinimas skirtas naudoti tik kūrimo tikslais. Jis gali būti naudojamas norint kopijuoti duomenis iš kompiuterio į įrenginį ir atvirkščiai, įdiegti programas įrenginyje be pranešimo ir skaityti žurnalo duomenis."</string>

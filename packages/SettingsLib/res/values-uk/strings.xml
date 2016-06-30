@@ -180,7 +180,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Фіктивні місцезнаходження"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Дозв. фіктивні місцезн."</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Увімкнути оцінку атрибуції переглядів"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"Використовувати клієнт DHCP з Lollipop, а не новий клієнт DHCP з Android."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Не вимикати мобільний Інтернет, навіть якщо ввімкнено Wi‑Fi (щоб швидше переходити між мережами)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Дозвол. налагодж. USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Налагодження USB застосовується лише з метою розробки. Його можна використовувати для копіювання даних між комп’ютером і пристроєм, встановлення програм на вашому пристрої без сповіщення та читання даних журналу."</string>
