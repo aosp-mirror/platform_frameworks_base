@@ -840,16 +840,15 @@ public interface InputConnection {
     public void closeConnection();
 
     /**
-     * When this flag is used in {@link #commitContent(InputContentInfo, int, Bundle)}, the editor
-     * will be able to request read access to the content URI contained in the
-     * {@link InputContentInfo} object.
+     * When this flag is used, the editor will be able to request read access to the content URI
+     * contained in the {@link InputContentInfo} object.
      *
      * <p>Make sure that the content provider owning the Uri sets the
      * {@link android.R.styleable#AndroidManifestProvider_grantUriPermissions
      * grantUriPermissions} attribute in its manifest or included the
      * {@link android.R.styleable#AndroidManifestGrantUriPermission
-     * &lt;grant-uri-permissions&gt;} tag. Otherwise
-     * {@link #commitContent(InputContentInfo, int, Bundle)} can fail.</p>
+     * &lt;grant-uri-permissions&gt;} tag. Otherwise {@link InputContentInfo#requestPermission()}
+     * can fail.</p>
      *
      * <p>Although calling this API is allowed only for the IME that is currently selected, the
      * client is able to request a temporary read-only access even after the current IME is switched
