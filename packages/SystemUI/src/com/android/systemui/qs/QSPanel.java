@@ -166,6 +166,10 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
         brightnessSlider.setMirrorController(c);
     }
 
+    View getBrightnessView() {
+        return mBrightnessView;
+    }
+
     public void setCallback(Callback callback) {
         mCallback = callback;
     }

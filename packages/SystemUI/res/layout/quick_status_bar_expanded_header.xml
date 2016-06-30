@@ -121,7 +121,6 @@
     <include
         android:id="@+id/date_time_alarm_group"
         layout="@layout/status_bar_alarm_group"
-        android:layout_marginTop="16dp"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true" />
 
