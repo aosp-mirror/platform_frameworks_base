@@ -73,6 +73,13 @@ public:
             bottom(height) {
     }
 
+    inline Rect(const SkIRect& rect):
+            left(rect.fLeft),
+            top(rect.fTop),
+            right(rect.fRight),
+            bottom(rect.fBottom) {
+    }
+
     inline Rect(const SkRect& rect):
             left(rect.fLeft),
             top(rect.fTop),
