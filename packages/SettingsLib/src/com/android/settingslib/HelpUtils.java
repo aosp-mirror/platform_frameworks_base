@@ -25,6 +25,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources.Theme;
 import android.net.Uri;
+import android.provider.Settings.Global;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.TypedValue;
@@ -91,6 +92,9 @@ public class HelpUtils {
      */
     public static boolean prepareHelpMenuItem(final Activity activity, MenuItem helpMenuItem,
             String helpUriString, String backupContext) {
+        if (Global.getInt(activity.getContentResolver(), Global.DEVICE_PROVISIONED, 0) == 0) {
+            return false;
+        }
         if (TextUtils.isEmpty(helpUriString)) {
             // The help url string is empty or null, so set the help menu item to be invisible.
             helpMenuItem.setVisible(false);
@@ -128,6 +132,9 @@ public class HelpUtils {
 
     public static Intent getHelpIntent(Context context, String helpUriString,
             String backupContext) {
+        if (Global.getInt(context.getContentResolver(), Global.DEVICE_PROVISIONED, 0) == 0) {
+            return null;
+        }
         // Try to handle as Intent Uri, otherwise just treat as Uri.
         try {
             Intent intent = Intent.parseUri(helpUriString,
