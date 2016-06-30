@@ -240,9 +240,7 @@ public class VectorDrawable extends Drawable {
      * constructors to set the state and initialize local properties.
      */
     private VectorDrawable(@NonNull VectorDrawableState state, @Nullable Resources res) {
-        // Constant state sharing is disabled until we fix onStateChanged()
-        // affecting the shared bitmap.
-        mVectorState = new VectorDrawableState(state);
+        mVectorState = state;
         updateLocalState(res);
     }
 
@@ -388,6 +386,11 @@ public class VectorDrawable extends Drawable {
     protected boolean onStateChange(int[] stateSet) {
         boolean changed = false;
 
+        // When the VD is stateful, we need to mutate the drawable such that we don't share the
+        // cache bitmap with others. Such that the state change only affect this new cached bitmap.
+        if (isStateful()) {
+            mutate();
+        }
         final VectorDrawableState state = mVectorState;
         if (state.onStateChange(stateSet)) {
             changed = true;
