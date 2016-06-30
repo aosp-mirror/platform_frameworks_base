@@ -184,7 +184,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Allow mock locations"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Allow mock locations"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Enable view attribute inspection"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"Use the DHCP client from Lollipop instead of the new Android DHCP client."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Always keep mobile data active, even when Wi‑Fi is active (for fast network switching)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Allow USB debugging?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB debugging is intended for development purposes only. Use it to copy data between your computer and your device, install apps on your device without notification and read log data."</string>

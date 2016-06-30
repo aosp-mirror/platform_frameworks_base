@@ -184,7 +184,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Permitir localizacións falsas"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Permite localizacións falsas"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Activar a inspección de atributos de visualización"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"Utiliza o cliente DHCP de Lollipop en lugar do novo cliente DHCP de Android."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Mantén sempre os datos móbiles activos, aínda que a wifi estea activada (para un rápido cambio de rede)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Queres permitir a depuración USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"A depuración de erros USB está deseñada unicamente para fins de programación. Utilízaa para copiar datos entre o ordenador e o dispositivo, instalar aplicacións no dispositivo sen enviar notificacións e ler os datos do rexistro."</string>

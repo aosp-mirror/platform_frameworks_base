@@ -184,7 +184,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Sınaq yerləşmələrə icazə verin"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Sınaq yerləşmələrə icazə verin"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Atribut inspeksiyasına baxışa icazə verin"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"Android DHCP klienti əvəzinə Lollipopdan DHCP klient istifadə edin."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Hətta Wi‑Fi aktiv olanda da mobil datanı həmişə aktiv saxlayın (sürətli şəbəkək keçidi üçün)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB debaq funksiyasına icazə verilsin?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB sazlanması yalnız inkişaf məqsədlidir. Kompüteriniz və cihazınız arasında datanı kopyalamaq üçün ondan istifadə edin, bildiriş olmadan tətbiqləri cihazınıza quraşdırın və qeydiyyat datasını oxuyun."</string>

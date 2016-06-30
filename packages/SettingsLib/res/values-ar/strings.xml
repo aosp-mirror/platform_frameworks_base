@@ -184,7 +184,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"السماح بمواقع وهمية"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"السماح بمواقع وهمية"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"تمكين فحص سمة العرض"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"‏يمكنك استخدام برنامج DHCP من Lollipop بدلاً من برنامج DHCP الجديد على Android."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"‏اجعل بيانات الجوّال نشطة دائمًا، حتى عندما يكون اتصال Wi‑Fi نشطًا (لتبديل الشبكة بسرعة)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"‏هل تريد السماح بتصحيح أخطاء USB؟"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"‏تم تصميم تصحيح أخطاء USB لأغراض التطوير فقط. يمكن استخدامه لنسخ البيانات بين الكمبيوتر والجهاز، وتثبيت التطبيقات على جهازك بدون تنبيه، وقراءة بيانات السجل."</string>

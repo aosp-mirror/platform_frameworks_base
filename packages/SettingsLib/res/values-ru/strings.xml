@@ -184,7 +184,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Фиктивные местоположения"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Разрешить использование фиктивных местоположений"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Включить проверку атрибутов"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"Использовать DHCP-клиент для Android 5.0, а не для новой версии."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Не отключать передачу данных по мобильной сети даже при активном Wi-Fi-подключении (для быстрого переключения между сетями)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Разрешить отладку USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Отладка по USB – это режим, который позволяет использовать ваше устройство как внешний накопитель: перемещать файлы (с компьютера и на компьютер), напрямую устанавливать приложения, а также просматривать системные журналы."</string>

@@ -184,7 +184,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Թույատրել կեղծ տեղադրությունները"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Թույլ տալ կեղծ տեղադրություններ"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Միացնել ցուցադրման հատկանիշների ստուգումը"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"Օգտագործել Lollipop-ի DHCP ծրագիրը՝ նոր Android DHCP ծրագրի փոխարեն:"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Միշտ ակտիվացրած պահել բջջային տվյալները, նույնիսկ Wi‑Fi-ը միացրած ժամանակ (ցանցերի միջև արագ փոխարկման համար):"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Թույլատրե՞լ USB-ի վրիպազերծումը:"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB վրիպազերծումը միայն ծրագրավորման նպատակների համար է: Օգտագործեք այն ձեր համակարգչից տվյալները ձեր սարք պատճենելու համար, առանց ծանուցման ձեր սարքի վրա ծրագրեր տեղադրելու և տվյալների մատյանը ընթերցելու համար:"</string>

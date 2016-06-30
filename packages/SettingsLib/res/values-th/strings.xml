@@ -184,7 +184,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"อนุญาตให้จำลองตำแหน่ง"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"อนุญาตให้จำลองตำแหน่ง"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"เปิดใช้การตรวจสอบแอตทริบิวต์มุมมอง"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"ใช้ไคลเอ็นต์ DHCP จาก Lollipop แทนไคลเอ็นต์ DHCP ใหม่บน Android"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"เปิดใช้ข้อมูลมือถืออยู่เสมอ แม้ในเวลาที่ใช้งาน Wi-Fi อยู่ (สำหรับสวิตชิงเครือข่ายความเร็วสูง)"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"อนุญาตให้แก้ไขข้อบกพร่อง USB หรือไม่"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"การแก้ไขข้อบกพร่อง USB มีไว้เพื่อการพัฒนาเท่านั้น ให้ใช้การแก้ไขนี้เพื่อคัดลอกข้อมูลระหว่างคอมพิวเตอร์และอุปกรณ์ ติดตั้งแอปพลิเคชันบนอุปกรณ์โดยไม่มีการแจ้งเตือน และอ่านข้อมูลบันทึก"</string>

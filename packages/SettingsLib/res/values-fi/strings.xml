@@ -184,7 +184,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Salli sijaintien imitointi"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Salli sijaintien imitointi"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Ota attribuuttinäkymän tarkistus käyttöön"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"Käytä Lollipopin DHCP-asiakassovellusta Androidin uuden DHCP-asiakassovelluksen sijasta."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Pidä mobiilidata aina käytössä, vaikka Wi-Fi olisi aktiivinen. Tämä mahdollistaa nopeamman vaihtelun verkkojen välillä."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Sallitaanko USB-vianetsintä?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB-vianetsintä on tarkoitettu vain kehittäjien käyttöön. Sen avulla voidaan kopioida tietoja tietokoneesi ja laitteesi välillä, asentaa laitteeseesi sovelluksia ilmoittamatta siitä sinulle ja lukea lokitietoja."</string>

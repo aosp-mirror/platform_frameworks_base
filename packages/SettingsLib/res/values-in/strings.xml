@@ -184,7 +184,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Mengizinkan lokasi palsu"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Mengizinkan lokasi palsu"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Aktifkan inspeksi atribut tampilan"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"Gunakan klien DHCP dari Lollipop alih-alih klien DHCP Android baru."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Selalu aktifkan data seluler, meski Wi-Fi aktif (agar jaringan beralih dengan cepat)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Izinkan melakukan debug USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Debugging USB dimaksudkan untuk tujuan pengembangan saja. Gunakan untuk menyalin data antara komputer dan perangkat Anda, memasang apl pada perangkat tanpa notifikasi, dan membaca data log."</string>

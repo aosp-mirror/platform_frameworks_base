@@ -184,7 +184,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Payagan ang mga kunwaring lokasyon"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Payagan ang mga kunwaring lokasyon"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"I-enable ang pagsisiyasat sa attribute na view"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"Gamitin ang DHCP client mula sa Lollipop sa halip na ang bagong Android DHCP client."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Palaging panatilihing aktibo ang mobile data, kahit na aktibo ang Wi‑Fi (para sa mabilis na paglipat ng network)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Payagan ang pag-debug ng USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Ang pag-debug ng USB ay nilalayon para sa mga layuning pagpapabuti lamang. Gamitin ito upang kumopya ng data sa pagitan ng iyong computer at iyong device, mag-install ng apps sa iyong device nang walang notification, at magbasa ng data ng log."</string>

@@ -184,7 +184,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Хуурамч байршлыг зөвшөөрөх"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Хуурамч байршлыг зөвшөөрөх"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Харах тохируулгын шалгалтыг идэвхжүүлэх"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"Шинэ Андройд DHCP харилцагчийн оронд Lollipop-ийн DHCP харилцагчийг хэрэглэ."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Wi‑Fi идэвхтэй байхад ч гэсэн гар утасны датаг идэвхтэй байлгадаг (сүлжээг түргэн солихын тулд)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB дебаг хийхийг зөвшөөрөх үү?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB дебаг нь зөвхөн хөгжүүлэлтийн зорилготой. Үүнийг өөрийн компьютер болон төхөөрөмжийн хооронд өгөгдөл хуулах, өөрийн төхөөрөмж дээр мэдэгдэлгүйгээр аппликешн суулгах, лог датаг унших зэрэгт ашиглаж болно."</string>

@@ -184,7 +184,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Cho phép vị trí mô phỏng"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Cho phép vị trí mô phỏng"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Cho phép kiểm tra thuộc tính của chế độ xem"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"Sử dụng ứng dụng DHCP từ Lollipop thay vì ứng dụng DHCP mới của Android."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Luôn giữ cho dữ liệu di động hoạt động, ngay cả khi Wi-Fi đang hoạt động (để chuyển đổi mạng nhanh)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Cho phép gỡ lỗi USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Gỡ lỗi USB chỉ dành cho mục đích phát triển. Hãy sử dụng tính năng này để sao chép dữ liệu giữa máy tính và thiết bị của bạn, cài đặt ứng dụng trên thiết bị của bạn mà không thông báo và đọc dữ liệu nhật ký."</string>

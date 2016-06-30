@@ -184,7 +184,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"ಅಣಕು ಸ್ಥಾನಗಳನ್ನು ಅನುಮತಿಸು"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"ಅಣಕು ಸ್ಥಾನಗಳನ್ನು ಅನುಮತಿಸು"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"ವೀಕ್ಷಣೆ ಆಟ್ರಿಬ್ಯೂಟ್ ಪರಿಶೀಲನೆ"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"ಹೊಸ Android DHCP ಕ್ಲೈಂಟ್ ಬದಲಾಗಿ Lollipop ನಿಂದ DHCP ಕ್ಲೈಂಟ್ ಬಳಸಿ."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"ವೈ-ಫೈ ಸಕ್ರಿಯವಾಗಿರುವಾಗಲೂ, ಯಾವಾಗಲೂ ಮೊಬೈಲ್‌ ಡೇಟಾ ಸಕ್ರಿಯವಾಗಿರಿಸಿ (ವೇಗವಾಗಿ ನೆಟ್‌ವರ್ಕ್‌ ಬದಲಾಯಿಸಲು)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB ಡೀಬಗ್ ಮಾಡುವಿಕೆಯನ್ನು ಅನುಮತಿಸುವುದೇ?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB ಡೀಬಗ್ ಮಾಡುವಿಕೆಯು ಅಭಿವೃದ್ಧಿ ಉದ್ದೇಶಗಳಿಗೆ ಮಾತ್ರ ಆಗಿದೆ. ನಿಮ್ಮ ಕಂಪ್ಯೂಟರ್ ಮತ್ತು ನಿಮ್ಮ ಸಾಧನದ ನಡುವೆ ಡೇಟಾವನ್ನು ನಕಲಿಸಲು, ಅಧಿಸೂಚನೆ ಇಲ್ಲದೆ ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಸ್ಥಾಪಿಸಲು ಮತ್ತು ಲಾಗ್ ಡೇಟಾ ಓದಲು ಅದನ್ನು ಬಳಸಿ."</string>

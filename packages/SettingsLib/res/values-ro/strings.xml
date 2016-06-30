@@ -184,7 +184,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Permiteți locațiile fictive"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Permiteți locațiile fictive"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Activați inspectarea atributelor de vizualizare"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"Folosiți clientul DHCP din Lollipop în locul noului client Android DHCP."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Păstrați întotdeauna conexiunea de date mobile activată, chiar și atunci când funcția Wi‑Fi este activată (pentru comutarea rapidă între rețele)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Permiteți depanarea USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Depanarea USB are exclusiv scopuri de dezvoltare. Utilizați-o pentru a copia date de pe computer pe dispozitiv, pentru a instala aplicații pe dispozitiv fără notificare și pentru a citi datele din jurnale."</string>

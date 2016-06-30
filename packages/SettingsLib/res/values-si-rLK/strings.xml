@@ -184,7 +184,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"ව්‍යාජ ස්ථානයන්ට අවසර දෙන්න"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"ව්‍යාජ ස්ථාන අනුමත කරන්න"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"උපලක්ෂණ පරික්ෂාව බැලීම සබල කරන්න"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"නව Android DHCP සේවාලාභියා වෙනුවට Lollipop වෙතින් DHCP සේවාලාභියා භාවිත කරන්න."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Wi‑Fi අක්‍රිය විට පවා, සැම විටම ජංගම දත්ත ක්‍රියාකාරීව තබන්න (අවසන් ජාල මාරුව සඳහා)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB දෝශාවේක්ෂණයට ඉඩ දෙන්නද?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB දෝශාවේක්ෂණය සංවර්ධන කටයුතු සඳහා පමණක් යොදාගැනේ. එය ඔබගේ පරිගණකය සහ ඔබගේ උපාංගය අතර දත්ත පිටපත් කිරීමට පමණක් භාවිතා කරන්න, ඔබගේ උපාංගය මත දැනුම්දීම් රහිතව යෙදුම් ස්ථාපනය කරන්න, සහ ලොග් දත්ත කියවන්න."</string>
