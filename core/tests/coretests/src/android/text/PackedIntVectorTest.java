@@ -16,13 +16,16 @@
 
 package android.text;
 
+import android.support.test.filters.SmallTest;
+
 import junit.framework.TestCase;
 
 /**
  * PackedIntVectorTest tests the features of android.util.PackedIntVector.
  */
 public class PackedIntVectorTest extends TestCase {
- 
+
+    @SmallTest
     public void testBasic() throws Exception {
         for (int width = 0; width < 10; width++) {
             PackedIntVector p = new PackedIntVector(width);

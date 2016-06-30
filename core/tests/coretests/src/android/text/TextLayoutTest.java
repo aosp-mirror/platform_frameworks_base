@@ -16,11 +16,8 @@
 
 package android.text;
 
-import android.test.suitebuilder.annotation.SmallTest;
-import android.text.DynamicLayout;
-import android.text.Layout;
-import android.text.StaticLayout;
-import android.text.TextPaint;
+import android.support.test.filters.SmallTest;
+
 import junit.framework.TestCase;
 
 

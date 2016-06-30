@@ -19,7 +19,6 @@ package android.text;
 import android.test.InstrumentationTestCase;
 import android.test.MoreAsserts;
 import android.test.suitebuilder.annotation.MediumTest;
-import android.text.Spannable;
 
 public abstract class SpannableTest extends InstrumentationTestCase {
 

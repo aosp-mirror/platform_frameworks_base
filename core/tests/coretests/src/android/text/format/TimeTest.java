@@ -16,9 +16,8 @@
 
 package android.text.format;
 
-import android.test.suitebuilder.annotation.SmallTest;
-import android.test.suitebuilder.annotation.Suppress;
-import android.text.format.Time;
+import android.support.test.filters.SmallTest;
+import android.support.test.filters.Suppress;
 import android.util.Log;
 import android.util.TimeFormatException;
 

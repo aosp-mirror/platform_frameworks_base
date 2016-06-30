@@ -16,13 +16,14 @@
 
 package android.text;
 
+import android.support.test.filters.SmallTest;
 import android.text.Layout.Directions;
 import android.text.StaticLayoutTest.LayoutBuilder;
 
+import junit.framework.TestCase;
+
 import java.util.Arrays;
 import java.util.Formatter;
-
-import junit.framework.TestCase;
 
 public class StaticLayoutDirectionsTest extends TestCase {
     private static final char ALEF = '\u05d0';
@@ -106,7 +107,7 @@ public class StaticLayoutDirectionsTest extends TestCase {
         return new String(chars, 0, chars.length);
     }
 
-    // @SmallTest
+    @SmallTest
     public void testDirections() {
         StringBuilder buf = new StringBuilder("\n");
         Formatter f = new Formatter(buf);
@@ -121,7 +122,7 @@ public class StaticLayoutDirectionsTest extends TestCase {
         }
     }
 
-    // @SmallTest
+    @SmallTest
     public void testTrailingWhitespace() {
         LayoutBuilder b = StaticLayoutTest.builder();
         b.setText(pseudoBidiToReal("Ab   c"));
@@ -136,6 +137,7 @@ public class StaticLayoutDirectionsTest extends TestCase {
         expectDirections("split line", expected, result);
     }
 
+    @SmallTest
     public void testNextToRightOf() {
         LayoutBuilder b = StaticLayoutTest.builder();
         b.setText(pseudoBidiToReal("aA1B2"));
@@ -159,6 +161,7 @@ public class StaticLayoutDirectionsTest extends TestCase {
         }
     }
 
+    @SmallTest
     public void testNextToLeftOf() {
         LayoutBuilder b = StaticLayoutTest.builder();
         b.setText(pseudoBidiToReal("aA1B2"));

@@ -16,7 +16,9 @@
 
 package android.text;
 
+import android.support.test.filters.SmallTest;
 import android.text.Layout.Alignment;
+
 import junit.framework.TestCase;
 
 /**
@@ -38,6 +40,7 @@ public class StaticLayoutTextMeasuringTest extends TestCase {
         }
     }
 
+    @SmallTest
     public void testGetPrimaryHorizontal_zwnbsp() {
         // a, ZERO WIDTH NO-BREAK SPACE
         String testString = "a\uFEFF";
@@ -48,6 +51,7 @@ public class StaticLayoutTextMeasuringTest extends TestCase {
         assertEquals(layout.getPrimaryHorizontal(2), layout.getPrimaryHorizontal(1));
     }
 
+    @SmallTest
     public void testGetPrimaryHorizontal_devanagari() {
         // DEVANAGARI LETTER KA, DEVANAGARI VOWEL SIGN AA
         String testString = "\u0915\u093E";
@@ -58,6 +62,7 @@ public class StaticLayoutTextMeasuringTest extends TestCase {
         assertEquals(layout.getPrimaryHorizontal(2), layout.getPrimaryHorizontal(1));
     }
 
+    @SmallTest
     public void testGetPrimaryHorizontal_flagEmoji() {
         // REGIONAL INDICATOR SYMBOL LETTER U, REGIONAL INDICATOR SYMBOL LETTER S, REGIONAL
         // INDICATOR SYMBOL LETTER Z

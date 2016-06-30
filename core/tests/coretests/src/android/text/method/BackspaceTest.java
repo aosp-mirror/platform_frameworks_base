@@ -16,18 +16,13 @@
 
 package android.text.method;
 
-import android.app.Activity;
-import android.test.suitebuilder.annotation.SmallTest;
-import android.test.suitebuilder.annotation.Suppress;
+import android.support.test.filters.SmallTest;
 import android.text.InputType;
-import android.text.method.BaseKeyListener;
-import android.text.method.KeyListenerTestCase;
 import android.view.KeyEvent;
-import android.widget.EditText;
 import android.widget.TextView.BufferType;
 
 /**
- * Test backspace key handling of {@link android.text.method.BaseKeyListner}.
+ * Test backspace key handling of {@link android.text.method.BaseKeyListener}.
  *
  * Only contains edge cases. For normal cases, see {@see android.text.method.cts.BackspaceTest}.
  * TODO: introduce test cases for surrogate pairs and replacement span.
