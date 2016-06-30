@@ -8690,19 +8690,21 @@ public class WindowManagerService extends IWindowManager.Stub
                 case SEAMLESS_ROTATION_TIMEOUT: {
                     // Rotation only supported on primary display.
                     // TODO(multi-display)
-                    final DisplayContent displayContent = getDefaultDisplayContentLocked();
-                    final WindowList windows = displayContent.getWindowList();
-                    boolean layoutNeeded = false;
-                    for (int i = windows.size() - 1; i >= 0; i--) {
-                        WindowState w = windows.get(i);
-                        if (w.mSeamlesslyRotated) {
-                            layoutNeeded = true;
-                            w.setDisplayLayoutNeeded();
+                    synchronized(mWindowMap) {
+                        final DisplayContent displayContent = getDefaultDisplayContentLocked();
+                        final WindowList windows = displayContent.getWindowList();
+                        boolean layoutNeeded = false;
+                        for (int i = windows.size() - 1; i >= 0; i--) {
+                            WindowState w = windows.get(i);
+                            if (w.mSeamlesslyRotated) {
+                                layoutNeeded = true;
+                                w.setDisplayLayoutNeeded();
+                            }
+                            w.mSeamlesslyRotated = false;
                         }
-                        w.mSeamlesslyRotated = false;
-                    }
-                    if (layoutNeeded) {
-                        mWindowPlacerLocked.performSurfacePlacement();
+                        if (layoutNeeded) {
+                            mWindowPlacerLocked.performSurfacePlacement();
+                        }
                     }
                 }
                 break;
