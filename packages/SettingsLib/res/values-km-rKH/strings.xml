@@ -184,7 +184,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"ឲ្យ​ក្លែង​ទីតាំង"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"អនុញ្ញាត​ទីតាំង​ក្លែងក្លាយ"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"បើក​ការ​ត្រួតពិនិត្យ​គុណ​លក្ខណៈ​ទិដ្ឋភាព"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"ប្រើម៉ាស៊ីនកូន DHCP ចេញពី Lollipop ជំនួសឲ្យម៉ាស៊ីនកូន Android DHCP ថ្មី។"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"រក្សាទិន្នន័យចល័តឲ្យសកម្មជានិច្ច បើទោះបីជា Wi‑Fi សកម្មក៏ដោយ (សម្រាប់ការប្តូរបណ្តាញដែលមានល្បឿនលឿន)។"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"អនុញ្ញាត​ការ​កែ​កំហុស​យូអេសប៊ី?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"ការ​កែ​កំហុស​​យូអេសប៊ី​គឺ​សម្រាប់​តែ​ការ​អភិវឌ្ឍ​ប៉ុណ្ណោះ។ ប្រើ​វា​ដើម្បី​ចម្លង​ទិន្នន័យ​រវាង​កុំព្យូទ័រ និង​ឧបករណ៍​របស់​អ្នក ដំឡើង​កម្មវិធី​ក្នុង​ឧបករណ៍​របស់​អ្នក​ដោយ​មិន​ជូន​ដំណឹង និង​អាន​ទិន្នន័យ​កំណត់ហេតុ។"</string>

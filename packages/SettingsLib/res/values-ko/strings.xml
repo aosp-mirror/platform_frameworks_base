@@ -184,7 +184,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"모의 위치 허용"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"모의 위치 허용"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"보기 속성 검사 사용"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"새로운 Android DHCP 클라이언트 대신 Lollipop의 DHCP 클라이언트 사용"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Wi‑Fi가 활성화되어 있을 때에도 빠른 네트워크 전환을 위하여 항상 모바일 데이터를 활성 상태로 유지합니다."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB 디버깅을 허용하시겠습니까?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB 디버깅은 개발용으로만 설계되었습니다. 이 기능을 사용하면 컴퓨터와 기기 간에 데이터를 복사하고 알림 없이 기기에 앱을 설치하며 로그 데이터를 읽을 수 있습니다."</string>

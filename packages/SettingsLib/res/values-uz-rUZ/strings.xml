@@ -184,7 +184,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Qo‘lbola joylashuvlarga ruxsat berish"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Joylashuv emulyatsiyasiga ruxsat berish"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Alomatlar tekshiruvini yoqish"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"Yangi Android DHCP mijoz-dasturi o‘rniga Lollipop tizimi DHCP mijoz-dasturidan foydalanilsin."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Mobil internet har doim yoniq tursin, hatto Wi-Fi yoniq bo‘lsa ham (bir tarmoqdan ikkinchisiga tezroq o‘tish uchun)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB orqali nosozliklarni tuzatishga ruxsat berilsinmi?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB orqali nosozliklarni tuzatish faqat dasturlash maqsadlarida yoqiladi. Undan ma‘lumotlarni qurilmangiz va kompyuter o‘rtasida ko‘chirish, ilovalarni xabarnomasiz o‘rnatish va jurnal ma‘lumotlarini o‘qish uchun foydalaniladi."</string>

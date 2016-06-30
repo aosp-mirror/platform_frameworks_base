@@ -184,7 +184,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Жасанды аймақтарға рұқсат беру"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Жасанды аймақтарды пайдалануға рұқсат беру"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Көру төлсипатын тексеруді қосу"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"Жаңа Android DHCP клиентінің орнына Lollipop ішіндегі DHCP клиентін пайдалану"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Wi‑Fi қосулы кезде де ұялы деректерді белсенді етіп ұстау (желіні жылдам ауыстыру үшін)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB жөндеулеріне рұқсат берілсін бе?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB жөндеу дамыту мақсаттарына ғана арналған. Оны компьютер және құрылғы арасында дерек көшіру, құрылғыға ескертусіз қолданба орнату және тіркелім деректерін оқу үшін қолданыңыз."</string>

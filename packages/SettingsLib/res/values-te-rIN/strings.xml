@@ -184,7 +184,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"అనుకృత స్థానాలను అనుమతించు"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"అనుకృత స్థానాలను అనుమతించు"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"వీక్షణ లక్షణ పర్యవేక్షణను ప్రారంభించు"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"కొత్త Android DHCP క్లయింట్‌కి బదులుగా Lollipop నుండి DHCP క్లయింట్‌ను ఉపయోగించండి."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"ఎల్లప్పుడూ మొబైల్ డేటాను సక్రియంగా ఉంచు, Wi‑Fi సక్రియంగా ఉన్నా కూడా (వేగవంతమైన నెట్‌వర్క్ మార్పు కోసం)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB డీబగ్గింగ్‌ను అనుమతించాలా?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB డీబగ్గింగ్ అనేది అభివృద్ధి ప్రయోజనాల కోసం మాత్రమే ఉద్దేశించబడింది. మీ కంప్యూటర్ మరియు మీ పరికరం మధ్య డేటాను కాపీ చేయడానికి, నోటిఫికేషన్ లేకుండా మీ పరికరంలో అనువర్తనాలను ఇన్‌స్టాల్ చేయడానికి మరియు లాగ్ డేటాను చదవడానికి దీన్ని ఉపయోగించండి."</string>

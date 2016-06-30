@@ -184,7 +184,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"ອະນຸຍາດໃຫ້ຈຳລອງຕຳແໜ່ງ"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"ອະນຸຍາດໃຫ້ຈຳລອງຕຳແໜ່ງ"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"ເປີດ​ນຳ​ໃຊ້​ການກວດ​ສອບ​ຄຸນ​ສົມ​ບັດ​ມຸມມອງ"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"ໃຊ້​ລູກ​ຄ້າ DHCP ຈາກ Lollipop ແທນ​ລູກ​ຄ້າ Android DHCP ໃໝ່."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"ໃຫ້​ຂໍ້​ມູນ​ມື​ຖື​ເປີດ​ຢູ່​ສະ​ເໝີ, ແມ້​ແຕ່​ເມື່ອ Wi‑Fi ເປີດ​ຢູ່ (ສຳ​ລັບ​ການ​ສະ​ຫຼັບ​ເຄືອ​ຂ່າຍ​ໄວ)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"ອະນຸຍາດໃຫ້ດີບັ໊ກຜ່ານ USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"ການດີບັ໊ກຜ່ານ USB ແມ່ນມີຈຸດປະສົງເພື່ອການພັດທະນາເທົ່ານັ້ນ. ມັນສາມາດໃຊ້ເພື່ອສຳເນົາຂໍ້ມູນລະຫວ່າງຄອມພິວເຕີ ແລະອຸປະກອນຂອງທ່ານ, ຕິດຕັ້ງແອັບຯໂດຍບໍ່ຜ່ານການແຈ້ງເຕືອນ ແລະອ່ານຂໍ້ມູນການບັນທຶກ."</string>

@@ -184,7 +184,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Onartu kokapen faltsuak"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Onartu kokapen faltsuak"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Gaitu ikuspegiaren atributuak ikuskatzeko aukera"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"Erabili Lollipop bertsioko DHCP bezeroa eta ez Android DHCP bezero berria."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Mantendu mugikorreko datuak beti aktibo, baita Wi-Fi konexioa aktibo dagoenean ere (sarez bizkor aldatu ahal izateko)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB arazketa onartu?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB arazketa garapen-xedeetarako soilik dago diseinatuta. Erabil ezazu ordenagailuaren eta gailuaren artean datuak kopiatzeko, aplikazioak gailuan jakinarazi gabe instalatzeko eta erregistro-datuak irakurtzeko."</string>

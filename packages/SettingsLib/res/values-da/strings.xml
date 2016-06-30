@@ -184,7 +184,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Imiterede placeringer"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Tillad imiterede placeringer"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Aktivér visning af attributinspektion"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"Brug DHCP-klienten fra Lollipop i stedet for den nye DHCP-klient i Android."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Hold altid mobildata aktiveret, selv når Wi-Fi er aktiveret (for at skifte hurtigt mellem netværk)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Vil du tillade USB-fejlretning?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB-fejlretning er kun beregnet til udvikling og kan bruges til at kopiere data mellem din computer og enheden, installere apps på enheden uden meddelelser og læse logdata."</string>

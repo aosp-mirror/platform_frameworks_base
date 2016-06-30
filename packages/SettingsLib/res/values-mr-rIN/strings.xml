@@ -184,7 +184,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"बनावट स्थानांना अनुमती द्या"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"बनावट स्थानांना अनुमती द्या"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"दृश्‍य विशेषता तपासणी सक्षम करा"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"नवीन Android DHCP क्लायंट ऐवजी Lollipop वरून DHCP क्लायंटचा वापर करा."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"जरी वाय-फाय सक्रिय असले तरीही, नेहमी मोबाईल डेटा सक्रिय ठेवा (जलद नेटवर्क स्विच करण्यासाठी)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB डीबग करण्यास अनुमती द्यायची?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB डीबग करण्याचा हेतू फक्त विकासाच्या उद्देशांसाठी आहे. याचा वापर आपला संगणक आणि आपले डिव्हाइस यांच्या दरम्यान डेटा कॉपी करण्यासाठी करा, सूचनेशिवाय आपल्या डिव्हाइसवर अॅप्स स्थापित करा आणि लॉग डेटा वाचा."</string>

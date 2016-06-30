@@ -184,7 +184,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"אפשר מיקומים מדומים"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"אפשר מיקומים מדומים"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"אפשר בדיקת תכונת תצוגה"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"‏השתמש בלקוח DHCP של Lollipop במקום לקוח DHCP החדש של Android."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"‏השאר את הנתונים לנייד פעילים תמיד, גם כש-Wi‑Fi פעיל (למעבר מהיר בין רשתות)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"‏לאפשר ניפוי באגים של USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"‏ניפוי באגים באמצעות USB מיועד למטרות פיתוח בלבד. השתמש בו להעתקת נתונים בין המחשב והמכשיר שלך, להתקנת אפליקציות במכשיר ללא התראה ולקריאת נתוני יומן."</string>
