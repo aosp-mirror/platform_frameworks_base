@@ -1109,6 +1109,7 @@
   <java-symbol type="string" name="config_demoModeLauncherComponent" />
   <java-symbol type="string" name="demo_starting_message" />
   <java-symbol type="string" name="demo_restarting_message" />
+  <java-symbol type="string" name="conference_call" />
 
 
   <java-symbol type="plurals" name="bugreport_countdown" />

@@ -4398,4 +4398,6 @@
     <!-- Accessibilty string added to a widget that has been suspended [CHAR LIMIT=20] -->
     <string name="suspended_widget_accessibility">Disabled <xliff:g id="label" example="Calendar">%1$s</xliff:g></string>
 
+    <!-- Label used by Telephony code, assigned as the display name for conference calls [CHAR LIMIT=60] -->
+    <string name="conference_call">Conference Call</string>
 </resources>
