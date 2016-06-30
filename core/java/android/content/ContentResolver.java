@@ -34,6 +34,7 @@ import android.database.CrossProcessCursorWrapper;
 import android.database.Cursor;
 import android.database.IContentObserver;
 import android.graphics.Point;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CancellationSignal;
@@ -51,6 +52,7 @@ import android.util.EventLog;
 import android.util.Log;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.MimeIconUtils;
 import com.android.internal.util.Preconditions;
 
 import dalvik.system.CloseGuard;
@@ -2692,5 +2694,10 @@ public abstract class ContentResolver {
     /** @hide */
     public int resolveUserId(Uri uri) {
         return ContentProvider.getUserIdFromUri(uri, mContext.getUserId());
+    }
+
+    /** @hide */
+    public Drawable getTypeDrawable(String mimeType) {
+        return MimeIconUtils.loadMimeIcon(mContext, mimeType);
     }
 }
