@@ -68,6 +68,14 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".InvalidateTreeActivity"
+            android:label="General/Invalidate Tree" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".TrivialAnimationActivity"
             android:label="General/Trivial Animation" >
             <intent-filter>
