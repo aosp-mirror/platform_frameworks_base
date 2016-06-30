@@ -24,7 +24,9 @@ import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.PersistableBundle;
+import android.test.suitebuilder.annotation.SmallTest;
 
+@SmallTest
 public class ShortcutManagerTest4 extends BaseShortcutManagerTest {
 
     private static Bundle sIntentExtras = makeBundle(

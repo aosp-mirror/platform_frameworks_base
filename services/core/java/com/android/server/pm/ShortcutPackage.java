@@ -260,9 +260,6 @@ class ShortcutPackage extends ShortcutPackageItem {
             }
         }
 
-        // TODO Check max dynamic count.
-        // mShortcutUser.mService.enforceMaxDynamicShortcuts(newDynamicCount);
-
         // If it was originally pinned, the new one should be pinned too.
         if (wasPinned) {
             newShortcut.addFlags(ShortcutInfo.FLAG_PINNED);
