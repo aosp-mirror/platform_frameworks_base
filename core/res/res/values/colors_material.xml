@@ -34,6 +34,7 @@
 
     <color name="secondary_material_settings">@color/material_blue_grey_800</color>
     <color name="tertiary_material_settings">@color/material_blue_grey_700</color>
+    <color name="quaternary_material_settings">@color/material_blue_grey_200</color>
 
     <color name="accent_material_light">@color/material_deep_teal_500</color>
     <color name="accent_material_dark">@color/material_deep_teal_200</color>
@@ -85,6 +86,7 @@
     <color name="material_deep_teal_300">#ff4db6ac</color>
     <color name="material_deep_teal_500">#ff009688</color>
 
+    <color name="material_blue_grey_200">#ffb0bec5</color>
     <color name="material_blue_grey_700">#ff455a64</color>
     <color name="material_blue_grey_800">#ff37474f</color>
     <color name="material_blue_grey_900">#ff263238</color>
