@@ -132,31 +132,6 @@ public class NetworkMonitor extends StateMachine {
     public static final int EVENT_NETWORK_TESTED = BASE + 2;
 
     /**
-     * Inform NetworkMonitor to linger a network.  The Monitor should
-     * start a timer and/or start watching for zero live connections while
-     * moving towards LINGER_COMPLETE.  After the Linger period expires
-     * (or other events mark the end of the linger state) the LINGER_COMPLETE
-     * event should be sent and the network will be shut down.  If a
-     * CMD_NETWORK_CONNECTED happens before the LINGER completes
-     * it indicates further desire to keep the network alive and so
-     * the LINGER is aborted.
-     */
-    public static final int CMD_NETWORK_LINGER = BASE + 3;
-
-    /**
-     * Message to self indicating linger delay has expired.
-     * arg1 = Token to ignore old messages.
-     */
-    private static final int CMD_LINGER_EXPIRED = BASE + 4;
-
-    /**
-     * Inform ConnectivityService that the network LINGER period has
-     * expired.
-     * obj = NetworkAgentInfo
-     */
-    public static final int EVENT_NETWORK_LINGER_COMPLETE = BASE + 5;
-
-    /**
      * Message to self indicating it's time to evaluate a network's connectivity.
      * arg1 = Token to ignore old messages.
      */
@@ -204,12 +179,6 @@ public class NetworkMonitor extends StateMachine {
      */
     private static final int CMD_CAPTIVE_PORTAL_RECHECK = BASE + 12;
 
-    private static final String LINGER_DELAY_PROPERTY = "persist.netmon.linger";
-    // Default to 30s linger time-out.  Modifyable only for testing.
-    private static int DEFAULT_LINGER_DELAY_MS = 30000;
-    private final int mLingerDelayMs;
-    private int mLingerToken = 0;
-
     // Start mReevaluateDelayMs at this value and double.
     private static final int INITIAL_REEVALUATE_DELAY_MS = 1000;
     private static final int MAX_REEVALUATE_DELAY_MS = 10*60*1000;
@@ -248,7 +217,6 @@ public class NetworkMonitor extends StateMachine {
     private final State mMaybeNotifyState = new MaybeNotifyState();
     private final State mEvaluatingState = new EvaluatingState();
     private final State mCaptivePortalState = new CaptivePortalState();
-    private final State mLingeringState = new LingeringState();
 
     private CustomIntentReceiver mLaunchCaptivePortalAppBroadcastReceiver = null;
 
@@ -275,10 +243,7 @@ public class NetworkMonitor extends StateMachine {
         addState(mMaybeNotifyState, mDefaultState);
             addState(mEvaluatingState, mMaybeNotifyState);
             addState(mCaptivePortalState, mMaybeNotifyState);
-        addState(mLingeringState, mDefaultState);
         setInitialState(mDefaultState);
-
-        mLingerDelayMs = SystemProperties.getInt(LINGER_DELAY_PROPERTY, DEFAULT_LINGER_DELAY_MS);
 
         mIsCaptivePortalCheckEnabled = Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.CAPTIVE_PORTAL_DETECTION_ENABLED, 1) == 1;
@@ -308,10 +273,6 @@ public class NetworkMonitor extends StateMachine {
         @Override
         public boolean processMessage(Message message) {
             switch (message.what) {
-                case CMD_NETWORK_LINGER:
-                    log("Lingering");
-                    transitionTo(mLingeringState);
-                    return HANDLED;
                 case CMD_NETWORK_CONNECTED:
                     logNetworkEvent(NetworkEvent.NETWORK_CONNECTED);
                     transitionTo(mEvaluatingState);
@@ -614,72 +575,6 @@ public class NetworkMonitor extends StateMachine {
         @Override
         public void exit() {
             removeMessages(CMD_CAPTIVE_PORTAL_RECHECK);
-        }
-    }
-
-    // Being in the LingeringState State indicates a Network's validated bit is true and it once
-    // was the highest scoring Network satisfying a particular NetworkRequest, but since then
-    // another Network satisfied the NetworkRequest with a higher score and hence this Network
-    // is "lingered" for a fixed period of time before it is disconnected.  This period of time
-    // allows apps to wrap up communication and allows for seamless reactivation if the other
-    // higher scoring Network happens to disconnect.
-    private class LingeringState extends State {
-        private static final String ACTION_LINGER_EXPIRED = "android.net.netmon.lingerExpired";
-
-        private WakeupMessage mWakeupMessage;
-
-        @Override
-        public void enter() {
-            mEvaluationTimer.reset();
-            final String cmdName = ACTION_LINGER_EXPIRED + "." + mNetId;
-            mWakeupMessage = makeWakeupMessage(mContext, getHandler(), cmdName, CMD_LINGER_EXPIRED);
-            long wakeupTime = SystemClock.elapsedRealtime() + mLingerDelayMs;
-            mWakeupMessage.schedule(wakeupTime);
-        }
-
-        @Override
-        public boolean processMessage(Message message) {
-            switch (message.what) {
-                case CMD_NETWORK_CONNECTED:
-                    log("Unlingered");
-                    // If already validated, go straight to validated state.
-                    if (mNetworkAgentInfo.lastValidated) {
-                        transitionTo(mValidatedState);
-                        return HANDLED;
-                    }
-                    return NOT_HANDLED;
-                case CMD_LINGER_EXPIRED:
-                    mConnectivityServiceHandler.sendMessage(
-                            obtainMessage(EVENT_NETWORK_LINGER_COMPLETE, mNetworkAgentInfo));
-                    return HANDLED;
-                case CMD_FORCE_REEVALUATION:
-                    // Ignore reevaluation attempts when lingering.  A reevaluation could result
-                    // in a transition to the validated state which would abort the linger
-                    // timeout.  Lingering is the result of score assessment; validity is
-                    // irrelevant.
-                    return HANDLED;
-                case CMD_CAPTIVE_PORTAL_APP_FINISHED:
-                    // Ignore user network determination as this could abort linger timeout.
-                    // Networks are only lingered once validated because:
-                    // - Unvalidated networks are never lingered (see rematchNetworkAndRequests).
-                    // - Once validated, a Network's validated bit is never cleared.
-                    // Since networks are only lingered after being validated a user's
-                    // determination will not change the death sentence that lingering entails:
-                    // - If the user wants to use the network or bypasses the captive portal,
-                    //   the network's score will not be increased beyond its current value
-                    //   because it is already validated.  Without a score increase there is no
-                    //   chance of reactivation (i.e. aborting linger timeout).
-                    // - If the user does not want the network, lingering will disconnect the
-                    //   network anyhow.
-                    return HANDLED;
-                default:
-                    return NOT_HANDLED;
-            }
-        }
-
-        @Override
-        public void exit() {
-            mWakeupMessage.cancel();
         }
     }
 
@@ -994,20 +889,6 @@ public class NetworkMonitor extends StateMachine {
         }
         mContext.sendBroadcastAsUser(latencyBroadcast, UserHandle.CURRENT,
                 PERMISSION_ACCESS_NETWORK_CONDITIONS);
-    }
-
-    // Allow tests to override linger time.
-    @VisibleForTesting
-    public static void SetDefaultLingerTime(int time_ms) {
-        if (Process.myUid() == Process.SYSTEM_UID) {
-            throw new SecurityException("SetDefaultLingerTime only for internal testing.");
-        }
-        DEFAULT_LINGER_DELAY_MS = time_ms;
-    }
-
-    @VisibleForTesting
-    protected WakeupMessage makeWakeupMessage(Context c, Handler h, String s, int i) {
-        return new WakeupMessage(c, h, s, i);
     }
 
     private void logNetworkEvent(int evtype) {
