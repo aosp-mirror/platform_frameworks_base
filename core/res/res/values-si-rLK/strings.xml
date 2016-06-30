@@ -1658,7 +1658,8 @@
     <string name="demo_starting_message" msgid="5268556852031489931">"ආදර්ශනය ආරම්භ කරමින්..."</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"උපාංගය යළි සකසමින්..."</string>
     <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"උපාංගය යළි සකසන්නද?"</string>
-    <string name="demo_user_inactivity_timeout_countdown" msgid="1743456683091721620">"ඔබට යම් වෙනස් කිරීම් අහිමි වනු ඇති අතර ආදර්ශනය තත්පර <xliff:g id="TIMEOUT">%1$s</xliff:g>කින් නැවත ආරම්භ වනු ඇත…"</string>
+    <!-- no translation found for demo_user_inactivity_timeout_countdown (5675588824402569506) -->
+    <skip />
     <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"අවලංගු කරන්න"</string>
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"දැන් යළි සකසන්න"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"සීමා කිරීම්වලින් තොරව මෙම උපාංගය භාවිත කිරීමට කර්මාන්ත ශාලා යළි සැකසීම"</string>
