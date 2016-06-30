@@ -1558,6 +1558,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     // being called for multiwindow assist in a single session.
     private int mViSessionId = 1000;
 
+    final boolean mPermissionReviewRequired;
+
     final class KillHandler extends Handler {
         static final int KILL_PROCESS_GROUP_MSG = 4000;
 
@@ -2583,6 +2585,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         mSystemThread = ActivityThread.currentActivityThread();
 
         Slog.i(TAG, "Memory class: " + ActivityManager.staticGetMemoryClass());
+
+        mPermissionReviewRequired = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_permissionReviewRequired);
 
         mHandlerThread = new ServiceThread(TAG,
                 android.os.Process.THREAD_PRIORITY_FOREGROUND, false /*allowIo*/);
@@ -10741,7 +10746,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     // If permissions need a review before any of the app components can run,
                     // we return no provider and launch a review activity if the calling app
                     // is in the foreground.
-                    if (Build.PERMISSIONS_REVIEW_REQUIRED) {
+                    if (mPermissionReviewRequired || Build.PERMISSIONS_REVIEW_REQUIRED) {
                         if (!requestTargetProviderPermissionsReviewIfNeededLocked(cpi, r, userId)) {
                             return null;
                         }

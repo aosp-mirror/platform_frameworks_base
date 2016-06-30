@@ -2616,4 +2616,7 @@
   <java-symbol type="array" name="config_emergency_mcc_codes" />
 
   <java-symbol type="drawable" name="emergency_icon" />
+
+  <java-symbol type="bool" name="config_permissionReviewRequired" />
+
 </resources>
