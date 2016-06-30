@@ -38,7 +38,7 @@ import java.util.List;
  *
  * An application can publish shortcuts with {@link #setDynamicShortcuts(List)} and
  * {@link #addDynamicShortcuts(List)}.  There can be at most
- * {@link #getMaxShortcutCountForActivity()} number of dynamic shortcuts at a time from the
+ * {@link #getMaxShortcutCountPerActivity()} number of dynamic shortcuts at a time from the
  * same application.
  * A dynamic shortcut can be deleted with {@link #removeDynamicShortcuts(List)}, and apps
  * can also use {@link #removeAllDynamicShortcuts()} to delete all dynamic shortcuts.
@@ -53,7 +53,7 @@ import java.util.List;
  * <p>The number of pinned shortcuts does not affect the number of dynamic shortcuts that can be
  * published by an application at a time.
  * No matter how many pinned shortcuts that Launcher has for an application, the
- * application can still always publish {@link #getMaxShortcutCountForActivity()} number of
+ * application can still always publish {@link #getMaxShortcutCountPerActivity()} number of
  * dynamic
  * shortcuts.
  *
@@ -135,7 +135,7 @@ public class ShortcutManager {
      * @return {@code true} if the call has succeeded. {@code false} if the call is rate-limited.
      *
      * @throws IllegalArgumentException if {@code shortcutInfoList} contains more than
-     * {@link #getMaxShortcutCountForActivity()} shortcuts.
+     * {@link #getMaxShortcutCountPerActivity()} shortcuts.
      */
     public boolean setDynamicShortcuts(@NonNull List<ShortcutInfo> shortcutInfoList) {
         try {
@@ -148,7 +148,7 @@ public class ShortcutManager {
 
     /**
      * Return all dynamic shortcuts from the caller application.  The number of result items
-     * will not exceed the value returned by {@link #getMaxShortcutCountForActivity()}.
+     * will not exceed the value returned by {@link #getMaxShortcutCountPerActivity()}.
      */
     @NonNull
     public List<ShortcutInfo> getDynamicShortcuts() {
@@ -259,7 +259,7 @@ public class ShortcutManager {
     }
 
     /**
-     * TODO Javadoc
+     * @hide old signature, kept for unit testing.
      */
     public void disableShortcuts(@NonNull List<String> shortcutIds, int disabledMessageResId) {
         try {
@@ -272,9 +272,16 @@ public class ShortcutManager {
     }
 
     /**
-     * TODO Javadoc
+     * @hide old signature, kept for unit testing.
      */
     public void disableShortcuts(@NonNull List<String> shortcutIds, String disabledMessage) {
+        disableShortcuts(shortcutIds, (CharSequence) disabledMessage);
+    }
+
+    /**
+     * TODO Javadoc
+     */
+    public void disableShortcuts(@NonNull List<String> shortcutIds, CharSequence disabledMessage) {
         try {
             mService.disableShortcuts(mContext.getPackageName(), shortcutIds,
                     disabledMessage, /* disabledMessageResId =*/ 0,
@@ -295,13 +302,21 @@ public class ShortcutManager {
         }
     }
 
+
+    /**
+     * @hide old signature, kept for unit testing.
+     */
+    public int getMaxShortcutCountForActivity() {
+        return getMaxShortcutCountPerActivity();
+    }
+
     /**
      * Return the max number of dynamic shortcuts + manifest shortcuts that each launcher icon
      * can have at a time.
      */
-    public int getMaxShortcutCountForActivity() {
+    public int getMaxShortcutCountPerActivity() {
         try {
-            return mService.getMaxShortcutCountForActivity(
+            return mService.getMaxShortcutCountPerActivity(
                     mContext.getPackageName(), injectMyUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
