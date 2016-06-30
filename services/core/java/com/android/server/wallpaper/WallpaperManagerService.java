@@ -229,10 +229,12 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
 
             if (moved && lockWallpaperChanged) {
                 // We just migrated sys -> lock to preserve imagery for an impending
-                // new system-only wallpaper.  Tell keyguard about it but that's it.
+                // new system-only wallpaper.  Tell keyguard about it and make sure it
+                // has the right SELinux label.
                 if (DEBUG) {
                     Slog.i(TAG, "Sys -> lock MOVED_TO");
                 }
+                SELinux.restorecon(changedFile);
                 notifyLockWallpaperChanged();
                 return;
             }
@@ -254,9 +256,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                             if (moved) {
                                 // This is a restore, so generate the crop using any just-restored new
                                 // crop guidelines, making sure to preserve our local dimension hints.
+                                // We also make sure to reapply the correct SELinux label.
                                 if (DEBUG) {
                                     Slog.v(TAG, "moved-to, therefore restore; reloading metadata");
                                 }
+                                SELinux.restorecon(changedFile);
                                 loadSettingsLocked(wallpaper.userId, true);
                             }
                             generateCrop(wallpaper);
