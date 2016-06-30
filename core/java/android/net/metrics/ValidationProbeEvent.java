@@ -29,6 +29,7 @@ import com.android.internal.util.MessageUtils;
 @SystemApi
 public final class ValidationProbeEvent implements Parcelable {
 
+    // TODO: use @IntDef
     public static final int PROBE_DNS   = 0;
     public static final int PROBE_HTTP  = 1;
     public static final int PROBE_HTTPS = 2;
