@@ -3626,6 +3626,24 @@ public class ActivityManager {
     }
 
     /**
+     * Enable more aggressive scheduling for latency-sensitive low-runtime VR threads. Only one
+     * thread can be a VR thread in a process at a time, and that thread may be subject to
+     * restrictions on the amount of time it can run.
+     *
+     * To reset the VR thread for an application, a tid of 0 can be passed.
+     *
+     * @see android.os.Process#myTid()
+     * @param tid tid of the VR thread
+     */
+    public static void setVrThread(int tid) {
+        try {
+            ActivityManagerNative.getDefault().setVrThread(tid);
+        } catch (RemoteException e) {
+            // pass
+        }
+    }
+
+    /**
      * The AppTask allows you to manage your own application's tasks.
      * See {@link android.app.ActivityManager#getAppTasks()}
      */
