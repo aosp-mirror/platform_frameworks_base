@@ -17627,6 +17627,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
     private Intent getHomeIntent() {
         Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.addCategory(Intent.CATEGORY_HOME);
+        intent.addCategory(Intent.CATEGORY_DEFAULT);
         return intent;
     }
 
