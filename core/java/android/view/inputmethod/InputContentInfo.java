@@ -191,8 +191,6 @@ public final class InputContentInfo implements Parcelable {
             mUriToken.release();
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
-        } finally {
-            mUriToken = null;
         }
     }
 
