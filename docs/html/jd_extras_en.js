@@ -3613,6 +3613,59 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "lang":"en",
     "type":"Video"
   },
+
+  {
+    "title":"Android Performance Testing Codelab",
+    "titleFriendly":"",
+    "summary":"This codelab shows how to create a stable and reusable testing harness to run performance tests on a very simple existing app.",
+    "url":"https://codelabs.developers.google.com/codelabs/android-perf-testing/index.html",
+    "group":"",
+    "keywords": ["testing"],
+    "tags": [
+    ],
+    "image":"images/testing/testing-icon.png",
+    "type":"google"
+  },
+
+  {
+    "title":"Introduction to Doze",
+    "category":"android developers",
+    "summary":"A new way for the device to preserve battery by entering into an idle state.",
+    "url":"https://www.youtube.com/watch?v=N72ksDKrX6c",
+    "group":"",
+    "keywords": ["android, performance","battery"],
+    "tags": ["video, performance"],
+    "image":"https://i1.ytimg.com/vi/N72ksDKrX6c/maxresdefault.jpg",
+    "lang":"en",
+    "type":"develop"
+  },
+
+  {
+    "title":"Performance Profiling Tools",
+    "category":"training",
+    "summary":"Take a look under the hood to identify performance bottlenecks.",
+    "url":"https://developer.android.com/tools/performance/index.html",
+    "group":"",
+    "keywords": ["android, performance","profiling"],
+    "tags": ["android, performance"],
+    "image":"/assets/images/resource-card-default-android.jpg",
+    "lang":"en",
+    "type":"develop"
+  },
+
+  {
+    "title":"Managing Your App's Memory",
+    "category":"training",
+    "summary":"Learn how you can proactively reduce memory usage while developing for Android.",
+    "url":"https://developer.android.com/training/articles/memory.html",
+    "group":"",
+    "keywords": ["android, performance","profiling"],
+    "tags": ["android, performance"],
+    "image":"/assets/images/resource-card-default-android.jpg",
+    "lang":"en",
+    "type":"develop"
+  },
+
   {
     "url":"https://www.youtube.com/watch?v=QDM52bblwlg",
     "image": "images/distribute/hero-family-discovery.jpg",
@@ -5379,12 +5432,26 @@ METADATA['en'].collections = {
       "preview/support.html"
     ]
   },
+
   "preview/landing/videos/first": {
     "title": "",
     "resources": [
     "https://www.youtube.com/watch?v=CsulIu3UaUM"
     ]
   },
+
+  "develop/performance/landing": {
+    "title": "",
+    "resources": [
+      "https://android-developers.blogspot.com/2010/07/multithreading-for-performance.html",
+      "https://www.udacity.com/course/ud825",
+      "https://www.youtube.com/watch?v=N72ksDKrX6c",
+      "https://developer.android.com/tools/performance/index.html",
+      "https://codelabs.developers.google.com/codelabs/android-perf-testing/index.html",
+      "https://developer.android.com/training/articles/memory.html",
+    ]
+  },
+
   "preview/landing/more": {
     "title": "",
     "resources": [
