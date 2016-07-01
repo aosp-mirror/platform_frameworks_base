@@ -180,5 +180,15 @@
             </intent-filter>
         </activity>
 
+        <!-- Navigation Drawer -->
+        <activity
+            android:name=".NavigationDrawerActivity"
+            android:label="Navigation Drawer Activity"
+            android:theme="@style/NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
     </application>
 </manifest>
