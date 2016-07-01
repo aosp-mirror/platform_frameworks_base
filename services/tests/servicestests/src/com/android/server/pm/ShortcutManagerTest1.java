@@ -1607,8 +1607,6 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
     /**
      * This is similar to the above test, except it used "disable" instead of "remove".  It also
      * does "enable".
-     *
-     * TODO Fix the commented out tests.
      */
     public void testDisableAndEnableShortcuts() {
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
@@ -1682,17 +1680,14 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_1,
                     /* activity =*/ null, ShortcutQuery.FLAG_GET_PINNED), getCallingUser())))),
                     "s2");
-//            assertFalse(mLauncherApps.startShortcut(
-//                    CALLING_PACKAGE_1, "s2", null, null, HANDLE_USER_0));
+            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s2", USER_0);
 
             assertShortcutIds(assertAllPinned(assertAllNotKeyFieldsOnly(
                     mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_2,
                     /* activity =*/ null, ShortcutQuery.FLAG_GET_PINNED), getCallingUser()))),
                     "s3", "s4");
-//            assertFalse(mLauncherApps.startShortcut(
-//                    CALLING_PACKAGE_2, "s3", null, null, HANDLE_USER_0));
-//            assertTrue(mLauncherApps.startShortcut(
-//                    CALLING_PACKAGE_2, "s4", null, null, HANDLE_USER_0));
+            assertShortcutNotLaunchable(CALLING_PACKAGE_2, "s3", USER_0);
+            assertShortcutLaunchable(CALLING_PACKAGE_2, "s4", USER_0);
 
             assertShortcutIds(assertAllPinned(assertAllNotKeyFieldsOnly(assertAllEnabled(
                     mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_3,
@@ -1712,8 +1707,77 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     mLauncherApps.getShortcuts(buildQuery(/* time =*/ 0, CALLING_PACKAGE_1,
                     /* activity =*/ null, ShortcutQuery.FLAG_GET_PINNED), getCallingUser())))),
                     "s2");
-//            assertTrue(mLauncherApps.startShortcut(
-//                    CALLING_PACKAGE_1, "s2", null, null, HANDLE_USER_0));
+            assertShortcutLaunchable(CALLING_PACKAGE_1, "s2", USER_0);
+        });
+    }
+
+    public void testDisableShortcuts_thenRepublish() {
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertTrue(mManager.setDynamicShortcuts(list(
+                    makeShortcut("s1"), makeShortcut("s2"), makeShortcut("s3"))));
+
+            runWithCaller(LAUNCHER_1, USER_0, () -> {
+                mLauncherApps.pinShortcuts(
+                        CALLING_PACKAGE_1, list("s1", "s2", "s3"), HANDLE_USER_0);
+            });
+
+            mManager.disableShortcuts(list("s1", "s2", "s3"));
+
+            assertWith(getCallerShortcuts())
+                    .haveIds("s1", "s2", "s3")
+                    .areAllNotDynamic()
+                    .areAllPinned()
+                    .areAllDisabled();
+
+            // Make sure updateShortcuts() will not re-enable them.
+            assertTrue(mManager.updateShortcuts(list(
+                    makeShortcut("s1"), makeShortcut("s2"), makeShortcut("s3"))));
+
+            assertWith(getCallerShortcuts())
+                    .haveIds("s1", "s2", "s3")
+                    .areAllNotDynamic()
+                    .areAllPinned()
+                    .areAllDisabled();
+
+            // Re-publish s1 with setDynamicShortcuts.
+            mInjectedCurrentTimeMillis += INTERVAL; // reset throttling
+
+            assertTrue(mManager.setDynamicShortcuts(list(
+                    makeShortcut("s1"))));
+
+            assertWith(getCallerShortcuts())
+                    .haveIds("s1", "s2", "s3")
+
+                    .selectByIds("s1")
+                    .areAllDynamic()
+                    .areAllPinned()
+                    .areAllEnabled()
+
+                    .revertToOriginalList()
+                    .selectByIds("s2", "s3")
+                    .areAllNotDynamic()
+                    .areAllPinned()
+                    .areAllDisabled();
+
+            // Re-publish s2 with addDynamicShortcuts.
+            mInjectedCurrentTimeMillis += INTERVAL; // reset throttling
+
+            assertTrue(mManager.addDynamicShortcuts(list(
+                    makeShortcut("s2"))));
+
+            assertWith(getCallerShortcuts())
+                    .haveIds("s1", "s2", "s3")
+
+                    .selectByIds("s1", "s2")
+                    .areAllDynamic()
+                    .areAllPinned()
+                    .areAllEnabled()
+
+                    .revertToOriginalList()
+                    .selectByIds("s3")
+                    .areAllNotDynamic()
+                    .areAllPinned()
+                    .areAllDisabled();
         });
     }
 

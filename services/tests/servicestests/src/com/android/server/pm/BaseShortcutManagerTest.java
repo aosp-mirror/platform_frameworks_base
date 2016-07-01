@@ -29,6 +29,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -1375,15 +1376,21 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         assertNotNull(launchShortcutAndGetIntent_withShortcutInfo(packageName, shortcutId, userId));
     }
 
-    // TODO Fix all tests using it.
     protected void assertShortcutNotLaunchable(@NonNull String packageName,
             @NonNull String shortcutId, int userId) {
+        reset(mServiceContext);
         try {
             mLauncherApps.startShortcut(packageName, shortcutId, null, null,
                     UserHandle.of(userId));
         } catch (SecurityException expected) {
-            // security exception is okay too.
+            // security exception is okay.
+            return;
         }
+        // This shouldn't have been called.
+        verify(mServiceContext, times(0)).startActivityAsUser(
+                any(Intent.class),
+                any(Bundle.class),
+                any(UserHandle.class));
     }
 
     protected void assertBitmapDirectories(int userId, String... expectedDirectories) {
