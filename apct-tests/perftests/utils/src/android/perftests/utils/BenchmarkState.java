@@ -46,13 +46,16 @@ public class BenchmarkState {
 
     private static final int NOT_STARTED = 1;  // The benchmark has not started yet.
     private static final int RUNNING = 2;  // The benchmark is running.
-    private static final int FINISHED = 3;  // The benchmark has stopped.
+    private static final int RUNNING_PAUSED = 3;  // The benchmark is temporary paused.
+    private static final int FINISHED = 4;  // The benchmark has stopped.
     private static final int MIN_REPEAT_TIMES = 16;
 
     private int mState = NOT_STARTED;  // Current benchmark state.
 
     private long mNanoPreviousTime = 0;  // Previously captured System.nanoTime().
     private long mNanoFinishTime = 0;  // Finish if System.nanoTime() returns after than this value.
+    private long mNanoPausedTime = 0; // The System.nanoTime() when the pauseTiming() is called.
+    private long mNanoPausedDuration = 0;  // The duration of paused state in nano sec.
     private long mNanoTimeLimit = 1 * 1000 * 1000 * 1000;  // 1 sec. Default time limit.
 
     // Statistics. These values will be filled when the benchmark has finished.
@@ -89,6 +92,29 @@ public class BenchmarkState {
         mStandardDeviation = Math.sqrt(mStandardDeviation / (double) (size - 1));
     }
 
+    // Stops the benchmark timer.
+    // This method can be called only when the timer is running.
+    public void pauseTiming() {
+        if (mState == RUNNING_PAUSED) {
+            throw new IllegalStateException(
+                    "Unable to pause the benchmark. The benchmark has already paused.");
+        }
+        mNanoPausedTime = System.nanoTime();
+        mState = RUNNING_PAUSED;
+    }
+
+    // Starts the benchmark timer.
+    // This method can be called only when the timer is stopped.
+    public void resumeTiming() {
+        if (mState == RUNNING) {
+            throw new IllegalStateException(
+                    "Unable to resume the benchmark. The benchmark is already running.");
+        }
+        mNanoPausedDuration += System.nanoTime() - mNanoPausedTime;
+        mNanoPausedTime = 0;
+        mState = RUNNING;
+    }
+
     /**
      * Judges whether the benchmark needs more samples.
      *
@@ -103,7 +129,8 @@ public class BenchmarkState {
                 return true;
             case RUNNING:
                 final long currentTime = System.nanoTime();
-                mResults.add(currentTime - mNanoPreviousTime);
+                mResults.add(currentTime - mNanoPreviousTime - mNanoPausedDuration);
+                mNanoPausedDuration = 0;
 
                 // To calculate statistics, needs two or more samples.
                 if (mResults.size() > MIN_REPEAT_TIMES && currentTime > mNanoFinishTime) {
@@ -114,6 +141,10 @@ public class BenchmarkState {
 
                 mNanoPreviousTime = currentTime;
                 return true;
+            case RUNNING_PAUSED:
+                throw new IllegalStateException(
+                        "Benchmark step finished with paused state. " +
+                        "Resume the benchmark before finishing each step.");
             case FINISHED:
                 throw new IllegalStateException("The benchmark has finished.");
             default:
