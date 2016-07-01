@@ -1,0 +1,50 @@
+<!--
+ Copyright (C) 2016 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:height="48dp"
+        android:width="48dp"
+        android:viewportHeight="48"
+        android:viewportWidth="48">
+
+    <group>
+        <clip-path
+                android:name="clip1"
+                android:pathData="M 0, 0 l 48, 0 l 0, 30 l -48, 0 z"/>
+
+        <group>
+            <clip-path
+                    android:name="clip2"
+                    android:pathData="M 0, 18 l 48, 0 l 0, 30 l -48, 0 z"/>
+
+            <path
+                    android:name="plus1"
+                    android:pathData="M20 16h-4v8h-8v4h8v8h4v-8h8v-4h-8zm9-3.84v3.64l5-1v21.2h4v-26z"
+                    android:fillColor="#ff00ff00"/>
+        </group>
+
+
+        <group android:name="backgroundGroup" >
+            <path
+                    android:name="background1"
+                    android:fillColor="#80000000"
+                    android:pathData="M 0,0 l 24,0 l 0,24 l -24, 0 z" />
+            <path
+                    android:name="background2"
+                    android:fillColor="#80000000"
+                    android:pathData="M 24,24 l 24,0 l 0, 24 l -24, 0 z" />
+        </group>
+    </group>
+</vector>
