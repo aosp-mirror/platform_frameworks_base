@@ -193,6 +193,7 @@ public class ActivityOptions {
             = "android:activity.exitCoordinatorIndex";
 
     private static final String KEY_USAGE_TIME_REPORT = "android:activity.usageTimeReport";
+    private static final String KEY_ROTATION_ANIMATION_HINT = "android:activity.rotationAnimationHint";
 
     /** @hide */
     public static final int ANIM_NONE = 0;
@@ -244,6 +245,7 @@ public class ActivityOptions {
     private int mDockCreateMode = DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
     private boolean mTaskOverlay;
     private AppTransitionAnimationSpec mAnimSpecs[];
+    private int mRotationAnimationHint = -1;
 
     /**
      * Create an ActivityOptions specifying a custom animation to run when
@@ -863,6 +865,7 @@ public class ActivityOptions {
             mAnimationFinishedListener = IRemoteCallback.Stub.asInterface(
                     opts.getBinder(KEY_ANIMATION_FINISHED_LISTENER));
         }
+        mRotationAnimationHint = opts.getInt(KEY_ROTATION_ANIMATION_HINT);
     }
 
     /**
@@ -1216,6 +1219,7 @@ public class ActivityOptions {
         if (mAnimationFinishedListener != null) {
             b.putBinder(KEY_ANIMATION_FINISHED_LISTENER, mAnimationFinishedListener.asBinder());
         }
+        b.putInt(KEY_ROTATION_ANIMATION_HINT, mRotationAnimationHint);
 
         return b;
     }
@@ -1260,6 +1264,27 @@ public class ActivityOptions {
         }
 
         return null;
+    }
+
+    /**
+     * Returns the rotation animation set by {@link setRotationAnimationHint} or -1
+     * if unspecified.
+     * @hide
+     */
+    public int getRotationAnimationHint() {
+        return mRotationAnimationHint;
+    }
+
+
+    /**
+     * Set a rotation animation to be used if launching the activity
+     * triggers an orientation change, or -1 to clear. See
+     * {@link android.view.WindowManager.LayoutParams} for rotation
+     * animation values.
+     * @hide
+     */
+    public void setRotationAnimationHint(int hint) {
+        mRotationAnimationHint = hint;
     }
 
     /** @hide */

@@ -2908,4 +2908,12 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     boolean shouldBeReplacedWithChildren() {
         return isChildWindow() || mAttrs.type == TYPE_APPLICATION;
     }
+
+    public int getRotationAnimationHint() {
+        if (mAppToken != null) {
+            return mAppToken.mRotationAnimationHint;
+        } else {
+            return -1;
+        }
+    }
 }

@@ -416,6 +416,8 @@ public interface WindowManagerPolicy {
          * screen with other application windows.
          */
         public boolean isInMultiWindowMode();
+
+        public int getRotationAnimationHint();
     }
 
     /**

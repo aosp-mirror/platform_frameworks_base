@@ -112,7 +112,7 @@ interface IWindowManager
             int requestedOrientation, boolean fullscreen, boolean showWhenLocked, int userId,
             int configChanges, boolean voiceInteraction, boolean launchTaskBehind,
             in Rect taskBounds, in Configuration configuration, int taskResizeMode,
-            boolean alwaysFocusable, boolean homeTask, int targetSdkVersion);
+            boolean alwaysFocusable, boolean homeTask, int targetSdkVersion, int rotationAnimationHint);
     /**
      *
      * @param token The token we are adding to the input task Id.
