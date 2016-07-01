@@ -2271,6 +2271,7 @@ public class Editor {
         }
 
         mCorrectionHighlighter.highlight(info);
+        mUndoInputFilter.onCommitCorrection();
     }
 
     void onScrollChanged() {
@@ -2402,42 +2403,41 @@ public class Editor {
             }
         }
 
-        final int offset = mTextView.getOffsetForPosition(event.getX(), event.getY());
-
-        Object localState = event.getLocalState();
-        DragLocalState dragLocalState = null;
-        if (localState instanceof DragLocalState) {
-            dragLocalState = (DragLocalState) localState;
-        }
-        boolean dragDropIntoItself = dragLocalState != null &&
-                dragLocalState.sourceTextView == mTextView;
-
-        if (dragDropIntoItself) {
-            if (offset >= dragLocalState.start && offset < dragLocalState.end) {
-                // A drop inside the original selection discards the drop.
-                return;
+        mTextView.beginBatchEdit();
+        try {
+            final int offset = mTextView.getOffsetForPosition(event.getX(), event.getY());
+            Object localState = event.getLocalState();
+            DragLocalState dragLocalState = null;
+            if (localState instanceof DragLocalState) {
+                dragLocalState = (DragLocalState) localState;
             }
-        }
+            boolean dragDropIntoItself = dragLocalState != null &&
+                    dragLocalState.sourceTextView == mTextView;
 
-        final int originalLength = mTextView.getText().length();
-        int min = offset;
-        int max = offset;
-
-        Selection.setSelection((Spannable) mTextView.getText(), max);
-        mTextView.replaceText_internal(min, max, content);
-
-        if (dragDropIntoItself) {
-            int dragSourceStart = dragLocalState.start;
-            int dragSourceEnd = dragLocalState.end;
-            if (max <= dragSourceStart) {
-                // Inserting text before selection has shifted positions
-                final int shift = mTextView.getText().length() - originalLength;
-                dragSourceStart += shift;
-                dragSourceEnd += shift;
+            if (dragDropIntoItself) {
+                if (offset >= dragLocalState.start && offset < dragLocalState.end) {
+                    // A drop inside the original selection discards the drop.
+                    return;
+                }
             }
 
-            mUndoInputFilter.setForceMerge(true);
-            try {
+            final int originalLength = mTextView.getText().length();
+            int min = offset;
+            int max = offset;
+
+            Selection.setSelection((Spannable) mTextView.getText(), max);
+            mTextView.replaceText_internal(min, max, content);
+
+            if (dragDropIntoItself) {
+                int dragSourceStart = dragLocalState.start;
+                int dragSourceEnd = dragLocalState.end;
+                if (max <= dragSourceStart) {
+                    // Inserting text before selection has shifted positions
+                    final int shift = mTextView.getText().length() - originalLength;
+                    dragSourceStart += shift;
+                    dragSourceEnd += shift;
+                }
+
                 // Delete original selection
                 mTextView.deleteText_internal(dragSourceStart, dragSourceEnd);
 
@@ -2450,9 +2450,9 @@ public class Editor {
                         mTextView.deleteText_internal(prevCharIdx, prevCharIdx + 1);
                     }
                 }
-            } finally {
-                mUndoInputFilter.setForceMerge(false);
             }
+        } finally {
+            mTextView.endBatchEdit();
         }
     }
 
@@ -5689,6 +5689,8 @@ public class Editor {
     /**
      * An InputFilter that monitors text input to maintain undo history. It does not modify the
      * text being typed (and hence always returns null from the filter() method).
+     *
+     * TODO: Make this span aware.
      */
     public static class UndoInputFilter implements InputFilter {
         private final Editor mEditor;
@@ -5700,8 +5702,11 @@ public class Editor {
         // rotates the screen during composition.
         private boolean mHasComposition;
 
-        // Whether to merge events into one operation.
-        private boolean mForceMerge;
+        // Whether the user is expanding or shortening the text
+        private boolean mExpanding;
+
+        // Whether the previous edit operation was in the current batch edit.
+        private boolean mPreviousOperationWasInSameBatchEdit;
 
         public UndoInputFilter(Editor editor) {
             mEditor = editor;
@@ -5710,15 +5715,15 @@ public class Editor {
         public void saveInstanceState(Parcel parcel) {
             parcel.writeInt(mIsUserEdit ? 1 : 0);
             parcel.writeInt(mHasComposition ? 1 : 0);
+            parcel.writeInt(mExpanding ? 1 : 0);
+            parcel.writeInt(mPreviousOperationWasInSameBatchEdit ? 1 : 0);
         }
 
         public void restoreInstanceState(Parcel parcel) {
             mIsUserEdit = parcel.readInt() != 0;
             mHasComposition = parcel.readInt() != 0;
-        }
-
-        public void setForceMerge(boolean forceMerge) {
-            mForceMerge = forceMerge;
+            mExpanding = parcel.readInt() != 0;
+            mPreviousOperationWasInSameBatchEdit = parcel.readInt() != 0;
         }
 
         /**
@@ -5732,6 +5737,7 @@ public class Editor {
         public void endBatchEdit() {
             if (DEBUG_UNDO) Log.d(TAG, "endBatchEdit");
             mIsUserEdit = false;
+            mPreviousOperationWasInSameBatchEdit = false;
         }
 
         @Override
@@ -5747,77 +5753,85 @@ public class Editor {
                 return null;
             }
 
-            // Check for and handle IME composition edits.
-            if (handleCompositionEdit(source, start, end, dstart)) {
-                return null;
+            final boolean hadComposition = mHasComposition;
+            mHasComposition = isComposition(source);
+            final boolean wasExpanding = mExpanding;
+            boolean shouldCreateSeparateState = false;
+            if ((end - start) != (dend - dstart)) {
+                mExpanding = (end - start) > (dend - dstart);
+                if (hadComposition && mExpanding != wasExpanding) {
+                    shouldCreateSeparateState = true;
+                }
             }
 
-            // Handle keyboard edits.
-            handleKeyboardEdit(source, start, end, dest, dstart, dend);
+            // Handle edit.
+            handleEdit(source, start, end, dest, dstart, dend, shouldCreateSeparateState);
             return null;
         }
 
-        /**
-         * Returns true iff the edit was handled, either because it should be ignored or because
-         * this function created an undo operation for it.
-         */
-        private boolean handleCompositionEdit(CharSequence source, int start, int end, int dstart) {
-            // Ignore edits while the user is composing.
-            if (isComposition(source)) {
-                mHasComposition = true;
-                return true;
+        void onCommitCorrection() {
+            mEditor.mUndoManager.beginUpdate("Edit text");
+            EditOperation lastEdit = getLastEdit();
+            if (lastEdit != null) {
+                lastEdit.mFrozen = true;
             }
-            final boolean hadComposition = mHasComposition;
-            mHasComposition = false;
-
-            // Check for the transition out of the composing state.
-            if (hadComposition) {
-                // If there was no text the user canceled composition. Ignore the edit.
-                if (start == end) {
-                    return true;
-                }
-
-                // Otherwise the user inserted the composition.
-                String newText = TextUtils.substring(source, start, end);
-                EditOperation edit = new EditOperation(mEditor, "", dstart, newText);
-                recordEdit(edit, mForceMerge);
-                return true;
-            }
-
-            // This was neither a composition event nor a transition out of composing.
-            return false;
+            mEditor.mUndoManager.endUpdate();
         }
 
-        private void handleKeyboardEdit(CharSequence source, int start, int end,
-                Spanned dest, int dstart, int dend) {
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef({MERGE_EDIT_MODE_FORCE_MERGE, MERGE_EDIT_MODE_NEVER_MERGE, MERGE_EDIT_MODE_NORMAL})
+        private @interface MergeMode {}
+        private final static int MERGE_EDIT_MODE_FORCE_MERGE = 0;
+        private final static int MERGE_EDIT_MODE_NEVER_MERGE = 1;
+        /** Use {@link EditOperation#mergeWith} to merge */
+        private final static int MERGE_EDIT_MODE_NORMAL = 2;
+
+        private void handleEdit(CharSequence source, int start, int end,
+                Spanned dest, int dstart, int dend, boolean shouldCreateSeparateState) {
             // An application may install a TextWatcher to provide additional modifications after
             // the initial input filters run (e.g. a credit card formatter that adds spaces to a
             // string). This results in multiple filter() calls for what the user considers to be
             // a single operation. Always undo the whole set of changes in one step.
-            final boolean forceMerge = mForceMerge || isInTextWatcher();
-
+            @MergeMode
+            final int mergeMode;
+            if (isInTextWatcher() || mPreviousOperationWasInSameBatchEdit) {
+                mergeMode = MERGE_EDIT_MODE_FORCE_MERGE;
+            } else if (shouldCreateSeparateState) {
+                mergeMode = MERGE_EDIT_MODE_NEVER_MERGE;
+            } else {
+                mergeMode = MERGE_EDIT_MODE_NORMAL;
+            }
             // Build a new operation with all the information from this edit.
             String newText = TextUtils.substring(source, start, end);
             String oldText = TextUtils.substring(dest, dstart, dend);
-            EditOperation edit = new EditOperation(mEditor, oldText, dstart, newText);
-            recordEdit(edit, forceMerge);
+            EditOperation edit = new EditOperation(mEditor, oldText, dstart, newText,
+                    mHasComposition);
+            if (mHasComposition && TextUtils.equals(edit.mNewText, edit.mOldText)) {
+                return;
+            }
+            recordEdit(edit, mergeMode);
         }
 
+        private EditOperation getLastEdit() {
+            final UndoManager um = mEditor.mUndoManager;
+            return um.getLastOperation(
+                  EditOperation.class, mEditor.mUndoOwner, UndoManager.MERGE_MODE_UNIQUE);
+        }
         /**
          * Fetches the last undo operation and checks to see if a new edit should be merged into it.
          * If forceMerge is true then the new edit is always merged.
          */
-        private void recordEdit(EditOperation edit, boolean forceMerge) {
+        private void recordEdit(EditOperation edit, @MergeMode int mergeMode) {
             // Fetch the last edit operation and attempt to merge in the new edit.
             final UndoManager um = mEditor.mUndoManager;
             um.beginUpdate("Edit text");
-            EditOperation lastEdit = um.getLastOperation(
-                  EditOperation.class, mEditor.mUndoOwner, UndoManager.MERGE_MODE_UNIQUE);
+            EditOperation lastEdit = getLastEdit();
             if (lastEdit == null) {
                 // Add this as the first edit.
                 if (DEBUG_UNDO) Log.d(TAG, "filter: adding first op " + edit);
                 um.addOperation(edit, UndoManager.MERGE_MODE_NONE);
-            } else if (forceMerge) {
+                mPreviousOperationWasInSameBatchEdit = mIsUserEdit;
+            } else if (mergeMode == MERGE_EDIT_MODE_FORCE_MERGE) {
                 // Forced merges take priority because they could be the result of a non-user-edit
                 // change and this case should not create a new undo operation.
                 if (DEBUG_UNDO) Log.d(TAG, "filter: force merge " + edit);
@@ -5828,7 +5842,8 @@ public class Editor {
                 if (DEBUG_UNDO) Log.d(TAG, "non-user edit, new op " + edit);
                 um.commitState(mEditor.mUndoOwner);
                 um.addOperation(edit, UndoManager.MERGE_MODE_NONE);
-            } else if (lastEdit.mergeWith(edit)) {
+                mPreviousOperationWasInSameBatchEdit = mIsUserEdit;
+            } else if (mergeMode == MERGE_EDIT_MODE_NORMAL && lastEdit.mergeWith(edit)) {
                 // Merge succeeded, nothing else to do.
                 if (DEBUG_UNDO) Log.d(TAG, "filter: merge succeeded, created " + lastEdit);
             } else {
@@ -5836,6 +5851,7 @@ public class Editor {
                 if (DEBUG_UNDO) Log.d(TAG, "filter: merge failed, adding " + edit);
                 um.commitState(mEditor.mUndoOwner);
                 um.addOperation(edit, UndoManager.MERGE_MODE_NONE);
+                mPreviousOperationWasInSameBatchEdit = mIsUserEdit;
             }
             um.endUpdate();
         }
@@ -5870,7 +5886,7 @@ public class Editor {
             return true;
         }
 
-        private boolean isComposition(CharSequence source) {
+        private static boolean isComposition(CharSequence source) {
             if (!(source instanceof Spannable)) {
                 return false;
             }
@@ -5898,70 +5914,70 @@ public class Editor {
 
         private int mType;
         private String mOldText;
-        private int mOldTextStart;
         private String mNewText;
-        private int mNewTextStart;
+        private int mStart;
 
         private int mOldCursorPos;
         private int mNewCursorPos;
+        private boolean mFrozen;
+        private boolean mIsComposition;
 
         /**
          * Constructs an edit operation from a text input operation on editor that replaces the
          * oldText starting at dstart with newText.
          */
-        public EditOperation(Editor editor, String oldText, int dstart, String newText) {
+        public EditOperation(Editor editor, String oldText, int dstart, String newText,
+                boolean isComposition) {
             super(editor.mUndoOwner);
             mOldText = oldText;
             mNewText = newText;
 
-            // Determine the type of the edit and store where it occurred. Avoid storing
-            // irrevelant data (e.g. mNewTextStart for a delete) because that makes the
-            // merging logic more complex (e.g. merging deletes could lead to mNewTextStart being
-            // outside the bounds of the final text).
+            // Determine the type of the edit.
             if (mNewText.length() > 0 && mOldText.length() == 0) {
                 mType = TYPE_INSERT;
-                mNewTextStart = dstart;
             } else if (mNewText.length() == 0 && mOldText.length() > 0) {
                 mType = TYPE_DELETE;
-                mOldTextStart = dstart;
             } else {
                 mType = TYPE_REPLACE;
-                mOldTextStart = mNewTextStart = dstart;
             }
 
+            mStart = dstart;
             // Store cursor data.
             mOldCursorPos = editor.mTextView.getSelectionStart();
             mNewCursorPos = dstart + mNewText.length();
+            mIsComposition = isComposition;
         }
 
         public EditOperation(Parcel src, ClassLoader loader) {
             super(src, loader);
             mType = src.readInt();
             mOldText = src.readString();
-            mOldTextStart = src.readInt();
             mNewText = src.readString();
-            mNewTextStart = src.readInt();
+            mStart = src.readInt();
             mOldCursorPos = src.readInt();
             mNewCursorPos = src.readInt();
+            mFrozen = src.readInt() == 1;
+            mIsComposition = src.readInt() == 1;
         }
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(mType);
             dest.writeString(mOldText);
-            dest.writeInt(mOldTextStart);
             dest.writeString(mNewText);
-            dest.writeInt(mNewTextStart);
+            dest.writeInt(mStart);
             dest.writeInt(mOldCursorPos);
             dest.writeInt(mNewCursorPos);
+            dest.writeInt(mFrozen ? 1 : 0);
+            dest.writeInt(mIsComposition ? 1 : 0);
         }
 
         private int getNewTextEnd() {
-            return mNewTextStart + mNewText.length();
+            return mStart + mNewText.length();
         }
 
         private int getOldTextEnd() {
-            return mOldTextStart + mOldText.length();
+            return mStart + mOldText.length();
         }
 
         @Override
@@ -5974,8 +5990,7 @@ public class Editor {
             // Remove the new text and insert the old.
             Editor editor = getOwnerData();
             Editable text = (Editable) editor.mTextView.getText();
-            modifyText(text, mNewTextStart, getNewTextEnd(), mOldText, mOldTextStart,
-                    mOldCursorPos);
+            modifyText(text, mStart, getNewTextEnd(), mOldText, mStart, mOldCursorPos);
         }
 
         @Override
@@ -5984,8 +5999,7 @@ public class Editor {
             // Remove the old text and insert the new.
             Editor editor = getOwnerData();
             Editable text = (Editable) editor.mTextView.getText();
-            modifyText(text, mOldTextStart, getOldTextEnd(), mNewText, mNewTextStart,
-                    mNewCursorPos);
+            modifyText(text, mStart, getOldTextEnd(), mNewText, mStart, mNewCursorPos);
         }
 
         /**
@@ -5999,6 +6013,11 @@ public class Editor {
                 Log.d(TAG, "mergeWith old " + this);
                 Log.d(TAG, "mergeWith new " + edit);
             }
+
+            if (mFrozen) {
+                return false;
+            }
+
             switch (mType) {
                 case TYPE_INSERT:
                     return mergeInsertWith(edit);
@@ -6012,17 +6031,27 @@ public class Editor {
         }
 
         private boolean mergeInsertWith(EditOperation edit) {
-            // Only merge continuous insertions.
-            if (edit.mType != TYPE_INSERT) {
-                return false;
+            if (edit.mType == TYPE_INSERT) {
+                // Merge insertions that are contiguous even when it's frozen.
+                if (getNewTextEnd() != edit.mStart) {
+                    return false;
+                }
+                mNewText += edit.mNewText;
+                mNewCursorPos = edit.mNewCursorPos;
+                mFrozen = edit.mFrozen;
+                mIsComposition = edit.mIsComposition;
+                return true;
             }
-            // Only merge insertions that are contiguous.
-            if (getNewTextEnd() != edit.mNewTextStart) {
-                return false;
+            if (mIsComposition && edit.mType == TYPE_REPLACE &&
+                    mStart <= edit.mStart && getNewTextEnd() >= edit.getOldTextEnd()) {
+                // Merge insertion with replace as they can be single insertion.
+                mNewText = mNewText.substring(0, edit.mStart - mStart) + edit.mNewText
+                        + mNewText.substring(edit.getOldTextEnd() - mStart, mNewText.length());
+                mNewCursorPos = edit.mNewCursorPos;
+                mIsComposition = edit.mIsComposition;
+                return true;
             }
-            mNewText += edit.mNewText;
-            mNewCursorPos = edit.mNewCursorPos;
-            return true;
+            return false;
         }
 
         // TODO: Support forward delete.
@@ -6032,24 +6061,47 @@ public class Editor {
                 return false;
             }
             // Only merge deletions that are contiguous.
-            if (mOldTextStart != edit.getOldTextEnd()) {
+            if (mStart != edit.getOldTextEnd()) {
                 return false;
             }
-            mOldTextStart = edit.mOldTextStart;
+            mStart = edit.mStart;
             mOldText = edit.mOldText + mOldText;
             mNewCursorPos = edit.mNewCursorPos;
+            mIsComposition = edit.mIsComposition;
             return true;
         }
 
         private boolean mergeReplaceWith(EditOperation edit) {
-            // Replacements can merge only with adjacent inserts.
-            if (edit.mType != TYPE_INSERT || getNewTextEnd() != edit.mNewTextStart) {
+            if (edit.mType == TYPE_INSERT && getNewTextEnd() == edit.mStart) {
+                // Merge with adjacent insert.
+                mNewText += edit.mNewText;
+                mNewCursorPos = edit.mNewCursorPos;
+                return true;
+            }
+            if (!mIsComposition) {
                 return false;
             }
-            mOldText += edit.mOldText;
-            mNewText += edit.mNewText;
-            mNewCursorPos = edit.mNewCursorPos;
-            return true;
+            if (edit.mType == TYPE_DELETE && mStart <= edit.mStart
+                    && getNewTextEnd() >= edit.getOldTextEnd()) {
+                // Merge with delete as they can be single operation.
+                mNewText = mNewText.substring(0, edit.mStart - mStart)
+                        + mNewText.substring(edit.getOldTextEnd() - mStart, mNewText.length());
+                if (mNewText.isEmpty()) {
+                    mType = TYPE_DELETE;
+                }
+                mNewCursorPos = edit.mNewCursorPos;
+                mIsComposition = edit.mIsComposition;
+                return true;
+            }
+            if (edit.mType == TYPE_REPLACE && mStart == edit.mStart
+                    && TextUtils.equals(mNewText, edit.mOldText)) {
+                // Merge with the replace that replaces the same region.
+                mNewText = edit.mNewText;
+                mNewCursorPos = edit.mNewCursorPos;
+                mIsComposition = edit.mIsComposition;
+                return true;
+            }
+            return false;
         }
 
         /**
@@ -6058,6 +6110,9 @@ public class Editor {
          */
         public void forceMergeWith(EditOperation edit) {
             if (DEBUG_UNDO) Log.d(TAG, "forceMerge");
+            if (mergeWith(edit)) {
+                return;
+            }
             Editor editor = getOwnerData();
 
             // Copy the text of the current field.
@@ -6068,21 +6123,20 @@ public class Editor {
             Editable originalText = new SpannableStringBuilder(editable.toString());
 
             // Roll back the last operation.
-            modifyText(originalText, mNewTextStart, getNewTextEnd(), mOldText, mOldTextStart,
-                    mOldCursorPos);
+            modifyText(originalText, mStart, getNewTextEnd(), mOldText, mStart, mOldCursorPos);
 
             // Clone the text again and apply the new operation.
             Editable finalText = new SpannableStringBuilder(editable.toString());
-            modifyText(finalText, edit.mOldTextStart, edit.getOldTextEnd(), edit.mNewText,
-                    edit.mNewTextStart, edit.mNewCursorPos);
+            modifyText(finalText, edit.mStart, edit.getOldTextEnd(),
+                    edit.mNewText, edit.mStart, edit.mNewCursorPos);
 
-            // Convert this operation into a non-mergeable replacement of the entire string.
+            // Convert this operation into a replace operation.
             mType = TYPE_REPLACE;
             mNewText = finalText.toString();
-            mNewTextStart = 0;
             mOldText = originalText.toString();
-            mOldTextStart = 0;
+            mStart = 0;
             mNewCursorPos = edit.mNewCursorPos;
+            mIsComposition = edit.mIsComposition;
             // mOldCursorPos is unchanged.
         }
 
@@ -6123,11 +6177,12 @@ public class Editor {
         public String toString() {
             return "[mType=" + getTypeString() + ", " +
                     "mOldText=" + mOldText + ", " +
-                    "mOldTextStart=" + mOldTextStart + ", " +
                     "mNewText=" + mNewText + ", " +
-                    "mNewTextStart=" + mNewTextStart + ", " +
+                    "mStart=" + mStart + ", " +
                     "mOldCursorPos=" + mOldCursorPos + ", " +
-                    "mNewCursorPos=" + mNewCursorPos + "]";
+                    "mNewCursorPos=" + mNewCursorPos + ", " +
+                    "mFrozen=" + mFrozen + ", " +
+                    "mIsComposition=" + mIsComposition + "]";
         }
 
         public static final Parcelable.ClassLoaderCreator<EditOperation> CREATOR
