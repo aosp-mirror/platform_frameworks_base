@@ -3430,7 +3430,7 @@ public class WindowManagerService extends IWindowManager.Stub
             int requestedOrientation, boolean fullscreen, boolean showForAllUsers, int userId,
             int configChanges, boolean voiceInteraction, boolean launchTaskBehind,
             Rect taskBounds, Configuration config, int taskResizeMode, boolean alwaysFocusable,
-            boolean homeTask, int targetSdkVersion) {
+            boolean homeTask, int targetSdkVersion, int rotationAnimationHint) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "addAppToken()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
@@ -3468,6 +3468,7 @@ public class WindowManagerService extends IWindowManager.Stub
             atoken.mAlwaysFocusable = alwaysFocusable;
             if (DEBUG_TOKEN_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "addAppToken: " + atoken
                     + " to stack=" + stackId + " task=" + taskId + " at " + addPos);
+            atoken.mRotationAnimationHint = rotationAnimationHint;
 
             Task task = mTaskIdToTask.get(taskId);
             if (task == null) {
@@ -8690,19 +8691,21 @@ public class WindowManagerService extends IWindowManager.Stub
                 case SEAMLESS_ROTATION_TIMEOUT: {
                     // Rotation only supported on primary display.
                     // TODO(multi-display)
-                    final DisplayContent displayContent = getDefaultDisplayContentLocked();
-                    final WindowList windows = displayContent.getWindowList();
-                    boolean layoutNeeded = false;
-                    for (int i = windows.size() - 1; i >= 0; i--) {
-                        WindowState w = windows.get(i);
-                        if (w.mSeamlesslyRotated) {
-                            layoutNeeded = true;
-                            w.setDisplayLayoutNeeded();
+                    synchronized(mWindowMap) {
+                        final DisplayContent displayContent = getDefaultDisplayContentLocked();
+                        final WindowList windows = displayContent.getWindowList();
+                        boolean layoutNeeded = false;
+                        for (int i = windows.size() - 1; i >= 0; i--) {
+                            WindowState w = windows.get(i);
+                            if (w.mSeamlesslyRotated) {
+                                layoutNeeded = true;
+                                w.setDisplayLayoutNeeded();
+                            }
+                            w.mSeamlesslyRotated = false;
                         }
-                        w.mSeamlesslyRotated = false;
-                    }
-                    if (layoutNeeded) {
-                        mWindowPlacerLocked.performSurfacePlacement();
+                        if (layoutNeeded) {
+                            mWindowPlacerLocked.performSurfacePlacement();
+                        }
                     }
                 }
                 break;
