@@ -12551,6 +12551,37 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
+    public void setRenderThread(int tid) {
+        synchronized (this) {
+            ProcessRecord proc;
+            synchronized (mPidsSelfLocked) {
+                int pid = Binder.getCallingPid();
+                proc = mPidsSelfLocked.get(pid);
+                if (proc != null && proc.renderThreadTid == 0 && tid > 0) {
+                    // ensure the tid belongs to the process
+                    if (Process.isThreadInProcess(pid, tid) == false) {
+                        return;
+                    }
+                    proc.renderThreadTid = tid;
+                    if (DEBUG_OOM_ADJ) {
+                        Slog.d("UI_FIFO", "Set RenderThread tid " + tid + " for pid " + pid);
+                    }
+                    // promote to FIFO now
+                    if (proc.curSchedGroup == ProcessList.SCHED_GROUP_TOP_APP) {
+                        if (DEBUG_OOM_ADJ) Slog.d("UI_FIFO", "Promoting " + tid + "out of band");
+                        Process.setThreadScheduler(proc.renderThreadTid,
+                            Process.SCHED_FIFO | Process.SCHED_RESET_ON_FORK, 1);
+                    }
+                } else {
+                    if (DEBUG_OOM_ADJ) {
+                        Slog.d("UI_FIFO", "Didn't set thread from setRenderThreadForPid?");
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
     public int setVrMode(IBinder token, boolean enabled, ComponentName packageName) {
         if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_VR_MODE)) {
             throw new UnsupportedOperationException("VR mode not supported on this device!");
