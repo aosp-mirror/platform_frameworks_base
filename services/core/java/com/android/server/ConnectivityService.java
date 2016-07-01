@@ -3978,8 +3978,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         } else {
             networkCapabilities = new NetworkCapabilities(networkCapabilities);
             enforceNetworkRequestPermissions(networkCapabilities);
+            enforceMeteredApnPolicy(networkCapabilities);
         }
-        enforceMeteredApnPolicy(networkCapabilities);
         ensureRequestableCapabilities(networkCapabilities);
 
         if (timeoutMs < 0 || timeoutMs > ConnectivityManager.MAX_NETWORK_REQUEST_TIMEOUT_MS) {
