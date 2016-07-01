@@ -71,8 +71,8 @@ public abstract class FileOperation implements Parcelable {
         mDestination = destination;
     }
 
-    public void dispose(Context context) {
-        mSrcs.dispose(context);
+    public void dispose() {
+        mSrcs.dispose();
     }
 
     abstract Job createJob(Context service, Job.Listener listener, String id);

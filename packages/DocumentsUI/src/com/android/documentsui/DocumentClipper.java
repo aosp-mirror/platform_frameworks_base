@@ -21,9 +21,7 @@ import android.content.ClipDescription;
 import android.content.ClipboardManager;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.BaseBundle;
 import android.os.PersistableBundle;
 import android.provider.DocumentsContract;
 import android.support.annotation.Nullable;
@@ -48,7 +46,7 @@ import java.util.function.Function;
  * ClipboardManager wrapper class providing higher level logical
  * support for dealing with Documents.
  */
-public final class DocumentClipper implements ClipboardManager.OnPrimaryClipChangedListener {
+public final class DocumentClipper {
 
     private static final String TAG = "DocumentClipper";
 
@@ -57,34 +55,14 @@ public final class DocumentClipper implements ClipboardManager.OnPrimaryClipChan
     static final String OP_JUMBO_SELECTION_SIZE = "jumboSelection-size";
     static final String OP_JUMBO_SELECTION_TAG = "jumboSelection-tag";
 
-    // Use shared preference to store last seen primary clip tag, so that we can delete the file
-    // when we realize primary clip has been changed when we're not running.
-    private static final String PREF_NAME = "DocumentClipperPref";
-    private static final String LAST_PRIMARY_CLIP_TAG = "lastPrimaryClipTag";
-
     private final Context mContext;
     private final ClipStorage mClipStorage;
     private final ClipboardManager mClipboard;
-
-    // Here we're tracking the last clipped tag ids so we can delete them later.
-    private long mLastDragClipTag = ClipStorage.NO_SELECTION_TAG;
-    private long mLastUnusedPrimaryClipTag = ClipStorage.NO_SELECTION_TAG;
-
-    private final SharedPreferences mPref;
 
     DocumentClipper(Context context, ClipStorage storage) {
         mContext = context;
         mClipStorage = storage;
         mClipboard = context.getSystemService(ClipboardManager.class);
-
-        mClipboard.addPrimaryClipChangedListener(this);
-
-        // Primary clips may be changed when we're not running, now it's time to clean up the
-        // remnant.
-        mPref = context.getSharedPreferences(PREF_NAME, 0);
-        mLastUnusedPrimaryClipTag =
-                mPref.getLong(LAST_PRIMARY_CLIP_TAG, ClipStorage.NO_SELECTION_TAG);
-        deleteLastUnusedPrimaryClip();
     }
 
     public boolean hasItemsToPaste() {
@@ -112,24 +90,8 @@ public final class DocumentClipper implements ClipboardManager.OnPrimaryClipChan
     /**
      * Returns {@link ClipData} representing the selection, or null if selection is empty,
      * or cannot be converted.
-     *
-     * This is specialized for drag and drop so that we know which file to delete if nobody accepts
-     * the drop.
      */
-    public @Nullable ClipData getClipDataForDrag(
-            Function<String, Uri> uriBuilder, Selection selection, @OpType int opType) {
-        ClipData data = getClipDataForDocuments(uriBuilder, selection, opType);
-
-        mLastDragClipTag = getTag(data);
-
-        return data;
-    }
-
-    /**
-     * Returns {@link ClipData} representing the selection, or null if selection is empty,
-     * or cannot be converted.
-     */
-    private @Nullable ClipData getClipDataForDocuments(
+    public ClipData getClipDataForDocuments(
         Function<String, Uri> uriBuilder, Selection selection, @OpType int opType) {
 
         assert(selection != null);
@@ -147,7 +109,7 @@ public final class DocumentClipper implements ClipboardManager.OnPrimaryClipChan
     /**
      * Returns ClipData representing the selection.
      */
-    private @Nullable ClipData createStandardClipData(
+    private ClipData createStandardClipData(
             Function<String, Uri> uriBuilder, Selection selection, @OpType int opType) {
 
         assert(!selection.isEmpty());
@@ -178,7 +140,7 @@ public final class DocumentClipper implements ClipboardManager.OnPrimaryClipChan
     /**
      * Returns ClipData representing the list of docs
      */
-    private @Nullable ClipData createJumboClipData(
+    private ClipData createJumboClipData(
             Function<String, Uri> uriBuilder, Selection selection, @OpType int opType) {
 
         assert(!selection.isEmpty());
@@ -210,8 +172,8 @@ public final class DocumentClipper implements ClipboardManager.OnPrimaryClipChan
         bundle.putInt(OP_JUMBO_SELECTION_SIZE, selection.size());
 
         // Creates a clip tag
-        long tag = mClipStorage.createTag();
-        bundle.putLong(OP_JUMBO_SELECTION_TAG, tag);
+        int tag = mClipStorage.claimStorageSlot();
+        bundle.putInt(OP_JUMBO_SELECTION_TAG, tag);
 
         ClipDescription description = new ClipDescription(
                 "", // Currently "label" is not displayed anywhere in the UI.
@@ -232,7 +194,7 @@ public final class DocumentClipper implements ClipboardManager.OnPrimaryClipChan
                 getClipDataForDocuments(uriBuilder, selection, FileOperationService.OPERATION_COPY);
         assert(data != null);
 
-        setPrimaryClip(data);
+        mClipboard.setPrimaryClip(data);
     }
 
     /**
@@ -250,65 +212,7 @@ public final class DocumentClipper implements ClipboardManager.OnPrimaryClipChan
         PersistableBundle bundle = data.getDescription().getExtras();
         bundle.putString(SRC_PARENT_KEY, parent.derivedUri.toString());
 
-        setPrimaryClip(data);
-    }
-
-    private void setPrimaryClip(ClipData data) {
-        deleteLastPrimaryClip();
-
-        long tag = getTag(data);
-        setLastUnusedPrimaryClipTag(tag);
-
         mClipboard.setPrimaryClip(data);
-    }
-
-    /**
-     * Sets this primary tag to both class variable and shared preference.
-     */
-    private void setLastUnusedPrimaryClipTag(long tag) {
-        mLastUnusedPrimaryClipTag = tag;
-        mPref.edit().putLong(LAST_PRIMARY_CLIP_TAG, tag).commit();
-    }
-
-    /**
-     * This is a good chance for us to remove previous clip file for cut/copy because we know a new
-     * primary clip is set.
-     */
-    @Override
-    public void onPrimaryClipChanged() {
-        deleteLastUnusedPrimaryClip();
-    }
-
-    private void deleteLastUnusedPrimaryClip() {
-        ClipData primary = mClipboard.getPrimaryClip();
-        long primaryTag = getTag(primary);
-
-        // onPrimaryClipChanged is also called after we call setPrimaryClip(), so make sure we don't
-        // delete the clip file we just created.
-        if (mLastUnusedPrimaryClipTag != primaryTag) {
-            deleteLastPrimaryClip();
-        }
-    }
-
-    private void deleteLastPrimaryClip() {
-        deleteClip(mLastUnusedPrimaryClipTag);
-        setLastUnusedPrimaryClipTag(ClipStorage.NO_SELECTION_TAG);
-    }
-
-    /**
-     * Deletes the last seen drag clip file.
-     */
-    public void deleteDragClip() {
-        deleteClip(mLastDragClipTag);
-        mLastDragClipTag = ClipStorage.NO_SELECTION_TAG;
-    }
-
-    private void deleteClip(long tag) {
-        try {
-            mClipStorage.delete(tag);
-        } catch (IOException e) {
-            Log.w(TAG, "Error deleting clip file with tag: " + tag, e);
-        }
     }
 
     /**
@@ -323,10 +227,6 @@ public final class DocumentClipper implements ClipboardManager.OnPrimaryClipChan
             DocumentInfo destination,
             DocumentStack docStack,
             FileOperations.Callback callback) {
-
-        // The primary clip has been claimed by a file operation. It's now the operation's duty
-        // to make sure the clip file is deleted after use.
-        setLastUnusedPrimaryClipTag(ClipStorage.NO_SELECTION_TAG);
 
         copyFromClipData(destination, docStack, mClipboard.getPrimaryClip(), callback);
     }
@@ -352,33 +252,38 @@ public final class DocumentClipper implements ClipboardManager.OnPrimaryClipChan
 
         PersistableBundle bundle = clipData.getDescription().getExtras();
         @OpType int opType = getOpType(bundle);
-        UrisSupplier uris = UrisSupplier.create(clipData);
+        try {
+            UrisSupplier uris = UrisSupplier.create(clipData, mContext);
+            if (!canCopy(destination)) {
+                callback.onOperationResult(
+                        FileOperations.Callback.STATUS_REJECTED, opType, 0);
+                return;
+            }
 
-        if (!canCopy(destination)) {
-            callback.onOperationResult(
-                    FileOperations.Callback.STATUS_REJECTED, opType, 0);
+            if (uris.getItemCount() == 0) {
+                callback.onOperationResult(
+                        FileOperations.Callback.STATUS_ACCEPTED, opType, 0);
+                return;
+            }
+
+            DocumentStack dstStack = new DocumentStack(docStack, destination);
+
+            String srcParentString = bundle.getString(SRC_PARENT_KEY);
+            Uri srcParent = srcParentString == null ? null : Uri.parse(srcParentString);
+
+            FileOperation operation = new FileOperation.Builder()
+                    .withOpType(opType)
+                    .withSrcParent(srcParent)
+                    .withDestination(dstStack)
+                    .withSrcs(uris)
+                    .build();
+
+            FileOperations.start(mContext, operation, callback);
+        } catch(IOException e) {
+            Log.e(TAG, "Cannot create uris supplier.", e);
+            callback.onOperationResult(FileOperations.Callback.STATUS_REJECTED, opType, 0);
             return;
         }
-
-        if (uris.getItemCount() == 0) {
-            callback.onOperationResult(
-                    FileOperations.Callback.STATUS_ACCEPTED, opType, 0);
-            return;
-        }
-
-        DocumentStack dstStack = new DocumentStack(docStack, destination);
-
-        String srcParentString = bundle.getString(SRC_PARENT_KEY);
-        Uri srcParent = srcParentString == null ? null : Uri.parse(srcParentString);
-
-        FileOperation operation = new FileOperation.Builder()
-                .withOpType(opType)
-                .withSrcParent(srcParent)
-                .withDestination(dstStack)
-                .withSrcs(uris)
-                .build();
-
-        FileOperations.start(mContext, operation, callback);
     }
 
     /**
@@ -395,28 +300,6 @@ public final class DocumentClipper implements ClipboardManager.OnPrimaryClipChan
         }
 
         return true;
-    }
-
-    /**
-     * Obtains tag from {@link ClipData}. Returns {@link ClipStorage#NO_SELECTION_TAG}
-     * if it's not a jumbo clip.
-     */
-    private static long getTag(@Nullable ClipData data) {
-        if (data == null) {
-            return ClipStorage.NO_SELECTION_TAG;
-        }
-
-        ClipDescription description = data.getDescription();
-        if (description == null) {
-            return ClipStorage.NO_SELECTION_TAG;
-        }
-
-        BaseBundle bundle = description.getExtras();
-        if (bundle == null) {
-            return ClipStorage.NO_SELECTION_TAG;
-        }
-
-        return bundle.getLong(OP_JUMBO_SELECTION_TAG, ClipStorage.NO_SELECTION_TAG);
     }
 
     public static @OpType int getOpType(ClipData data) {

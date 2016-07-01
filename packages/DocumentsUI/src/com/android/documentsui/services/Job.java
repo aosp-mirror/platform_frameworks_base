@@ -151,7 +151,7 @@ abstract public class Job implements Runnable {
 
             // NOTE: If this details is a JumboClipDetails, and it's still referred in primary clip
             // at this point, user won't be able to paste it to anywhere else because the underlying
-            srcs.dispose(appContext);
+            srcs.dispose();
         }
     }
 

@@ -272,7 +272,7 @@ class CopyJob extends Job {
     private void buildDocumentList() throws ResourceException {
         try {
             final ContentResolver resolver = appContext.getContentResolver();
-            final Iterable<Uri> uris = srcs.getDocs(appContext);
+            final Iterable<Uri> uris = srcs.getUris(appContext);
             for (Uri uri : uris) {
                 DocumentInfo doc = DocumentInfo.fromUri(resolver, uri);
                 if (canCopy(doc, stack.root)) {

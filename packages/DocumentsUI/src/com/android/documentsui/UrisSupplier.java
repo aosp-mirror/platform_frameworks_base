@@ -31,6 +31,7 @@ import android.util.Log;
 import com.android.documentsui.dirlist.MultiSelectManager.Selection;
 import com.android.documentsui.services.FileOperation;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -54,31 +55,25 @@ public abstract class UrisSupplier implements Parcelable {
      *
      * @param context We need context to obtain {@link ClipStorage}. It can't be sent in a parcel.
      */
-    public Iterable<Uri> getDocs(Context context) throws IOException {
-        return getDocs(DocumentsApplication.getClipStorage(context));
+    public Iterable<Uri> getUris(Context context) throws IOException {
+        return getUris(DocumentsApplication.getClipStorage(context));
     }
 
     @VisibleForTesting
-    abstract Iterable<Uri> getDocs(ClipStorage storage) throws IOException;
+    abstract Iterable<Uri> getUris(ClipStorage storage) throws IOException;
 
-    public void dispose(Context context) {
-        ClipStorage storage = DocumentsApplication.getClipStorage(context);
-        dispose(storage);
-    }
-
-    @VisibleForTesting
-    void dispose(ClipStorage storage) {}
+    public void dispose() {}
 
     @Override
     public int describeContents() {
         return 0;
     }
 
-    public static UrisSupplier create(ClipData clipData) {
+    public static UrisSupplier create(ClipData clipData, Context context) throws IOException {
         UrisSupplier uris;
         PersistableBundle bundle = clipData.getDescription().getExtras();
         if (bundle.containsKey(OP_JUMBO_SELECTION_TAG)) {
-            uris = new JumboUrisSupplier(clipData);
+            uris = new JumboUrisSupplier(clipData, context);
         } else {
             uris = new StandardUrisSupplier(clipData);
         }
@@ -87,7 +82,9 @@ public abstract class UrisSupplier implements Parcelable {
     }
 
     public static UrisSupplier create(
-            Selection selection, Function<String, Uri> uriBuilder, Context context) {
+            Selection selection, Function<String, Uri> uriBuilder, Context context)
+            throws IOException {
+
         ClipStorage storage = DocumentsApplication.getClipStorage(context);
 
         List<Uri> uris = new ArrayList<>(selection.size());
@@ -99,7 +96,7 @@ public abstract class UrisSupplier implements Parcelable {
     }
 
     @VisibleForTesting
-    static UrisSupplier create(List<Uri> uris, ClipStorage storage) {
+    static UrisSupplier create(List<Uri> uris, ClipStorage storage) throws IOException {
         UrisSupplier urisSupplier = (uris.size() > Shared.MAX_DOCS_IN_INTENT)
                 ? new JumboUrisSupplier(uris, storage)
                 : new StandardUrisSupplier(uris);
@@ -110,24 +107,32 @@ public abstract class UrisSupplier implements Parcelable {
     private static class JumboUrisSupplier extends UrisSupplier {
         private static final String TAG = "JumboUrisSupplier";
 
-        private final long mSelectionTag;
+        private final File mFile;
         private final int mSelectionSize;
 
         private final transient AtomicReference<ClipStorage.Reader> mReader =
                 new AtomicReference<>();
 
-        private JumboUrisSupplier(ClipData clipData) {
+        private JumboUrisSupplier(ClipData clipData, Context context) throws IOException {
             PersistableBundle bundle = clipData.getDescription().getExtras();
-            mSelectionTag = bundle.getLong(OP_JUMBO_SELECTION_TAG, ClipStorage.NO_SELECTION_TAG);
-            assert(mSelectionTag != ClipStorage.NO_SELECTION_TAG);
+            final int tag = bundle.getInt(OP_JUMBO_SELECTION_TAG, ClipStorage.NO_SELECTION_TAG);
+            assert(tag != ClipStorage.NO_SELECTION_TAG);
+            mFile = DocumentsApplication.getClipStorage(context).getFile(tag);
+            assert(mFile.exists());
 
             mSelectionSize = bundle.getInt(OP_JUMBO_SELECTION_SIZE);
             assert(mSelectionSize > Shared.MAX_DOCS_IN_INTENT);
         }
 
-        private JumboUrisSupplier(Collection<Uri> uris, ClipStorage storage) {
-            mSelectionTag = storage.createTag();
-            new ClipStorage.PersistTask(storage, uris, mSelectionTag).execute();
+        private JumboUrisSupplier(Collection<Uri> uris, ClipStorage storage) throws IOException {
+            final int tag = storage.claimStorageSlot();
+            new ClipStorage.PersistTask(storage, uris, tag).execute();
+
+            // There is a tiny race condition here. A job may starts to read before persist task
+            // starts to write, but it has to beat an IPC and background task schedule, which is
+            // pretty rare. Creating a symlink doesn't need that file to exist, but we can't assert
+            // on its existence.
+            mFile = storage.getFile(tag);
             mSelectionSize = uris.size();
         }
 
@@ -137,8 +142,8 @@ public abstract class UrisSupplier implements Parcelable {
         }
 
         @Override
-        Iterable<Uri> getDocs(ClipStorage storage) throws IOException {
-            ClipStorage.Reader reader = mReader.getAndSet(storage.createReader(mSelectionTag));
+        Iterable<Uri> getUris(ClipStorage storage) throws IOException {
+            ClipStorage.Reader reader = mReader.getAndSet(storage.createReader(mFile));
             if (reader != null) {
                 reader.close();
                 mReader.get().close();
@@ -149,7 +154,7 @@ public abstract class UrisSupplier implements Parcelable {
         }
 
         @Override
-        void dispose(ClipStorage storage) {
+        public void dispose() {
             try {
                 ClipStorage.Reader reader = mReader.get();
                 if (reader != null) {
@@ -158,18 +163,18 @@ public abstract class UrisSupplier implements Parcelable {
             } catch (IOException e) {
                 Log.w(TAG, "Failed to close the reader.", e);
             }
-            try {
-                storage.delete(mSelectionTag);
-            } catch(IOException e) {
-                Log.w(TAG, "Failed to delete clip with tag: " + mSelectionTag + ".", e);
-            }
+
+            // mFile is a symlink to the actual data file. Delete the symlink here so that we know
+            // there is one fewer referrer that needs the data file. The actual data file will be
+            // cleaned up during file slot rotation. See ClipStorage for more details.
+            mFile.delete();
         }
 
         @Override
         public String toString() {
             StringBuilder builder = new StringBuilder();
             builder.append("JumboUrisSupplier{");
-            builder.append("selectionTag=").append(mSelectionTag);
+            builder.append("file=").append(mFile.getAbsolutePath());
             builder.append(", selectionSize=").append(mSelectionSize);
             builder.append("}");
             return builder.toString();
@@ -177,12 +182,12 @@ public abstract class UrisSupplier implements Parcelable {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeLong(mSelectionTag);
+            dest.writeString(mFile.getAbsolutePath());
             dest.writeInt(mSelectionSize);
         }
 
         private JumboUrisSupplier(Parcel in) {
-            mSelectionTag = in.readLong();
+            mFile = new File(in.readString());
             mSelectionSize = in.readInt();
         }
 
@@ -236,7 +241,7 @@ public abstract class UrisSupplier implements Parcelable {
         }
 
         @Override
-        Iterable<Uri> getDocs(ClipStorage storage) {
+        Iterable<Uri> getUris(ClipStorage storage) {
             return mDocs;
         }
 

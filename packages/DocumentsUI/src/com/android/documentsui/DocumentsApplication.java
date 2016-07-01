@@ -77,7 +77,9 @@ public class DocumentsApplication extends Application {
 
         mThumbnailCache = new ThumbnailCache(memoryClassBytes / 4);
 
-        mClipStorage = new ClipStorage(ClipStorage.prepareStorage(getCacheDir()));
+        mClipStorage = new ClipStorage(
+                ClipStorage.prepareStorage(getCacheDir()),
+                getSharedPreferences(ClipStorage.PREF_NAME, 0));
         mClipper = new DocumentClipper(this, mClipStorage);
 
         final IntentFilter packageFilter = new IntentFilter();

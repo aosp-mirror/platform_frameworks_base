@@ -26,13 +26,11 @@ public final class Files {
     private Files() {}  // no initialization for utility classes.
 
     public static void deleteRecursively(File file) {
-        if (file.exists()) {
-            if (file.isDirectory()) {
-                for (File child : file.listFiles()) {
-                    deleteRecursively(child);
-                }
+        if (file.isDirectory()) {
+            for (File child : file.listFiles()) {
+                deleteRecursively(child);
             }
-            file.delete();
         }
+        file.delete();
     }
 }

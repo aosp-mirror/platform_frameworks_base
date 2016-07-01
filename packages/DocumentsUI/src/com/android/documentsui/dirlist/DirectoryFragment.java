@@ -99,6 +99,7 @@ import com.android.documentsui.services.FileOperationService;
 import com.android.documentsui.services.FileOperationService.OpType;
 import com.android.documentsui.services.FileOperations;
 
+import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -409,7 +410,7 @@ public class DirectoryFragment extends Fragment
         if (resultCode == Activity.RESULT_CANCELED || data == null) {
             // User pressed the back button or otherwise cancelled the destination pick. Don't
             // proceed with the copy.
-            operation.dispose(getContext());
+            operation.dispose();
             return;
         }
 
@@ -492,26 +493,6 @@ public class DirectoryFragment extends Fragment
         getView().saveHierarchyState(container);
         final State state = getDisplayState();
         state.dirState.put(mStateKey, container);
-    }
-
-    void dragStarted() {
-        // When files are selected for dragging, ActionMode is started. This obscures the breadcrumb
-        // with an ActionBar. In order to make drag and drop to the breadcrumb possible, we first
-        // end ActionMode so the breadcrumb is visible to the user.
-        if (mActionMode != null) {
-            mActionMode.finish();
-        }
-    }
-
-    void dragStopped(boolean result) {
-        if (result) {
-            clearSelection();
-        } else {
-            // When drag starts we might write a new clip file to disk.
-            // No drop event happens, remove clip file here. This may be called multiple times,
-            // but it should be OK because deletion is idempotent and cheap.
-            deleteDragClipFile();
-        }
     }
 
     public void onDisplayStateChanged() {
@@ -1005,10 +986,15 @@ public class DirectoryFragment extends Fragment
                                     Log.w(TAG, "Action mode is null before deleting documents.");
                                 }
 
-                                UrisSupplier srcs = UrisSupplier.create(
-                                        selected,
-                                        mModel::getItemUri,
-                                        getContext());
+                                UrisSupplier srcs;
+                                try {
+                                    srcs = UrisSupplier.create(
+                                            selected,
+                                            mModel::getItemUri,
+                                            getContext());
+                                } catch(IOException e) {
+                                    throw new RuntimeException("Failed to create uri supplier.", e);
+                                }
 
                                 FileOperation operation = new FileOperation.Builder()
                                         .withOpType(FileOperationService.OPERATION_DELETE)
@@ -1041,8 +1027,12 @@ public class DirectoryFragment extends Fragment
                 getActivity(),
                 DocumentsActivity.class);
 
-        UrisSupplier srcs =
-                UrisSupplier.create(selected, mModel::getItemUri, getContext());
+        UrisSupplier srcs;
+        try {
+            srcs = UrisSupplier.create(selected, mModel::getItemUri, getContext());
+        } catch(IOException e) {
+            throw new RuntimeException("Failed to create uri supplier.", e);
+        }
 
         Uri srcParent = getDisplayState().stack.peek().derivedUri;
         mPendingOperation = new FileOperation.Builder()
@@ -1276,8 +1266,19 @@ public class DirectoryFragment extends Fragment
         }
     }
 
-    public void clearSelection() {
-        mSelectionManager.clearSelection();
+    void dragStarted() {
+        // When files are selected for dragging, ActionMode is started. This obscures the breadcrumb
+        // with an ActionBar. In order to make drag and drop to the breadcrumb possible, we first
+        // end ActionMode so the breadcrumb is visible to the user.
+        if (mActionMode != null) {
+            mActionMode.finish();
+        }
+    }
+
+    void dragStopped(boolean result) {
+        if (result) {
+            mSelectionManager.clearSelection();
+        }
     }
 
     @Override
@@ -1298,10 +1299,6 @@ public class DirectoryFragment extends Fragment
         }
 
         activity.setRootsDrawerOpen(false);
-    }
-
-    private void deleteDragClipFile() {
-        mClipper.deleteDragClip();
     }
 
     boolean handleDropEvent(View v, DragEvent event) {
@@ -1508,7 +1505,7 @@ public class DirectoryFragment extends Fragment
                     // the current code layout and framework assumptions don't support
                     // this. So for now, we could end up doing a bunch of i/o on main thread.
                     v.startDragAndDrop(
-                            mClipper.getClipDataForDrag(
+                            mClipper.getClipDataForDocuments(
                                     mModel::getItemUri,
                                     selection,
                                     FileOperationService.OPERATION_COPY),
