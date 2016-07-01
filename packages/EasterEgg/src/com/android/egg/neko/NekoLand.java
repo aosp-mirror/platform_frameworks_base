@@ -138,7 +138,7 @@ public class NekoLand extends Activity implements PrefsListener {
                 .setPositiveButton(android.R.string.ok, new OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        MetricsLogger.count(context, "egg_neko_rename_cat", 1);
+                        cat.logRename(context);
                         cat.setName(text.getText().toString().trim());
                         mPrefs.addCat(cat);
                     }
