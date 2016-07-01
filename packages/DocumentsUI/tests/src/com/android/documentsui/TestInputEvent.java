@@ -12,12 +12,18 @@ public class TestInputEvent implements Events.InputEvent {
     public boolean actionDown;
     public boolean actionUp;
     public Point location;
+    public Point rawLocation;
     public int position = Integer.MIN_VALUE;
 
     public TestInputEvent() {}
 
     public TestInputEvent(int position) {
         this.position = position;
+    }
+
+    @Override
+    public boolean isTouchEvent() {
+        return !mouseEvent;
     }
 
     @Override
@@ -66,6 +72,16 @@ public class TestInputEvent implements Events.InputEvent {
     }
 
     @Override
+    public float getRawX() {
+        return rawLocation.x;
+    }
+
+    @Override
+    public float getRawY() {
+        return rawLocation.y;
+    }
+
+    @Override
     public boolean isOverItem() {
         return position != Integer.MIN_VALUE && position != RecyclerView.NO_POSITION;
     }
@@ -74,6 +90,9 @@ public class TestInputEvent implements Events.InputEvent {
     public int getItemPosition() {
         return position;
     }
+
+    @Override
+    public void close() {}
 
     public static TestInputEvent tap(int position) {
         return new TestInputEvent(position);

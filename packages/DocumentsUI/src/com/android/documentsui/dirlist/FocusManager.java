@@ -49,7 +49,7 @@ import java.util.TimerTask;
 /**
  * A class that handles navigation and focus within the DirectoryFragment.
  */
-class FocusManager implements View.OnFocusChangeListener {
+final class FocusManager implements FocusHandler {
     private static final String TAG = "FocusManager";
 
     private RecyclerView mView;
@@ -70,15 +70,7 @@ class FocusManager implements View.OnFocusChangeListener {
         mSearchHelper = new TitleSearchHelper(context);
     }
 
-    /**
-     * Handles navigation (setting focus, adjusting selection if needed) arising from incoming key
-     * events.
-     *
-     * @param doc The DocumentHolder receiving the key event.
-     * @param keyCode
-     * @param event
-     * @return Whether the event was handled.
-     */
+    @Override
     public boolean handleKey(DocumentHolder doc, int keyCode, KeyEvent event) {
         // Search helper gets first crack, for doing type-to-focus.
         if (mSearchHelper.handleKey(doc, keyCode, event)) {
@@ -116,9 +108,7 @@ class FocusManager implements View.OnFocusChangeListener {
         }
     }
 
-    /**
-     * Requests focus on the item that last had focus. Scrolls to that item if necessary.
-     */
+    @Override
     public void restoreLastFocus() {
         if (mAdapter.getItemCount() == 0) {
             // Nothing to focus.
@@ -134,9 +124,7 @@ class FocusManager implements View.OnFocusChangeListener {
         }
     }
 
-    /**
-     * @return The adapter position of the last focused item.
-     */
+    @Override
     public int getFocusPosition() {
         return mLastFocusPosition;
     }

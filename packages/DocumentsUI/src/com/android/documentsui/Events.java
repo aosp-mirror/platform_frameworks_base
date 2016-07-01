@@ -115,7 +115,8 @@ public final class Events {
      * A facade over MotionEvent primarily designed to permit for unit testing
      * of related code.
      */
-    public interface InputEvent {
+    public interface InputEvent extends AutoCloseable {
+        boolean isTouchEvent();
         boolean isMouseEvent();
         boolean isPrimaryButtonPressed();
         boolean isSecondaryButtonPressed();
@@ -127,9 +128,15 @@ public final class Events {
         /** Returns true if the action is the final release of a mouse or touch. */
         boolean isActionUp();
 
+        // Eliminate the checked Exception from Autoclosable.
+        @Override
+        public void close();
+
         Point getOrigin();
         float getX();
         float getY();
+        float getRawX();
+        float getRawY();
 
         /** Returns true if the there is an item under the finger/cursor. */
         boolean isOverItem();
@@ -138,7 +145,7 @@ public final class Events {
         int getItemPosition();
     }
 
-    public static final class MotionInputEvent implements InputEvent, AutoCloseable {
+    public static final class MotionInputEvent implements InputEvent {
         private static final String TAG = "MotionInputEvent";
 
         private static final Pools.SimplePool<MotionInputEvent> sPool = new Pools.SimplePool<>(1);
@@ -205,6 +212,11 @@ public final class Events {
         }
 
         @Override
+        public boolean isTouchEvent() {
+            return Events.isTouchEvent(mEvent);
+        }
+
+        @Override
         public boolean isMouseEvent() {
             return Events.isMouseEvent(mEvent);
         }
@@ -247,6 +259,16 @@ public final class Events {
         @Override
         public float getY() {
             return mEvent.getY();
+        }
+
+        @Override
+        public float getRawX() {
+            return mEvent.getRawX();
+        }
+
+        @Override
+        public float getRawY() {
+            return mEvent.getRawY();
         }
 
         @Override

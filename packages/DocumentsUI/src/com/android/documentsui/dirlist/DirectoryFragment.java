@@ -63,6 +63,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -75,6 +76,7 @@ import com.android.documentsui.DirectoryResult;
 import com.android.documentsui.DocumentClipper;
 import com.android.documentsui.DocumentsActivity;
 import com.android.documentsui.DocumentsApplication;
+import com.android.documentsui.Events.InputEvent;
 import com.android.documentsui.Events.MotionInputEvent;
 import com.android.documentsui.ItemDragListener;
 import com.android.documentsui.MenuManager;
@@ -92,6 +94,7 @@ import com.android.documentsui.State;
 import com.android.documentsui.State.ViewMode;
 import com.android.documentsui.UrisSupplier;
 import com.android.documentsui.dirlist.MultiSelectManager.Selection;
+import com.android.documentsui.dirlist.UserInputHandler.DocumentDetails;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.RootInfo;
 import com.android.documentsui.services.FileOperation;
@@ -106,6 +109,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
@@ -136,9 +140,9 @@ public class DirectoryFragment extends Fragment
     private static final int LOADER_ID = 42;
 
     private Model mModel;
-    private MultiSelectManager mSelectionManager;
+    private MultiSelectManager mSelectionMgr;
     private Model.UpdateListener mModelUpdateListener = new ModelUpdateListener();
-    private ItemEventListener mItemEventListener;
+    private UserInputHandler mInputHandler;
     private SelectionModeListener mSelectionModeListener;
     private FocusManager mFocusManager;
 
@@ -240,7 +244,7 @@ public class DirectoryFragment extends Fragment
 
     @Override
     public void onDestroyView() {
-        mSelectionManager.clearSelection();
+        mSelectionMgr.clearSelection();
 
         // Cancel any outstanding thumbnail requests
         final int count = mRecView.getChildCount();
@@ -296,45 +300,48 @@ public class DirectoryFragment extends Fragment
         // TODO: instead of inserting the view into the constructor, extract listener-creation code
         // and set the listener on the view after the fact.  Then the view doesn't need to be passed
         // into the selection manager.
-        mSelectionManager = new MultiSelectManager(
+        mSelectionMgr = new MultiSelectManager(
                 mAdapter,
                 state.allowMultiple
                     ? MultiSelectManager.MODE_MULTIPLE
                     : MultiSelectManager.MODE_SINGLE);
 
-        GestureListener gestureListener = new GestureListener(
-                mSelectionManager,
-                mRecView,
+        // Make sure this is done after the RecyclerView is set up.
+        mFocusManager = new FocusManager(context, mRecView, mModel);
+
+        mInputHandler = new UserInputHandler(
+                mSelectionMgr,
+                mFocusManager,
+                new Function<MotionEvent, InputEvent>() {
+                    @Override
+                    public InputEvent apply(MotionEvent t) {
+                        return MotionInputEvent.obtain(t, mRecView);
+                    }
+                },
                 this::getTarget,
-                this::onDoubleTap,
-                this::onRightClick);
+                this::canSelect,
+                this::onRightClick,
+                this::onActivate,
+                (DocumentDetails ignored) -> {
+                    return onDeleteSelectedDocuments();
+                });
 
         mGestureDetector =
-                new ListeningGestureDetector(this.getContext(), mDragHelper, gestureListener);
+                new ListeningGestureDetector(this.getContext(), mDragHelper, mInputHandler);
 
         mRecView.addOnItemTouchListener(mGestureDetector);
         mEmptyView.setOnTouchListener(mGestureDetector);
 
         if (state.allowMultiple) {
-            mBandController = new BandController(mRecView, mAdapter, mSelectionManager);
+            mBandController = new BandController(mRecView, mAdapter, mSelectionMgr);
         }
 
         mSelectionModeListener = new SelectionModeListener();
-        mSelectionManager.addCallback(mSelectionModeListener);
+        mSelectionMgr.addCallback(mSelectionModeListener);
 
         mModel = new Model();
         mModel.addUpdateListener(mAdapter);
         mModel.addUpdateListener(mModelUpdateListener);
-
-        // Make sure this is done after the RecyclerView is set up.
-        mFocusManager = new FocusManager(context, mRecView, mModel);
-
-        mItemEventListener = new ItemEventListener(
-                mSelectionManager,
-                mFocusManager,
-                this::handleViewItem,
-                this::deleteDocuments,
-                this::canSelect);
 
         final BaseActivity activity = getBaseActivity();
         mTuner = activity.createFragmentTuner();
@@ -351,7 +358,7 @@ public class DirectoryFragment extends Fragment
     }
 
     public void retainState(RetainedState state) {
-        state.selection = mSelectionManager.getSelection(new Selection());
+        state.selection = mSelectionMgr.getSelection(new Selection());
     }
 
     @Override
@@ -419,49 +426,37 @@ public class DirectoryFragment extends Fragment
         FileOperations.start(getContext(), operation, mFileOpCallback);
     }
 
-    protected boolean onDoubleTap(MotionInputEvent event) {
-        if (event.isMouseEvent()) {
-            String id = getModelId(event);
-            if (id != null) {
-                return handleViewItem(id);
-            }
-        }
-        return false;
-    }
-
-    protected boolean onRightClick(MotionInputEvent e) {
+    protected boolean onRightClick(InputEvent e) {
         if (e.getItemPosition() != RecyclerView.NO_POSITION) {
-            final DocumentHolder holder = getTarget(e);
-            String modelId = getModelId(holder.itemView);
-            if (!mSelectionManager.getSelection().contains(modelId)) {
-                mSelectionManager.clearSelection();
-                // Set selection on the one single item
-                List<String> ids = Collections.singletonList(modelId);
-                mSelectionManager.setItemsSelected(ids, true);
+            final DocumentHolder doc = getTarget(e);
+            if (!mSelectionMgr.getSelection().contains(doc.modelId)) {
+                mSelectionMgr.replaceSelection(Collections.singleton(doc.modelId));
             }
 
             // We are registering for context menu here so long-press doesn't trigger this
             // floating context menu, and then quickly unregister right afterwards
-            registerForContextMenu(holder.itemView);
-            mRecView.showContextMenuForChild(holder.itemView,
-                    e.getX() - holder.itemView.getLeft(), e.getY() - holder.itemView.getTop());
-            unregisterForContextMenu(holder.itemView);
+            registerForContextMenu(doc.itemView);
+            mRecView.showContextMenuForChild(doc.itemView,
+                    e.getX() - doc.itemView.getLeft(), e.getY() - doc.itemView.getTop());
+            unregisterForContextMenu(doc.itemView);
+            return true;
         }
+
         // If there was no corresponding item pos, that means user right-clicked on the blank
         // pane
         // We would want to show different options then, and not select any item
         // The blank pane could be the recyclerView or the emptyView, so we need to register
         // according to whichever one is visible
-        else if (mEmptyView.getVisibility() == View.VISIBLE) {
+        if (mEmptyView.getVisibility() == View.VISIBLE) {
             registerForContextMenu(mEmptyView);
             mEmptyView.showContextMenu(e.getX(), e.getY());
             unregisterForContextMenu(mEmptyView);
             return true;
-        } else {
-            registerForContextMenu(mRecView);
-            mRecView.showContextMenu(e.getX(), e.getY());
-            unregisterForContextMenu(mRecView);
         }
+
+        registerForContextMenu(mRecView);
+        mRecView.showContextMenu(e.getX(), e.getY());
+        unregisterForContextMenu(mRecView);
         return true;
     }
 
@@ -478,7 +473,7 @@ public class DirectoryFragment extends Fragment
         if (mTuner.isDocumentEnabled(docMimeType, docFlags)) {
             final DocumentInfo doc = DocumentInfo.fromDirectoryCursor(cursor);
             getBaseActivity().onDocumentPicked(doc, mModel);
-            mSelectionManager.clearSelection();
+            mSelectionMgr.clearSelection();
             return true;
         }
         return false;
@@ -643,7 +638,7 @@ public class DirectoryFragment extends Fragment
 
         @Override
         public void onSelectionChanged() {
-            mSelectionManager.getSelection(mSelected);
+            mSelectionMgr.getSelection(mSelected);
             if (mSelected.size() > 0) {
                 if (DEBUG) Log.d(TAG, "Maybe starting action mode.");
                 if (mActionMode == null) {
@@ -673,7 +668,7 @@ public class DirectoryFragment extends Fragment
             if (DEBUG) Log.d(TAG, "Handling action mode destroyed.");
             mActionMode = null;
             // clear selection
-            mSelectionManager.clearSelection();
+            mSelectionMgr.clearSelection();
             mSelected.clear();
 
             mDirectoryCount = 0;
@@ -704,7 +699,7 @@ public class DirectoryFragment extends Fragment
                 mRecView.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
             }
 
-            int size = mSelectionManager.getSelection().size();
+            int size = mSelectionMgr.getSelection().size();
             mode.getMenuInflater().inflate(R.menu.mode_directory, menu);
             mode.setTitle(TextUtils.formatSelectedCount(size));
 
@@ -752,7 +747,7 @@ public class DirectoryFragment extends Fragment
 
         @Override
         public boolean canRename() {
-            return mNoRenameCount == 0 && mSelectionManager.getSelection().size() == 1;
+            return mNoRenameCount == 0 && mSelectionMgr.getSelection().size() == 1;
         }
 
         private void updateActionMenu() {
@@ -768,7 +763,7 @@ public class DirectoryFragment extends Fragment
     }
 
     private boolean handleMenuItemClick(MenuItem item) {
-        Selection selection = mSelectionManager.getSelection(new Selection());
+        Selection selection = mSelectionMgr.getSelection(new Selection());
 
         switch (item.getItemId()) {
             case R.id.menu_open:
@@ -835,9 +830,9 @@ public class DirectoryFragment extends Fragment
     }
 
     public final boolean onBackPressed() {
-        if (mSelectionManager.hasSelection()) {
+        if (mSelectionMgr.hasSelection()) {
             if (DEBUG) Log.d(TAG, "Clearing selection on selection manager.");
-            mSelectionManager.clearSelection();
+            mSelectionMgr.clearSelection();
             return true;
         }
         return false;
@@ -948,6 +943,29 @@ public class DirectoryFragment extends Fragment
         }
         return message;
     }
+
+    private boolean onDeleteSelectedDocuments() {
+        if (mSelectionMgr.hasSelection()) {
+            deleteDocuments(mSelectionMgr.getSelection(new Selection()));
+        }
+        return false;
+    }
+
+    private boolean onActivate(DocumentDetails doc) {
+        // Toggle selection if we're in selection mode, othewise, view item.
+        if (mSelectionMgr.hasSelection()) {
+            mSelectionMgr.toggleSelection(doc.getModelId());
+        } else {
+            handleViewItem(doc.getModelId());
+        }
+        return true;
+    }
+
+//    private boolean onSelect(DocumentDetails doc) {
+//        mSelectionMgr.toggleSelection(doc.getModelId());
+//        mSelectionMgr.setSelectionRangeBegin(doc.getAdapterPosition());
+//        return true;
+//    }
 
     private void deleteDocuments(final Selection selected) {
         Metrics.logUserAction(getContext(), Metrics.USER_ACTION_DELETE);
@@ -1100,7 +1118,7 @@ public class DirectoryFragment extends Fragment
 
     @Override
     public void initDocumentHolder(DocumentHolder holder) {
-        holder.addEventListener(mItemEventListener);
+        holder.addKeyEventListener(mInputHandler);
         holder.itemView.setOnFocusChangeListener(mFocusManager);
     }
 
@@ -1186,11 +1204,11 @@ public class DirectoryFragment extends Fragment
     public void copySelectedToClipboard() {
         Metrics.logUserAction(getContext(), Metrics.USER_ACTION_COPY_CLIPBOARD);
 
-        Selection selection = mSelectionManager.getSelection(new Selection());
+        Selection selection = mSelectionMgr.getSelection(new Selection());
         if (selection.isEmpty()) {
             return;
         }
-        mSelectionManager.clearSelection();
+        mSelectionMgr.clearSelection();
 
         mClipper.clipDocumentsForCopy(mModel::getItemUri, selection);
 
@@ -1200,11 +1218,11 @@ public class DirectoryFragment extends Fragment
     public void cutSelectedToClipboard() {
         Metrics.logUserAction(getContext(), Metrics.USER_ACTION_CUT_CLIPBOARD);
 
-        Selection selection = mSelectionManager.getSelection(new Selection());
+        Selection selection = mSelectionMgr.getSelection(new Selection());
         if (selection.isEmpty()) {
             return;
         }
-        mSelectionManager.clearSelection();
+        mSelectionMgr.clearSelection();
 
         mClipper.clipDocumentsForCut(mModel::getItemUri, selection, getDisplayState().stack.peek());
 
@@ -1239,7 +1257,7 @@ public class DirectoryFragment extends Fragment
         }
 
         // Only select things currently visible in the adapter.
-        boolean changed = mSelectionManager.setItemsSelected(enabled, true);
+        boolean changed = mSelectionMgr.setItemsSelected(enabled, true);
         if (changed) {
             updateDisplayState();
         }
@@ -1277,7 +1295,7 @@ public class DirectoryFragment extends Fragment
 
     void dragStopped(boolean result) {
         if (result) {
-            mSelectionManager.clearSelection();
+            mSelectionMgr.clearSelection();
         }
     }
 
@@ -1363,19 +1381,7 @@ public class DirectoryFragment extends Fragment
         }
     }
 
-    /**
-     * Gets the model ID for a given motion event (using the event position)
-     */
-    private String getModelId(MotionInputEvent e) {
-        RecyclerView.ViewHolder vh = getTarget(e);
-        if (vh instanceof DocumentHolder) {
-            return ((DocumentHolder) vh).modelId;
-        } else {
-            return null;
-        }
-    }
-
-    private @Nullable DocumentHolder getTarget(MotionInputEvent e) {
+    private @Nullable DocumentHolder getTarget(InputEvent e) {
         View childView = mRecView.findChildViewUnder(e.getX(), e.getY());
         if (childView != null) {
             return (DocumentHolder) mRecView.getChildViewHolder(childView);
@@ -1423,7 +1429,7 @@ public class DirectoryFragment extends Fragment
 
     @Override
     public boolean isSelected(String modelId) {
-        return mSelectionManager.getSelection().contains(modelId);
+        return mSelectionMgr.getSelection().contains(modelId);
     }
 
     private final class ModelUpdateListener implements Model.UpdateListener {
@@ -1480,7 +1486,7 @@ public class DirectoryFragment extends Fragment
 
     private DocumentInfo getSingleSelectedDocument(Selection selection) {
         assert (selection.size() == 1);
-        final List<DocumentInfo> docs = mModel.getDocuments(mSelectionManager.getSelection());
+        final List<DocumentInfo> docs = mModel.getDocuments(mSelectionMgr.getSelection());
         assert (docs.size() == 1);
         return docs.get(0);
     }
@@ -1489,7 +1495,7 @@ public class DirectoryFragment extends Fragment
             new DragStartHelper.OnDragStartListener() {
                 @Override
                 public boolean onDragStart(View v, DragStartHelper helper) {
-                    Selection selection = mSelectionManager.getSelection();
+                    Selection selection = mSelectionMgr.getSelection();
 
                     if (v == null) {
                         Log.d(TAG, "Ignoring drag event, null view");
@@ -1531,6 +1537,10 @@ public class DirectoryFragment extends Fragment
             return mDragHelper.onLongClick(v);
         }
     };
+
+    private boolean canSelect(DocumentDetails doc) {
+        return canSelect(doc.getModelId());
+    }
 
     private boolean canSelect(String modelId) {
 
@@ -1662,7 +1672,7 @@ public class DirectoryFragment extends Fragment
         updateLayout(state.derivedMode);
 
         if (mRestoredSelection != null) {
-            mSelectionManager.restoreSelection(mRestoredSelection);
+            mSelectionMgr.restoreSelection(mRestoredSelection);
             // Note, we'll take care of cleaning up retained selection
             // in the selection handler where we already have some
             // specialized code to handle when selection was restored.
