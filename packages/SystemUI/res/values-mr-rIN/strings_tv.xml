@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/**
+ * Copyright (c) 2016, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="pip_close" msgid="3480680679023423574">"PIP बंद करा"</string>
+    <string name="pip_fullscreen" msgid="8604643018538487816">"पूर्ण स्क्रीन"</string>
+    <string name="pip_play" msgid="674145557658227044">"प्ले करा"</string>
+    <string name="pip_pause" msgid="8412075640017218862">"विराम द्या"</string>
+    <string name="pip_hold_home" msgid="340086535668778109">"PIP नियंत्रित करण्यासाठी "<b>"मुख्यपृष्ठ"</b>" धरून ठेवा"</string>
+    <string name="pip_onboarding_title" msgid="7850436557670253991">"चित्रा-मध्ये-चित्र"</string>
+    <string name="pip_onboarding_description" msgid="4028124563309465267">"आपण दुसरा व्हिडिओ प्ले करेपर्यंत हे आपल्या व्हिडिओस दृश्यामध्ये ठेवते. ते नियंत्रित करण्यासाठी "<b>"मुख्यपृष्ठ"</b>" दाबा आणि धरून ठेवा."</string>
+    <string name="pip_onboarding_button" msgid="3957426748484904611">"समजले"</string>
+    <string name="recents_tv_dismiss" msgid="3555093879593377731">"डिसमिस करा"</string>
+  <string-array name="recents_tv_blacklist_array">
+  </string-array>
+</resources>
