@@ -1,4 +1,4 @@
-page.title=Performance and the View Hierarchy
+page.title=Performance and View Hierarchies
 @jd:body
 
 <div id="qv-wrapper">
@@ -227,7 +227,7 @@ GPU Rendering Walkthrough.</a>
 <h3 id="lint">Lint</h3>
 
 <p>
-AndroidStudio’s <a
+Android Studio’s <a
 href="{@docRoot}studio/write/lint.html">Lint</a> tool can
 help you gain a sense of inefficiencies in the view hierarchy. To use this tool,
 select <strong>Analyze > Inspect Code</strong>, as shown in Figure 1.
