@@ -1536,8 +1536,11 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
         }
 
         mExecutingActions = true;
-        action.run();
-        mExecutingActions = false;
+        try {
+            action.run();
+        } finally {
+            mExecutingActions = false;
+        }
 
         doPendingDeferredStart();
     }
@@ -1574,11 +1577,14 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
             }
             
             mExecutingActions = true;
-            for (int i=0; i<numActions; i++) {
-                mTmpActions[i].run();
-                mTmpActions[i] = null;
+            try {
+                for (int i = 0; i < numActions; i++) {
+                    mTmpActions[i].run();
+                    mTmpActions[i] = null;
+                }
+            } finally {
+                mExecutingActions = false;
             }
-            mExecutingActions = false;
             didSomething = true;
         }
 
