@@ -222,6 +222,8 @@ final class ActivityRecord {
     boolean pendingVoiceInteractionStart;   // Waiting for activity-invoked voice session
     IVoiceInteractionSession voiceSession;  // Voice interaction session for this activity
 
+    int mRotationAnimationHint;
+
     private static String startingWindowStateToString(int state) {
         switch (state) {
             case STARTING_WINDOW_NOT_SHOWN:
@@ -636,6 +638,7 @@ final class ActivityRecord {
         if (options != null) {
             pendingOptions = options;
             mLaunchTaskBehind = pendingOptions.getLaunchTaskBehind();
+            mRotationAnimationHint = pendingOptions.getRotationAnimationHint();
             PendingIntent usageReport = pendingOptions.getUsageTimeReport();
             if (usageReport != null) {
                 appTimeTracker = new AppTimeTracker(usageReport);

@@ -2874,8 +2874,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 + mTopFullscreenOpaqueWindowState + " rotationAnimation="
                 + (mTopFullscreenOpaqueWindowState == null ?
                         "0" : mTopFullscreenOpaqueWindowState.getAttrs().rotationAnimation));
-        if (mTopFullscreenOpaqueWindowState != null && mTopIsFullscreen) {
-            switch (mTopFullscreenOpaqueWindowState.getAttrs().rotationAnimation) {
+        if (mTopFullscreenOpaqueWindowState != null) {
+            int animationHint = mTopFullscreenOpaqueWindowState.getRotationAnimationHint();
+            if (animationHint < 0 && mTopIsFullscreen) {
+                animationHint = mTopFullscreenOpaqueWindowState.getAttrs().rotationAnimation;
+            }
+            switch (animationHint) {
                 case ROTATION_ANIMATION_CROSSFADE:
                     anim[0] = R.anim.rotation_animation_xfade_exit;
                     anim[1] = R.anim.rotation_animation_enter;
@@ -7682,7 +7686,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return false;
         }
 
+        // We only enable seamless rotation if the top window has requested
+        // it and is in the fullscreen opaque state. Seamless rotation
+        // requires freezing various Surface states and won't work well
+        // with animations, so we disable it in the animation case for now.
         if (mTopFullscreenOpaqueWindowState != null && mTopIsFullscreen &&
+                !mTopFullscreenOpaqueWindowState.isAnimatingLw() &&
                 mTopFullscreenOpaqueWindowState.getAttrs().rotationAnimation ==
                 ROTATION_ANIMATION_JUMPCUT) {
             return true;

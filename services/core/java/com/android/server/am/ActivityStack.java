@@ -5199,7 +5199,7 @@ final class ActivityStack {
                 (r.info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0, r.userId, r.info.configChanges,
                 task.voiceSession != null, r.mLaunchTaskBehind, bounds, task.mOverrideConfig,
                 task.mResizeMode, r.isAlwaysFocusable(), task.isHomeTask(),
-                r.appInfo.targetSdkVersion);
+                r.appInfo.targetSdkVersion, r.mRotationAnimationHint);
         r.taskConfigOverride = task.mOverrideConfig;
     }
 

@@ -132,6 +132,7 @@ class AppWindowToken extends WindowToken {
     boolean mAlwaysFocusable;
 
     boolean mAppStopped;
+    int mRotationAnimationHint;
     int mPendingRelaunchCount;
 
     private ArrayList<WindowSurfaceController.SurfaceControlWithBackground> mSurfaceViewBackgrounds =
