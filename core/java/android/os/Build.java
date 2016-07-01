@@ -672,6 +672,11 @@ public class Build {
          * N is for ¯\_(ツ)_/¯.
          */
         public static final int N = 24;
+
+        /**
+         * N MR1: Still ¯\_(シ)_/¯.
+         */
+        public static final int N_MR1 = 25;
     }
 
     /** The type of build, like "user" or "eng". */
