@@ -64,7 +64,7 @@ public class HandlerThread extends Thread {
     
     /**
      * This method returns the Looper associated with this thread. If this thread not been started
-     * or for any reason is isAlive() returns false, this method will return null. If this thread 
+     * or for any reason isAlive() returns false, this method will return null. If this thread
      * has been started, this method will block until the looper has been initialized.  
      * @return The looper.
      */
