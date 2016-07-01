@@ -804,8 +804,9 @@ public final class MediaMetadata implements Parcelable {
          * <li>{@link #METADATA_KEY_DISPLAY_ICON}</li>
          * </ul>
          * <p>
-         * Large bitmaps may be scaled down by the system. To pass full
-         * resolution images {@link Uri Uris} should be used with
+         * Large bitmaps may be scaled down by the system when
+         * {@link android.media.session.MediaSession#setMetadata} is called.
+         * To pass full resolution images {@link Uri Uris} should be used with
          * {@link #putString}.
          *
          * @param key The key for referencing this value
