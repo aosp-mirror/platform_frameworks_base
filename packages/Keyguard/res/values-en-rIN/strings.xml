@@ -108,7 +108,7 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM PUK operation failed!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Code accepted"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"No service."</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Switch input method button."</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"Switch input method"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Aeroplane mode"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Pattern required after device restarts"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"PIN required after device restarts"</string>
@@ -119,6 +119,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Pattern required when you switch profiles"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"PIN required when you switch profiles"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Password required when you switch profiles"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"Device administrator locked device"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"Device was locked manually"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">Device hasn\'t been unlocked for <xliff:g id="NUMBER_1">%d</xliff:g> hours. Confirm pattern.</item>
       <item quantity="one">Device hasn\'t been unlocked for <xliff:g id="NUMBER_0">%d</xliff:g> hour. Confirm pattern.</item>

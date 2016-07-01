@@ -108,7 +108,7 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM PUK राख्‍ने कार्य बिफल भयो!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"कोड स्वीकृत!"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"कुनै सेवा छैन।"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"इनपुट विधि बटन स्विच गर्नुहोस्।"</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"इनपुट विधिलाई स्विच गर्नुहोस्"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"हवाइजहाज मोड"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"यन्त्र पुनः सुरू भएपछि ढाँचा आवश्यक"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"यन्त्र पुनः सुरू भएपछि PIN आवश्यक"</string>
@@ -119,6 +119,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"तपाईँले प्रोफाइलहरू स्विच गर्नुहुँदा ढाँचा आवश्यक"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"तपाईँले प्रोफाइलहरू स्विच गर्नुहुँदा PIN आवश्यक"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"तपाईँले प्रोफाइलहरू स्विच गर्नुहुँदा पासवर्ड आवश्यक"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"यन्त्रको प्रशासकले यन्त्रलाई लक गरेको छ"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"यन्त्रलाई म्यानुअल तरिकाले लक गरिएको थियो"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other"> यन्त्र <xliff:g id="NUMBER_1">%d</xliff:g> घन्टा देखि अनलक भएको छैन। ढाँचा पुष्टि गर्नुहोस्।</item>
       <item quantity="one"> यन्त्र <xliff:g id="NUMBER_0">%d</xliff:g> घन्टा देखि अनलक भएको छैन। ढाँचा पुष्टि गर्नुहोस्। </item>
