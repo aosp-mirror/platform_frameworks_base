@@ -28,6 +28,7 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.android.egg.R;
+import com.android.internal.logging.MetricsLogger;
 
 public class Cat extends Drawable {
     public static final long[] PURR = {0, 40, 20, 40, 20, 40, 20, 40, 20, 40, 20, 40};
@@ -37,6 +38,8 @@ public class Cat extends Drawable {
     private long mSeed;
     private String mName;
     private int mBodyColor;
+    private int mFootType;
+    private boolean mBowTie;
 
     private synchronized Random notSoRandom(long seed) {
         if (mNotSoRandom == null) {
@@ -64,6 +67,15 @@ public class Cat extends Drawable {
             i+=2;
         }
         return a[i+1];
+    }
+
+    public static final int getColorIndex(int q, int[] a) {
+        for(int i = 1; i < a.length; i+=2) {
+            if (a[i] == q) {
+                return i/2;
+            }
+        }
+        return -1;
     }
 
     public static final int[] P_BODY_COLORS = {
@@ -155,14 +167,19 @@ public class Cat extends Drawable {
             tint(0xFF000000, D.mouth, D.nose);
         }
 
+        mFootType = 0;
         if (nsr.nextFloat() < 0.25f) {
+            mFootType = 4;
             tint(0xFFFFFFFF, D.foot1, D.foot2, D.foot3, D.foot4);
         } else {
             if (nsr.nextFloat() < 0.25f) {
+                mFootType = 2;
                 tint(0xFFFFFFFF, D.foot1, D.foot2);
             } else if (nsr.nextFloat() < 0.25f) {
+                mFootType = 3; // maybe -2 would be better? meh.
                 tint(0xFFFFFFFF, D.foot3, D.foot4);
             } else if (nsr.nextFloat() < 0.1f) {
+                mFootType = 1;
                 tint(0xFFFFFFFF, (Drawable) choose(nsr, D.foot1, D.foot2, D.foot3, D.foot4));
             }
         }
@@ -175,7 +192,8 @@ public class Cat extends Drawable {
 
         final int collarColor = chooseP(nsr, P_COLLAR_COLORS);
         tint(collarColor, D.collar);
-        tint((nsr.nextFloat() < 0.1f) ? collarColor : 0, D.bowtie);
+        mBowTie = nsr.nextFloat() < 0.1f;
+        tint(mBowTie ? collarColor : 0, D.bowtie);
     }
 
     public static Cat create(Context context) {
@@ -288,6 +306,26 @@ public class Cat extends Drawable {
 
     public int getBodyColor() {
         return mBodyColor;
+    }
+
+    public void logAdd(Context context) {
+        logCatAction(context, "egg_neko_add");
+    }
+
+    public void logRemove(Context context) {
+        logCatAction(context, "egg_neko_remove");
+    }
+
+    public void logShare(Context context) {
+        logCatAction(context, "egg_neko_share");
+    }
+
+    private void logCatAction(Context context, String prefix) {
+        MetricsLogger.count(context, prefix, 1);
+        MetricsLogger.histogram(context, prefix +"_color",
+                getColorIndex(mBodyColor, P_BODY_COLORS));
+        MetricsLogger.histogram(context, prefix + "_bowtie", mBowTie ? 1 : 0);
+        MetricsLogger.histogram(context, prefix + "_feet", mFootType);
     }
 
     public static class CatParts {
