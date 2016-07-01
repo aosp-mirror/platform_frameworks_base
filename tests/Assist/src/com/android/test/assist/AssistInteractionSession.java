@@ -77,6 +77,9 @@ public class AssistInteractionSession extends VoiceInteractionSession {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        getWindow().getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
     }
 
     @Override
