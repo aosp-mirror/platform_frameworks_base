@@ -200,6 +200,12 @@ public class DisconnectCause {
      */
     public static final int CALL_PULLED = 51;
 
+    /**
+     * The call was terminated because it was answered on another device.
+     * {@hide}
+     */
+    public static final int ANSWERED_ELSEWHERE = 52;
+
     //*********************************************************************************************
     // When adding a disconnect type:
     // 1) Please assign the new type the next id value below.
@@ -208,14 +214,14 @@ public class DisconnectCause {
     // 4) Update toString() with the newly added disconnect type.
     // 5) Update android.telecom.DisconnectCauseUtil with any mappings to a telecom.DisconnectCause.
     //
-    // NextId: 50
+    // NextId: 53
     //*********************************************************************************************
 
     /** Smallest valid value for call disconnect codes. */
     public static final int MINIMUM_VALID_VALUE = NOT_DISCONNECTED;
 
     /** Largest valid value for call disconnect codes. */
-    public static final int MAXIMUM_VALID_VALUE = VIDEO_CALL_NOT_ALLOWED_WHILE_TTY_ENABLED;
+    public static final int MAXIMUM_VALID_VALUE = ANSWERED_ELSEWHERE;
 
     /** Private constructor to avoid class instantiation. */
     private DisconnectCause() {
@@ -327,6 +333,8 @@ public class DisconnectCause {
             return "VIDEO_CALL_NOT_ALLOWED_WHILE_TTY_ENABLED";
         case CALL_PULLED:
             return "CALL_PULLED";
+        case ANSWERED_ELSEWHERE:
+            return "ANSWERED_ELSEWHERE";
         default:
             return "INVALID: " + cause;
         }
