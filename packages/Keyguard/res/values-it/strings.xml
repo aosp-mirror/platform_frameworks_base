@@ -108,7 +108,7 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Operazione con PUK della SIM non riuscita."</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Codice accettato."</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Nessun servizio."</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Pulsante per cambiare metodo di immissione."</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"Cambia metodo di immissione"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Modalità aereo"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Sequenza obbligatoria dopo il riavvio del dispositivo"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"PIN obbligatorio dopo il riavvio del dispositivo"</string>
@@ -119,6 +119,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Sequenza obbligatoria dopo aver cambiato profilo"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"PIN obbligatorio dopo aver cambiato profilo"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Password obbligatoria dopo aver cambiato profilo"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"L\'amministratore del dispositivo lo ha bloccato"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"Il dispositivo è stato bloccato manualmente"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">Il dispositivo non viene sbloccato da <xliff:g id="NUMBER_1">%d</xliff:g> ore. Conferma la sequenza.</item>
       <item quantity="one">Il dispositivo non viene sbloccato da <xliff:g id="NUMBER_0">%d</xliff:g> ora. Conferma la sequenza.</item>
