@@ -16,11 +16,14 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
-    <string name="enroll">Load</string>
-    <string name="reenroll">Re-load</string>
-    <string name="unenroll">Un-load</string>
+    <string name="load">Load</string>
+    <string name="reload">Reload</string>
+    <string name="unload">Unload</string>
     <string name="start_recog">Start</string>
     <string name="stop_recog">Stop</string>
     <string name="play_trigger">Play Trigger Audio</string>
+    <string name="capture">Capture Audio</string>
+    <string name="stop_capture">Stop Capturing Audio</string>
+    <string name="play_capture">Play Captured Audio</string>
     <string name="none">Debug messages appear here:\n</string>
 </resources>

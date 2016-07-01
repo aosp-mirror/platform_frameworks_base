@@ -18,7 +18,6 @@ package com.android.test.soundtrigger;
 
 import android.annotation.Nullable;
 import android.content.Context;
-import android.hardware.soundtrigger.SoundTrigger;
 import android.hardware.soundtrigger.SoundTrigger.GenericSoundModel;
 import android.media.soundtrigger.SoundTriggerDetector;
 import android.media.soundtrigger.SoundTriggerManager;
@@ -36,7 +35,7 @@ import java.util.UUID;
  * Utility class for the managing sound trigger sound models.
  */
 public class SoundTriggerUtil {
-    private static final String TAG = "TestSoundTriggerUtil:Hotsound";
+    private static final String TAG = "SoundTriggerTestUtil";
 
     private final ISoundTriggerService mSoundTriggerService;
     private final SoundTriggerManager mSoundTriggerManager;
@@ -68,10 +67,6 @@ public class SoundTriggerUtil {
         return true;
     }
 
-    public void addOrUpdateSoundModel(SoundTriggerManager.Model soundModel) {
-        mSoundTriggerManager.updateModel(soundModel);
-    }
-
     /**
      * Gets the sound model for the given keyphrase, null if none exists.
      * If a sound model for a given keyphrase exists, and it needs to be updated,
@@ -91,7 +86,7 @@ public class SoundTriggerUtil {
         }
 
         if (model == null) {
-            Log.w(TAG, "No models present for the gien keyphrase ID");
+            Log.w(TAG, "No models present for the given keyphrase ID");
             return null;
         } else {
             return model;
@@ -109,18 +104,14 @@ public class SoundTriggerUtil {
         try {
             mSoundTriggerService.deleteSoundModel(new ParcelUuid(modelId));
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in updateSoundModel");
+            Log.e(TAG, "RemoteException in deleteSoundModel");
+            return false;
         }
         return true;
-    }
-
-    public void deleteSoundModelUsingManager(UUID modelId) {
-            mSoundTriggerManager.deleteModel(modelId);
     }
 
     public SoundTriggerDetector createSoundTriggerDetector(UUID modelId,
             SoundTriggerDetector.Callback callback) {
         return mSoundTriggerManager.createSoundTriggerDetector(modelId, callback, null);
     }
-
 }
