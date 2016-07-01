@@ -799,10 +799,24 @@ redirects:
   to: http://android-developers.blogspot.com/2016/03/first-preview-of-android-n-developer.html
 - from: /reference/org/apache/http/...
   to: /about/versions/marshmallow/android-6.0-changes.html#behavior-apache-http-client
-- from: /shareables/...
-  to: https://commondatastorage.googleapis.com/androiddevelopers/shareables/...
-- from: /downloads/...
-  to: https://commondatastorage.googleapis.com/androiddevelopers/...
+- from: /shareables/
+  to: https://commondatastorage.googleapis.com/androiddevelopers/shareables/
+- from: /downloads/
+  to: https://commondatastorage.googleapis.com/androiddevelopers/
+- from: /training/performance/battery/network/action-any-traffic.html
+  to: /topic/performance/power/network/action-any-traffic.html
+- from: /training/performance/battery/network/action-app-traffic.html
+  to: /topic/performance/power/network/action-app-traffic.html
+- from: /training/performance/battery/network/action-server-traffic.html
+  to: /topic/performance/power/network/action-server-traffic.html
+- from: /training/performance/battery/network/action-user-traffic.html
+  to: /topic/performance/power/network/action-user-traffic.html
+- from: /training/performance/battery/network/analyze-data.html
+  to: /topic/performance/power/network/analyze-data.html
+- from: /training/performance/battery/network/gather-data.html
+  to: /topic/performance/power/network/gather-data.html
+- from: /training/performance/battery/network/index.html
+  to: /topic/performance/power/network/index.html
 
 # Redirects for the new [dac]/topic/libraries/ area
 
