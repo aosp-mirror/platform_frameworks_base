@@ -44,6 +44,7 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_alignParentEnd="true"
+            android:focusable="true"
             android:background="@drawable/ripple_drawable" >
             <ImageView android:id="@+id/multi_user_avatar"
                 android:layout_width="@dimen/multi_user_avatar_expanded_size"
