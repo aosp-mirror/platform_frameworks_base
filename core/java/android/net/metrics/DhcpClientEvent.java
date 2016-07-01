@@ -21,36 +21,43 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
+ *  An event recorded when a DhcpClient state machine transitions to a new state.
  * {@hide}
  */
 @SystemApi
 public final class DhcpClientEvent implements Parcelable {
     public final String ifName;
     public final String msg;
+    public final int durationMs;
 
     /** {@hide} */
-    public DhcpClientEvent(String ifName, String msg) {
+    public DhcpClientEvent(String ifName, String msg, int durationMs) {
         this.ifName = ifName;
         this.msg = msg;
+        this.durationMs = durationMs;
     }
 
     private DhcpClientEvent(Parcel in) {
         this.ifName = in.readString();
         this.msg = in.readString();
+        this.durationMs = in.readInt();
     }
 
+    @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeString(ifName);
         out.writeString(msg);
+        out.writeInt(durationMs);
     }
 
+    @Override
     public int describeContents() {
         return 0;
     }
 
     @Override
     public String toString() {
-        return String.format("DhcpClientEvent(%s, %s)", ifName, msg);
+        return String.format("DhcpClientEvent(%s, %s, %dms)", ifName, msg, durationMs);
     }
 
     public static final Parcelable.Creator<DhcpClientEvent> CREATOR
