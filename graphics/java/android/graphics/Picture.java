@@ -21,11 +21,14 @@ import java.io.OutputStream;
 
 /**
  * A Picture records drawing calls (via the canvas returned by beginRecording)
- * and can then play them back into Canvas (via {@link Picture#draw(Canvas)} or 
+ * and can then play them back into Canvas (via {@link Picture#draw(Canvas)} or
  * {@link Canvas#drawPicture(Picture)}).For most content (e.g. text, lines, rectangles),
  * drawing a sequence from a picture can be faster than the equivalent API
  * calls, since the picture performs its playback without incurring any
  * method-call overhead.
+ *
+ * <p class="note"><strong>Note:</strong> Prior to API level 23 a picture cannot
+ * be replayed on a hardware accelerated canvas.</p>
  */
 public class Picture {
     private Canvas mRecordingCanvas;
@@ -135,10 +138,6 @@ public class Picture {
      * have been persisted across device restarts are not guaranteed to decode
      * properly and are highly discouraged.
      *
-     * <p>
-     * <strong>Note:</strong> Prior to API level 23 a picture created from an
-     * input stream cannot be replayed on a hardware accelerated canvas.
-     *
      * @see #writeToStream(java.io.OutputStream)
      * @deprecated The recommended alternative is to not use writeToStream and
      * instead draw the picture into a Bitmap from which you can persist it as
@@ -154,10 +153,6 @@ public class Picture {
      * the picture in this or another process by calling createFromStream(...)
      * The resulting stream is NOT to be persisted across device restarts as
      * there is no guarantee that the Picture can be successfully reconstructed.
-     *
-     * <p>
-     * <strong>Note:</strong> Prior to API level 23 a picture created from an
-     * input stream cannot be replayed on a hardware accelerated canvas.
      *
      * @see #createFromStream(java.io.InputStream)
      * @deprecated The recommended alternative is to draw the picture into a
