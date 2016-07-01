@@ -1,0 +1,538 @@
+page.title=Reduce APK Size
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#apk-structure">Understand the APK Structure</a></li>
+  <li><a href="#reduce-resources">Reduce Resource Count and Size</a></li>
+  <li><a href="#reduce-code">Reduce Native and Java Code</a></li>
+  <li><a href="#multiple-apks">Maintain Multiple Lean APKs</a></li>
+</ol>
+
+<h2>
+  You should also read
+</h2>
+
+<ul>
+  <li>
+    <a href="{@docRoot}studio/build/shrink-code.html">Shrink Your Code and
+    Resources</a>
+  </li>
+</ul>
+
+
+</div>
+</div>
+
+<p>
+  Users often avoid downloading apps that seem too large, particularly in
+  emerging markets where devices connect to often-spotty 2G and
+  3G networks or work on pay-by-the-byte plans. This article describes how to
+  reduce your app's APK size, which enables more users to download your app.
+</p>
+
+<h2 id="apk-structure">
+  Understand the APK Structure
+</h2>
+
+<p>
+  Before discussing how to reduce the size of your app, it's helpful to
+  understand the structure of an app's APK. An APK file consists of a ZIP
+  archive that contains all the files that comprise your app. These files
+  include Java class files, resource files, and a file containing compiled
+  resources.
+</p>
+
+<p>
+An APK contains the following directories:
+</p>
+
+<ul>
+  <li>{@code META-INF/}: Contains the <code>CERT.SF</code> and
+  <code>CERT.RSA</code> signature files, as well as the {@code MANIFEST.MF}
+  manifest file.
+  </li>
+
+  <li>{@code assets/}: Contains the app's assets, which the app can retrieve
+  using an {@link android.content.res.AssetManager} object.
+  </li>
+
+  <li>
+  {@code res/}: Contains resources that aren't compiled into
+  <code>resources.arsc</code>.
+  </li>
+
+  <li>{@code lib/}: Contains the compiled code that is specific to the software
+  layer of a processor. This directory contains a subdirectory for each
+  platform type, like <code>armeabi</code>, <code>armeabi-v7a</code>,
+  <code>arm64-v8a</code>, <code>x86</code>, <code>x86_64</code>, and
+  <code>mips</code>.
+  </li>
+</ul>
+
+<p>
+An APK also contains the following files. Among them,
+only <code>AndroidManifest.xml</code> is mandatory.
+</p>
+
+<ul>
+  <li>{@code resources.arsc}: Contains compiled resources. This file contains
+  the XML content from all configurations of the <code>res/values/</code>
+  folder. The packaging tool extracts this XML content, compiles it to binary
+  form, and archives the content. This content includes language strings and
+  styles, as well as paths to content that is not included directly in the
+  <code>resources.arsc</code> file, such as layout files and images.
+  </li>
+
+  <li>{@code classes.dex}: Contains the classes compiled in the DEX file format
+  understood by the Dalvik/ART virtual machine.
+  </li>
+
+  <li>{@code AndroidManifest.xml}: Contains the core Android manifest file.
+  This file lists the name, version, access rights, and referenced library
+  files of the app. The file uses Android's binary XML format.
+  </li>
+</ul>
+
+<h2 id="reduce-resources">
+  Reduce Resource Count and Size
+</h2>
+
+<p>
+  The size of your APK has an impact on how fast your app loads, how much
+  memory it uses, and how much power it consumes. One of the simple ways to
+  make your APK smaller is to reduce the number and size of the
+  resources it contains. In particular, you can remove resources
+  that your app no longer uses, and you can use scalable {@link
+  android.graphics.drawable.Drawable} objects in place of image files. This
+  section discusses these methods as well as several other ways that you can
+  reduce the resources in your app to decrease the overall size of your APK.
+</p>
+
+<h3 id="remove-unused">
+  Remove Unused Resources
+</h3>
+
+<p>
+  The <a href="{@docRoot}studio/write/lint.html">{@code lint}</a> tool, a
+  static code analyzer included in Android Studio, detects resources in your
+  <code>res/</code> folder that your code doesn't reference. When the
+  <code>lint</code> tool discovers a potentially unused resource in your
+  project, it prints a message like the following example.
+</p>
+
+<pre class="no-pretty-print">
+res/layout/preferences.xml: Warning: The resource R.layout.preferences appears
+    to be unused [UnusedResources]
+</pre>
+<p class="note">
+  <strong>Note:</strong> The <code>lint</code> tool doesn't scan the {@code
+  assets/} folder, assets that are referenced via reflection, or library files
+  that you've linked to your app. Also, it doesn't remove resources; it only
+  alerts you to their presence.
+</p>
+
+<p>
+  Libraries that you add to your code may include unused resources. Gradle can
+  automatically remove resources on your behalf if you enable <a href=
+  "{@docRoot}studio/build/shrink-code.html">{@code shrinkResources}</a> in
+  your app's <code>build.gradle</code> file.
+</p>
+
+<pre class="prettyprint">
+android {
+    // Other settings
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+</pre>
+<p>
+  To use {@code shrinkResources}, you must enable code shrinking. During the
+  build process, first <a href=
+  "{@docRoot}studio/build/shrink-code.html">ProGuard</a> removes unused code
+  but leaves unused resources. Then Gradle removes the unused resources.
+</p>
+
+<p>
+  For more information about ProGuard and other ways
+  Android Studio helps you reduce APK size, see <a href=
+  "{@docRoot}studio/build/shrink-code.html">Shrink Your Code and Resources</a>.
+</p>
+
+<p>
+  In Android Gradle Plugin 0.7 and higher, you can declare the configurations
+  that your app supports. Gradle passes this information to the build system
+  using the {@code resConfig} and {@code resConfigs} flavors and the
+  <code>defaultConfig</code> option. The build system then prevents resources
+  from other, unsupported configurations from appearing in the APK, reducing
+  the APK's size. For more information about this feature, see <a href=
+  "{@docRoot}studio/build/shrink-code.html#unused-alt-resources">Remove unused
+  alternative resources</a>.
+</p>
+
+<h3 id="minimize">
+  Minimize Resource Use from Libraries
+</h3>
+
+<p>
+  When developing an Android app, you usually use external libraries to improve
+  your app's usability and versatility. For example, you might reference the
+  <a href="{@docRoot}topic/libraries/support-library/index.html">Android
+  Support Library</a> to improve the user experience on older devices, or you
+  could use <a class="external-link" href=
+  "https://developers.google.com/android/guides/overview">Google Play
+  Services</a> to retrieve automatic translations for text within your app.
+</p>
+
+<p>
+  If a library was designed for a server or desktop, it can include many
+  objects and methods that your app doesn’t need. To include only the parts of
+  the library that your app needs, you can edit the library's files if the
+  license allows you to modify the library. You can also use an alternative,
+  mobile-friendly library to add specific functionality to your app.
+</p>
+
+<p class="note">
+  <strong>Note:</strong> <a href=
+  "{@docRoot}studio/build/shrink-code.html">ProGuard</a> can clean up some
+  unnecessary code imported with a library, but it can't remove a library's
+  large internal dependencies.
+</p>
+
+<h3 id="support-densities">
+  Support Only Specific Densities
+</h3>
+
+<p>
+  Android supports a very large set of devices, encompassing a variety of
+  screen densities. In Android 4.4 (API level 19) and higher, the framework
+  supports various densities: <code>ldpi</code>, <code>mdpi</code>,
+  <code>tvdpi</code>, <code>hdpi,</code> <code>xhdpi</code>,
+  <code>xxhdpi</code> and <code>xxxhdpi</code>. Although Android supports all
+  these densities, you don't need to export your rasterized assets to each
+  density.
+</p>
+
+<p>
+  If you know that only a small percentage of your users have devices with
+  specific densities, consider whether you need to bundle those densities into
+  your app. If you don't include resources for a specific screen density,
+  Android automatically scales existing resources originally designed for other
+  screen densities.
+</p>
+
+<p>
+  If your app needs only scaled images, you can save even more space by having
+  a single variant of an image in <code>drawable-nodpi/</code>. We recommend
+  that every app include at least an <code>xxhdpi</code> image variant.
+</p>
+
+<p>
+  For more information screen densities, see <a class="external-link" href=
+  "{@docRoot}about/dashboards/index.html#Screens">Screen Sizes and
+  Densities</a>.
+</p>
+
+<h3 id="reduce-frames">
+  Reduce Animation Frames
+</h3>
+
+<p>
+  Frame-by-frame animations can drastically increase the size of your APK.
+  Figure 1 shows an example of a frame-by-frame animation separated into
+  multiple PNG files within a directory. Each image is one frame in the
+  animation.
+</p>
+
+<p>
+  For each frame that you add to the animation, you increase the number of
+  images stored in the APK. In Figure 1, the image animates at 30 FPS within
+  the app. If the image animated at only 15 FPS instead, the animation would
+  require only half the number of needed frames.
+</p>
+
+<figure id="fig-frame-animations">
+  <img src="{@docRoot}images/training/performance/animation-frames.png" srcset=
+  "{@docRoot}images/training/performance/animation-frames.png 1x, {@docRoot}images/training/performance/animation-frames_2x.png 2x"
+  width="803" alt="">
+  <figcaption>
+    <strong>Figure 1.</strong> Frame by frame animations stored as resources.
+  </figcaption>
+</figure>
+
+<h3 id="use-drawables">
+  Use Drawable Objects
+</h3>
+
+<p>
+  Some images don't require a static image resource; the framework can
+  dynamically draw the image at runtime instead. {@link
+  android.graphics.drawable.Drawable} objects (<code>&lt;shape&gt;</code> in
+  XML) can take up a tiny amount of space in your APK. In addition, XML {@link
+  android.graphics.drawable.Drawable} objects produce monochromatic images
+  compliant with material design guidelines.
+</p>
+
+<h3 id="reuse-resources">
+  Reuse Resources
+</h3>
+
+<p>
+  You can include a separate resource for variations of an image, such as
+  tinted, shaded, or rotated versions of the same image. We recommend, however,
+  that you reuse the same set of resources, customizing them as needed at
+  runtime.
+</p>
+
+<p>
+  Android provides several utilities to change the color of an asset, either
+  using the {@code android:tint} and {@code tintMode} attributes on Android 5.0
+  (API level 21) and higher. For lower versions of the platform, use the {@link
+  android.graphics.ColorFilter} class.
+</p>
+<p>
+  You can also omit resources that are only a rotated equivalent of another
+  resource. The following code snippet provides an example of turning an
+  "expand" arrow into a "collapse" arrow icon by simply rotating the original
+  image 180 degrees:
+</p>
+
+<pre class="prettyprint">
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;rotate xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/ic_arrow_expand"
+    android:fromDegrees="180"
+    android:pivotX="50%"
+    android:pivotY="50%"
+    android:toDegrees="180" /&gt;
+</pre>
+<h3 id="render-code">
+  Render From Code
+</h3>
+
+<p>
+  You can also reduce your APK size by procedurally rendering your images.
+  Procedural rendering frees up space because you no longer store an image file
+  in your APK.
+</p>
+
+<h3 id="crunch">
+  Crunch PNG Files
+</h3>
+
+<p>
+  The <code>aapt</code> tool can optimize the image resources placed in
+  <code>res/drawable/</code> with lossless compression during the build
+  process. For example, the <code>aapt</code> tool can convert a true-color PNG
+  that does not require more than 256 colors to an 8-bit PNG with a color
+  palette. Doing so results in an image of equal quality but a smaller memory
+  footprint.
+</p>
+
+<p>
+  Keep in mind that the <code>aapt</code> has the following limitations:
+</p>
+
+<ul>
+  <li>The <code>aapt</code> tool does not shrink PNG files contained in the
+  <code>asset/</code> folder.
+  </li>
+
+  <li>Image files need to use 256 or fewer colors for the <code>aapt</code>
+  tool to optimize them.
+  </li>
+
+  <li>The <code>aapt</code> tool may inflate PNG files that have already been
+  compressed. To prevent this, you can use the <code>cruncherEnabled</code>
+  flag in Gradle to disable this process for PNG files:
+  </li>
+</ul>
+
+<pre class="prettyprint">
+aaptOptions {
+    cruncherEnabled = false
+}
+</pre>
+<h3 id="compress">
+  Compress PNG and JPEG Files
+</h3>
+
+<p>
+  You can reduce PNG file sizes without losing image quality using tools like
+  <a class="external-link" href=
+  "http://pmt.sourceforge.net/pngcrush/">pngcrush</a>, <a class="external-link"
+  href="https://pngquant.org/">pngquant</a>, or <a class="external-link" href=
+  "https://github.com/google/zopfli">zopflipng</a>. All of these tools can
+  reduce PNG file size while preserving image quality.
+</p>
+
+<p>
+  The {@code pngcrush} tool is particularly effective: This tool iterates over
+  PNG filters and zlib (Deflate) parameters, using each combination of filters
+  and parameters to compress the image. It then chooses the configuration that
+  yields the smallest compressed output.
+</p>
+
+<p>
+  For JPEG files, you can use tools like <a class="external-link" href=
+  "http://www.elektronik.htw-aalen.de/packjpg/">packJPG</a> that compress JPEG
+  files into a more compact form.
+</p>
+
+<h3 id="use-webp">
+  Use WebP File Format
+</h3>
+
+<p>
+  Instead of using PNG or JPEG files, you can also use the <a class=
+  "external-link" href="https://developers.google.com/speed/webp/">WebP</a>
+  file format for your images. The WebP format provides lossy compression (like
+  JPEG) as well as transparency (like PNG) but can provide better compression
+  than either JPEG or PNG.
+</p>
+
+<p>
+  Using the WebP file format has a few notable drawbacks, however. First,
+  support for WebP is not available in versions of the platform lower than
+  Android 3.2 (API level 13). Second, it takes a longer amount of time for the
+  system to decode WebP than PNG files.
+</p>
+
+<p class="note">
+  <strong>Note:</strong> Google Play accepts APKs only if the included icons
+  use the PNG format. You can't use other file formats like JPEG or WebP for
+  app icons if you intend to publish your app through Google Play.
+</p>
+
+<h3 id="vector">
+  Use Vector Graphics
+</h3>
+
+<p>
+  You can use vector graphics to create resolution-independent icons and other
+  scalable media. Using these graphics can greatly reduce your APK footprint.
+  Vector images are represented in Android as {@link
+  android.graphics.drawable.VectorDrawable} objects. With a {@link
+  android.graphics.drawable.VectorDrawable } object, a 100-byte file can
+  generate a sharp image the size of the screen.
+</p>
+
+<p>
+  However, it takes a significant amount of time for the system to render each
+  {@link android.graphics.drawable.VectorDrawable} object, and larger images
+  take even longer to appear on the screen. Therefore, consider using these
+  vector graphics only when displaying small images.
+</p>
+
+<p>
+  For more information on working with {@link
+  android.graphics.drawable.VectorDrawable } objects, see <a class=
+  "external-link" href="{@docRoot}training/material/drawables.html">Working
+  with Drawables</a>.
+</p>
+
+<h2 id="reduce-code">
+  Reduce Native and Java Code
+</h2>
+
+<p>
+  There are several methods you can use to reduce the size of the Java and
+  native codebase in your app.
+</p>
+
+<h3 id="remove-generated">
+  Remove Unnecessary Generated Code
+</h3>
+
+<p>
+  Make sure to understand the footprint of any code which is automatically
+  generated. For example, many protocol buffer tools generate an excessive
+  number of methods and classes, which can double or triple the size of your
+  app.
+</p>
+
+<h3 id="remove-enums">
+  Remove Enumerations
+</h3>
+
+<p>
+  A single enum can add about 1.0 to 1.4 KB of size to your app's
+  <code>classes.dex</code> file. These additions can quickly accumulate for
+  complex systems or shared libraries. If possible, consider using the
+  <code>@IntDef</code> annotation and <a href=
+  "{@docRoot}studio/build/shrink-code.html">ProGuard</a> to strip enumerations
+  out and convert them to integers. This type conversion preserves all of the
+  type safety benefits of enums.
+</p>
+
+<h3 id="reduce-binaries">
+  Reduce the Size of Native Binaries
+</h3>
+
+<p>
+  If your app uses native code and the Android NDK, you can also reduce the
+  size of your app by optimizing your code. Two useful techniques are
+  removing debug symbols and not extracting native libraries.
+</p>
+
+<h4 id="remove-debug">
+  Remove Debug Symbols
+</h4>
+
+<p>
+  Using debug symbols makes sense if your application is in development and
+  still requires debugging. Use the <code>arm-eabi-strip</code> tool, provided
+  in the Android NDK, to remove unnecessary debug symbols from native
+  libraries. After that, you can compile your release build.
+</p>
+
+<h4 id="extract-false">
+  Avoid Extracting Native Libraries
+</h4>
+
+<p>
+  Store {@code .so} files uncompressed in the APK, and set the {@code
+  android:extractNativeLibs} flag to false in the <a href=
+  "{@docRoot}guide/topics/manifest/application-element.html">{@code
+  <application>}</a> element of your app manifest. This will prevent
+  {@link android.content.pm.PackageManager} from copying out {@code .so} files
+  from the APK to the filesystem during installation and will have the added
+  benefit of making delta updates of your app smaller.
+</p>
+
+<h2 id="multiple-apks">
+  Maintain Multiple Lean APKs
+</h2>
+
+<p>
+  Your APK can contain content that users download but never use, like regional
+  or language information. To create a minimal download for your users, you can
+  segment your app into several APKs, differentiated by factors such as screen
+  size or GPU texture support.
+</p>
+
+<p>
+  When a user downloads your app, their device receives the correct APK based
+  on the device's features and settings. This way, devices don't receive assets
+  for features that the devices don't have. For example, if a user has a
+  <code>hdpi</code> device, they don’t need <code>xxxhdpi</code> resources that
+  you might include for devices with higher density displays.
+</p>
+
+<p>
+  For more information, see <a href=
+  "{@docRoot}studio/build/configure-apk-splits.html">Configure APK Splits</a>
+  and <a class="external-link" href=
+  "{@docRoot}training/multiple-apks/index.html">Maintaining Multiple APKs</a>.
+</p>
