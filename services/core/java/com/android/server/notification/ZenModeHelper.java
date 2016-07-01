@@ -332,14 +332,16 @@ public class ZenModeHelper {
         }
         mConditions.evaluateConfig(config, false /*processSubscriptions*/);  // may modify config
         mConfigs.put(config.user, config);
-        if (config.equals(mConfig)) return true;
         if (DEBUG) Log.d(TAG, "setConfig reason=" + reason, new Throwable());
         ZenLog.traceConfig(reason, mConfig, config);
         final boolean policyChanged = !Objects.equals(getNotificationPolicy(mConfig),
                 getNotificationPolicy(config));
+        boolean configChanged = !config.equals(mConfig);
         mConfig = config;
-        dispatchOnConfigChanged();
-        if (policyChanged){
+        if (configChanged) {
+            dispatchOnConfigChanged();
+        }
+        if (policyChanged) {
             dispatchOnPolicyChanged();
         }
         final String val = Integer.toString(mConfig.hashCode());
@@ -372,9 +374,9 @@ public class ZenModeHelper {
 
     private boolean evaluateZenMode(String reason, boolean setRingerMode) {
         if (DEBUG) Log.d(TAG, "evaluateZenMode");
+        final int zenBefore = mZenMode;
         final ArraySet<ZenRule> automaticRules = new ArraySet<ZenRule>();
         final int zen = computeZenMode(automaticRules);
-        if (zen == mZenMode) return false;
         ZenLog.traceSetZenMode(zen, reason);
         mZenMode = zen;
         updateRingerModeAffectedStreams();
@@ -383,7 +385,9 @@ public class ZenModeHelper {
             applyZenToRingerMode();
         }
         applyRestrictions();
-        mHandler.postDispatchOnZenModeChanged();
+        if (zen != zenBefore) {
+            mHandler.postDispatchOnZenModeChanged();
+        }
         return true;
     }
 
