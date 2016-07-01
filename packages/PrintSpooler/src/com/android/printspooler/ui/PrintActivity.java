@@ -2116,6 +2116,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
         if (mPrinterRegistry != null) {
             mPrinterRegistry.setTrackedPrinter(null);
+            mPrinterRegistry.setOnPrintersChangeListener(null);
         }
 
         if (mPrintersObserver != null) {
