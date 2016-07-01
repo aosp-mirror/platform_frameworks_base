@@ -28,6 +28,7 @@
         android:minHeight="112dp"
         android:clipChildren="false"
         android:clipToPadding="false"
+        android:focusable="true"
         android:background="@drawable/ripple_drawable"
         systemui:activatedFontFamily="sans-serif-medium">
 
