@@ -208,7 +208,8 @@ TEST(StringPoolTest, FlattenUtf8) {
     StringPool::Ref ref1 = pool.makeRef(u"hello");
     StringPool::Ref ref2 = pool.makeRef(u"goodbye");
     StringPool::Ref ref3 = pool.makeRef(sLongString);
-    StringPool::StyleRef ref4 = pool.makeRef(StyleString{
+    StringPool::Ref ref4 = pool.makeRef(u"");
+    StringPool::StyleRef ref5 = pool.makeRef(StyleString{
             { u"style" },
             { Span{ { u"b" }, 0, 1 }, Span{ { u"i" }, 2, 3 } }
     });
@@ -217,6 +218,7 @@ TEST(StringPoolTest, FlattenUtf8) {
     EXPECT_EQ(1u, ref2.getIndex());
     EXPECT_EQ(2u, ref3.getIndex());
     EXPECT_EQ(3u, ref4.getIndex());
+    EXPECT_EQ(4u, ref5.getIndex());
 
     BigBuffer buffer(1024);
     StringPool::flattenUtf8(&buffer, pool);
@@ -229,9 +231,11 @@ TEST(StringPoolTest, FlattenUtf8) {
         EXPECT_EQ(util::getString(test, 0), u"hello");
         EXPECT_EQ(util::getString(test, 1), u"goodbye");
         EXPECT_EQ(util::getString(test, 2), sLongString);
-        EXPECT_EQ(util::getString(test, 3), u"style");
+        size_t len;
+        EXPECT_NE(nullptr, test.stringAt(3, &len));
+        EXPECT_EQ(util::getString(test, 4), u"style");
 
-        const ResStringPool_span* span = test.styleAt(3);
+        const ResStringPool_span* span = test.styleAt(4);
         ASSERT_NE(nullptr, span);
         EXPECT_EQ(util::getString(test, span->name.index), u"b");
         EXPECT_EQ(0u, span->firstChar);

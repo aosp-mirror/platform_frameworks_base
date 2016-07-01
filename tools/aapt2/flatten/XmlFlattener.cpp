@@ -57,14 +57,15 @@ struct XmlFlattenerVisitor : public xml::Visitor {
             mBuffer(buffer), mOptions(options) {
     }
 
-    void addString(const StringPiece16& str, uint32_t priority, android::ResStringPool_ref* dest) {
-        if (!str.empty()) {
+    void addString(const StringPiece16& str, uint32_t priority, android::ResStringPool_ref* dest,
+                   bool treatEmptyStringAsNull = false) {
+        if (str.empty() && treatEmptyStringAsNull) {
+            // Some parts of the runtime treat null differently than empty string.
+            dest->index = util::deviceToHost32(-1);
+        } else {
             mStringRefs.push_back(StringFlattenDest{
                     mPool.makeRef(str, StringPool::Context{ priority }),
                     dest });
-        } else {
-            // The device doesn't think a string of size 0 is the same as null.
-            dest->index = util::deviceToHost32(-1);
         }
     }
 
@@ -118,8 +119,14 @@ struct XmlFlattenerVisitor : public xml::Visitor {
             flatNode->comment.index = util::hostToDevice32(-1);
 
             ResXMLTree_attrExt* flatElem = startWriter.nextBlock<ResXMLTree_attrExt>();
-            addString(node->namespaceUri, kLowPriority, &flatElem->ns);
-            addString(node->name, kLowPriority, &flatElem->name);
+
+            // A missing namespace must be null, not an empty string. Otherwise the runtime
+            // complains.
+            addString(node->namespaceUri, kLowPriority, &flatElem->ns,
+                      true /* treatEmptyStringAsNull */);
+            addString(node->name, kLowPriority, &flatElem->name,
+                      true /* treatEmptyStringAsNull */);
+
             flatElem->attributeStart = util::hostToDevice16(sizeof(*flatElem));
             flatElem->attributeSize = util::hostToDevice16(sizeof(ResXMLTree_attribute));
 
@@ -138,7 +145,8 @@ struct XmlFlattenerVisitor : public xml::Visitor {
             flatEndNode->comment.index = util::hostToDevice32(-1);
 
             ResXMLTree_endElementExt* flatEndElem = endWriter.nextBlock<ResXMLTree_endElementExt>();
-            addString(node->namespaceUri, kLowPriority, &flatEndElem->ns);
+            addString(node->namespaceUri, kLowPriority, &flatEndElem->ns,
+                      true /* treatEmptyStringAsNull */);
             addString(node->name, kLowPriority, &flatEndElem->name);
 
             endWriter.finish();
@@ -205,8 +213,10 @@ struct XmlFlattenerVisitor : public xml::Visitor {
             }
             attributeIndex++;
 
-            // Add the namespaceUri to the list of StringRefs to encode.
-            addString(xmlAttr->namespaceUri, kLowPriority, &flatAttr->ns);
+            // Add the namespaceUri to the list of StringRefs to encode. Use null if the namespace
+            // is empty (doesn't exist).
+            addString(xmlAttr->namespaceUri, kLowPriority, &flatAttr->ns,
+                      true /* treatEmptyStringAsNull */);
 
             flatAttr->rawValue.index = util::hostToDevice32(-1);
 

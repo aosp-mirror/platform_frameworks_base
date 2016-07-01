@@ -207,4 +207,23 @@ TEST_F(XmlFlattenerTest, NoNamespaceIsNotTheSameAsEmptyNamespace) {
     EXPECT_GE(tree.indexOfAttribute(nullptr, 0, kPackage.data(), kPackage.size()), 0);
 }
 
+TEST_F(XmlFlattenerTest, EmptyStringValueInAttributeIsNotNull) {
+    std::unique_ptr<xml::XmlResource> doc = test::buildXmlDom("<View package=\"\"/>");
+
+    android::ResXMLTree tree;
+    ASSERT_TRUE(flatten(doc.get(), &tree));
+
+    while (tree.next() != android::ResXMLTree::START_TAG) {
+        ASSERT_NE(tree.getEventType(), android::ResXMLTree::BAD_DOCUMENT);
+        ASSERT_NE(tree.getEventType(), android::ResXMLTree::END_DOCUMENT);
+    }
+
+    const StringPiece16 kPackage = u"package";
+    ssize_t idx = tree.indexOfAttribute(nullptr, 0, kPackage.data(), kPackage.size());
+    ASSERT_GE(idx, 0);
+
+    size_t len;
+    EXPECT_NE(nullptr, tree.getAttributeStringValue(idx, &len));
+}
+
 } // namespace aapt
