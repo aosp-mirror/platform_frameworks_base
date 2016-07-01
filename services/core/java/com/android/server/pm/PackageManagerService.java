@@ -7986,7 +7986,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         } catch (IOException ignore) {
         } finally {
             try {
-                jarFile.close();
+                if (jarFile != null) {
+                    jarFile.close();
+                }
             } catch (IOException ignore) {}
         }
         return false;
