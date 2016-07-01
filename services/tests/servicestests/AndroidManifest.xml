@@ -108,9 +108,53 @@
         <service android:name="com.android.server.job.MockPriorityJobService"
                  android:permission="android.permission.BIND_JOB_SERVICE" />
 
-        <activity android:name="com.android.server.pm.ShortcutManagerTest$ShortcutActivity" />
-        <activity android:name="com.android.server.pm.ShortcutManagerTest$ShortcutActivity2" />
-        <activity android:name="com.android.server.pm.ShortcutManagerTest$ShortcutActivity3" />
+        <activity android:name="com.android.server.pm.BaseShortcutManagerTest$ShortcutActivity" />
+        <activity android:name="com.android.server.pm.BaseShortcutManagerTest$ShortcutActivity2" />
+        <activity android:name="com.android.server.pm.BaseShortcutManagerTest$ShortcutActivity3" />
+
+        <activity android:name="com.android.server.pm.ShortcutTestActivity"
+            android:enabled="true" android:exported="true" />
+
+        <activity-alias android:name="a.ShortcutEnabled"
+            android:targetActivity="com.android.server.pm.ShortcutTestActivity"
+            android:enabled="true" android:exported="true">
+        </activity-alias>
+        <activity-alias android:name="a.ShortcutDisabled"
+            android:targetActivity="com.android.server.pm.ShortcutTestActivity"
+            android:enabled="false" android:exported="true">
+            <meta-data android:name="android.app.shortcuts" android:resource="@xml/shortcut_5"/>
+        </activity-alias>
+        <activity-alias android:name="a.ShortcutUnexported"
+            android:targetActivity="com.android.server.pm.ShortcutTestActivity"
+            android:enabled="true" android:exported="false">
+            <meta-data android:name="android.app.shortcuts" android:resource="@xml/shortcut_5"/>
+        </activity-alias>
+        <activity-alias android:name="a.Shortcut1"
+            android:targetActivity="com.android.server.pm.ShortcutTestActivity"
+            android:enabled="true" android:exported="true">
+            <meta-data android:name="android.app.shortcuts" android:resource="@xml/shortcut_1"/>
+        </activity-alias>
+
+        <activity-alias android:name="a.DisabledMain"
+            android:targetActivity="com.android.server.pm.ShortcutTestActivity"
+            android:enabled="false" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias android:name="a.UnexportedMain"
+            android:targetActivity="com.android.server.pm.ShortcutTestActivity"
+            android:enabled="true" android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
     </application>
 
     <instrumentation

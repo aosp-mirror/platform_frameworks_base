@@ -20,7 +20,6 @@ import android.annotation.UserIdInt;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.content.pm.PackageInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutInfo;
 import android.content.res.TypedArray;
@@ -79,7 +78,7 @@ public class ShortcutParser {
                 }
 
                 final ActivityInfo activityInfoWithMetadata =
-                        service.injectGetActivityInfoWithMetadata(
+                        service.getActivityInfoWithMetadata(
                         activityInfoNoMetadata.getComponentName(), userId);
                 if (activityInfoWithMetadata != null) {
                     result = parseShortcutsOneFile(
