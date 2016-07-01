@@ -2430,7 +2430,7 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
-     * Equivalent to calling View.setVisibility
+     * Equivalent to calling {@link View#setVisibility(int)}
      *
      * @param viewId The id of the view whose visibility should change
      * @param visibility The new visibility for the view
@@ -2440,7 +2440,7 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
-     * Equivalent to calling TextView.setText
+     * Equivalent to calling {@link TextView#setText(CharSequence)}
      *
      * @param viewId The id of the view whose text should change
      * @param text The new text for the view
@@ -2547,7 +2547,7 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
-     * Equivalent to calling ImageView.setImageResource
+     * Equivalent to calling {@link ImageView#setImageResource(int)}
      *
      * @param viewId The id of the view whose drawable should change
      * @param srcId The new resource id for the drawable
@@ -2557,7 +2557,7 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
-     * Equivalent to calling ImageView.setImageURI
+     * Equivalent to calling {@link ImageView#setImageURI(Uri)}
      *
      * @param viewId The id of the view whose drawable should change
      * @param uri The Uri for the image
@@ -2567,7 +2567,7 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
-     * Equivalent to calling ImageView.setImageBitmap
+     * Equivalent to calling {@link ImageView#setImageBitmap(Bitmap)}
      *
      * @param viewId The id of the view whose bitmap should change
      * @param bitmap The new Bitmap for the drawable
@@ -2577,7 +2577,7 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
-     * Equivalent to calling ImageView.setImageIcon
+     * Equivalent to calling {@link ImageView#setImageIcon(Icon)}
      *
      * @param viewId The id of the view whose bitmap should change
      * @param icon The new Icon for the ImageView
@@ -2587,7 +2587,7 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
-     * Equivalent to calling AdapterView.setEmptyView
+     * Equivalent to calling {@link AdapterView#setEmptyView(View)}
      *
      * @param viewId The id of the view on which to set the empty view
      * @param emptyViewId The view id of the empty view
@@ -2839,7 +2839,7 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
-     * Equivalent to calling {@link android.widget.AbsListView#smoothScrollToPosition(int, int)}.
+     * Equivalent to calling {@link ListView#smoothScrollToPosition(int)}.
      *
      * @param viewId The id of the view to change
      * @param position Scroll to this adapter position
@@ -2849,7 +2849,7 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
-     * Equivalent to calling {@link android.widget.AbsListView#smoothScrollToPosition(int, int)}.
+     * Equivalent to calling {@link ListView#smoothScrollByOffset(int)}.
      *
      * @param viewId The id of the view to change
      * @param offset Scroll by this adapter position offset
@@ -3117,7 +3117,7 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
-     * Equivalent to calling View.setLabelFor(int).
+     * Equivalent to calling {@link View#setLabelFor(int)}.
      *
      * @param viewId The id of the view whose property to set.
      * @param labeledId The id of a view for which this view serves as a label.
