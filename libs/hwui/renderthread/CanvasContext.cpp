@@ -198,6 +198,45 @@ static bool wasSkipped(FrameInfo* info) {
     return info && ((*info)[FrameInfoIndex::Flags] & FrameInfoFlags::SkippedFrame);
 }
 
+bool CanvasContext::isSwapChainStuffed() {
+    if (mSwapHistory.size() != mSwapHistory.capacity()) {
+        // We want at least 3 frames of history before attempting to
+        // guess if the queue is stuffed
+        return false;
+    }
+    nsecs_t frameInterval = mRenderThread.timeLord().frameIntervalNanos();
+    auto& swapA = mSwapHistory[0];
+
+    // Was there a happy queue & dequeue time? If so, don't
+    // consider it stuffed
+    if (swapA.dequeueDuration < 3_ms
+            && swapA.queueDuration < 3_ms) {
+        return false;
+    }
+
+    for (size_t i = 1; i < mSwapHistory.size(); i++) {
+        auto& swapB = mSwapHistory[i];
+
+        // If there's a frameInterval gap we effectively already dropped a frame,
+        // so consider the queue healthy.
+        if (swapA.swapCompletedTime - swapB.swapCompletedTime > frameInterval) {
+            return false;
+        }
+
+        // Was there a happy queue & dequeue time? If so, don't
+        // consider it stuffed
+        if (swapB.dequeueDuration < 3_ms
+                && swapB.queueDuration < 3_ms) {
+            return false;
+        }
+
+        swapA = swapB;
+    }
+
+    // All signs point to a stuffed swap chain
+    return true;
+}
+
 void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo,
         int64_t syncQueued, RenderNode* target) {
     mRenderThread.removeFrameCallback(this);
@@ -243,7 +282,12 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo,
 
     if (CC_LIKELY(mSwapHistory.size())) {
         nsecs_t latestVsync = mRenderThread.timeLord().latestVsync();
-        const SwapHistory& lastSwap = mSwapHistory.back();
+        SwapHistory& lastSwap = mSwapHistory.back();
+        int durationUs;
+        mNativeSurface->query(NATIVE_WINDOW_LAST_DEQUEUE_DURATION, &durationUs);
+        lastSwap.dequeueDuration = us2ns(durationUs);
+        mNativeSurface->query(NATIVE_WINDOW_LAST_QUEUE_DURATION, &durationUs);
+        lastSwap.queueDuration = us2ns(durationUs);
         nsecs_t vsyncDelta = std::abs(lastSwap.vsyncTime - latestVsync);
         // The slight fudge-factor is to deal with cases where
         // the vsync was estimated due to being slow handling the signal.
@@ -253,15 +297,12 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo,
             // Already drew for this vsync pulse, UI draw request missed
             // the deadline for RT animations
             info.out.canDrawThisFrame = false;
-        } else if (lastSwap.swapTime < latestVsync) {
+        } else if (vsyncDelta >= mRenderThread.timeLord().frameIntervalNanos()) {
+            // It's been at least an entire frame interval, assume
+            // the buffer queue is fine
             info.out.canDrawThisFrame = true;
         } else {
-            // We're maybe behind? Find out for sure
-            int runningBehind = 0;
-            // TODO: Have this method be on Surface, too, not just ANativeWindow...
-            ANativeWindow* window = mNativeSurface.get();
-            window->query(window, NATIVE_WINDOW_CONSUMER_RUNNING_BEHIND, &runningBehind);
-            info.out.canDrawThisFrame = !runningBehind;
+            info.out.canDrawThisFrame = !isSwapChainStuffed();
         }
     } else {
         info.out.canDrawThisFrame = true;
@@ -516,7 +557,7 @@ void CanvasContext::draw() {
         }
         SwapHistory& swap = mSwapHistory.next();
         swap.damage = screenDirty;
-        swap.swapTime = systemTime(CLOCK_MONOTONIC);
+        swap.swapCompletedTime = systemTime(CLOCK_MONOTONIC);
         swap.vsyncTime = mRenderThread.timeLord().latestVsync();
         mHaveNewSurface = false;
         mFrameNumber = -1;

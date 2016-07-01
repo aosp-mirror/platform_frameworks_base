@@ -180,6 +180,8 @@ private:
 
     void waitOnFences();
 
+    bool isSwapChainStuffed();
+
     EGLint mLastFrameWidth = 0;
     EGLint mLastFrameHeight = 0;
 
@@ -198,7 +200,9 @@ private:
     struct SwapHistory {
         SkRect damage;
         nsecs_t vsyncTime;
-        nsecs_t swapTime;
+        nsecs_t swapCompletedTime;
+        nsecs_t dequeueDuration;
+        nsecs_t queueDuration;
     };
 
     RingBuffer<SwapHistory, 3> mSwapHistory;
