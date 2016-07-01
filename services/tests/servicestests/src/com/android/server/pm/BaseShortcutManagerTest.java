@@ -103,8 +103,6 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
 
 public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected static final String TAG = "ShortcutManagerTest";
@@ -206,7 +204,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         IUidObserver mUidObserver;
 
         public ShortcutServiceTestable(ServiceContext context, Looper looper) {
-            super(context, looper);
+            super(context, looper, /* onyForPackageManagerApis */ false);
             mContext = context;
         }
 
@@ -301,24 +299,26 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
 
         @Override
-        PackageInfo injectPackageInfo(String packageName, @UserIdInt int userId,
+        PackageInfo injectPackageInfoWithUninstalled(String packageName, @UserIdInt int userId,
                 boolean getSignatures) {
             return getInjectedPackageInfo(packageName, userId, getSignatures);
         }
 
         @Override
-        ApplicationInfo injectApplicationInfo(String packageName, @UserIdInt int userId) {
-            PackageInfo pi = injectPackageInfo(packageName, userId, /* getSignatures= */ false);
+        ApplicationInfo injectApplicationInfoWithUninstalled(
+                String packageName, @UserIdInt int userId) {
+            PackageInfo pi = injectPackageInfoWithUninstalled(
+                    packageName, userId, /* getSignatures= */ false);
             return pi != null ? pi.applicationInfo : null;
         }
 
         @Override
-        List<PackageInfo> injectInstalledPackages(@UserIdInt int userId) {
-            return getInstalledPackages(userId);
+        List<PackageInfo> injectGetPackagesWithUninstalled(@UserIdInt int userId) {
+            return BaseShortcutManagerTest.this.getInstalledPackagesWithUninstalled(userId);
         }
 
         @Override
-        ActivityInfo injectGetActivityInfoWithMetadata(ComponentName activity,
+        ActivityInfo injectGetActivityInfoWithMetadataWithUninstalled(ComponentName activity,
                 @UserIdInt int userId) {
             final PackageInfo pi = mContext.injectGetActivitiesWithMetadata(
                     activity.getPackageName(), userId);
@@ -367,6 +367,11 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         @Override
         ComponentName injectGetDefaultMainActivity(@NonNull String packageName, int userId) {
             return mMainActivityFetcher.apply(packageName, userId);
+        }
+
+        @Override
+        boolean injectIsActivityEnabledAndExported(ComponentName activity, @UserIdInt int userId) {
+            return mEnabledActivityChecker.test(activity, userId);
         }
 
         @Override
@@ -951,7 +956,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
     }
 
-    private List<PackageInfo> getInstalledPackages(int userId) {
+    private List<PackageInfo> getInstalledPackagesWithUninstalled(int userId) {
         final ArrayList<PackageInfo> ret = new ArrayList<>();
 
         addPackageInfo(getInjectedPackageInfo(CALLING_PACKAGE_1, userId, false), ret);
@@ -990,6 +995,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                 ai.name = cn.getClassName();
                 ai.metaData = new Bundle();
                 ai.metaData.putInt(ShortcutParser.METADATA_KEY, activities.get(cn));
+                ai.applicationInfo = ret.applicationInfo;
                 list.add(ai);
             }
             ret.activities = list.toArray(new ActivityInfo[list.size()]);
@@ -1462,14 +1468,18 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         return infoList.get(0);
     }
 
-    protected Intent genPackageAddIntent(String pakcageName, int userId) {
+    protected Intent genPackageAddIntent(String packageName, int userId) {
+        installPackage(userId, packageName);
+
         Intent i = new Intent(Intent.ACTION_PACKAGE_ADDED);
-        i.setData(Uri.parse("package:" + pakcageName));
+        i.setData(Uri.parse("package:" + packageName));
         i.putExtra(Intent.EXTRA_USER_HANDLE, userId);
         return i;
     }
 
     protected Intent genPackageDeleteIntent(String pakcageName, int userId) {
+        uninstallPackage(userId, pakcageName);
+
         Intent i = new Intent(Intent.ACTION_PACKAGE_REMOVED);
         i.setData(Uri.parse("package:" + pakcageName));
         i.putExtra(Intent.EXTRA_USER_HANDLE, userId);
@@ -1477,6 +1487,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     }
 
     protected Intent genPackageUpdateIntent(String pakcageName, int userId) {
+        installPackage(userId, pakcageName);
+
         Intent i = new Intent(Intent.ACTION_PACKAGE_ADDED);
         i.setData(Uri.parse("package:" + pakcageName));
         i.putExtra(Intent.EXTRA_USER_HANDLE, userId);

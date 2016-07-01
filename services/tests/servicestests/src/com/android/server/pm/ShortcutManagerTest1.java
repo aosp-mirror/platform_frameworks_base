@@ -55,7 +55,6 @@ import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -86,7 +85,6 @@ import com.android.frameworks.servicestests.R;
 import com.android.server.pm.ShortcutService.ConfigConstants;
 import com.android.server.pm.ShortcutService.FileOutputStreamWithPath;
 import com.android.server.pm.ShortcutUser.PackageWithUser;
-import com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.ShortcutListAsserter;
 
 import org.mockito.ArgumentCaptor;
 
@@ -94,9 +92,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 /**
  * Tests for ShortcutService and ShortcutManager.
