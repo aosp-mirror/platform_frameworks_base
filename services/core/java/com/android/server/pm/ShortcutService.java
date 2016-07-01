@@ -232,6 +232,13 @@ public class ShortcutService extends IShortcutService.Stub {
 
     private final Object mLock = new Object();
 
+    private static List<ResolveInfo> EMPTY_RESOLVE_INFO = new ArrayList<>(0);
+
+    private static Predicate<ResolveInfo> ACTIVITY_NOT_EXPORTED =
+            ri -> !ri.activityInfo.exported;
+
+    private static Predicate<PackageInfo> PACKAGE_NOT_INSTALLED = pi -> !isInstalled(pi);
+
     private final Handler mHandler;
 
     @GuardedBy("mLock")
@@ -318,8 +325,9 @@ public class ShortcutService extends IShortcutService.Stub {
         int RESOURCE_NAME_LOOKUP = 10;
         int GET_LAUNCHER_ACTIVITY = 11;
         int CHECK_LAUNCHER_ACTIVITY = 12;
+        int IS_ACTIVITY_ENABLED = 13;
 
-        int COUNT = CHECK_LAUNCHER_ACTIVITY + 1;
+        int COUNT = IS_ACTIVITY_ENABLED + 1;
     }
 
     final Object mStatLock = new Object();
@@ -348,11 +356,11 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     public ShortcutService(Context context) {
-        this(context, BackgroundThread.get().getLooper());
+        this(context, BackgroundThread.get().getLooper(), /*onyForPackgeManagerApis*/ false);
     }
 
     @VisibleForTesting
-    ShortcutService(Context context, Looper looper) {
+    ShortcutService(Context context, Looper looper, boolean onlyForPackageManagerApis) {
         mContext = Preconditions.checkNotNull(context);
         LocalServices.addService(ShortcutServiceInternal.class, new LocalService());
         mHandler = new Handler(looper);
@@ -362,6 +370,10 @@ public class ShortcutService extends IShortcutService.Stub {
         mUserManager = Preconditions.checkNotNull(context.getSystemService(UserManager.class));
         mUsageStatsManagerInternal = Preconditions.checkNotNull(
                 LocalServices.getService(UsageStatsManagerInternal.class));
+
+        if (onlyForPackageManagerApis) {
+            return; // Don't do anything further.  For unit tests only.
+        }
 
         mPackageMonitor.register(context, looper, UserHandle.ALL, /* externalStorage= */ false);
 
@@ -1571,11 +1583,6 @@ public class ShortcutService extends IShortcutService.Stub {
                     removeIcon(userId, target);
                 }
 
-                if (source.getActivity() != null &&
-                        !source.getActivity().equals(target.getActivity())) {
-                    // TODO When activity is changing, check the dynamic count.
-                }
-
                 // Note copyNonNullFieldsFrom() does the "updatable with?" check too.
                 target.copyNonNullFieldsFrom(source);
                 target.setTimestamp(injectCurrentTimeMillis());
@@ -1915,9 +1922,16 @@ public class ShortcutService extends IShortcutService.Stub {
             } else {
                 detected = user.getDefaultLauncherComponent();
 
-                // TODO: Make sure it's still enabled.
-                if (DEBUG) {
-                    Slog.v(TAG, "Cached launcher: " + detected);
+                if (detected != null) {
+                    if (injectIsActivityEnabledAndExported(detected, userId)) {
+                        if (DEBUG) {
+                            Slog.v(TAG, "Cached launcher: " + detected);
+                        }
+                    } else {
+                        Slog.w(TAG, "Cached launcher " + detected + " no longer exists");
+                        detected = null;
+                        user.setDefaultLauncherComponent(null);
+                    }
                 }
             }
 
@@ -2363,6 +2377,10 @@ public class ShortcutService extends IShortcutService.Stub {
                         return; // Don't delete shadow information.
                     }
                     if (!isPackageInstalled(spi.getPackageName(), spi.getPackageUserId())) {
+                        if (DEBUG) {
+                            Slog.d(TAG, "Uninstalled: " + spi.getPackageName()
+                                    + " user " + spi.getPackageUserId());
+                        }
                         gonePackages.add(PackageWithUser.of(spi));
                     }
                 });
@@ -2457,21 +2475,26 @@ public class ShortcutService extends IShortcutService.Stub {
 
     // === PackageManager interaction ===
 
+    /**
+     * Returns {@link PackageInfo} unless it's uninstalled or disabled.
+     */
     @Nullable
-    PackageInfo getPackageInfoWithSignatures(String packageName, @UserIdInt int userId) {
-        return injectPackageInfo(packageName, userId, true);
+    final PackageInfo getPackageInfoWithSignatures(String packageName, @UserIdInt int userId) {
+        return getPackageInfo(packageName, userId, true);
     }
 
+    /**
+     * Returns {@link PackageInfo} unless it's uninstalled or disabled.
+     */
     @Nullable
-    PackageInfo getPackageInfo(String packageName, @UserIdInt int userId) {
-        return injectPackageInfo(packageName, userId, false);
+    final PackageInfo getPackageInfo(String packageName, @UserIdInt int userId) {
+        return getPackageInfo(packageName, userId, false);
     }
 
     int injectGetPackageUid(@NonNull String packageName, @UserIdInt int userId) {
         final long token = injectClearCallingIdentity();
         try {
-            return mIPackageManager.getPackageUid(packageName, PACKAGE_MATCH_FLAGS
-                    , userId);
+            return mIPackageManager.getPackageUid(packageName, PACKAGE_MATCH_FLAGS, userId);
         } catch (RemoteException e) {
             // Shouldn't happen.
             Slog.wtf(TAG, "RemoteException", e);
@@ -2481,16 +2504,30 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
+    /**
+     * Returns {@link PackageInfo} unless it's uninstalled or disabled.
+     */
     @Nullable
     @VisibleForTesting
-    PackageInfo injectPackageInfo(String packageName, @UserIdInt int userId,
+    final PackageInfo getPackageInfo(String packageName, @UserIdInt int userId,
+            boolean getSignatures) {
+        return isInstalledOrNull(injectPackageInfoWithUninstalled(
+                packageName, userId, getSignatures));
+    }
+
+    /**
+     * Do not use directly; this returns uninstalled packages too.
+     */
+    @Nullable
+    @VisibleForTesting
+    PackageInfo injectPackageInfoWithUninstalled(String packageName, @UserIdInt int userId,
             boolean getSignatures) {
         final long start = injectElapsedRealtime();
         final long token = injectClearCallingIdentity();
         try {
-            return mIPackageManager.getPackageInfo(packageName, PACKAGE_MATCH_FLAGS
-                            | (getSignatures ? PackageManager.GET_SIGNATURES : 0)
-                    , userId);
+            return mIPackageManager.getPackageInfo(
+                    packageName, PACKAGE_MATCH_FLAGS
+                            | (getSignatures ? PackageManager.GET_SIGNATURES : 0), userId);
         } catch (RemoteException e) {
             // Shouldn't happen.
             Slog.wtf(TAG, "RemoteException", e);
@@ -2504,9 +2541,22 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
+    /**
+     * Returns {@link ApplicationInfo} unless it's uninstalled or disabled.
+     */
     @Nullable
     @VisibleForTesting
-    ApplicationInfo injectApplicationInfo(String packageName, @UserIdInt int userId) {
+    final ApplicationInfo getApplicationInfo(String packageName, @UserIdInt int userId) {
+        return isInstalledOrNull(injectApplicationInfoWithUninstalled(packageName, userId));
+    }
+
+    /**
+     * Do not use directly; this returns uninstalled packages too.
+     */
+    @Nullable
+    @VisibleForTesting
+    ApplicationInfo injectApplicationInfoWithUninstalled(
+            String packageName, @UserIdInt int userId) {
         final long start = injectElapsedRealtime();
         final long token = injectClearCallingIdentity();
         try {
@@ -2522,13 +2572,27 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
+    /**
+     * Returns {@link ActivityInfo} with its metadata unless it's uninstalled or disabled.
+     */
     @Nullable
-    ActivityInfo injectGetActivityInfoWithMetadata(ComponentName activity, @UserIdInt int userId) {
+    final ActivityInfo getActivityInfoWithMetadata(ComponentName activity, @UserIdInt int userId) {
+        return isInstalledOrNull(injectGetActivityInfoWithMetadataWithUninstalled(
+                activity, userId));
+    }
+
+    /**
+     * Do not use directly; this returns uninstalled packages too.
+     */
+    @Nullable
+    @VisibleForTesting
+    ActivityInfo injectGetActivityInfoWithMetadataWithUninstalled(
+            ComponentName activity, @UserIdInt int userId) {
         final long start = injectElapsedRealtime();
         final long token = injectClearCallingIdentity();
         try {
             return mIPackageManager.getActivityInfo(activity,
-                    PACKAGE_MATCH_FLAGS | PackageManager.GET_META_DATA, userId);
+                    (PACKAGE_MATCH_FLAGS | PackageManager.GET_META_DATA), userId);
         } catch (RemoteException e) {
             // Shouldn't happen.
             Slog.wtf(TAG, "RemoteException", e);
@@ -2540,18 +2604,20 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
-    @Nullable
+    /**
+     * Return all installed and enabled packages.
+     */
+    @NonNull
     @VisibleForTesting
-    List<PackageInfo> injectInstalledPackages(@UserIdInt int userId) {
+    final List<PackageInfo> getInstalledPackages(@UserIdInt int userId) {
         final long start = injectElapsedRealtime();
         final long token = injectClearCallingIdentity();
         try {
-            final ParceledListSlice<PackageInfo> parceledList =
-                    mIPackageManager.getInstalledPackages(PACKAGE_MATCH_FLAGS, userId);
-            if (parceledList == null) {
-                return Collections.emptyList();
-            }
-            return parceledList.getList();
+            final List<PackageInfo> all = injectGetPackagesWithUninstalled(userId);
+
+            all.removeIf(PACKAGE_NOT_INSTALLED);
+
+            return all;
         } catch (RemoteException e) {
             // Shouldn't happen.
             Slog.wtf(TAG, "RemoteException", e);
@@ -2563,17 +2629,31 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
+    /**
+     * Do not use directly; this returns uninstalled packages too.
+     */
+    @NonNull
+    @VisibleForTesting
+    List<PackageInfo> injectGetPackagesWithUninstalled(@UserIdInt int userId)
+            throws RemoteException {
+        final ParceledListSlice<PackageInfo> parceledList =
+                mIPackageManager.getInstalledPackages(PACKAGE_MATCH_FLAGS, userId);
+        if (parceledList == null) {
+            return Collections.emptyList();
+        }
+        return parceledList.getList();
+    }
+
     private void forUpdatedPackages(@UserIdInt int userId, long lastScanTime,
             Consumer<ApplicationInfo> callback) {
         if (DEBUG) {
             Slog.d(TAG, "forUpdatedPackages for user " + userId + ", lastScanTime=" + lastScanTime);
         }
-        final List<PackageInfo> list = injectInstalledPackages(userId);
+        final List<PackageInfo> list = getInstalledPackages(userId);
         for (int i = list.size() - 1; i >= 0; i--) {
             final PackageInfo pi = list.get(i);
 
-            if (((pi.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED) != 0)
-                    && (pi.lastUpdateTime >= lastScanTime)) {
+            if (pi.lastUpdateTime >= lastScanTime) {
                 if (DEBUG) {
                     Slog.d(TAG, "Found updated package " + pi.packageName);
                 }
@@ -2582,13 +2662,37 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
-    private boolean isApplicationFlagSet(String packageName, int userId, int flags) {
-        final ApplicationInfo ai = injectApplicationInfo(packageName, userId);
+    private boolean isApplicationFlagSet(@NonNull String packageName, int userId, int flags) {
+        final ApplicationInfo ai = injectApplicationInfoWithUninstalled(packageName, userId);
         return (ai != null) && ((ai.flags & flags) == flags);
     }
 
+    private static boolean isInstalled(@Nullable ApplicationInfo ai) {
+        return (ai != null) && (ai.flags & ApplicationInfo.FLAG_INSTALLED) != 0;
+    }
+
+    private static boolean isInstalled(@Nullable PackageInfo pi) {
+        return (pi != null) && isInstalled(pi.applicationInfo);
+    }
+
+    private static boolean isInstalled(@Nullable ActivityInfo ai) {
+        return (ai != null) && isInstalled(ai.applicationInfo);
+    }
+
+    private static ApplicationInfo isInstalledOrNull(ApplicationInfo ai) {
+        return isInstalled(ai) ? ai : null;
+    }
+
+    private static PackageInfo isInstalledOrNull(PackageInfo pi) {
+        return isInstalled(pi) ? pi : null;
+    }
+
+    private static ActivityInfo isInstalledOrNull(ActivityInfo ai) {
+        return isInstalled(ai) ? ai : null;
+    }
+
     boolean isPackageInstalled(String packageName, int userId) {
-        return isApplicationFlagSet(packageName, userId, ApplicationInfo.FLAG_INSTALLED);
+        return getApplicationInfo(packageName, userId) != null;
     }
 
     @Nullable
@@ -2619,20 +2723,46 @@ public class ShortcutService extends IShortcutService.Stub {
         return intent;
     }
 
+    /**
+     * Same as queryIntentActivitiesAsUser, except it makes sure the package is installed,
+     * and only returns exported activities.
+     */
+    @NonNull
+    @VisibleForTesting
+    List<ResolveInfo> queryActivities(@NonNull Intent baseIntent,
+            @NonNull String packageName, @Nullable ComponentName activity, int userId) {
+
+        baseIntent.setPackage(Preconditions.checkNotNull(packageName));
+        if (activity != null) {
+            baseIntent.setComponent(activity);
+        }
+
+        final List<ResolveInfo> resolved =
+                mContext.getPackageManager().queryIntentActivitiesAsUser(
+                        baseIntent, PACKAGE_MATCH_FLAGS, userId);
+        if (resolved == null || resolved.size() == 0) {
+            return EMPTY_RESOLVE_INFO;
+        }
+        // Make sure the package is installed.
+        if (!isInstalled(resolved.get(0).activityInfo)) {
+            return EMPTY_RESOLVE_INFO;
+        }
+        resolved.removeIf(ACTIVITY_NOT_EXPORTED);
+        return resolved;
+    }
+
+    /**
+     * Return the main activity that is enabled and exported.  If multiple activities are found,
+     * return the first one.
+     */
     @Nullable
     ComponentName injectGetDefaultMainActivity(@NonNull String packageName, int userId) {
         final long start = injectElapsedRealtime();
         final long token = injectClearCallingIdentity();
         try {
-            final Intent intent = getMainActivityIntent();
-            intent.setPackage(packageName);
-
             final List<ResolveInfo> resolved =
-                    mContext.getPackageManager().queryIntentActivitiesAsUser(
-                            intent, PACKAGE_MATCH_FLAGS, userId);
-
-            return (resolved == null || resolved.size() == 0)
-                    ? null : resolved.get(0).activityInfo.getComponentName();
+                    queryActivities(getMainActivityIntent(), packageName, null, userId);
+            return resolved.size() == 0 ? null : resolved.get(0).activityInfo.getComponentName();
         } finally {
             injectRestoreCallingIdentity(token);
 
@@ -2640,19 +2770,17 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
+    /**
+     * Return whether an activity is enabled, exported and main.
+     */
     boolean injectIsMainActivity(@NonNull ComponentName activity, int userId) {
         final long start = injectElapsedRealtime();
         final long token = injectClearCallingIdentity();
         try {
-            final Intent intent = getMainActivityIntent();
-            intent.setPackage(activity.getPackageName());
-            intent.setComponent(activity);
-
             final List<ResolveInfo> resolved =
-                    mContext.getPackageManager().queryIntentActivitiesAsUser(
-                            intent, PACKAGE_MATCH_FLAGS, userId);
-
-            return resolved != null && resolved.size() > 0;
+                    queryActivities(getMainActivityIntent(), activity.getPackageName(),
+                            activity, userId);
+            return resolved.size() > 0;
         } finally {
             injectRestoreCallingIdentity(token);
 
@@ -2660,23 +2788,37 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
+    /**
+     * Return all the enabled, exported and main activities from a package.
+     */
     @NonNull
     List<ResolveInfo> injectGetMainActivities(@NonNull String packageName, int userId) {
         final long start = injectElapsedRealtime();
         final long token = injectClearCallingIdentity();
         try {
-            final Intent intent = getMainActivityIntent();
-            intent.setPackage(packageName);
-
-            final List<ResolveInfo> resolved =
-                    mContext.getPackageManager().queryIntentActivitiesAsUser(
-                            intent, PACKAGE_MATCH_FLAGS, userId);
-
-            return (resolved != null) ? resolved : new ArrayList<>(0);
+            return queryActivities(getMainActivityIntent(), packageName, null, userId);
         } finally {
             injectRestoreCallingIdentity(token);
 
             logDurationStat(Stats.CHECK_LAUNCHER_ACTIVITY, start);
+        }
+    }
+
+    /**
+     * Return whether an activity is enabled and exported.
+     */
+    @VisibleForTesting
+    boolean injectIsActivityEnabledAndExported(
+            @NonNull ComponentName activity, @UserIdInt int userId) {
+        final long start = injectElapsedRealtime();
+        final long token = injectClearCallingIdentity();
+        try {
+            return queryActivities(new Intent(), activity.getPackageName(), activity, userId)
+                    .size() > 0;
+        } finally {
+            injectRestoreCallingIdentity(token);
+
+            logDurationStat(Stats.IS_ACTIVITY_ENABLED, start);
         }
     }
 
@@ -2839,6 +2981,7 @@ public class ShortcutService extends IShortcutService.Stub {
                 dumpStatLS(pw, p, Stats.RESOURCE_NAME_LOOKUP, "resourceNameLookup");
                 dumpStatLS(pw, p, Stats.GET_LAUNCHER_ACTIVITY, "getLauncherActivity");
                 dumpStatLS(pw, p, Stats.CHECK_LAUNCHER_ACTIVITY, "checkLauncherActivity");
+                dumpStatLS(pw, p, Stats.IS_ACTIVITY_ENABLED, "isActivityEnabled");
             }
 
             for (int i = 0; i < mUsers.size(); i++) {
