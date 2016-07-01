@@ -28,6 +28,7 @@ import com.android.systemui.assist.AssistManager;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
+import com.android.systemui.statusbar.phone.LockscreenWallpaper;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.phone.QSTileHost;
@@ -92,7 +93,7 @@ public class SystemUIFactory {
     }
 
     public ScrimController createScrimController(ScrimView scrimBehind, ScrimView scrimInFront,
-            View headsUpScrim) {
+            View headsUpScrim, LockscreenWallpaper lockscreenWallpaper) {
         return new ScrimController(scrimBehind, scrimInFront, headsUpScrim);
     }
 

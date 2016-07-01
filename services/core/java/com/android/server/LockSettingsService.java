@@ -1391,6 +1391,8 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
 
         if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
+
+
             // credential has matched
             unlockKeystore(credential, userId);
 
