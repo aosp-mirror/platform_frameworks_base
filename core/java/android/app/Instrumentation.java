@@ -1151,16 +1151,6 @@ public class Instrumentation {
 //      }
       
       activity.performDestroy();
-      
-      if (mActivityMonitors != null) {
-          synchronized (mSync) {
-              final int N = mActivityMonitors.size();
-              for (int i=0; i<N; i++) {
-                  final ActivityMonitor am = mActivityMonitors.get(i);
-                  am.match(activity, activity, activity.getIntent());
-              }
-          }
-      }
   }
 
     /**
