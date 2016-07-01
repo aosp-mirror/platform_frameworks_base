@@ -528,7 +528,7 @@ public class PipManager {
     private static boolean isSettingsShown(ComponentName topActivity) {
         for (Pair<String, String> componentName : sSettingsPackageAndClassNamePairList) {
             String packageName = componentName.first;
-            if (topActivity.getPackageName().equals(componentName.first)) {
+            if (topActivity.getPackageName().equals(packageName)) {
                 String className = componentName.second;
                 if (className == null || topActivity.getClassName().equals(className)) {
                     return true;
