@@ -19,6 +19,7 @@ package android.os;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
 import android.system.Os;
+import android.system.OsConstants;
 import android.util.Log;
 import com.android.internal.os.Zygote;
 import dalvik.system.VMRuntime;
@@ -1250,4 +1251,22 @@ public class Process {
      * @hide
      */
     public static final native void removeAllProcessGroups();
+
+    /**
+     * Check to see if a thread belongs to a given process. This may require
+     * more permissions than apps generally have.
+     * @return true if this thread belongs to a process
+     * @hide
+     */
+    public static final boolean isThreadInProcess(int tid, int pid) {
+        try {
+            if (Os.access("/proc/" + tid + "/task/" + pid, OsConstants.F_OK)) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }
