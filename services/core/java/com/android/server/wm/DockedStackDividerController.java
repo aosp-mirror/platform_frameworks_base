@@ -388,8 +388,8 @@ public class DockedStackDividerController implements DimLayerUser {
                 inputMethodManagerInternal.hideCurrentInputMethod();
                 mImeHideRequested = true;
             }
-        } else {
-            setMinimizedDockedStack(false);
+        } else if (setMinimizedDockedStack(false)) {
+            mService.mWindowPlacerLocked.performSurfacePlacement();
         }
     }
 
@@ -542,31 +542,43 @@ public class DockedStackDividerController implements DimLayerUser {
             return;
         }
 
-        clearImeAdjustAnimation();
+        final boolean imeChanged = clearImeAdjustAnimation();
+        boolean minimizedChange = false;
         if (minimizedDock) {
             if (animate) {
                 startAdjustAnimation(0f, 1f);
             } else {
-                setMinimizedDockedStack(true);
+                minimizedChange |= setMinimizedDockedStack(true);
             }
         } else {
             if (animate) {
                 startAdjustAnimation(1f, 0f);
             } else {
-                setMinimizedDockedStack(false);
+                minimizedChange |= setMinimizedDockedStack(false);
             }
+        }
+        if (imeChanged || minimizedChange) {
+            if (imeChanged && !minimizedChange) {
+                Slog.d(TAG, "setMinimizedDockedStack: IME adjust changed due to minimizing,"
+                        + " minimizedDock=" + minimizedDock
+                        + " minimizedChange=" + minimizedChange);
+            }
+            mService.mWindowPlacerLocked.performSurfacePlacement();
         }
     }
 
-    private void clearImeAdjustAnimation() {
+    private boolean clearImeAdjustAnimation() {
+        boolean changed = false;
         final ArrayList<TaskStack> stacks = mDisplayContent.getStacks();
         for (int i = stacks.size() - 1; i >= 0; --i) {
             final TaskStack stack = stacks.get(i);
             if (stack != null && stack.isAdjustedForIme()) {
                 stack.resetAdjustedForIme(true /* adjustBoundsNow */);
+                changed  = true;
             }
         }
         mAnimatingForIme = false;
+        return changed;
     }
 
     private void startAdjustAnimation(float from, float to) {
@@ -625,8 +637,21 @@ public class DockedStackDividerController implements DimLayerUser {
                 if (mDelayedImeWin != null) {
                     mDelayedImeWin.mWinAnimator.endDelayingAnimationStart();
                 }
+                // If the adjust status changed since this was posted, only notify
+                // the new states and don't animate.
+                long duration = 0;
+                if (mAdjustedForIme == adjustedForIme
+                        && mAdjustedForDivider == adjustedForDivider) {
+                    duration = IME_ADJUST_ANIM_DURATION;
+                } else {
+                    Slog.w(TAG, "IME adjust changed while waiting for drawn:"
+                            + " adjustedForIme=" + adjustedForIme
+                            + " adjustedForDivider=" + adjustedForDivider
+                            + " mAdjustedForIme=" + mAdjustedForIme
+                            + " mAdjustedForDivider=" + mAdjustedForDivider);
+                }
                 notifyAdjustedForImeChanged(
-                        adjustedForIme || adjustedForDivider, IME_ADJUST_ANIM_DURATION);
+                        mAdjustedForIme || mAdjustedForDivider, duration);
             };
         } else {
             notifyAdjustedForImeChanged(
@@ -634,15 +659,10 @@ public class DockedStackDividerController implements DimLayerUser {
         }
     }
 
-    private void setMinimizedDockedStack(boolean minimized) {
+    private boolean setMinimizedDockedStack(boolean minimized) {
         final TaskStack stack = mDisplayContent.getDockedStackVisibleForUserLocked();
         notifyDockedStackMinimizedChanged(minimized, 0);
-        if (stack == null) {
-            return;
-        }
-        if (stack.setAdjustedForMinimizedDock(minimized ? 1f : 0f)) {
-            mService.mWindowPlacerLocked.performSurfacePlacement();
-        }
+        return stack != null && stack.setAdjustedForMinimizedDock(minimized ? 1f : 0f);
     }
 
     private boolean isAnimationMaximizing() {
