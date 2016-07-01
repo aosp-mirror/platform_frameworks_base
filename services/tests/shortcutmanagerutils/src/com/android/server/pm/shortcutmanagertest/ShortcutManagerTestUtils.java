@@ -18,13 +18,11 @@ package com.android.server.pm.shortcutmanagertest;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertNotSame;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -50,11 +48,9 @@ import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.UserHandle;
 import android.test.MoreAsserts;
-import android.util.ArraySet;
 import android.util.Log;
 
 import junit.framework.Assert;
-import junit.framework.AssertionFailedError;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
