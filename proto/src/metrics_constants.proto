@@ -2358,6 +2358,15 @@ message MetricsEvent {
     // ACTION: Settings -> Support -> Phone/Chat -> Disclaimer OK
     ACTION_SUPPORT_DISCLAIMER_OK = 484;
 
+    // ACTION: Settings -> Support -> Toll-Free Phone
+    ACTION_SUPPORT_DAIL_TOLLFREE = 485;
+
+    // ACTION: Settings -> Support -> "Travel Abroad" Button
+    ACTION_SUPPORT_VIEW_TRAVEL_ABROAD_DIALOG = 486;
+
+    // ACTION: Settings -> Support -> "Travel Abroad" Button -> Tolled Phone
+    ACTION_SUPPORT_DIAL_TOLLED = 487;
+
     // ---- End N-MR1 Constants, all N-MR1 constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
