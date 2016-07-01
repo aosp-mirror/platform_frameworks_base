@@ -82,6 +82,7 @@ public class NekoService extends JobService {
                 if (cats.size() == 0 || rng.nextFloat() <= new_cat_prob) {
                     cat = Cat.create(this);
                     prefs.addCat(cat);
+                    cat.logAdd(this);
                     Log.v(TAG, "A new cat is here: " + cat.getName());
                 } else {
                     cat = cats.get(rng.nextInt(cats.size()));
