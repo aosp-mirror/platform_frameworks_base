@@ -255,9 +255,6 @@ class ShortcutPackage extends ShortcutPackageItem {
             oldShortcut.ensureUpdatableWith(newShortcut);
 
             wasPinned = oldShortcut.isPinned();
-            if (!oldShortcut.isEnabled()) {
-                newShortcut.addFlags(ShortcutInfo.FLAG_DISABLED);
-            }
         }
 
         // If it was originally pinned, the new one should be pinned too.
@@ -1422,12 +1419,12 @@ class ShortcutPackage extends ShortcutPackageItem {
         // Verify each shortcut's status.
         for (int i = mShortcuts.size() - 1; i >= 0; i--) {
             final ShortcutInfo si = mShortcuts.valueAt(i);
-            if (!(si.isManifestShortcut() || si.isDynamic() || si.isPinned())) {
+            if (!(si.isDeclaredInManifest() || si.isDynamic() || si.isPinned())) {
                 failed = true;
                 Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
                         + " is not manifest, dynamic or pinned.");
             }
-            if (si.isManifestShortcut() && si.isDynamic()) {
+            if (si.isDeclaredInManifest() && si.isDynamic()) {
                 failed = true;
                 Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
                         + " is both dynamic and manifest at the same time.");
