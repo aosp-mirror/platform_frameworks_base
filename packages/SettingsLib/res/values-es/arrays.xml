@@ -29,7 +29,7 @@
     <item msgid="4221763391123233270">"Conexión establecida"</item>
     <item msgid="624838831631122137">"Suspendida"</item>
     <item msgid="7979680559596111948">"Desconectando..."</item>
-    <item msgid="1634960474403853625">"Desconectada"</item>
+    <item msgid="1634960474403853625">"Desconectado"</item>
     <item msgid="746097431216080650">"Con error"</item>
     <item msgid="6367044185730295334">"Bloqueada"</item>
     <item msgid="503942654197908005">"Inhabilitando conexión inestable temporalmente..."</item>
@@ -79,6 +79,16 @@
     <item msgid="1314234299552254621">"1 M/búfer registro"</item>
     <item msgid="3606047780792894151">"4 M/búfer registro"</item>
     <item msgid="5431354956856655120">"16 M/búfer registro"</item>
+  </string-array>
+  <string-array name="select_logpersist_titles">
+    <item msgid="1744840221860799971">"No"</item>
+    <item msgid="3054662377365844197">"Todo"</item>
+    <item msgid="688870735111627832">"Todo menos señal móvil"</item>
+  </string-array>
+  <string-array name="select_logpersist_summaries">
+    <item msgid="2216470072500521830">"No"</item>
+    <item msgid="172978079776521897">"Todos los búferes de registro"</item>
+    <item msgid="3873873912383879240">"Todo excepto búferes de registro de señal móvil"</item>
   </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"Animación desactivada"</item>

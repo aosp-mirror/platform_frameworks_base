@@ -80,6 +80,16 @@
     <item msgid="3606047780792894151">"4 MB žurnalo buferis"</item>
     <item msgid="5431354956856655120">"16 MB žurnalo buferis"</item>
   </string-array>
+  <string-array name="select_logpersist_titles">
+    <item msgid="1744840221860799971">"Išjungta"</item>
+    <item msgid="3054662377365844197">"Viskas"</item>
+    <item msgid="688870735111627832">"Viskas, išsk. rad. r."</item>
+  </string-array>
+  <string-array name="select_logpersist_summaries">
+    <item msgid="2216470072500521830">"Išjungta"</item>
+    <item msgid="172978079776521897">"Visi žurnalų buferiai"</item>
+    <item msgid="3873873912383879240">"Visi, išskyrus radijo ryšio žurnalų buferius"</item>
+  </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"Animacija išjungta"</item>
     <item msgid="6624864048416710414">"Animacijos mastelis 0,5x"</item>
@@ -138,7 +148,7 @@
     <item msgid="1851438178120770973">"In adb shell dumpsys gfxinfo"</item>
   </string-array>
   <string-array name="debug_hw_overdraw_entries">
-    <item msgid="8190572633763871652">"Išjungti"</item>
+    <item msgid="8190572633763871652">"Išjungta"</item>
     <item msgid="7688197031296835369">"Rodyti perdangos sritis"</item>
     <item msgid="2290859360633824369">"Rodyti deuteranomalijos sritis"</item>
   </string-array>
