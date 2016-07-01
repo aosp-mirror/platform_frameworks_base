@@ -46,10 +46,11 @@ public class MultiSelectManagerTest extends AndroidTestCase {
     private TestCallback mCallback;
     private TestDocumentsAdapter mAdapter;
 
+    @Override
     public void setUp() throws Exception {
         mCallback = new TestCallback();
         mAdapter = new TestDocumentsAdapter(items);
-        mManager = new MultiSelectManager(mAdapter, MultiSelectManager.MODE_MULTIPLE, null);
+        mManager = new MultiSelectManager(mAdapter, MultiSelectManager.MODE_MULTIPLE);
         mManager.addCallback(mCallback);
     }
 
@@ -173,7 +174,7 @@ public class MultiSelectManagerTest extends AndroidTestCase {
     }
 
     public void testSingleSelectMode() {
-        mManager = new MultiSelectManager(mAdapter, MultiSelectManager.MODE_SINGLE, null);
+        mManager = new MultiSelectManager(mAdapter, MultiSelectManager.MODE_SINGLE);
         mManager.addCallback(mCallback);
         longPress(20);
         tap(13);
@@ -181,7 +182,7 @@ public class MultiSelectManagerTest extends AndroidTestCase {
     }
 
     public void testSingleSelectMode_ShiftTap() {
-        mManager = new MultiSelectManager(mAdapter, MultiSelectManager.MODE_SINGLE, null);
+        mManager = new MultiSelectManager(mAdapter, MultiSelectManager.MODE_SINGLE);
         mManager.addCallback(mCallback);
         longPress(13);
         shiftTap(20);
@@ -228,7 +229,7 @@ public class MultiSelectManagerTest extends AndroidTestCase {
     }
 
     public void testRangeSelection_singleSelect() {
-        mManager = new MultiSelectManager(mAdapter, MultiSelectManager.MODE_SINGLE, null);
+        mManager = new MultiSelectManager(mAdapter, MultiSelectManager.MODE_SINGLE);
         mManager.addCallback(mCallback);
         mManager.startRangeSelection(11);
         mManager.snapRangeSelection(19);

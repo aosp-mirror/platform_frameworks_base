@@ -138,7 +138,7 @@ public final class Events {
         int getItemPosition();
     }
 
-    public static final class MotionInputEvent implements InputEvent {
+    public static final class MotionInputEvent implements InputEvent, AutoCloseable {
         private static final String TAG = "MotionInputEvent";
 
         private static final Pools.SimplePool<MotionInputEvent> sPool = new Pools.SimplePool<>(1);
@@ -197,6 +197,11 @@ public final class Events {
             // Right now one instance is enough because we expect all instances are only used in
             // main thread.
             assert(released);
+        }
+
+        @Override
+        public void close() {
+            recycle();
         }
 
         @Override

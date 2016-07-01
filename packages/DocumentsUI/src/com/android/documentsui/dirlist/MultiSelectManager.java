@@ -65,39 +65,13 @@ public final class MultiSelectManager {
     private Range mRanger;
     private boolean mSingleSelect;
 
-    /**
-     * @param mode Selection single or multiple selection mode.
-     * @param initialSelection selection state probably preserved in external state.
-     */
-    public MultiSelectManager(
-            final RecyclerView recyclerView,
-            DocumentsAdapter adapter,
-            @SelectionMode int mode,
-            @Nullable Selection initialSelection) {
-
-        this(adapter, mode, initialSelection);
-    }
-
-    /**
-     * Constructs a new instance with {@code adapter} and {@code helper}.
-     * @param runtimeSelectionEnvironment
-     * @hide
-     */
-    @VisibleForTesting
-    MultiSelectManager(
-            DocumentsAdapter adapter,
-            @SelectionMode int mode,
-            @Nullable Selection initialSelection) {
+    public MultiSelectManager(DocumentsAdapter adapter, @SelectionMode int mode) {
 
         assert(adapter != null);
 
         mAdapter = adapter;
 
         mSingleSelect = mode == MODE_SINGLE;
-        if (initialSelection != null) {
-            mSelection.copyFrom(initialSelection);
-        }
-
         mAdapter.registerAdapterDataObserver(
                 new RecyclerView.AdapterDataObserver() {
 

@@ -58,13 +58,11 @@ import android.util.SparseArray;
 import android.view.ActionMode;
 import android.view.ContextMenu;
 import android.view.DragEvent;
-import android.view.GestureDetector;
 import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -74,11 +72,9 @@ import android.widget.Toolbar;
 import com.android.documentsui.BaseActivity;
 import com.android.documentsui.DirectoryLoader;
 import com.android.documentsui.DirectoryResult;
-import com.android.documentsui.UrisSupplier;
 import com.android.documentsui.DocumentClipper;
 import com.android.documentsui.DocumentsActivity;
 import com.android.documentsui.DocumentsApplication;
-import com.android.documentsui.Events;
 import com.android.documentsui.Events.MotionInputEvent;
 import com.android.documentsui.ItemDragListener;
 import com.android.documentsui.MenuManager;
@@ -94,6 +90,7 @@ import com.android.documentsui.Shared;
 import com.android.documentsui.Snackbars;
 import com.android.documentsui.State;
 import com.android.documentsui.State.ViewMode;
+import com.android.documentsui.UrisSupplier;
 import com.android.documentsui.dirlist.MultiSelectManager.Selection;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.RootInfo;
@@ -295,22 +292,27 @@ public class DirectoryFragment extends Fragment
         }
         mRecView.setLayoutManager(mLayout);
 
-        mGestureDetector =
-                new ListeningGestureDetector(this.getContext(), mDragHelper, new GestureListener());
-
-        mRecView.addOnItemTouchListener(mGestureDetector);
-        mEmptyView.setOnTouchListener(mGestureDetector);
-
         // TODO: instead of inserting the view into the constructor, extract listener-creation code
         // and set the listener on the view after the fact.  Then the view doesn't need to be passed
         // into the selection manager.
         mSelectionManager = new MultiSelectManager(
-                mRecView,
                 mAdapter,
                 state.allowMultiple
                     ? MultiSelectManager.MODE_MULTIPLE
-                    : MultiSelectManager.MODE_SINGLE,
-                null);
+                    : MultiSelectManager.MODE_SINGLE);
+
+        GestureListener gestureListener = new GestureListener(
+                mSelectionManager,
+                mRecView,
+                this::getTarget,
+                this::onDoubleTap,
+                this::onRightClick);
+
+        mGestureDetector =
+                new ListeningGestureDetector(this.getContext(), mDragHelper, gestureListener);
+
+        mRecView.addOnItemTouchListener(mGestureDetector);
+        mEmptyView.setOnTouchListener(mGestureDetector);
 
         if (state.allowMultiple) {
             mBandController = new BandController(mRecView, mAdapter, mSelectionManager);
@@ -426,44 +428,38 @@ public class DirectoryFragment extends Fragment
         return false;
     }
 
-    protected boolean onRightClick(MotionEvent e) {
-        // First get target to see if it's a blank window or a file/doc
-        final MotionInputEvent event = MotionInputEvent.obtain(e, mRecView);
-        try {
-            if (event.getItemPosition() != RecyclerView.NO_POSITION) {
-                final DocumentHolder holder = getTarget(event);
-                String modelId = getModelId(holder.itemView);
-                if (!mSelectionManager.getSelection().contains(modelId)) {
-                    mSelectionManager.clearSelection();
-                    // Set selection on the one single item
-                    List<String> ids = Collections.singletonList(modelId);
-                    mSelectionManager.setItemsSelected(ids, true);
-                }
+    protected boolean onRightClick(MotionInputEvent e) {
+        if (e.getItemPosition() != RecyclerView.NO_POSITION) {
+            final DocumentHolder holder = getTarget(e);
+            String modelId = getModelId(holder.itemView);
+            if (!mSelectionManager.getSelection().contains(modelId)) {
+                mSelectionManager.clearSelection();
+                // Set selection on the one single item
+                List<String> ids = Collections.singletonList(modelId);
+                mSelectionManager.setItemsSelected(ids, true);
+            }
 
-                // We are registering for context menu here so long-press doesn't trigger this
-                // floating context menu, and then quickly unregister right afterwards
-                registerForContextMenu(holder.itemView);
-                mRecView.showContextMenuForChild(holder.itemView,
-                        e.getX() - holder.itemView.getLeft(), e.getY() - holder.itemView.getTop());
-                unregisterForContextMenu(holder.itemView);
-            }
-            // If there was no corresponding item pos, that means user right-clicked on the blank
-            // pane
-            // We would want to show different options then, and not select any item
-            // The blank pane could be the recyclerView or the emptyView, so we need to register
-            // according to whichever one is visible
-            else if (mEmptyView.getVisibility() == View.VISIBLE) {
-                registerForContextMenu(mEmptyView);
-                mEmptyView.showContextMenu(e.getX(), e.getY());
-                unregisterForContextMenu(mEmptyView);
-                return true;
-            } else {
-                registerForContextMenu(mRecView);
-                mRecView.showContextMenu(e.getX(), e.getY());
-                unregisterForContextMenu(mRecView);
-            }
-        } finally {
-            event.recycle();
+            // We are registering for context menu here so long-press doesn't trigger this
+            // floating context menu, and then quickly unregister right afterwards
+            registerForContextMenu(holder.itemView);
+            mRecView.showContextMenuForChild(holder.itemView,
+                    e.getX() - holder.itemView.getLeft(), e.getY() - holder.itemView.getTop());
+            unregisterForContextMenu(holder.itemView);
+        }
+        // If there was no corresponding item pos, that means user right-clicked on the blank
+        // pane
+        // We would want to show different options then, and not select any item
+        // The blank pane could be the recyclerView or the emptyView, so we need to register
+        // according to whichever one is visible
+        else if (mEmptyView.getVisibility() == View.VISIBLE) {
+            registerForContextMenu(mEmptyView);
+            mEmptyView.showContextMenu(e.getX(), e.getY());
+            unregisterForContextMenu(mEmptyView);
+            return true;
+        } else {
+            registerForContextMenu(mRecView);
+            mRecView.showContextMenu(e.getX(), e.getY());
+            unregisterForContextMenu(mRecView);
         }
         return true;
     }
@@ -1552,81 +1548,6 @@ public class DirectoryFragment extends Fragment
         final String docMimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
         final int docFlags = getCursorInt(cursor, Document.COLUMN_FLAGS);
         return mTuner.canSelectType(docMimeType, docFlags);
-    }
-
-    /**
-     * The gesture listener for items in the list/grid view. Interprets gestures and sends the
-     * events to the target DocumentHolder, whence they are routed to the appropriate listener.
-     */
-    class GestureListener extends GestureDetector.SimpleOnGestureListener {
-        // From the RecyclerView, we get two events sent to
-        // ListeningGestureDetector#onInterceptTouchEvent on a mouse click; we first get an
-        // ACTION_DOWN Event for clicking on the mouse, and then an ACTION_UP event from releasing
-        // the mouse click. ACTION_UP event doesn't have information regarding the button (primary
-        // vs. secondary), so we have to save that somewhere first from ACTION_DOWN, and then reuse
-        // it later. The ACTION_DOWN event doesn't get forwarded to GestureListener, so we have open
-        // up a public set method to set it.
-        private int mLastButtonState = -1;
-
-        public void setLastButtonState(int state) {
-            mLastButtonState = state;
-        }
-
-        @Override
-        public boolean onSingleTapUp(MotionEvent e) {
-            // Single tap logic:
-            // We first see if it's a mouse event, and if it was right click by checking on
-            // @{code ListeningGestureDetector#mLastButtonState}
-            // If the selection manager is active, it gets first whack at handling tap
-            // events. Otherwise, tap events are routed to the target DocumentHolder.
-            if (Events.isMouseEvent(e) && mLastButtonState == MotionEvent.BUTTON_SECONDARY) {
-                mLastButtonState = -1;
-                return onRightClick(e);
-            }
-
-            final MotionInputEvent event = MotionInputEvent.obtain(e, mRecView);
-            try {
-                boolean handled = mSelectionManager.onSingleTapUp(event);
-
-                if (handled) {
-                    return handled;
-                }
-
-                // Give the DocumentHolder a crack at the event.
-                DocumentHolder holder = DirectoryFragment.this.getTarget(event);
-                if (holder != null) {
-                    handled = holder.onSingleTapUp(e);
-                }
-
-                return handled;
-            } finally {
-                event.recycle();
-            }
-        }
-
-        @Override
-        public void onLongPress(MotionEvent e) {
-            // Long-press events get routed directly to the selection manager. They can be
-            // changed to route through the DocumentHolder if necessary.
-            final MotionInputEvent event = MotionInputEvent.obtain(e, mRecView);
-            try {
-                mSelectionManager.onLongPress(event);
-            } finally {
-                event.recycle();
-            }
-        }
-
-        @Override
-        public boolean onDoubleTap(MotionEvent e) {
-            // Double-tap events are handled directly by the DirectoryFragment. They can be changed
-            // to route through the DocumentHolder if necessary.
-            final MotionInputEvent event = MotionInputEvent.obtain(e, mRecView);
-            return DirectoryFragment.this.onDoubleTap(event);
-        }
-
-        public boolean onRightClick(MotionEvent e) {
-            return DirectoryFragment.this.onRightClick(e);
-        }
     }
 
     public static void showDirectory(

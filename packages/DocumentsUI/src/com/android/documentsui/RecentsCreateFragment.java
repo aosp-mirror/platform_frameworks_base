@@ -52,12 +52,12 @@ import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.DurableUtils;
 import com.android.documentsui.model.RootInfo;
 
-import libcore.io.IoUtils;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import libcore.io.IoUtils;
 
 /**
  * Display directories where recent creates took place.
@@ -141,17 +141,13 @@ public class RecentsCreateFragment extends Fragment {
             new RecyclerView.OnItemTouchListener() {
                 @Override
                 public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
-                    final MotionInputEvent event = MotionInputEvent.obtain(e, mRecView);
-                    try {
+                    try (MotionInputEvent event = MotionInputEvent.obtain(e, mRecView)) {
                         if (event.isOverItem() && event.isActionUp()) {
                             final DocumentStack stack = mAdapter.getItem(event.getItemPosition());
                             ((BaseActivity) getActivity()).onStackPicked(stack);
                             return true;
                         }
-
                         return false;
-                    } finally {
-                        event.recycle();
                     }
                 }
 
@@ -247,7 +243,7 @@ public class RecentsCreateFragment extends Fragment {
 
           final LayoutInflater inflater = LayoutInflater.from(context);
           return new StackHolder(
-                  (View) inflater.inflate(R.layout.item_doc_list, parent, false));
+                  inflater.inflate(R.layout.item_doc_list, parent, false));
         }
 
         @Override

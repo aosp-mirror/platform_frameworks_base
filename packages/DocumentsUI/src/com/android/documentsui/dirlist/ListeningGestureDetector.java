@@ -26,7 +26,6 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 
 import com.android.documentsui.Events;
-import com.android.documentsui.dirlist.DirectoryFragment.GestureListener;
 
 // Previously we listened to events with one class, only to bounce them forward
 // to GestureDetector. We're still doing that here, but with a single class

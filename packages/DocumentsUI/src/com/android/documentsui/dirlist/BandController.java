@@ -85,21 +85,15 @@ public class BandController extends RecyclerView.OnScrollListener {
                 new RecyclerView.OnItemTouchListener() {
                     @Override
                     public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
-                        final MotionInputEvent event = MotionInputEvent.obtain(e, view);
-                        try {
+                        try (MotionInputEvent event = MotionInputEvent.obtain(e, view)) {
                             return handleEvent(event);
-                        } finally {
-                            event.recycle();
                         }
                     }
                     @Override
                     public void onTouchEvent(RecyclerView rv, MotionEvent e) {
                         if (Events.isMouseEvent(e)) {
-                            final MotionInputEvent event = MotionInputEvent.obtain(e, view);
-                            try {
+                            try (MotionInputEvent event = MotionInputEvent.obtain(e, view)) {
                                 processInputEvent(event);
-                            } finally {
-                                event.recycle();
                             }
                         }
                     }
