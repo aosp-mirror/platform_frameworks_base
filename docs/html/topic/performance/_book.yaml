@@ -1,28 +1,25 @@
 toc:
-- title: Optimizing Power Consumption
-  path: /topic/performance/power/index.html
+- title: Reducing Network Battery Drain
+  path: /topic/performance/power/network/index.html
+  path_attributes:
+  - name: description
+    value: Access the network while going easy on battery life.
   section:
-  - title: Reducing Network Battery Drain
-    path: /topic/performance/power/network/index.html
-    path_attributes:
-    - name: description
-      value: Access the network while going easy on battery life.
-    section:
-    - title: Collecting Network Traffic Data
-      path: /topic/performance/power/network/gather-data.html
-    - title: Analyzing Network Traffic Data
-      path: /topic/performance/power/network/analyze-data.html
-    - title: Optimizing User-Initiated Network Use
-      path: /topic/performance/power/network/action-user-traffic.html
-    - title: Optimizing Server-Initiated Network Use
-      path: /topic/performance/power/network/action-server-traffic.html
-    - title: Optimizing General Network Use
-      path: /topic/performance/power/network/action-any-traffic.html
-  - title: Implementing Doze
-    path: /monitoring-device-state/doze-standby.html
-    path_attributes:
-    - name: description
-      value: Help ensure the device isn't depleting the battery when not in use.
+  - title: Collecting Network Traffic Data
+    path: /topic/performance/power/network/gather-data.html
+  - title: Analyzing Network Traffic Data
+    path: /topic/performance/power/network/analyze-data.html
+  - title: Optimizing User-Initiated Network Use
+    path: /topic/performance/power/network/action-user-traffic.html
+  - title: Optimizing Server-Initiated Network Use
+    path: /topic/performance/power/network/action-server-traffic.html
+  - title: Optimizing General Network Use
+    path: /topic/performance/power/network/action-any-traffic.html
+- title: Implementing Doze
+  path: /training/monitoring-device-state/doze-standby.html
+  path_attributes:
+  - name: description
+    value: Help ensure the device isn't depleting the battery when not in use.
 - title: Launch-Time Performance
   path: /topic/performance/launch-time.html
 - title: Better Performance through Threading
@@ -32,4 +29,4 @@ toc:
 - title: Intelligent Job-Scheduling
   path: /topic/performance/scheduling.html
 - title: Reducing APK Size
-  path: /topic/performance/apk/reduce-apk-size.html
+  path: /topic/performance/reduce-apk-size.html
