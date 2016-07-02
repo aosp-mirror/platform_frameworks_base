@@ -3648,7 +3648,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "group":"",
     "keywords": ["android, performance","profiling"],
     "tags": ["android, performance"],
-    "image":"/assets/images/resource-card-default-android.jpg",
+    "image": null,
     "lang":"en",
     "type":"develop"
   },
@@ -3661,7 +3661,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "group":"",
     "keywords": ["android, performance","profiling"],
     "tags": ["android, performance"],
-    "image":"/assets/images/resource-card-default-android.jpg",
+    "image": null,
     "lang":"en",
     "type":"develop"
   },
@@ -5446,9 +5446,9 @@ METADATA['en'].collections = {
       "https://android-developers.blogspot.com/2010/07/multithreading-for-performance.html",
       "https://www.udacity.com/course/ud825",
       "https://www.youtube.com/watch?v=N72ksDKrX6c",
-      "https://developer.android.com/tools/performance/index.html",
+      "tools/performance/index.html",
       "https://codelabs.developers.google.com/codelabs/android-perf-testing/index.html",
-      "https://developer.android.com/training/articles/memory.html",
+      "training/articles/memory.html",
     ]
   },
 
