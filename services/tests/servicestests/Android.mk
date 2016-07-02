@@ -13,6 +13,7 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
     frameworks-base-testutils \
+    services.accessibility \
     services.core \
     services.devicepolicy \
     services.net \

@@ -2174,7 +2174,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
      * connection for the service.
      */
     class Service extends IAccessibilityServiceConnection.Stub
-            implements ServiceConnection, DeathRecipient {;
+            implements ServiceConnection, DeathRecipient, KeyEventDispatcher.KeyEventFilter {;
 
         final int mUserId;
 
@@ -2258,6 +2258,23 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 }
             }
             setDynamicallyConfigurableProperties(accessibilityServiceInfo);
+        }
+
+        @Override
+        public boolean onKeyEvent(KeyEvent keyEvent, int sequenceNumber) {
+            if (!mRequestFilterKeyEvents) {
+                return false;
+            }
+            if((mAccessibilityServiceInfo.getCapabilities()
+                    & AccessibilityServiceInfo.CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS) == 0) {
+                return false;
+            }
+            try {
+                mServiceInterface.onKeyEvent(keyEvent, sequenceNumber);
+            } catch (RemoteException e) {
+                return false;
+            }
+            return true;
         }
 
         public void setDynamicallyConfigurableProperties(AccessibilityServiceInfo info) {
