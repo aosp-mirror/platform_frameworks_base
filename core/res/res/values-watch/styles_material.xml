@@ -53,6 +53,10 @@ please see styles_device_defaults.xml.
         <item name="wallpaperIntraCloseExitAnimation">@anim/slide_in_exit_micro</item>
     </style>
 
+    <style name="PreferenceFragment.Material" parent="BasePreferenceFragment">
+        <item name="divider">@empty</item>
+    </style>
+
     <style name="Widget.Material.TextView" parent="Widget.TextView">
         <item name="breakStrategy">balanced</item>
     </style>
