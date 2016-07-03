@@ -57,4 +57,6 @@
     <!-- Quick settings tiles columns and rows config -->
     <integer name="config_qs_num_rows_landscape_default">2</integer>
 
+    <!-- Battery level for when "show battery percent only on low battery" is enabled -->
+    <integer name="config_batteryPercentLowOnlyLevel">25</integer>
 </resources>

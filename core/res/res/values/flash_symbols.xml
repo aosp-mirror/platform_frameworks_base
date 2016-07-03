@@ -77,4 +77,6 @@
   <!-- Quick settings tiles columns and rows config -->
   <java-symbol type="integer" name="config_qs_num_rows_landscape_default"/>
 
+  <!-- Show battery percent only when battery is low -->
+  <java-symbol type="integer" name="config_batteryPercentLowOnlyLevel" />
 </resources>

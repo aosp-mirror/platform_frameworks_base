@@ -79,6 +79,7 @@ public class BatteryMeterDrawable extends Drawable implements
     private final int mIntrinsicHeight;
 
     private boolean mShowPercent;
+    protected boolean mShowPercentLowOnly;
     private float mButtonHeightFraction;
     private float mSubpixelSmoothingLeft;
     private float mSubpixelSmoothingRight;
@@ -90,6 +91,7 @@ public class BatteryMeterDrawable extends Drawable implements
     private int mWidth;
     private String mWarningString;
     private final int mCriticalLevel;
+    private final int mLowLevel;
     private int mChargeColor;
     private int mStyle;
     private boolean mBoltOverlay;
@@ -172,9 +174,12 @@ public class BatteryMeterDrawable extends Drawable implements
         colors.recycle();
         updateShowPercent();
         updateForceChargeBatteryText();
+        updateShowPercentLowOnly();
         mWarningString = context.getString(R.string.battery_meter_very_low_overlay_symbol);
         mCriticalLevel = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_criticalBatteryWarningLevel);
+        mLowLevel = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_batteryPercentLowOnlyLevel);
         mButtonHeightFraction = context.getResources().getFraction(
                 R.fraction.battery_button_height_fraction, 1, 1);
         mSubpixelSmoothingLeft = context.getResources().getFraction(
@@ -250,9 +255,13 @@ public class BatteryMeterDrawable extends Drawable implements
         mContext.getContentResolver().registerContentObserver(
                 Settings.Secure.getUriFor(FORCE_CHARGE_BATTERY_TEXT),
                 false, mSettingObserver);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.STATUS_BAR_SHOW_BATTERY_PERCENT_LOW_ONLY),
+                false, mSettingObserver);
         updateShowPercent();
         updateChargeColor();
         updateForceChargeBatteryText();
+        updateShowPercentLowOnly();
         mBatteryController.addStateChangedCallback(this);
     }
 
@@ -335,7 +344,7 @@ public class BatteryMeterDrawable extends Drawable implements
 
     private void updateShowPercent() {
         mShowPercent = Settings.Secure.getInt(mContext.getContentResolver(),
-                STATUS_BAR_SHOW_BATTERY_PERCENT, 0) == 1;
+                STATUS_BAR_SHOW_BATTERY_PERCENT, 1) == 1;
     }
 
     private void updateChargeColor() {
@@ -352,6 +361,11 @@ public class BatteryMeterDrawable extends Drawable implements
     private void updateForceChargeBatteryText() {
         mForceChargeBatteryText = Settings.Secure.getInt(mContext.getContentResolver(),
                 FORCE_CHARGE_BATTERY_TEXT, 1) == 1 ? true : false;
+    }
+
+    private void updateShowPercentLowOnly() {
+        mShowPercentLowOnly = Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.STATUS_BAR_SHOW_BATTERY_PERCENT_LOW_ONLY, 1) == 1;
     }
 
     private int getColorForLevel(int percent) {
@@ -468,6 +482,7 @@ public class BatteryMeterDrawable extends Drawable implements
             super.onChange(selfChange, uri);
             updateShowPercent();
             updateChargeColor();
+            updateShowPercentLowOnly();
             postInvalidate();
         }
     }
@@ -719,12 +734,14 @@ public class BatteryMeterDrawable extends Drawable implements
     private void drawPercentageText(Canvas canvas) {
         final int level = mLevel;
         if (level > mCriticalLevel && mShowPercent && level != 100) {
-            // Draw the percentage text
-            String pctText = String.valueOf(SINGLE_DIGIT_PERCENT ? (level / 10) : level);
-            mTextAndBoltPaint.setColor(getColorForLevel(level));
-            canvas.drawText(pctText, mTextX, mTextY, mTextAndBoltPaint);
-            if (mBoltOverlay) {
-                mBoltDrawable.setTint(getBoltColor());
+            if (!mShowPercentLowOnly || level <= mLowLevel) {
+                // Draw the percentage text
+                String pctText = String.valueOf(SINGLE_DIGIT_PERCENT ? (level / 10) : level);
+                mTextAndBoltPaint.setColor(getColorForLevel(level));
+                canvas.drawText(pctText, mTextX, mTextY, mTextAndBoltPaint);
+                if (mBoltOverlay) {
+                    mBoltDrawable.setTint(getBoltColor());
+                }
             }
         } else if (level <= mCriticalLevel) {
             // Draw the warning text
