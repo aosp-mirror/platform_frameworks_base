@@ -3952,8 +3952,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
         } else {
             networkCapabilities = new NetworkCapabilities(networkCapabilities);
             enforceNetworkRequestPermissions(networkCapabilities);
+            // TODO: this is incorrect. We mark the request as metered or not depending on the state
+            // of the app when the request is filed, but we never change the request if the app
+            // changes network state. http://b/29964605
+            enforceMeteredApnPolicy(networkCapabilities);
         }
-        enforceMeteredApnPolicy(networkCapabilities);
         ensureRequestableCapabilities(networkCapabilities);
 
         if (timeoutMs < 0 || timeoutMs > ConnectivityManager.MAX_NETWORK_REQUEST_TIMEOUT_MS) {
