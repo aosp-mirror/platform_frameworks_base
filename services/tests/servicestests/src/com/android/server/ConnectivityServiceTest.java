@@ -1043,6 +1043,11 @@ public class ConnectivityServiceTest extends AndroidTestCase {
      * received. assertNoCallback may be called at any time.
      */
     private class TestNetworkCallback extends NetworkCallback {
+        // Chosen to be much less than the linger timeout. This ensures that we can distinguish
+        // between a LOST callback that arrives immediately and a LOST callback that arrives after
+        // the linger timeout.
+        private final static int TIMEOUT_MS = 50;
+
         private class CallbackInfo {
             public final CallbackState state;
             public final Network network;
@@ -1297,7 +1302,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         assertEquals(mCellNetworkAgent.getNetwork(), mCm.getActiveNetwork());
 
         // Bring up wifi with a score of 70.
-        // Cell is lingered because it would not satisfy any reques, even if it validated.
+        // Cell is lingered because it would not satisfy any request, even if it validated.
         mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
         mWiFiNetworkAgent.adjustScore(50);
         mWiFiNetworkAgent.connect(false);   // Score: 70
@@ -1324,6 +1329,29 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         callback.expectCallback(CallbackState.LOST, mCellNetworkAgent);
         defaultCallback.expectCallback(CallbackState.AVAILABLE, mWiFiNetworkAgent);
         assertEquals(mWiFiNetworkAgent.getNetwork(), mCm.getActiveNetwork());
+
+        mWiFiNetworkAgent.disconnect();
+        callback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
+        defaultCallback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
+
+        // The current code has a bug: if a network is lingering, and we add and then remove a
+        // request from it, we forget that the network was lingering and tear it down immediately.
+        mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
+        mCellNetworkAgent.connect(true);
+        callback.expectCallback(CallbackState.AVAILABLE, mCellNetworkAgent);
+        defaultCallback.expectCallback(CallbackState.AVAILABLE, mCellNetworkAgent);
+        mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
+        mWiFiNetworkAgent.connect(true);
+        callback.expectCallback(CallbackState.AVAILABLE, mWiFiNetworkAgent);
+        defaultCallback.expectCallback(CallbackState.AVAILABLE, mWiFiNetworkAgent);
+        callback.expectCallback(CallbackState.LOSING, mCellNetworkAgent);
+
+        NetworkRequest cellRequest = new NetworkRequest.Builder()
+                .addTransportType(TRANSPORT_CELLULAR).build();
+        NetworkCallback noopCallback = new NetworkCallback();
+        mCm.requestNetwork(cellRequest, noopCallback);
+        mCm.unregisterNetworkCallback(noopCallback);
+        callback.expectCallback(CallbackState.LOST, mCellNetworkAgent);
 
         mWiFiNetworkAgent.disconnect();
         callback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
