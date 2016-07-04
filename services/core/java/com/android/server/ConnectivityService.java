@@ -1083,6 +1083,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return nai != null ? nai.network : null;
     }
 
+    // Public because it's used by mLockdownTracker.
     public NetworkInfo getActiveNetworkInfoUnfiltered() {
         enforceAccessPermission();
         final int uid = Binder.getCallingUid();
@@ -1338,6 +1339,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
      * desired
      * @return {@code true} on success, {@code false} on failure
      */
+    @Override
     public boolean requestRouteToHostAddress(int networkType, byte[] hostAddress) {
         enforceChangePermission();
         if (mProtectedNetworks.contains(networkType)) {
@@ -1546,6 +1548,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mContext.enforceCallingOrSelfPermission(KeepaliveTracker.PERMISSION, "ConnectivityService");
     }
 
+    // Public because it's used by mLockdownTracker.
     public void sendConnectedBroadcast(NetworkInfo info) {
         enforceConnectivityInternalPermission();
         sendGeneralBroadcast(info, CONNECTIVITY_ACTION);
@@ -2513,6 +2516,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
+    @Override
     public void setAcceptUnvalidated(Network network, boolean accept, boolean always) {
         enforceConnectivityInternalPermission();
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_SET_ACCEPT_UNVALIDATED,
@@ -2696,6 +2700,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     // javadoc from interface
+    @Override
     public int tether(String iface) {
         ConnectivityManager.enforceTetherChangePermission(mContext);
         if (isTetheringSupported()) {
@@ -2713,6 +2718,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     // javadoc from interface
+    @Override
     public int untether(String iface) {
         ConnectivityManager.enforceTetherChangePermission(mContext);
 
@@ -2731,6 +2737,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     // javadoc from interface
+    @Override
     public int getLastTetherError(String iface) {
         enforceTetherAccessPermission();
 
@@ -2742,6 +2749,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     // TODO - proper iface API for selection by property, inspection, etc
+    @Override
     public String[] getTetherableUsbRegexs() {
         enforceTetherAccessPermission();
         if (isTetheringSupported()) {
@@ -2751,6 +2759,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
+    @Override
     public String[] getTetherableWifiRegexs() {
         enforceTetherAccessPermission();
         if (isTetheringSupported()) {
@@ -2760,6 +2769,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
+    @Override
     public String[] getTetherableBluetoothRegexs() {
         enforceTetherAccessPermission();
         if (isTetheringSupported()) {
@@ -2769,6 +2779,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
+    @Override
     public int setUsbTethering(boolean enable) {
         ConnectivityManager.enforceTetherChangePermission(mContext);
         if (isTetheringSupported()) {
@@ -2780,21 +2791,25 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     // TODO - move iface listing, queries, etc to new module
     // javadoc from interface
+    @Override
     public String[] getTetherableIfaces() {
         enforceTetherAccessPermission();
         return mTethering.getTetherableIfaces();
     }
 
+    @Override
     public String[] getTetheredIfaces() {
         enforceTetherAccessPermission();
         return mTethering.getTetheredIfaces();
     }
 
+    @Override
     public String[] getTetheringErroredIfaces() {
         enforceTetherAccessPermission();
         return mTethering.getErroredIfaces();
     }
 
+    @Override
     public String[] getTetheredDhcpRanges() {
         enforceConnectivityInternalPermission();
         return mTethering.getTetheredDhcpRanges();
@@ -2853,12 +2868,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     // 100 percent is full good, 0 is full bad.
+    @Override
     public void reportInetCondition(int networkType, int percentage) {
         NetworkAgentInfo nai = mLegacyTypeTracker.getNetworkForType(networkType);
         if (nai == null) return;
         reportNetworkConnectivity(nai.network, percentage > 50);
     }
 
+    @Override
     public void reportNetworkConnectivity(Network network, boolean hasConnectivity) {
         enforceAccessPermission();
         enforceInternetPermission();
@@ -2903,6 +2920,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
+    @Override
     public ProxyInfo getProxyForNetwork(Network network) {
         if (network == null) return getDefaultProxy();
         final ProxyInfo globalProxy = getGlobalProxy();
