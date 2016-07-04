@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.TestApi;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Parcelable;
@@ -411,6 +412,34 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
         String selectedDateUtterance = DateUtils.formatDateTime(mContext,
                 mTempCalendar.getTimeInMillis(), flags);
         event.getText().add(selectedDateUtterance);
+    }
+
+    /** @hide */
+    @Override
+    @TestApi
+    public View getHourView() {
+        return mHourSpinnerInput;
+    }
+
+    /** @hide */
+    @Override
+    @TestApi
+    public View getMinuteView() {
+        return mMinuteSpinnerInput;
+    }
+
+    /** @hide */
+    @Override
+    @TestApi
+    public View getAmView() {
+        return mAmPmSpinnerInput;
+    }
+
+    /** @hide */
+    @Override
+    @TestApi
+    public View getPmView() {
+        return mAmPmSpinnerInput;
     }
 
     private void updateInputState() {

@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
@@ -539,6 +540,34 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
         final String selectionMode = mRadialTimePickerView.getCurrentItemShowing() == HOUR_INDEX ?
                 mSelectHours : mSelectMinutes;
         event.getText().add(selectedTime + " " + selectionMode);
+    }
+
+    /** @hide */
+    @Override
+    @TestApi
+    public View getHourView() {
+        return mHourView;
+    }
+
+    /** @hide */
+    @Override
+    @TestApi
+    public View getMinuteView() {
+        return mMinuteView;
+    }
+
+    /** @hide */
+    @Override
+    @TestApi
+    public View getAmView() {
+        return mAmLabel;
+    }
+
+    /** @hide */
+    @Override
+    @TestApi
+    public View getPmView() {
+        return mPmLabel;
     }
 
     /**
