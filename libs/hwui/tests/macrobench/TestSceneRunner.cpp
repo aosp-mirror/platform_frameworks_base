@@ -22,6 +22,7 @@
 #include "renderthread/RenderProxy.h"
 #include "renderthread/RenderTask.h"
 
+#include <benchmark/benchmark.h>
 #include <cutils/log.h>
 #include <gui/Surface.h>
 #include <ui/PixelFormat.h>
@@ -62,13 +63,62 @@ private:
     T mAverage;
 };
 
-void run(const TestScene::Info& info, const TestScene::Options& opts) {
+void outputBenchmarkReport(const TestScene::Info& info, const TestScene::Options& opts,
+        benchmark::BenchmarkReporter* reporter, RenderProxy* proxy,
+        double durationInS) {
+    using namespace benchmark;
+
+    struct ReportInfo {
+        int percentile;
+        const char* suffix;
+    };
+
+    static std::array<ReportInfo, 4> REPORTS = {
+        ReportInfo { 50, "_50th" },
+        ReportInfo { 90, "_90th" },
+        ReportInfo { 95, "_95th" },
+        ReportInfo { 99, "_99th" },
+    };
+
+    // Although a vector is used, it must stay with only a single element
+    // otherwise the BenchmarkReporter will automatically compute
+    // mean and stddev which doesn't make sense for our usage
+    std::vector<BenchmarkReporter::Run> reports;
+    BenchmarkReporter::Run report;
+    report.benchmark_name = info.name;
+    report.iterations = static_cast<int64_t>(opts.count);
+    report.real_accumulated_time = durationInS;
+    report.cpu_accumulated_time = durationInS;
+    report.items_per_second = opts.count / durationInS;
+    reports.push_back(report);
+    reporter->ReportRuns(reports);
+
+    // Pretend the percentiles are single-iteration runs of the test
+    // If rendering offscreen skip this as it's fps that's more interesting
+    // in that test case than percentiles.
+    if (!opts.renderOffscreen) {
+        for (auto& ri : REPORTS) {
+            reports[0].benchmark_name = info.name;
+            reports[0].benchmark_name += ri.suffix;
+            durationInS = proxy->frameTimePercentile(ri.percentile) / 1000.0;
+            reports[0].real_accumulated_time = durationInS;
+            reports[0].cpu_accumulated_time = durationInS;
+            reports[0].iterations = 1;
+            reports[0].items_per_second = 0;
+            reporter->ReportRuns(reports);
+        }
+    }
+}
+
+void run(const TestScene::Info& info, const TestScene::Options& opts,
+        benchmark::BenchmarkReporter* reporter) {
     // Switch to the real display
     gDisplay = getBuiltInDisplay();
 
     std::unique_ptr<TestScene> scene(info.createScene(opts));
 
     TestContext testContext;
+    testContext.setRenderOffscreen(opts.renderOffscreen);
 
     // create the native surface
     const int width = gDisplay.w;
@@ -91,7 +141,12 @@ void run(const TestScene::Info& info, const TestScene::Options& opts) {
     proxy->setLightCenter((Vector3){lightX, dp(-200.0f), dp(800.0f)});
 
     // Do a few cold runs then reset the stats so that the caches are all hot
-    for (int i = 0; i < 5; i++) {
+    int warmupFrameCount = 5;
+    if (opts.renderOffscreen) {
+        // Do a few more warmups to try and boost the clocks up
+        warmupFrameCount = 10;
+    }
+    for (int i = 0; i < warmupFrameCount; i++) {
         testContext.waitForVsync();
         nsecs_t vsync = systemTime(CLOCK_MONOTONIC);
         UiFrameInfoBuilder(proxy->frameInfo()).setVsync(vsync, vsync);
@@ -103,6 +158,7 @@ void run(const TestScene::Info& info, const TestScene::Options& opts) {
 
     ModifiedMovingAverage<double> avgMs(opts.reportFrametimeWeight);
 
+    nsecs_t start = systemTime(CLOCK_MONOTONIC);
     for (int i = 0; i < opts.count; i++) {
         testContext.waitForVsync();
         nsecs_t vsync = systemTime(CLOCK_MONOTONIC);
@@ -121,6 +177,13 @@ void run(const TestScene::Info& info, const TestScene::Options& opts) {
             }
         }
     }
+    proxy->fence();
+    nsecs_t end = systemTime(CLOCK_MONOTONIC);
 
-    proxy->dumpProfileInfo(STDOUT_FILENO, DumpFlags::JankStats);
+    if (reporter) {
+        outputBenchmarkReport(info, opts, reporter, proxy.get(),
+                (end - start) / (double) s2ns(1));
+    } else {
+        proxy->dumpProfileInfo(STDOUT_FILENO, DumpFlags::JankStats);
+    }
 }

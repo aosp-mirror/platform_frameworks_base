@@ -62,20 +62,53 @@ TestContext::TestContext() {
 TestContext::~TestContext() {}
 
 sp<Surface> TestContext::surface() {
-    if (!mSurfaceControl.get()) {
-        mSurfaceControl = mSurfaceComposerClient->createSurface(String8("HwuiTest"),
-                gDisplay.w, gDisplay.h, PIXEL_FORMAT_RGBX_8888);
-
-        SurfaceComposerClient::openGlobalTransaction();
-        mSurfaceControl->setLayer(0x7FFFFFF);
-        mSurfaceControl->show();
-        SurfaceComposerClient::closeGlobalTransaction();
+    if (!mSurface.get()) {
+        createSurface();
     }
+    return mSurface;
+}
 
-    return mSurfaceControl->getSurface();
+void TestContext::createSurface() {
+    if (mRenderOffscreen) {
+        createOffscreenSurface();
+    } else {
+        createWindowSurface();
+    }
+}
+
+void TestContext::createWindowSurface() {
+    mSurfaceControl = mSurfaceComposerClient->createSurface(String8("HwuiTest"),
+            gDisplay.w, gDisplay.h, PIXEL_FORMAT_RGBX_8888);
+
+    SurfaceComposerClient::openGlobalTransaction();
+    mSurfaceControl->setLayer(0x7FFFFFF);
+    mSurfaceControl->show();
+    SurfaceComposerClient::closeGlobalTransaction();
+    mSurface = mSurfaceControl->getSurface();
+}
+
+void TestContext::createOffscreenSurface() {
+    sp<IGraphicBufferProducer> producer;
+    sp<IGraphicBufferConsumer> consumer;
+    BufferQueue::createBufferQueue(&producer, &consumer);
+    producer->setMaxDequeuedBufferCount(3);
+    producer->setAsyncMode(true);
+    mConsumer = new BufferItemConsumer(consumer, GRALLOC_USAGE_HW_COMPOSER, 4);
+    mConsumer->setDefaultBufferSize(gDisplay.w, gDisplay.h);
+    mSurface = new Surface(producer);
 }
 
 void TestContext::waitForVsync() {
+    if (mConsumer.get()) {
+        BufferItem buffer;
+        if (mConsumer->acquireBuffer(&buffer, 0, false) == OK) {
+            // We assume the producer is internally ordered enough such that
+            // it is unneccessary to set a release fence
+            mConsumer->releaseBuffer(buffer);
+        }
+        // We running free, go go go!
+        return;
+    }
 #if !HWUI_NULL_GPU
     // Request vsync
     mDisplayEventReceiver.requestNextVsync();

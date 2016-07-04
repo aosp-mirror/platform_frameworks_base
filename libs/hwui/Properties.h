@@ -295,6 +295,7 @@ public:
 
     // Should be used only by test apps
     static bool waitForGpuCompletion;
+    static bool forceDrawFrame;
 
     // Should only be set by automated tests to try and filter out
     // any overhead they add

@@ -19,11 +19,15 @@
 
 #include <gui/DisplayEventReceiver.h>
 #include <gui/ISurfaceComposer.h>
+#include <gui/BufferItemConsumer.h>
 #include <gui/SurfaceComposerClient.h>
 #include <gui/SurfaceControl.h>
 #include <gui/Surface.h>
 #include <ui/DisplayInfo.h>
 #include <utils/Looper.h>
+
+#include <thread>
+#include <atomic>
 
 namespace android {
 namespace uirenderer {
@@ -39,15 +43,29 @@ public:
     TestContext();
     ~TestContext();
 
+    // Must be called before surface();
+    void setRenderOffscreen(bool renderOffscreen) {
+        LOG_ALWAYS_FATAL_IF(mSurface.get(),
+                "Must be called before surface is created");
+        mRenderOffscreen = renderOffscreen;
+    }
+
     sp<Surface> surface();
 
     void waitForVsync();
 
 private:
+    void createSurface();
+    void createWindowSurface();
+    void createOffscreenSurface();
+
     sp<SurfaceComposerClient> mSurfaceComposerClient;
     sp<SurfaceControl> mSurfaceControl;
+    sp<BufferItemConsumer> mConsumer;
     DisplayEventReceiver mDisplayEventReceiver;
     sp<Looper> mLooper;
+    sp<Surface> mSurface;
+    bool mRenderOffscreen;
 };
 
 } // namespace test
