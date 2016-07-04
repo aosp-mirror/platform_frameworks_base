@@ -22,6 +22,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
+ * An event recorded by ConnectivityService when there is a change in the default network.
  * {@hide}
  */
 @SystemApi
@@ -55,6 +56,7 @@ public final class DefaultNetworkEvent implements Parcelable {
         this.prevIPv6 = (in.readByte() > 0);
     }
 
+    @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(netId);
         out.writeIntArray(transportTypes);
@@ -63,6 +65,7 @@ public final class DefaultNetworkEvent implements Parcelable {
         out.writeByte(prevIPv6 ? (byte) 1 : (byte) 0);
     }
 
+    @Override
     public int describeContents() {
         return 0;
     }
