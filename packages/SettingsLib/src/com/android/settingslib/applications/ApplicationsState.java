@@ -137,9 +137,11 @@ public class ApplicationsState {
         // Only the owner can see all apps.
         mAdminRetrieveFlags = PackageManager.GET_UNINSTALLED_PACKAGES |
                 PackageManager.GET_DISABLED_COMPONENTS |
-                PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS;
+                PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS |
+                PackageManager.GET_META_DATA;
         mRetrieveFlags = PackageManager.GET_DISABLED_COMPONENTS |
-                PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS;
+                PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS |
+                PackageManager.GET_META_DATA;
 
         /**
          * This is a trick to prevent the foreground thread from being delayed.
@@ -1309,6 +1311,17 @@ public class ApplicationsState {
         public boolean filterApp(AppEntry entry) {
             return entry.info.enabledSetting
                     != PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED;
+        }
+    };
+
+    public static final AppFilter FILTER_SUBSTRATUM = new AppFilter() {
+        public void init() {
+        }
+
+        @Override
+        public boolean filterApp(AppEntry entry) {
+            return !((entry.info.metaData != null) &&
+                    (entry.info.metaData.getString("Substratum_Parent") != null));
         }
     };
 
