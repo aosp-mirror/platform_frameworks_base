@@ -1656,11 +1656,11 @@
     <string name="demo_starting_message" msgid="5268556852031489931">"正在启动演示模式…"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"正在重置设备…"</string>
     <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"要重置设备吗？"</string>
-    <!-- no translation found for demo_user_inactivity_timeout_countdown (5675588824402569506) -->
-    <skip />
+    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"您将丢失所有更改，而且演示模式将在 <xliff:g id="TIMEOUT">%1$s</xliff:g> 秒后重新启动…"</string>
     <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"取消"</string>
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"立即重置"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"恢复出厂设置即可正常使用此设备，不受任何限制"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"触摸即可了解详情。"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"已停用的<xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="conference_call" msgid="3751093130790472426">"电话会议"</string>
 </resources>

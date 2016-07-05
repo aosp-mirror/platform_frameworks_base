@@ -1656,11 +1656,11 @@
     <string name="demo_starting_message" msgid="5268556852031489931">"Begin tans demonstrasie …"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"Stel toestel tans terug …"</string>
     <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"Stel toestel terug?"</string>
-    <!-- no translation found for demo_user_inactivity_timeout_countdown (5675588824402569506) -->
-    <skip />
+    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"Jy sal enige veranderinge verloor en die demonstrasie sal oor <xliff:g id="TIMEOUT">%1$s</xliff:g> sekondes weer begin …"</string>
     <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"Kanselleer"</string>
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Stel nou terug"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Doen \'n fabriekterugstelling om hierdie toestel sonder beperkinge te gebruik"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Raak om meer te wete te kom."</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"Het <xliff:g id="LABEL">%1$s</xliff:g> gedeaktiveer"</string>
+    <string name="conference_call" msgid="3751093130790472426">"Konferensie-oproep"</string>
 </resources>

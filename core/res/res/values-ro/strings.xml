@@ -1692,11 +1692,11 @@
     <string name="demo_starting_message" msgid="5268556852031489931">"Se pornește demonstrația…"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"Se resetează dispozitivul…"</string>
     <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"Resetați dispozitivul?"</string>
-    <!-- no translation found for demo_user_inactivity_timeout_countdown (5675588824402569506) -->
-    <skip />
+    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"Veți pierde toate modificările, iar demonstrația va începe din nou peste <xliff:g id="TIMEOUT">%1$s</xliff:g> secunde…"</string>
     <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"Anulați"</string>
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Resetați acum"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Reveniți la setările din fabrică pentru a folosi acest dispozitiv fără restricții"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Atingeți pentru a afla mai multe."</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> a fost dezactivat"</string>
+    <string name="conference_call" msgid="3751093130790472426">"Conferință telefonică"</string>
 </resources>

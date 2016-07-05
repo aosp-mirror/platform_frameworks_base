@@ -1356,7 +1356,7 @@
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"تلویزیون"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"تلفن"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"هدفون‌ها"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"بلندگوهای جایگاه اتصال"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"بلندگوهای جایگاه"</string>
     <string name="default_media_route_name_hdmi" msgid="2450970399023478055">"HDMI"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"سیستم"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"بلوتوث‌های صوتی"</string>
@@ -1656,11 +1656,11 @@
     <string name="demo_starting_message" msgid="5268556852031489931">"در حال شروع نسخه نمایشی…"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"در حال بازنشانی دستگاه…"</string>
     <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"دستگاه بازنشانی شود؟"</string>
-    <!-- no translation found for demo_user_inactivity_timeout_countdown (5675588824402569506) -->
-    <skip />
+    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"همه تغییرات را از دست خواهید داد و نسخه نمایشی دوباره تا <xliff:g id="TIMEOUT">%1$s</xliff:g> ثانیه دیگر شروع می‌شود…‏"</string>
     <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"لغو"</string>
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"بازنشانی در این لحظه"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"برای استفاده بدون محدودیت از این دستگاه، بازنشانی کارخانه‌ای انجام دهید"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"برای یادگیری بیشتر لمس کنید."</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> غیرفعال شد"</string>
+    <string name="conference_call" msgid="3751093130790472426">"تماس کنفرانسی"</string>
 </resources>

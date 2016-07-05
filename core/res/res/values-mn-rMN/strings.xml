@@ -1654,11 +1654,11 @@
     <string name="demo_starting_message" msgid="5268556852031489931">"Жишээг эхлүүлж байна…"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"Төхөөрөмжийг шинэчилж байна…"</string>
     <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"Төхөөрөмжийг шинэчлэх үү?"</string>
-    <!-- no translation found for demo_user_inactivity_timeout_countdown (5675588824402569506) -->
-    <skip />
+    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"Таны хийсэн өөрчлөлтийг хадгалахгүй бөгөөд жишээ <xliff:g id="TIMEOUT">%1$s</xliff:g> секундын дотор дахин эхлэх болно..."</string>
     <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"Цуцлах"</string>
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Одоо шинэчлэх"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Энэ төхөөрөмжийг хязгаарлалтгүй ашиглахын тулд үйлдвэрийн тохиргоонд дахин тохируулна уу"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Дэлгэрэнгүй үзэх бол дарна уу."</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g>-г цуцалсан"</string>
+    <string name="conference_call" msgid="3751093130790472426">"Хурлын дуудлага"</string>
 </resources>
