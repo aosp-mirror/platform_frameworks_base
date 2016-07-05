@@ -42,6 +42,7 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -384,8 +385,16 @@ public class ExifInterface {
     public static final int WHITEBALANCE_AUTO = 0;
     public static final int WHITEBALANCE_MANUAL = 1;
 
+    // Maximum size for checking file type signature (see image_type_recognition_lite.cc)
+    private static final int SIGNATURE_CHECK_SIZE = 5000;
+
     private static final byte[] JPEG_SIGNATURE = new byte[] {(byte) 0xff, (byte) 0xd8, (byte) 0xff};
     private static final int JPEG_SIGNATURE_SIZE = 3;
+    private static final String RAF_SIGNATURE = "FUJIFILMCCD-RAW";
+    private static final int RAF_SIGNATURE_SIZE = 15;
+    private static final int RAF_OFFSET_TO_JPEG_IMAGE_OFFSET = 84;
+    private static final int RAF_INFO_SIZE = 160;
+    private int mRafJpegOffset, mRafJpegLength, mRafCfaHeaderOffset, mRafCfaHeaderLength;
 
     private static SimpleDateFormat sFormatter;
 
@@ -1034,6 +1043,9 @@ public class ExifInterface {
             new ExifTag(TAG_EXIF_IFD_POINTER, 34665, IFD_FORMAT_ULONG),
             new ExifTag(TAG_GPS_INFO_IFD_POINTER, 34853, IFD_FORMAT_ULONG)
     };
+    // RAF file tag (See piex.cc line 372)
+    private static final ExifTag TAG_RAF_IMAGE_SIZE =
+            new ExifTag(TAG_STRIP_OFFSETS, 273, IFD_FORMAT_USHORT);
 
     // See JEITA CP-3451C Section 4.6.3: Exif-specific IFD.
     // The following values are used for indicating pointers to the other Image File Directories.
@@ -1106,6 +1118,20 @@ public class ExifInterface {
     private static final byte MARKER_COM = (byte) 0xfe;
     private static final byte MARKER_EOI = (byte) 0xd9;
 
+    // Supported Image File Types
+    private static final int IMAGE_TYPE_UNKNOWN = 0;
+    private static final int IMAGE_TYPE_ARW = 1;
+    private static final int IMAGE_TYPE_CR2 = 2;
+    private static final int IMAGE_TYPE_DNG = 3;
+    private static final int IMAGE_TYPE_JPEG = 4;
+    private static final int IMAGE_TYPE_NEF = 5;
+    private static final int IMAGE_TYPE_NRW = 6;
+    private static final int IMAGE_TYPE_ORF = 7;
+    private static final int IMAGE_TYPE_PEF = 8;
+    private static final int IMAGE_TYPE_RAF = 9;
+    private static final int IMAGE_TYPE_RW2 = 10;
+    private static final int IMAGE_TYPE_SRW = 11;
+
     static {
         System.loadLibrary("media_jni");
         nativeInitRaw();
@@ -1128,7 +1154,7 @@ public class ExifInterface {
     private final AssetManager.AssetInputStream mAssetInputStream;
     private final boolean mIsInputStream;
     private boolean mIsRaw;
-    private int mRawType;
+    private int mMimeType;
     private final HashMap[] mAttributes = new HashMap[EXIF_TAGS.length];
     private ByteOrder mExifByteOrder = ByteOrder.BIG_ENDIAN;
     private boolean mHasThumbnail;
@@ -1504,13 +1530,24 @@ public class ExifInterface {
                 mAttributes[i] = new HashMap();
             }
 
-            // Process RAW input stream
             if (HANDLE_RAW) {
-                in = new BufferedInputStream(in, JPEG_SIGNATURE_SIZE);
+                // Check file type
+                in = new BufferedInputStream(in, SIGNATURE_CHECK_SIZE);
+                mMimeType = getMimeType((BufferedInputStream) in);
 
-                if (!isJpegInputStream((BufferedInputStream) in)) {
-                    getRawAttributes(in);
-                    return;
+                switch (mMimeType) {
+                    case IMAGE_TYPE_JPEG: {
+                        getJpegAttributes(in, IFD_TIFF_HINT);
+                        break;
+                    }
+                    case IMAGE_TYPE_RAF: {
+                        getRafAttributes(in);
+                        break;
+                    }
+                    default: {
+                        getRawAttributes(in);
+                        break;
+                    }
                 }
             } else {
                 if (mAssetInputStream != null) {
@@ -1524,16 +1561,20 @@ public class ExifInterface {
                         return;
                     }
                 } else {
-                    in = new BufferedInputStream(in, JPEG_SIGNATURE_SIZE);
-                    if (!isJpegInputStream((BufferedInputStream) in) && handleRawResult(
+                    in.mark(JPEG_SIGNATURE_SIZE);
+                    byte[] signatureBytes = new byte[JPEG_SIGNATURE_SIZE];
+                    if (in.read(signatureBytes) != JPEG_SIGNATURE_SIZE) {
+                        throw new EOFException();
+                    }
+                    in.reset();
+                    if (!isJpegInputStream(signatureBytes) && handleRawResult(
                             nativeGetRawAttributesFromInputStream(in))) {
                         return;
                     }
                 }
+                // Process JPEG input stream
+                getJpegAttributes(in, IFD_TIFF_HINT);
             }
-
-            // Process JPEG input stream
-            getJpegAttributes(in, IFD_TIFF_HINT);
         } catch (IOException e) {
             // Ignore exceptions in order to keep the compatibility with the old versions of
             // ExifInterface.
@@ -1549,15 +1590,13 @@ public class ExifInterface {
         }
     }
 
-    private static boolean isJpegInputStream(BufferedInputStream in) throws IOException {
-        in.mark(JPEG_SIGNATURE_SIZE);
-        byte[] signatureBytes = new byte[JPEG_SIGNATURE_SIZE];
-        if (in.read(signatureBytes) != JPEG_SIGNATURE_SIZE) {
-            throw new EOFException();
+    private static boolean isJpegInputStream(byte[] signatureBytes) throws IOException {
+        for (int i = 0; i < JPEG_SIGNATURE_SIZE; i++) {
+            if (signatureBytes[i] != JPEG_SIGNATURE[i]) {
+                return false;
+            }
         }
-        boolean isJpeg = Arrays.equals(JPEG_SIGNATURE, signatureBytes);
-        in.reset();
-        return isJpeg;
+        return true;
     }
 
     private boolean handleRawResult(HashMap map) {
@@ -1879,6 +1918,22 @@ public class ExifInterface {
         }
     }
 
+    // Checks the type of image file
+    private int getMimeType(BufferedInputStream in) throws IOException {
+        in.mark(SIGNATURE_CHECK_SIZE);
+        byte[] signatureBytes = new byte[SIGNATURE_CHECK_SIZE];
+        if (in.read(signatureBytes) != SIGNATURE_CHECK_SIZE) {
+            throw new EOFException();
+        }
+        in.reset();
+        if (isJpegInputStream(signatureBytes)) {
+            return IMAGE_TYPE_JPEG;
+        } else if (isRafInputStream(signatureBytes)) {
+            return IMAGE_TYPE_RAF;
+        }
+        return IMAGE_TYPE_UNKNOWN;
+    }
+
     /**
      * Loads EXIF attributes from a JPEG input stream.
      *
@@ -1959,7 +2014,7 @@ public class ExifInterface {
                     if (dataInputStream.read(bytes) != length) {
                         throw new IOException("Invalid exif");
                     }
-                    readExifSegment(bytes, bytesRead);
+                    readExifSegment(bytes, bytesRead, imageType);
                     bytesRead += length;
                     length = 0;
                     break;
@@ -2059,10 +2114,99 @@ public class ExifInterface {
                 mAttributes[IFD_PREVIEW_HINT] = new HashMap();
             }
         }
-
         // Process thumbnail.
-        processThumbnail(dataInputStream, bytesRead, exifBytes.length);
+        processThumbnail(dataInputStream, 0, exifBytes.length);
+    }
 
+    /**
+     * RAF files contains a JPEG and a CFA data.
+     * The JPEG contains two images, a preview and a thumbnail, while the CFA contains a RAW image.
+     * This method looks at the first 160 bytes to determine if this file is a RAF file.
+     * There is no official specification for RAF files from Fuji, but there is an online archive of
+     * image file specifications:
+     * http://fileformats.archiveteam.org/wiki/Fujifilm_RAF
+     */
+    private boolean isRafInputStream(byte[] signatureBytes) throws IOException {
+        byte[] rafSignatureBytes = RAF_SIGNATURE.getBytes();
+        for (int i = 0; i < RAF_SIGNATURE_SIZE; i++) {
+            if (signatureBytes[i] != rafSignatureBytes[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * This method looks at the first 160 bytes of a RAF file to retrieve the offset and length
+     * values for the JPEG and CFA data.
+     * Using that data, it parses the JPEG data to retrieve the preview and thumbnail image data,
+     * then parses the CFA metadata to retrieve the primary image length/width values.
+     * For data format details, see http://fileformats.archiveteam.org/wiki/Fujifilm_RAF
+     */
+    private void getRafAttributes(InputStream in) throws IOException {
+        // Retrieve offset & length values
+        in.mark(RAF_INFO_SIZE);
+        in.skip(RAF_OFFSET_TO_JPEG_IMAGE_OFFSET);
+        byte[] jpegOffsetBytes = new byte[4];
+        byte[] jpegLengthBytes = new byte[4];
+        byte[] cfaHeaderOffsetBytes = new byte[4];
+        byte[] cfaHeaderLengthBytes = new byte[4];
+        in.read(jpegOffsetBytes);
+        in.read(jpegLengthBytes);
+        in.read(cfaHeaderOffsetBytes);
+        in.read(cfaHeaderLengthBytes);
+        mRafJpegOffset = ByteBuffer.wrap(jpegOffsetBytes).getInt();
+        mRafJpegLength = ByteBuffer.wrap(jpegLengthBytes).getInt();
+        mRafCfaHeaderOffset = ByteBuffer.wrap(cfaHeaderOffsetBytes).getInt();
+        mRafCfaHeaderLength = ByteBuffer.wrap(cfaHeaderLengthBytes).getInt();
+        in.reset();
+
+        // Retrieve JPEG image metadata
+        in.mark(mRafJpegOffset + mRafJpegLength);
+        in.skip(mRafJpegOffset);
+        getJpegAttributes(in, IFD_PREVIEW_HINT);
+        in.reset();
+
+        // Skip to CFA header offset.
+        // A while loop is used because the skip method may not be able to skip the requested amount
+        // at once because the size of the buffer may be restricted.
+        int totalSkip = mRafCfaHeaderOffset;
+        while (totalSkip > 0) {
+            long skipped = in.skip(totalSkip);
+            totalSkip -= skipped;
+        }
+
+        // Retrieve primary image length/width values, if TAG_RAF_IMAGE_SIZE exists
+        byte[] exifBytes = new byte[mRafCfaHeaderLength];
+        int read = in.read(exifBytes);
+        ByteOrderAwarenessDataInputStream dataInputStream =
+                new ByteOrderAwarenessDataInputStream(exifBytes);
+        int numberOfDirectoryEntry = dataInputStream.readInt();
+        if (DEBUG) {
+            Log.d(TAG, "numberOfDirectoryEntry: " + numberOfDirectoryEntry);
+        }
+        // CFA stores some metadata about the RAW image. Since CFA uses proprietary tags, can only
+        // find and retrieve image size information tags, while skipping others.
+        // See piex.cc RafGetDimension()
+        for (int i = 0; i < numberOfDirectoryEntry; ++i) {
+            int tagNumber = dataInputStream.readUnsignedShort();
+            int numberOfBytes = dataInputStream.readUnsignedShort();
+            if (tagNumber == TAG_RAF_IMAGE_SIZE.number) {
+                int imageLength = dataInputStream.readShort();
+                int imageWidth = dataInputStream.readShort();
+                ExifAttribute imageLengthAttribute =
+                        ExifAttribute.createUShort(imageLength, mExifByteOrder);
+                ExifAttribute imageWidthAttribute =
+                        ExifAttribute.createUShort(imageWidth, mExifByteOrder);
+                mAttributes[IFD_TIFF_HINT].put(TAG_IMAGE_LENGTH, imageLengthAttribute);
+                mAttributes[IFD_TIFF_HINT].put(TAG_IMAGE_WIDTH, imageWidthAttribute);
+                if (DEBUG) {
+                    Log.d(TAG, "Updated to length: " + imageLength + ", width: " + imageWidth);
+                }
+                return;
+            }
+            dataInputStream.skip(numberOfBytes);
+        }
     }
 
     // Stores a new JPEG image with EXIF attributes into a given output stream.
@@ -2164,7 +2308,8 @@ public class ExifInterface {
     }
 
     // Reads the given EXIF byte area and save its tag data into attributes.
-    private void readExifSegment(byte[] exifBytes, int exifOffsetFromBeginning) throws IOException {
+    private void readExifSegment(byte[] exifBytes, int exifOffsetFromBeginning, int imageType)
+            throws IOException {
         ByteOrderAwarenessDataInputStream dataInputStream =
                 new ByteOrderAwarenessDataInputStream(exifBytes);
 
@@ -2172,7 +2317,7 @@ public class ExifInterface {
         parseTiffHeaders(dataInputStream, exifBytes.length);
 
         // Read TIFF image file directories. See JEITA CP-3451C Section 4.5.2. Figure 6.
-        readImageFileDirectory(dataInputStream, IFD_TIFF_HINT);
+        readImageFileDirectory(dataInputStream, imageType);
 
         // Process thumbnail.
         processThumbnail(dataInputStream, exifOffsetFromBeginning, exifBytes.length);
@@ -2482,18 +2627,20 @@ public class ExifInterface {
         }
         // The following code limits the size of thumbnail size not to overflow EXIF data area.
         thumbnailLength = Math.min(thumbnailLength, exifBytesLength - thumbnailOffset);
+        // The following code changes the offset value for RAF files.
+        if (mMimeType == IMAGE_TYPE_RAF) {
+            exifOffsetFromBeginning += mRafJpegOffset;
+        }
         if (thumbnailOffset > 0 && thumbnailLength > 0) {
             mHasThumbnail = true;
             mThumbnailOffset = exifOffsetFromBeginning + thumbnailOffset;
             mThumbnailLength = thumbnailLength;
-
             if (mFilename == null && mAssetInputStream == null && mSeekableFileDescriptor == null) {
                 // Save the thumbnail in memory if the input doesn't support reading again.
                 byte[] thumbnailBytes = new byte[thumbnailLength];
                 dataInputStream.seek(thumbnailOffset);
                 dataInputStream.readFully(thumbnailBytes);
                 mThumbnailBytes = thumbnailBytes;
-
                 if (DEBUG) {
                     Bitmap bitmap = BitmapFactory.decodeByteArray(
                             thumbnailBytes, 0, thumbnailBytes.length);
@@ -2511,6 +2658,7 @@ public class ExifInterface {
     private boolean isThumbnail(HashMap map) throws IOException {
         ExifAttribute imageLengthAttribute = (ExifAttribute) map.get(TAG_IMAGE_LENGTH);
         ExifAttribute imageWidthAttribute = (ExifAttribute) map.get(TAG_IMAGE_WIDTH);
+
         if (imageLengthAttribute != null && imageWidthAttribute != null) {
             int imageLengthValue = imageLengthAttribute.getIntValue(mExifByteOrder);
             int imageWidthValue = imageWidthAttribute.getIntValue(mExifByteOrder);
