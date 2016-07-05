@@ -492,10 +492,19 @@ public class DhcpClient extends StateMachine {
     }
 
     abstract class LoggingState extends State {
+        private long mEnterTimeMs;
+
         @Override
         public void enter() {
             if (STATE_DBG) Log.d(TAG, "Entering state " + getName());
-            mMetricsLog.log(new DhcpClientEvent(mIfaceName, getName()));
+            mEnterTimeMs = SystemClock.elapsedRealtime();
+            // TODO: record time for Init -> Bound and Bound -> Renewing -> Bound
+        }
+
+        @Override
+        public void exit() {
+            long durationMs = SystemClock.elapsedRealtime() - mEnterTimeMs;
+            mMetricsLog.log(new DhcpClientEvent(mIfaceName, getName(), (int) durationMs));
         }
 
         private String messageName(int what) {
@@ -519,6 +528,13 @@ public class DhcpClient extends StateMachine {
                 Log.d(TAG, getName() + messageToString(message));
             }
             return NOT_HANDLED;
+        }
+
+        @Override
+        public String getName() {
+            // All DhcpClient's states are inner classes with a well defined name.
+            // Use getSimpleName() and avoid super's getName() creating new String instances.
+            return getClass().getSimpleName();
         }
     }
 
@@ -546,10 +562,9 @@ public class DhcpClient extends StateMachine {
         }
     }
 
-    class StoppedState extends LoggingState {
+    class StoppedState extends State {
         @Override
         public boolean processMessage(Message message) {
-            super.processMessage(message);
             switch (message.what) {
                 case CMD_START_DHCP:
                     if (mRegisteredForPreDhcpNotification) {
@@ -578,10 +593,9 @@ public class DhcpClient extends StateMachine {
         }
     }
 
-    class DhcpState extends LoggingState {
+    class DhcpState extends State {
         @Override
         public void enter() {
-            super.enter();
             clearDhcpState();
             if (initInterface() && initSockets()) {
                 mReceiveThread = new ReceiveThread();
@@ -679,7 +693,9 @@ public class DhcpClient extends StateMachine {
             }
         }
 
+        @Override
         public void exit() {
+            super.exit();
             mKickAlarm.cancel();
             mTimeoutAlarm.cancel();
         }
@@ -784,15 +800,9 @@ public class DhcpClient extends StateMachine {
         }
     }
 
-    class DhcpHaveLeaseState extends LoggingState {
-        @Override
-        public void enter() {
-            super.enter();
-        }
-
+    class DhcpHaveLeaseState extends State {
         @Override
         public boolean processMessage(Message message) {
-            super.processMessage(message);
             switch (message.what) {
                 case CMD_EXPIRE_DHCP:
                     Log.d(TAG, "Lease expired!");
