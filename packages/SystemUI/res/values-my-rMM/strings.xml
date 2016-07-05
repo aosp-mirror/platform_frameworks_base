@@ -20,9 +20,9 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"စနစ်၏UI"</string>
-    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"ဖယ်ရှားရန်"</string>
+    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"ရှင်းရန်"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"စာရင်းမှ ဖယ်မည်"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"အပ်ပလီကေးရှင်း အချက်အလက်များ"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"အက်ပ်အချက်အလက်များ"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"သင်၏ မကြာမီက မျက်နှာပြင်များ ဒီမှာ ပေါ်လာကြမည်"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"လတ်တလောအပ်ပလီကေးရှင်းများအား ဖယ်ထုတ်မည်"</string>
     <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
@@ -96,7 +96,7 @@
     <string name="voice_assist_label" msgid="3956854378310019854">"အသံ အကူအညီအား ဖွင့်ရန်"</string>
     <string name="camera_label" msgid="7261107956054836961">"ကင်မရာ ဖွင့်ရန်"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"အလုပ်သစ်စီစဥ်မှုကို ရွေးပါ။"</string>
-    <string name="cancel" msgid="6442560571259935130">"မလုပ်တော့ပါ"</string>
+    <string name="cancel" msgid="6442560571259935130">"မလုပ်တော့"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"အံ့ဝင်သောချုံ့ချဲ့ခလုတ်"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"ဖန်သားပြင်ပေါ်တွင် အသေးမှအကြီးသို့ချဲ့ခြင်း"</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"ဘလူးတုသ်ချိတ်ဆက်ထားမှု"</string>
@@ -320,7 +320,7 @@
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"အလုပ် မုဒ်"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"မကြာမီကဖွင့်ထားသည်များ မရှိပါ"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"သင်အားလုံးကို ရှင်းလင်းပြီးပါပြီ"</string>
-    <string name="recents_app_info_button_label" msgid="2890317189376000030">"အက်ပ် အင်ဖို"</string>
+    <string name="recents_app_info_button_label" msgid="2890317189376000030">"အက်ပ်အင်ဖို"</string>
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"မျက်နှာပြင် ပင်ထိုးမှု"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"ရှာဖွေရန်"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> ကို မစနိုင်ပါ။"</string>
@@ -375,9 +375,9 @@
     <string name="guest_wipe_session_title" msgid="6419439912885956132">"ပြန်လာတာ ကြိုဆိုပါသည်၊ ဧည့်သည်!"</string>
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"သင်သည် သင်၏ ချိတ်ဆက်မှုကို ဆက်ပြုလုပ် လိုပါသလား?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"အစမှ ပြန်စပါ"</string>
-    <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"ဟုတ်ကဲ့၊ ဆက်လုပ်ပါ"</string>
+    <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"ဆက်လုပ်ပါ"</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"ဧည့်သည် အသုံးပြုသူ"</string>
-    <string name="guest_notification_text" msgid="335747957734796689">"App များနှင့် ဒေတာအား ဖျက်ရန်၊ တခဏသုံးစွဲသူအား ဖယ်ရှားပါ"</string>
+    <string name="guest_notification_text" msgid="335747957734796689">"အက်ပ်များနှင့် ဒေတာအား ဖျက်ရန်၊ တခဏသုံးစွဲသူအား ဖယ်ရှားပါ"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"ဧည့်သည်ကို ဖယ်ထုတ်မည်"</string>
     <string name="user_logout_notification_title" msgid="1453960926437240727">"အသုံးပြုသူ ထွက်လိုက်ပါ"</string>
     <string name="user_logout_notification_text" msgid="3350262809611876284">"လက်ရှိ အသုံးပြုသူကို ထုတ်ပစ်ရန်"</string>
@@ -404,15 +404,15 @@
     <string name="disable_vpn" msgid="4435534311510272506">"VPN ကို ပိတ်ထားရန်"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN ကို အဆက်ဖြတ်ရန်"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"သင့်စက်ကိရိယာကို<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nမှစီမံခန့်ခွဲထားပါသည်။သင့်စီမံခန့်ခွဲသူသည် ကြိုတင်ပြင်ဆင်မှုများ၊စုပေါင်းဝင်ရောက်ခွင့်၊အက်ပလီကေးရှင်းများ၊သင့်စက်ကိရိယာနှင့်ဆက်နွယ်နေသောအချက်အလက်နှင့်သင့်စက်ကိရိယာ ရဲ့နေရာအချက်အလက်များကိုကြီးကြပ်စောင့်ကြည့်နိုင်ပါသည်။အသေးစိတ်သိရှိလိုပါကသင်၏စီမံခန့်ခွဲသူကိုဆက်သွယ်ပါ။"</string>
-    <string name="monitoring_description_vpn" msgid="4445150119515393526">"VPN ချိတ်ဆက်မှုပြုလုပ်ရန် အပ်ဖ်ကို သင်ခွင့်ပြုလိုက်သည်။ \n\n ဤအပ်ဖ်သည် အီးမေးလ်များ၊ အပ်ဖ်များနှင့် ဝက်ဘ်ဆိုက်များအပါအဝင် သင့်ကိုယ်ရေးကိုယ်တာကွန်ရပ် လှုပ်ရှားမှုကို စောင့်ကြည့်နိုင်သည်။"</string>
+    <string name="monitoring_description_vpn" msgid="4445150119515393526">"VPN ချိတ်ဆက်မှုပြုလုပ်ရန် အက်ပ်ကို သင်ခွင့်ပြုလိုက်သည်။ \n\n ဤအက်ပ်သည် အီးမေးလ်များ၊ အက်ပ်များနှင့် ဝဘ်ဆိုက်များအပါအဝင် သင့်ကွန်ရက်လုပ်ဆောင်ချက်များကို စောင့်ကြည့်နိုင်သည်။"</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"သင့်စက်ကိရိယာကို<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n \n မှစီမံခန့်ခွဲထားပါသည်။သင့်စီမံခန့်ခွဲသူသည် ကြိုတင်ပြင်ဆင်မှုများ၊စုပေါင်းဝင်ရောက်ခွင့်၊အက်ပလီကေးရှင်းများ၊သင့်စက်ကိရိယာနှင့်ဆက်နွယ်နေသောအချက်အလက်နှင့်သင့်စက်ကိရိယာ ရဲ့နေရာအချက်အလက်များကိုကြီးကြပ်စောင့်ကြည့်နိုင်ပါသည်။ \n\n အီးမေးလ်များ၊အက်ပလီကေးရှင်းများနှင့် ဝက်ဘ်ဆိုက်များအပါအဝင်သင့်ကွန်ယက်လုပ်ဆောင်ချက်ကိုစောင့်ကြည့်နိုင်သည့် VPN ကိုချိတ်ဆက်ထားပြီဖြစ် သည်။\n\n အသေးစိတ်သိရှိလိုပါကသင်၏စီမံခန့်ခွဲသူကိုဆက်သွယ်ပါ။"</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"သင့်အလုပ်ပရိုဖိုင်ကို <xliff:g id="ORGANIZATION">%1$s</xliff:g>မှ စီမံခန့်ခွဲပါသည်။ \n\nသင့်စီမံခန့်ခွဲသူသည် အီးမေးလ်များ၊ အပ်ဖ်များ၊ နှင့် ဝက်ဘ်ဆိုက်များအပါအဝင် သင့်ကွန်ရက်လှုပ်ရှားမှုကို စောင့်ကြည့်နိုင်သည်။ \n\nပိုမိုသော သတင်းအချက်အလက်အတွက်၊ သင့်စီမံခန့်ခွဲသူကို ဆက်သွယ်ပါ။ \n\nသင်သည် VPN သို့လည်းဆက်သွယ်ထားပြီး၊ ၎င်းသည် သင့်ကွန်ရက်လှုပ်ရှားမှုကို စောင့်ကြည့်နိုင်ပါသည်။"</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"သင့်အလုပ်ပရိုဖိုင်ကို <xliff:g id="ORGANIZATION">%1$s</xliff:g>မှ စီမံခန့်ခွဲပါသည်။ \n\nသင့်စီမံခန့်ခွဲသူသည် အီးမေးလ်များ၊ အက်ပ်များ၊ နှင့် ဝဘ်ဆိုက်များအပါအဝင် သင့်ကွန်ရက်လုပ်ဆောက်ချက်ကို စောင့်ကြည့်နိုင်သည်။ \n\nအချက်အလက်များ ပိုမိုရယူရန် သင်၏ စီမံခန့်ခွဲသူကို ဆက်သွယ်ပါ။ \n\nသင်သည် VPN တစ်ခုသို့ပါ ချိတ်ဆက်ထားပြီး ၎င်းကပါ သင်၏ ကွန်ရက်လုပ်ဆောင်ချက်ကို စောင့်ကြည့်နိုင်ပါသည်။"</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <string name="monitoring_description_app" msgid="6259179342284742878">"သင်သည် <xliff:g id="APPLICATION">%1$s</xliff:g> သို့ချိတ်ဆက်ထားသည်၊ ၎င်းသည် အီးမေးများ၊ အပ်ဖ်များနှင့် ဝက်ဘ်ဆိုက်များအပါအဝင် သင့်ကွန်ရက်လှုပ်ရှားမှုများကို စောင့်ကြည့်နိုင်သည်။"</string>
-    <string name="monitoring_description_app_personal" msgid="484599052118316268">"သင်သည် <xliff:g id="APPLICATION">%1$s</xliff:g> သို့ချိတ်ဆက်ထားသည်၊ ၎င်းသည် အီးမေးလ်များ၊ အပ်ဖ်များနှင့် ဝက်ဘ်ဆိုက်များအပါအဝင် သင့်ကိုယ်ရေးကိုယ်တာကွန်ရပ် လှုပ်ရှားမှုကို စောင့်ကြည့်နိုင်သည်။"</string>
-    <string name="monitoring_description_app_work" msgid="1754325860918060897">"သင့်အလုပ် ပရိုဖိုင်ကို <xliff:g id="ORGANIZATION">%1$s</xliff:g> မှစီမံခန့်ခွဲသည်။ ၎င်းကို <xliff:g id="APPLICATION">%2$s</xliff:g> သို့ချိတ်ဆက်ထားသည်၊ ၎င်းသည် အီးမေးလ်များ၊ အပ်ဖ်များနှင့် ဝက်ဘ်ဆိုက်များအပါအဝင် သင့်ကိုယ်ရေးကိုယ်တာကွန်ရပ် လှုပ်ရှားမှုကို စောင့်ကြည့်နိုင်သည်။ \n\nနောက်ထပ်အချက်အလက်များအတွက်၊ သင့်ကြီးကြပ်သူကို ဆက်သွယ်ပါ။"</string>
-    <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"သင့်အလုပ် ပရိုဖိုင်ကို <xliff:g id="ORGANIZATION">%1$s</xliff:g> မှစီမံခန့်ခွဲသည်။ ၎င်းကို <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> သို့ချိတ်ဆက်ထားသည်၊ ၎င်းသည် အီးမေးလ်များ၊ အပ်ဖ်များနှင့် ဝက်ဘ်ဆိုက်များအပါအဝင် သင့်ကိုယ်ရေးကိုယ်တာကွန်ရပ် လှုပ်ရှားမှုကို စောင့်ကြည့်နိုင်သည်။ \n\n သင်သည်<xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> ကိုလည်းချိတ်ဆက်ထားသည်၊ ၎င်းသည် သင့်ကိုယ်ရေးကိုယ်တာ ကွန်ရက် လှုပ်ရှားမှုများကို စောင့်ကြည့်နိုင်သည်။"</string>
-    <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"သင့်စက်ကိရိယာကို <xliff:g id="ORGANIZATION">%1$s</xliff:g> မှစီမံခန့်ခွဲပါသည်။ \n\n သင်စီမံခန့်ခွဲသူသည် ကြိုတင်ပြင်ဆင်မှုများ၊ စုပေါင်းဝင်ရောက်ခွင့်၊ အပ်ဖ်များ၊ သင့်ကိရိယာနှင့် သက်ဆိုင်သော ဒေတာ၊ နှင့် သင့်ကိရိယာ၏ တည်နေရာအချိက်အလက်များကို စောင့်ကြည့်ပြီး စီမံခန့်ခွဲနိုင်သည်။ \n\nသင်သည် <xliff:g id="APPLICATION">%2$s</xliff:g> သို့ချိတ်ဆက်ထားသည်၊ ၎င်းသည် အီးမေးလ်းများ၊ အပ်ဖ်များ၊ နှင့် ဝက်ဘ်ဆိုက်များအပါအဝင် သင့်ကွန်ရက်လှုပ်ရှားမှုကို စောင့်ကြည့်နိုင်သည်။ \n\nပိုမိုသော သတင်းအချက်အလက်အတွက်၊ သင့်စီမံခန့်ခွဲသူကို ဆက်သွယ်ပါ။"</string>
+    <string name="monitoring_description_app" msgid="6259179342284742878">"သင်သည် <xliff:g id="APPLICATION">%1$s</xliff:g> သို့ ချိတ်ဆက်ထားသည်၊ ၎င်းသည် အီးမေးများ၊ အက်ပ်များနှင့် ဝဘ်ဆိုက်များအပါအဝင် သင့်ကွန်ရက်လုပ်ဆောင်ချက်များကို စောင့်ကြည့်နိုင်သည်။"</string>
+    <string name="monitoring_description_app_personal" msgid="484599052118316268">"သင်သည် <xliff:g id="APPLICATION">%1$s</xliff:g> သို့ ချိတ်ဆက်ထားသည်။ ၎င်းသည် အီးမေးလ်များ၊ အက်ပ်များနှင့် ဝဘ်ဆိုက်များအပါအဝင် သင့်ကွန်ရက်လုပ်ဆောင်ချက်ကို စောင့်ကြည့်နိုင်သည်။"</string>
+    <string name="monitoring_description_app_work" msgid="1754325860918060897">"သင့်အလုပ်ပရိုဖိုင်ကို <xliff:g id="ORGANIZATION">%1$s</xliff:g> မှစီမံခန့်ခွဲသည်။ ၎င်းကို <xliff:g id="APPLICATION">%2$s</xliff:g> သို့ ချိတ်ဆက်ထားသည်၊ ၎င်းသည် အီးမေးလ်များ၊ အက်ပ်များနှင့် ဝဘ်ဆိုက်များအပါအဝင် သင့်အလုပ်ကွန်ရက်လုပ်ဆောင်ချက်ကို စောင့်ကြည့်နိုင်သည်။ \n\nအချက်အလက်များ ပိုမိုရယူရန် သင်၏ စီမံခန့်ခွဲသူကို ဆက်သွယ်ပါ။"</string>
+    <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"သင့်အလုပ် ပရိုဖိုင်ကို <xliff:g id="ORGANIZATION">%1$s</xliff:g> မှစီမံခန့်ခွဲသည်။ ၎င်းကို <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> သို့ ချိတ်ဆက်ထားသည်၊ ၎င်းသည် အီးမေးလ်များ၊ အက်ပ်များနှင့် ဝဘ်ဆိုက်များအပါအဝင် သင့်အလုပ်ကွန်ရက်လုပ်ဆောင်ချက်ကို စောင့်ကြည့်နိုင်သည်။ \n\n သင်သည်<xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> ကိုလည်း ချိတ်ဆက်ထားသည်၊ ၎င်းသည် သင့်ကိုယ်ပိုင်ကွန်ရက်လုပ်ဆောင်ချက်များကို စောင့်ကြည့်နိုင်သည်။"</string>
+    <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"သင့်စက်ကိရိယာကို <xliff:g id="ORGANIZATION">%1$s</xliff:g> မှစီမံခန့်ခွဲပါသည်။ \n\n စီမံခန့်ခွဲသူသည် ကြိုတင်ပြင်ဆင်မှုများ၊ စုပေါင်းဝင်ရောက်ခွင့်၊ အက်ပ်များ၊ သင့်ကိရိယာနှင့်သက်ဆိုင်သော ဒေတာနှင့် သင့်ကိရိယာ၏ တည်နေရာအချက်အလက်များကို စောင့်ကြည့်ပြီး စီမံခန့်ခွဲနိုင်သည်။ \n\nသင်သည် <xliff:g id="APPLICATION">%2$s</xliff:g> သို့ချိတ်ဆက်ထားသည်၊ ၎င်းသည် အီးမေးလ်များ၊ အက်ပ်များ၊ နှင့် ဝဘ်ဆိုက်များအပါအဝင် သင့်ကွန်ရက်လုပ်ဆောင်ချက်ကို စောင့်ကြည့်နိုင်သည်။ \n\nအချက်အလက်များ ပိုမိုရယူရန် သင်၏ စီမံခန့်ခွဲသူကို ဆက်သွယ်ပါ။"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"သင်က လက်ဖြင့် သော့မဖွင့်မချင်း ကိရိယာမှာ သော့ပိတ်လျက် ရှိနေမည်"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"အကြောင်းကြားချက်များ မြန်မြန်ရရန်"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"မဖွင့်ခင် ၎င်းတို့ကို ကြည့်ပါ"</string>
