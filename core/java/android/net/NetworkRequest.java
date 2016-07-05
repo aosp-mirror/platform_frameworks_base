@@ -19,6 +19,8 @@ package android.net;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Objects;
+
 /**
  * Defines a request for a network, made through {@link NetworkRequest.Builder} and used
  * to request a network via {@link ConnectivityManager#requestNetwork} or listen for changes
@@ -264,7 +266,7 @@ public class NetworkRequest implements Parcelable {
         dest.writeParcelable(networkCapabilities, flags);
         dest.writeInt(legacyType);
         dest.writeInt(requestId);
-        // type intentionally not preserved across process boundaries.
+        dest.writeString(type.name());
     }
     public static final Creator<NetworkRequest> CREATOR =
         new Creator<NetworkRequest>() {
@@ -272,8 +274,8 @@ public class NetworkRequest implements Parcelable {
                 NetworkCapabilities nc = (NetworkCapabilities)in.readParcelable(null);
                 int legacyType = in.readInt();
                 int requestId = in.readInt();
-                // type intentionally not preserved across process boundaries.
-                NetworkRequest result = new NetworkRequest(nc, legacyType, requestId, Type.NONE);
+                Type type = Type.valueOf(in.readString());  // IllegalArgumentException if invalid.
+                NetworkRequest result = new NetworkRequest(nc, legacyType, requestId, type);
                 return result;
             }
             public NetworkRequest[] newArray(int size) {
@@ -311,13 +313,10 @@ public class NetworkRequest implements Parcelable {
         return (that.legacyType == this.legacyType &&
                 that.requestId == this.requestId &&
                 that.type == this.type &&
-                ((that.networkCapabilities == null && this.networkCapabilities == null) ||
-                 (that.networkCapabilities != null &&
-                  that.networkCapabilities.equals(this.networkCapabilities))));
+                Objects.equals(that.networkCapabilities, this.networkCapabilities));
     }
 
     public int hashCode() {
-        return requestId + (legacyType * 1013) +
-                (networkCapabilities.hashCode() * 1051) + type.hashCode() * 17;
+        return Objects.hash(requestId, legacyType, networkCapabilities, type);
     }
 }
