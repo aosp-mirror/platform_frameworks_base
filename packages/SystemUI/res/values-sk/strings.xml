@@ -607,8 +607,8 @@
     <string name="add_button" msgid="4134946063432258161">"Pridať tlačidlo"</string>
     <string name="save" msgid="2311877285724540644">"Uložiť"</string>
     <string name="reset" msgid="2448168080964209908">"Obnoviť"</string>
-    <string name="no_home_title" msgid="1563808595146071549">"Tlačidlo Plocha sa nenašlo"</string>
-    <string name="no_home_message" msgid="5408485011659260911">"Ak chcete používať navigáciu v tomto zariadení, musíte použiť tlačidlo Plocha. Pred uložením pridajte tlačidlo Plocha."</string>
+    <string name="no_home_title" msgid="1563808595146071549">"Nenašlo sa tlačidlo plochy"</string>
+    <string name="no_home_message" msgid="5408485011659260911">"Ak chcete používať navigáciu v tomto zariadení, musíte použiť tlačidlo plochy. Pred uložením pridajte tlačidlo plochy."</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"Upraviť šírku tlačidla"</string>
     <string name="clipboard" msgid="1313879395099896312">"Schránka"</string>
     <string name="clipboard_description" msgid="3819919243940546364">"Schránka umožňuje presunúť položky priamo do schránky. Ak ju máte k dispozícii, môžete ich z nej aj priamo vytiahnuť."</string>

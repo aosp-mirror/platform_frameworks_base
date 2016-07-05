@@ -441,9 +441,9 @@
     <string name="volumeui_notification_text" msgid="8819536904234337445">"Дакраніцеся, каб аднавіць арыгінал."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Вы выкарыстоўваеце свой працоўны профіль"</string>
   <string-array name="volume_stream_titles">
-    <item msgid="5841843895402729630">"Выклікаць"</item>
-    <item msgid="5997713001067658559">"Сістэмныя файлы"</item>
-    <item msgid="7858983209929864160">"Празваніць"</item>
+    <item msgid="5841843895402729630">"Выклік"</item>
+    <item msgid="5997713001067658559">"Сістэма"</item>
+    <item msgid="7858983209929864160">"Званок"</item>
     <item msgid="1850038478268896762">"Медыя"</item>
     <item msgid="8265110906352372092">"Будзільнік"</item>
     <item msgid="5339394737636839168"></item>
