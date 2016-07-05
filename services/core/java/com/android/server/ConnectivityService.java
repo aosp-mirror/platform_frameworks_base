@@ -3836,6 +3836,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
+    private void ensureNetworkRequestHasType(NetworkRequest request) {
+        if (request.type == NetworkRequest.Type.NONE) {
+            throw new IllegalArgumentException(
+                    "All NetworkRequests in ConnectivityService must have a type");
+        }
+    }
+
     /**
      * Tracks info about the requester.
      * Also used to notice when the calling process dies so we can self-expire
@@ -3851,7 +3858,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         NetworkRequestInfo(NetworkRequest r, PendingIntent pi) {
             request = r;
-            ensureRequestHasType();
+            ensureNetworkRequestHasType(request);
             mPendingIntent = pi;
             messenger = null;
             mBinder = null;
@@ -3864,7 +3871,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             super();
             messenger = m;
             request = r;
-            ensureRequestHasType();
+            ensureNetworkRequestHasType(request);
             mBinder = binder;
             mPid = getCallingPid();
             mUid = getCallingUid();
@@ -3875,13 +3882,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 mBinder.linkToDeath(this, 0);
             } catch (RemoteException e) {
                 binderDied();
-            }
-        }
-
-        private void ensureRequestHasType() {
-            if (request.type == NetworkRequest.Type.NONE) {
-                throw new IllegalArgumentException(
-                        "All NetworkRequests in ConnectivityService must have a type");
             }
         }
 
@@ -4138,6 +4138,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     @Override
     public void releaseNetworkRequest(NetworkRequest networkRequest) {
+        ensureNetworkRequestHasType(networkRequest);
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_RELEASE_NETWORK_REQUEST, getCallingUid(),
                 0, networkRequest));
     }
