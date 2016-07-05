@@ -16,12 +16,16 @@
 
 package android.net.metrics;
 
+import android.annotation.IntDef;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.SparseArray;
 
 import com.android.internal.util.MessageUtils;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * {@hide}
@@ -37,19 +41,32 @@ public final class NetworkEvent implements Parcelable {
     public static final int NETWORK_UNLINGER             = 6;
     public static final int NETWORK_DISCONNECTED         = 7;
 
+    /** {@hide} */
+    @IntDef(value = {
+            NETWORK_CONNECTED,
+            NETWORK_VALIDATED,
+            NETWORK_VALIDATION_FAILED,
+            NETWORK_CAPTIVE_PORTAL_FOUND,
+            NETWORK_LINGER,
+            NETWORK_UNLINGER,
+            NETWORK_DISCONNECTED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface EventType {}
+
     public final int netId;
-    public final int eventType;
+    public final @EventType int eventType;
     public final long durationMs;
 
     /** {@hide} */
-    public NetworkEvent(int netId, int eventType, long durationMs) {
+    public NetworkEvent(int netId, @EventType int eventType, long durationMs) {
         this.netId = netId;
         this.eventType = eventType;
         this.durationMs = durationMs;
     }
 
     /** {@hide} */
-    public NetworkEvent(int netId, int eventType) {
+    public NetworkEvent(int netId, @EventType int eventType) {
         this(netId, eventType, 0);
     }
 
@@ -59,12 +76,14 @@ public final class NetworkEvent implements Parcelable {
         durationMs = in.readLong();
     }
 
+    @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(netId);
         out.writeInt(eventType);
         out.writeLong(durationMs);
     }
 
+    @Override
     public int describeContents() {
         return 0;
     }

@@ -16,15 +16,20 @@
 
 package android.net.metrics;
 
+import android.annotation.IntDef;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 import android.util.SparseArray;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
-
 import com.android.internal.util.MessageUtils;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.List;
 
 /**
  * An event logged when there is a change or event that requires updating the
@@ -36,9 +41,13 @@ public final class ApfProgramEvent implements Parcelable {
 
     // Bitflag constants describing what an Apf program filters.
     // Bits are indexeds from LSB to MSB, starting at index 0.
-    // TODO: use @IntDef
     public static final int FLAG_MULTICAST_FILTER_ON = 0;
     public static final int FLAG_HAS_IPV4_ADDRESS    = 1;
+
+    /** {@hide} */
+    @IntDef(flag = true, value = {FLAG_MULTICAST_FILTER_ON, FLAG_HAS_IPV4_ADDRESS})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Flags {}
 
     public final long lifetime;     // Lifetime of the program in seconds
     public final int filteredRas;   // Number of RAs filtered by the APF program
@@ -48,7 +57,7 @@ public final class ApfProgramEvent implements Parcelable {
 
     /** {@hide} */
     public ApfProgramEvent(
-            long lifetime, int filteredRas, int currentRas, int programLength, int flags) {
+            long lifetime, int filteredRas, int currentRas, int programLength, @Flags int flags) {
         this.lifetime = lifetime;
         this.filteredRas = filteredRas;
         this.currentRas = currentRas;
@@ -97,7 +106,7 @@ public final class ApfProgramEvent implements Parcelable {
     };
 
     /** {@hide} */
-    public static int flagsFor(boolean hasIPv4, boolean multicastFilterOn) {
+    public static @Flags int flagsFor(boolean hasIPv4, boolean multicastFilterOn) {
         int bitfield = 0;
         if (hasIPv4) {
             bitfield |= (1 << FLAG_HAS_IPV4_ADDRESS);
@@ -108,25 +117,14 @@ public final class ApfProgramEvent implements Parcelable {
         return bitfield;
     }
 
-    // TODO: consider using java.util.BitSet
-    private static int[] bitflagsOf(int bitfield) {
-        int[] flags = new int[Integer.bitCount(bitfield)];
-        int i = 0;
-        int bitflag = 0;
-        while (bitfield != 0) {
-          if ((bitfield & 1) != 0) {
-              flags[i++] = bitflag;
-          }
-          bitflag++;
-          bitfield = bitfield >>> 1;
+    private static String namesOf(@Flags int bitfield) {
+        List<String> names = new ArrayList<>(Integer.bitCount(bitfield));
+        BitSet set = BitSet.valueOf(new long[]{bitfield & Integer.MAX_VALUE});
+        // Only iterate over flag bits which are set.
+        for (int bit = set.nextSetBit(0); bit >= 0; bit = set.nextSetBit(bit+1)) {
+            names.add(Decoder.constants.get(bit));
         }
-        return flags;
-    }
-
-    private static String namesOf(int bitfields) {
-        return Arrays.stream(bitflagsOf(bitfields))
-                .mapToObj(i -> Decoder.constants.get(i))
-                .collect(Collectors.joining(", "));
+        return TextUtils.join(", ", names);
     }
 
     final static class Decoder {
