@@ -858,7 +858,7 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> மணிநேரம்</item>
       <item quantity="one">1 மணிநேரம்</item>
     </plurals>
-    <string name="now_string_shortest" msgid="8912796667087856402">"உடனே"</string>
+    <string name="now_string_shortest" msgid="8912796667087856402">"இப்போது"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>நி</item>
       <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>நி</item>
@@ -1656,11 +1656,11 @@
     <string name="demo_starting_message" msgid="5268556852031489931">"டெமோவைத் தொடங்குகிறது…"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"சாதனத்தை மீட்டமைக்கிறது…"</string>
     <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"சாதனத்தை மீட்டமைக்கவா?"</string>
-    <!-- no translation found for demo_user_inactivity_timeout_countdown (5675588824402569506) -->
-    <skip />
+    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"மாற்றங்கள் சேமிக்கப்படாது, <xliff:g id="TIMEOUT">%1$s</xliff:g> வினாடிகளில் டெமோ மீண்டும் தொடங்கும்…"</string>
     <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"ரத்துசெய்"</string>
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"இப்போதே மீட்டமை"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"இந்தச் சாதனத்தைக் கட்டுப்பாடுகளின்றிப் பயன்படுத்த, ஆரம்ப நிலைக்கு மீட்டமைக்கவும்"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"மேலும் அறிய தொடவும்."</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"முடக்கப்பட்டது: <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="conference_call" msgid="3751093130790472426">"குழு அழைப்பு"</string>
 </resources>

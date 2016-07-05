@@ -1656,11 +1656,11 @@
     <string name="demo_starting_message" msgid="5268556852031489931">"데모 시작 중..."</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"기기 초기화 중..."</string>
     <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"기기를 초기화하시겠습니까?"</string>
-    <!-- no translation found for demo_user_inactivity_timeout_countdown (5675588824402569506) -->
-    <skip />
+    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"변경사항이 사라지며 데모가 <xliff:g id="TIMEOUT">%1$s</xliff:g>초 후에 시작됩니다."</string>
     <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"취소"</string>
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"지금 초기화"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"제한 없이 기기를 사용하기 위한 초기화"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"자세한 내용을 보려면 터치하세요."</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> 사용 중지됨"</string>
+    <string name="conference_call" msgid="3751093130790472426">"다자간 통화"</string>
 </resources>

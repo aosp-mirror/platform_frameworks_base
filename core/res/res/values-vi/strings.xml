@@ -1656,11 +1656,11 @@
     <string name="demo_starting_message" msgid="5268556852031489931">"Đang bắt đầu bản trình diễn..."</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"Đang đặt lại thiết bị..."</string>
     <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"Đặt lại thiết bị?"</string>
-    <!-- no translation found for demo_user_inactivity_timeout_countdown (5675588824402569506) -->
-    <skip />
+    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"Bạn sẽ bị mất mọi thay đổi và bản trình diễn sẽ bắt đầu lại sau <xliff:g id="TIMEOUT">%1$s</xliff:g> giây…"</string>
     <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"Hủy"</string>
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Đặt lại ngay bây giờ"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Khôi phục cài đặt gốc để sử dụng thiết bị này mà không bị hạn chế"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Chạm để tìm hiểu thêm."</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"Đã tắt <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="conference_call" msgid="3751093130790472426">"Cuộc gọi nhiều bên"</string>
 </resources>
