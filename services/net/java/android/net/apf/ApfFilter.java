@@ -213,7 +213,7 @@ public class ApfFilter {
     private final ApfCapabilities mApfCapabilities;
     private final IpManager.Callback mIpManagerCallback;
     private final NetworkInterface mNetworkInterface;
-    private final IpConnectivityLog mMetricsLog = new IpConnectivityLog();
+    private final IpConnectivityLog mMetricsLog;
     @VisibleForTesting
     byte[] mHardwareAddress;
     @VisibleForTesting
@@ -228,11 +228,12 @@ public class ApfFilter {
 
     @VisibleForTesting
     ApfFilter(ApfCapabilities apfCapabilities, NetworkInterface networkInterface,
-            IpManager.Callback ipManagerCallback, boolean multicastFilter) {
+            IpManager.Callback ipManagerCallback, boolean multicastFilter, IpConnectivityLog log) {
         mApfCapabilities = apfCapabilities;
         mIpManagerCallback = ipManagerCallback;
         mNetworkInterface = networkInterface;
         mMulticastFilter = multicastFilter;
+        mMetricsLog = log;
 
         maybeStartFilter();
     }
@@ -371,6 +372,14 @@ public class ApfFilter {
             return i & 0xffffffffL;
         }
 
+        private long getUint16(ByteBuffer buffer, int position) {
+            return uint16(buffer.getShort(position));
+        }
+
+        private long getUint32(ByteBuffer buffer, int position) {
+            return uint32(buffer.getInt(position));
+        }
+
         private void prefixOptionToString(StringBuffer sb, int offset) {
             String prefix = IPv6AddresstoString(offset + 16);
             int length = uint8(mPacket.get(offset + 2));
@@ -417,7 +426,7 @@ public class ApfFilter {
          * @param lifetimeOffset offset from mPacket.position() to the next lifetime data.
          * @param lifetimeLength length of the next lifetime data.
          * @return offset within packet of where the next binary range of data not including
-         *         a lifetime.  This can be passed into the next invocation of this function
+         *         a lifetime. This can be passed into the next invocation of this function
          *         via {@code lastNonLifetimeStart}.
          */
         private int addNonLifetime(int lastNonLifetimeStart, int lifetimeOffset,
@@ -438,9 +447,9 @@ public class ApfFilter {
         // (from ByteBuffer.get(int) ) if parsing encounters something non-compliant with
         // specifications.
         Ra(byte[] packet, int length) {
-            mPacket = ByteBuffer.allocate(length).put(ByteBuffer.wrap(packet, 0, length));
-            mPacket.clear();
+            mPacket = ByteBuffer.wrap(Arrays.copyOf(packet, length));
             mLastSeen = curTime();
+            RaEvent.Builder builder = new RaEvent.Builder();
 
             // Ignore the checksum.
             int lastNonLifetimeStart = addNonLifetime(0,
@@ -451,14 +460,7 @@ public class ApfFilter {
             lastNonLifetimeStart = addNonLifetime(lastNonLifetimeStart,
                     ICMP6_RA_ROUTER_LIFETIME_OFFSET,
                     ICMP6_RA_ROUTER_LIFETIME_LEN);
-
-            long routerLifetime = uint16(mPacket.getShort(
-                    ICMP6_RA_ROUTER_LIFETIME_OFFSET + mPacket.position()));
-            long prefixValidLifetime = -1L;
-            long prefixPreferredLifetime = -1L;
-            long routeInfoLifetime = -1L;
-            long dnsslLifetime = - 1L;
-            long rdnssLifetime = -1L;
+            builder.updateRouterLifetime(getUint16(mPacket, ICMP6_RA_ROUTER_LIFETIME_OFFSET));
 
             // Ensures that the RA is not truncated.
             mPacket.position(ICMP6_RA_OPTION_OFFSET);
@@ -466,39 +468,42 @@ public class ApfFilter {
                 final int position = mPacket.position();
                 final int optionType = uint8(mPacket.get(position));
                 final int optionLength = uint8(mPacket.get(position + 1)) * 8;
+                long lifetime;
                 switch (optionType) {
                     case ICMP6_PREFIX_OPTION_TYPE:
                         // Parse valid lifetime
                         lastNonLifetimeStart = addNonLifetime(lastNonLifetimeStart,
                                 ICMP6_PREFIX_OPTION_VALID_LIFETIME_OFFSET,
                                 ICMP6_PREFIX_OPTION_VALID_LIFETIME_LEN);
+                        lifetime = getUint32(mPacket,
+                                position + ICMP6_PREFIX_OPTION_VALID_LIFETIME_OFFSET);
+                        builder.updatePrefixValidLifetime(lifetime);
                         // Parse preferred lifetime
                         lastNonLifetimeStart = addNonLifetime(lastNonLifetimeStart,
                                 ICMP6_PREFIX_OPTION_PREFERRED_LIFETIME_OFFSET,
                                 ICMP6_PREFIX_OPTION_PREFERRED_LIFETIME_LEN);
+                        lifetime = getUint32(mPacket,
+                                position + ICMP6_PREFIX_OPTION_PREFERRED_LIFETIME_OFFSET);
+                        builder.updatePrefixPreferredLifetime(lifetime);
                         mPrefixOptionOffsets.add(position);
-                        prefixValidLifetime = uint32(mPacket.getInt(
-                                ICMP6_PREFIX_OPTION_VALID_LIFETIME_OFFSET + position));
-                        prefixPreferredLifetime = uint32(mPacket.getInt(
-                                ICMP6_PREFIX_OPTION_PREFERRED_LIFETIME_OFFSET + position));
                         break;
                     // These three options have the same lifetime offset and size, and
-                    // are processed with the same specialized addNonLifetime4B:
+                    // are processed with the same specialized addNonLifetimeU32:
                     case ICMP6_RDNSS_OPTION_TYPE:
                         mRdnssOptionOffsets.add(position);
                         lastNonLifetimeStart = addNonLifetimeU32(lastNonLifetimeStart);
-                        rdnssLifetime =
-                                uint32(mPacket.getInt(ICMP6_4_BYTE_LIFETIME_OFFSET + position));
+                        lifetime = getUint32(mPacket, position + ICMP6_4_BYTE_LIFETIME_OFFSET);
+                        builder.updateRdnssLifetime(lifetime);
                         break;
                     case ICMP6_ROUTE_INFO_OPTION_TYPE:
                         lastNonLifetimeStart = addNonLifetimeU32(lastNonLifetimeStart);
-                        routeInfoLifetime =
-                                uint32(mPacket.getInt(ICMP6_4_BYTE_LIFETIME_OFFSET + position));
+                        lifetime = getUint32(mPacket, position + ICMP6_4_BYTE_LIFETIME_OFFSET);
+                        builder.updateRouteInfoLifetime(lifetime);
                         break;
                     case ICMP6_DNSSL_OPTION_TYPE:
                         lastNonLifetimeStart = addNonLifetimeU32(lastNonLifetimeStart);
-                        dnsslLifetime =
-                                uint32(mPacket.getInt(ICMP6_4_BYTE_LIFETIME_OFFSET + position));
+                        lifetime = getUint32(mPacket, position + ICMP6_4_BYTE_LIFETIME_OFFSET);
+                        builder.updateDnsslLifetime(lifetime);
                         break;
                     default:
                         // RFC4861 section 4.2 dictates we ignore unknown options for fowards
@@ -514,9 +519,7 @@ public class ApfFilter {
             // Mark non-lifetime bytes since last lifetime.
             addNonLifetime(lastNonLifetimeStart, 0, 0);
             mMinLifetime = minLifetime(packet, length);
-            // TODO: record per-option minimum lifetimes instead of last seen lifetimes
-            mMetricsLog.log(new RaEvent(routerLifetime, prefixValidLifetime,
-                    prefixPreferredLifetime, routeInfoLifetime, rdnssLifetime, dnsslLifetime));
+            mMetricsLog.log(builder.build());
         }
 
         // Ignoring lifetimes (which may change) does {@code packet} match this RA?
@@ -1000,7 +1003,8 @@ public class ApfFilter {
             Log.e(TAG, "Unsupported APF version: " + apfCapabilities.apfVersionSupported);
             return null;
         }
-        return new ApfFilter(apfCapabilities, networkInterface, ipManagerCallback, multicastFilter);
+        return new ApfFilter(apfCapabilities, networkInterface, ipManagerCallback,
+                multicastFilter, new IpConnectivityLog());
     }
 
     public synchronized void shutdown() {

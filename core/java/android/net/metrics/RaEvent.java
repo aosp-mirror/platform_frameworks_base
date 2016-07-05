@@ -27,6 +27,9 @@ import android.os.Parcelable;
 @SystemApi
 public final class RaEvent implements Parcelable {
 
+    /** {@hide} */
+    public static final long NO_LIFETIME = -1L;
+
     // Lifetime in seconds of options found in a single RA packet.
     // When an option is not set, the value of the associated field is -1;
     public final long routerLifetime;
@@ -92,4 +95,60 @@ public final class RaEvent implements Parcelable {
             return new RaEvent[size];
         }
     };
+
+    /** {@hide} */
+    public static class Builder {
+
+        long routerLifetime          = NO_LIFETIME;
+        long prefixValidLifetime     = NO_LIFETIME;
+        long prefixPreferredLifetime = NO_LIFETIME;
+        long routeInfoLifetime       = NO_LIFETIME;
+        long rdnssLifetime           = NO_LIFETIME;
+        long dnsslLifetime           = NO_LIFETIME;
+
+        public Builder() {
+        }
+
+        public RaEvent build() {
+            return new RaEvent(routerLifetime, prefixValidLifetime, prefixPreferredLifetime,
+                    routeInfoLifetime, rdnssLifetime, dnsslLifetime);
+        }
+
+        public Builder updateRouterLifetime(long lifetime) {
+            routerLifetime = updateLifetime(routerLifetime, lifetime);
+            return this;
+        }
+
+        public Builder updatePrefixValidLifetime(long lifetime) {
+            prefixValidLifetime = updateLifetime(prefixValidLifetime, lifetime);
+            return this;
+        }
+
+        public Builder updatePrefixPreferredLifetime(long lifetime) {
+            prefixPreferredLifetime = updateLifetime(prefixPreferredLifetime, lifetime);
+            return this;
+        }
+
+        public Builder updateRouteInfoLifetime(long lifetime) {
+            routeInfoLifetime = updateLifetime(routeInfoLifetime, lifetime);
+            return this;
+        }
+
+        public Builder updateRdnssLifetime(long lifetime) {
+            rdnssLifetime = updateLifetime(rdnssLifetime, lifetime);
+            return this;
+        }
+
+        public Builder updateDnsslLifetime(long lifetime) {
+            dnsslLifetime = updateLifetime(dnsslLifetime, lifetime);
+            return this;
+        }
+
+        private long updateLifetime(long currentLifetime, long newLifetime) {
+            if (currentLifetime == RaEvent.NO_LIFETIME) {
+                return newLifetime;
+            }
+            return Math.min(currentLifetime, newLifetime);
+        }
+    }
 }
