@@ -24,7 +24,8 @@ import android.util.SparseArray;
 import com.android.internal.util.MessageUtils;
 
 /**
- * {@hide} Event class used to record error events when parsing DHCP response packets.
+ * Event class used to record error events when parsing DHCP response packets.
+ * {@hide}
  */
 @SystemApi
 public final class DhcpErrorEvent implements Parcelable {
@@ -72,11 +73,13 @@ public final class DhcpErrorEvent implements Parcelable {
         this.errorCode = in.readInt();
     }
 
+    @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeString(ifName);
         out.writeInt(errorCode);
     }
 
+    @Override
     public int describeContents() {
         return 0;
     }

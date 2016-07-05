@@ -21,6 +21,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
+ * An event recorded by DnsEventListenerService.
  * {@hide}
  */
 @SystemApi
@@ -60,6 +61,7 @@ final public class DnsEvent implements Parcelable {
         out.writeIntArray(latenciesMs);
     }
 
+    @Override
     public int describeContents() {
         return 0;
     }

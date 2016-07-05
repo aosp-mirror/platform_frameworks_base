@@ -16,6 +16,7 @@
 
 package android.net.metrics;
 
+import android.annotation.IntDef;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -23,13 +24,16 @@ import android.util.SparseArray;
 
 import com.android.internal.util.MessageUtils;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
+ * An event recorded by NetworkMonitor when sending a probe for finding captive portals.
  * {@hide}
  */
 @SystemApi
 public final class ValidationProbeEvent implements Parcelable {
 
-    // TODO: use @IntDef
     public static final int PROBE_DNS   = 0;
     public static final int PROBE_HTTP  = 1;
     public static final int PROBE_HTTPS = 2;
@@ -38,13 +42,24 @@ public final class ValidationProbeEvent implements Parcelable {
     public static final int DNS_FAILURE = 0;
     public static final int DNS_SUCCESS = 1;
 
+    /** {@hide} */
+    @IntDef(value = {PROBE_DNS, PROBE_HTTP, PROBE_HTTPS, PROBE_PAC})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ProbeType {}
+
+    /** {@hide} */
+    @IntDef(value = {DNS_FAILURE, DNS_SUCCESS})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ReturnCode {}
+
     public final int netId;
     public final long durationMs;
-    public final int probeType;
-    public final int returnCode;
+    public final @ProbeType int probeType;
+    public final @ReturnCode int returnCode;
 
     /** @hide */
-    public ValidationProbeEvent(int netId, long durationMs, int probeType, int returnCode) {
+    public ValidationProbeEvent(
+            int netId, long durationMs, @ProbeType int probeType, @ReturnCode int returnCode) {
         this.netId = netId;
         this.durationMs = durationMs;
         this.probeType = probeType;
@@ -58,6 +73,7 @@ public final class ValidationProbeEvent implements Parcelable {
         returnCode = in.readInt();
     }
 
+    @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(netId);
         out.writeLong(durationMs);
@@ -65,6 +81,7 @@ public final class ValidationProbeEvent implements Parcelable {
         out.writeInt(returnCode);
     }
 
+    @Override
     public int describeContents() {
         return 0;
     }
