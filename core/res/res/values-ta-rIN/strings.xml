@@ -858,7 +858,7 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> மணிநேரம்</item>
       <item quantity="one">1 மணிநேரம்</item>
     </plurals>
-    <string name="now_string_shortest" msgid="8912796667087856402">"உடனே"</string>
+    <string name="now_string_shortest" msgid="8912796667087856402">"இப்போது"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>நி</item>
       <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>நி</item>
