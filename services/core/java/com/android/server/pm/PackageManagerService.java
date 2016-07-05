@@ -11944,6 +11944,12 @@ public class PackageManagerService extends IPackageManager.Stub {
             return false;
         }
 
+        if (mProtectedPackages.isPackageStateProtected(userId, packageName)) {
+            Slog.w(TAG, "Cannot suspend/un-suspend package \"" + packageName
+                    + "\": protected package");
+            return false;
+        }
+
         return true;
     }
 
