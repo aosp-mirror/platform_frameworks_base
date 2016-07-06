@@ -157,6 +157,10 @@ public class ButtonDispatcher {
         }
     }
 
+    public ArrayList<View> getViews() {
+        return mViews;
+    }
+
     public View getCurrentView() {
         return mCurrentView;
     }
