@@ -4315,7 +4315,10 @@ public class BackupManagerService {
                 Slog.e(TAG, "Internal exception during full backup", e);
             } finally {
                 try {
-                    if (out != null) out.close();
+                    if (out != null) {
+                        out.flush();
+                        out.close();
+                    }
                     mOutputFile.close();
                 } catch (IOException e) {
                     /* nothing we can do about this */
