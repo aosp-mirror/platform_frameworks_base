@@ -54,7 +54,7 @@
             android:textAppearance="@style/TextAppearance.Material.DatePicker.DateLabel"
             android:includeFontPadding="false"
             android:gravity="start"
-            android:maxLines="2"
+            android:maxLines="@integer/date_picker_header_max_lines_material"
             android:ellipsize="none" />
     </LinearLayout>
 </LinearLayout>
