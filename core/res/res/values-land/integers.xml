@@ -23,4 +23,6 @@
     <integer name="kg_widget_region_weight">45</integer>
     <integer name="kg_security_flipper_weight">55</integer>
     <integer name="kg_glowpad_rotation_offset">-90</integer>
+
+    <integer name="date_picker_header_max_lines_material">4</integer>
 </resources>
