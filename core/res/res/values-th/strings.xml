@@ -1656,11 +1656,11 @@
     <string name="demo_starting_message" msgid="5268556852031489931">"กำลังเริ่มการสาธิต…"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"กำลังรีเซ็ตอุปกรณ์…"</string>
     <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"รีเซ็ตอุปกรณ์ไหม"</string>
-    <!-- no translation found for demo_user_inactivity_timeout_countdown (5675588824402569506) -->
-    <skip />
+    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"การเปลี่ยนแปลงของคุณจะหายไปและการสาธิตจะเริ่มต้นอีกครั้งใน <xliff:g id="TIMEOUT">%1$s</xliff:g> วินาที…"</string>
     <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"ยกเลิก"</string>
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"รีเซ็ตทันที"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"รีเซ็ตเป็นค่าเริ่มต้นเพื่อใช้อุปกรณ์นี้โดยไร้ข้อจำกัด"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"แตะเพื่อเรียนรู้เพิ่มเติม"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"ปิดใช้ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="conference_call" msgid="3751093130790472426">"การประชุมสาย"</string>
 </resources>

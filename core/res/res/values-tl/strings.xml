@@ -1656,11 +1656,11 @@
     <string name="demo_starting_message" msgid="5268556852031489931">"Sinisimulan ang demo…"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"Nire-reset ang device…"</string>
     <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"Gusto mo bang i-reset ang device?"</string>
-    <!-- no translation found for demo_user_inactivity_timeout_countdown (5675588824402569506) -->
-    <skip />
+    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"Mawawala mo ang anumang mga pagbabago at magsisimulang muli ang demo pagkalipas ng <xliff:g id="TIMEOUT">%1$s</xliff:g> (na) segundo…"</string>
     <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"Kanselahin"</string>
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"I-reset ngayon"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"I-factory reset upang magamit ang device na ito nang walang mga paghihigpit"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Pindutin upang matuto nang higit pa."</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"Na-disable ang <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="conference_call" msgid="3751093130790472426">"Conference Call"</string>
 </resources>

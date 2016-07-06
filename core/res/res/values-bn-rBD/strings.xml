@@ -1656,11 +1656,11 @@
     <string name="demo_starting_message" msgid="5268556852031489931">"ডেমো শুরু করা হচ্ছে…"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"ডিভাইস পুনরায় সেট করা হচ্ছে…"</string>
     <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"ডিভাইস পুনরায় সেট করবেন?"</string>
-    <!-- no translation found for demo_user_inactivity_timeout_countdown (5675588824402569506) -->
-    <skip />
+    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"আপনার করা যে কোনো পরিবর্তন মুছে যাবে এবং <xliff:g id="TIMEOUT">%1$s</xliff:g> সেকেন্ডের মধ্যে ডেমো আবার শুরু হবে…"</string>
     <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"বাতিল করুন"</string>
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"এখনই পুনরায় সেট করুন"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"কোনো বিধিনিষেধ ছাড়াই এই ডিভাইসটিকে ব্যবহার করতে ফ্যাক্টরি রিসেট করুন"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"আরো জানতে স্পর্শ করুন৷"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"অক্ষম করা <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="conference_call" msgid="3751093130790472426">"কনফারেন্স কল"</string>
 </resources>
