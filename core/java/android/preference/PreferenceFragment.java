@@ -189,12 +189,10 @@ public abstract class PreferenceFragment extends Fragment implements
                 0);
 
         ListView lv = (ListView) view.findViewById(android.R.id.list);
-        if (lv != null) {
-            Drawable divider =
-                    a.getDrawable(com.android.internal.R.styleable.PreferenceFragment_divider);
-            if (divider != null) {
-                lv.setDivider(divider);
-            }
+        if (lv != null
+                && a.hasValueOrEmpty(com.android.internal.R.styleable.PreferenceFragment_divider)) {
+            lv.setDivider(
+                    a.getDrawable(com.android.internal.R.styleable.PreferenceFragment_divider));
         }
 
         a.recycle();

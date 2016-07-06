@@ -36,7 +36,7 @@ please see styles_device_defaults.xml.
         <item name="layout">@layout/preference_material</item>
     </style>
 
-    <style name="PreferenceFragment.Material">
+    <style name="BasePreferenceFragment">
         <item name="layout">@layout/preference_list_fragment_material</item>
         <item name="paddingStart">@dimen/preference_fragment_padding_side_material</item>
         <item name="paddingEnd">@dimen/preference_fragment_padding_side_material</item>
@@ -45,6 +45,8 @@ please see styles_device_defaults.xml.
         <item name="divider">?attr/listDivider</item>
         <item name="clipToPadding">@bool/config_preferenceFragmentClipToPadding</item>
     </style>
+
+    <style name="PreferenceFragment.Material" parent="BasePreferenceFragment"/>
 
     <style name="PreferenceActivity.Material">
         <item name="layout">@layout/preference_list_content_material</item>
