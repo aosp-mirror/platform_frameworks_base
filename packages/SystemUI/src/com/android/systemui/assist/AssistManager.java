@@ -15,6 +15,7 @@ import android.graphics.PixelFormat;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -28,9 +29,9 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 
 import com.android.internal.app.AssistUtils;
+import com.android.internal.app.IVoiceInteractionSessionListener;
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.systemui.R;
-import com.android.systemui.SystemUIFactory;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.CommandQueue;
 
@@ -52,7 +53,7 @@ public class AssistManager {
 
     private AssistOrbContainer mView;
     private final BaseStatusBar mBar;
-    private final AssistUtils mAssistUtils;
+    protected final AssistUtils mAssistUtils;
 
     private IVoiceInteractionSessionShowCallback mShowCallback =
             new IVoiceInteractionSessionShowCallback.Stub() {
@@ -82,6 +83,23 @@ public class AssistManager {
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         mAssistUtils = new AssistUtils(context);
         mAssistDisclosure = new AssistDisclosure(context, new Handler());
+
+        registerVoiceInteractionSessionListener();
+    }
+
+    protected void registerVoiceInteractionSessionListener() {
+        mAssistUtils.registerVoiceInteractionSessionListener(
+                new IVoiceInteractionSessionListener.Stub() {
+            @Override
+            public void onVoiceSessionShown() throws RemoteException {
+                Log.v(TAG, "Voice open");
+            }
+
+            @Override
+            public void onVoiceSessionHidden() throws RemoteException {
+                Log.v(TAG, "Voice closed");
+            }
+        });
     }
 
     public void onConfigurationChanged() {

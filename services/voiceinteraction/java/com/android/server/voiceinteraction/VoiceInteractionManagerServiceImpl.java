@@ -30,6 +30,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -41,6 +42,7 @@ import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.view.IWindowManager;
 
+import com.android.internal.app.IVoiceInteractionSessionListener;
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.server.LocalServices;
@@ -70,6 +72,9 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
 
     VoiceInteractionSessionConnection mActiveSession;
     int mDisabledShowContext;
+
+    private final RemoteCallbackList<IVoiceInteractionSessionListener>
+            mVoiceInteractionSessionListeners = new RemoteCallbackList<>();
 
     final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -353,10 +358,52 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         }
     }
 
+    public void registerVoiceInteractionSessionListener(
+            IVoiceInteractionSessionListener listener) {
+        synchronized (mLock) {
+            mVoiceInteractionSessionListeners.register(listener);
+        }
+    }
+
     @Override
     public void sessionConnectionGone(VoiceInteractionSessionConnection connection) {
         synchronized (mLock) {
             finishLocked(connection.mToken, false);
+        }
+    }
+
+    @Override
+    public void onSessionShown(VoiceInteractionSessionConnection connection) {
+        synchronized (mLock) {
+            final int size = mVoiceInteractionSessionListeners.beginBroadcast();
+            for (int i = 0; i < size; ++i) {
+                final IVoiceInteractionSessionListener listener =
+                        mVoiceInteractionSessionListeners.getBroadcastItem(i);
+                try {
+                    listener.onVoiceSessionShown();
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Error delivering voice interaction open event.", e);
+                }
+            }
+            mVoiceInteractionSessionListeners.finishBroadcast();
+        }
+    }
+
+    @Override
+    public void onSessionHidden(VoiceInteractionSessionConnection connection) {
+        synchronized (mLock) {
+            final int size = mVoiceInteractionSessionListeners.beginBroadcast();
+            for (int i = 0; i < size; ++i) {
+                final IVoiceInteractionSessionListener listener =
+                        mVoiceInteractionSessionListeners.getBroadcastItem(i);
+                try {
+                    listener.onVoiceSessionHidden();
+
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Error delivering voice interaction closed event.", e);
+                }
+            }
+            mVoiceInteractionSessionListeners.finishBroadcast();
         }
     }
 }
