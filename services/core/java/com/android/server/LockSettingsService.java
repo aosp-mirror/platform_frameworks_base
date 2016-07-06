@@ -347,7 +347,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         CharSequence detail = r.getText(
                 com.android.internal.R.string.user_encrypted_detail);
 
-        PendingIntent intent = PendingIntent.getBroadcast(mContext, 0, ACTION_NULL,
+        PendingIntent intent = PendingIntent.getActivity(mContext, 0, ACTION_NULL,
                 PendingIntent.FLAG_UPDATE_CURRENT);
 
         showEncryptionNotification(user, title, message, detail, intent);
