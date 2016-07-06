@@ -511,8 +511,8 @@ public class TaskStack {
             int top = dockArea.bottom < 1f
                     ? 0
                     : insets.top;
-            layoutAlgorithm.getTaskStackBounds(displayRect, windowRectOut, top, insets.right,
-                    taskStackBounds);
+            layoutAlgorithm.getTaskStackBounds(displayRect, windowRectOut, top, insets.left,
+                    insets.right, taskStackBounds);
             return taskStackBounds;
         }
     }

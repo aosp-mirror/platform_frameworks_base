@@ -1057,7 +1057,7 @@ public class AppTransition implements Dump {
         final float thumbWidth = thumbWidthI > 0 ? thumbWidthI : 1;
         final int thumbHeightI = mTmpRect.height();
         final float thumbHeight = thumbHeightI > 0 ? thumbHeightI : 1;
-        final int thumbStartX = mTmpRect.left - containingFrame.left;
+        final int thumbStartX = mTmpRect.left - containingFrame.left - contentInsets.left;
         final int thumbStartY = mTmpRect.top - containingFrame.top;
 
         switch (thumbTransitState) {
