@@ -227,8 +227,8 @@ public class MediaSessionService extends SystemService implements Monitor {
     }
 
     private void updateUser() {
+        int userId = ActivityManager.getCurrentUser();
         synchronized (mLock) {
-            int userId = ActivityManager.getCurrentUser();
             if (mCurrentUserId != userId) {
                 final int oldUserId = mCurrentUserId;
                 mCurrentUserId = userId; // do this first
