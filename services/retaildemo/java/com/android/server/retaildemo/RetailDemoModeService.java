@@ -55,6 +55,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.util.KeyValueListParser;
 import android.util.Slog;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.R;
@@ -75,15 +76,17 @@ public class RetailDemoModeService extends SystemService {
 
     private static final String TAG = RetailDemoModeService.class.getSimpleName();
     private static final String DEMO_USER_NAME = "Demo";
-    private static final String ACTION_RESET_DEMO = "com.android.server.am.ACTION_RESET_DEMO";
+    private static final String ACTION_RESET_DEMO =
+            "com.android.server.retaildemo.ACTION_RESET_DEMO";
 
     private static final int MSG_TURN_SCREEN_ON = 0;
     private static final int MSG_INACTIVITY_TIME_OUT = 1;
     private static final int MSG_START_NEW_SESSION = 2;
 
     private static final long SCREEN_WAKEUP_DELAY = 2500;
-    private static final long USER_INACTIVITY_TIMEOUT = 30000;
-    private static final long WARNING_DIALOG_TIMEOUT = 6000;
+    private static final long USER_INACTIVITY_TIMEOUT_MIN = 10000;
+    private static final long USER_INACTIVITY_TIMEOUT_DEFAULT = 30000;
+    private static final long WARNING_DIALOG_TIMEOUT_DEFAULT = 6000;
     private static final long MILLIS_PER_SECOND = 1000;
 
     private static final int[] VOLUME_STREAMS_TO_MUTE = {
@@ -97,6 +100,8 @@ public class RetailDemoModeService extends SystemService {
 
     boolean mDeviceInDemoMode = false;
     int mCurrentUserId = UserHandle.USER_SYSTEM;
+    long mUserInactivityTimeout;
+    long mWarningDialogTimeout;
     private ActivityManagerService mAms;
     private ActivityManagerInternal mAmi;
     private AudioManager mAudioManager;
@@ -179,9 +184,79 @@ public class RetailDemoModeService extends SystemService {
         }
     }
 
+    private class SettingsObserver extends ContentObserver {
+
+        private final static String KEY_USER_INACTIVITY_TIMEOUT = "user_inactivity_timeout_ms";
+        private final static String KEY_WARNING_DIALOG_TIMEOUT = "warning_dialog_timeout_ms";
+
+        private final Uri mDeviceDemoModeUri = Settings.Global
+                .getUriFor(Settings.Global.DEVICE_DEMO_MODE);
+        private final Uri mDeviceProvisionedUri = Settings.Global
+                .getUriFor(Settings.Global.DEVICE_PROVISIONED);
+        private final Uri mRetailDemoConstantsUri = Settings.Global
+                .getUriFor(Settings.Global.RETAIL_DEMO_MODE_CONSTANTS);
+
+        private final KeyValueListParser mParser = new KeyValueListParser(',');
+
+        public SettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        public void register() {
+            ContentResolver cr = getContext().getContentResolver();
+            cr.registerContentObserver(mDeviceDemoModeUri, false, this, UserHandle.USER_SYSTEM);
+            cr.registerContentObserver(mDeviceProvisionedUri, false, this, UserHandle.USER_SYSTEM);
+            cr.registerContentObserver(mRetailDemoConstantsUri, false, this,
+                    UserHandle.USER_SYSTEM);
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            if (mRetailDemoConstantsUri.equals(uri)) {
+                refreshTimeoutConstants();
+                return;
+            }
+            if (mDeviceDemoModeUri.equals(uri)) {
+                mDeviceInDemoMode = UserManager.isDeviceInDemoMode(getContext());
+                if (mDeviceInDemoMode) {
+                    mHandler.sendEmptyMessage(MSG_START_NEW_SESSION);
+                } else if (mWakeLock.isHeld()) {
+                    mWakeLock.release();
+                }
+            }
+            // If device is provisioned and left demo mode - run the cleanup in demo folder
+            if (!mDeviceInDemoMode && isDeviceProvisioned()) {
+                // Run on the bg thread to not block the fg thread
+                BackgroundThread.getHandler().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (!deleteDemoFolderContents()) {
+                            Slog.w(TAG, "Failed to delete demo folder contents");
+                        }
+                    }
+                });
+            }
+        }
+
+        private void refreshTimeoutConstants() {
+            try {
+                mParser.setString(Settings.Global.getString(getContext().getContentResolver(),
+                    Settings.Global.RETAIL_DEMO_MODE_CONSTANTS));
+            } catch (IllegalArgumentException exc) {
+                Slog.e(TAG, "Invalid string passed to KeyValueListParser");
+                // Consuming the exception to fall back to default values.
+            }
+            mWarningDialogTimeout = mParser.getLong(KEY_WARNING_DIALOG_TIMEOUT,
+                    WARNING_DIALOG_TIMEOUT_DEFAULT);
+            mUserInactivityTimeout = mParser.getLong(KEY_USER_INACTIVITY_TIMEOUT,
+                    USER_INACTIVITY_TIMEOUT_DEFAULT);
+            mUserInactivityTimeout = Math.max(mUserInactivityTimeout, USER_INACTIVITY_TIMEOUT_MIN);
+        }
+    }
+
     private void showInactivityCountdownDialog() {
         UserInactivityCountdownDialog dialog = new UserInactivityCountdownDialog(getContext(),
-                WARNING_DIALOG_TIMEOUT, MILLIS_PER_SECOND);
+                mWarningDialogTimeout, MILLIS_PER_SECOND);
         dialog.setNegativeButtonClickListener(null);
         dialog.setPositiveButtonClickListener(new DialogInterface.OnClickListener() {
             @Override
@@ -304,42 +379,6 @@ public class RetailDemoModeService extends SystemService {
         return mAudioManager;
     }
 
-    private void registerSettingsChangeObserver() {
-        final Uri deviceDemoModeUri = Settings.Global.getUriFor(Settings.Global.DEVICE_DEMO_MODE);
-        final Uri deviceProvisionedUri = Settings.Global.getUriFor(
-                Settings.Global.DEVICE_PROVISIONED);
-        final ContentResolver cr = getContext().getContentResolver();
-        final ContentObserver deviceDemoModeSettingObserver = new ContentObserver(mHandler) {
-            @Override
-            public void onChange(boolean selfChange, Uri uri, int userId) {
-                if (deviceDemoModeUri.equals(uri)) {
-                    mDeviceInDemoMode = UserManager.isDeviceInDemoMode(getContext());
-                    if (mDeviceInDemoMode) {
-                        mHandler.sendEmptyMessage(MSG_START_NEW_SESSION);
-                    } else if (mWakeLock.isHeld()) {
-                        mWakeLock.release();
-                    }
-                }
-                // If device is provisioned and left demo mode - run the cleanup in demo folder
-                if (!mDeviceInDemoMode && isDeviceProvisioned()) {
-                    // Run on the bg thread to not block the fg thread
-                    BackgroundThread.getHandler().post(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (!deleteDemoFolderContents()) {
-                                Slog.w(TAG, "Failed to delete demo folder contents");
-                            }
-                        }
-                    });
-                }
-            }
-        };
-        cr.registerContentObserver(deviceDemoModeUri, false, deviceDemoModeSettingObserver,
-                UserHandle.USER_SYSTEM);
-        cr.registerContentObserver(deviceProvisionedUri, false, deviceDemoModeSettingObserver,
-                UserHandle.USER_SYSTEM);
-    }
-
     private boolean isDeviceProvisioned() {
         return Settings.Global.getInt(
                 getContext().getContentResolver(), Settings.Global.DEVICE_PROVISIONED, 0) != 0;
@@ -427,7 +466,9 @@ public class RetailDemoModeService extends SystemService {
             mDeviceInDemoMode = true;
             mHandler.sendEmptyMessage(MSG_START_NEW_SESSION);
         }
-        registerSettingsChangeObserver();
+        SettingsObserver settingsObserver = new SettingsObserver(mHandler);
+        settingsObserver.register();
+        settingsObserver.refreshTimeoutConstants();
         registerBroadcastReceiver();
     }
 
@@ -481,7 +522,7 @@ public class RetailDemoModeService extends SystemService {
                 }
             }
             mHandler.removeMessages(MSG_INACTIVITY_TIME_OUT);
-            mHandler.sendEmptyMessageDelayed(MSG_INACTIVITY_TIME_OUT, USER_INACTIVITY_TIMEOUT);
+            mHandler.sendEmptyMessageDelayed(MSG_INACTIVITY_TIME_OUT, mUserInactivityTimeout);
         }
     };
 }
