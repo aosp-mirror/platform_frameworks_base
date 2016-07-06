@@ -1548,7 +1548,7 @@ public final class Settings {
 
         private IContentProvider lazyGetProvider(ContentResolver cr) {
             IContentProvider cp = null;
-            synchronized (this) {
+            synchronized (NameValueCache.this) {
                 cp = mContentProvider;
                 if (cp == null) {
                     cp = mContentProvider = cr.acquireProvider(mUri.getAuthority());
@@ -1575,7 +1575,7 @@ public final class Settings {
         public String getStringForUser(ContentResolver cr, String name, final int userHandle) {
             final boolean isSelf = (userHandle == UserHandle.myUserId());
             if (isSelf) {
-                synchronized (this) {
+                synchronized (NameValueCache.this) {
                     if (mGenerationTracker != null) {
                         if (mGenerationTracker.isGenerationChanged()) {
                             if (DEBUG) {
@@ -1608,7 +1608,7 @@ public final class Settings {
                         args.putInt(CALL_METHOD_USER_KEY, userHandle);
                     }
                     boolean needsGenerationTracker = false;
-                    synchronized (this) {
+                    synchronized (NameValueCache.this) {
                         if (isSelf && mGenerationTracker == null) {
                             needsGenerationTracker = true;
                             if (args == null) {
@@ -1627,7 +1627,7 @@ public final class Settings {
                         String value = b.getString(Settings.NameValueTable.VALUE);
                         // Don't update our cache for reads of other users' data
                         if (isSelf) {
-                            synchronized (this) {
+                            synchronized (NameValueCache.this) {
                                 if (needsGenerationTracker) {
                                     MemoryIntArray array = b.getParcelable(
                                             CALL_METHOD_TRACK_GENERATION_KEY);
@@ -1644,7 +1644,7 @@ public final class Settings {
                                         }
                                         mGenerationTracker = new GenerationTracker(array, index,
                                                 generation, () -> {
-                                            synchronized (this) {
+                                            synchronized (NameValueCache.this) {
                                                 Log.e(TAG, "Error accessing generation"
                                                         + " tracker - removing");
                                                 if (mGenerationTracker != null) {
@@ -1685,7 +1685,7 @@ public final class Settings {
                 }
 
                 String value = c.moveToNext() ? c.getString(0) : null;
-                synchronized (this) {
+                synchronized (NameValueCache.this) {
                     mValues.put(name, value);
                 }
                 if (LOCAL_LOGV) {
