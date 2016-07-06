@@ -26,4 +26,5 @@
 
     <integer name="date_picker_mode">1</integer>
     <integer name="time_picker_mode">1</integer>
+    <integer name="date_picker_header_max_lines_material">2</integer>
 </resources>
