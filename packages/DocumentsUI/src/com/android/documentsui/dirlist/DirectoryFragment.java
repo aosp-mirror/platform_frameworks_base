@@ -1468,7 +1468,7 @@ public class DirectoryFragment extends Fragment
             DocumentInfo doc = getSingleSelectedDocument(selection);
             return mIconHelper.getDocumentIcon(getContext(), doc);
         }
-        return getContext().getDrawable(R.drawable.ic_doc_generic);
+        return getContext().getDrawable(com.android.internal.R.drawable.ic_doc_generic);
     }
 
     private String getDragTitle(Selection selection) {

@@ -2640,4 +2640,30 @@
 
   <!-- Package name for the device provisioning package -->
   <java-symbol type="string" name="config_deviceProvisioningPackage" />
+
+  <!-- Used for MimeIconUtils. -->
+  <java-symbol type="drawable" name="ic_doc_apk" />
+  <java-symbol type="drawable" name="ic_doc_audio" />
+  <java-symbol type="drawable" name="ic_doc_certificate" />
+  <java-symbol type="drawable" name="ic_doc_codes" />
+  <java-symbol type="drawable" name="ic_doc_compressed" />
+  <java-symbol type="drawable" name="ic_doc_contact" />
+  <java-symbol type="drawable" name="ic_doc_event" />
+  <java-symbol type="drawable" name="ic_doc_font" />
+  <java-symbol type="drawable" name="ic_doc_image" />
+  <java-symbol type="drawable" name="ic_doc_pdf" />
+  <java-symbol type="drawable" name="ic_doc_presentation" />
+  <java-symbol type="drawable" name="ic_doc_spreadsheet" />
+  <java-symbol type="drawable" name="ic_doc_document" />
+  <java-symbol type="drawable" name="ic_doc_video" />
+  <java-symbol type="drawable" name="ic_doc_word" />
+  <java-symbol type="drawable" name="ic_doc_excel" />
+  <java-symbol type="drawable" name="ic_doc_powerpoint" />
+  <java-symbol type="drawable" name="ic_doc_folder" />
+  <java-symbol type="drawable" name="ic_doc_audio" />
+  <java-symbol type="drawable" name="ic_doc_image" />
+  <java-symbol type="drawable" name="ic_doc_text" />
+  <java-symbol type="drawable" name="ic_doc_video" />
+  <java-symbol type="drawable" name="ic_doc_generic" />
+
 </resources>
