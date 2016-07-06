@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_HWUI_CACHES_H
-#define ANDROID_HWUI_CACHES_H
+#pragma once
 
 #include "AssetAtlas.h"
 #include "Dither.h"
@@ -23,7 +22,6 @@
 #include "FboCache.h"
 #include "GammaFontRenderer.h"
 #include "GradientCache.h"
-#include "LayerCache.h"
 #include "PatchCache.h"
 #include "ProgramCache.h"
 #include "PathCache.h"
@@ -146,7 +144,6 @@ private:
     Extensions mExtensions;
 public:
     TextureCache textureCache;
-    LayerCache layerCache;
     RenderBufferCache renderBufferCache;
     GradientCache gradientCache;
     PatchCache patchCache;
@@ -205,5 +202,3 @@ private:
 
 }; // namespace uirenderer
 }; // namespace android
-
-#endif // ANDROID_HWUI_CACHES_H

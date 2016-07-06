@@ -24,7 +24,6 @@
 #include <SkPathOps.h>
 
 #include "Matrix.h"
-#include "OpenGLRenderer.h"
 #include "hwui/Canvas.h"
 #include "utils/MathUtils.h"
 

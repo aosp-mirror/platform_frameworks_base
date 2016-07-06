@@ -15,11 +15,10 @@
  */
 #include "DeferredLayerUpdater.h"
 
-#include "OpenGLRenderer.h"
-
 #include "LayerRenderer.h"
 #include "renderthread/EglManager.h"
 #include "renderthread/RenderTask.h"
+#include "utils/PaintUtils.h"
 
 namespace android {
 namespace uirenderer {
@@ -29,8 +28,7 @@ DeferredLayerUpdater::DeferredLayerUpdater(Layer* layer)
         , mTransform(nullptr)
         , mNeedsGLContextAttach(false)
         , mUpdateTexImage(false)
-        , mLayer(layer)
-        , mCaches(Caches::getInstance()) {
+        , mLayer(layer) {
     mWidth = mLayer->layer.getWidth();
     mHeight = mLayer->layer.getHeight();
     mBlend = mLayer->isBlend();
@@ -54,7 +52,6 @@ void DeferredLayerUpdater::setPaint(const SkPaint* paint) {
 }
 
 void DeferredLayerUpdater::apply() {
-    // These properties are applied the same to both layer types
     mLayer->setColorFilter(mColorFilter);
     mLayer->setAlpha(mAlpha, mMode);
 

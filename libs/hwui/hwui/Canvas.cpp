@@ -16,7 +16,6 @@
 
 #include "Canvas.h"
 
-#include "DisplayListCanvas.h"
 #include "RecordingCanvas.h"
 #include "MinikinUtils.h"
 #include "Paint.h"
@@ -27,11 +26,7 @@
 namespace android {
 
 Canvas* Canvas::create_recording_canvas(int width, int height) {
-#if HWUI_NEW_OPS
     return new uirenderer::RecordingCanvas(width, height);
-#else
-    return new uirenderer::DisplayListCanvas(width, height);
-#endif
 }
 
 void Canvas::drawTextDecorations(float x, float y, float length, const SkPaint& paint) {

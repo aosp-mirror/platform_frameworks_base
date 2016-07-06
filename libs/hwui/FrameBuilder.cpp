@@ -477,7 +477,7 @@ void FrameBuilder::deferProjectedChildren(const RenderNode& renderNode) {
         projectionReceiverOutline->transform(
                 skCurrentTransform,
                 &transformedMaskPath);
-        mCanvasState.setProjectionPathMask(mAllocator, &transformedMaskPath);
+        mCanvasState.setProjectionPathMask(&transformedMaskPath);
     }
 
     for (size_t i = 0; i < renderNode.mProjectedNodes.size(); i++) {

@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_HWUI_FONT_RENDERER_H
-#define ANDROID_HWUI_FONT_RENDERER_H
+#pragma once
 
 #include "font/FontUtil.h"
 #include "font/CacheTexture.h"
@@ -44,31 +43,21 @@ namespace RSC {
 namespace android {
 namespace uirenderer {
 
-#if HWUI_NEW_OPS
 class BakedOpState;
 class BakedOpRenderer;
 struct ClipBase;
-#else
-class OpenGLRenderer;
-#endif
 
 class TextDrawFunctor {
 public:
     TextDrawFunctor(
-#if HWUI_NEW_OPS
             BakedOpRenderer* renderer,
             const BakedOpState* bakedState,
             const ClipBase* clip,
-#else
-            OpenGLRenderer* renderer,
-#endif
             float x, float y, bool pureTranslate,
             int alpha, SkXfermode::Mode mode, const SkPaint* paint)
         : renderer(renderer)
-#if HWUI_NEW_OPS
         , bakedState(bakedState)
         , clip(clip)
-#endif
         , x(x)
         , y(y)
         , pureTranslate(pureTranslate)
@@ -79,13 +68,9 @@ public:
 
     void draw(CacheTexture& texture, bool linearFiltering);
 
-#if HWUI_NEW_OPS
     BakedOpRenderer* renderer;
     const BakedOpState* bakedState;
     const ClipBase* clip;
-#else
-    OpenGLRenderer* renderer;
-#endif
     float x;
     float y;
     bool pureTranslate;
@@ -218,5 +203,3 @@ private:
 
 }; // namespace uirenderer
 }; // namespace android
-
-#endif // ANDROID_HWUI_FONT_RENDERER_H

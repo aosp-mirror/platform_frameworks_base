@@ -2,8 +2,6 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
 
-HWUI_NEW_OPS := true
-
 # Enables fine-grained GLES error checking
 # If set to true, every GLES call is wrapped & error checked
 # Has moderate overhead
@@ -45,19 +43,21 @@ hwui_src_files := \
     Animator.cpp \
     AnimatorManager.cpp \
     AssetAtlas.cpp \
+    BakedOpDispatcher.cpp \
+    BakedOpRenderer.cpp \
+    BakedOpState.cpp \
     Caches.cpp \
     CanvasState.cpp \
     ClipArea.cpp \
     DamageAccumulator.cpp \
-    DeferredDisplayList.cpp \
     DeferredLayerUpdater.cpp \
     DeviceInfo.cpp \
     DisplayList.cpp \
-    DisplayListCanvas.cpp \
     Dither.cpp \
     Extensions.cpp \
     FboCache.cpp \
     FontRenderer.cpp \
+    FrameBuilder.cpp \
     FrameInfo.cpp \
     FrameInfoVisualizer.cpp \
     GammaFontRenderer.cpp \
@@ -68,23 +68,24 @@ hwui_src_files := \
     Interpolator.cpp \
     JankTracker.cpp \
     Layer.cpp \
-    LayerCache.cpp \
+    LayerBuilder.cpp \
     LayerRenderer.cpp \
     LayerUpdateQueue.cpp \
     Matrix.cpp \
-    OpenGLRenderer.cpp \
+    OpDumper.cpp \
     Patch.cpp \
     PatchCache.cpp \
     PathCache.cpp \
-    PathTessellator.cpp \
     PathParser.cpp \
+    PathTessellator.cpp \
     PixelBuffer.cpp \
     Program.cpp \
     ProgramCache.cpp \
     Properties.cpp \
-    PropertyValuesHolder.cpp \
     PropertyValuesAnimatorSet.cpp \
+    PropertyValuesHolder.cpp \
     Readback.cpp \
+    RecordingCanvas.cpp \
     RenderBufferCache.cpp \
     RenderNode.cpp \
     RenderProperties.cpp \
@@ -129,20 +130,6 @@ hwui_cflags += -Wno-free-nonheap-object
 
 # clang's warning is broken, see: https://llvm.org/bugs/show_bug.cgi?id=21629
 hwui_cflags += -Wno-missing-braces
-
-ifeq (true, $(HWUI_NEW_OPS))
-    hwui_src_files += \
-        BakedOpDispatcher.cpp \
-        BakedOpRenderer.cpp \
-        BakedOpState.cpp \
-        FrameBuilder.cpp \
-        LayerBuilder.cpp \
-        OpDumper.cpp \
-        RecordingCanvas.cpp
-
-    hwui_cflags += -DHWUI_NEW_OPS
-
-endif
 
 ifndef HWUI_COMPILE_SYMBOLS
     hwui_cflags += -fvisibility=hidden
@@ -255,40 +242,36 @@ LOCAL_C_INCLUDES := $(hwui_c_includes)
 LOCAL_SRC_FILES += \
     $(hwui_test_common_src_files) \
     tests/unit/main.cpp \
+    tests/unit/BakedOpDispatcherTests.cpp \
+    tests/unit/BakedOpRendererTests.cpp \
+    tests/unit/BakedOpStateTests.cpp \
     tests/unit/CanvasStateTests.cpp \
     tests/unit/ClipAreaTests.cpp \
     tests/unit/DamageAccumulatorTests.cpp \
     tests/unit/DeviceInfoTests.cpp \
     tests/unit/FatVectorTests.cpp \
     tests/unit/FontRendererTests.cpp \
+    tests/unit/FrameBuilderTests.cpp \
     tests/unit/GlopBuilderTests.cpp \
     tests/unit/GpuMemoryTrackerTests.cpp \
     tests/unit/GradientCacheTests.cpp \
     tests/unit/LayerUpdateQueueTests.cpp \
+    tests/unit/LeakCheckTests.cpp \
     tests/unit/LinearAllocatorTests.cpp \
     tests/unit/MatrixTests.cpp \
     tests/unit/MeshStateTests.cpp \
     tests/unit/OffscreenBufferPoolTests.cpp \
+    tests/unit/OpDumperTests.cpp \
+    tests/unit/RecordingCanvasTests.cpp \
     tests/unit/RenderNodeTests.cpp \
     tests/unit/RenderPropertiesTests.cpp \
     tests/unit/SkiaBehaviorTests.cpp \
+    tests/unit/SkiaCanvasTests.cpp \
     tests/unit/SnapshotTests.cpp \
     tests/unit/StringUtilsTests.cpp \
     tests/unit/TestUtilsTests.cpp \
     tests/unit/TextDropShadowCacheTests.cpp \
-    tests/unit/VectorDrawableTests.cpp
-
-ifeq (true, $(HWUI_NEW_OPS))
-    LOCAL_SRC_FILES += \
-        tests/unit/BakedOpDispatcherTests.cpp \
-        tests/unit/BakedOpRendererTests.cpp \
-        tests/unit/BakedOpStateTests.cpp \
-        tests/unit/FrameBuilderTests.cpp \
-        tests/unit/LeakCheckTests.cpp \
-        tests/unit/OpDumperTests.cpp \
-        tests/unit/RecordingCanvasTests.cpp \
-        tests/unit/SkiaCanvasTests.cpp
-endif
+    tests/unit/VectorDrawableTests.cpp \
 
 include $(LOCAL_PATH)/hwui_static_deps.mk
 include $(BUILD_NATIVE_TEST)
@@ -344,15 +327,12 @@ LOCAL_SRC_FILES += \
     tests/microbench/main.cpp \
     tests/microbench/DisplayListCanvasBench.cpp \
     tests/microbench/FontBench.cpp \
+    tests/microbench/FrameBuilderBench.cpp \
     tests/microbench/LinearAllocatorBench.cpp \
     tests/microbench/PathParserBench.cpp \
     tests/microbench/ShadowBench.cpp \
     tests/microbench/TaskManagerBench.cpp
 
-ifeq (true, $(HWUI_NEW_OPS))
-    LOCAL_SRC_FILES += \
-        tests/microbench/FrameBuilderBench.cpp
-endif
 
 include $(LOCAL_PATH)/hwui_static_deps.mk
 include $(BUILD_NATIVE_BENCHMARK)

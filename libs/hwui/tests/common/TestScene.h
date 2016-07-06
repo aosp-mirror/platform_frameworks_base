@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef TESTS_TESTSCENE_H
-#define TESTS_TESTSCENE_H
+
+#pragma once
 
 #include <string>
 #include <unordered_map>
@@ -22,14 +22,9 @@
 namespace android {
 namespace uirenderer {
 class RenderNode;
-
-#if HWUI_NEW_OPS
 class RecordingCanvas;
+
 typedef RecordingCanvas TestCanvas;
-#else
-class DisplayListCanvas;
-typedef DisplayListCanvas TestCanvas;
-#endif
 
 namespace test {
 
@@ -76,5 +71,3 @@ public:
 } // namespace test
 } // namespace uirenderer
 } // namespace android
-
-#endif /* TESTS_TESTSCENE_H */

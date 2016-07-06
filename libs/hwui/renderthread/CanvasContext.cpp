@@ -21,9 +21,8 @@
 #include "Caches.h"
 #include "DeferredLayerUpdater.h"
 #include "EglManager.h"
-#include "LayerUpdateQueue.h"
 #include "LayerRenderer.h"
-#include "OpenGLRenderer.h"
+#include "LayerUpdateQueue.h"
 #include "Properties.h"
 #include "Readback.h"
 #include "RenderThread.h"
@@ -109,12 +108,6 @@ void CanvasContext::destroy(TreeObserver* observer) {
     freePrefetchedLayers(observer);
     destroyHardwareResources(observer);
     mAnimationContext->destroy();
-#if !HWUI_NEW_OPS
-    if (mCanvas) {
-        delete mCanvas;
-        mCanvas = nullptr;
-    }
-#endif
 }
 
 void CanvasContext::setSurface(Surface* surface) {
@@ -149,11 +142,6 @@ void CanvasContext::setSwapBehavior(SwapBehavior swapBehavior) {
 
 void CanvasContext::initialize(Surface* surface) {
     setSurface(surface);
-#if !HWUI_NEW_OPS
-    if (mCanvas) return;
-    mCanvas = new OpenGLRenderer(mRenderThread.renderState());
-    mCanvas->initProperties();
-#endif
 }
 
 void CanvasContext::updateSurface(Surface* surface) {
@@ -180,23 +168,13 @@ void CanvasContext::setStopped(bool stopped) {
 
 void CanvasContext::setup(float lightRadius,
         uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha) {
-#if HWUI_NEW_OPS
     mLightGeometry.radius = lightRadius;
     mLightInfo.ambientShadowAlpha = ambientShadowAlpha;
     mLightInfo.spotShadowAlpha = spotShadowAlpha;
-#else
-    if (!mCanvas) return;
-    mCanvas->initLight(lightRadius, ambientShadowAlpha, spotShadowAlpha);
-#endif
 }
 
 void CanvasContext::setLightCenter(const Vector3& lightCenter) {
-#if HWUI_NEW_OPS
     mLightGeometry.center = lightCenter;
-#else
-    if (!mCanvas) return;
-    mCanvas->setLightCenter(lightCenter);
-#endif
 }
 
 void CanvasContext::setOpaque(bool opaque) {
@@ -273,11 +251,7 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo,
     mCurrentFrameInfo->markSyncStart();
 
     info.damageAccumulator = &mDamageAccumulator;
-#if HWUI_NEW_OPS
     info.layerUpdateQueue = &mLayerUpdateQueue;
-#else
-    info.renderer = mCanvas;
-#endif
 
     mAnimationContext->startFrame(info.mode);
     for (const sp<RenderNode>& node : mRenderNodes) {
@@ -354,10 +328,8 @@ void CanvasContext::notifyFramePending() {
 }
 
 void CanvasContext::draw() {
-#if !HWUI_NEW_OPS
-    LOG_ALWAYS_FATAL_IF(!mCanvas || mEglSurface == EGL_NO_SURFACE,
-            "drawRenderNode called on a context with no canvas or surface!");
-#endif
+    LOG_ALWAYS_FATAL_IF(mEglSurface == EGL_NO_SURFACE,
+            "drawRenderNode called on a context with no surface!");
 
     SkRect dirty;
     mDamageAccumulator.finish(&dirty);
@@ -420,7 +392,6 @@ void CanvasContext::draw() {
 
     mEglManager.damageFrame(frame, dirty);
 
-#if HWUI_NEW_OPS
     auto& caches = Caches::getInstance();
     FrameBuilder frameBuilder(dirty, frame.width(), frame.height(), mLightGeometry, caches);
 
@@ -446,122 +417,6 @@ void CanvasContext::draw() {
     if (CC_UNLIKELY(Properties::debugLevel & kDebugMemory)) {
         caches.dumpMemoryUsage();
     }
-#endif
-
-#else
-    mCanvas->prepareDirty(frame.width(), frame.height(),
-            dirty.fLeft, dirty.fTop, dirty.fRight, dirty.fBottom, mOpaque);
-
-    Rect outBounds;
-    // It there are multiple render nodes, they are laid out as follows:
-    // #0 - backdrop (content + caption)
-    // #1 - content (positioned at (0,0) and clipped to - its bounds mContentDrawBounds)
-    // #2 - additional overlay nodes
-    // Usually the backdrop cannot be seen since it will be entirely covered by the content. While
-    // resizing however it might become partially visible. The following render loop will crop the
-    // backdrop against the content and draw the remaining part of it. It will then draw the content
-    // cropped to the backdrop (since that indicates a shrinking of the window).
-    //
-    // Additional nodes will be drawn on top with no particular clipping semantics.
-
-    // The bounds of the backdrop against which the content should be clipped.
-    Rect backdropBounds = mContentDrawBounds;
-    // Usually the contents bounds should be mContentDrawBounds - however - we will
-    // move it towards the fixed edge to give it a more stable appearance (for the moment).
-    Rect contentBounds;
-    // If there is no content bounds we ignore the layering as stated above and start with 2.
-    int layer = (mContentDrawBounds.isEmpty() || mRenderNodes.size() == 1) ? 2 : 0;
-    // Draw all render nodes. Note that
-    for (const sp<RenderNode>& node : mRenderNodes) {
-        if (layer == 0) { // Backdrop.
-            // Draw the backdrop clipped to the inverse content bounds, but assume that the content
-            // was moved to the upper left corner.
-            const RenderProperties& properties = node->properties();
-            Rect targetBounds(properties.getLeft(), properties.getTop(),
-                              properties.getRight(), properties.getBottom());
-            // Move the content bounds towards the fixed corner of the backdrop.
-            const int x = targetBounds.left;
-            const int y = targetBounds.top;
-            contentBounds.set(x, y, x + mContentDrawBounds.getWidth(),
-                                    y + mContentDrawBounds.getHeight());
-            // Remember the intersection of the target bounds and the intersection bounds against
-            // which we have to crop the content.
-            backdropBounds.set(x, y, x + backdropBounds.getWidth(), y + backdropBounds.getHeight());
-            backdropBounds.doIntersect(targetBounds);
-            // Check if we have to draw something on the left side ...
-            if (targetBounds.left < contentBounds.left) {
-                mCanvas->save(SaveFlags::Clip);
-                if (mCanvas->clipRect(targetBounds.left, targetBounds.top,
-                                      contentBounds.left, targetBounds.bottom,
-                                      SkRegion::kIntersect_Op)) {
-                    mCanvas->drawRenderNode(node.get(), outBounds);
-                }
-                // Reduce the target area by the area we have just painted.
-                targetBounds.left = std::min(contentBounds.left, targetBounds.right);
-                mCanvas->restore();
-            }
-            // ... or on the right side ...
-            if (targetBounds.right > contentBounds.right &&
-                !targetBounds.isEmpty()) {
-                mCanvas->save(SaveFlags::Clip);
-                if (mCanvas->clipRect(contentBounds.right, targetBounds.top,
-                                      targetBounds.right, targetBounds.bottom,
-                                      SkRegion::kIntersect_Op)) {
-                    mCanvas->drawRenderNode(node.get(), outBounds);
-                }
-                // Reduce the target area by the area we have just painted.
-                targetBounds.right = std::max(targetBounds.left, contentBounds.right);
-                mCanvas->restore();
-            }
-            // ... or at the top ...
-            if (targetBounds.top < contentBounds.top &&
-                !targetBounds.isEmpty()) {
-                mCanvas->save(SaveFlags::Clip);
-                if (mCanvas->clipRect(targetBounds.left, targetBounds.top, targetBounds.right,
-                                      contentBounds.top,
-                                      SkRegion::kIntersect_Op)) {
-                    mCanvas->drawRenderNode(node.get(), outBounds);
-                }
-                // Reduce the target area by the area we have just painted.
-                targetBounds.top = std::min(contentBounds.top, targetBounds.bottom);
-                mCanvas->restore();
-            }
-            // ... or at the bottom.
-            if (targetBounds.bottom > contentBounds.bottom &&
-                !targetBounds.isEmpty()) {
-                mCanvas->save(SaveFlags::Clip);
-                if (mCanvas->clipRect(targetBounds.left, contentBounds.bottom, targetBounds.right,
-                                      targetBounds.bottom, SkRegion::kIntersect_Op)) {
-                    mCanvas->drawRenderNode(node.get(), outBounds);
-                }
-                mCanvas->restore();
-            }
-        } else if (layer == 1) { // Content
-            // It gets cropped against the bounds of the backdrop to stay inside.
-            mCanvas->save(SaveFlags::MatrixClip);
-
-            // We shift and clip the content to match its final location in the window.
-            const float left = mContentDrawBounds.left;
-            const float top = mContentDrawBounds.top;
-            const float dx = backdropBounds.left - left;
-            const float dy = backdropBounds.top - top;
-            const float width = backdropBounds.getWidth();
-            const float height = backdropBounds.getHeight();
-
-            mCanvas->translate(dx, dy);
-            if (mCanvas->clipRect(left, top, left + width, top + height, SkRegion::kIntersect_Op)) {
-                mCanvas->drawRenderNode(node.get(), outBounds);
-            }
-            mCanvas->restore();
-        } else { // draw the rest on top at will!
-            mCanvas->drawRenderNode(node.get(), outBounds);
-        }
-        layer++;
-    }
-
-    profiler().draw(mCanvas);
-
-    bool drew = mCanvas->finish();
 #endif
 
     waitOnFences();
@@ -614,11 +469,7 @@ void CanvasContext::draw() {
 
 // Called by choreographer to do an RT-driven animation
 void CanvasContext::doFrame() {
-#if HWUI_NEW_OPS
     if (CC_UNLIKELY(mEglSurface == EGL_NO_SURFACE)) return;
-#else
-    if (CC_UNLIKELY(!mCanvas || mEglSurface == EGL_NO_SURFACE)) return;
-#endif
     prepareAndDraw(nullptr);
 }
 
@@ -669,9 +520,6 @@ void CanvasContext::freePrefetchedLayers(TreeObserver* observer) {
 void CanvasContext::buildLayer(RenderNode* node, TreeObserver* observer) {
     ATRACE_CALL();
     if (!mEglManager.hasEglContext()) return;
-#if !HWUI_NEW_OPS
-    if (!mCanvas) return;
-#endif
 
     // buildLayer() will leave the tree in an unknown state, so we must stop drawing
     stopDrawing();
@@ -679,11 +527,7 @@ void CanvasContext::buildLayer(RenderNode* node, TreeObserver* observer) {
     TreeInfo info(TreeInfo::MODE_FULL, *this);
     info.damageAccumulator = &mDamageAccumulator;
     info.observer = observer;
-#if HWUI_NEW_OPS
     info.layerUpdateQueue = &mLayerUpdateQueue;
-#else
-    info.renderer = mCanvas;
-#endif
     info.runAnimations = false;
     node->prepareTree(info);
     SkRect ignore;
@@ -692,7 +536,6 @@ void CanvasContext::buildLayer(RenderNode* node, TreeObserver* observer) {
     // purposes when the frame is actually drawn
     node->setPropertyFieldsDirty(RenderNode::GENERIC);
 
-#if HWUI_NEW_OPS
     static const std::vector< sp<RenderNode> > emptyNodeList;
     auto& caches = Caches::getInstance();
     FrameBuilder frameBuilder(mLayerUpdateQueue, mLightGeometry, caches);
@@ -701,10 +544,6 @@ void CanvasContext::buildLayer(RenderNode* node, TreeObserver* observer) {
             mOpaque, mLightInfo);
     LOG_ALWAYS_FATAL_IF(renderer.didDraw(), "shouldn't draw in buildlayer case");
     frameBuilder.replayBakedOps<BakedOpDispatcher>(renderer);
-#else
-    mCanvas->markLayersAsBuildLayers();
-    mCanvas->flushLayerUpdates();
-#endif
 
     node->incStrong(nullptr);
     mPrefetchedLayers.insert(node);

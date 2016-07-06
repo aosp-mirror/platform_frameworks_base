@@ -17,8 +17,10 @@
 
 #include "Caches.h"
 #include "Glop.h"
+#include "Layer.h"
 #include "Matrix.h"
 #include "Patch.h"
+#include "PathCache.h"
 #include "renderstate/MeshState.h"
 #include "renderstate/RenderState.h"
 #include "SkiaShader.h"
@@ -156,20 +158,6 @@ GlopBuilder& GlopBuilder::setMeshTexturedIndexedQuads(TextureVertex* vertexData,
 
     mOutGlop->mesh.primitiveMode = GL_TRIANGLES;
     mOutGlop->mesh.indices = { mRenderState.meshState().getQuadListIBO(), nullptr };
-    mOutGlop->mesh.vertices = {
-            0,
-            VertexAttribFlags::TextureCoord,
-            &vertexData[0].x, &vertexData[0].u, nullptr,
-            kTextureVertexStride };
-    mOutGlop->mesh.elementCount = elementCount;
-    return *this;
-}
-
-GlopBuilder& GlopBuilder::setMeshTexturedMesh(TextureVertex* vertexData, int elementCount) {
-    TRIGGER_STAGE(kMeshStage);
-
-    mOutGlop->mesh.primitiveMode = GL_TRIANGLES;
-    mOutGlop->mesh.indices = { 0, nullptr };
     mOutGlop->mesh.vertices = {
             0,
             VertexAttribFlags::TextureCoord,
@@ -514,9 +502,6 @@ GlopBuilder& GlopBuilder::setModelViewMapUnitToRect(const Rect destination) {
 
     mOutGlop->transform.modelView.loadTranslate(destination.left, destination.top, 0.0f);
     mOutGlop->transform.modelView.scale(destination.getWidth(), destination.getHeight(), 1.0f);
-#if !HWUI_NEW_OPS
-    mOutGlop->bounds = destination;
-#endif
     return *this;
 }
 
@@ -540,9 +525,6 @@ GlopBuilder& GlopBuilder::setModelViewMapUnitToRectSnap(const Rect destination) 
 
     mOutGlop->transform.modelView.loadTranslate(left, top, 0.0f);
     mOutGlop->transform.modelView.scale(destination.getWidth(), destination.getHeight(), 1.0f);
-#if !HWUI_NEW_OPS
-    mOutGlop->bounds = destination;
-#endif
     return *this;
 }
 
@@ -550,10 +532,6 @@ GlopBuilder& GlopBuilder::setModelViewOffsetRect(float offsetX, float offsetY, c
     TRIGGER_STAGE(kModelViewStage);
 
     mOutGlop->transform.modelView.loadTranslate(offsetX, offsetY, 0.0f);
-#if !HWUI_NEW_OPS
-    mOutGlop->bounds = source;
-    mOutGlop->bounds.translate(offsetX, offsetY);
-#endif
     return *this;
 }
 
@@ -573,10 +551,6 @@ GlopBuilder& GlopBuilder::setModelViewOffsetRectSnap(float offsetX, float offset
     }
 
     mOutGlop->transform.modelView.loadTranslate(offsetX, offsetY, 0.0f);
-#if !HWUI_NEW_OPS
-    mOutGlop->bounds = source;
-    mOutGlop->bounds.translate(offsetX, offsetY);
-#endif
     return *this;
 }
 
@@ -676,9 +650,6 @@ void GlopBuilder::build() {
 
     // Final step: populate program and map bounds into render target space
     mOutGlop->fill.program = mCaches.programCache.get(mDescription);
-#if !HWUI_NEW_OPS
-    mOutGlop->transform.meshTransform().mapRect(mOutGlop->bounds);
-#endif
 }
 
 void GlopBuilder::dump(const Glop& glop) {
@@ -718,9 +689,6 @@ void GlopBuilder::dump(const Glop& glop) {
     ALOGD_IF(glop.roundRectClipState, "Glop RRCS %p", glop.roundRectClipState);
 
     ALOGD("Glop blend %d %d", glop.blend.src, glop.blend.dst);
-#if !HWUI_NEW_OPS
-    ALOGD("Glop bounds " RECT_STRING, RECT_ARGS(glop.bounds));
-#endif
 }
 
 } /* namespace uirenderer */

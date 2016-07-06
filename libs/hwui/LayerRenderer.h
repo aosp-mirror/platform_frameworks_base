@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_HWUI_LAYER_RENDERER_H
-#define ANDROID_HWUI_LAYER_RENDERER_H
+#pragma once
 
 #include <cutils/compiler.h>
 
-#include "OpenGLRenderer.h"
 #include "Layer.h"
 
 #include <SkBitmap.h>
@@ -44,40 +42,12 @@ class RenderState;
 // Renderer
 ///////////////////////////////////////////////////////////////////////////////
 
-class LayerRenderer: public OpenGLRenderer {
+class LayerRenderer {
 public:
-    LayerRenderer(RenderState& renderState, Layer* layer);
-    virtual ~LayerRenderer();
-
-    virtual void onViewportInitialized() override { /* do nothing */ }
-    virtual void prepareDirty(int viewportWidth, int viewportHeight,
-            float left, float top, float right, float bottom, bool opaque) override;
-    virtual void clear(float left, float top, float right, float bottom, bool opaque) override;
-    virtual bool finish() override;
-
     static Layer* createTextureLayer(RenderState& renderState);
-    static Layer* createRenderLayer(RenderState& renderState, uint32_t width, uint32_t height);
-    static bool resizeLayer(Layer* layer, uint32_t width, uint32_t height);
     static void updateTextureLayer(Layer* layer, uint32_t width, uint32_t height,
             bool isOpaque, bool forceFilter, GLenum renderTarget, const float* textureTransform);
-    static void destroyLayer(Layer* layer);
-
-    static void flushLayer(RenderState& renderState, Layer* layer);
-
-protected:
-    virtual void ensureStencilBuffer() override;
-    virtual bool hasLayer() const override;
-    virtual Region* getRegion() const override;
-    virtual GLuint getTargetFbo() const override;
-    virtual bool suppressErrorChecks() const override;
-
-private:
-    void generateMesh();
-
-    Layer* mLayer;
 }; // class LayerRenderer
 
 }; // namespace uirenderer
 }; // namespace android
-
-#endif // ANDROID_HWUI_LAYER_RENDERER_H

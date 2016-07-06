@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef DEFERREDLAYERUPDATE_H_
-#define DEFERREDLAYERUPDATE_H_
+
+#pragma once
 
 #include <cutils/compiler.h>
 #include <gui/GLConsumer.h>
@@ -100,19 +100,15 @@ private:
     SkColorFilter* mColorFilter;
     int mAlpha;
     SkXfermode::Mode mMode;
-
     sp<GLConsumer> mSurfaceTexture;
     SkMatrix* mTransform;
     bool mNeedsGLContextAttach;
     bool mUpdateTexImage;
 
     Layer* mLayer;
-    Caches& mCaches;
 
     void doUpdateTexImage();
 };
 
 } /* namespace uirenderer */
 } /* namespace android */
-
-#endif /* DEFERREDLAYERUPDATE_H_ */

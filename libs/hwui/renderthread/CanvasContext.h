@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-#ifndef CANVASCONTEXT_H_
-#define CANVASCONTEXT_H_
+#pragma once
 
+#include "BakedOpDispatcher.h"
+#include "BakedOpRenderer.h"
 #include "DamageAccumulator.h"
+#include "FrameBuilder.h"
 #include "FrameInfo.h"
 #include "FrameInfoVisualizer.h"
 #include "FrameMetricsReporter.h"
@@ -29,12 +31,6 @@
 #include "utils/RingBuffer.h"
 #include "renderthread/RenderTask.h"
 #include "renderthread/RenderThread.h"
-
-#if HWUI_NEW_OPS
-#include "BakedOpDispatcher.h"
-#include "BakedOpRenderer.h"
-#include "FrameBuilder.h"
-#endif
 
 #include <cutils/compiler.h>
 #include <EGL/egl.h>
@@ -53,9 +49,8 @@ namespace uirenderer {
 
 class AnimationContext;
 class DeferredLayerUpdater;
-class OpenGLRenderer;
-class Rect;
 class Layer;
+class Rect;
 class RenderState;
 
 namespace renderthread {
@@ -211,12 +206,8 @@ private:
     int64_t mFrameNumber = -1;
 
     bool mOpaque;
-#if HWUI_NEW_OPS
     BakedOpRenderer::LightInfo mLightInfo;
     FrameBuilder::LightGeometry mLightGeometry = { {0, 0, 0}, 0 };
-#else
-    OpenGLRenderer* mCanvas = nullptr;
-#endif
 
     bool mHaveNewSurface = false;
     DamageAccumulator mDamageAccumulator;
@@ -252,4 +243,3 @@ private:
 } /* namespace renderthread */
 } /* namespace uirenderer */
 } /* namespace android */
-#endif /* CANVASCONTEXT_H_ */

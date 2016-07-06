@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_HWUI_PATCH_CACHE_H
-#define ANDROID_HWUI_PATCH_CACHE_H
+#pragma once
 
 #include <GLES2/gl2.h>
 
@@ -48,6 +47,7 @@ class Patch;
 ///////////////////////////////////////////////////////////////////////////////
 
 class Caches;
+class RenderState;
 
 class PatchCache {
 public:
@@ -186,5 +186,3 @@ private:
 
 }; // namespace uirenderer
 }; // namespace android
-
-#endif // ANDROID_HWUI_PATCH_CACHE_H

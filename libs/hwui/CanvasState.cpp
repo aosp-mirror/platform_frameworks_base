@@ -23,8 +23,7 @@ namespace uirenderer {
 
 
 CanvasState::CanvasState(CanvasStateClient& renderer)
-        : mDirtyClip(false)
-        , mWidth(-1)
+        : mWidth(-1)
         , mHeight(-1)
         , mSaveCount(1)
         , mCanvas(renderer)
@@ -205,19 +204,16 @@ void CanvasState::concatMatrix(const Matrix4& matrix) {
 
 bool CanvasState::clipRect(float left, float top, float right, float bottom, SkRegion::Op op) {
     mSnapshot->clip(Rect(left, top, right, bottom), op);
-    mDirtyClip = true;
     return !mSnapshot->clipIsEmpty();
 }
 
 bool CanvasState::clipPath(const SkPath* path, SkRegion::Op op) {
     mSnapshot->clipPath(*path, op);
-    mDirtyClip = true;
     return !mSnapshot->clipIsEmpty();
 }
 
 bool CanvasState::clipRegion(const SkRegion* region, SkRegion::Op op) {
     mSnapshot->clipRegionTransformed(*region, op);
-    mDirtyClip = true;
     return !mSnapshot->clipIsEmpty();
 }
 
@@ -234,15 +230,6 @@ void CanvasState::setClippingOutline(LinearAllocator& allocator, const Outline* 
     if (outlineIsRounded) {
         setClippingRoundRect(allocator, bounds, radius, false);
     }
-}
-
-void CanvasState::setClippingRoundRect(LinearAllocator& allocator,
-        const Rect& rect, float radius, bool highPriority) {
-    mSnapshot->setClippingRoundRect(allocator, rect, radius, highPriority);
-}
-
-void CanvasState::setProjectionPathMask(LinearAllocator& allocator, const SkPath* path) {
-    mSnapshot->setProjectionPathMask(allocator, path);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -263,7 +250,7 @@ bool CanvasState::calculateQuickRejectForScissor(float left, float top,
         float right, float bottom,
         bool* clipRequired, bool* roundRectClipRequired,
         bool snapOut) const {
-    if (mSnapshot->isIgnored() || bottom <= top || right <= left) {
+    if (bottom <= top || right <= left) {
         return true;
     }
 
@@ -291,7 +278,7 @@ bool CanvasState::calculateQuickRejectForScissor(float left, float top,
 
 bool CanvasState::quickRejectConservative(float left, float top,
         float right, float bottom) const {
-    if (mSnapshot->isIgnored() || bottom <= top || right <= left) {
+    if (bottom <= top || right <= left) {
         return true;
     }
 

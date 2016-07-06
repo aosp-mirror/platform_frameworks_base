@@ -163,17 +163,15 @@ void Caches::dumpMemoryUsage(String8 &log) {
     log.appendFormat("Current memory usage / total memory usage (bytes):\n");
     log.appendFormat("  TextureCache         %8d / %8d\n",
             textureCache.getSize(), textureCache.getMaxSize());
-    log.appendFormat("  LayerCache           %8d / %8d (numLayers = %zu)\n",
-            layerCache.getSize(), layerCache.getMaxSize(), layerCache.getCount());
     if (mRenderState) {
         int memused = 0;
         for (std::set<Layer*>::iterator it = mRenderState->mActiveLayers.begin();
                 it != mRenderState->mActiveLayers.end(); it++) {
             const Layer* layer = *it;
-            log.appendFormat("    Layer size %dx%d; isTextureLayer()=%d; texid=%u fbo=%u; refs=%d\n",
+            log.appendFormat("    Layer size %dx%d; texid=%u refs=%d\n",
                     layer->getWidth(), layer->getHeight(),
-                    layer->isTextureLayer(), layer->getTextureId(),
-                    layer->getFbo(), layer->getStrongCount());
+                    layer->getTextureId(),
+                    layer->getStrongCount());
             memused += layer->getWidth() * layer->getHeight() * 4;
         }
         log.appendFormat("  Layers total   %8d (numLayers = %zu)\n",
@@ -248,7 +246,6 @@ void Caches::flush(FlushMode mode) {
             tessellationCache.clear();
             // fall through
         case FlushMode::Layers:
-            layerCache.clear();
             renderBufferCache.clear();
             break;
     }

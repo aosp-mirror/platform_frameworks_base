@@ -17,21 +17,13 @@
 #include <benchmark/benchmark.h>
 
 #include "DisplayList.h"
-#if HWUI_NEW_OPS
 #include "RecordingCanvas.h"
-#else
-#include "DisplayListCanvas.h"
-#endif
 #include "tests/common/TestUtils.h"
 
 using namespace android;
 using namespace android::uirenderer;
 
-#if HWUI_NEW_OPS
 typedef RecordingCanvas TestCanvas;
-#else
-typedef DisplayListCanvas TestCanvas;
-#endif
 
 void BM_DisplayList_alloc(benchmark::State& benchState) {
     while (benchState.KeepRunning()) {

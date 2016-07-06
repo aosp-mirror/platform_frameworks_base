@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef DRAWPROFILER_H
-#define DRAWPROFILER_H
+
+#pragma once
 
 #include "FrameInfo.h"
 #include "Properties.h"
@@ -28,13 +28,8 @@
 namespace android {
 namespace uirenderer {
 
-#if HWUI_NEW_OPS
 class BakedOpRenderer;
 typedef BakedOpRenderer ContentRenderer;
-#else
-class OpenGLRenderer;
-typedef OpenGLRenderer ContentRenderer;
-#endif
 
 // TODO: This is a bit awkward as it needs to match the thing in CanvasContext
 // A better abstraction here would be nice but iterators are painful
@@ -93,5 +88,3 @@ private:
 
 } /* namespace uirenderer */
 } /* namespace android */
-
-#endif /* DRAWPROFILER_H */

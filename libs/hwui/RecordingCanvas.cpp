@@ -43,7 +43,6 @@ void RecordingCanvas::resetRecording(int width, int height) {
     mState.initializeRecordingSaveStack(width, height);
 
     mDeferredBarrierType = DeferredBarrierType::InOrder;
-    mState.setDirtyClip(false);
 }
 
 DisplayList* RecordingCanvas::finishRecording() {

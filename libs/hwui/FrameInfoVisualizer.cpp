@@ -15,11 +15,7 @@
  */
 #include "FrameInfoVisualizer.h"
 
-#if HWUI_NEW_OPS
 #include "BakedOpRenderer.h"
-#else
-#include "OpenGLRenderer.h"
-#endif
 #include "utils/Color.h"
 
 #include <cutils/compiler.h>

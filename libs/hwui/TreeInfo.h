@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef TREEINFO_H
-#define TREEINFO_H
+
+#pragma once
 
 #include "utils/Macros.h"
 
@@ -31,7 +31,6 @@ class CanvasContext;
 
 class DamageAccumulator;
 class LayerUpdateQueue;
-class OpenGLRenderer;
 class RenderNode;
 class RenderState;
 
@@ -89,13 +88,7 @@ public:
     // Must not be null during actual usage
     DamageAccumulator* damageAccumulator = nullptr;
 
-#if HWUI_NEW_OPS
     LayerUpdateQueue* layerUpdateQueue = nullptr;
-#else
-    // The renderer that will be drawing the next frame. Use this to push any
-    // layer updates or similar. May be NULL.
-    OpenGLRenderer* renderer = nullptr;
-#endif
     ErrorHandler* errorHandler = nullptr;
 
     // Optional, may be nullptr. Used to allow things to observe interesting
@@ -128,5 +121,3 @@ public:
 
 } /* namespace uirenderer */
 } /* namespace android */
-
-#endif /* TREEINFO_H */

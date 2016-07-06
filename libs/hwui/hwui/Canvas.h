@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_GRAPHICS_CANVAS_H
-#define ANDROID_GRAPHICS_CANVAS_H
+#pragma once
 
 #include <cutils/compiler.h>
 #include <utils/Functor.h>
@@ -253,4 +252,3 @@ protected:
 };
 
 }; // namespace android
-#endif // ANDROID_GRAPHICS_CANVAS_H

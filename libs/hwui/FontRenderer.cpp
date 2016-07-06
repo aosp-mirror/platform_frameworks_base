@@ -16,6 +16,9 @@
 
 #include "FontRenderer.h"
 
+#include "BakedOpDispatcher.h"
+#include "BakedOpRenderer.h"
+#include "BakedOpState.h"
 #include "Caches.h"
 #include "Debug.h"
 #include "Extensions.h"
@@ -26,15 +29,6 @@
 #include "renderstate/RenderState.h"
 #include "utils/Blur.h"
 #include "utils/Timing.h"
-
-
-#if HWUI_NEW_OPS
-#include "BakedOpDispatcher.h"
-#include "BakedOpRenderer.h"
-#include "BakedOpState.h"
-#else
-#include "OpenGLRenderer.h"
-#endif
 
 #include <algorithm>
 #include <cutils/properties.h>
@@ -67,7 +61,6 @@ void TextDrawFunctor::draw(CacheTexture& texture, bool linearFiltering) {
     int transformFlags = pureTranslate
             ? TransformFlags::MeshIgnoresCanvasTransform : TransformFlags::None;
     Glop glop;
-#if HWUI_NEW_OPS
     GlopBuilder(renderer->renderState(), renderer->caches(), &glop)
             .setRoundRectClipState(bakedState->roundRectClipState)
             .setMeshTexturedIndexedQuads(texture.mesh(), texture.meshElementCount())
@@ -77,16 +70,6 @@ void TextDrawFunctor::draw(CacheTexture& texture, bool linearFiltering) {
             .build();
     // Note: don't pass dirty bounds here, so user must manage passing dirty bounds to renderer
     renderer->renderGlop(nullptr, clip, glop);
-#else
-    GlopBuilder(renderer->mRenderState, renderer->mCaches, &glop)
-            .setRoundRectClipState(renderer->currentSnapshot()->roundRectClipState)
-            .setMeshTexturedIndexedQuads(texture.mesh(), texture.meshElementCount())
-            .setFillTexturePaint(texture.getTexture(), textureFillFlags, paint, renderer->currentSnapshot()->alpha)
-            .setTransform(*(renderer->currentSnapshot()), transformFlags)
-            .setModelViewOffsetRect(0, 0, Rect())
-            .build();
-    renderer->renderGlop(glop);
-#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////

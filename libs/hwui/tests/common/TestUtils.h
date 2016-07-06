@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef TEST_UTILS_H
-#define TEST_UTILS_H
+
+#pragma once
 
 #include <DeviceInfo.h>
 #include <DisplayList.h>
@@ -25,24 +25,15 @@
 #include <renderthread/RenderThread.h>
 #include <Snapshot.h>
 
-#if HWUI_NEW_OPS
 #include <RecordedOp.h>
 #include <RecordingCanvas.h>
-#else
-#include <DisplayListOp.h>
-#include <DisplayListCanvas.h>
-#endif
 
 #include <memory>
 
 namespace android {
 namespace uirenderer {
 
-#if HWUI_NEW_OPS
 typedef RecordingCanvas TestCanvas;
-#else
-typedef DisplayListCanvas TestCanvas;
-#endif
 
 #define EXPECT_MATRIX_APPROX_EQ(a, b) \
     EXPECT_TRUE(TestUtils::matricesAreApproxEqual(a, b))
@@ -251,5 +242,3 @@ private:
 
 } /* namespace uirenderer */
 } /* namespace android */
-
-#endif /* TEST_UTILS_H */

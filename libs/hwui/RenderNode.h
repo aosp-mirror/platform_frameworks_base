@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef RENDERNODE_H
-#define RENDERNODE_H
+
+#pragma once
 
 #include <SkCamera.h>
 #include <SkMatrix.h>
@@ -44,29 +44,13 @@ namespace android {
 namespace uirenderer {
 
 class CanvasState;
-class DisplayListCanvas;
 class DisplayListOp;
-class OpenGLRenderer;
-class Rect;
-class SkiaShader;
-
-#if HWUI_NEW_OPS
 class FrameBuilder;
 class OffscreenBuffer;
+class Rect;
+class SkiaShader;
 struct RenderNodeOp;
-typedef OffscreenBuffer layer_t;
-typedef RenderNodeOp renderNodeOp_t;
-#else
-class Layer;
-typedef Layer layer_t;
-typedef DrawRenderNodeOp renderNodeOp_t;
-#endif
 
-class ClipRectOp;
-class DrawRenderNodeOp;
-class SaveLayerOp;
-class SaveOp;
-class RestoreToCountOp;
 class TreeInfo;
 class TreeObserver;
 
@@ -78,9 +62,8 @@ class RenderNode;
  * Primary class for storing recorded canvas commands, as well as per-View/ViewGroup display properties.
  *
  * Recording of canvas commands is somewhat similar to SkPicture, except the canvas-recording
- * functionality is split between DisplayListCanvas (which manages the recording), DisplayList
- * (which holds the actual data), and DisplayList (which holds properties and performs playback onto
- * a renderer).
+ * functionality is split between RecordingCanvas (which manages the recording), DisplayList
+ * (which holds the actual data), and RenderNode (which holds properties used for render playback).
  *
  * Note that DisplayList is swapped out from beneath an individual RenderNode when a view's
  * recorded stream of canvas operations is refreshed. The RenderNode (and its properties) stay
@@ -115,20 +98,11 @@ public:
         kReplayFlag_ClipChildren = 0x1
     };
 
-    void debugDumpLayers(const char* prefix);
-
     ANDROID_API void setStagingDisplayList(DisplayList* newData, TreeObserver* observer);
 
     void computeOrdering();
 
-    void defer(DeferStateStruct& deferStruct, const int level);
-    void replay(ReplayStateStruct& replayStruct, const int level);
-
-#if HWUI_NEW_OPS
     ANDROID_API void output(uint32_t level = 0, const char* label = "Root");
-#else
-    ANDROID_API void output(uint32_t level = 1);
-#endif
     ANDROID_API int getDebugSize();
     void copyTo(proto::RenderNode* node);
 
@@ -223,10 +197,8 @@ public:
     const DisplayList* getDisplayList() const {
         return mDisplayList;
     }
-#if HWUI_NEW_OPS
     OffscreenBuffer* getLayer() const { return mLayer; }
     OffscreenBuffer** getLayerHandle() { return &mLayer; } // ugh...
-#endif
 
     // Note: The position callbacks are relying on the listener using
     // the frameNumber to appropriately batch/synchronize these transactions.
@@ -257,62 +229,9 @@ public:
     }
 
 private:
-    typedef key_value_pair_t<float, DrawRenderNodeOp*> ZDrawRenderNodeOpPair;
-
-    static size_t findNonNegativeIndex(const std::vector<ZDrawRenderNodeOpPair>& nodes) {
-        for (size_t i = 0; i < nodes.size(); i++) {
-            if (nodes[i].key >= 0.0f) return i;
-        }
-        return nodes.size();
-    }
-
-    enum class ChildrenSelectMode {
-        NegativeZChildren,
-        PositiveZChildren
-    };
-
-    void computeOrderingImpl(renderNodeOp_t* opState,
-            std::vector<renderNodeOp_t*>* compositedChildrenOfProjectionSurface,
+    void computeOrderingImpl(RenderNodeOp* opState,
+            std::vector<RenderNodeOp*>* compositedChildrenOfProjectionSurface,
             const mat4* transformFromProjectionSurface);
-
-    template <class T>
-    inline void setViewProperties(OpenGLRenderer& renderer, T& handler);
-
-    void buildZSortedChildList(const DisplayList::Chunk& chunk,
-            std::vector<ZDrawRenderNodeOpPair>& zTranslatedNodes);
-
-    template<class T>
-    inline void issueDrawShadowOperation(const Matrix4& transformFromParent, T& handler);
-
-    template <class T>
-    inline void issueOperationsOf3dChildren(ChildrenSelectMode mode,
-            const Matrix4& initialTransform, const std::vector<ZDrawRenderNodeOpPair>& zTranslatedNodes,
-            OpenGLRenderer& renderer, T& handler);
-
-    template <class T>
-    inline void issueOperationsOfProjectedChildren(OpenGLRenderer& renderer, T& handler);
-
-    /**
-     * Issue the RenderNode's operations into a handler, recursing for subtrees through
-     * DrawRenderNodeOp's defer() or replay() methods
-     */
-    template <class T>
-    inline void issueOperations(OpenGLRenderer& renderer, T& handler);
-
-    class TextContainer {
-    public:
-        size_t length() const {
-            return mByteLength;
-        }
-
-        const char* text() const {
-            return (const char*) mText;
-        }
-
-        size_t mByteLength;
-        const char* mText;
-    };
-
 
     void syncProperties();
     void syncDisplayList(TreeInfo* info);
@@ -321,9 +240,6 @@ private:
     void pushStagingPropertiesChanges(TreeInfo& info);
     void pushStagingDisplayListChanges(TreeInfo& info);
     void prepareSubTree(TreeInfo& info, bool functorsNeedLayer, DisplayList* subtree);
-#if !HWUI_NEW_OPS
-    void applyLayerPropertiesToLayer(TreeInfo& info);
-#endif
     void prepareLayer(TreeInfo& info, uint32_t dirtyMask);
     void pushLayerUpdate(TreeInfo& info);
     void deleteDisplayList(TreeObserver* observer, TreeInfo* info = nullptr);
@@ -349,14 +265,14 @@ private:
 
     // Owned by RT. Lifecycle is managed by prepareTree(), with the exception
     // being in ~RenderNode() which may happen on any thread.
-    layer_t* mLayer = nullptr;
+    OffscreenBuffer* mLayer = nullptr;
 
     /**
      * Draw time state - these properties are only set and used during rendering
      */
 
     // for projection surfaces, contains a list of all children items
-    std::vector<renderNodeOp_t*> mProjectedNodes;
+    std::vector<RenderNodeOp*> mProjectedNodes;
 
     // How many references our parent(s) have to us. Typically this should alternate
     // between 2 and 1 (when a staging push happens we inc first then dec)
@@ -371,5 +287,3 @@ private:
 
 } /* namespace uirenderer */
 } /* namespace android */
-
-#endif /* RENDERNODE_H */

@@ -20,8 +20,7 @@
 #include <cutils/properties.h>
 
 /**
- * This file contains the list of system properties used to configure
- * the OpenGLRenderer.
+ * This file contains the list of system properties used to configure libhwui.
  */
 
 namespace android {
@@ -167,7 +166,7 @@ enum DebugLevel {
  * Used to enable/disable scissor optimization. The accepted values are
  * "true" and "false". The default value is "false".
  *
- * When scissor optimization is enabled, OpenGLRenderer will attempt to
+ * When scissor optimization is enabled, libhwui will attempt to
  * minimize the use of scissor by selectively enabling and disabling the
  * GL scissor test.
  * When the optimization is disabled, OpenGLRenderer will keep the GL

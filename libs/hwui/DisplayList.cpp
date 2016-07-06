@@ -21,13 +21,8 @@
 
 #include "Debug.h"
 #include "DisplayList.h"
-#include "RenderNode.h"
-
-#if HWUI_NEW_OPS
 #include "RecordedOp.h"
-#else
-#include "DisplayListOp.h"
-#endif
+#include "RenderNode.h"
 
 namespace android {
 namespace uirenderer {
@@ -45,8 +40,7 @@ DisplayList::DisplayList()
         , regions(stdAllocator)
         , referenceHolders(stdAllocator)
         , functors(stdAllocator)
-        , vectorDrawables(stdAllocator)
-        , hasDrawOps(false) {
+        , vectorDrawables(stdAllocator) {
 }
 
 DisplayList::~DisplayList() {

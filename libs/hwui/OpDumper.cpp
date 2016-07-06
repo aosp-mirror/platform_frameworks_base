@@ -16,6 +16,7 @@
 
 #include "OpDumper.h"
 
+#include "ClipArea.h"
 #include "RecordedOp.h"
 
 namespace android {

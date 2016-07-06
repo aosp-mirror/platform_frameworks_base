@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_HWUI_RECORDED_OP_H
-#define ANDROID_HWUI_RECORDED_OP_H
+#pragma once
 
-#include "RecordedOp.h"
 #include "font/FontUtil.h"
 #include "Matrix.h"
 #include "Rect.h"
 #include "RenderNode.h"
 #include "TessellationCache.h"
 #include "utils/LinearAllocator.h"
+#include "utils/PaintUtils.h"
 #include "Vector.h"
 
 #include <androidfw/ResourceTypes.h>
@@ -529,5 +528,3 @@ struct LayerOp : RecordedOp {
 
 }; // namespace uirenderer
 }; // namespace android
-
-#endif // ANDROID_HWUI_RECORDED_OP_H

@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef RENDERNODEPROPERTIES_H
-#define RENDERNODEPROPERTIES_H
+
+#pragma once
 
 #include "Caches.h"
 #include "DeviceInfo.h"
@@ -22,6 +22,7 @@
 #include "RevealClip.h"
 #include "Outline.h"
 #include "utils/MathUtils.h"
+#include "utils/PaintUtils.h"
 
 #include <SkCamera.h>
 #include <SkMatrix.h>
@@ -680,5 +681,3 @@ private:
 
 } /* namespace uirenderer */
 } /* namespace android */
-
-#endif /* RENDERNODEPROPERTIES_H */
