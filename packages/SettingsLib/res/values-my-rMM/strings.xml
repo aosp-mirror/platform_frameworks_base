@@ -71,7 +71,7 @@
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"ထည့်သွင်းရန်အသုံးပြုသည်"</string>
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"အတူတွဲပါ"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"ချိတ်တွဲရန်"</string>
-    <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"မလုပ်တော့ပါ"</string>
+    <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"မလုပ်တော့"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"ချိတ်တွဲမှုက ချိတ်ဆက်ထားလျှင် သင်၏ အဆက်အသွယ်များ နှင့် ခေါ်ဆိုမှု မှတ်တမ်းကို ရယူခွင့် ပြုသည်။"</string>
     <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>နှင့် တွဲချိတ်မရပါ"</string>
     <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"ပင်နံပါတ် သို့မဟုတ် ဖြတ်သန်းခွင့်ကီးမမှန်ကန်သောကြောင့်<xliff:g id="DEVICE_NAME">%1$s</xliff:g>နှင့် တွဲချိတ်မရပါ။"</string>
@@ -159,8 +159,8 @@
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"အစပြုခြင်းကိရိယာအား သော့ဖွင့်ရန် ခွင့်ပြုမည်"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"OEM သော့ဖွင့်ခြင်း ခွင့်ပြုမလား?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"သတိပေးချက်: ဤချိန်ညှိချက်ဖွင့်ထားလျှင်၊ ဤစက်ပစ္စည်းပေါ်တွင် စက်ပစ္စည်းကာကွယ်သည့် အထူးပြုလုပ်ချက် အလုပ်လုပ်မည်မဟုတ်ပါ။"</string>
-    <string name="mock_location_app" msgid="7966220972812881854">"တည်နေရာအတုပြု အက်ပ် ရွေးရန်"</string>
-    <string name="mock_location_app_not_set" msgid="809543285495344223">"တည်နေရာအတုပြ အက်ပ် သတ်မှတ်ထားခြင်းမရှိပါ"</string>
+    <string name="mock_location_app" msgid="7966220972812881854">"တည်နေရာအတုပြု အက်ပ်ရွေးရန်"</string>
+    <string name="mock_location_app_not_set" msgid="809543285495344223">"တည်နေရာအတုပြ အက်ပ်သတ်မှတ်ထားခြင်းမရှိပါ"</string>
     <string name="mock_location_app_set" msgid="8966420655295102685">"တည်နေရာအတုပြ အက်ပ်- <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"ကွန်ရက်လုပ်ငန်း"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"ကြိုးမဲ့ပြသမှု အသိအမှတ်ပြုလက်မှတ်"</string>
@@ -241,7 +241,7 @@
     <string name="transition_animation_scale_title" msgid="387527540523595875">"သက်ဝင်အသွင်ပြောင်းခြင်း"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"လှုပ်ရှားမှုကြာချိန်စကေး"</string>
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"ဆင့်ပွားမျက်နှာပြင်များအသွင်ဆောင်သည်"</string>
-    <string name="debug_applications_category" msgid="4206913653849771549">"အပလီကေးရှင်းများ"</string>
+    <string name="debug_applications_category" msgid="4206913653849771549">"အက်ပ်များ"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"ဆောင်ရွက်မှုများကို မသိမ်းထားပါနှင့်"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"အသုံးပြုသူထွက်ခွါသွားသည်နှင့် လုပ်ဆောင်ချက်များကို ဖျက်ပစ်မည်"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"နောက်ခံလုပ်ငန်းစဉ်ကန့်သတ်ခြင်း"</string>
@@ -269,7 +269,7 @@
     <item msgid="8280754435979370728">"မျက်လုံးမှတွေ့ရသည့် သဘာဝအရောင်"</item>
     <item msgid="5363960654009010371">"ဒီဂျစ်တယ်အကြောင်းအရာအတွက် ပြင်ဆင်ထားသည့် အရောင်များ"</item>
   </string-array>
-    <string name="inactive_apps_title" msgid="1317817863508274533">"အလုပ်မလုပ်သော အက်ပ် များ"</string>
+    <string name="inactive_apps_title" msgid="1317817863508274533">"အလုပ်မလုပ်သော အက်ပ်များ"</string>
     <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"ပွင့်မနေပါ။ ပြောင်းရန်တို့ပါ။"</string>
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"ပွင့်နေသည်။ ပြောင်းရန်တို့ပါ။"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"အလုပ်လုပ်နေသောဝန်ဆောင်မှုများ"</string>
