@@ -335,20 +335,17 @@ public final class WindowManagerGlobal {
             mViews.add(view);
             mRoots.add(root);
             mParams.add(wparams);
-        }
 
-        // do this last because it fires off messages to start doing things
-        try {
-            root.setView(view, wparams, panelParentView);
-        } catch (RuntimeException e) {
-            // BadTokenException or InvalidDisplayException, clean up.
-            synchronized (mLock) {
-                final int index = findViewLocked(view, false);
+            // do this last because it fires off messages to start doing things
+            try {
+                root.setView(view, wparams, panelParentView);
+            } catch (RuntimeException e) {
+                // BadTokenException or InvalidDisplayException, clean up.
                 if (index >= 0) {
                     removeViewLocked(index, true);
                 }
+                throw e;
             }
-            throw e;
         }
     }
 
