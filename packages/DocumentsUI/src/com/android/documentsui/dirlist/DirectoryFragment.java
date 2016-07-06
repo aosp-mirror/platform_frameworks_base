@@ -1391,7 +1391,7 @@ public class DirectoryFragment extends Fragment
                 return mIconHelper.getDocumentIcon(mContext, doc.authority, doc.documentId,
                         doc.mimeType, doc.icon);
             }
-            return mContext.getDrawable(R.drawable.ic_doc_generic);
+            return mContext.getDrawable(com.android.internal.R.drawable.ic_doc_generic);
         }
 
         private String getTitle(List<DocumentInfo> docs) {
