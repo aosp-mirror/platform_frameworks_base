@@ -18,7 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Shell"</string>
     <string name="bugreport_in_progress_title" msgid="4311705936714972757">"正在生成错误报告 <xliff:g id="ID">#%d</xliff:g>"</string>
-    <string name="bugreport_finished_title" msgid="4429132808670114081">"已捕获错误报告 <xliff:g id="ID">#%d</xliff:g>"</string>
+    <string name="bugreport_finished_title" msgid="4429132808670114081">"已获取错误报告 <xliff:g id="ID">#%d</xliff:g>"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"正在向错误报告添加详细信息"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"请稍候…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"向左滑动即可分享错误报告"</string>
