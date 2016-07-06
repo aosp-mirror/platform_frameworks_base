@@ -2286,6 +2286,7 @@ public class NotificationManagerService extends SystemService {
                                         .setFlag(Notification.FLAG_AUTOGROUP_SUMMARY, true)
                                         .setFlag(Notification.FLAG_GROUP_SUMMARY, true)
                                         .setColor(adjustedSbn.getNotification().color)
+                                        .setLocalOnly(true)
                                         .build();
                         summaryNotification.extras.putAll(extras);
                         Intent appIntent = getContext().getPackageManager()
