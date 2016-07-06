@@ -974,7 +974,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                         if (user.mLastMediaButtonReceiver != null) {
                             user.mLastMediaButtonReceiver.send(getContext(),
                                     needWakeLock ? mKeyEventReceiver.mLastTimeoutId : -1,
-                                    mediaButtonIntent, mKeyEventReceiver, null);
+                                    mediaButtonIntent, mKeyEventReceiver, mHandler);
                         } else {
                             mediaButtonIntent.setComponent(user.mRestoredMediaButtonReceiver);
                             getContext().sendBroadcastAsUser(mediaButtonIntent,
