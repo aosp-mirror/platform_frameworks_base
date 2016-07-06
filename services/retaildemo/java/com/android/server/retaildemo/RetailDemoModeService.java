@@ -16,6 +16,7 @@
 
 package com.android.server.retaildemo;
 
+import android.Manifest;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
@@ -32,6 +33,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
@@ -51,6 +53,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.Slog;
 import com.android.internal.os.BackgroundThread;
@@ -250,6 +253,26 @@ public class RetailDemoModeService extends SystemService {
         um.setUserRestriction(UserManager.DISALLOW_MODIFY_ACCOUNTS, true, user);
         Settings.Secure.putIntForUser(getContext().getContentResolver(),
                 Settings.Secure.SKIP_FIRST_USE_HINTS, 1, userInfo.id);
+
+        grantRuntimePermissionToCamera(userInfo.getUserHandle());
+    }
+
+    private void grantRuntimePermissionToCamera(UserHandle user) {
+        final Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        final PackageManager pm = getContext().getPackageManager();
+        final ResolveInfo handler = pm.resolveActivityAsUser(cameraIntent,
+                PackageManager.MATCH_DIRECT_BOOT_AWARE | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
+                user.getIdentifier());
+        if (handler == null || handler.activityInfo == null) {
+            return;
+        }
+        try {
+            pm.grantRuntimePermission(handler.activityInfo.packageName,
+                    Manifest.permission.ACCESS_FINE_LOCATION, user);
+        } catch (Exception e) {
+            // Ignore
+        }
+
     }
 
     void logSessionDuration() {
