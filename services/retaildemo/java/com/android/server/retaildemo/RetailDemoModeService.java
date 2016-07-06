@@ -110,6 +110,7 @@ public class RetailDemoModeService extends SystemService {
     private CameraManager mCameraManager;
     private String[] mCameraIdsWithFlash;
     private Configuration mSystemUserConfiguration;
+    private PreloadAppsInstaller mPreloadAppsInstaller;
 
     final Object mActivityLock = new Object();
     // Whether the newly created demo user has interacted with the screen yet
@@ -203,6 +204,7 @@ public class RetailDemoModeService extends SystemService {
         synchronized (mActivityLock) {
             mFirstUserActivityTime = mLastUserActivityTime = SystemClock.uptimeMillis();
         }
+        mPreloadAppsInstaller = new PreloadAppsInstaller();
     }
 
     private Notification createResetNotification() {
@@ -253,6 +255,8 @@ public class RetailDemoModeService extends SystemService {
         um.setUserRestriction(UserManager.DISALLOW_MODIFY_ACCOUNTS, true, user);
         Settings.Secure.putIntForUser(getContext().getContentResolver(),
                 Settings.Secure.SKIP_FIRST_USE_HINTS, 1, userInfo.id);
+        Settings.Secure.putIntForUser(getContext().getContentResolver(),
+                Settings.Global.PACKAGE_VERIFIER_ENABLE, 0, userInfo.id);
 
         grantRuntimePermissionToCamera(userInfo.getUserHandle());
     }
@@ -458,6 +462,12 @@ public class RetailDemoModeService extends SystemService {
         }
         MetricsLogger.count(getContext(), DEMO_SESSION_COUNT, 1);
         mHandler.removeMessages(MSG_INACTIVITY_TIME_OUT);
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mPreloadAppsInstaller.installApps(userId);
+            }
+        });
     }
 
     private RetailDemoModeServiceInternal mLocalService = new RetailDemoModeServiceInternal() {
