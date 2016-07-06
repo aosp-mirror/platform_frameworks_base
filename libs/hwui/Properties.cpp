@@ -65,6 +65,7 @@ ProfileType Properties::sProfileType = ProfileType::None;
 bool Properties::sDisableProfileBars = false;
 
 bool Properties::waitForGpuCompletion = false;
+bool Properties::forceDrawFrame = false;
 
 bool Properties::filterOutTestOverhead = false;
 

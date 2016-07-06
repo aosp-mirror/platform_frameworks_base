@@ -20,6 +20,8 @@
 #include "protos/hwui.pb.h"
 #include "Properties.h"
 
+#include <benchmark/benchmark.h>
+#include <../src/sysinfo.h>
 #include <getopt.h>
 #include <stdio.h>
 #include <string>
@@ -40,8 +42,10 @@ using namespace android::uirenderer::test;
 static int gRepeatCount = 1;
 static std::vector<TestScene::Info> gRunTests;
 static TestScene::Options gOpts;
+std::unique_ptr<benchmark::BenchmarkReporter> gBenchmarkReporter;
 
-void run(const TestScene::Info& info, const TestScene::Options& opts);
+void run(const TestScene::Info& info, const TestScene::Options& opts,
+        benchmark::BenchmarkReporter* reporter);
 
 static void printHelp() {
     printf(R"(
@@ -122,6 +126,20 @@ static void moveToCpuSet(const char* cpusetName) {
     close(fd);
 }
 
+static bool setBenchmarkFormat(const char* format) {
+    if (!strcmp(format, "tabular")) {
+        gBenchmarkReporter.reset(new benchmark::ConsoleReporter());
+    } else if (!strcmp(format, "json")) {
+        gBenchmarkReporter.reset(new benchmark::JSONReporter());
+    } else if (!strcmp(format, "csv")) {
+        gBenchmarkReporter.reset(new benchmark::CSVReporter());
+    } else {
+        fprintf(stderr, "Unknown format '%s'", format);
+        return false;
+    }
+    return true;
+}
+
 // For options that only exist in long-form. Anything in the
 // 0-255 range is reserved for short options (which just use their ASCII value)
 namespace LongOpts {
@@ -131,6 +149,8 @@ enum {
     WaitForGpu,
     ReportFrametime,
     CpuSet,
+    BenchmarkFormat,
+    Offscreen,
 };
 }
 
@@ -142,6 +162,8 @@ static const struct option LONG_OPTIONS[] = {
     { "wait-for-gpu", no_argument, nullptr, LongOpts::WaitForGpu },
     { "report-frametime", optional_argument, nullptr, LongOpts::ReportFrametime },
     { "cpuset", required_argument, nullptr, LongOpts::CpuSet },
+    { "benchmark_format", required_argument, nullptr, LongOpts::BenchmarkFormat },
+    { "offscreen", no_argument, nullptr, LongOpts::Offscreen },
     { 0, 0, 0, 0 }
 };
 
@@ -215,6 +237,20 @@ void parseOptions(int argc, char* argv[]) {
             moveToCpuSet(optarg);
             break;
 
+        case LongOpts::BenchmarkFormat:
+            if (!optarg) {
+                error = true;
+                break;
+            }
+            if (!setBenchmarkFormat(optarg)) {
+                error = true;
+            }
+            break;
+
+        case LongOpts::Offscreen:
+            gOpts.renderOffscreen = true;
+            break;
+
         case 'h':
             printHelp();
             exit(EXIT_SUCCESS);
@@ -238,12 +274,18 @@ void parseOptions(int argc, char* argv[]) {
     if (optind < argc) {
         do {
             const char* test = argv[optind++];
-            auto pos = TestScene::testMap().find(test);
-            if (pos == TestScene::testMap().end()) {
-                fprintf(stderr, "Unknown test '%s'\n", test);
-                exit(EXIT_FAILURE);
+            if (!strcmp(test, "all")) {
+                for (auto& iter : TestScene::testMap()) {
+                    gRunTests.push_back(iter.second);
+                }
             } else {
-                gRunTests.push_back(pos->second);
+                auto pos = TestScene::testMap().find(test);
+                if (pos == TestScene::testMap().end()) {
+                    fprintf(stderr, "Unknown test '%s'\n", test);
+                    exit(EXIT_FAILURE);
+                } else {
+                    gRunTests.push_back(pos->second);
+                }
             }
         } while (optind < argc);
     } else {
@@ -256,13 +298,36 @@ int main(int argc, char* argv[]) {
     gOpts.count = 150;
 
     parseOptions(argc, argv);
+    if (!gBenchmarkReporter && gOpts.renderOffscreen) {
+        gBenchmarkReporter.reset(new benchmark::ConsoleReporter());
+    }
+
+    if (gBenchmarkReporter) {
+        size_t name_field_width = 10;
+        for (auto&& test : gRunTests) {
+            name_field_width = std::max<size_t>(name_field_width, test.name.size());
+        }
+        // _50th, _90th, etc...
+        name_field_width += 5;
+
+        benchmark::BenchmarkReporter::Context context;
+        context.num_cpus = benchmark::NumCPUs();
+        context.mhz_per_cpu = benchmark::CyclesPerSecond() / 1000000.0f;
+        context.cpu_scaling_enabled = benchmark::CpuScalingEnabled();
+        context.name_field_width = name_field_width;
+        gBenchmarkReporter->ReportContext(context);
+    }
 
     for (int i = 0; i < gRepeatCount; i++) {
         for (auto&& test : gRunTests) {
-            run(test, gOpts);
+            run(test, gOpts, gBenchmarkReporter.get());
         }
     }
-    printf("Success!\n");
+
+    if (gBenchmarkReporter) {
+        gBenchmarkReporter->Finalize();
+    }
+
     LeakChecker::checkForLeaks();
     return 0;
 }

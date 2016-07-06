@@ -127,6 +127,9 @@ hwui_cflags := \
 # a problem
 hwui_cflags += -Wno-free-nonheap-object
 
+# clang's warning is broken, see: https://llvm.org/bugs/show_bug.cgi?id=21629
+hwui_cflags += -Wno-missing-braces
+
 ifeq (true, $(HWUI_NEW_OPS))
     hwui_src_files += \
         BakedOpDispatcher.cpp \
@@ -309,6 +312,7 @@ LOCAL_C_INCLUDES := $(hwui_c_includes)
 # set to libhwui_static_debug to skip actual GL commands
 LOCAL_WHOLE_STATIC_LIBRARIES := libhwui_static
 LOCAL_SHARED_LIBRARIES := libmemunreachable
+LOCAL_STATIC_LIBRARIES := libgoogle-benchmark
 
 LOCAL_SRC_FILES += \
     $(hwui_test_common_src_files) \

@@ -442,6 +442,19 @@ void RenderProxy::resetProfileInfo() {
     postAndWait(task);
 }
 
+CREATE_BRIDGE2(frameTimePercentile, RenderThread* thread, int percentile) {
+    return reinterpret_cast<void*>(static_cast<uintptr_t>(
+        args->thread->jankTracker().findPercentile(args->percentile)));
+}
+
+uint32_t RenderProxy::frameTimePercentile(int p) {
+    SETUP_TASK(frameTimePercentile);
+    args->thread = &mRenderThread;
+    args->percentile = p;
+    return static_cast<uint32_t>(reinterpret_cast<uintptr_t>(
+        postAndWait(task)));
+}
+
 CREATE_BRIDGE2(dumpGraphicsMemory, int fd, RenderThread* thread) {
     args->thread->jankTracker().dump(args->fd);
 

@@ -240,7 +240,7 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo,
         return;
     }
 
-    if (CC_LIKELY(mSwapHistory.size())) {
+    if (CC_LIKELY(mSwapHistory.size() && !Properties::forceDrawFrame)) {
         nsecs_t latestVsync = mRenderThread.timeLord().latestVsync();
         const SwapHistory& lastSwap = mSwapHistory.back();
         nsecs_t vsyncDelta = std::abs(lastSwap.vsyncTime - latestVsync);
