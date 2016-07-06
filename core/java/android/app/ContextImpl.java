@@ -185,15 +185,6 @@ class ContextImpl extends Context {
     @GuardedBy("mSync")
     private File mCodeCacheDir;
 
-    @GuardedBy("mSync")
-    private File[] mExternalObbDirs;
-    @GuardedBy("mSync")
-    private File[] mExternalFilesDirs;
-    @GuardedBy("mSync")
-    private File[] mExternalCacheDirs;
-    @GuardedBy("mSync")
-    private File[] mExternalMediaDirs;
-
     // The system service cache for the system services that are cached per-ContextImpl.
     final Object[] mServiceCache = SystemServiceRegistry.createServiceCache();
 
@@ -562,17 +553,10 @@ class ContextImpl extends Context {
     @Override
     public File[] getExternalFilesDirs(String type) {
         synchronized (mSync) {
-            if (mExternalFilesDirs == null) {
-                mExternalFilesDirs = Environment.buildExternalStorageAppFilesDirs(getPackageName());
-            }
-
-            // Splice in requested type, if any
-            File[] dirs = mExternalFilesDirs;
+            File[] dirs = Environment.buildExternalStorageAppFilesDirs(getPackageName());
             if (type != null) {
                 dirs = Environment.buildPaths(dirs, type);
             }
-
-            // Create dirs if needed
             return ensureExternalDirsExistOrFilter(dirs);
         }
     }
@@ -586,12 +570,8 @@ class ContextImpl extends Context {
     @Override
     public File[] getObbDirs() {
         synchronized (mSync) {
-            if (mExternalObbDirs == null) {
-                mExternalObbDirs = Environment.buildExternalStorageAppObbDirs(getPackageName());
-            }
-
-            // Create dirs if needed
-            return ensureExternalDirsExistOrFilter(mExternalObbDirs);
+            File[] dirs = Environment.buildExternalStorageAppObbDirs(getPackageName());
+            return ensureExternalDirsExistOrFilter(dirs);
         }
     }
 
@@ -624,24 +604,16 @@ class ContextImpl extends Context {
     @Override
     public File[] getExternalCacheDirs() {
         synchronized (mSync) {
-            if (mExternalCacheDirs == null) {
-                mExternalCacheDirs = Environment.buildExternalStorageAppCacheDirs(getPackageName());
-            }
-
-            // Create dirs if needed
-            return ensureExternalDirsExistOrFilter(mExternalCacheDirs);
+            File[] dirs = Environment.buildExternalStorageAppCacheDirs(getPackageName());
+            return ensureExternalDirsExistOrFilter(dirs);
         }
     }
 
     @Override
     public File[] getExternalMediaDirs() {
         synchronized (mSync) {
-            if (mExternalMediaDirs == null) {
-                mExternalMediaDirs = Environment.buildExternalStorageAppMediaDirs(getPackageName());
-            }
-
-            // Create dirs if needed
-            return ensureExternalDirsExistOrFilter(mExternalMediaDirs);
+            File[] dirs = Environment.buildExternalStorageAppMediaDirs(getPackageName());
+            return ensureExternalDirsExistOrFilter(dirs);
         }
     }
 
