@@ -54,7 +54,6 @@ import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeConfig.EventInfo;
 import android.service.notification.ZenModeConfig.ScheduleInfo;
 import android.service.notification.ZenModeConfig.ZenRule;
-import android.text.TextUtils;
 import android.util.AndroidRuntimeException;
 import android.util.Log;
 import android.util.SparseArray;
@@ -229,7 +228,7 @@ public class ZenModeHelper {
     public void requestFromListener(ComponentName name, int filter) {
         final int newZen = NotificationManager.zenModeFromInterruptionFilter(filter, -1);
         if (newZen != -1) {
-            setManualZenMode(newZen, null,
+            setManualZenMode(newZen, null, name != null ? name.getPackageName() : null,
                     "listener:" + (name != null ? name.flattenToShortString() : null));
         }
     }
@@ -452,11 +451,11 @@ public class ZenModeHelper {
                 rule.creationTime);
     }
 
-    public void setManualZenMode(int zenMode, Uri conditionId, String reason) {
-        setManualZenMode(zenMode, conditionId, reason, true /*setRingerMode*/);
+    public void setManualZenMode(int zenMode, Uri conditionId, String caller, String reason) {
+        setManualZenMode(zenMode, conditionId, reason, caller, true /*setRingerMode*/);
     }
 
-    private void setManualZenMode(int zenMode, Uri conditionId, String reason,
+    private void setManualZenMode(int zenMode, Uri conditionId, String reason, String caller,
             boolean setRingerMode) {
         ZenModeConfig newConfig;
         synchronized (mConfig) {
@@ -478,6 +477,7 @@ public class ZenModeHelper {
                 newRule.enabled = true;
                 newRule.zenMode = zenMode;
                 newRule.conditionId = conditionId;
+                newRule.enabler = caller;
                 newConfig.manualRule = newRule;
             }
             setConfigLocked(newConfig, reason, setRingerMode);
@@ -950,7 +950,8 @@ public class ZenModeHelper {
                     break;
             }
             if (newZen != -1) {
-                setManualZenMode(newZen, null, "ringerModeInternal", false /*setRingerMode*/);
+                setManualZenMode(newZen, null, "ringerModeInternal", null,
+                        false /*setRingerMode*/);
             }
 
             if (isChange || newZen != -1 || ringerModeExternal != ringerModeExternalOut) {
@@ -988,7 +989,8 @@ public class ZenModeHelper {
                     break;
             }
             if (newZen != -1) {
-                setManualZenMode(newZen, null, "ringerModeExternal", false /*setRingerMode*/);
+                setManualZenMode(newZen, null, "ringerModeExternal", caller,
+                        false /*setRingerMode*/);
             }
 
             ZenLog.traceSetRingerModeExternal(ringerModeOld, ringerModeNew, caller,
