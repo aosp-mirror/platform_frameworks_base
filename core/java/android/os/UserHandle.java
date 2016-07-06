@@ -299,7 +299,11 @@ public final class UserHandle implements Parcelable {
      */
     @SystemApi
     public static @UserIdInt int myUserId() {
-        return getUserId(Process.myUid());
+        int myUid = Process.myUid();
+        if (myUid == 0) {
+            throw new IllegalStateException("myUserId unsupported in zygote.");
+        }
+        return getUserId(myUid);
     }
 
     /**
