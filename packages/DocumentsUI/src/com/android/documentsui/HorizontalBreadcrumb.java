@@ -169,12 +169,16 @@ public final class HorizontalBreadcrumb extends RecyclerView
         @Override
         public void onBindViewHolder(BreadcrumbHolder holder, int position) {
             final DocumentInfo doc = getItem(position);
+            final int horizontalPadding = (int) holder.itemView.getResources()
+                    .getDimension(R.dimen.breadcrumb_item_padding);
 
             if (position == 0) {
                 final RootInfo root = mEnv.getCurrentRoot();
                 holder.title.setText(root.title);
+                holder.title.setPadding(0, 0, horizontalPadding, 0);
             } else {
                 holder.title.setText(doc.displayName);
+                holder.title.setPadding(horizontalPadding, 0, horizontalPadding, 0);
             }
 
             if (position == getItemCount() - 1) {
