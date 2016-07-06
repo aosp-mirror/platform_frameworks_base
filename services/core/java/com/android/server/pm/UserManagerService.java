@@ -2961,6 +2961,14 @@ public class UserManagerService extends IUserManager.Stub {
      *             number is mismatched.
      */
     public static void enforceSerialNumber(File file, int serialNumber) throws IOException {
+        if (StorageManager.isFileEncryptedEmulatedOnly()) {
+            // When we're emulating FBE, the directory may have been chmod
+            // 000'ed, meaning we can't read the serial number to enforce it;
+            // instead of destroying the user, just log a warning.
+            Slog.w(LOG_TAG, "Device is emulating FBE; assuming current serial number is valid");
+            return;
+        }
+
         final int foundSerial = getSerialNumber(file);
         Slog.v(LOG_TAG, "Found " + file + " with serial number " + foundSerial);
 
