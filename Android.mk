@@ -468,6 +468,9 @@ LOCAL_SRC_FILES += \
 	../../system/update_engine/binder_bindings/android/os/IUpdateEngine.aidl \
 	../../system/update_engine/binder_bindings/android/os/IUpdateEngineCallback.aidl \
 
+LOCAL_SRC_FILES +=  \
+	../../system/netd/server/binder/android/net/INetd.aidl \
+
 LOCAL_AIDL_INCLUDES += system/update_engine/binder_bindings
 
 # FRAMEWORKS_BASE_JAVA_SRC_DIRS comes from build/core/pathmap.mk
