@@ -75,6 +75,7 @@ public class VectorDrawablePerformance extends Activity {
             R.drawable.vector_drawable28,
             R.drawable.vector_drawable29,
             R.drawable.vector_drawable30,
+            R.drawable.vector_drawable_group_clip,
             R.drawable.vector_drawable_scale0,
             R.drawable.vector_drawable_scale1,
             R.drawable.vector_drawable_scale2,
