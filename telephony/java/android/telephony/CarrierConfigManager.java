@@ -825,7 +825,9 @@ public class CarrierConfigManager {
             "allow_merge_wifi_calls_when_vowifi_off_bool";
 
     /**
-     * When true, indicates that adding a call is disabled when there is an ongoing video call.
+     * When true, indicates that adding a call is disabled when there is an ongoing video call
+     * or when there is an ongoing call on wifi which was downgraded from video and VoWifi is
+     * turned off.
      */
     public static final String KEY_ALLOW_ADD_CALL_DURING_VIDEO_CALL_BOOL =
             "allow_add_call_during_video_call";
