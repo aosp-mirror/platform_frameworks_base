@@ -132,6 +132,16 @@ public class AssistUtils {
         }
     }
 
+    public void registerVoiceInteractionSessionListener(IVoiceInteractionSessionListener listener) {
+        try {
+            if (mVoiceInteractionManagerService != null) {
+                mVoiceInteractionManagerService.registerVoiceInteractionSessionListener(listener);
+            }
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to register voice interaction listener", e);
+        }
+    }
+
     public ComponentName getAssistComponentForUser(int userId) {
         final String setting = Settings.Secure.getStringForUser(mContext.getContentResolver(),
                 Settings.Secure.ASSISTANT, userId);
