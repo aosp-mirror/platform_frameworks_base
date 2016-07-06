@@ -1656,11 +1656,11 @@
     <string name="demo_starting_message" msgid="5268556852031489931">"ਡੈਮੋ ਚਾਲੂ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"ਡੀਵਾਈਸ ਮੁੜ-ਸੈੱਟ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ…"</string>
     <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"ਕੀ ਡੀਵਾਈਸ ਮੁੜ-ਸੈੱਟ ਕਰਨੀ ਹੈ?"</string>
-    <!-- no translation found for demo_user_inactivity_timeout_countdown (5675588824402569506) -->
-    <skip />
+    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"ਤੁਸੀਂ ਕਿਸੇ ਵੀ ਤਬਦੀਲੀਆਂ ਨੂੰ ਗੁਆ ਬੈਠੋਂਗੇ ਅਤੇ ਡੈਮੋ <xliff:g id="TIMEOUT">%1$s</xliff:g> ਸਕਿੰਟਾਂ ਵਿੱਚ ਦੁਬਾਰਾ ਚਾਲੂ ਕੀਤਾ ਜਾਵੇਗਾ…"</string>
     <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"ਰੱਦ ਕਰੋ"</string>
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"ਹੁਣੇ ਮੁੜ-ਸੈੱਟ ਕਰੋ"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"ਇਸ ਡੀਵਾਈਸ ਨੂੰ ਬਿਨਾਂ ਪਾਬੰਦੀਆਂ ਦੇ ਵਰਤਣ ਲਈ ਫੈਕਟਰੀ ਰੀਸੈੱਟ ਕਰੋ"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"ਹੋਰ ਜਾਣਨ ਲਈ ਸਪਰਸ਼ ਕਰੋ।"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"ਅਯੋਗ ਬਣਾਇਆ ਗਿਆ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="conference_call" msgid="3751093130790472426">"ਕਾਨਫਰੰਸ ਕਾਲ"</string>
 </resources>

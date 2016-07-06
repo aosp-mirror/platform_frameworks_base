@@ -1658,11 +1658,11 @@
     <string name="demo_starting_message" msgid="5268556852031489931">"Се вклучува демонстрацијата…"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"Се ресетира уредот…"</string>
     <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"Да се ресетира уредот?"</string>
-    <!-- no translation found for demo_user_inactivity_timeout_countdown (5675588824402569506) -->
-    <skip />
+    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"Ќе ги изгубите измените и демонстрацијата ќе започне повторно по <xliff:g id="TIMEOUT">%1$s</xliff:g> секунди…"</string>
     <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"Откажи"</string>
     <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Ресетирај сега"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Ресетирајте до фабричките поставки за уредов да го користите без ограничувања"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Допрете за да дознаете повеќе."</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"Оневозможен <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="conference_call" msgid="3751093130790472426">"Конференциски повик"</string>
 </resources>
