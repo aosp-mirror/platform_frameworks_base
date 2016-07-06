@@ -280,7 +280,7 @@ public class RetailDemoModeService extends SystemService {
         synchronized (mActivityLock) {
             sessionDuration = (int) ((mLastUserActivityTime - mFirstUserActivityTime) / 1000);
         }
-        MetricsLogger.count(getContext(), DEMO_SESSION_DURATION, sessionDuration);
+        MetricsLogger.histogram(getContext(), DEMO_SESSION_DURATION, sessionDuration);
     }
 
     private ActivityManagerService getActivityManager() {
