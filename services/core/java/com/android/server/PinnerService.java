@@ -28,6 +28,10 @@ import android.util.EventLog;
 import android.util.Slog;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+import android.os.Process;
 import android.provider.MediaStore;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -35,6 +39,7 @@ import android.system.OsConstants;
 import android.system.StructStat;
 
 import com.android.internal.app.ResolverActivity;
+import com.android.internal.os.BackgroundThread;
 
 import dalvik.system.VMRuntime;
 
@@ -64,6 +69,8 @@ public final class PinnerService extends SystemService {
 
     private final long MAX_CAMERA_PIN_SIZE = 50 * (1 << 20); //50MB max
 
+    private PinnerHandler mPinnerHandler = null;
+
 
     public PinnerService(Context context) {
         super(context);
@@ -71,6 +78,7 @@ public final class PinnerService extends SystemService {
         mContext = context;
         mShouldPinCamera = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_pinnerCameraApp);
+        mPinnerHandler = new PinnerHandler(BackgroundThread.get().getLooper());
     }
 
     @Override
@@ -80,22 +88,8 @@ public final class PinnerService extends SystemService {
         }
         mBinderService = new BinderService();
         publishBinderService("pinner", mBinderService);
-
-        // Files to pin come from the overlay and can be specified per-device config
-        String[] filesToPin = mContext.getResources().getStringArray(
-                com.android.internal.R.array.config_defaultPinnerServiceFiles);
-        // Continue trying to pin remaining files even if there is a failure
-        for (int i = 0; i < filesToPin.length; i++){
-            PinnedFile pf = pinFile(filesToPin[i], 0, 0, 0);
-            if (pf != null) {
-                mPinnedFiles.add(pf);
-                if (DEBUG) {
-                    Slog.i(TAG, "Pinned file = " + pf.mFilename);
-                }
-            } else {
-                Slog.e(TAG, "Failed to pin file = " + filesToPin[i]);
-            }
-        }
+        mPinnerHandler.sendMessage(
+                mPinnerHandler.obtainMessage(PinnerHandler.PIN_ONSTART_MSG));
     }
 
     /**
@@ -106,27 +100,57 @@ public final class PinnerService extends SystemService {
      */
     @Override
     public void onUnlockUser(int userHandle) {
-        handlePin(userHandle);
+        mPinnerHandler.sendMessage(
+                mPinnerHandler.obtainMessage(PinnerHandler.PIN_CAMERA_MSG, userHandle, 0));
     }
 
     /**
-    * Pin camera on user switch.
-    * If more than one user is using the device
-    * each user may set a different preference for the camera app.
-    * Make sure that user's preference is pinned into memory.
-    */
+     * Pin camera on user switch.
+     * If more than one user is using the device
+     * each user may set a different preference for the camera app.
+     * Make sure that user's preference is pinned into memory.
+     */
     @Override
     public void onSwitchUser(int userHandle) {
-        handlePin(userHandle);
+        mPinnerHandler.sendMessage(
+                mPinnerHandler.obtainMessage(PinnerHandler.PIN_CAMERA_MSG, userHandle, 0));
     }
 
-    private void handlePin(int userHandle) {
+    /**
+     * Handler for on start pinning message
+     */
+    private void handlePinOnStart() {
+         // Files to pin come from the overlay and can be specified per-device config
+        String[] filesToPin = mContext.getResources().getStringArray(
+                com.android.internal.R.array.config_defaultPinnerServiceFiles);
+        synchronized(this) {
+            // Continue trying to pin remaining files even if there is a failure
+            for (int i = 0; i < filesToPin.length; i++){
+                PinnedFile pf = pinFile(filesToPin[i], 0, 0, 0);
+                if (pf != null) {
+                    mPinnedFiles.add(pf);
+                    if (DEBUG) {
+                        Slog.i(TAG, "Pinned file = " + pf.mFilename);
+                    }
+                } else {
+                    Slog.e(TAG, "Failed to pin file = " + filesToPin[i]);
+                }
+            }
+        }
+    }
+
+    /**
+     * Handler for camera pinning message
+     */
+    private void handlePinCamera(int userHandle) {
         if (mShouldPinCamera) {
-            boolean success = pinCamera(userHandle);
-            if (!success) {
-                //this is not necessarily an error
-                if (DEBUG) {
-                    Slog.v(TAG, "Failed to pin camera.");
+            synchronized(this) {
+                boolean success = pinCamera(userHandle);
+                if (!success) {
+                    //this is not necessarily an error
+                    if (DEBUG) {
+                        Slog.v(TAG, "Failed to pin camera.");
+                    }
                 }
             }
         }
@@ -316,11 +340,13 @@ public final class PinnerService extends SystemService {
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
             pw.println("Pinned Files:");
-            for (int i = 0; i < mPinnedFiles.size(); i++) {
-                pw.println(mPinnedFiles.get(i).mFilename);
-            }
-            for (int i = 0; i < mPinnedCameraFiles.size(); i++) {
-                pw.println(mPinnedCameraFiles.get(i).mFilename);
+            synchronized(this) {
+                for (int i = 0; i < mPinnedFiles.size(); i++) {
+                    pw.println(mPinnedFiles.get(i).mFilename);
+                }
+                for (int i = 0; i < mPinnedCameraFiles.size(); i++) {
+                    pw.println(mPinnedCameraFiles.get(i).mFilename);
+                }
             }
         }
     }
@@ -336,4 +362,35 @@ public final class PinnerService extends SystemService {
              mFilename = filename;
         }
     }
+
+    final class PinnerHandler extends Handler {
+        static final int PIN_CAMERA_MSG  = 4000;
+        static final int PIN_ONSTART_MSG = 4001;
+
+        public PinnerHandler(Looper looper) {
+            super(looper, null, true);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+
+                case PIN_CAMERA_MSG:
+                {
+                    handlePinCamera(msg.arg1);
+                }
+                break;
+
+                case PIN_ONSTART_MSG:
+                {
+                    handlePinOnStart();
+                }
+                break;
+
+                default:
+                    super.handleMessage(msg);
+            }
+        }
+    }
+
 }
