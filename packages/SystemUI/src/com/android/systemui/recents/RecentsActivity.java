@@ -801,9 +801,13 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         Recents.getTaskLoader().dump(prefix, writer);
 
         String id = Integer.toHexString(System.identityHashCode(this));
+        long lastStackActiveTime = Prefs.getLong(this,
+                Prefs.Key.OVERVIEW_LAST_STACK_TASK_ACTIVE_TIME, -1);
 
         writer.print(prefix); writer.print(TAG);
         writer.print(" visible="); writer.print(mIsVisible ? "Y" : "N");
+        writer.print(" lastStackTaskActiveTime="); writer.print(lastStackActiveTime);
+        writer.print(" currentTime="); writer.print(System.currentTimeMillis());
         writer.print(" [0x"); writer.print(id); writer.print("]");
         writer.println();
 
