@@ -129,7 +129,6 @@ import java.util.Set;
  *          state it may be best for the link to disconnect completely and
  *          reconnect afresh.
  *
- *
  * @hide
  */
 public class IpReachabilityMonitor {
@@ -163,6 +162,8 @@ public class IpReachabilityMonitor {
     private int mIpWatchListVersion;
     @GuardedBy("mLock")
     private boolean mRunning;
+    // Time in milliseconds of the last forced probe request.
+    private volatile long mLastProbeTimeMs;
 
     /**
      * Make the kernel perform neighbor reachability detection (IPv4 ARP or IPv6 ND)
@@ -339,7 +340,7 @@ public class IpReachabilityMonitor {
 
     private void handleNeighborLost(String msg) {
         InetAddress ip = null;
-        ProvisioningChange delta;
+        final ProvisioningChange delta;
         synchronized (mLock) {
             LinkProperties whatIfLp = new LinkProperties(mLinkProperties);
 
@@ -368,10 +369,8 @@ public class IpReachabilityMonitor {
                 // an InetAddress argument.
                 mCallback.notifyLost(ip, logMsg);
             }
-            logEvent(IpReachabilityEvent.PROVISIONING_LOST, 0);
-        } else {
-            logEvent(IpReachabilityEvent.NUD_FAILED, 0);
         }
+        logNudFailed(delta);
     }
 
     public void probeAll() {
@@ -397,9 +396,10 @@ public class IpReachabilityMonitor {
             final int returnValue = probeNeighbor(mInterfaceIndex, target);
             logEvent(IpReachabilityEvent.PROBE, returnValue);
         }
+        mLastProbeTimeMs = SystemClock.elapsedRealtime();
     }
 
-    private long getProbeWakeLockDuration() {
+    private static long getProbeWakeLockDuration() {
         // Ideally, this would be computed by examining the values of:
         //
         //     /proc/sys/net/ipv[46]/neigh/<ifname>/ucast_solicit
@@ -416,7 +416,15 @@ public class IpReachabilityMonitor {
     }
 
     private void logEvent(int probeType, int errorCode) {
-        int eventType = probeType | (errorCode & 0xff );
+        int eventType = probeType | (errorCode & 0xff);
+        mMetricsLog.log(new IpReachabilityEvent(mInterfaceName, eventType));
+    }
+
+    private void logNudFailed(ProvisioningChange delta) {
+        long duration = SystemClock.elapsedRealtime() - mLastProbeTimeMs;
+        boolean isFromProbe = (duration < getProbeWakeLockDuration());
+        boolean isProvisioningLost = (delta == ProvisioningChange.LOST_PROVISIONING);
+        int eventType = IpReachabilityEvent.nudFailureEventType(isFromProbe, isProvisioningLost);
         mMetricsLog.log(new IpReachabilityEvent(mInterfaceName, eventType));
     }
 

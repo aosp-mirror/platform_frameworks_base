@@ -124,7 +124,7 @@ public final class ApfProgramEvent implements Parcelable {
         for (int bit = set.nextSetBit(0); bit >= 0; bit = set.nextSetBit(bit+1)) {
             names.add(Decoder.constants.get(bit));
         }
-        return TextUtils.join(", ", names);
+        return TextUtils.join("|", names);
     }
 
     final static class Decoder {
