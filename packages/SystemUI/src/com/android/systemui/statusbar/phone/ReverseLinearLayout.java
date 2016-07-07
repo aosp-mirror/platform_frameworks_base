@@ -30,11 +30,7 @@ import java.util.ArrayList;
  */
 public class ReverseLinearLayout extends LinearLayout {
 
-    /** If true, the layout is reversed vs. a regular linear layout */
-    private boolean mIsLayoutReverse;
-
-    /** If true, the layout is opposite to it's natural reversity from the layout direction */
-    private boolean mIsAlternativeOrder;
+    private boolean mIsLayoutRtl;
 
     public ReverseLinearLayout(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -43,50 +39,45 @@ public class ReverseLinearLayout extends LinearLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        updateOrder();
+        mIsLayoutRtl = getResources().getConfiguration()
+                .getLayoutDirection() == LAYOUT_DIRECTION_RTL;
     }
 
     @Override
     public void addView(View child) {
         reversParams(child.getLayoutParams());
-        if (mIsLayoutReverse) {
-            super.addView(child, 0);
-        } else {
+        if (mIsLayoutRtl) {
             super.addView(child);
+        } else {
+            super.addView(child, 0);
         }
     }
 
     @Override
     public void addView(View child, ViewGroup.LayoutParams params) {
         reversParams(params);
-        if (mIsLayoutReverse) {
-            super.addView(child, 0, params);
-        } else {
+        if (mIsLayoutRtl) {
             super.addView(child, params);
+        } else {
+            super.addView(child, 0, params);
         }
     }
 
     @Override
-    public void onRtlPropertiesChanged(int layoutDirection) {
-        super.onRtlPropertiesChanged(layoutDirection);
-        updateOrder();
-    }
-
-    public void setAlternativeOrder(boolean alternative) {
-        mIsAlternativeOrder = alternative;
-        updateOrder();
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        updateRTLOrder();
     }
 
     /**
      * In landscape, the LinearLayout is not auto mirrored since it is vertical. Therefore we
      * have to do it manually
      */
-    private void updateOrder() {
-        boolean isLayoutRtl = getLayoutDirection() == LAYOUT_DIRECTION_RTL;
-        boolean isLayoutReverse = isLayoutRtl ^ mIsAlternativeOrder;
-
-        if (mIsLayoutReverse != isLayoutReverse) {
-            // reversity changed, swap the order of all views.
+    private void updateRTLOrder() {
+        boolean isLayoutRtl = getResources().getConfiguration()
+                .getLayoutDirection() == LAYOUT_DIRECTION_RTL;
+        if (mIsLayoutRtl != isLayoutRtl) {
+            // RTL changed, swap the order of all views.
             int childCount = getChildCount();
             ArrayList<View> childList = new ArrayList<>(childCount);
             for (int i = 0; i < childCount; i++) {
@@ -96,7 +87,7 @@ public class ReverseLinearLayout extends LinearLayout {
             for (int i = childCount - 1; i >= 0; i--) {
                 super.addView(childList.get(i));
             }
-            mIsLayoutReverse = isLayoutReverse;
+            mIsLayoutRtl = isLayoutRtl;
         }
     }
 
