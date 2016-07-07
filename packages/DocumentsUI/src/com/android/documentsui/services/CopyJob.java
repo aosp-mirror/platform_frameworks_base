@@ -51,9 +51,11 @@ import android.text.format.DateUtils;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
-import com.android.documentsui.UrisSupplier;
+import com.android.documentsui.DocumentsApplication;
 import com.android.documentsui.Metrics;
 import com.android.documentsui.R;
+import com.android.documentsui.RootsCache;
+import com.android.documentsui.UrisSupplier;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.RootInfo;
@@ -210,7 +212,6 @@ class CopyJob extends Job {
 
     @Override
     boolean setUp() {
-
         try {
             buildDocumentList();
         } catch (ResourceException e) {
@@ -218,6 +219,7 @@ class CopyJob extends Job {
             return false;
         }
 
+        // Check if user has canceled this task.
         if (isCanceled()) {
             return false;
         }
@@ -229,7 +231,15 @@ class CopyJob extends Job {
             mBatchSize = -1;
         }
 
-        return true;
+        // Check if user has canceled this task. We should check it again here as user cancels
+        // tasks in main thread, but this is running in a worker thread. calculateSize() may
+        // take a long time during which user can cancel this task, and we don't want to waste
+        // resources doing useless large chunk of work.
+        if (isCanceled()) {
+            return false;
+        }
+
+        return checkSpace();
     }
 
     @Override
@@ -284,6 +294,44 @@ class CopyJob extends Job {
     private static boolean canCopy(DocumentInfo doc, RootInfo root) {
         // Can't copy folders to downloads, because we don't show folders there.
         return !root.isDownloads() || !doc.isDirectory();
+    }
+
+    /**
+     * Checks whether the destination folder has enough space to take all source files.
+     * @return true if the root has enough space or doesn't provide free space info; otherwise false
+     */
+    boolean checkSpace() {
+        return checkSpace(mBatchSize);
+    }
+
+    /**
+     * Checks whether the destination folder has enough space to take files of batchSize
+     * @param batchSize the total size of files
+     * @return true if the root has enough space or doesn't provide free space info; otherwise false
+     */
+    final boolean checkSpace(long batchSize) {
+        // Default to be true because if batchSize or available space is invalid, we still let the
+        // copy start anyway.
+        boolean result = true;
+        if (batchSize >= 0) {
+            RootsCache cache = DocumentsApplication.getRootsCache(appContext);
+
+            // Query root info here instead of using stack.root because the number there may be
+            // stale.
+            RootInfo root = cache.getRootOneshot(stack.root.authority, stack.root.rootId, true);
+            if (root.availableBytes >= 0) {
+                result = (batchSize <= root.availableBytes);
+            } else {
+                Log.w(TAG, root.toString() + " doesn't provide available bytes.");
+            }
+        }
+
+        if (!result) {
+            failedFileCount += mSrcs.size();
+            failedFiles.addAll(mSrcs);
+        }
+
+        return result;
     }
 
     @Override
@@ -585,7 +633,7 @@ class CopyJob extends Job {
                     result += calculateFileSizesRecursively(getClient(src), src.derivedUri);
                 } catch (RemoteException e) {
                     throw new ResourceException("Failed to obtain the client for %s.",
-                            src.derivedUri);
+                            src.derivedUri, e);
                 }
             } else {
                 result += src.size;
@@ -603,7 +651,7 @@ class CopyJob extends Job {
      *
      * @throws ResourceException
      */
-    private long calculateFileSizesRecursively(
+    long calculateFileSizesRecursively(
             ContentProviderClient client, Uri uri) throws ResourceException {
         final String authority = uri.getAuthority();
         final Uri queryUri = buildChildDocumentsUri(authority, getDocumentId(uri));
