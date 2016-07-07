@@ -20,6 +20,7 @@ import static android.content.Intent.ACTION_UID_REMOVED;
 import static android.content.Intent.EXTRA_UID;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.TYPE_WIFI;
+import static android.net.NetworkPolicy.CYCLE_NONE;
 import static android.net.NetworkPolicy.LIMIT_DISABLED;
 import static android.net.NetworkPolicy.WARNING_DISABLED;
 import static android.net.NetworkPolicyManager.POLICY_NONE;
@@ -86,7 +87,9 @@ import org.easymock.EasyMock;
 import org.easymock.IAnswer;
 
 import java.io.File;
+import java.util.Calendar;
 import java.util.LinkedHashSet;
+import java.util.TimeZone;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -141,8 +144,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
     private static final int PID_2 = 401;
     private static final int PID_3 = 402;
 
-    @Override
-    public void setUp() throws Exception {
+    public void _setUp() throws Exception {
         super.setUp();
 
         setCurrentTimeMillis(TEST_START);
@@ -229,8 +231,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
     }
 
-    @Override
-    public void tearDown() throws Exception {
+    public void _tearDown() throws Exception {
         for (File file : mPolicyDir.listFiles()) {
             file.delete();
         }
@@ -263,6 +264,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         backgroundChanged.get();
     }
 
+    @Suppress
     public void testPidForegroundCombined() throws Exception {
         IdleFuture idle;
 
@@ -310,6 +312,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         assertFalse(mService.isUidForeground(UID_A));
     }
 
+    @Suppress
     public void testScreenChangesRules() throws Exception {
         Future<Void> future;
 
@@ -351,6 +354,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         verifyAndReset();
     }
 
+    @Suppress
     public void testPolicyNone() throws Exception {
         Future<Void> future;
 
@@ -381,6 +385,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         verifyAndReset();
     }
 
+    @Suppress
     public void testPolicyReject() throws Exception {
         Future<Void> future;
 
@@ -412,6 +417,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         verifyAndReset();
     }
 
+    @Suppress
     public void testPolicyRejectAddRemove() throws Exception {
         Future<Void> future;
 
@@ -576,6 +582,17 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
                 computeLastCycleBoundary(parseTime("2013-01-14T15:11:00.000-08:00"), policy));
     }
 
+    public void testLastCycleBoundaryDST() throws Exception {
+        final long currentTime = parseTime("1989-01-02T07:30:00.000");
+        final long expectedCycle = parseTime("1988-12-03T02:00:00.000Z");
+
+        final NetworkPolicy policy = new NetworkPolicy(
+                sTemplateWifi, 3, "America/Argentina/Buenos_Aires", 1024L, 1024L, false);
+        final long actualCycle = computeLastCycleBoundary(currentTime, policy);
+        assertTimeEquals(expectedCycle, actualCycle);
+    }
+
+    @Suppress
     public void testNetworkPolicyAppliedCycleLastMonth() throws Exception {
         NetworkState[] state = null;
         NetworkStats stats = null;
@@ -628,6 +645,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         verifyAndReset();
     }
 
+    @Suppress
     public void testUidRemovedPolicyCleared() throws Exception {
         Future<Void> future;
 
@@ -652,6 +670,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         verifyAndReset();
     }
 
+    @Suppress
     public void testOverWarningLimitNotification() throws Exception {
         NetworkState[] state = null;
         NetworkStats stats = null;
@@ -783,6 +802,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         }
     }
 
+    @Suppress
     public void testMeteredNetworkWithoutLimit() throws Exception {
         NetworkState[] state = null;
         NetworkStats stats = null;
