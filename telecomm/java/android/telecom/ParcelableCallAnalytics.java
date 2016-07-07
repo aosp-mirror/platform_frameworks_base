@@ -21,6 +21,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -28,6 +29,67 @@ import java.util.List;
  */
 @SystemApi
 public class ParcelableCallAnalytics implements Parcelable {
+    public static final class VideoEvent implements Parcelable {
+        public static final int SEND_LOCAL_SESSION_MODIFY_REQUEST = 0;
+        public static final int SEND_LOCAL_SESSION_MODIFY_RESPONSE = 1;
+        public static final int RECEIVE_REMOTE_SESSION_MODIFY_REQUEST = 2;
+        public static final int RECEIVE_REMOTE_SESSION_MODIFY_RESPONSE = 3;
+
+        public static final Parcelable.Creator<VideoEvent> CREATOR =
+                new Parcelable.Creator<VideoEvent> () {
+
+                    @Override
+                    public VideoEvent createFromParcel(Parcel in) {
+                        return new VideoEvent(in);
+                    }
+
+                    @Override
+                    public VideoEvent[] newArray(int size) {
+                        return new VideoEvent[size];
+                    }
+                };
+
+        private int mEventName;
+        private long mTimeSinceLastEvent;
+        private int mVideoState;
+
+        public VideoEvent(int eventName, long timeSinceLastEvent, int videoState) {
+            mEventName = eventName;
+            mTimeSinceLastEvent = timeSinceLastEvent;
+            mVideoState = videoState;
+        }
+
+        VideoEvent(Parcel in) {
+            mEventName = in.readInt();
+            mTimeSinceLastEvent = in.readLong();
+            mVideoState = in.readInt();
+        }
+
+        public int getEventName() {
+            return mEventName;
+        }
+
+        public long getTimeSinceLastEvent() {
+            return mTimeSinceLastEvent;
+        }
+
+        public int getVideoState() {
+            return mVideoState;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            out.writeInt(mEventName);
+            out.writeLong(mTimeSinceLastEvent);
+            out.writeInt(mVideoState);
+        }
+    }
+
     public static final class AnalyticsEvent implements Parcelable {
         public static final int SET_SELECT_PHONE_ACCOUNT = 0;
         public static final int SET_ACTIVE = 1;
@@ -250,6 +312,12 @@ public class ParcelableCallAnalytics implements Parcelable {
     // A map from event-pair names to their durations.
     private final List<EventTiming> eventTimings;
 
+    // Whether the call has ever been a video call.
+    private boolean isVideoCall = false;
+
+    // A list of video events that have occurred.
+    private List<VideoEvent> videoEvents;
+
     public ParcelableCallAnalytics(long startTimeMillis, long callDurationMillis, int callType,
             boolean isAdditionalCall, boolean isInterrupted, int callTechnologies,
             int callTerminationCode, boolean isEmergencyCall, String connectionService,
@@ -284,6 +352,9 @@ public class ParcelableCallAnalytics implements Parcelable {
         in.readTypedList(analyticsEvents, AnalyticsEvent.CREATOR);
         eventTimings = new ArrayList<>();
         in.readTypedList(eventTimings, EventTiming.CREATOR);
+        isVideoCall = readByteAsBoolean(in);
+        videoEvents = new LinkedList<>();
+        in.readTypedList(videoEvents, VideoEvent.CREATOR);
     }
 
     public void writeToParcel(Parcel out, int flags) {
@@ -299,6 +370,15 @@ public class ParcelableCallAnalytics implements Parcelable {
         writeBooleanAsByte(out, isCreatedFromExistingConnection);
         out.writeTypedList(analyticsEvents);
         out.writeTypedList(eventTimings);
+        writeBooleanAsByte(out, isVideoCall);
+        out.writeTypedList(videoEvents);
+    }
+    public void setIsVideoCall(boolean isVideoCall) {
+        this.isVideoCall = isVideoCall;
+    }
+
+    public void setVideoEvents(List<VideoEvent> videoEvents) {
+        this.videoEvents = videoEvents;
     }
 
     public long getStartTimeMillis() {
@@ -347,6 +427,14 @@ public class ParcelableCallAnalytics implements Parcelable {
 
     public List<EventTiming> getEventTimings() {
         return eventTimings;
+    }
+
+    public boolean isVideoCall() {
+        return isVideoCall;
+    }
+
+    public List<VideoEvent> getVideoEvents() {
+        return videoEvents;
     }
 
     @Override
