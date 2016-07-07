@@ -19,6 +19,7 @@
 #include "Caches.h"
 #include "Image.h"
 #include "GlopBuilder.h"
+#include "Layer.h"
 #include "renderstate/RenderState.h"
 #include "renderthread/EglManager.h"
 #include "utils/GLUtils.h"
@@ -30,14 +31,8 @@
 namespace android {
 namespace uirenderer {
 
-CopyResult Readback::copySurfaceInto(renderthread::RenderThread& renderThread,
-        Surface& surface, SkBitmap* bitmap) {
-    // TODO: Clean this up and unify it with LayerRenderer::copyLayer,
-    // of which most of this is copied from.
-    renderThread.eglManager().initialize();
-
-    Caches& caches = Caches::getInstance();
-    RenderState& renderState = renderThread.renderState();
+static CopyResult copyTextureInto(Caches& caches, RenderState& renderState,
+        Texture& sourceTexture, Matrix4& texTransform, SkBitmap* bitmap) {
     int destWidth = bitmap->width();
     int destHeight = bitmap->height();
     if (destWidth > caches.maxTextureSize
@@ -98,6 +93,44 @@ CopyResult Readback::copySurfaceInto(renderthread::RenderThread& renderThread,
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
             GL_TEXTURE_2D, texture, 0);
 
+    {
+        // Draw & readback
+        renderState.setViewport(destWidth, destHeight);
+        renderState.scissor().setEnabled(false);
+        renderState.blend().syncEnabled();
+        renderState.stencil().disable();
+
+        Glop glop;
+        GlopBuilder(renderState, caches, &glop)
+                .setRoundRectClipState(nullptr)
+                .setMeshTexturedUnitQuad(nullptr)
+                .setFillExternalTexture(sourceTexture, texTransform)
+                .setTransform(Matrix4::identity(), TransformFlags::None)
+                .setModelViewMapUnitToRect(Rect(destWidth, destHeight))
+                .build();
+        Matrix4 ortho;
+        ortho.loadOrtho(destWidth, destHeight);
+        renderState.render(glop, ortho);
+
+        glReadPixels(0, 0, bitmap->width(), bitmap->height(), format,
+                type, bitmap->getPixels());
+    }
+
+    // Cleanup
+    caches.textureState().deleteTexture(texture);
+    renderState.deleteFramebuffer(fbo);
+
+    GL_CHECKPOINT(MODERATE);
+
+    return CopyResult::Success;
+}
+
+CopyResult Readback::copySurfaceInto(renderthread::RenderThread& renderThread,
+        Surface& surface, SkBitmap* bitmap) {
+    renderThread.eglManager().initialize();
+
+    Caches& caches = Caches::getInstance();
+
     // Setup the source
     sp<GraphicBuffer> sourceBuffer;
     sp<Fence> sourceFence;
@@ -142,7 +175,7 @@ CopyResult Readback::copySurfaceInto(renderthread::RenderThread& renderThread,
     GLuint sourceTexId;
     // Create a 2D texture to sample from the EGLImage
     glGenTextures(1, &sourceTexId);
-    Caches::getInstance().textureState().bindTexture(GL_TEXTURE_EXTERNAL_OES, sourceTexId);
+    caches.textureState().bindTexture(GL_TEXTURE_EXTERNAL_OES, sourceTexId);
     glEGLImageTargetTexture2DOES(GL_TEXTURE_EXTERNAL_OES, sourceImage);
 
     GLenum status = GL_NO_ERROR;
@@ -155,37 +188,13 @@ CopyResult Readback::copySurfaceInto(renderthread::RenderThread& renderThread,
     sourceTexture.wrap(sourceTexId,
             sourceBuffer->getWidth(), sourceBuffer->getHeight(), 0 /* total lie */);
 
-    {
-        // Draw & readback
-        renderState.setViewport(destWidth, destHeight);
-        renderState.scissor().setEnabled(false);
-        renderState.blend().syncEnabled();
-        renderState.stencil().disable();
+    return copyTextureInto(caches, renderThread.renderState(), sourceTexture, texTransform, bitmap);
+}
 
-        Rect destRect(destWidth, destHeight);
-        Glop glop;
-        GlopBuilder(renderState, caches, &glop)
-                .setRoundRectClipState(nullptr)
-                .setMeshTexturedUnitQuad(nullptr)
-                .setFillExternalTexture(sourceTexture, texTransform)
-                .setTransform(Matrix4::identity(), TransformFlags::None)
-                .setModelViewMapUnitToRect(destRect)
-                .build();
-        Matrix4 ortho;
-        ortho.loadOrtho(destWidth, destHeight);
-        renderState.render(glop, ortho);
-
-        glReadPixels(0, 0, bitmap->width(), bitmap->height(), format,
-                type, bitmap->getPixels());
-    }
-
-    // Cleanup
-    caches.textureState().deleteTexture(texture);
-    renderState.deleteFramebuffer(fbo);
-
-    GL_CHECKPOINT(MODERATE);
-
-    return CopyResult::Success;
+CopyResult Readback::copyTextureLayerInto(renderthread::RenderThread& renderThread,
+        Layer& layer, SkBitmap* bitmap) {
+    return copyTextureInto(Caches::getInstance(), renderThread.renderState(),
+            layer.getTexture(), layer.getTexTransform(), bitmap);
 }
 
 } // namespace uirenderer
