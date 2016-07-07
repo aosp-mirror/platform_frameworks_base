@@ -29,6 +29,7 @@ import java.util.List;
  */
 @SystemApi
 public class ParcelableCallAnalytics implements Parcelable {
+    /** {@hide} */
     public static final class VideoEvent implements Parcelable {
         public static final int SEND_LOCAL_SESSION_MODIFY_REQUEST = 0;
         public static final int SEND_LOCAL_SESSION_MODIFY_RESPONSE = 1;
@@ -373,10 +374,13 @@ public class ParcelableCallAnalytics implements Parcelable {
         writeBooleanAsByte(out, isVideoCall);
         out.writeTypedList(videoEvents);
     }
+
+    /** {@hide} */
     public void setIsVideoCall(boolean isVideoCall) {
         this.isVideoCall = isVideoCall;
     }
 
+    /** {@hide} */
     public void setVideoEvents(List<VideoEvent> videoEvents) {
         this.videoEvents = videoEvents;
     }
@@ -429,10 +433,12 @@ public class ParcelableCallAnalytics implements Parcelable {
         return eventTimings;
     }
 
+    /** {@hide} */
     public boolean isVideoCall() {
         return isVideoCall;
     }
 
+    /** {@hide} */
     public List<VideoEvent> getVideoEvents() {
         return videoEvents;
     }
