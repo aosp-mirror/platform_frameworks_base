@@ -1058,9 +1058,9 @@ public class TaskStackLayoutAlgorithm {
      * top and right system insets (but not the bottom inset) and left/right paddings, but _not_
      * the top/bottom padding or insets.
      */
-    public void getTaskStackBounds(Rect displayRect, Rect windowRect, int topInset, int rightInset,
-            Rect taskStackBounds) {
-        taskStackBounds.set(windowRect.left, windowRect.top + topInset,
+    public void getTaskStackBounds(Rect displayRect, Rect windowRect, int topInset, int leftInset,
+            int rightInset, Rect taskStackBounds) {
+        taskStackBounds.set(windowRect.left + leftInset, windowRect.top + topInset,
                 windowRect.right - rightInset, windowRect.bottom);
 
         // Ensure that the new width is at most the smaller display edge size
