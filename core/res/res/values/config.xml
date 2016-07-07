@@ -2527,4 +2527,9 @@
 
     <!-- Package name for the device provisioning package. -->
     <string name="config_deviceProvisioningPackage"></string>
+
+    <!-- User restrictions set when the first user is created.
+         Note: Also update appropriate overlay files. -->
+    <string-array translatable="false" name="config_defaultFirstUserRestrictions">
+    </string-array>
 </resources>

@@ -1799,6 +1799,18 @@ public class UserManagerService extends IUserManager.Stub {
         mUserVersion = USER_VERSION;
 
         Bundle restrictions = new Bundle();
+        try {
+            final String[] defaultFirstUserRestrictions = mContext.getResources().getStringArray(
+                    com.android.internal.R.array.config_defaultFirstUserRestrictions);
+            for (String userRestriction : defaultFirstUserRestrictions) {
+                if (UserRestrictionsUtils.isValidRestriction(userRestriction)) {
+                    restrictions.putBoolean(userRestriction, true);
+                }
+            }
+        } catch (Resources.NotFoundException e) {
+            Log.e(LOG_TAG, "Couldn't find resource: config_defaultFirstUserRestrictions", e);
+        }
+
         synchronized (mRestrictionsLock) {
             mBaseUserRestrictions.append(UserHandle.USER_SYSTEM, restrictions);
         }
