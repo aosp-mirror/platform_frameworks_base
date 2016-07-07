@@ -151,7 +151,7 @@
     <color name="battery_saver_mode_color">#fff4511e</color><!-- deep orange 600 -->
 
     <!-- Default user icon colors -->
-    <color name="user_icon_1">#ff00bcd4</color><!-- teal 500 -->
+    <color name="user_icon_1">#ff00bcd4</color><!-- cyan 500 -->
     <color name="user_icon_2">#ff3f51b5</color><!-- indigo 500 -->
     <color name="user_icon_3">#ff4285f4</color><!-- blue 500 -->
     <color name="user_icon_4">#ffe91e63</color><!-- pink 500 -->
