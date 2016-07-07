@@ -57,7 +57,7 @@ public abstract class PreBootBroadcaster extends IIntentReceiver.Stub {
     private int mIndex = 0;
 
     public PreBootBroadcaster(ActivityManagerService service, int userId,
-            ProgressReporter progress) {
+            ProgressReporter progress, boolean quiet) {
         mService = service;
         mUserId = userId;
         mProgress = progress;
@@ -68,7 +68,9 @@ public abstract class PreBootBroadcaster extends IIntentReceiver.Stub {
         mTargets = mService.mContext.getPackageManager().queryBroadcastReceiversAsUser(mIntent,
                 MATCH_SYSTEM_ONLY, UserHandle.of(userId));
 
-        mHandler.obtainMessage(MSG_SHOW).sendToTarget();
+        if (!quiet) {
+            mHandler.obtainMessage(MSG_SHOW).sendToTarget();
+        }
     }
 
     public void sendNext() {

@@ -351,7 +351,11 @@ final class UserController {
                 // PRE_BOOT receivers are finished to avoid ANR'ing apps
                 final UserInfo info = getUserInfo(userId);
                 if (!Objects.equals(info.lastLoggedInFingerprint, Build.FINGERPRINT)) {
-                    new PreBootBroadcaster(mService, userId, null) {
+                    // Suppress double notifications for managed profiles that
+                    // were unlocked automatically (no challenge token required)
+                    // as part of their parent user being unlocked.
+                    final boolean quiet = info.isManagedProfile() && !uss.tokenProvided;
+                    new PreBootBroadcaster(mService, userId, null, quiet) {
                         @Override
                         public void onFinished() {
                             finishUserUnlockedCompleted(uss);
@@ -972,6 +976,7 @@ final class UserController {
                 return false;
             } else {
                 uss.mUnlockProgress.addListener(listener);
+                uss.tokenProvided = (token != null);
             }
 
             finishUserUnlocking(uss);
