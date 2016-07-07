@@ -23,6 +23,7 @@ import android.os.Parcelable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 /**
@@ -58,7 +59,7 @@ public class PublishConfig implements Parcelable {
     /**
      * @hide
      */
-    public final String mServiceName;
+    public final byte[] mServiceName;
 
     /**
      * @hide
@@ -110,7 +111,7 @@ public class PublishConfig implements Parcelable {
      */
     public final boolean mEnableTerminateNotification;
 
-    private PublishConfig(String serviceName, byte[] serviceSpecificInfo,
+    private PublishConfig(byte[] serviceName, byte[] serviceSpecificInfo,
             int serviceSpecificInfoLength, byte[] txFilter, int txFilterLength, byte[] rxFilter,
             int rxFilterLength, int publishType, int publichCount, int ttlSec,
             boolean enableTerminateNotification) {
@@ -147,7 +148,10 @@ public class PublishConfig implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(mServiceName);
+        dest.writeInt(mServiceName.length);
+        if (mServiceName.length != 0) {
+            dest.writeByteArray(mServiceName);
+        }
         dest.writeInt(mServiceSpecificInfoLength);
         if (mServiceSpecificInfoLength != 0) {
             dest.writeByteArray(mServiceSpecificInfo, 0, mServiceSpecificInfoLength);
@@ -174,7 +178,11 @@ public class PublishConfig implements Parcelable {
 
         @Override
         public PublishConfig createFromParcel(Parcel in) {
-            String serviceName = in.readString();
+            int serviceNameLength = in.readInt();
+            byte[] serviceName = new byte[serviceNameLength];
+            if (serviceNameLength != 0) {
+                in.readByteArray(serviceName);
+            }
             int ssiLength = in.readInt();
             byte[] ssi = new byte[ssiLength];
             if (ssiLength != 0) {
@@ -213,7 +221,7 @@ public class PublishConfig implements Parcelable {
 
         PublishConfig lhs = (PublishConfig) o;
 
-        if (!mServiceName.equals(lhs.mServiceName)
+        if (!Arrays.equals(mServiceName, lhs.mServiceName)
                 || mServiceSpecificInfoLength != lhs.mServiceSpecificInfoLength
                 || mTxFilterLength != lhs.mTxFilterLength
                 || mRxFilterLength != lhs.mRxFilterLength) {
@@ -259,7 +267,7 @@ public class PublishConfig implements Parcelable {
     public int hashCode() {
         int result = 17;
 
-        result = 31 * result + mServiceName.hashCode();
+        result = 31 * result + Arrays.hashCode(mServiceName);
         result = 31 * result + mServiceSpecificInfoLength;
         result = 31 * result + Arrays.hashCode(mServiceSpecificInfo);
         result = 31 * result + mTxFilterLength;
@@ -281,6 +289,8 @@ public class PublishConfig implements Parcelable {
      * @hide
      */
     public void validate() throws IllegalArgumentException {
+        WifiNanUtils.validateServiceName(mServiceName);
+
         if (mServiceSpecificInfoLength != 0 && (mServiceSpecificInfo == null
                 || mServiceSpecificInfo.length < mServiceSpecificInfoLength)) {
             throw new IllegalArgumentException("Non-matching combination of "
@@ -317,7 +327,7 @@ public class PublishConfig implements Parcelable {
      * Builder used to build {@link PublishConfig} objects.
      */
     public static final class Builder {
-        private String mServiceName;
+        private byte[] mServiceName;
         private int mServiceSpecificInfoLength;
         private byte[] mServiceSpecificInfo = new byte[0];
         private int mTxFilterLength;
@@ -333,12 +343,20 @@ public class PublishConfig implements Parcelable {
          * Specify the service name of the publish session. The actual on-air
          * value is a 6 byte hashed representation of this string.
          *
+         * Per spec: The Service Name is a UTF-8 encoded string from 1 to 255 bytes in length.
+         * The only acceptable single-byte UTF-8 symbols for a Service Name are alphanumeric
+         * values (A-Z, a-z, 0-9), the hyphen ('-'), and the period ('.'). All valid multi-byte
+         * UTF-8 characters are acceptable in a Service Name.
+         *
          * @param serviceName The service name for the publish session.
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
         public Builder setServiceName(@NonNull String serviceName) {
-            mServiceName = serviceName;
+            if (serviceName == null) {
+                throw new IllegalArgumentException("Invalid service name - must be non-null");
+            }
+            mServiceName = serviceName.getBytes(StandardCharsets.UTF_8);
             return this;
         }
 
