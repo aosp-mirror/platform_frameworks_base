@@ -6678,8 +6678,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     @Override
     public void showBootMessage(final CharSequence msg, final boolean always) {
         if (Binder.getCallingUid() != Process.myUid()) {
-            // These days only the core system can call this, so apps can't get in
-            // the way of what we show about running them.
+            throw new SecurityException();
         }
         mWindowManager.showBootMessage(msg, always);
     }
