@@ -61,6 +61,28 @@ namespace android {
 namespace uirenderer {
 namespace renderthread {
 
+CanvasContext* CanvasContext::create(RenderThread& thread,
+        bool translucent, RenderNode* rootRenderNode, IContextFactory* contextFactory) {
+
+    auto renderType = Properties::getRenderPipelineType();
+    switch (renderType) {
+        case RenderPipelineType::OpenGL:
+            return new CanvasContext(thread, translucent, rootRenderNode, contextFactory);
+        case RenderPipelineType::SkiaGL:
+            //TODO: implement SKIA GL
+            LOG_ALWAYS_FATAL("skiaGL canvas type not implemented.");
+            break;
+        case RenderPipelineType::Vulkan:
+            //TODO: implement Vulkan
+            LOG_ALWAYS_FATAL("Vulkan canvas type not implemented.");
+            break;
+        default:
+            LOG_ALWAYS_FATAL("canvas context type %d not supported", (int32_t) renderType);
+            break;
+    }
+    return nullptr;
+}
+
 CanvasContext::CanvasContext(RenderThread& thread, bool translucent,
         RenderNode* rootRenderNode, IContextFactory* contextFactory)
         : mRenderThread(thread)
@@ -787,6 +809,11 @@ int64_t CanvasContext::getFrameNumber() {
         mFrameNumber = static_cast<int64_t>(mNativeSurface->getNextFrameNumber());
     }
     return mFrameNumber;
+}
+
+bool CanvasContext::isSkiaEnabled() {
+    auto renderType = Properties::getRenderPipelineType();
+    return RenderPipelineType::SkiaGL == renderType || RenderPipelineType::Vulkan == renderType;
 }
 
 } /* namespace renderthread */

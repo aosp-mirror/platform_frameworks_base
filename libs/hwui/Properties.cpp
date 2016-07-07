@@ -63,6 +63,7 @@ int Properties::overrideSpotShadowStrength = -1;
 
 ProfileType Properties::sProfileType = ProfileType::None;
 bool Properties::sDisableProfileBars = false;
+RenderPipelineType Properties::sRenderPipelineType = RenderPipelineType::NotInitialized;
 
 bool Properties::waitForGpuCompletion = false;
 bool Properties::forceDrawFrame = false;
@@ -203,6 +204,22 @@ ProfileType Properties::getProfileType() {
     if (CC_UNLIKELY(sDisableProfileBars && sProfileType == ProfileType::Bars))
         return ProfileType::None;
     return sProfileType;
+}
+
+RenderPipelineType Properties::getRenderPipelineType() {
+    if (RenderPipelineType::NotInitialized != sRenderPipelineType) {
+        return sRenderPipelineType;
+    }
+    char prop[PROPERTY_VALUE_MAX];
+    property_get(PROPERTY_DEFAULT_RENDERER, prop, "opengl");
+    if (!strcmp(prop, "skiagl") ) {
+        sRenderPipelineType = RenderPipelineType::SkiaGL;
+    } else if (!strcmp(prop, "vulkan") ) {
+        sRenderPipelineType = RenderPipelineType::Vulkan;
+    } else { //"opengl"
+        sRenderPipelineType = RenderPipelineType::OpenGL;
+    }
+    return sRenderPipelineType;
 }
 
 }; // namespace uirenderer

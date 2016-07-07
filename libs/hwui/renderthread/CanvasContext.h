@@ -72,8 +72,8 @@ enum SwapBehavior {
 // TODO: Rename to Renderer or some other per-window, top-level manager
 class CanvasContext : public IFrameCallback {
 public:
-    CanvasContext(RenderThread& thread, bool translucent, RenderNode* rootRenderNode,
-            IContextFactory* contextFactory);
+    static CanvasContext* create(RenderThread& thread, bool translucent,
+            RenderNode* rootRenderNode, IContextFactory* contextFactory);
     virtual ~CanvasContext();
 
     // Won't take effect until next EGLSurface creation
@@ -107,6 +107,7 @@ public:
     static void trimMemory(RenderThread& thread, int level);
 
     static void invokeFunctor(RenderThread& thread, Functor* functor);
+    static bool isSkiaEnabled();
 
     Layer* createTextureLayer();
 
@@ -167,6 +168,9 @@ public:
     ANDROID_API int64_t getFrameNumber();
 
 private:
+    CanvasContext(RenderThread& thread, bool translucent, RenderNode* rootRenderNode,
+            IContextFactory* contextFactory);
+
     friend class RegisterFrameCallbackTask;
     // TODO: Replace with something better for layer & other GL object
     // lifecycle tracking
