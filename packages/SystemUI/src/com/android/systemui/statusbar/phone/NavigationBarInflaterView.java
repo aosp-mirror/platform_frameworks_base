@@ -28,6 +28,7 @@ import android.widget.LinearLayout;
 import android.widget.Space;
 
 import com.android.systemui.R;
+import com.android.systemui.SystemUIFactory;
 import com.android.systemui.statusbar.policy.KeyButtonView;
 import com.android.systemui.tuner.TunerService;
 
@@ -69,8 +70,6 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
 
     private View mLastRot0;
     private View mLastRot90;
-
-    private boolean mAlternativeOrder;
 
     public NavigationBarInflaterView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -115,7 +114,6 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
                 false);
         mRot90.setId(R.id.rot90);
         addView(mRot90);
-        updateAlternativeOrder();
         if (getParent() instanceof NavigationBarView) {
             ((NavigationBarView) getParent()).updateRotatedViews();
         }
@@ -152,20 +150,6 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
         for (int i = 0; i < buttonDisatchers.size(); i++) {
             initiallyFill(buttonDisatchers.valueAt(i));
         }
-    }
-
-    public void setAlternativeOrder(boolean alternativeOrder) {
-        if (alternativeOrder != mAlternativeOrder) {
-            mAlternativeOrder = alternativeOrder;
-            updateAlternativeOrder();
-        }
-    }
-
-    private void updateAlternativeOrder() {
-        ((ReverseLinearLayout) mRot90.findViewById(R.id.ends_group)).setAlternativeOrder(
-                mAlternativeOrder);
-        ((ReverseLinearLayout) mRot90.findViewById(R.id.center_group)).setAlternativeOrder(
-                mAlternativeOrder);
     }
 
     private void initiallyFill(ButtonDispatcher buttonDispatcher) {
