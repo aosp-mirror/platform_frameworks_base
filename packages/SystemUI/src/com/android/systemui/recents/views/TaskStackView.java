@@ -1553,7 +1553,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         bindTaskView(tv, task);
 
         // If the doze trigger has already fired, then update the state for this task view
-        if (mUIDozeTrigger.isAsleep()) {
+        if (mUIDozeTrigger.isAsleep() || Recents.getSystemServices().hasFreeformWorkspaceSupport()) {
             tv.setNoUserInteractionState();
         }
 

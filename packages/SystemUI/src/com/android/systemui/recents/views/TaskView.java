@@ -216,9 +216,6 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     protected void onFinishInflate() {
         // Bind the views
         mHeaderView = (TaskViewHeader) findViewById(R.id.task_view_bar);
-        if (Recents.getSystemServices().hasFreeformWorkspaceSupport()) {
-            mHeaderView.setNoUserInteractionState();
-        }
         mThumbnailView = (TaskViewThumbnail) findViewById(R.id.task_view_thumbnail);
         mThumbnailView.updateClipToTaskBar(mHeaderView);
         mActionButtonView = findViewById(R.id.lock_to_app_fab);
