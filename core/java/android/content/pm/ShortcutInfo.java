@@ -696,7 +696,8 @@ public final class ShortcutInfo implements Parcelable {
         private PersistableBundle mExtras;
 
         /**
-         * Old style constructor.  STOPSHIP hide it before launch.
+         * Old style constructor.
+         * @hide
          */
         @Deprecated
         public Builder(Context context) {
@@ -704,7 +705,8 @@ public final class ShortcutInfo implements Parcelable {
         }
 
         /**
-         * Used with the old style constructor, kept for unit tests. STOPSHIP hide it before launch.
+         * Used with the old style constructor, kept for unit tests.
+         * @hide
          */
         @NonNull
         @Deprecated
@@ -1004,7 +1006,7 @@ public final class ShortcutInfo implements Parcelable {
         return mTitle;
     }
 
-    /** TODO Javadoc */
+    /** @hide */
     public int getShortLabelResourceId() {
         return mTitleResId;
     }
@@ -1017,7 +1019,7 @@ public final class ShortcutInfo implements Parcelable {
         return mText;
     }
 
-    /** TODO Javadoc */
+    /** @hide */
     public int getLongLabelResourceId() {
         return mTextResId;
     }
@@ -1030,7 +1032,7 @@ public final class ShortcutInfo implements Parcelable {
         return mDisabledMessage;
     }
 
-    /** TODO Javadoc */
+    /** @hide */
     public int getDisabledMessageResourceId() {
         return mDisabledMessageResId;
     }
