@@ -612,7 +612,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         stackLayout.setSystemInsets(systemInsets);
         if (stack != null) {
             stackLayout.getTaskStackBounds(displayRect, windowRect, systemInsets.top,
-                    systemInsets.right, mTaskStackBounds);
+                    systemInsets.left, systemInsets.right, mTaskStackBounds);
             stackLayout.reset();
             stackLayout.initialize(displayRect, windowRect, mTaskStackBounds,
                     TaskStackLayoutAlgorithm.StackState.getStackStateForStack(stack));

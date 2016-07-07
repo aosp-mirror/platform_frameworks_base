@@ -1194,7 +1194,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // bounds have changed.  This is because we may get spurious measures while dragging where
         // our current stack bounds reflect the target drop region.
         mLayoutAlgorithm.getTaskStackBounds(mDisplayRect, new Rect(0, 0, width, height),
-                mLayoutAlgorithm.mSystemInsets.top, mLayoutAlgorithm.mSystemInsets.right, mTmpRect);
+                mLayoutAlgorithm.mSystemInsets.top, mLayoutAlgorithm.mSystemInsets.left,
+                mLayoutAlgorithm.mSystemInsets.right, mTmpRect);
         if (!mTmpRect.equals(mStableStackBounds)) {
             mStableStackBounds.set(mTmpRect);
             mStackBounds.set(mTmpRect);
