@@ -105,8 +105,9 @@ TEST(RenderNode, releasedCallback) {
 
 RENDERTHREAD_TEST(RenderNode, prepareTree_nullableDisplayList) {
     ContextFactory contextFactory;
-    CanvasContext canvasContext(renderThread, false, nullptr, &contextFactory);
-    TreeInfo info(TreeInfo::MODE_RT_ONLY, canvasContext);
+    std::unique_ptr<CanvasContext> canvasContext(CanvasContext::create(
+            renderThread, false, nullptr, &contextFactory));
+    TreeInfo info(TreeInfo::MODE_RT_ONLY, *canvasContext.get());
     DamageAccumulator damageAccumulator;
     info.damageAccumulator = &damageAccumulator;
     info.observer = nullptr;
@@ -128,5 +129,5 @@ RENDERTHREAD_TEST(RenderNode, prepareTree_nullableDisplayList) {
         nullDLNode->prepareTree(info);
     }
 
-    canvasContext.destroy(nullptr);
+    canvasContext->destroy(nullptr);
 }

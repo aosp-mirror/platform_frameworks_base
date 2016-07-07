@@ -55,7 +55,7 @@ namespace renderthread {
 
 CREATE_BRIDGE4(createContext, RenderThread* thread, bool translucent,
         RenderNode* rootRenderNode, IContextFactory* contextFactory) {
-    return new CanvasContext(*args->thread, args->translucent,
+    return CanvasContext::create(*args->thread, args->translucent,
             args->rootRenderNode, args->contextFactory);
 }
 

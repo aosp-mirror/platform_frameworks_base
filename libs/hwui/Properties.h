@@ -153,6 +153,12 @@ enum DebugLevel {
 
 #define PROPERTY_FILTER_TEST_OVERHEAD "debug.hwui.filter_test_overhead"
 
+/**
+ * Allows to set rendering pipeline mode to OpenGL (default), Skia OpenGL
+ * or Vulkan.
+ */
+#define PROPERTY_DEFAULT_RENDERER "debug.hwui.default_renderer"
+
 ///////////////////////////////////////////////////////////////////////////////
 // Runtime configuration properties
 ///////////////////////////////////////////////////////////////////////////////
@@ -245,6 +251,13 @@ enum class StencilClipDebug {
     ShowRegion
 };
 
+enum class RenderPipelineType {
+    OpenGL = 0,
+    SkiaGL,
+    Vulkan,
+    NotInitialized = 128
+};
+
 /**
  * Renderthread-only singleton which manages several static rendering properties. Most of these
  * are driven by system properties which are queried once at initialization, and again if init()
@@ -292,6 +305,7 @@ public:
     static int overrideSpotShadowStrength;
 
     static ProfileType getProfileType();
+    static RenderPipelineType getRenderPipelineType();
 
     // Should be used only by test apps
     static bool waitForGpuCompletion;
@@ -304,6 +318,7 @@ public:
 private:
     static ProfileType sProfileType;
     static bool sDisableProfileBars;
+    static RenderPipelineType sRenderPipelineType;
 
 }; // class Caches
 
