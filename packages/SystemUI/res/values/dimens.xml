@@ -141,6 +141,9 @@
     <!-- Margin start of the system icons super container -->
     <dimen name="system_icons_super_container_margin_start">16dp</dimen>
 
+    <!-- Margin end of the system icons super container when the avatar is missing. -->
+    <dimen name="system_icons_super_container_avatarless_margin_end">6dp</dimen>
+
     <!-- Width for the notification panel and related windows -->
     <dimen name="match_parent">-1px</dimen>
     <dimen name="standard_notification_panel_width">416dp</dimen>
