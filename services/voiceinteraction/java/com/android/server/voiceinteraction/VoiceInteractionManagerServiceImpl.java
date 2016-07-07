@@ -30,7 +30,6 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -60,7 +59,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
 
     final Context mContext;
     final Handler mHandler;
-    final Object mLock;
+    final VoiceInteractionManagerService.VoiceInteractionManagerServiceStub mServiceStub;
     final int mUser;
     final ComponentName mComponent;
     final IActivityManager mAm;
@@ -73,16 +72,13 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
     VoiceInteractionSessionConnection mActiveSession;
     int mDisabledShowContext;
 
-    private final RemoteCallbackList<IVoiceInteractionSessionListener>
-            mVoiceInteractionSessionListeners = new RemoteCallbackList<>();
-
     final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
                 String reason = intent.getStringExtra("reason");
                 if (!CLOSE_REASON_VOICE_INTERACTION.equals(reason) && !"dream".equals(reason)) {
-                    synchronized (mLock) {
+                    synchronized (mServiceStub) {
                         if (mActiveSession != null && mActiveSession.mSession != null) {
                             try {
                                 mActiveSession.mSession.closeSystemDialogs();
@@ -98,7 +94,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
     final ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            synchronized (mLock) {
+            synchronized (mServiceStub) {
                 mService = IVoiceInteractionService.Stub.asInterface(service);
                 try {
                     mService.ready();
@@ -113,11 +109,12 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         }
     };
 
-    VoiceInteractionManagerServiceImpl(Context context, Handler handler, Object lock,
+    VoiceInteractionManagerServiceImpl(Context context, Handler handler,
+            VoiceInteractionManagerService.VoiceInteractionManagerServiceStub stub,
             int userHandle, ComponentName service) {
         mContext = context;
         mHandler = handler;
-        mLock = lock;
+        mServiceStub = stub;
         mUser = userHandle;
         mComponent = service;
         mAm = ActivityManagerNative.getDefault();
@@ -153,8 +150,9 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
     public boolean showSessionLocked(Bundle args, int flags,
             IVoiceInteractionSessionShowCallback showCallback, IBinder activityToken) {
         if (mActiveSession == null) {
-            mActiveSession = new VoiceInteractionSessionConnection(mLock, mSessionComponentName,
-                    mUser, mContext, this, mInfo.getServiceInfo().applicationInfo.uid, mHandler);
+            mActiveSession = new VoiceInteractionSessionConnection(mServiceStub,
+                    mSessionComponentName, mUser, mContext, this,
+                    mInfo.getServiceInfo().applicationInfo.uid, mHandler);
         }
         List<IBinder> activityTokens = null;
         if (activityToken == null) {
@@ -358,52 +356,20 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         }
     }
 
-    public void registerVoiceInteractionSessionListener(
-            IVoiceInteractionSessionListener listener) {
-        synchronized (mLock) {
-            mVoiceInteractionSessionListeners.register(listener);
-        }
-    }
-
     @Override
     public void sessionConnectionGone(VoiceInteractionSessionConnection connection) {
-        synchronized (mLock) {
+        synchronized (mServiceStub) {
             finishLocked(connection.mToken, false);
         }
     }
 
     @Override
     public void onSessionShown(VoiceInteractionSessionConnection connection) {
-        synchronized (mLock) {
-            final int size = mVoiceInteractionSessionListeners.beginBroadcast();
-            for (int i = 0; i < size; ++i) {
-                final IVoiceInteractionSessionListener listener =
-                        mVoiceInteractionSessionListeners.getBroadcastItem(i);
-                try {
-                    listener.onVoiceSessionShown();
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Error delivering voice interaction open event.", e);
-                }
-            }
-            mVoiceInteractionSessionListeners.finishBroadcast();
-        }
+        mServiceStub.onSessionShown();
     }
 
     @Override
     public void onSessionHidden(VoiceInteractionSessionConnection connection) {
-        synchronized (mLock) {
-            final int size = mVoiceInteractionSessionListeners.beginBroadcast();
-            for (int i = 0; i < size; ++i) {
-                final IVoiceInteractionSessionListener listener =
-                        mVoiceInteractionSessionListeners.getBroadcastItem(i);
-                try {
-                    listener.onVoiceSessionHidden();
-
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Error delivering voice interaction closed event.", e);
-                }
-            }
-            mVoiceInteractionSessionListeners.finishBroadcast();
-        }
+        mServiceStub.onSessionHidden();
     }
 }
