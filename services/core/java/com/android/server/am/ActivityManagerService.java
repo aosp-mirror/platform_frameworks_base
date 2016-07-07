@@ -569,6 +569,9 @@ public final class ActivityManagerService extends ActivityManagerNative
     private boolean mShowDialogs = true;
     private boolean mInVrMode = false;
 
+    // Whether we should use SCHED_FIFO for UI and RenderThreads.
+    private boolean mUseFifoUiScheduling = false;
+
     BroadcastQueue mFgBroadcastQueue;
     BroadcastQueue mBgBroadcastQueue;
     // Convenient for easy iteration over the queues. Foreground is first
@@ -2656,6 +2659,10 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         GL_ES_VERSION = SystemProperties.getInt("ro.opengles.version",
             ConfigurationInfo.GL_ES_VERSION_UNDEFINED);
+
+        if (SystemProperties.getInt("sys.use_fifo_ui", 0) != 0) {
+            mUseFifoUiScheduling = true;
+        }
 
         mTrackingAssociations = "1".equals(SystemProperties.get("debug.track-associations"));
 
@@ -12532,6 +12539,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 final int pid = Binder.getCallingPid();
                 proc = mPidsSelfLocked.get(pid);
                 if (proc != null && mInVrMode && tid >= 0) {
+                    // ensure the tid belongs to the process
+                    if (!Process.isThreadInProcess(pid, tid)) {
+                        throw new IllegalArgumentException("VR thread does not belong to process");
+                    }
                     // reset existing VR thread to CFS
                     if (proc.vrThreadTid != 0) {
                         Process.setThreadScheduler(proc.vrThreadTid, Process.SCHED_OTHER, 0);
@@ -12544,6 +12555,40 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                 } else {
                     //Slog.e("VR_FIFO", "Didn't set thread from setVrThread?");
+                }
+            }
+        }
+    }
+
+    @Override
+    public void setRenderThread(int tid) {
+        synchronized (this) {
+            ProcessRecord proc;
+            synchronized (mPidsSelfLocked) {
+                int pid = Binder.getCallingPid();
+                proc = mPidsSelfLocked.get(pid);
+                if (mUseFifoUiScheduling && proc != null && proc.renderThreadTid == 0 && tid > 0) {
+                    // ensure the tid belongs to the process
+                    if (!Process.isThreadInProcess(pid, tid)) {
+                        throw new IllegalArgumentException(
+                            "Render thread does not belong to process");
+                    }
+                    proc.renderThreadTid = tid;
+                    if (DEBUG_OOM_ADJ) {
+                        Slog.d("UI_FIFO", "Set RenderThread tid " + tid + " for pid " + pid);
+                    }
+                    // promote to FIFO now
+                    if (proc.curSchedGroup == ProcessList.SCHED_GROUP_TOP_APP) {
+                        if (DEBUG_OOM_ADJ) Slog.d("UI_FIFO", "Promoting " + tid + "out of band");
+                        Process.setThreadScheduler(proc.renderThreadTid,
+                            Process.SCHED_FIFO | Process.SCHED_RESET_ON_FORK, 1);
+                    }
+                } else {
+                    if (DEBUG_OOM_ADJ) {
+                        Slog.d("UI_FIFO", "Didn't set thread from setRenderThread? " +
+                               "PID: " + pid + ", TID: " + tid + " FIFO: " +
+                               mUseFifoUiScheduling);
+                    }
                 }
             }
         }
@@ -19547,7 +19592,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             adj = ProcessList.FOREGROUND_APP_ADJ;
                             if ((cr.flags&Context.BIND_NOT_FOREGROUND) == 0) {
                                 if ((cr.flags&Context.BIND_IMPORTANT) != 0) {
-                                    schedGroup = ProcessList.SCHED_GROUP_TOP_APP;
+                                    schedGroup = ProcessList.SCHED_GROUP_TOP_APP_BOUND;
                                 } else {
                                     schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
                                 }
@@ -20164,47 +20209,65 @@ public final class ActivityManagerService extends ActivityManagerNative
                         processGroup = Process.THREAD_GROUP_BG_NONINTERACTIVE;
                         break;
                     case ProcessList.SCHED_GROUP_TOP_APP:
+                    case ProcessList.SCHED_GROUP_TOP_APP_BOUND:
                         processGroup = Process.THREAD_GROUP_TOP_APP;
                         break;
                     default:
                         processGroup = Process.THREAD_GROUP_DEFAULT;
                         break;
                 }
-                if (true) {
-                    long oldId = Binder.clearCallingIdentity();
-                    try {
-                        Process.setProcessGroup(app.pid, processGroup);
-                        if (app.curSchedGroup == ProcessList.SCHED_GROUP_TOP_APP) {
-                            // do nothing if we already switched to RT
-                            if (oldSchedGroup != ProcessList.SCHED_GROUP_TOP_APP) {
-                                // Switch VR thread for app to SCHED_FIFO
-                                if (mInVrMode && app.vrThreadTid != 0) {
-                                    Process.setThreadScheduler(app.vrThreadTid,
+                long oldId = Binder.clearCallingIdentity();
+                try {
+                    Process.setProcessGroup(app.pid, processGroup);
+                    if (app.curSchedGroup == ProcessList.SCHED_GROUP_TOP_APP) {
+                        // do nothing if we already switched to RT
+                        if (oldSchedGroup != ProcessList.SCHED_GROUP_TOP_APP) {
+                            // Switch VR thread for app to SCHED_FIFO
+                            if (mInVrMode && app.vrThreadTid != 0) {
+                                Process.setThreadScheduler(app.vrThreadTid,
+                                    Process.SCHED_FIFO | Process.SCHED_RESET_ON_FORK, 1);
+                            }
+                            if (mUseFifoUiScheduling) {
+                                // Switch UI pipeline for app to SCHED_FIFO
+                                app.savedPriority = Process.getThreadPriority(app.pid);
+                                Process.setThreadScheduler(app.pid,
+                                    Process.SCHED_FIFO | Process.SCHED_RESET_ON_FORK, 1);
+                                if (app.renderThreadTid != 0) {
+                                    Process.setThreadScheduler(app.renderThreadTid,
                                         Process.SCHED_FIFO | Process.SCHED_RESET_ON_FORK, 1);
+                                    if (DEBUG_OOM_ADJ) {
+                                        Slog.d("UI_FIFO", "Set RenderThread (TID " +
+                                            app.renderThreadTid + ") to FIFO");
+                                    }
+                                } else {
+                                    if (DEBUG_OOM_ADJ) {
+                                        Slog.d("UI_FIFO", "Not setting RenderThread TID");
+                                    }
                                 }
                             }
-                        } else if (oldSchedGroup == ProcessList.SCHED_GROUP_TOP_APP &&
-                                   app.curSchedGroup != ProcessList.SCHED_GROUP_TOP_APP) {
-                            // Reset VR thread to SCHED_OTHER
-                            // Safe to do even if we're not in VR mode
-                            if (app.vrThreadTid != 0) {
-                                Process.setThreadScheduler(app.vrThreadTid, Process.SCHED_OTHER, 0);
-                            }
                         }
-                    } catch (Exception e) {
-                        Slog.w(TAG, "Failed setting process group of " + app.pid
-                                + " to " + app.curSchedGroup);
-                        e.printStackTrace();
-                    } finally {
-                        Binder.restoreCallingIdentity(oldId);
-                    }
-                } else {
-                    if (app.thread != null) {
-                        try {
-                            app.thread.setSchedulingGroup(processGroup);
-                        } catch (RemoteException e) {
+                    } else if (oldSchedGroup == ProcessList.SCHED_GROUP_TOP_APP &&
+                               app.curSchedGroup != ProcessList.SCHED_GROUP_TOP_APP) {
+                        // Reset VR thread to SCHED_OTHER
+                        // Safe to do even if we're not in VR mode
+                        if (app.vrThreadTid != 0) {
+                            Process.setThreadScheduler(app.vrThreadTid, Process.SCHED_OTHER, 0);
+                        }
+                        if (mUseFifoUiScheduling) {
+                            // Reset UI pipeline to SCHED_OTHER
+                            Process.setThreadScheduler(app.pid, Process.SCHED_OTHER, 0);
+                            Process.setThreadScheduler(app.renderThreadTid,
+                                Process.SCHED_OTHER, 0);
+                            Process.setThreadPriority(app.pid, app.savedPriority);
+                            Process.setThreadPriority(app.renderThreadTid, -4);
                         }
                     }
+                } catch (Exception e) {
+                    Slog.w(TAG, "Failed setting process group of " + app.pid
+                            + " to " + app.curSchedGroup);
+                    e.printStackTrace();
+                } finally {
+                    Binder.restoreCallingIdentity(oldId);
                 }
             }
         }
