@@ -16,17 +16,45 @@
 
 package android.text.format;
 
+import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.os.LocaleList;
 import android.support.test.filters.SmallTest;
-
-import java.util.Locale;
 
 import junit.framework.TestCase;
 
+import java.util.Locale;
+
 public class DateUtilsTest extends TestCase {
-    // This test is not in CTS because formatDuration is @hidden.
+
+    private static final LocaleList LOCALE_LIST_US = new LocaleList(Locale.US);
+    private LocaleList mOriginalLocales;
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        mOriginalLocales = Resources.getSystem().getConfiguration().getLocales();
+        setLocales(LOCALE_LIST_US);
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        setLocales(mOriginalLocales);
+        super.tearDown();
+    }
+
+    private void setLocales(LocaleList locales) {
+        final Resources systemResources = Resources.getSystem();
+        final Configuration config = new Configuration(systemResources.getConfiguration());
+        config.setLocales(locales);
+        // This is not very safe to call, but since DateUtils.formatDuration() is a static method
+        // (it gets its format strings from the system resources), we can't pass a modified Context
+        // to it.
+        systemResources.updateConfiguration(config, null);
+    }
+
     @SmallTest
     public void test_formatDuration_seconds() throws Exception {
-        assertEquals("en-US", Locale.getDefault().toLanguageTag());
         assertEquals("0 seconds", DateUtils.formatDuration(0));
         assertEquals("0 seconds", DateUtils.formatDuration(1));
         assertEquals("0 seconds", DateUtils.formatDuration(499));
@@ -35,20 +63,16 @@ public class DateUtilsTest extends TestCase {
         assertEquals("2 seconds", DateUtils.formatDuration(1500));
     }
 
-    // This test is not in CTS because formatDuration is @hidden.
     @SmallTest
     public void test_formatDuration_Minutes() throws Exception {
-        assertEquals("en-US", Locale.getDefault().toLanguageTag());
         assertEquals("59 seconds", DateUtils.formatDuration(59000));
         assertEquals("60 seconds", DateUtils.formatDuration(59500));
         assertEquals("1 minute", DateUtils.formatDuration(60000));
         assertEquals("2 minutes", DateUtils.formatDuration(120000));
     }
 
-    // This test is not in CTS because formatDuration is @hidden.
     @SmallTest
     public void test_formatDuration_Hours() throws Exception {
-        assertEquals("en-US", Locale.getDefault().toLanguageTag());
         assertEquals("59 minutes", DateUtils.formatDuration(3540000));
         assertEquals("1 hour", DateUtils.formatDuration(3600000));
         assertEquals("48 hours", DateUtils.formatDuration(172800000));
