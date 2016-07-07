@@ -327,9 +327,17 @@ public class SubscribeConfig implements Parcelable {
             throw new IllegalArgumentException(
                     "Non-matching combination of txFilter and txFilterLength");
         }
+        if (!TlvBufferUtils.isValid(mTxFilter, mTxFilterLength, 0, 1)) {
+            throw new IllegalArgumentException(
+                    "Invalid txFilter configuration - LV fields do not match up to length");
+        }
         if (mRxFilterLength != 0 && (mRxFilter == null || mRxFilter.length < mRxFilterLength)) {
             throw new IllegalArgumentException(
                     "Non-matching combination of rxFilter and rxFilterLength");
+        }
+        if (!TlvBufferUtils.isValid(mRxFilter, mRxFilterLength, 0, 1)) {
+            throw new IllegalArgumentException(
+                    "Invalid rxFilter configuration - LV fields do not match up to length");
         }
         if (mSubscribeType < SUBSCRIBE_TYPE_PASSIVE || mSubscribeType > SUBSCRIBE_TYPE_ACTIVE) {
             throw new IllegalArgumentException("Invalid subscribeType - " + mSubscribeType);

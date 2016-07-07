@@ -300,9 +300,17 @@ public class PublishConfig implements Parcelable {
             throw new IllegalArgumentException(
                     "Non-matching combination of txFilter and txFilterLength");
         }
+        if (!TlvBufferUtils.isValid(mTxFilter, mTxFilterLength, 0, 1)) {
+            throw new IllegalArgumentException(
+                    "Invalid txFilter configuration - LV fields do not match up to length");
+        }
         if (mRxFilterLength != 0 && (mRxFilter == null || mRxFilter.length < mRxFilterLength)) {
             throw new IllegalArgumentException(
                     "Non-matching combination of rxFilter and rxFilterLength");
+        }
+        if (!TlvBufferUtils.isValid(mRxFilter, mRxFilterLength, 0, 1)) {
+            throw new IllegalArgumentException(
+                    "Invalid rxFilter configuration - LV fields do not match up to length");
         }
         if (mPublishType < PUBLISH_TYPE_UNSOLICITED || mPublishType > PUBLISH_TYPE_SOLICITED) {
             throw new IllegalArgumentException("Invalid publishType - " + mPublishType);
