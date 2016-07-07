@@ -62,7 +62,7 @@ public class WifiNanEventCallback {
      * Called when NAN connect operation
      * {@link WifiNanManager#connect(android.os.Looper, WifiNanEventCallback)}
      * is completed. Doesn't necessarily mean that have joined or started a NAN
-     * cluster. An indication is provided by {@link #onIdentityChanged()}.
+     * cluster. An indication is provided by {@link #onIdentityChanged(byte[])}.
      */
     public void onConnectSuccess() {
         /* empty */
@@ -81,12 +81,14 @@ public class WifiNanEventCallback {
     }
 
     /**
-     * Called when NAN identity has changed. This may be due to joining a
-     * cluster, starting a cluster, or discovery interface change. The
-     * implication is that peers you've been communicating with may no longer
-     * recognize you and you need to re-establish your identity.
+     * Called when NAN identity has changed and after {@link #onConnectSuccess()}. Call may be
+     * due to joining a cluster, starting a cluster, or discovery interface change. The
+     * implication is that peers you've been communicating with may no longer recognize you and
+     * you need to re-establish your identity.
+     * @param mac The MAC address of the NAN discovery interface. Depending on the permission
+     *            model may be all 0's.
      */
-    public void onIdentityChanged() {
+    public void onIdentityChanged(byte[] mac) {
         /* empty */
     }
 }
