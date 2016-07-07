@@ -454,18 +454,20 @@ following example code demonstrates a basic implementation of this method.</p>
 
 <pre>
 &#64;Override
-public void dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
-    super.dispatchPopulateAccessibilityEvent(event);
+public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
     // Call the super implementation to populate its text to the event, which
     // calls onPopulateAccessibilityEvent() on API Level 14 and up.
-
+    boolean completed = super.dispatchPopulateAccessibilityEvent(event);
+    
     // In case this is running on a API revision earlier that 14, check
     // the text content of the event and add an appropriate text
     // description for this custom view:
     CharSequence text = getText();
     if (!TextUtils.isEmpty(text)) {
         event.getText().add(text);
+        return true;
     }
+    return completed;
 }
 </pre>
 
