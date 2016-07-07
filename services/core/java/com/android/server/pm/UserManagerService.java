@@ -38,6 +38,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
@@ -2919,10 +2920,15 @@ public class UserManagerService extends IUserManager.Stub {
                             com.android.internal.R.string.config_demoModeLauncherComponent);
             if (!TextUtils.isEmpty(demoLauncher)) {
                 ComponentName componentToEnable = ComponentName.unflattenFromString(demoLauncher);
+                String demoLauncherPkg = componentToEnable.getPackageName();
                 try {
-                    AppGlobals.getPackageManager().setComponentEnabledSetting(componentToEnable,
+                    final IPackageManager iPm = AppGlobals.getPackageManager();
+                    iPm.setComponentEnabledSetting(componentToEnable,
                             PackageManager.COMPONENT_ENABLED_STATE_ENABLED, /* flags= */ 0,
                             /* userId= */ userId);
+                    iPm.setApplicationEnabledSetting(demoLauncherPkg,
+                            PackageManager.COMPONENT_ENABLED_STATE_ENABLED, /* flags= */ 0,
+                            /* userId= */ userId, null);
                 } catch (RemoteException re) {
                     // Internal, shouldn't happen
                 }
