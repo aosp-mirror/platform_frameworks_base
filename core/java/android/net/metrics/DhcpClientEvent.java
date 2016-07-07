@@ -21,11 +21,18 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- *  An event recorded when a DhcpClient state machine transitions to a new state.
+ * An event recorded when a DhcpClient state machine transitions to a new state.
  * {@hide}
  */
 @SystemApi
 public final class DhcpClientEvent implements Parcelable {
+
+    // Names for recording DhcpClient pseudo-state transitions.
+    /** {@hide} Represents transitions from DhcpInitState to DhcpBoundState */
+    public static final String INITIAL_BOUND = "InitialBoundState";
+    /** {@hide} Represents transitions from and to DhcpBoundState via DhcpRenewingState */
+    public static final String RENEWING_BOUND = "RenewingBoundState";
+
     public final String ifName;
     public final String msg;
     public final int durationMs;
