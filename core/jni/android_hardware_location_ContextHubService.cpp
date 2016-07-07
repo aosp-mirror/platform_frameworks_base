@@ -186,9 +186,13 @@ static int set_dest_app(hub_message_t *msg, int id) {
 
 static void send_query_for_apps() {
     hub_message_t msg;
+    query_apps_request_t queryMsg;
+
+    queryMsg.app_name.id = NANOAPP_VENDOR_ALL_APPS;
 
     msg.message_type = CONTEXT_HUB_QUERY_APPS;
-    msg.message_len  = 0;
+    msg.message_len  = sizeof(queryMsg);
+    msg.message = &queryMsg;
 
     for (int i = 0; i < db.hubInfo.numHubs; i++ ) {
         ALOGD("Sending query for apps to hub %d", i);
