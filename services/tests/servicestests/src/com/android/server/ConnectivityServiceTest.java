@@ -96,6 +96,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
     private static final String TAG = "ConnectivityServiceTest";
 
     private static final int TIMEOUT_MS = 500;
+    private static final int TEST_LINGER_DELAY_MS = 120;
 
     private BroadcastInterceptingContext mServiceContext;
     private WrappedConnectivityService mService;
@@ -330,7 +331,8 @@ public class ConnectivityServiceTest extends AndroidTestCase {
          * @param validated Indicate if network should pretend to be validated.
          */
         public void connect(boolean validated) {
-            assertEquals(mNetworkInfo.getDetailedState(), DetailedState.IDLE);
+            assertEquals("MockNetworkAgents can only be connected once",
+                    mNetworkInfo.getDetailedState(), DetailedState.IDLE);
             assertFalse(mNetworkCapabilities.hasCapability(NET_CAPABILITY_INTERNET));
 
             NetworkCallback callback = null;
@@ -548,6 +550,11 @@ public class ConnectivityServiceTest extends AndroidTestCase {
             super(context, handler, cmdName, cmd);
         }
 
+        public FakeWakeupMessage(Context context, Handler handler, String cmdName, int cmd,
+                int arg1, int arg2, Object obj) {
+            super(context, handler, cmdName, cmd, arg1, arg2, obj);
+        }
+
         @Override
         public void schedule(long when) {
             long delayMs = when - SystemClock.elapsedRealtime();
@@ -556,12 +563,13 @@ public class ConnectivityServiceTest extends AndroidTestCase {
                 fail("Attempting to send msg more than " + UNREASONABLY_LONG_WAIT +
                         "ms into the future: " + delayMs);
             }
-            mHandler.sendEmptyMessageDelayed(mCmd, delayMs);
+            Message msg = mHandler.obtainMessage(mCmd, mArg1, mArg2, mObj);
+            mHandler.sendMessageDelayed(msg, delayMs);
         }
 
         @Override
         public void cancel() {
-            mHandler.removeMessages(mCmd);
+            mHandler.removeMessages(mCmd, mObj);
         }
 
         @Override
@@ -585,12 +593,6 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         protected CaptivePortalProbeResult isCaptivePortal() {
             return new CaptivePortalProbeResult(gen204ProbeResult, gen204ProbeRedirectUrl);
         }
-
-        @Override
-        protected WakeupMessage makeWakeupMessage(
-                Context context, Handler handler, String cmdName, int cmd) {
-            return new FakeWakeupMessage(context, handler, cmdName, cmd);
-        }
     }
 
     private class WrappedConnectivityService extends ConnectivityService {
@@ -599,6 +601,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         public WrappedConnectivityService(Context context, INetworkManagementService netManager,
                 INetworkStatsService statsService, INetworkPolicyManager policyManager) {
             super(context, netManager, statsService, policyManager);
+            mLingerDelayMs = TEST_LINGER_DELAY_MS;
         }
 
         @Override
@@ -640,6 +643,12 @@ public class ConnectivityServiceTest extends AndroidTestCase {
                     defaultRequest);
             mLastCreatedNetworkMonitor = monitor;
             return monitor;
+        }
+
+        @Override
+        public WakeupMessage makeWakeupMessage(
+                Context context, Handler handler, String cmdName, int cmd, Object obj) {
+            return new FakeWakeupMessage(context, handler, cmdName, cmd, 0, 0, obj);
         }
 
         public WrappedNetworkMonitor getLastCreatedWrappedNetworkMonitor() {
@@ -685,8 +694,6 @@ public class ConnectivityServiceTest extends AndroidTestCase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-
-        NetworkMonitor.SetDefaultLingerTime(120);
 
         // InstrumentationTestRunner prepares a looper, but AndroidJUnitRunner does not.
         // http://b/25897652 .
@@ -1051,42 +1058,58 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         private class CallbackInfo {
             public final CallbackState state;
             public final Network network;
-            public CallbackInfo(CallbackState s, Network n) { state = s; network = n; }
+            public Object arg;
+            public CallbackInfo(CallbackState s, Network n, Object o) {
+                state = s; network = n; arg = o;
+            }
             public String toString() { return String.format("%s (%s)", state, network); }
             public boolean equals(Object o) {
                 if (!(o instanceof CallbackInfo)) return false;
+                // Ignore timeMs, since it's unpredictable.
                 CallbackInfo other = (CallbackInfo) o;
                 return state == other.state && Objects.equals(network, other.network);
             }
         }
         private final LinkedBlockingQueue<CallbackInfo> mCallbacks = new LinkedBlockingQueue<>();
 
-        private void setLastCallback(CallbackState state, Network network) {
-            mCallbacks.offer(new CallbackInfo(state, network));
+        private void setLastCallback(CallbackState state, Network network, Object o) {
+            mCallbacks.offer(new CallbackInfo(state, network, o));
         }
 
         public void onAvailable(Network network) {
-            setLastCallback(CallbackState.AVAILABLE, network);
+            setLastCallback(CallbackState.AVAILABLE, network, null);
         }
 
         public void onLosing(Network network, int maxMsToLive) {
-            setLastCallback(CallbackState.LOSING, network);
+            setLastCallback(CallbackState.LOSING, network, maxMsToLive /* autoboxed int */);
         }
 
         public void onLost(Network network) {
-            setLastCallback(CallbackState.LOST, network);
+            setLastCallback(CallbackState.LOST, network, null);
+        }
+
+        void expectCallback(CallbackState state, MockNetworkAgent mockAgent, int timeoutMs) {
+            CallbackInfo expected = new CallbackInfo(
+                    state, (mockAgent != null) ? mockAgent.getNetwork() : null, 0);
+            CallbackInfo actual;
+            try {
+                actual = mCallbacks.poll(timeoutMs, TimeUnit.MILLISECONDS);
+                assertEquals("Unexpected callback:", expected, actual);
+            } catch (InterruptedException e) {
+                fail("Did not receive expected " + expected + " after " + TIMEOUT_MS + "ms");
+                actual = null;  // Or the compiler can't tell it's never used uninitialized.
+            }
+            if (state == CallbackState.LOSING) {
+                String msg = String.format(
+                        "Invalid linger time value %d, must be between %d and %d",
+                        actual.arg, 0, TEST_LINGER_DELAY_MS);
+                int maxMsToLive = (Integer) actual.arg;
+                assertTrue(msg, 0 <= maxMsToLive && maxMsToLive <= TEST_LINGER_DELAY_MS);
+            }
         }
 
         void expectCallback(CallbackState state, MockNetworkAgent mockAgent) {
-            CallbackInfo expected = new CallbackInfo(
-                    state,
-                    (mockAgent != null) ? mockAgent.getNetwork() : null);
-            try {
-                assertEquals("Unexpected callback:",
-                        expected, mCallbacks.poll(TIMEOUT_MS, TimeUnit.MILLISECONDS));
-            } catch (InterruptedException e) {
-                fail("Did not receive expected " + expected + " after " + TIMEOUT_MS + "ms");
-            }
+            expectCallback(state, mockAgent, TIMEOUT_MS);
         }
 
         void assertNoCallback() {
@@ -1249,6 +1272,8 @@ public class ConnectivityServiceTest extends AndroidTestCase {
 
             }
             callback.expectCallback(CallbackState.LOSING, oldNetwork);
+            // TODO: should we send an AVAILABLE callback to newNetwork, to indicate that it is no
+            // longer lingering?
             defaultCallback.expectCallback(CallbackState.AVAILABLE, newNetwork);
             assertEquals(newNetwork.getNetwork(), mCm.getActiveNetwork());
         }
@@ -1306,8 +1331,8 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
         mWiFiNetworkAgent.adjustScore(50);
         mWiFiNetworkAgent.connect(false);   // Score: 70
-        callback.expectCallback(CallbackState.LOSING, mCellNetworkAgent);
         callback.expectCallback(CallbackState.AVAILABLE, mWiFiNetworkAgent);
+        callback.expectCallback(CallbackState.LOSING, mCellNetworkAgent);
         defaultCallback.expectCallback(CallbackState.AVAILABLE, mWiFiNetworkAgent);
         assertEquals(mWiFiNetworkAgent.getNetwork(), mCm.getActiveNetwork());
 
@@ -1318,24 +1343,24 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         defaultCallback.expectCallback(CallbackState.AVAILABLE, mCellNetworkAgent);
         assertEquals(mCellNetworkAgent.getNetwork(), mCm.getActiveNetwork());
 
-        // Bring up wifi, then validate it. In this case we do not linger cell. What happens is that
-        // when wifi connects, we don't linger because cell could potentially become the default
-        // network if it validated. Then, when wifi validates, we re-evaluate cell, see it has no
-        // requests, and tear it down because it's unneeded.
-        // TODO: can we linger in this case?
+        // Bring up wifi, then validate it. Previous versions would immediately tear down cell, but
+        // it's arguably correct to linger it, since it was the default network before it validated.
         mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
         mWiFiNetworkAgent.connect(true);
         callback.expectCallback(CallbackState.AVAILABLE, mWiFiNetworkAgent);
-        callback.expectCallback(CallbackState.LOST, mCellNetworkAgent);
+        callback.expectCallback(CallbackState.LOSING, mCellNetworkAgent);
         defaultCallback.expectCallback(CallbackState.AVAILABLE, mWiFiNetworkAgent);
         assertEquals(mWiFiNetworkAgent.getNetwork(), mCm.getActiveNetwork());
 
         mWiFiNetworkAgent.disconnect();
         callback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
         defaultCallback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
+        defaultCallback.expectCallback(CallbackState.AVAILABLE, mCellNetworkAgent);
+        mCellNetworkAgent.disconnect();
+        callback.expectCallback(CallbackState.LOST, mCellNetworkAgent);
+        defaultCallback.expectCallback(CallbackState.LOST, mCellNetworkAgent);
 
-        // The current code has a bug: if a network is lingering, and we add and then remove a
-        // request from it, we forget that the network was lingering and tear it down immediately.
+        // If a network is lingering, and we add and remove a request from it, resume lingering.
         mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
         mCellNetworkAgent.connect(true);
         callback.expectCallback(CallbackState.AVAILABLE, mCellNetworkAgent);
@@ -1350,11 +1375,43 @@ public class ConnectivityServiceTest extends AndroidTestCase {
                 .addTransportType(TRANSPORT_CELLULAR).build();
         NetworkCallback noopCallback = new NetworkCallback();
         mCm.requestNetwork(cellRequest, noopCallback);
+        // TODO: should this cause an AVAILABLE callback, to indicate that the network is no longer
+        // lingering?
         mCm.unregisterNetworkCallback(noopCallback);
-        callback.expectCallback(CallbackState.LOST, mCellNetworkAgent);
+        callback.expectCallback(CallbackState.LOSING, mCellNetworkAgent);
 
+        // Similar to the above: lingering can start even after the lingered request is removed.
+        // Disconnect wifi and switch to cell.
         mWiFiNetworkAgent.disconnect();
         callback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
+        defaultCallback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
+        defaultCallback.expectCallback(CallbackState.AVAILABLE, mCellNetworkAgent);
+
+        // Cell is now the default network. Pin it with a cell-specific request.
+        noopCallback = new NetworkCallback();  // Can't reuse NetworkCallbacks. http://b/20701525
+        mCm.requestNetwork(cellRequest, noopCallback);
+
+        // Now connect wifi, and expect it to become the default network.
+        mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
+        mWiFiNetworkAgent.connect(true);
+        callback.expectCallback(CallbackState.AVAILABLE, mWiFiNetworkAgent);
+        defaultCallback.expectCallback(CallbackState.AVAILABLE, mWiFiNetworkAgent);
+        // The default request is lingering on cell, but nothing happens to cell, and we send no
+        // callbacks for it, because it's kept up by cellRequest.
+        callback.assertNoCallback();
+        // Now unregister cellRequest and expect cell to start lingering.
+        mCm.unregisterNetworkCallback(noopCallback);
+        callback.expectCallback(CallbackState.LOSING, mCellNetworkAgent);
+
+        // Let linger run its course.
+        callback.assertNoCallback();
+        callback.expectCallback(CallbackState.LOST, mCellNetworkAgent,
+                TEST_LINGER_DELAY_MS /* timeoutMs */);
+
+        // Clean up.
+        mWiFiNetworkAgent.disconnect();
+        callback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
+        defaultCallback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
 
         mCm.unregisterNetworkCallback(callback);
         mCm.unregisterNetworkCallback(defaultCallback);
