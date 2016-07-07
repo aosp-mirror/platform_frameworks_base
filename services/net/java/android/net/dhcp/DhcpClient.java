@@ -194,6 +194,10 @@ public class DhcpClient extends StateMachine {
     private long mDhcpLeaseExpiry;
     private DhcpResults mOffer;
 
+    // Milliseconds SystemClock timestamps used to record transition times to DhcpBoundState.
+    private long mLastInitEnterTime;
+    private long mLastBoundExitTime;
+
     // States.
     private State mStoppedState = new StoppedState();
     private State mDhcpState = new DhcpState();
@@ -498,13 +502,12 @@ public class DhcpClient extends StateMachine {
         public void enter() {
             if (STATE_DBG) Log.d(TAG, "Entering state " + getName());
             mEnterTimeMs = SystemClock.elapsedRealtime();
-            // TODO: record time for Init -> Bound and Bound -> Renewing -> Bound
         }
 
         @Override
         public void exit() {
             long durationMs = SystemClock.elapsedRealtime() - mEnterTimeMs;
-            mMetricsLog.log(new DhcpClientEvent(mIfaceName, getName(), (int) durationMs));
+            logState(getName(), (int) durationMs);
         }
 
         private String messageName(int what) {
@@ -742,6 +745,7 @@ public class DhcpClient extends StateMachine {
         public void enter() {
             super.enter();
             startNewTransaction();
+            mLastInitEnterTime = SystemClock.elapsedRealtime();
         }
 
         protected boolean sendPacket() {
@@ -866,6 +870,13 @@ public class DhcpClient extends StateMachine {
             }
 
             scheduleLeaseTimers();
+            logTimeToBoundState();
+        }
+
+        @Override
+        public void exit() {
+            super.exit();
+            mLastBoundExitTime = SystemClock.elapsedRealtime();
         }
 
         @Override
@@ -881,6 +892,15 @@ public class DhcpClient extends StateMachine {
                     return HANDLED;
                 default:
                     return NOT_HANDLED;
+            }
+        }
+
+        private void logTimeToBoundState() {
+            long now = SystemClock.elapsedRealtime();
+            if (mLastBoundExitTime > mLastInitEnterTime) {
+                logState(DhcpClientEvent.RENEWING_BOUND, (int)(now - mLastBoundExitTime));
+            } else {
+                logState(DhcpClientEvent.INITIAL_BOUND, (int)(now - mLastInitEnterTime));
             }
         }
     }
@@ -992,5 +1012,9 @@ public class DhcpClient extends StateMachine {
 
     private void logError(int errorCode) {
         mMetricsLog.log(new DhcpErrorEvent(mIfaceName, errorCode));
+    }
+
+    private void logState(String name, int durationMs) {
+        mMetricsLog.log(new DhcpClientEvent(mIfaceName, name, durationMs));
     }
 }
