@@ -103,6 +103,8 @@ final class ProcessRecord {
     int repProcState = PROCESS_STATE_NONEXISTENT; // Last reported process state
     int setProcState = PROCESS_STATE_NONEXISTENT; // Last set process state in process tracker
     int pssProcState = PROCESS_STATE_NONEXISTENT; // Currently requesting pss for
+    int savedPriority;          // Previous priority value if we're switching to non-SCHED_OTHER
+    int renderThreadTid;        // TID for RenderThread
     boolean serviceb;           // Process currently is on the service B list
     boolean serviceHighRam;     // We are forcing to service B list due to its RAM use
     boolean setIsForeground;    // Running foreground UI when last set?

@@ -542,6 +542,12 @@ static void android_view_ThreadedRenderer_setProcessStatsBuffer(JNIEnv* env, job
     proxy->setProcessStatsBuffer(fd);
 }
 
+static jint android_view_ThreadedRenderer_getRenderThreadTid(JNIEnv* env, jobject clazz,
+        jlong proxyPtr) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    return proxy->getRenderThreadTid();
+}
+
 static jlong android_view_ThreadedRenderer_createRootRenderNode(JNIEnv* env, jobject clazz) {
     RootRenderNode* node = new RootRenderNode(env);
     node->incStrong(0);
@@ -857,6 +863,7 @@ const char* const kClassPathName = "android/view/ThreadedRenderer";
 static const JNINativeMethod gMethods[] = {
     { "nSetAtlas", "(JLandroid/view/GraphicBuffer;[J)V",   (void*) android_view_ThreadedRenderer_setAtlas },
     { "nSetProcessStatsBuffer", "(JI)V", (void*) android_view_ThreadedRenderer_setProcessStatsBuffer },
+    { "nGetRenderThreadTid", "(J)I", (void*) android_view_ThreadedRenderer_getRenderThreadTid },
     { "nCreateRootRenderNode", "()J", (void*) android_view_ThreadedRenderer_createRootRenderNode },
     { "nCreateProxy", "(ZJ)J", (void*) android_view_ThreadedRenderer_createProxy },
     { "nDeleteProxy", "(J)V", (void*) android_view_ThreadedRenderer_deleteProxy },
