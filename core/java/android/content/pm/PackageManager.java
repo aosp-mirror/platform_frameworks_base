@@ -146,6 +146,8 @@ public abstract class PackageManager {
             MATCH_UNINSTALLED_PACKAGES,
             MATCH_SYSTEM_ONLY,
             MATCH_DEBUG_TRIAGED_MISSING,
+            MATCH_DISABLED_UNTIL_USED_COMPONENTS,
+            GET_DISABLED_UNTIL_USED_COMPONENTS,
             GET_UNINSTALLED_PACKAGES,
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -2879,6 +2881,7 @@ public abstract class PackageManager {
      *
      * @see #GET_META_DATA
      * @see #GET_SHARED_LIBRARY_FILES
+     * @see #MATCH_DISABLED_UNTIL_USED_COMPONENTS
      * @see #MATCH_SYSTEM_ONLY
      * @see #MATCH_UNINSTALLED_PACKAGES
      */
@@ -3507,6 +3510,7 @@ public abstract class PackageManager {
      *
      * @see #GET_META_DATA
      * @see #GET_SHARED_LIBRARY_FILES
+     * @see #MATCH_DISABLED_UNTIL_USED_COMPONENTS
      * @see #MATCH_SYSTEM_ONLY
      * @see #MATCH_UNINSTALLED_PACKAGES
      */
