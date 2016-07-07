@@ -1043,7 +1043,9 @@ public class VoiceInteractionManagerService extends SystemService {
         public void registerVoiceInteractionSessionListener(
                 IVoiceInteractionSessionListener listener) {
             enforceCallingPermission(Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE);
-            mImpl.registerVoiceInteractionSessionListener(listener);
+            if (mImpl != null) {
+                mImpl.registerVoiceInteractionSessionListener(listener);
+            }
         }
 
         @Override
