@@ -1905,7 +1905,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         SomeArgs args = SomeArgs.obtain();
         args.arg1 = widget.host;
         args.arg2 = widget.host.callbacks;
-        args.arg3 = updateViews;
+        args.arg3 = updateViews.clone();
         args.arg4 = requestTime;
         args.argi1 = widget.appWidgetId;
 
