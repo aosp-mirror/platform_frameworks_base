@@ -24,6 +24,8 @@
 namespace android {
 namespace uirenderer {
 
+class Layer;
+
 // Keep in sync with PixelCopy.java codes
 enum class CopyResult {
     Success = 0,
@@ -36,8 +38,18 @@ enum class CopyResult {
 
 class Readback {
 public:
+    /**
+     * Copies the surface's most recently queued buffer into the provided bitmap.
+     */
     static CopyResult copySurfaceInto(renderthread::RenderThread& renderThread,
             Surface& surface, SkBitmap* bitmap);
+
+    /**
+     * Copies the TextureLayer's texture content (thus, the currently rendering buffer) into the
+     * provided bitmap.
+     */
+    static CopyResult copyTextureLayerInto(renderthread::RenderThread& renderThread,
+            Layer& layer, SkBitmap* bitmap);
 };
 
 } // namespace uirenderer

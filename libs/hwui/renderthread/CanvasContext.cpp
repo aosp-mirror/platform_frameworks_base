@@ -25,6 +25,7 @@
 #include "LayerRenderer.h"
 #include "OpenGLRenderer.h"
 #include "Properties.h"
+#include "Readback.h"
 #include "RenderThread.h"
 #include "hwui/Canvas.h"
 #include "renderstate/RenderState.h"
@@ -648,7 +649,8 @@ void CanvasContext::buildLayer(RenderNode* node, TreeObserver* observer) {
 
 bool CanvasContext::copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap) {
     layer->apply();
-    return LayerRenderer::copyLayer(mRenderThread.renderState(), layer->backingLayer(), bitmap);
+    return Readback::copyTextureLayerInto(mRenderThread, *(layer->backingLayer()), bitmap)
+            == CopyResult::Success;
 }
 
 void CanvasContext::destroyHardwareResources(TreeObserver* observer) {
