@@ -3125,13 +3125,10 @@ public class ConnectivityManager {
             throw new IllegalArgumentException("Invalid NetworkCallback");
         }
         try {
+            // CallbackHandler will release callback when receiving CALLBACK_RELEASED.
             mService.releaseNetworkRequest(networkCallback.networkRequest);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
-        }
-
-        synchronized (sNetworkCallback) {
-            sNetworkCallback.remove(networkCallback.networkRequest);
         }
     }
 
