@@ -4427,6 +4427,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         intent.putExtra(DeviceAdminReceiver.EXTRA_CHOOSE_PRIVATE_KEY_URI, uri);
         intent.putExtra(DeviceAdminReceiver.EXTRA_CHOOSE_PRIVATE_KEY_ALIAS, alias);
         intent.putExtra(DeviceAdminReceiver.EXTRA_CHOOSE_PRIVATE_KEY_RESPONSE, response);
+        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
 
         final long id = mInjector.binderClearCallingIdentity();
         try {
