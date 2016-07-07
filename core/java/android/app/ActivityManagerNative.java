@@ -3003,6 +3003,13 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reply.writeNoException();
             return true;
         }
+        case SET_RENDER_THREAD_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            final int tid = data.readInt();
+            setRenderThread(tid);
+            reply.writeNoException();
+            return true;
+        }
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -7040,12 +7047,25 @@ class ActivityManagerProxy implements IActivityManager
 
     @Override
     public void setVrThread(int tid)
-            throws RemoteException {
+        throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeInt(tid);
         mRemote.transact(SET_VR_THREAD_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+        return;
+    }
+
+    public void setRenderThread(int tid)
+        throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeInt(tid);
+        mRemote.transact(SET_RENDER_THREAD_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();

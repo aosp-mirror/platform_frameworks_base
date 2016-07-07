@@ -17,6 +17,7 @@
 package android.os;
 
 import android.system.Os;
+import android.system.OsConstants;
 import android.util.Log;
 import dalvik.system.VMRuntime;
 
@@ -302,7 +303,6 @@ public class Process {
      * @hide
      */
     public static final int SCHED_RESET_ON_FORK = 0x40000000;
-
 
     // Keep in sync with SP_* constants of enum type SchedPolicy
     // declared in system/core/include/cutils/sched_policy.h,
@@ -899,4 +899,22 @@ public class Process {
      * @hide
      */
     public static final native void removeAllProcessGroups();
+
+    /**
+     * Check to see if a thread belongs to a given process. This may require
+     * more permissions than apps generally have.
+     * @return true if this thread belongs to a process
+     * @hide
+     */
+    public static final boolean isThreadInProcess(int tid, int pid) {
+        try {
+            if (Os.access("/proc/" + tid + "/task/" + pid, OsConstants.F_OK)) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }
