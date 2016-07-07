@@ -145,10 +145,15 @@ public class BenchmarkState {
     private String summaryLine() {
         StringBuilder sb = new StringBuilder();
         sb.append("Summary: ");
-        sb.append("median=" + median() + "ns, ");
-        sb.append("mean=" + mean() + "ns, ");
-        sb.append("sigma=" + standardDeviation() + ", ");
-        sb.append("iteration=" + mResults.size());
+        sb.append("median=").append(median()).append("ns, ");
+        sb.append("mean=").append(mean()).append("ns, ");
+        sb.append("sigma=").append(standardDeviation()).append(", ");
+        sb.append("iteration=").append(mResults.size()).append(", ");
+        // print out the first few iterations' number for double checking.
+        int sampleNumber = Math.min(mResults.size(), MIN_REPEAT_TIMES);
+        for (int i = 0; i < sampleNumber; i++) {
+            sb.append("No ").append(i).append(" result is ").append(mResults.get(i)).append(", ");
+        }
         return sb.toString();
     }
 
