@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.TypedValue;
@@ -59,6 +60,7 @@ public class KeyguardStatusBarView extends RelativeLayout
     private UserSwitcherController mUserSwitcherController;
 
     private int mSystemIconsSwitcherHiddenExpandedMargin;
+    private int mSystemIconsBaseMargin;
     private View mSystemIconsContainer;
 
     public KeyguardStatusBarView(Context context, AttributeSet attrs) {
@@ -137,8 +139,11 @@ public class KeyguardStatusBarView extends RelativeLayout
     }
 
     private void loadDimens() {
-        mSystemIconsSwitcherHiddenExpandedMargin = getResources().getDimensionPixelSize(
+        Resources res = getResources();
+        mSystemIconsSwitcherHiddenExpandedMargin = res.getDimensionPixelSize(
                 R.dimen.system_icons_switcher_hidden_expanded_margin);
+        mSystemIconsBaseMargin = res.getDimensionPixelSize(
+                R.dimen.system_icons_super_container_avatarless_margin_end);
     }
 
     private void updateVisibilities() {
@@ -166,7 +171,13 @@ public class KeyguardStatusBarView extends RelativeLayout
     private void updateSystemIconsLayoutParams() {
         RelativeLayout.LayoutParams lp =
                 (LayoutParams) mSystemIconsSuperContainer.getLayoutParams();
-        int marginEnd = mKeyguardUserSwitcherShowing ? mSystemIconsSwitcherHiddenExpandedMargin : 0;
+        // If the avatar icon is gone, we need to have some end margin to display the system icons
+        // correctly.
+        int baseMarginEnd = mMultiUserSwitch.getVisibility() == View.GONE
+                ? mSystemIconsBaseMargin
+                : 0;
+        int marginEnd = mKeyguardUserSwitcherShowing ? mSystemIconsSwitcherHiddenExpandedMargin :
+                baseMarginEnd;
         if (marginEnd != lp.getMarginEnd()) {
             lp.setMarginEnd(marginEnd);
             mSystemIconsSuperContainer.setLayoutParams(lp);
@@ -301,6 +312,7 @@ public class KeyguardStatusBarView extends RelativeLayout
             mMultiUserSwitch.setAlpha(1f);
         } else {
             updateVisibilities();
+            updateSystemIconsLayoutParams();
         }
     }
 
