@@ -60,11 +60,14 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -451,6 +454,8 @@ public class MediaScanner implements AutoCloseable {
 
     private class MyMediaScannerClient implements MediaScannerClient {
 
+        private final SimpleDateFormat mDateFormatter;
+
         private String mArtist;
         private String mAlbumArtist;    // use this if mArtist is missing
         private String mAlbum;
@@ -463,6 +468,7 @@ public class MediaScanner implements AutoCloseable {
         private int mYear;
         private int mDuration;
         private String mPath;
+        private long mDate;
         private long mLastModified;
         private long mFileSize;
         private String mWriter;
@@ -471,6 +477,11 @@ public class MediaScanner implements AutoCloseable {
         private boolean mNoMedia;   // flag to suppress file from appearing in media tables
         private int mWidth;
         private int mHeight;
+
+        public MyMediaScannerClient() {
+            mDateFormatter = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
+            mDateFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+        }
 
         public FileEntry beginFile(String path, String mimeType, long lastModified,
                 long fileSize, boolean isDirectory, boolean noMedia) {
@@ -537,6 +548,7 @@ public class MediaScanner implements AutoCloseable {
             mYear = 0;
             mDuration = 0;
             mPath = path;
+            mDate = 0;
             mLastModified = lastModified;
             mWriter = null;
             mCompilation = 0;
@@ -627,6 +639,14 @@ public class MediaScanner implements AutoCloseable {
             return result;
         }
 
+        private long parseDate(String date) {
+            try {
+              return mDateFormatter.parse(date).getTime();
+            } catch (ParseException e) {
+              return 0;
+            }
+        }
+
         private int parseSubstring(String s, int start, int defaultValue) {
             int length = s.length();
             if (start == length) return defaultValue;
@@ -684,6 +704,8 @@ public class MediaScanner implements AutoCloseable {
                 mCompilation = parseSubstring(value, 0, 0);
             } else if (name.equalsIgnoreCase("isdrm")) {
                 mIsDrm = (parseSubstring(value, 0, 0) == 1);
+            } else if (name.equalsIgnoreCase("date")) {
+                mDate = parseDate(value);
             } else if (name.equalsIgnoreCase("width")) {
                 mWidth = parseSubstring(value, 0, 0);
             } else if (name.equalsIgnoreCase("height")) {
@@ -829,6 +851,9 @@ public class MediaScanner implements AutoCloseable {
                     map.put(Video.Media.DURATION, mDuration);
                     if (resolution != null) {
                         map.put(Video.Media.RESOLUTION, resolution);
+                    }
+                    if (mDate > 0) {
+                        map.put(Video.Media.DATE_TAKEN, mDate);
                     }
                 } else if (MediaFile.isImageFileType(mFileType)) {
                     // FIXME - add DESCRIPTION
