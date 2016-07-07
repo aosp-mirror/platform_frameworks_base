@@ -54,6 +54,7 @@ public final class UserState {
     public int state = STATE_BOOTING;
     public int lastState = STATE_BOOTING;
     public boolean switching;
+    public boolean tokenProvided;
 
     /**
      * The last time that a provider was reported to usage stats as being brought to important
