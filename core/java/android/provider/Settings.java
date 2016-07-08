@@ -6147,6 +6147,15 @@ public final class Settings {
                 "camera_double_tap_power_gesture_disabled";
 
         /**
+         * Whether the camera double twist gesture to flip between front and back mode should be
+         * enabled.
+         *
+         * @hide
+         */
+        public static final String CAMERA_DOUBLE_TWIST_TO_FLIP_ENABLED =
+                "camera_double_twist_to_flip_enabled";
+
+        /**
          * Control whether Night display is currently activated.
          * @hide
          */
@@ -6298,6 +6307,14 @@ public final class Settings {
          */
         public static final String AUTOMATIC_STORAGE_MANAGER_LAST_RUN =
                 "automatic_storage_manager_last_run";
+
+
+        /**
+         * Whether SystemUI navigation keys is enabled.
+         * @hide
+         */
+        public static final String SYSTEM_NAVIGATION_KEYS_ENABLED =
+                "system_navigation_keys_enabled";
 
 
         /**
@@ -9112,13 +9129,6 @@ public final class Settings {
          * @hide
          */
         public static final String MAX_NOTIFICATION_ENQUEUE_RATE = "max_notification_enqueue_rate";
-
-        /**
-         * Whether SystemUI navigation keys is enabled.
-         * @hide
-         */
-        public static final String SYSTEM_NAVIGATION_KEYS_ENABLED =
-                "system_navigation_keys_enabled";
 
         /**
          * Whether cell is enabled/disabled
