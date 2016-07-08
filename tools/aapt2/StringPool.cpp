@@ -59,11 +59,11 @@ StringPool::Ref& StringPool::Ref::operator=(const StringPool::Ref& rhs) {
     return *this;
 }
 
-const std::u16string* StringPool::Ref::operator->() const {
+const std::string* StringPool::Ref::operator->() const {
     return &mEntry->value;
 }
 
-const std::u16string& StringPool::Ref::operator*() const {
+const std::string& StringPool::Ref::operator*() const {
     return mEntry->value;
 }
 
@@ -124,15 +124,15 @@ const StringPool::Context& StringPool::StyleRef::getContext() const {
     return mEntry->str.getContext();
 }
 
-StringPool::Ref StringPool::makeRef(const StringPiece16& str) {
+StringPool::Ref StringPool::makeRef(const StringPiece& str) {
     return makeRefImpl(str, Context{}, true);
 }
 
-StringPool::Ref StringPool::makeRef(const StringPiece16& str, const Context& context) {
+StringPool::Ref StringPool::makeRef(const StringPiece& str, const Context& context) {
     return makeRefImpl(str, context, true);
 }
 
-StringPool::Ref StringPool::makeRefImpl(const StringPiece16& str, const Context& context,
+StringPool::Ref StringPool::makeRefImpl(const StringPiece& str, const Context& context,
         bool unique) {
     if (unique) {
         auto iter = mIndexedStrings.find(str);
@@ -147,7 +147,7 @@ StringPool::Ref StringPool::makeRefImpl(const StringPiece16& str, const Context&
     entry->index = mStrings.size();
     entry->ref = 0;
     mStrings.emplace_back(entry);
-    mIndexedStrings.insert(std::make_pair(StringPiece16(entry->value), entry));
+    mIndexedStrings.insert(std::make_pair(StringPiece(entry->value), entry));
     return Ref(entry);
 }
 
@@ -162,13 +162,12 @@ StringPool::StyleRef StringPool::makeRef(const StyleString& str, const Context& 
     entry->index = mStrings.size();
     entry->ref = 0;
     mStrings.emplace_back(entry);
-    mIndexedStrings.insert(std::make_pair(StringPiece16(entry->value), entry));
+    mIndexedStrings.insert(std::make_pair(StringPiece(entry->value), entry));
 
     StyleEntry* styleEntry = new StyleEntry();
     styleEntry->str = Ref(entry);
     for (const aapt::Span& span : str.spans) {
-        styleEntry->spans.emplace_back(Span{makeRef(span.name),
-                span.firstChar, span.lastChar});
+        styleEntry->spans.emplace_back(Span{ makeRef(span.name), span.firstChar, span.lastChar });
     }
     styleEntry->ref = 0;
     mStyles.emplace_back(styleEntry);
@@ -182,7 +181,7 @@ StringPool::StyleRef StringPool::makeRef(const StyleRef& ref) {
     entry->index = mStrings.size();
     entry->ref = 0;
     mStrings.emplace_back(entry);
-    mIndexedStrings.insert(std::make_pair(StringPiece16(entry->value), entry));
+    mIndexedStrings.insert(std::make_pair(StringPiece(entry->value), entry));
 
     StyleEntry* styleEntry = new StyleEntry();
     styleEntry->str = Ref(entry);
@@ -320,33 +319,40 @@ bool StringPool::flatten(BigBuffer* out, const StringPool& pool, bool utf8) {
         indices++;
 
         if (utf8) {
-            std::string encoded = util::utf16ToUtf8(entry->value);
+            const std::string& encoded = entry->value;
+            const ssize_t utf16Length = utf8_to_utf16_length(
+                    reinterpret_cast<const uint8_t*>(entry->value.data()), entry->value.size());
+            assert(utf16Length >= 0);
 
-            const size_t totalSize = encodedLengthUnits<char>(entry->value.size())
+            const size_t totalSize = encodedLengthUnits<char>(utf16Length)
                     + encodedLengthUnits<char>(encoded.length())
                     + encoded.size() + 1;
 
             char* data = out->nextBlock<char>(totalSize);
 
-            // First encode the actual UTF16 string length.
-            data = encodeLength(data, entry->value.size());
+            // First encode the UTF16 string length.
+            data = encodeLength(data, utf16Length);
 
-            // Now encode the size of the converted UTF8 string.
+            // Now encode the size of the real UTF8 string.
             data = encodeLength(data, encoded.length());
             strncpy(data, encoded.data(), encoded.size());
+
         } else {
-            const size_t totalSize = encodedLengthUnits<char16_t>(entry->value.size())
-                    + entry->value.size() + 1;
+            const std::u16string encoded = util::utf8ToUtf16(entry->value);
+            const ssize_t utf16Length = encoded.size();
+
+            // Total number of 16-bit words to write.
+            const size_t totalSize = encodedLengthUnits<char16_t>(utf16Length) + encoded.size() + 1;
 
             char16_t* data = out->nextBlock<char16_t>(totalSize);
 
             // Encode the actual UTF16 string length.
-            data = encodeLength(data, entry->value.size());
-            const size_t byteLength = entry->value.size() * sizeof(char16_t);
+            data = encodeLength(data, utf16Length);
+            const size_t byteLength = encoded.size() * sizeof(char16_t);
 
             // NOTE: For some reason, strncpy16(data, entry->value.data(), entry->value.size())
             // truncates the string.
-            memcpy(data, entry->value.data(), byteLength);
+            memcpy(data, encoded.data(), byteLength);
 
             // The null-terminating character is already here due to the block of data being set
             // to 0s on allocation.

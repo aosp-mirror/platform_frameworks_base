@@ -43,8 +43,8 @@ namespace aapt {
 
 struct ResourcePathData {
     Source source;
-    std::u16string resourceDir;
-    std::u16string name;
+    std::string resourceDir;
+    std::string name;
     std::string extension;
 
     // Original config str. We keep this because when we parse the config, we may add on
@@ -96,8 +96,8 @@ static Maybe<ResourcePathData> extractResourcePathData(const std::string& path,
 
     return ResourcePathData{
             Source(path),
-            util::utf8ToUtf16(dirStr),
-            util::utf8ToUtf16(name),
+            dirStr.toString(),
+            name.toString(),
             extension.toString(),
             configStr.toString(),
             config
@@ -127,7 +127,7 @@ static std::string buildIntermediateFilename(const ResourcePathData& data) {
 }
 
 static bool isHidden(const StringPiece& filename) {
-    return util::stringStartsWith<char>(filename, ".");
+    return util::stringStartsWith(filename, ".");
 }
 
 /**
@@ -200,7 +200,7 @@ static bool compileTable(IAaptContext* context, const CompileOptions& options,
         parserOptions.errorOnPositionalArguments = !options.legacyMode;
 
         // If the filename includes donottranslate, then the default translatable is false.
-        parserOptions.translatable = pathData.name.find(u"donottranslate") == std::string::npos;
+        parserOptions.translatable = pathData.name.find("donottranslate") == std::string::npos;
 
         ResourceParser resParser(context->getDiagnostics(), &table, pathData.source,
                                  pathData.config, parserOptions);
@@ -440,8 +440,8 @@ public:
        return nullptr;
     }
 
-    const std::u16string& getCompilationPackage() override {
-        static std::u16string empty;
+    const std::string& getCompilationPackage() override {
+        static std::string empty;
         return empty;
     }
 
@@ -530,7 +530,7 @@ int compile(const std::vector<StringPiece>& args) {
             context.getDiagnostics()->note(DiagMessage(pathData.source) << "processing");
         }
 
-        if (pathData.resourceDir == u"values") {
+        if (pathData.resourceDir == "values") {
             // Overwrite the extension.
             pathData.extension = "arsc";
 

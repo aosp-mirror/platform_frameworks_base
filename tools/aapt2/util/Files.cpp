@@ -157,7 +157,7 @@ void appendPath(std::string* base, StringPiece part) {
 
 std::string packageToPath(const StringPiece& package) {
     std::string outPath;
-    for (StringPiece part : util::tokenize<char>(package, '.')) {
+    for (StringPiece part : util::tokenize(package, '.')) {
         appendPath(&outPath, part);
     }
     return outPath;
@@ -199,7 +199,7 @@ bool appendArgsFromFile(const StringPiece& path, std::vector<std::string>* outAr
         return false;
     }
 
-    for (StringPiece line : util::tokenize<char>(contents, ' ')) {
+    for (StringPiece line : util::tokenize(contents, ' ')) {
         line = util::trimWhitespace(line);
         if (!line.empty()) {
             outArgList->push_back(line.toString());

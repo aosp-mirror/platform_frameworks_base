@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-#include <string>
-
 #include "ResourceValues.h"
-#include "util/Util.h"
 #include "ValueVisitor.h"
-#include "test/Builders.h"
+#include "test/Test.h"
+#include "util/Util.h"
+
+#include <string>
 
 namespace aapt {
 
@@ -51,7 +50,7 @@ struct StyleVisitor : public ValueVisitor {
 };
 
 TEST(ValueVisitorTest, VisitsReference) {
-    Reference ref(ResourceName{u"android", ResourceType::kAttr, u"foo"});
+    Reference ref(ResourceName{"android", ResourceType::kAttr, "foo"});
     SingleReferenceVisitor visitor;
     ref.accept(&visitor);
 
@@ -60,8 +59,8 @@ TEST(ValueVisitorTest, VisitsReference) {
 
 TEST(ValueVisitorTest, VisitsReferencesInStyle) {
     std::unique_ptr<Style> style = test::StyleBuilder()
-            .setParent(u"@android:style/foo")
-            .addItem(u"@android:attr/one", test::buildReference(u"@android:id/foo"))
+            .setParent("@android:style/foo")
+            .addItem("@android:attr/one", test::buildReference("@android:id/foo"))
             .build();
 
     StyleVisitor visitor;
@@ -74,11 +73,11 @@ TEST(ValueVisitorTest, VisitsReferencesInStyle) {
 }
 
 TEST(ValueVisitorTest, ValueCast) {
-    std::unique_ptr<Reference> ref = test::buildReference(u"@android:color/white");
+    std::unique_ptr<Reference> ref = test::buildReference("@android:color/white");
     EXPECT_NE(valueCast<Reference>(ref.get()), nullptr);
 
     std::unique_ptr<Style> style = test::StyleBuilder()
-            .addItem(u"@android:attr/foo", test::buildReference(u"@android:color/black"))
+            .addItem("@android:attr/foo", test::buildReference("@android:color/black"))
             .build();
     EXPECT_NE(valueCast<Style>(style.get()), nullptr);
     EXPECT_EQ(valueCast<Reference>(style.get()), nullptr);

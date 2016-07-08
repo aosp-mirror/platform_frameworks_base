@@ -103,6 +103,7 @@ testSources := \
 	java/JavaClassGenerator_test.cpp \
 	java/ManifestClassGenerator_test.cpp \
 	Locale_test.cpp \
+	NameMangler_test.cpp \
 	Resource_test.cpp \
 	ResourceParser_test.cpp \
 	ResourceTable_test.cpp \

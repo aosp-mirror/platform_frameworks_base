@@ -70,10 +70,9 @@ public:
 
         std::map<ResourceId, ResourceNameRef> idIndex;
 
-        ResourceTablePackage* pkg = table->createPackage(
-                util::utf8ToUtf16(pbPackage.package_name()), id);
+        ResourceTablePackage* pkg = table->createPackage(pbPackage.package_name(), id);
         for (const pb::Type& pbType : pbPackage.types()) {
-            const ResourceType* resType = parseResourceType(util::utf8ToUtf16(pbType.name()));
+            const ResourceType* resType = parseResourceType(pbType.name());
             if (!resType) {
                 mDiag->error(DiagMessage(mSource) << "unknown type '" << pbType.name() << "'");
                 return {};
@@ -82,7 +81,7 @@ public:
             ResourceTableType* type = pkg->findOrCreateType(*resType);
 
             for (const pb::Entry& pbEntry : pbType.entries()) {
-                ResourceEntry* entry = type->findOrCreateEntry(util::utf8ToUtf16(pbEntry.name()));
+                ResourceEntry* entry = type->findOrCreateEntry(pbEntry.name());
 
                 // Deserialize the symbol status (public/private with source and comments).
                 if (pbEntry.has_symbol_status()) {
@@ -93,7 +92,7 @@ public:
                     }
 
                     if (pbStatus.has_comment()) {
-                        entry->symbolStatus.comment = util::utf8ToUtf16(pbStatus.comment());
+                        entry->symbolStatus.comment = pbStatus.comment();
                     }
 
                     SymbolState visibility = deserializeVisibilityFromPb(pbStatus.visibility());
@@ -179,14 +178,14 @@ private:
 
         } else if (pbItem.has_str()) {
             const uint32_t idx = pbItem.str().idx();
-            StringPiece16 str = util::getString(*mValuePool, idx);
+            const std::string str = util::getString(*mValuePool, idx);
 
             const android::ResStringPool_span* spans = mValuePool->styleAt(idx);
             if (spans && spans->name.index != android::ResStringPool_span::END) {
-                StyleString styleStr = { str.toString() };
+                StyleString styleStr = { str };
                 while (spans->name.index != android::ResStringPool_span::END) {
                     styleStr.spans.push_back(Span{
-                            util::getString(*mValuePool, spans->name.index).toString(),
+                            util::getString(*mValuePool, spans->name.index),
                             spans->firstChar,
                             spans->lastChar
                     });
@@ -200,13 +199,13 @@ private:
 
         } else if (pbItem.has_raw_str()) {
             const uint32_t idx = pbItem.raw_str().idx();
-            StringPiece16 str = util::getString(*mValuePool, idx);
+            const std::string str = util::getString(*mValuePool, idx);
             return util::make_unique<RawString>(
                     pool->makeRef(str, StringPool::Context{ 1, config }));
 
         } else if (pbItem.has_file()) {
             const uint32_t idx = pbItem.file().path_idx();
-            StringPiece16 str = util::getString(*mValuePool, idx);
+            const std::string str = util::getString(*mValuePool, idx);
             return util::make_unique<FileReference>(
                     pool->makeRef(str, StringPool::Context{ 0, config }));
 
@@ -351,7 +350,7 @@ private:
         }
 
         if (pbRef.has_symbol_idx()) {
-            StringPiece16 strSymbol = util::getString(*mSymbolPool, pbRef.symbol_idx());
+            const std::string strSymbol = util::getString(*mSymbolPool, pbRef.symbol_idx());
             ResourceNameRef nameRef;
             if (!ResourceUtils::parseResourceName(strSymbol, &nameRef, nullptr)) {
                 mDiag->error(DiagMessage(mSource) << "invalid reference name '"
@@ -373,7 +372,7 @@ private:
         }
 
         if (pbItem.has_comment()) {
-            outValue->setComment(util::utf8ToUtf16(pbItem.comment()));
+            outValue->setComment(pbItem.comment());
         }
     }
 
@@ -446,8 +445,7 @@ std::unique_ptr<ResourceFile> deserializeCompiledFileFromPb(const pb::CompiledFi
     ResourceNameRef nameRef;
 
     // Need to create an lvalue here so that nameRef can point to something real.
-    std::u16string utf16Name = util::utf8ToUtf16(pbFile.resource_name());
-    if (!ResourceUtils::parseResourceName(utf16Name, &nameRef)) {
+    if (!ResourceUtils::parseResourceName(pbFile.resource_name(), &nameRef)) {
         diag->error(DiagMessage(source) << "invalid resource name in compiled file header: "
                     << pbFile.resource_name());
         return {};
@@ -458,8 +456,7 @@ std::unique_ptr<ResourceFile> deserializeCompiledFileFromPb(const pb::CompiledFi
 
     for (const pb::CompiledFile_Symbol& pbSymbol : pbFile.exported_symbols()) {
         // Need to create an lvalue here so that nameRef can point to something real.
-        utf16Name = util::utf8ToUtf16(pbSymbol.resource_name());
-        if (!ResourceUtils::parseResourceName(utf16Name, &nameRef)) {
+        if (!ResourceUtils::parseResourceName(pbSymbol.resource_name(), &nameRef)) {
             diag->error(DiagMessage(source) << "invalid resource name for exported symbol in "
                                                "compiled file header: "
                                             << pbFile.resource_name());

@@ -14,102 +14,101 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-
 #include "Resource.h"
+#include "test/Test.h"
 
 namespace aapt {
 
 TEST(ResourceTypeTest, ParseResourceTypes) {
-    const ResourceType* type = parseResourceType(u"anim");
+    const ResourceType* type = parseResourceType("anim");
     ASSERT_NE(type, nullptr);
     EXPECT_EQ(*type, ResourceType::kAnim);
 
-    type = parseResourceType(u"animator");
+    type = parseResourceType("animator");
     ASSERT_NE(type, nullptr);
     EXPECT_EQ(*type, ResourceType::kAnimator);
 
-    type = parseResourceType(u"array");
+    type = parseResourceType("array");
     ASSERT_NE(type, nullptr);
     EXPECT_EQ(*type, ResourceType::kArray);
 
-    type = parseResourceType(u"attr");
+    type = parseResourceType("attr");
     ASSERT_NE(type, nullptr);
     EXPECT_EQ(*type, ResourceType::kAttr);
 
-    type = parseResourceType(u"^attr-private");
+    type = parseResourceType("^attr-private");
     ASSERT_NE(type, nullptr);
     EXPECT_EQ(*type, ResourceType::kAttrPrivate);
 
-    type = parseResourceType(u"bool");
+    type = parseResourceType("bool");
     ASSERT_NE(type, nullptr);
     EXPECT_EQ(*type, ResourceType::kBool);
 
-    type = parseResourceType(u"color");
+    type = parseResourceType("color");
     ASSERT_NE(type, nullptr);
     EXPECT_EQ(*type, ResourceType::kColor);
 
-    type = parseResourceType(u"dimen");
+    type = parseResourceType("dimen");
     ASSERT_NE(type, nullptr);
     EXPECT_EQ(*type, ResourceType::kDimen);
 
-    type = parseResourceType(u"drawable");
+    type = parseResourceType("drawable");
     ASSERT_NE(type, nullptr);
     EXPECT_EQ(*type, ResourceType::kDrawable);
 
-    type = parseResourceType(u"fraction");
+    type = parseResourceType("fraction");
     ASSERT_NE(type, nullptr);
     EXPECT_EQ(*type, ResourceType::kFraction);
 
-    type = parseResourceType(u"id");
+    type = parseResourceType("id");
     ASSERT_NE(type, nullptr);
     EXPECT_EQ(*type, ResourceType::kId);
 
-    type = parseResourceType(u"integer");
+    type = parseResourceType("integer");
     ASSERT_NE(type, nullptr);
     EXPECT_EQ(*type, ResourceType::kInteger);
 
-    type = parseResourceType(u"interpolator");
+    type = parseResourceType("interpolator");
     ASSERT_NE(type, nullptr);
     EXPECT_EQ(*type, ResourceType::kInterpolator);
 
-    type = parseResourceType(u"layout");
+    type = parseResourceType("layout");
     ASSERT_NE(type, nullptr);
     EXPECT_EQ(*type, ResourceType::kLayout);
 
-    type = parseResourceType(u"menu");
+    type = parseResourceType("menu");
     ASSERT_NE(type, nullptr);
     EXPECT_EQ(*type, ResourceType::kMenu);
 
-    type = parseResourceType(u"mipmap");
+    type = parseResourceType("mipmap");
     ASSERT_NE(type, nullptr);
     EXPECT_EQ(*type, ResourceType::kMipmap);
 
-    type = parseResourceType(u"plurals");
+    type = parseResourceType("plurals");
     ASSERT_NE(type, nullptr);
     EXPECT_EQ(*type, ResourceType::kPlurals);
 
-    type = parseResourceType(u"raw");
+    type = parseResourceType("raw");
     ASSERT_NE(type, nullptr);
     EXPECT_EQ(*type, ResourceType::kRaw);
 
-    type = parseResourceType(u"string");
+    type = parseResourceType("string");
     ASSERT_NE(type, nullptr);
     EXPECT_EQ(*type, ResourceType::kString);
 
-    type = parseResourceType(u"style");
+    type = parseResourceType("style");
     ASSERT_NE(type, nullptr);
     EXPECT_EQ(*type, ResourceType::kStyle);
 
-    type = parseResourceType(u"transition");
+    type = parseResourceType("transition");
     ASSERT_NE(type, nullptr);
     EXPECT_EQ(*type, ResourceType::kTransition);
 
-    type = parseResourceType(u"xml");
+    type = parseResourceType("xml");
     ASSERT_NE(type, nullptr);
     EXPECT_EQ(*type, ResourceType::kXml);
 
-    type = parseResourceType(u"blahaha");
+    type = parseResourceType("blahaha");
     EXPECT_EQ(type, nullptr);
 }
 

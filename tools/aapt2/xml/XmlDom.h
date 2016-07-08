@@ -41,7 +41,7 @@ struct Node {
     Node* parent = nullptr;
     size_t lineNumber = 0;
     size_t columnNumber = 0;
-    std::u16string comment;
+    std::string comment;
     std::vector<std::unique_ptr<Node>> children;
 
     virtual ~Node() = default;
@@ -63,8 +63,8 @@ struct BaseNode : public Node {
  * A Namespace XML node. Can only have one child.
  */
 struct Namespace : public BaseNode<Namespace> {
-    std::u16string namespacePrefix;
-    std::u16string namespaceUri;
+    std::string namespacePrefix;
+    std::string namespaceUri;
 };
 
 struct AaptAttribute {
@@ -76,9 +76,9 @@ struct AaptAttribute {
  * An XML attribute.
  */
 struct Attribute {
-    std::u16string namespaceUri;
-    std::u16string name;
-    std::u16string value;
+    std::string namespaceUri;
+    std::string name;
+    std::string value;
 
     Maybe<AaptAttribute> compiledAttribute;
     std::unique_ptr<Item> compiledValue;
@@ -88,16 +88,16 @@ struct Attribute {
  * An Element XML node.
  */
 struct Element : public BaseNode<Element> {
-    std::u16string namespaceUri;
-    std::u16string name;
+    std::string namespaceUri;
+    std::string name;
     std::vector<Attribute> attributes;
 
-    Attribute* findAttribute(const StringPiece16& ns, const StringPiece16& name);
-    xml::Element* findChild(const StringPiece16& ns, const StringPiece16& name);
-    xml::Element* findChildWithAttribute(const StringPiece16& ns, const StringPiece16& name,
-                                         const StringPiece16& attrNs,
-                                         const StringPiece16& attrName,
-                                         const StringPiece16& attrValue);
+    Attribute* findAttribute(const StringPiece& ns, const StringPiece& name);
+    xml::Element* findChild(const StringPiece& ns, const StringPiece& name);
+    xml::Element* findChildWithAttribute(const StringPiece& ns, const StringPiece& name,
+                                         const StringPiece& attrNs,
+                                         const StringPiece& attrName,
+                                         const StringPiece& attrValue);
     std::vector<xml::Element*> getChildElements();
 };
 
@@ -105,7 +105,7 @@ struct Element : public BaseNode<Element> {
  * A Text (CDATA) XML node. Can not have any children.
  */
 struct Text : public BaseNode<Text> {
-    std::u16string text;
+    std::string text;
 };
 
 /**
@@ -175,7 +175,7 @@ struct Visitor : public RawVisitor {
 class PackageAwareVisitor : public Visitor, public IPackageDeclStack {
 private:
     struct PackageDecl {
-        std::u16string prefix;
+        std::string prefix;
         ExtractedPackage package;
     };
 
@@ -186,7 +186,7 @@ public:
 
     void visit(Namespace* ns) override;
     Maybe<ExtractedPackage> transformPackageAlias(
-            const StringPiece16& alias, const StringPiece16& localPackage) const override;
+            const StringPiece& alias, const StringPiece& localPackage) const override;
 };
 
 // Implementations

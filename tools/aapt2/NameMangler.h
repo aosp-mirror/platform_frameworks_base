@@ -18,7 +18,6 @@
 #define AAPT_NAME_MANGLER_H
 
 #include "Resource.h"
-
 #include "util/Maybe.h"
 
 #include <set>
@@ -31,12 +30,12 @@ struct NameManglerPolicy {
      * Represents the package we are trying to build. References pointing
      * to this package are not mangled, and mangled references inherit this package name.
      */
-    std::u16string targetPackageName;
+    std::string targetPackageName;
 
     /**
      * We must know which references to mangle, and which to keep (android vs. com.android.support).
      */
-    std::set<std::u16string> packagesToMangle;
+    std::set<std::string> packagesToMangle;
 };
 
 class NameMangler {
@@ -53,14 +52,11 @@ public:
             return {};
         }
 
-        return ResourceName{
-                mPolicy.targetPackageName,
-                name.type,
-                mangleEntry(name.package, name.entry)
-        };
+        std::string mangledEntryName = mangleEntry(name.package, name.entry);
+        return ResourceName(mPolicy.targetPackageName, name.type, mangledEntryName);
     }
 
-    bool shouldMangle(const std::u16string& package) const {
+    bool shouldMangle(const std::string& package) const {
         if (package.empty() || mPolicy.targetPackageName == package) {
             return false;
         }
@@ -72,8 +68,8 @@ public:
      * The mangled name should contain symbols that are illegal to define in XML,
      * so that there will never be name mangling collisions.
      */
-    static std::u16string mangleEntry(const std::u16string& package, const std::u16string& name) {
-        return package + u"$" + name;
+    static std::string mangleEntry(const std::string& package, const std::string& name) {
+        return package + "$" + name;
     }
 
     /**
@@ -81,8 +77,8 @@ public:
      * and the package in `outPackage`. Returns true if the name was unmangled or
      * false if the name was never mangled to begin with.
      */
-    static bool unmangle(std::u16string* outName, std::u16string* outPackage) {
-        size_t pivot = outName->find(u'$');
+    static bool unmangle(std::string* outName, std::string* outPackage) {
+        size_t pivot = outName->find('$');
         if (pivot == std::string::npos) {
             return false;
         }

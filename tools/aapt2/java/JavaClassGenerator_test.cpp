@@ -25,40 +25,40 @@ namespace aapt {
 
 TEST(JavaClassGeneratorTest, FailWhenEntryIsJavaKeyword) {
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
-            .setPackageId(u"android", 0x01)
-            .addSimple(u"@android:id/class", ResourceId(0x01020000))
+            .setPackageId("android", 0x01)
+            .addSimple("@android:id/class", ResourceId(0x01020000))
             .build();
 
     std::unique_ptr<IAaptContext> context = test::ContextBuilder()
             .addSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
-            .setNameManglerPolicy(NameManglerPolicy{ u"android" })
+            .setNameManglerPolicy(NameManglerPolicy{ "android" })
             .build();
     JavaClassGenerator generator(context.get(), table.get(), {});
 
     std::stringstream out;
-    EXPECT_FALSE(generator.generate(u"android", &out));
+    EXPECT_FALSE(generator.generate("android", &out));
 }
 
 TEST(JavaClassGeneratorTest, TransformInvalidJavaIdentifierCharacter) {
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
-            .setPackageId(u"android", 0x01)
-            .addSimple(u"@android:id/hey-man", ResourceId(0x01020000))
-            .addValue(u"@android:attr/cool.attr", ResourceId(0x01010000),
+            .setPackageId("android", 0x01)
+            .addSimple("@android:id/hey-man", ResourceId(0x01020000))
+            .addValue("@android:attr/cool.attr", ResourceId(0x01010000),
                       test::AttributeBuilder(false).build())
-            .addValue(u"@android:styleable/hey.dude", ResourceId(0x01030000),
+            .addValue("@android:styleable/hey.dude", ResourceId(0x01030000),
                       test::StyleableBuilder()
-                              .addItem(u"@android:attr/cool.attr", ResourceId(0x01010000))
+                              .addItem("@android:attr/cool.attr", ResourceId(0x01010000))
                               .build())
             .build();
 
     std::unique_ptr<IAaptContext> context = test::ContextBuilder()
             .addSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
-            .setNameManglerPolicy(NameManglerPolicy{ u"android" })
+            .setNameManglerPolicy(NameManglerPolicy{ "android" })
             .build();
     JavaClassGenerator generator(context.get(), table.get(), {});
 
     std::stringstream out;
-    EXPECT_TRUE(generator.generate(u"android", &out));
+    EXPECT_TRUE(generator.generate("android", &out));
 
     std::string output = out.str();
 
@@ -74,18 +74,18 @@ TEST(JavaClassGeneratorTest, TransformInvalidJavaIdentifierCharacter) {
 
 TEST(JavaClassGeneratorTest, CorrectPackageNameIsUsed) {
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
-            .setPackageId(u"android", 0x01)
-            .addSimple(u"@android:id/one", ResourceId(0x01020000))
-            .addSimple(u"@android:id/com.foo$two", ResourceId(0x01020001))
+            .setPackageId("android", 0x01)
+            .addSimple("@android:id/one", ResourceId(0x01020000))
+            .addSimple("@android:id/com.foo$two", ResourceId(0x01020001))
             .build();
 
     std::unique_ptr<IAaptContext> context = test::ContextBuilder()
             .addSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
-            .setNameManglerPolicy(NameManglerPolicy{ u"android" })
+            .setNameManglerPolicy(NameManglerPolicy{ "android" })
             .build();
     JavaClassGenerator generator(context.get(), table.get(), {});
     std::stringstream out;
-    ASSERT_TRUE(generator.generate(u"android", u"com.android.internal", &out));
+    ASSERT_TRUE(generator.generate("android", "com.android.internal", &out));
 
     std::string output = out.str();
     EXPECT_NE(std::string::npos, output.find("package com.android.internal;"));
@@ -96,18 +96,18 @@ TEST(JavaClassGeneratorTest, CorrectPackageNameIsUsed) {
 
 TEST(JavaClassGeneratorTest, AttrPrivateIsWrittenAsAttr) {
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
-            .setPackageId(u"android", 0x01)
-            .addSimple(u"@android:attr/two", ResourceId(0x01010001))
-            .addSimple(u"@android:^attr-private/one", ResourceId(0x01010000))
+            .setPackageId("android", 0x01)
+            .addSimple("@android:attr/two", ResourceId(0x01010001))
+            .addSimple("@android:^attr-private/one", ResourceId(0x01010000))
             .build();
 
     std::unique_ptr<IAaptContext> context = test::ContextBuilder()
             .addSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
-            .setNameManglerPolicy(NameManglerPolicy{ u"android" })
+            .setNameManglerPolicy(NameManglerPolicy{ "android" })
             .build();
     JavaClassGenerator generator(context.get(), table.get(), {});
     std::stringstream out;
-    ASSERT_TRUE(generator.generate(u"android", &out));
+    ASSERT_TRUE(generator.generate("android", &out));
 
     std::string output = out.str();
     EXPECT_NE(std::string::npos, output.find("public static final class attr"));
@@ -117,17 +117,17 @@ TEST(JavaClassGeneratorTest, AttrPrivateIsWrittenAsAttr) {
 TEST(JavaClassGeneratorTest, OnlyWritePublicResources) {
     StdErrDiagnostics diag;
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
-            .setPackageId(u"android", 0x01)
-            .addSimple(u"@android:id/one", ResourceId(0x01020000))
-            .addSimple(u"@android:id/two", ResourceId(0x01020001))
-            .addSimple(u"@android:id/three", ResourceId(0x01020002))
-            .setSymbolState(u"@android:id/one", ResourceId(0x01020000), SymbolState::kPublic)
-            .setSymbolState(u"@android:id/two", ResourceId(0x01020001), SymbolState::kPrivate)
+            .setPackageId("android", 0x01)
+            .addSimple("@android:id/one", ResourceId(0x01020000))
+            .addSimple("@android:id/two", ResourceId(0x01020001))
+            .addSimple("@android:id/three", ResourceId(0x01020002))
+            .setSymbolState("@android:id/one", ResourceId(0x01020000), SymbolState::kPublic)
+            .setSymbolState("@android:id/two", ResourceId(0x01020001), SymbolState::kPrivate)
             .build();
 
     std::unique_ptr<IAaptContext> context = test::ContextBuilder()
             .addSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
-            .setNameManglerPolicy(NameManglerPolicy{ u"android" })
+            .setNameManglerPolicy(NameManglerPolicy{ "android" })
             .build();
 
     JavaClassGeneratorOptions options;
@@ -135,7 +135,7 @@ TEST(JavaClassGeneratorTest, OnlyWritePublicResources) {
     {
         JavaClassGenerator generator(context.get(), table.get(), options);
         std::stringstream out;
-        ASSERT_TRUE(generator.generate(u"android", &out));
+        ASSERT_TRUE(generator.generate("android", &out));
         std::string output = out.str();
         EXPECT_NE(std::string::npos, output.find("public static final int one=0x01020000;"));
         EXPECT_EQ(std::string::npos, output.find("two"));
@@ -146,7 +146,7 @@ TEST(JavaClassGeneratorTest, OnlyWritePublicResources) {
     {
         JavaClassGenerator generator(context.get(), table.get(), options);
         std::stringstream out;
-        ASSERT_TRUE(generator.generate(u"android", &out));
+        ASSERT_TRUE(generator.generate("android", &out));
         std::string output = out.str();
         EXPECT_NE(std::string::npos, output.find("public static final int one=0x01020000;"));
         EXPECT_NE(std::string::npos, output.find("public static final int two=0x01020001;"));
@@ -157,7 +157,7 @@ TEST(JavaClassGeneratorTest, OnlyWritePublicResources) {
     {
         JavaClassGenerator generator(context.get(), table.get(), options);
         std::stringstream out;
-        ASSERT_TRUE(generator.generate(u"android", &out));
+        ASSERT_TRUE(generator.generate("android", &out));
         std::string output = out.str();
         EXPECT_NE(std::string::npos, output.find("public static final int one=0x01020000;"));
         EXPECT_NE(std::string::npos, output.find("public static final int two=0x01020001;"));
@@ -198,27 +198,27 @@ TEST(JavaClassGeneratorTest, OnlyWritePublicResources) {
 
 TEST(JavaClassGeneratorTest, EmitOtherPackagesAttributesInStyleable) {
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
-                .setPackageId(u"android", 0x01)
-                .setPackageId(u"com.lib", 0x02)
-                .addValue(u"@android:attr/bar", ResourceId(0x01010000),
+                .setPackageId("android", 0x01)
+                .setPackageId("com.lib", 0x02)
+                .addValue("@android:attr/bar", ResourceId(0x01010000),
                           test::AttributeBuilder(false).build())
-                .addValue(u"@com.lib:attr/bar", ResourceId(0x02010000),
+                .addValue("@com.lib:attr/bar", ResourceId(0x02010000),
                            test::AttributeBuilder(false).build())
-                .addValue(u"@android:styleable/foo", ResourceId(0x01030000),
+                .addValue("@android:styleable/foo", ResourceId(0x01030000),
                           test::StyleableBuilder()
-                                  .addItem(u"@android:attr/bar", ResourceId(0x01010000))
-                                  .addItem(u"@com.lib:attr/bar", ResourceId(0x02010000))
+                                  .addItem("@android:attr/bar", ResourceId(0x01010000))
+                                  .addItem("@com.lib:attr/bar", ResourceId(0x02010000))
                                   .build())
                 .build();
 
     std::unique_ptr<IAaptContext> context = test::ContextBuilder()
             .addSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
-            .setNameManglerPolicy(NameManglerPolicy{ u"android" })
+            .setNameManglerPolicy(NameManglerPolicy{ "android" })
             .build();
     JavaClassGenerator generator(context.get(), table.get(), {});
 
     std::stringstream out;
-    EXPECT_TRUE(generator.generate(u"android", &out));
+    EXPECT_TRUE(generator.generate("android", &out));
 
     std::string output = out.str();
     EXPECT_NE(std::string::npos, output.find("int foo_bar="));
@@ -227,19 +227,19 @@ TEST(JavaClassGeneratorTest, EmitOtherPackagesAttributesInStyleable) {
 
 TEST(JavaClassGeneratorTest, CommentsForSimpleResourcesArePresent) {
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
-            .setPackageId(u"android", 0x01)
-            .addSimple(u"@android:id/foo", ResourceId(0x01010000))
+            .setPackageId("android", 0x01)
+            .addSimple("@android:id/foo", ResourceId(0x01010000))
             .build();
-    test::getValue<Id>(table.get(), u"@android:id/foo")
-            ->setComment(std::u16string(u"This is a comment\n@deprecated"));
+    test::getValue<Id>(table.get(), "@android:id/foo")
+            ->setComment(std::string("This is a comment\n@deprecated"));
 
     std::unique_ptr<IAaptContext> context = test::ContextBuilder()
             .addSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
-            .setNameManglerPolicy(NameManglerPolicy{ u"android" })
+            .setNameManglerPolicy(NameManglerPolicy{ "android" })
             .build();
     JavaClassGenerator generator(context.get(), table.get(), {});
     std::stringstream out;
-    ASSERT_TRUE(generator.generate(u"android", &out));
+    ASSERT_TRUE(generator.generate("android", &out));
     std::string actual = out.str();
 
     const char* expectedText =
@@ -259,58 +259,55 @@ TEST(JavaClassGeneratorTest, CommentsForEnumAndFlagAttributesArePresent) {
 
 TEST(JavaClassGeneratorTest, CommentsForStyleablesAndNestedAttributesArePresent) {
     Attribute attr(false);
-    attr.setComment(StringPiece16(u"This is an attribute"));
+    attr.setComment(StringPiece("This is an attribute"));
 
     Styleable styleable;
-    styleable.entries.push_back(Reference(test::parseNameOrDie(u"@android:attr/one")));
-    styleable.setComment(StringPiece16(u"This is a styleable"));
+    styleable.entries.push_back(Reference(test::parseNameOrDie("@android:attr/one")));
+    styleable.setComment(StringPiece("This is a styleable"));
 
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
-            .setPackageId(u"android", 0x01)
-            .addValue(u"@android:attr/one", util::make_unique<Attribute>(attr))
-            .addValue(u"@android:styleable/Container",
+            .setPackageId("android", 0x01)
+            .addValue("@android:attr/one", util::make_unique<Attribute>(attr))
+            .addValue("@android:styleable/Container",
                       std::unique_ptr<Styleable>(styleable.clone(nullptr)))
             .build();
 
     std::unique_ptr<IAaptContext> context = test::ContextBuilder()
             .addSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
-            .setNameManglerPolicy(NameManglerPolicy{ u"android" })
+            .setNameManglerPolicy(NameManglerPolicy{ "android" })
             .build();
     JavaClassGeneratorOptions options;
     options.useFinal = false;
     JavaClassGenerator generator(context.get(), table.get(), options);
     std::stringstream out;
-    ASSERT_TRUE(generator.generate(u"android", &out));
+    ASSERT_TRUE(generator.generate("android", &out));
     std::string actual = out.str();
 
     EXPECT_NE(std::string::npos, actual.find("@attr name android:one"));
     EXPECT_NE(std::string::npos, actual.find("@attr description"));
-    EXPECT_NE(std::string::npos, actual.find(util::utf16ToUtf8(attr.getComment())));
-    EXPECT_NE(std::string::npos, actual.find(util::utf16ToUtf8(styleable.getComment())));
+    EXPECT_NE(std::string::npos, actual.find(attr.getComment().data()));
+    EXPECT_NE(std::string::npos, actual.find(styleable.getComment().data()));
 }
 
 TEST(JavaClassGeneratorTest, CommentsForRemovedAttributesAreNotPresentInClass) {
     Attribute attr(false);
-    attr.setComment(StringPiece16(u"@removed"));
-
+    attr.setComment(StringPiece("@removed"));
 
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
-            .setPackageId(u"android", 0x01)
-            .addValue(u"@android:attr/one", util::make_unique<Attribute>(attr))
+            .setPackageId("android", 0x01)
+            .addValue("@android:attr/one", util::make_unique<Attribute>(attr))
             .build();
 
     std::unique_ptr<IAaptContext> context = test::ContextBuilder()
             .addSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
-            .setNameManglerPolicy(NameManglerPolicy{ u"android" })
+            .setNameManglerPolicy(NameManglerPolicy{ "android" })
             .build();
     JavaClassGeneratorOptions options;
     options.useFinal = false;
     JavaClassGenerator generator(context.get(), table.get(), options);
     std::stringstream out;
-    ASSERT_TRUE(generator.generate(u"android", &out));
+    ASSERT_TRUE(generator.generate("android", &out));
     std::string actual = out.str();
-
-    std::cout << actual << std::endl;
 
     EXPECT_EQ(std::string::npos, actual.find("@attr name android:one"));
     EXPECT_EQ(std::string::npos, actual.find("@attr description"));

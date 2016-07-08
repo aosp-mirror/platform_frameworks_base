@@ -32,11 +32,12 @@ static bool nameIsJavaClassName(xml::Element* el, xml::Attribute* attr,
     // We allow unqualified class names (ie: .HelloActivity)
     // Since we don't know the package name, we can just make a fake one here and
     // the test will be identical as long as the real package name is valid too.
-    Maybe<std::u16string> fullyQualifiedClassName =
-            util::getFullyQualifiedClassName(u"a", attr->value);
+    Maybe<std::string> fullyQualifiedClassName =
+            util::getFullyQualifiedClassName("a", attr->value);
 
-    StringPiece16 qualifiedClassName = fullyQualifiedClassName
+    StringPiece qualifiedClassName = fullyQualifiedClassName
             ? fullyQualifiedClassName.value() : attr->value;
+
     if (!util::isJavaClassName(qualifiedClassName)) {
         diag->error(DiagMessage(el->lineNumber)
                     << "attribute 'android:name' in <"
@@ -47,14 +48,14 @@ static bool nameIsJavaClassName(xml::Element* el, xml::Attribute* attr,
 }
 
 static bool optionalNameIsJavaClassName(xml::Element* el, SourcePathDiagnostics* diag) {
-    if (xml::Attribute* attr = el->findAttribute(xml::kSchemaAndroid, u"name")) {
+    if (xml::Attribute* attr = el->findAttribute(xml::kSchemaAndroid, "name")) {
         return nameIsJavaClassName(el, attr, diag);
     }
     return true;
 }
 
 static bool requiredNameIsJavaClassName(xml::Element* el, SourcePathDiagnostics* diag) {
-    if (xml::Attribute* attr = el->findAttribute(xml::kSchemaAndroid, u"name")) {
+    if (xml::Attribute* attr = el->findAttribute(xml::kSchemaAndroid, "name")) {
         return nameIsJavaClassName(el, attr, diag);
     }
     diag->error(DiagMessage(el->lineNumber)
@@ -63,7 +64,7 @@ static bool requiredNameIsJavaClassName(xml::Element* el, SourcePathDiagnostics*
 }
 
 static bool verifyManifest(xml::Element* el, SourcePathDiagnostics* diag) {
-    xml::Attribute* attr = el->findAttribute({}, u"package");
+    xml::Attribute* attr = el->findAttribute({}, "package");
     if (!attr) {
         diag->error(DiagMessage(el->lineNumber) << "<manifest> tag is missing 'package' attribute");
         return false;
@@ -100,31 +101,31 @@ bool ManifestFixer::buildRules(xml::XmlActionExecutor* executor, IDiagnostics* d
 
     // Common intent-filter actions.
     xml::XmlNodeAction intentFilterAction;
-    intentFilterAction[u"action"];
-    intentFilterAction[u"category"];
-    intentFilterAction[u"data"];
+    intentFilterAction["action"];
+    intentFilterAction["category"];
+    intentFilterAction["data"];
 
     // Common meta-data actions.
     xml::XmlNodeAction metaDataAction;
 
     // Manifest actions.
-    xml::XmlNodeAction& manifestAction = (*executor)[u"manifest"];
+    xml::XmlNodeAction& manifestAction = (*executor)["manifest"];
     manifestAction.action(verifyManifest);
     manifestAction.action([&](xml::Element* el) -> bool {
         if (mOptions.versionNameDefault) {
-            if (el->findAttribute(xml::kSchemaAndroid, u"versionName") == nullptr) {
+            if (el->findAttribute(xml::kSchemaAndroid, "versionName") == nullptr) {
                 el->attributes.push_back(xml::Attribute{
                         xml::kSchemaAndroid,
-                        u"versionName",
+                        "versionName",
                         mOptions.versionNameDefault.value() });
             }
         }
 
         if (mOptions.versionCodeDefault) {
-            if (el->findAttribute(xml::kSchemaAndroid, u"versionCode") == nullptr) {
+            if (el->findAttribute(xml::kSchemaAndroid, "versionCode") == nullptr) {
                 el->attributes.push_back(xml::Attribute{
                         xml::kSchemaAndroid,
-                        u"versionCode",
+                        "versionCode",
                         mOptions.versionCodeDefault.value() });
             }
         }
@@ -132,87 +133,87 @@ bool ManifestFixer::buildRules(xml::XmlActionExecutor* executor, IDiagnostics* d
     });
 
     // Meta tags.
-    manifestAction[u"eat-comment"];
+    manifestAction["eat-comment"];
 
     // Uses-sdk actions.
-    manifestAction[u"uses-sdk"].action([&](xml::Element* el) -> bool {
+    manifestAction["uses-sdk"].action([&](xml::Element* el) -> bool {
         if (mOptions.minSdkVersionDefault &&
-                el->findAttribute(xml::kSchemaAndroid, u"minSdkVersion") == nullptr) {
+                el->findAttribute(xml::kSchemaAndroid, "minSdkVersion") == nullptr) {
             // There was no minSdkVersion defined and we have a default to assign.
             el->attributes.push_back(xml::Attribute{
-                    xml::kSchemaAndroid, u"minSdkVersion",
+                    xml::kSchemaAndroid, "minSdkVersion",
                     mOptions.minSdkVersionDefault.value() });
         }
 
         if (mOptions.targetSdkVersionDefault &&
-                el->findAttribute(xml::kSchemaAndroid, u"targetSdkVersion") == nullptr) {
+                el->findAttribute(xml::kSchemaAndroid, "targetSdkVersion") == nullptr) {
             // There was no targetSdkVersion defined and we have a default to assign.
             el->attributes.push_back(xml::Attribute{
-                    xml::kSchemaAndroid, u"targetSdkVersion",
+                    xml::kSchemaAndroid, "targetSdkVersion",
                     mOptions.targetSdkVersionDefault.value() });
         }
         return true;
     });
 
     // Instrumentation actions.
-    manifestAction[u"instrumentation"].action([&](xml::Element* el) -> bool {
+    manifestAction["instrumentation"].action([&](xml::Element* el) -> bool {
         if (!mOptions.renameInstrumentationTargetPackage) {
             return true;
         }
 
-        if (xml::Attribute* attr = el->findAttribute(xml::kSchemaAndroid, u"targetPackage")) {
+        if (xml::Attribute* attr = el->findAttribute(xml::kSchemaAndroid, "targetPackage")) {
             attr->value = mOptions.renameInstrumentationTargetPackage.value();
         }
         return true;
     });
 
-    manifestAction[u"original-package"];
-    manifestAction[u"protected-broadcast"];
-    manifestAction[u"uses-permission"];
-    manifestAction[u"permission"];
-    manifestAction[u"permission-tree"];
-    manifestAction[u"permission-group"];
+    manifestAction["original-package"];
+    manifestAction["protected-broadcast"];
+    manifestAction["uses-permission"];
+    manifestAction["permission"];
+    manifestAction["permission-tree"];
+    manifestAction["permission-group"];
 
-    manifestAction[u"uses-configuration"];
-    manifestAction[u"uses-feature"];
-    manifestAction[u"supports-screens"];
-    manifestAction[u"compatible-screens"];
-    manifestAction[u"supports-gl-texture"];
+    manifestAction["uses-configuration"];
+    manifestAction["uses-feature"];
+    manifestAction["supports-screens"];
+    manifestAction["compatible-screens"];
+    manifestAction["supports-gl-texture"];
 
     // Application actions.
-    xml::XmlNodeAction& applicationAction = (*executor)[u"manifest"][u"application"];
+    xml::XmlNodeAction& applicationAction = manifestAction["application"];
     applicationAction.action(optionalNameIsJavaClassName);
 
     // Uses library actions.
-    applicationAction[u"uses-library"];
+    applicationAction["uses-library"];
 
     // Meta-data.
-    applicationAction[u"meta-data"] = metaDataAction;
+    applicationAction["meta-data"] = metaDataAction;
 
     // Activity actions.
-    applicationAction[u"activity"].action(requiredNameIsJavaClassName);
-    applicationAction[u"activity"][u"intent-filter"] = intentFilterAction;
-    applicationAction[u"activity"][u"meta-data"] = metaDataAction;
+    applicationAction["activity"].action(requiredNameIsJavaClassName);
+    applicationAction["activity"]["intent-filter"] = intentFilterAction;
+    applicationAction["activity"]["meta-data"] = metaDataAction;
 
     // Activity alias actions.
-    applicationAction[u"activity-alias"][u"intent-filter"] = intentFilterAction;
-    applicationAction[u"activity-alias"][u"meta-data"] = metaDataAction;
+    applicationAction["activity-alias"]["intent-filter"] = intentFilterAction;
+    applicationAction["activity-alias"]["meta-data"] = metaDataAction;
 
     // Service actions.
-    applicationAction[u"service"].action(requiredNameIsJavaClassName);
-    applicationAction[u"service"][u"intent-filter"] = intentFilterAction;
-    applicationAction[u"service"][u"meta-data"] = metaDataAction;
+    applicationAction["service"].action(requiredNameIsJavaClassName);
+    applicationAction["service"]["intent-filter"] = intentFilterAction;
+    applicationAction["service"]["meta-data"] = metaDataAction;
 
     // Receiver actions.
-    applicationAction[u"receiver"].action(requiredNameIsJavaClassName);
-    applicationAction[u"receiver"][u"intent-filter"] = intentFilterAction;
-    applicationAction[u"receiver"][u"meta-data"] = metaDataAction;
+    applicationAction["receiver"].action(requiredNameIsJavaClassName);
+    applicationAction["receiver"]["intent-filter"] = intentFilterAction;
+    applicationAction["receiver"]["meta-data"] = metaDataAction;
 
     // Provider actions.
-    applicationAction[u"provider"].action(requiredNameIsJavaClassName);
-    applicationAction[u"provider"][u"grant-uri-permissions"];
-    applicationAction[u"provider"][u"meta-data"] = metaDataAction;
-    applicationAction[u"provider"][u"path-permissions"];
+    applicationAction["provider"].action(requiredNameIsJavaClassName);
+    applicationAction["provider"]["grant-uri-permissions"];
+    applicationAction["provider"]["meta-data"] = metaDataAction;
+    applicationAction["provider"]["path-permissions"];
     return true;
 }
 
@@ -220,14 +221,14 @@ class FullyQualifiedClassNameVisitor : public xml::Visitor {
 public:
     using xml::Visitor::visit;
 
-    explicit FullyQualifiedClassNameVisitor(const StringPiece16& package) : mPackage(package) {
+    explicit FullyQualifiedClassNameVisitor(const StringPiece& package) : mPackage(package) {
     }
 
     void visit(xml::Element* el) override {
         for (xml::Attribute& attr : el->attributes) {
             if (attr.namespaceUri == xml::kSchemaAndroid
                     && mClassAttributes.find(attr.name) != mClassAttributes.end()) {
-                if (Maybe<std::u16string> newValue =
+                if (Maybe<std::string> newValue =
                         util::getFullyQualifiedClassName(mPackage, attr.value)) {
                     attr.value = std::move(newValue.value());
                 }
@@ -239,17 +240,17 @@ public:
     }
 
 private:
-    StringPiece16 mPackage;
-    std::unordered_set<StringPiece16> mClassAttributes = { u"name" };
+    StringPiece mPackage;
+    std::unordered_set<StringPiece> mClassAttributes = { "name" };
 };
 
-static bool renameManifestPackage(const StringPiece16& packageOverride, xml::Element* manifestEl) {
-    xml::Attribute* attr = manifestEl->findAttribute({}, u"package");
+static bool renameManifestPackage(const StringPiece& packageOverride, xml::Element* manifestEl) {
+    xml::Attribute* attr = manifestEl->findAttribute({}, "package");
 
     // We've already verified that the manifest element is present, with a package name specified.
     assert(attr);
 
-    std::u16string originalPackage = std::move(attr->value);
+    std::string originalPackage = std::move(attr->value);
     attr->value = packageOverride.toString();
 
     FullyQualifiedClassNameVisitor visitor(originalPackage);
@@ -259,17 +260,17 @@ static bool renameManifestPackage(const StringPiece16& packageOverride, xml::Ele
 
 bool ManifestFixer::consume(IAaptContext* context, xml::XmlResource* doc) {
     xml::Element* root = xml::findRootElement(doc->root.get());
-    if (!root || !root->namespaceUri.empty() || root->name != u"manifest") {
+    if (!root || !root->namespaceUri.empty() || root->name != "manifest") {
         context->getDiagnostics()->error(DiagMessage(doc->file.source)
                                          << "root tag must be <manifest>");
         return false;
     }
 
     if ((mOptions.minSdkVersionDefault || mOptions.targetSdkVersionDefault)
-            && root->findChild({}, u"uses-sdk") == nullptr) {
+            && root->findChild({}, "uses-sdk") == nullptr) {
         // Auto insert a <uses-sdk> element.
         std::unique_ptr<xml::Element> usesSdk = util::make_unique<xml::Element>();
-        usesSdk->name = u"uses-sdk";
+        usesSdk->name = "uses-sdk";
         root->addChild(std::move(usesSdk));
     }
 

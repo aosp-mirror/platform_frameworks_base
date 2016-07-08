@@ -84,15 +84,15 @@ struct Value {
     /**
      * Returns the comment that was associated with this resource.
      */
-    StringPiece16 getComment() const {
+    const std::string& getComment() const {
         return mComment;
     }
 
-    void setComment(const StringPiece16& str) {
+    void setComment(const StringPiece& str) {
         mComment = str.toString();
     }
 
-    void setComment(std::u16string&& str) {
+    void setComment(std::string&& str) {
         mComment = std::move(str);
     }
 
@@ -115,7 +115,7 @@ struct Value {
 
 protected:
     Source mSource;
-    std::u16string mComment;
+    std::string mComment;
     bool mWeak = false;
     bool mTranslateable = true;
 };

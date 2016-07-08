@@ -20,41 +20,41 @@
 namespace aapt {
 
 // String basis to generate expansion
-static const std::u16string k_expansion_string = u"one two three "
+static const std::string k_expansion_string = "one two three "
         "four five six seven eight nine ten eleven twelve thirteen "
         "fourteen fiveteen sixteen seventeen nineteen twenty";
 
 // Special unicode characters to override directionality of the words
-static const std::u16string k_rlm = u"\u200f";
-static const std::u16string k_rlo = u"\u202e";
-static const std::u16string k_pdf = u"\u202c";
+static const std::string k_rlm = "\u200f";
+static const std::string k_rlo = "\u202e";
+static const std::string k_pdf = "\u202c";
 
 // Placeholder marks
-static const std::u16string k_placeholder_open = u"\u00bb";
-static const std::u16string k_placeholder_close = u"\u00ab";
+static const std::string k_placeholder_open = "\u00bb";
+static const std::string k_placeholder_close = "\u00ab";
 
-static const char16_t k_arg_start = u'{';
-static const char16_t k_arg_end = u'}';
+static const char k_arg_start = '{';
+static const char k_arg_end = '}';
 
 class PseudoMethodNone : public PseudoMethodImpl {
 public:
-    std::u16string text(const StringPiece16& text) override { return text.toString(); }
-    std::u16string placeholder(const StringPiece16& text) override { return text.toString(); }
+    std::string text(const StringPiece& text) override { return text.toString(); }
+    std::string placeholder(const StringPiece& text) override { return text.toString(); }
 };
 
 class PseudoMethodBidi : public PseudoMethodImpl {
 public:
-    std::u16string text(const StringPiece16& text) override;
-    std::u16string placeholder(const StringPiece16& text) override;
+    std::string text(const StringPiece& text) override;
+    std::string placeholder(const StringPiece& text) override;
 };
 
 class PseudoMethodAccent : public PseudoMethodImpl {
 public:
     PseudoMethodAccent() : mDepth(0), mWordCount(0), mLength(0) {}
-    std::u16string start() override;
-    std::u16string end() override;
-    std::u16string text(const StringPiece16& text) override;
-    std::u16string placeholder(const StringPiece16& text) override;
+    std::string start() override;
+    std::string end() override;
+    std::string text(const StringPiece& text) override;
+    std::string placeholder(const StringPiece& text) override;
 private:
     size_t mDepth;
     size_t mWordCount;
@@ -79,12 +79,12 @@ void Pseudolocalizer::setMethod(Method method) {
     }
 }
 
-std::u16string Pseudolocalizer::text(const StringPiece16& text) {
-    std::u16string out;
+std::string Pseudolocalizer::text(const StringPiece& text) {
+    std::string out;
     size_t depth = mLastDepth;
     size_t lastpos, pos;
     const size_t length = text.size();
-    const char16_t* str = text.data();
+    const char* str = text.data();
     bool escaped = false;
     for (lastpos = pos = 0; pos < length; pos++) {
         char16_t c = str[pos];
@@ -111,7 +111,7 @@ std::u16string Pseudolocalizer::text(const StringPiece16& text) {
             }
             size_t size = nextpos - lastpos;
             if (size) {
-                std::u16string chunk = text.substr(lastpos, size).toString();
+                std::string chunk = text.substr(lastpos, size).toString();
                 if (pseudo) {
                     chunk = mImpl->text(chunk);
                 } else if (str[lastpos] == k_arg_start && str[nextpos - 1] == k_arg_end) {
@@ -131,67 +131,67 @@ std::u16string Pseudolocalizer::text(const StringPiece16& text) {
     return out;
 }
 
-static const char16_t* pseudolocalizeChar(const char16_t c) {
+static const char* pseudolocalizeChar(const char c) {
     switch (c) {
-        case 'a':   return u"\u00e5";
-        case 'b':   return u"\u0253";
-        case 'c':   return u"\u00e7";
-        case 'd':   return u"\u00f0";
-        case 'e':   return u"\u00e9";
-        case 'f':   return u"\u0192";
-        case 'g':   return u"\u011d";
-        case 'h':   return u"\u0125";
-        case 'i':   return u"\u00ee";
-        case 'j':   return u"\u0135";
-        case 'k':   return u"\u0137";
-        case 'l':   return u"\u013c";
-        case 'm':   return u"\u1e3f";
-        case 'n':   return u"\u00f1";
-        case 'o':   return u"\u00f6";
-        case 'p':   return u"\u00fe";
-        case 'q':   return u"\u0051";
-        case 'r':   return u"\u0155";
-        case 's':   return u"\u0161";
-        case 't':   return u"\u0163";
-        case 'u':   return u"\u00fb";
-        case 'v':   return u"\u0056";
-        case 'w':   return u"\u0175";
-        case 'x':   return u"\u0445";
-        case 'y':   return u"\u00fd";
-        case 'z':   return u"\u017e";
-        case 'A':   return u"\u00c5";
-        case 'B':   return u"\u03b2";
-        case 'C':   return u"\u00c7";
-        case 'D':   return u"\u00d0";
-        case 'E':   return u"\u00c9";
-        case 'G':   return u"\u011c";
-        case 'H':   return u"\u0124";
-        case 'I':   return u"\u00ce";
-        case 'J':   return u"\u0134";
-        case 'K':   return u"\u0136";
-        case 'L':   return u"\u013b";
-        case 'M':   return u"\u1e3e";
-        case 'N':   return u"\u00d1";
-        case 'O':   return u"\u00d6";
-        case 'P':   return u"\u00de";
-        case 'Q':   return u"\u0071";
-        case 'R':   return u"\u0154";
-        case 'S':   return u"\u0160";
-        case 'T':   return u"\u0162";
-        case 'U':   return u"\u00db";
-        case 'V':   return u"\u03bd";
-        case 'W':   return u"\u0174";
-        case 'X':   return u"\u00d7";
-        case 'Y':   return u"\u00dd";
-        case 'Z':   return u"\u017d";
-        case '!':   return u"\u00a1";
-        case '?':   return u"\u00bf";
-        case '$':   return u"\u20ac";
-        default:    return NULL;
+        case 'a':   return "\u00e5";
+        case 'b':   return "\u0253";
+        case 'c':   return "\u00e7";
+        case 'd':   return "\u00f0";
+        case 'e':   return "\u00e9";
+        case 'f':   return "\u0192";
+        case 'g':   return "\u011d";
+        case 'h':   return "\u0125";
+        case 'i':   return "\u00ee";
+        case 'j':   return "\u0135";
+        case 'k':   return "\u0137";
+        case 'l':   return "\u013c";
+        case 'm':   return "\u1e3f";
+        case 'n':   return "\u00f1";
+        case 'o':   return "\u00f6";
+        case 'p':   return "\u00fe";
+        case 'q':   return "\u0051";
+        case 'r':   return "\u0155";
+        case 's':   return "\u0161";
+        case 't':   return "\u0163";
+        case 'u':   return "\u00fb";
+        case 'v':   return "\u0056";
+        case 'w':   return "\u0175";
+        case 'x':   return "\u0445";
+        case 'y':   return "\u00fd";
+        case 'z':   return "\u017e";
+        case 'A':   return "\u00c5";
+        case 'B':   return "\u03b2";
+        case 'C':   return "\u00c7";
+        case 'D':   return "\u00d0";
+        case 'E':   return "\u00c9";
+        case 'G':   return "\u011c";
+        case 'H':   return "\u0124";
+        case 'I':   return "\u00ce";
+        case 'J':   return "\u0134";
+        case 'K':   return "\u0136";
+        case 'L':   return "\u013b";
+        case 'M':   return "\u1e3e";
+        case 'N':   return "\u00d1";
+        case 'O':   return "\u00d6";
+        case 'P':   return "\u00de";
+        case 'Q':   return "\u0071";
+        case 'R':   return "\u0154";
+        case 'S':   return "\u0160";
+        case 'T':   return "\u0162";
+        case 'U':   return "\u00db";
+        case 'V':   return "\u03bd";
+        case 'W':   return "\u0174";
+        case 'X':   return "\u00d7";
+        case 'Y':   return "\u00dd";
+        case 'Z':   return "\u017d";
+        case '!':   return "\u00a1";
+        case '?':   return "\u00bf";
+        case '$':   return "\u20ac";
+        default:    return nullptr;
     }
 }
 
-static bool isPossibleNormalPlaceholderEnd(const char16_t c) {
+static bool isPossibleNormalPlaceholderEnd(const char c) {
     switch (c) {
         case 's': return true;
         case 'S': return true;
@@ -218,11 +218,11 @@ static bool isPossibleNormalPlaceholderEnd(const char16_t c) {
     }
 }
 
-static std::u16string pseudoGenerateExpansion(const unsigned int length) {
-    std::u16string result = k_expansion_string;
-    const char16_t* s = result.data();
+static std::string pseudoGenerateExpansion(const unsigned int length) {
+    std::string result = k_expansion_string;
+    const char* s = result.data();
     if (result.size() < length) {
-        result += u" ";
+        result += " ";
         result += pseudoGenerateExpansion(length - result.size());
     } else {
         int ext = 0;
@@ -238,26 +238,26 @@ static std::u16string pseudoGenerateExpansion(const unsigned int length) {
     return result;
 }
 
-std::u16string PseudoMethodAccent::start() {
-    std::u16string result;
+std::string PseudoMethodAccent::start() {
+    std::string result;
     if (mDepth == 0) {
-        result = u"[";
+        result = "[";
     }
     mWordCount = mLength = 0;
     mDepth++;
     return result;
 }
 
-std::u16string PseudoMethodAccent::end() {
-    std::u16string result;
+std::string PseudoMethodAccent::end() {
+    std::string result;
     if (mLength) {
-        result += u" ";
+        result += " ";
         result += pseudoGenerateExpansion(mWordCount > 3 ? mLength : mLength / 2);
     }
     mWordCount = mLength = 0;
     mDepth--;
     if (mDepth == 0) {
-        result += u"]";
+        result += "]";
     }
     return result;
 }
@@ -267,17 +267,17 @@ std::u16string PseudoMethodAccent::end() {
  *
  * Note: This leaves placeholder syntax untouched.
  */
-std::u16string PseudoMethodAccent::text(const StringPiece16& source)
+std::string PseudoMethodAccent::text(const StringPiece& source)
 {
-    const char16_t* s = source.data();
-    std::u16string result;
+    const char* s = source.data();
+    std::string result;
     const size_t I = source.size();
     bool lastspace = true;
     for (size_t i = 0; i < I; i++) {
-        char16_t c = s[i];
+        char c = s[i];
         if (c == '%') {
             // Placeholder syntax, no need to pseudolocalize
-            std::u16string chunk;
+            std::string chunk;
             bool end = false;
             chunk.append(&c, 1);
             while (!end && i + 1 < I) {
@@ -300,7 +300,7 @@ std::u16string PseudoMethodAccent::text(const StringPiece16& source)
             bool tag_closed = false;
             while (!tag_closed && i < I) {
                 if (c == '&') {
-                    std::u16string escapeText;
+                    std::string escapeText;
                     escapeText.append(&c, 1);
                     bool end = false;
                     size_t htmlCodePos = i;
@@ -322,7 +322,7 @@ std::u16string PseudoMethodAccent::text(const StringPiece16& source)
                         }
                     }
                     result += escapeText;
-                    if (escapeText != u"&lt;") {
+                    if (escapeText != "&lt;") {
                         tag_closed = true;
                     }
                     continue;
@@ -338,11 +338,11 @@ std::u16string PseudoMethodAccent::text(const StringPiece16& source)
             }
         } else {
             // This is a pure text that should be pseudolocalized
-            const char16_t* p = pseudolocalizeChar(c);
+            const char* p = pseudolocalizeChar(c);
             if (p != nullptr) {
                 result += p;
             } else {
-                bool space = util::isspace16(c);
+                bool space = isspace(c);
                 if (lastspace && !space) {
                     mWordCount++;
                 }
@@ -356,19 +356,19 @@ std::u16string PseudoMethodAccent::text(const StringPiece16& source)
     return result;
 }
 
-std::u16string PseudoMethodAccent::placeholder(const StringPiece16& source) {
+std::string PseudoMethodAccent::placeholder(const StringPiece& source) {
     // Surround a placeholder with brackets
     return k_placeholder_open + source.toString() + k_placeholder_close;
 }
 
-std::u16string PseudoMethodBidi::text(const StringPiece16& source) {
-    const char16_t* s = source.data();
-    std::u16string result;
+std::string PseudoMethodBidi::text(const StringPiece& source) {
+    const char* s = source.data();
+    std::string result;
     bool lastspace = true;
     bool space = true;
     for (size_t i = 0; i < source.size(); i++) {
-        char16_t c = s[i];
-        space = util::isspace16(c);
+        char c = s[i];
+        space = isspace(c);
         if (lastspace && !space) {
             // Word start
             result += k_rlm + k_rlo;
@@ -386,7 +386,7 @@ std::u16string PseudoMethodBidi::text(const StringPiece16& source) {
     return result;
 }
 
-std::u16string PseudoMethodBidi::placeholder(const StringPiece16& source) {
+std::string PseudoMethodBidi::placeholder(const StringPiece& source) {
     // Surround a placeholder with directionality change sequence
     return k_rlm + k_rlo + source.toString() + k_pdf + k_rlm;
 }

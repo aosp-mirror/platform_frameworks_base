@@ -27,10 +27,10 @@ namespace aapt {
 
 TEST(IdAssignerTest, AssignIds) {
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
-            .addSimple(u"@android:attr/foo")
-            .addSimple(u"@android:attr/bar")
-            .addSimple(u"@android:id/foo")
-            .setPackageId(u"android", 0x01)
+            .addSimple("@android:attr/foo")
+            .addSimple("@android:attr/bar")
+            .addSimple("@android:id/foo")
+            .setPackageId("android", 0x01)
             .build();
 
     std::unique_ptr<IAaptContext> context = test::ContextBuilder().build();
@@ -42,12 +42,12 @@ TEST(IdAssignerTest, AssignIds) {
 
 TEST(IdAssignerTest, AssignIdsWithReservedIds) {
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
-            .addSimple(u"@android:attr/foo", ResourceId(0x01040006))
-            .addSimple(u"@android:attr/bar")
-            .addSimple(u"@android:id/foo")
-            .addSimple(u"@app:id/biz")
-            .setPackageId(u"android", 0x01)
-            .setPackageId(u"app", 0x7f)
+            .addSimple("@android:attr/foo", ResourceId(0x01040006))
+            .addSimple("@android:attr/bar")
+            .addSimple("@android:id/foo")
+            .addSimple("@app:id/biz")
+            .setPackageId("android", 0x01)
+            .setPackageId("app", 0x7f)
             .build();
 
     std::unique_ptr<IAaptContext> context = test::ContextBuilder().build();
@@ -59,10 +59,10 @@ TEST(IdAssignerTest, AssignIdsWithReservedIds) {
 
 TEST(IdAssignerTest, FailWhenNonUniqueIdsAssigned) {
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
-            .addSimple(u"@android:attr/foo", ResourceId(0x01040006))
-            .addSimple(u"@android:attr/bar", ResourceId(0x01040006))
-            .setPackageId(u"android", 0x01)
-            .setPackageId(u"app", 0x7f)
+            .addSimple("@android:attr/foo", ResourceId(0x01040006))
+            .addSimple("@android:attr/bar", ResourceId(0x01040006))
+            .setPackageId("android", 0x01)
+            .setPackageId("app", 0x7f)
             .build();
 
     std::unique_ptr<IAaptContext> context = test::ContextBuilder().build();

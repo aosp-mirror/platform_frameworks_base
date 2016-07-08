@@ -31,19 +31,19 @@ namespace proguard {
 
 class KeepSet {
 public:
-    inline void addClass(const Source& source, const std::u16string& className) {
+    inline void addClass(const Source& source, const std::string& className) {
         mKeepSet[className].insert(source);
     }
 
-    inline void addMethod(const Source& source, const std::u16string& methodName) {
+    inline void addMethod(const Source& source, const std::string& methodName) {
         mKeepMethodSet[methodName].insert(source);
     }
 
 private:
     friend bool writeKeepSet(std::ostream* out, const KeepSet& keepSet);
 
-    std::map<std::u16string, std::set<Source>> mKeepSet;
-    std::map<std::u16string, std::set<Source>> mKeepMethodSet;
+    std::map<std::string, std::set<Source>> mKeepSet;
+    std::map<std::string, std::set<Source>> mKeepMethodSet;
 };
 
 bool collectProguardRulesForManifest(const Source& source, xml::XmlResource* res, KeepSet* keepSet,

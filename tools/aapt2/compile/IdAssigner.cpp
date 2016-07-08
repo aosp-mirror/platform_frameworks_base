@@ -15,7 +15,6 @@
  */
 
 #include "ResourceTable.h"
-
 #include "compile/IdAssigner.h"
 #include "process/IResourceTableConsumer.h"
 #include "util/Util.h"

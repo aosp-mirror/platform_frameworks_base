@@ -27,12 +27,12 @@
 namespace aapt {
 
 struct ManifestFixerOptions {
-    Maybe<std::u16string> minSdkVersionDefault;
-    Maybe<std::u16string> targetSdkVersionDefault;
-    Maybe<std::u16string> renameManifestPackage;
-    Maybe<std::u16string> renameInstrumentationTargetPackage;
-    Maybe<std::u16string> versionNameDefault;
-    Maybe<std::u16string> versionCodeDefault;
+    Maybe<std::string> minSdkVersionDefault;
+    Maybe<std::string> targetSdkVersionDefault;
+    Maybe<std::string> renameManifestPackage;
+    Maybe<std::string> renameInstrumentationTargetPackage;
+    Maybe<std::string> versionNameDefault;
+    Maybe<std::string> versionCodeDefault;
 };
 
 /**

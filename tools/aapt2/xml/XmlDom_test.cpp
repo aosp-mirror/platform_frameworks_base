@@ -43,8 +43,8 @@ TEST(XmlDomTest, Inflate) {
 
     xml::Namespace* ns = xml::nodeCast<xml::Namespace>(doc->root.get());
     ASSERT_NE(ns, nullptr);
-    EXPECT_EQ(ns->namespaceUri, u"http://schemas.android.com/apk/res/android");
-    EXPECT_EQ(ns->namespacePrefix, u"android");
+    EXPECT_EQ(ns->namespaceUri, xml::kSchemaAndroid);
+    EXPECT_EQ(ns->namespacePrefix, "android");
 }
 
 } // namespace aapt

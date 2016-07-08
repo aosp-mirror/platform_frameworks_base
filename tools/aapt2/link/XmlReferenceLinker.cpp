@@ -81,7 +81,7 @@ public:
                     xml::extractPackageFromNamespace(attr.namespaceUri);
             if (maybePackage) {
                 // There is a valid package name for this attribute. We will look this up.
-                StringPiece16 package = maybePackage.value().package;
+                StringPiece package = maybePackage.value().package;
                 if (package.empty()) {
                     // Empty package means the 'current' or 'local' package.
                     package = mContext->getCompilationPackage();

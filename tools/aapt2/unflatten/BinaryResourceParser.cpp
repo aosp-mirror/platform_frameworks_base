@@ -178,7 +178,8 @@ bool BinaryResourceParser::parsePackage(const ResChunk_header* chunk) {
         packageName[i] = util::deviceToHost16(packageHeader->name[i]);
     }
 
-    ResourceTablePackage* package = mTable->createPackage(packageName, (uint8_t) packageId);
+    ResourceTablePackage* package = mTable->createPackage(util::utf16ToUtf8(packageName),
+                                                          static_cast<uint8_t>(packageId));
     if (!package) {
         mContext->getDiagnostics()->error(DiagMessage(mSource)
                                           << "incompatible package '" << packageName
@@ -308,12 +309,12 @@ bool BinaryResourceParser::parseType(const ResourceTablePackage* package,
     ConfigDescription config;
     config.copyFromDtoH(type->config);
 
-    StringPiece16 typeStr16 = util::getString(mTypePool, type->id - 1);
+    const std::string typeStr = util::getString(mTypePool, type->id - 1);
 
-    const ResourceType* parsedType = parseResourceType(typeStr16);
+    const ResourceType* parsedType = parseResourceType(typeStr);
     if (!parsedType) {
         mContext->getDiagnostics()->error(DiagMessage(mSource)
-                                          << "invalid type name '" << typeStr16
+                                          << "invalid type name '" << typeStr
                                           << "' for type with ID " << (int) type->id);
         return false;
     }
@@ -327,7 +328,7 @@ bool BinaryResourceParser::parseType(const ResourceTablePackage* package,
 
         const ResourceName name(package->name, *parsedType,
                                 util::getString(mKeyPool,
-                                                util::deviceToHost32(entry->key.index)).toString());
+                                                util::deviceToHost32(entry->key.index)));
 
         const ResourceId resId(package->id.value(), type->id, static_cast<uint16_t>(it.index()));
 
@@ -387,16 +388,16 @@ std::unique_ptr<Item> BinaryResourceParser::parseValue(const ResourceNameRef& na
     const uint32_t data = util::deviceToHost32(value->data);
 
     if (value->dataType == Res_value::TYPE_STRING) {
-        StringPiece16 str = util::getString(mValuePool, data);
+        const std::string str = util::getString(mValuePool, data);
 
         const ResStringPool_span* spans = mValuePool.styleAt(data);
 
         // Check if the string has a valid style associated with it.
         if (spans != nullptr && spans->name.index != ResStringPool_span::END) {
-            StyleString styleStr = { str.toString() };
+            StyleString styleStr = { str };
             while (spans->name.index != ResStringPool_span::END) {
                 styleStr.spans.push_back(Span{
-                        util::getString(mValuePool, spans->name.index).toString(),
+                        util::getString(mValuePool, spans->name.index),
                         spans->firstChar,
                         spans->lastChar
                 });
@@ -406,7 +407,7 @@ std::unique_ptr<Item> BinaryResourceParser::parseValue(const ResourceNameRef& na
                     styleStr, StringPool::Context{1, config}));
         } else {
             if (name.type != ResourceType::kString &&
-                    util::stringStartsWith<char16_t>(str, u"res/")) {
+                    util::stringStartsWith(str, "res/")) {
                 // This must be a FileReference.
                 return util::make_unique<FileReference>(mTable->stringPool.makeRef(
                             str, StringPool::Context{ 0, config }));

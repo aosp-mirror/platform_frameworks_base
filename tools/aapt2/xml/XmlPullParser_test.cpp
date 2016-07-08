@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+#include "test/Test.h"
 #include "util/StringPiece.h"
 #include "xml/XmlPullParser.h"
 
-#include <gtest/gtest.h>
 #include <sstream>
 
 namespace aapt {
@@ -32,21 +32,21 @@ TEST(XmlPullParserTest, NextChildNodeTraversesCorrectly) {
     ASSERT_TRUE(xml::XmlPullParser::nextChildNode(&parser, depthOuter));
 
     EXPECT_EQ(xml::XmlPullParser::Event::kStartElement, parser.getEvent());
-    EXPECT_EQ(StringPiece16(u"a"), StringPiece16(parser.getElementName()));
+    EXPECT_EQ(StringPiece("a"), StringPiece(parser.getElementName()));
 
     const size_t depthA = parser.getDepth();
     ASSERT_TRUE(xml::XmlPullParser::nextChildNode(&parser, depthA));
     EXPECT_EQ(xml::XmlPullParser::Event::kStartElement, parser.getEvent());
-    EXPECT_EQ(StringPiece16(u"b"), StringPiece16(parser.getElementName()));
+    EXPECT_EQ(StringPiece("b"), StringPiece(parser.getElementName()));
 
     const size_t depthB = parser.getDepth();
     ASSERT_TRUE(xml::XmlPullParser::nextChildNode(&parser, depthB));
     EXPECT_EQ(xml::XmlPullParser::Event::kStartElement, parser.getEvent());
-    EXPECT_EQ(StringPiece16(u"c"), StringPiece16(parser.getElementName()));
+    EXPECT_EQ(StringPiece("c"), StringPiece(parser.getElementName()));
 
     ASSERT_TRUE(xml::XmlPullParser::nextChildNode(&parser, depthB));
     EXPECT_EQ(xml::XmlPullParser::Event::kStartElement, parser.getEvent());
-    EXPECT_EQ(StringPiece16(u"e"), StringPiece16(parser.getElementName()));
+    EXPECT_EQ(StringPiece("e"), StringPiece(parser.getElementName()));
 
     ASSERT_FALSE(xml::XmlPullParser::nextChildNode(&parser, depthOuter));
     EXPECT_EQ(xml::XmlPullParser::Event::kEndDocument, parser.getEvent());

@@ -22,7 +22,7 @@ namespace aapt {
 template <typename T>
 using uptr = std::unique_ptr<T>;
 
-static uptr<ResourceTable> buildTableWithConfigs(const StringPiece16& name,
+static uptr<ResourceTable> buildTableWithConfigs(const StringPiece& name,
                                                  std::initializer_list<std::string> list) {
     test::ResourceTableBuilder builder;
     for (const std::string& item : list) {
@@ -34,7 +34,7 @@ static uptr<ResourceTable> buildTableWithConfigs(const StringPiece16& name,
 TEST(VersionCollapserTest, CollapseVersions) {
     uptr<IAaptContext> context = test::ContextBuilder().setMinSdkVersion(7).build();
 
-    const StringPiece16 resName = u"@android:string/foo";
+    const StringPiece resName = "@android:string/foo";
 
     uptr<ResourceTable> table =
             buildTableWithConfigs(resName,
@@ -64,7 +64,7 @@ TEST(VersionCollapserTest, CollapseVersions) {
 TEST(VersionCollapserTest, CollapseVersionsWhenMinSdkIsHighest) {
     uptr<IAaptContext> context = test::ContextBuilder().setMinSdkVersion(26).build();
 
-    const StringPiece16 resName = u"@android:string/foo";
+    const StringPiece resName = "@android:string/foo";
 
     uptr<ResourceTable> table =
                 buildTableWithConfigs(resName,

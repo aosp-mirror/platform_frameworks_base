@@ -40,81 +40,81 @@ public:
         return &mTable->stringPool;
     }
 
-    ResourceTableBuilder& setPackageId(const StringPiece16& packageName, uint8_t id) {
+    ResourceTableBuilder& setPackageId(const StringPiece& packageName, uint8_t id) {
         ResourceTablePackage* package = mTable->createPackage(packageName, id);
         assert(package);
         return *this;
     }
 
-    ResourceTableBuilder& addSimple(const StringPiece16& name, const ResourceId id = {}) {
+    ResourceTableBuilder& addSimple(const StringPiece& name, const ResourceId id = {}) {
         return addValue(name, id, util::make_unique<Id>());
     }
 
-    ResourceTableBuilder& addSimple(const StringPiece16& name, const ConfigDescription& config,
+    ResourceTableBuilder& addSimple(const StringPiece& name, const ConfigDescription& config,
                                     const ResourceId id = {}) {
         return addValue(name, config, id, util::make_unique<Id>());
     }
 
-    ResourceTableBuilder& addReference(const StringPiece16& name, const StringPiece16& ref) {
+    ResourceTableBuilder& addReference(const StringPiece& name, const StringPiece& ref) {
         return addReference(name, {}, ref);
     }
 
-    ResourceTableBuilder& addReference(const StringPiece16& name, const ResourceId id,
-                                       const StringPiece16& ref) {
+    ResourceTableBuilder& addReference(const StringPiece& name, const ResourceId id,
+                                       const StringPiece& ref) {
         return addValue(name, id, util::make_unique<Reference>(parseNameOrDie(ref)));
     }
 
-    ResourceTableBuilder& addString(const StringPiece16& name, const StringPiece16& str) {
+    ResourceTableBuilder& addString(const StringPiece& name, const StringPiece& str) {
         return addString(name, {}, str);
     }
 
-    ResourceTableBuilder& addString(const StringPiece16& name, const ResourceId id,
-                                    const StringPiece16& str) {
+    ResourceTableBuilder& addString(const StringPiece& name, const ResourceId id,
+                                    const StringPiece& str) {
         return addValue(name, id, util::make_unique<String>(mTable->stringPool.makeRef(str)));
     }
 
-    ResourceTableBuilder& addString(const StringPiece16& name, const ResourceId id,
-                                    const ConfigDescription& config, const StringPiece16& str) {
+    ResourceTableBuilder& addString(const StringPiece& name, const ResourceId id,
+                                    const ConfigDescription& config, const StringPiece& str) {
         return addValue(name, config, id,
                         util::make_unique<String>(mTable->stringPool.makeRef(str)));
     }
 
-    ResourceTableBuilder& addFileReference(const StringPiece16& name, const StringPiece16& path) {
+    ResourceTableBuilder& addFileReference(const StringPiece& name, const StringPiece& path) {
         return addFileReference(name, {}, path);
     }
 
-    ResourceTableBuilder& addFileReference(const StringPiece16& name, const ResourceId id,
-                                           const StringPiece16& path) {
+    ResourceTableBuilder& addFileReference(const StringPiece& name, const ResourceId id,
+                                           const StringPiece& path) {
         return addValue(name, id,
                         util::make_unique<FileReference>(mTable->stringPool.makeRef(path)));
     }
 
-    ResourceTableBuilder& addFileReference(const StringPiece16& name, const StringPiece16& path,
+    ResourceTableBuilder& addFileReference(const StringPiece& name, const StringPiece& path,
                                            const ConfigDescription& config) {
         return addValue(name, config, {},
                         util::make_unique<FileReference>(mTable->stringPool.makeRef(path)));
     }
 
-    ResourceTableBuilder& addValue(const StringPiece16& name,
+    ResourceTableBuilder& addValue(const StringPiece& name,
                                    std::unique_ptr<Value> value) {
         return addValue(name, {}, std::move(value));
     }
 
-    ResourceTableBuilder& addValue(const StringPiece16& name, const ResourceId id,
+    ResourceTableBuilder& addValue(const StringPiece& name, const ResourceId id,
                                    std::unique_ptr<Value> value) {
         return addValue(name, {}, id, std::move(value));
     }
 
-    ResourceTableBuilder& addValue(const StringPiece16& name, const ConfigDescription& config,
+    ResourceTableBuilder& addValue(const StringPiece& name, const ConfigDescription& config,
                                    const ResourceId id, std::unique_ptr<Value> value) {
         ResourceName resName = parseNameOrDie(name);
-        bool result = mTable->addResourceAllowMangled(resName, id, config, std::string(),
+        bool result = mTable->addResourceAllowMangled(resName, id, config, {},
                                                       std::move(value), &mDiagnostics);
         assert(result);
         return *this;
     }
 
-    ResourceTableBuilder& setSymbolState(const StringPiece16& name, ResourceId id,
+    ResourceTableBuilder& setSymbolState(const StringPiece& name, ResourceId id,
                                          SymbolState state) {
         ResourceName resName = parseNameOrDie(name);
         Symbol symbol;
@@ -129,7 +129,7 @@ public:
     }
 };
 
-inline std::unique_ptr<Reference> buildReference(const StringPiece16& ref,
+inline std::unique_ptr<Reference> buildReference(const StringPiece& ref,
                                                  Maybe<ResourceId> id = {}) {
     std::unique_ptr<Reference> reference = util::make_unique<Reference>(parseNameOrDie(ref));
     reference->id = id;
@@ -160,7 +160,7 @@ public:
         return *this;
     }
 
-    ValueBuilder& setComment(const StringPiece16& str) {
+    ValueBuilder& setComment(const StringPiece& str) {
         mValue->setComment(str);
         return *this;
     }
@@ -184,9 +184,9 @@ public:
         return *this;
     }
 
-    AttributeBuilder& addItem(const StringPiece16& name, uint32_t value) {
+    AttributeBuilder& addItem(const StringPiece& name, uint32_t value) {
         mAttr->symbols.push_back(Attribute::Symbol{
-                Reference(ResourceName{ {}, ResourceType::kId, name.toString()}),
+                Reference(ResourceName({}, ResourceType::kId, name)),
                 value});
         return *this;
     }
@@ -201,17 +201,17 @@ private:
     std::unique_ptr<Style> mStyle = util::make_unique<Style>();
 
 public:
-    StyleBuilder& setParent(const StringPiece16& str) {
+    StyleBuilder& setParent(const StringPiece& str) {
         mStyle->parent = Reference(parseNameOrDie(str));
         return *this;
     }
 
-    StyleBuilder& addItem(const StringPiece16& str, std::unique_ptr<Item> value) {
+    StyleBuilder& addItem(const StringPiece& str, std::unique_ptr<Item> value) {
         mStyle->entries.push_back(Style::Entry{ Reference(parseNameOrDie(str)), std::move(value) });
         return *this;
     }
 
-    StyleBuilder& addItem(const StringPiece16& str, ResourceId id, std::unique_ptr<Item> value) {
+    StyleBuilder& addItem(const StringPiece& str, ResourceId id, std::unique_ptr<Item> value) {
         addItem(str, std::move(value));
         mStyle->entries.back().key.id = id;
         return *this;
@@ -227,7 +227,7 @@ private:
     std::unique_ptr<Styleable> mStyleable = util::make_unique<Styleable>();
 
 public:
-    StyleableBuilder& addItem(const StringPiece16& str, Maybe<ResourceId> id = {}) {
+    StyleableBuilder& addItem(const StringPiece& str, Maybe<ResourceId> id = {}) {
         mStyleable->entries.push_back(Reference(parseNameOrDie(str)));
         mStyleable->entries.back().id = id;
         return *this;

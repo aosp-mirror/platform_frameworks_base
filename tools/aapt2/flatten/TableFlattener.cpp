@@ -25,6 +25,7 @@
 
 #include <android-base/macros.h>
 #include <algorithm>
+#include <sstream>
 #include <type_traits>
 #include <numeric>
 
@@ -231,7 +232,8 @@ public:
         }
 
         // Copy the package name in device endianness.
-        strcpy16_htod(pkgHeader->name, arraysize(pkgHeader->name), mPackage->name);
+        strcpy16_htod(pkgHeader->name, arraysize(pkgHeader->name),
+                      util::utf8ToUtf16(mPackage->name));
 
         // Serialize the types. We do this now so that our type and key strings
         // are populated. We write those first.
@@ -423,9 +425,9 @@ private:
             // If there is a gap in the type IDs, fill in the StringPool
             // with empty values until we reach the ID we expect.
             while (type->id.value() > expectedTypeId) {
-                std::u16string typeName(u"?");
-                typeName += expectedTypeId;
-                mTypePool.makeRef(typeName);
+                std::stringstream typeName;
+                typeName << "?" << expectedTypeId;
+                mTypePool.makeRef(typeName.str());
                 expectedTypeId++;
             }
             expectedTypeId++;

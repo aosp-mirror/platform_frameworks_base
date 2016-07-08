@@ -24,6 +24,7 @@
 
 #include <iomanip>
 #include <limits>
+#include <sstream>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -60,28 +61,28 @@ enum class ResourceType {
     kXml,
 };
 
-StringPiece16 toString(ResourceType type);
+StringPiece toString(ResourceType type);
 
 /**
  * Returns a pointer to a valid ResourceType, or nullptr if
  * the string was invalid.
  */
-const ResourceType* parseResourceType(const StringPiece16& str);
+const ResourceType* parseResourceType(const StringPiece& str);
 
 /**
  * A resource's name. This can uniquely identify
  * a resource in the ResourceTable.
  */
 struct ResourceName {
-    std::u16string package;
+    std::string package;
     ResourceType type;
-    std::u16string entry;
+    std::string entry;
 
     ResourceName() : type(ResourceType::kRaw) {}
-    ResourceName(const StringPiece16& p, ResourceType t, const StringPiece16& e);
+    ResourceName(const StringPiece& p, ResourceType t, const StringPiece& e);
 
     bool isValid() const;
-    std::u16string toString() const;
+    std::string toString() const;
 };
 
 /**
@@ -91,15 +92,15 @@ struct ResourceName {
  * of the original string.
  */
 struct ResourceNameRef {
-    StringPiece16 package;
+    StringPiece package;
     ResourceType type;
-    StringPiece16 entry;
+    StringPiece entry;
 
     ResourceNameRef() = default;
     ResourceNameRef(const ResourceNameRef&) = default;
     ResourceNameRef(ResourceNameRef&&) = default;
     ResourceNameRef(const ResourceName& rhs);
-    ResourceNameRef(const StringPiece16& p, ResourceType t, const StringPiece16& e);
+    ResourceNameRef(const StringPiece& p, ResourceType t, const StringPiece& e);
     ResourceNameRef& operator=(const ResourceNameRef& rhs) = default;
     ResourceNameRef& operator=(ResourceNameRef&& rhs) = default;
     ResourceNameRef& operator=(const ResourceName& rhs);
@@ -252,7 +253,7 @@ inline ::std::ostream& operator<<(::std::ostream& out, const ResourceType& val) 
 // ResourceName implementation.
 //
 
-inline ResourceName::ResourceName(const StringPiece16& p, ResourceType t, const StringPiece16& e) :
+inline ResourceName::ResourceName(const StringPiece& p, ResourceType t, const StringPiece& e) :
         package(p.toString()), type(t), entry(e.toString()) {
 }
 
@@ -275,14 +276,6 @@ inline bool operator!=(const ResourceName& lhs, const ResourceName& rhs) {
             != std::tie(rhs.package, rhs.type, rhs.entry);
 }
 
-inline std::u16string ResourceName::toString() const {
-    std::u16string result;
-    if (!package.empty()) {
-        result = package + u":";
-    }
-    return result + aapt::toString(type).toString() + u"/" + entry;
-}
-
 inline ::std::ostream& operator<<(::std::ostream& out, const ResourceName& name) {
     if (!name.package.empty()) {
         out << name.package << ":";
@@ -290,6 +283,11 @@ inline ::std::ostream& operator<<(::std::ostream& out, const ResourceName& name)
     return out << name.type << "/" << name.entry;
 }
 
+inline std::string ResourceName::toString() const {
+    std::stringstream stream;
+    stream << *this;
+    return stream.str();
+}
 
 //
 // ResourceNameRef implementation.
@@ -299,8 +297,8 @@ inline ResourceNameRef::ResourceNameRef(const ResourceName& rhs) :
         package(rhs.package), type(rhs.type), entry(rhs.entry) {
 }
 
-inline ResourceNameRef::ResourceNameRef(const StringPiece16& p, ResourceType t,
-                                        const StringPiece16& e) :
+inline ResourceNameRef::ResourceNameRef(const StringPiece& p, ResourceType t,
+                                        const StringPiece& e) :
         package(p), type(t), entry(e) {
 }
 
@@ -312,7 +310,7 @@ inline ResourceNameRef& ResourceNameRef::operator=(const ResourceName& rhs) {
 }
 
 inline ResourceName ResourceNameRef::toResourceName() const {
-    return { package.toString(), type, entry.toString() };
+    return ResourceName(package, type, entry);
 }
 
 inline bool ResourceNameRef::isValid() const {

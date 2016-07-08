@@ -55,7 +55,7 @@ public:
      * Find or create a child XmlNodeAction that will be performed for the child element
      * with the name `name`.
      */
-    XmlNodeAction& operator[](const std::u16string& name) {
+    XmlNodeAction& operator[](const std::string& name) {
         return mMap[name];
     }
 
@@ -70,7 +70,7 @@ private:
 
     bool execute(XmlActionExecutorPolicy policy, SourcePathDiagnostics* diag, Element* el) const;
 
-    std::map<std::u16string, XmlNodeAction> mMap;
+    std::map<std::string, XmlNodeAction> mMap;
     std::vector<ActionFuncWithDiag> mActions;
 };
 
@@ -86,7 +86,7 @@ public:
      * Find or create a root XmlNodeAction that will be performed for the root XML element
      * with the name `name`.
      */
-    XmlNodeAction& operator[](const std::u16string& name) {
+    XmlNodeAction& operator[](const std::string& name) {
         return mMap[name];
     }
 
@@ -97,7 +97,7 @@ public:
     bool execute(XmlActionExecutorPolicy policy, IDiagnostics* diag, XmlResource* doc) const;
 
 private:
-    std::map<std::u16string, XmlNodeAction> mMap;
+    std::map<std::string, XmlNodeAction> mMap;
 
     DISALLOW_COPY_AND_ASSIGN(XmlActionExecutor);
 };

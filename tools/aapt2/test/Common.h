@@ -62,7 +62,7 @@ inline IDiagnostics* getDiagnostics() {
     return &diag;
 }
 
-inline ResourceName parseNameOrDie(const StringPiece16& str) {
+inline ResourceName parseNameOrDie(const StringPiece& str) {
     ResourceNameRef ref;
     bool result = ResourceUtils::tryParseReference(str, &ref);
     assert(result && "invalid resource name");
@@ -77,7 +77,7 @@ inline ConfigDescription parseConfigOrDie(const StringPiece& str) {
 }
 
 template <typename T> T* getValueForConfigAndProduct(ResourceTable* table,
-                                                     const StringPiece16& resName,
+                                                     const StringPiece& resName,
                                                      const ConfigDescription& config,
                                                      const StringPiece& product) {
     Maybe<ResourceTable::SearchResult> result = table->findResource(parseNameOrDie(resName));
@@ -90,12 +90,12 @@ template <typename T> T* getValueForConfigAndProduct(ResourceTable* table,
     return nullptr;
 }
 
-template <typename T> T* getValueForConfig(ResourceTable* table, const StringPiece16& resName,
+template <typename T> T* getValueForConfig(ResourceTable* table, const StringPiece& resName,
                                            const ConfigDescription& config) {
     return getValueForConfigAndProduct<T>(table, resName, config, {});
 }
 
-template <typename T> T* getValue(ResourceTable* table, const StringPiece16& resName) {
+template <typename T> T* getValue(ResourceTable* table, const StringPiece& resName) {
     return getValueForConfig<T>(table, resName, {});
 }
 

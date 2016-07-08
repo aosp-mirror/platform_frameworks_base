@@ -63,7 +63,7 @@ private:
      * contains the escaped and whitespace trimmed text, while `outRawString`
      * contains the unescaped text. Returns true on success.
      */
-    bool flattenXmlSubtree(xml::XmlPullParser* parser, std::u16string* outRawString,
+    bool flattenXmlSubtree(xml::XmlPullParser* parser, std::string* outRawString,
                            StyleString* outStyleString);
 
     /*
@@ -89,7 +89,7 @@ private:
     bool parseAttr(xml::XmlPullParser* parser, ParsedResource* outResource);
     bool parseAttrImpl(xml::XmlPullParser* parser, ParsedResource* outResource, bool weak);
     Maybe<Attribute::Symbol> parseEnumOrFlagItem(xml::XmlPullParser* parser,
-                                                 const StringPiece16& tag);
+                                                 const StringPiece& tag);
     bool parseStyle(xml::XmlPullParser* parser, ParsedResource* outResource);
     bool parseStyleItem(xml::XmlPullParser* parser, Style* style);
     bool parseDeclareStyleable(xml::XmlPullParser* parser, ParsedResource* outResource);

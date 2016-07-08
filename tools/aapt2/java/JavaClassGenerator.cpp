@@ -19,7 +19,6 @@
 #include "ResourceTable.h"
 #include "ResourceValues.h"
 #include "ValueVisitor.h"
-
 #include "java/AnnotationProcessor.h"
 #include "java/ClassDefinition.h"
 #include "java/JavaClassGenerator.h"
@@ -39,20 +38,20 @@ JavaClassGenerator::JavaClassGenerator(IAaptContext* context, ResourceTable* tab
         mContext(context), mTable(table), mOptions(options) {
 }
 
-static const std::set<StringPiece16> sJavaIdentifiers = {
-    u"abstract", u"assert", u"boolean", u"break", u"byte",
-    u"case", u"catch", u"char", u"class", u"const", u"continue",
-    u"default", u"do", u"double", u"else", u"enum", u"extends",
-    u"final", u"finally", u"float", u"for", u"goto", u"if",
-    u"implements", u"import", u"instanceof", u"int", u"interface",
-    u"long", u"native", u"new", u"package", u"private", u"protected",
-    u"public", u"return", u"short", u"static", u"strictfp", u"super",
-    u"switch", u"synchronized", u"this", u"throw", u"throws",
-    u"transient", u"try", u"void", u"volatile", u"while", u"true",
-    u"false", u"null"
+static const std::set<StringPiece> sJavaIdentifiers = {
+    "abstract", "assert", "boolean", "break", "byte",
+    "case", "catch", "char", "class", "const", "continue",
+    "default", "do", "double", "else", "enum", "extends",
+    "final", "finally", "float", "for", "goto", "if",
+    "implements", "import", "instanceof", "int", "interface",
+    "long", "native", "new", "package", "private", "protected",
+    "public", "return", "short", "static", "strictfp", "super",
+    "switch", "synchronized", "this", "throw", "throws",
+    "transient", "try", "void", "volatile", "while", "true",
+    "false", "null"
 };
 
-static bool isValidSymbol(const StringPiece16& symbol) {
+static bool isValidSymbol(const StringPiece& symbol) {
     return sJavaIdentifiers.find(symbol) == sJavaIdentifiers.end();
 }
 
@@ -60,8 +59,8 @@ static bool isValidSymbol(const StringPiece16& symbol) {
  * Java symbols can not contain . or -, but those are valid in a resource name.
  * Replace those with '_'.
  */
-static std::string transform(const StringPiece16& symbol) {
-    std::string output = util::utf16ToUtf8(symbol);
+static std::string transform(const StringPiece& symbol) {
+    std::string output = symbol.toString();
     for (char& c : output) {
         if (c == '.' || c == '-') {
             c = '_';
@@ -83,7 +82,7 @@ static std::string transform(const StringPiece16& symbol) {
  */
 static std::string transformNestedAttr(const ResourceNameRef& attrName,
                                        const std::string& styleableClassName,
-                                       const StringPiece16& packageNameToGenerate) {
+                                       const StringPiece& packageNameToGenerate) {
     std::string output = styleableClassName;
 
     // We may reference IDs from other packages, so prefix the entry name with
@@ -204,8 +203,8 @@ static bool lessStyleableAttr(const StyleableAttr& lhs, const StyleableAttr& rhs
     }
 }
 
-void JavaClassGenerator::addMembersToStyleableClass(const StringPiece16& packageNameToGenerate,
-                                                    const std::u16string& entryName,
+void JavaClassGenerator::addMembersToStyleableClass(const StringPiece& packageNameToGenerate,
+                                                    const std::string& entryName,
                                                     const Styleable* styleable,
                                                     ClassDefinition* outStyleableClassDef) {
     const std::string className = transform(entryName);
@@ -284,8 +283,8 @@ void JavaClassGenerator::addMembersToStyleableClass(const StringPiece16& package
                 continue;
             }
 
-            StringPiece16 attrCommentLine = entry.symbol->attribute->getComment();
-            if (attrCommentLine.contains(StringPiece16(u"@removed"))) {
+            StringPiece attrCommentLine = entry.symbol->attribute->getComment();
+            if (attrCommentLine.contains("@removed")) {
                 // Removed attributes are public but hidden from the documentation, so don't emit
                 // them as part of the class documentation.
                 continue;
@@ -354,12 +353,12 @@ void JavaClassGenerator::addMembersToStyleableClass(const StringPiece16& package
             continue;
         }
 
-        StringPiece16 comment = styleableAttr.attrRef->getComment();
+        StringPiece comment = styleableAttr.attrRef->getComment();
         if (styleableAttr.symbol->attribute && comment.empty()) {
             comment = styleableAttr.symbol->attribute->getComment();
         }
 
-        if (comment.contains(StringPiece16(u"@removed"))) {
+        if (comment.contains("@removed")) {
             // Removed attributes are public but hidden from the documentation, so don't emit them
             // as part of the class documentation.
             continue;
@@ -367,7 +366,7 @@ void JavaClassGenerator::addMembersToStyleableClass(const StringPiece16& package
 
         const ResourceName& attrName = styleableAttr.attrRef->name.value();
 
-        StringPiece16 packageName = attrName.package;
+        StringPiece packageName = attrName.package;
         if (packageName.empty()) {
             packageName = mContext->getCompilationPackage();
         }
@@ -403,7 +402,7 @@ void JavaClassGenerator::addMembersToStyleableClass(const StringPiece16& package
     }
 }
 
-bool JavaClassGenerator::addMembersToTypeClass(const StringPiece16& packageNameToGenerate,
+bool JavaClassGenerator::addMembersToTypeClass(const StringPiece& packageNameToGenerate,
                                                const ResourceTablePackage* package,
                                                const ResourceTableType* type,
                                                ClassDefinition* outTypeClassDef) {
@@ -418,8 +417,8 @@ bool JavaClassGenerator::addMembersToTypeClass(const StringPiece16& packageNameT
             id = ResourceId(package->id.value(), type->id.value(), entry->id.value());
         }
 
-        std::u16string unmangledPackage;
-        std::u16string unmangledName = entry->name;
+        std::string unmangledPackage;
+        std::string unmangledName = entry->name;
         if (NameMangler::unmangle(&unmangledName, &unmangledPackage)) {
             // The entry name was mangled, and we successfully unmangled it.
             // Check that we want to emit this symbol.
@@ -481,7 +480,7 @@ bool JavaClassGenerator::addMembersToTypeClass(const StringPiece16& packageNameT
     return true;
 }
 
-bool JavaClassGenerator::generate(const StringPiece16& packageNameToGenerate, std::ostream* out) {
+bool JavaClassGenerator::generate(const StringPiece& packageNameToGenerate, std::ostream* out) {
     return generate(packageNameToGenerate, packageNameToGenerate, out);
 }
 
@@ -494,8 +493,8 @@ static void appendJavaDocAnnotations(const std::vector<std::string>& annotations
     }
 }
 
-bool JavaClassGenerator::generate(const StringPiece16& packageNameToGenerate,
-                                  const StringPiece16& outPackageName, std::ostream* out) {
+bool JavaClassGenerator::generate(const StringPiece& packageNameToGenerate,
+                                  const StringPiece& outPackageName, std::ostream* out) {
 
     ClassDefinition rClass("R", ClassQualifier::None, true);
 
@@ -509,8 +508,7 @@ bool JavaClassGenerator::generate(const StringPiece16& packageNameToGenerate,
                     (mOptions.types == JavaClassGeneratorOptions::SymbolTypes::kPublic);
 
             std::unique_ptr<ClassDefinition> classDef = util::make_unique<ClassDefinition>(
-                    util::utf16ToUtf8(toString(type->type)), ClassQualifier::Static,
-                    forceCreationIfEmpty);
+                    toString(type->type), ClassQualifier::Static, forceCreationIfEmpty);
 
             bool result = addMembersToTypeClass(packageNameToGenerate, package.get(), type.get(),
                                                 classDef.get());
@@ -545,8 +543,7 @@ bool JavaClassGenerator::generate(const StringPiece16& packageNameToGenerate,
 
     appendJavaDocAnnotations(mOptions.javadocAnnotations, rClass.getCommentBuilder());
 
-    if (!ClassDefinition::writeJavaFile(&rClass, util::utf16ToUtf8(outPackageName),
-                                        mOptions.useFinal, out)) {
+    if (!ClassDefinition::writeJavaFile(&rClass, outPackageName, mOptions.useFinal, out)) {
         return false;
     }
 

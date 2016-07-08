@@ -22,8 +22,8 @@ namespace xml {
 
 TEST(XmlActionExecutorTest, BuildsAccessibleNestedPattern) {
     XmlActionExecutor executor;
-    XmlNodeAction& manifestAction = executor[u"manifest"];
-    XmlNodeAction& applicationAction = manifestAction[u"application"];
+    XmlNodeAction& manifestAction = executor["manifest"];
+    XmlNodeAction& applicationAction = manifestAction["application"];
 
     Element* manifestEl = nullptr;
     manifestAction.action([&](Element* manifest) -> bool {
@@ -42,15 +42,15 @@ TEST(XmlActionExecutorTest, BuildsAccessibleNestedPattern) {
     StdErrDiagnostics diag;
     ASSERT_TRUE(executor.execute(XmlActionExecutorPolicy::None, &diag, doc.get()));
     ASSERT_NE(nullptr, manifestEl);
-    EXPECT_EQ(std::u16string(u"manifest"), manifestEl->name);
+    EXPECT_EQ(std::string("manifest"), manifestEl->name);
 
     ASSERT_NE(nullptr, applicationEl);
-    EXPECT_EQ(std::u16string(u"application"), applicationEl->name);
+    EXPECT_EQ(std::string("application"), applicationEl->name);
 }
 
 TEST(XmlActionExecutorTest, FailsWhenUndefinedHierarchyExists) {
     XmlActionExecutor executor;
-    executor[u"manifest"][u"application"];
+    executor["manifest"]["application"];
 
     std::unique_ptr<XmlResource> doc = test::buildXmlDom(
             "<manifest><application /><activity /></manifest>");

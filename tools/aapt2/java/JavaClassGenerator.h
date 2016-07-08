@@ -66,22 +66,22 @@ public:
      * We need to generate these symbols in a separate file.
      * Returns true on success.
      */
-    bool generate(const StringPiece16& packageNameToGenerate, std::ostream* out);
+    bool generate(const StringPiece& packageNameToGenerate, std::ostream* out);
 
-    bool generate(const StringPiece16& packageNameToGenerate,
-                  const StringPiece16& outputPackageName,
+    bool generate(const StringPiece& packageNameToGenerate,
+                  const StringPiece& outputPackageName,
                   std::ostream* out);
 
     const std::string& getError() const;
 
 private:
-    bool addMembersToTypeClass(const StringPiece16& packageNameToGenerate,
+    bool addMembersToTypeClass(const StringPiece& packageNameToGenerate,
                                const ResourceTablePackage* package,
                                const ResourceTableType* type,
                                ClassDefinition* outTypeClassDef);
 
-    void addMembersToStyleableClass(const StringPiece16& packageNameToGenerate,
-                                    const std::u16string& entryName,
+    void addMembersToStyleableClass(const StringPiece& packageNameToGenerate,
+                                    const std::string& entryName,
                                     const Styleable* styleable,
                                     ClassDefinition* outStyleableClassDef);
 

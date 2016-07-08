@@ -49,7 +49,7 @@ enum {
 
 size_t findAttributeSdkLevel(ResourceId id);
 size_t findAttributeSdkLevel(const ResourceName& name);
-std::pair<StringPiece16, int> getDevelopmentSdkCodeNameAndVersion();
+std::pair<StringPiece, int> getDevelopmentSdkCodeNameAndVersion();
 
 } // namespace aapt
 

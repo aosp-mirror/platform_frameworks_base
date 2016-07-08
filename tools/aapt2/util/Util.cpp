@@ -54,23 +54,18 @@ std::vector<std::string> splitAndLowercase(const StringPiece& str, char sep) {
     return splitAndTransform(str, sep, ::tolower);
 }
 
-StringPiece16 trimWhitespace(const StringPiece16& str) {
-    if (str.size() == 0 || str.data() == nullptr) {
-        return str;
+bool stringStartsWith(const StringPiece& str, const StringPiece& prefix) {
+    if (str.size() < prefix.size()) {
+        return false;
     }
+    return str.substr(0, prefix.size()) == prefix;
+}
 
-    const char16_t* start = str.data();
-    const char16_t* end = str.data() + str.length();
-
-    while (start != end && util::isspace16(*start)) {
-        start++;
+bool stringEndsWith(const StringPiece& str, const StringPiece& suffix) {
+    if (str.size() < suffix.size()) {
+        return false;
     }
-
-    while (end != start && util::isspace16(*(end - 1))) {
-        end--;
-    }
-
-    return StringPiece16(start, end - start);
+    return str.substr(str.size() - suffix.size(), suffix.size()) == suffix;
 }
 
 StringPiece trimWhitespace(const StringPiece& str) {
@@ -92,11 +87,11 @@ StringPiece trimWhitespace(const StringPiece& str) {
     return StringPiece(start, end - start);
 }
 
-StringPiece16::const_iterator findNonAlphaNumericAndNotInSet(const StringPiece16& str,
-        const StringPiece16& allowedChars) {
+StringPiece::const_iterator findNonAlphaNumericAndNotInSet(const StringPiece& str,
+                                                           const StringPiece& allowedChars) {
     const auto endIter = str.end();
     for (auto iter = str.begin(); iter != endIter; ++iter) {
-        char16_t c = *iter;
+        char c = *iter;
         if ((c >= u'a' && c <= u'z') ||
                 (c >= u'A' && c <= u'Z') ||
                 (c >= u'0' && c <= u'9')) {
@@ -104,7 +99,7 @@ StringPiece16::const_iterator findNonAlphaNumericAndNotInSet(const StringPiece16
         }
 
         bool match = false;
-        for (char16_t i : allowedChars) {
+        for (char i : allowedChars) {
             if (c == i) {
                 match = true;
                 break;
@@ -118,51 +113,51 @@ StringPiece16::const_iterator findNonAlphaNumericAndNotInSet(const StringPiece16
     return endIter;
 }
 
-bool isJavaClassName(const StringPiece16& str) {
+bool isJavaClassName(const StringPiece& str) {
     size_t pieces = 0;
-    for (const StringPiece16& piece : tokenize(str, u'.')) {
+    for (const StringPiece& piece : tokenize(str, '.')) {
         pieces++;
         if (piece.empty()) {
             return false;
         }
 
         // Can't have starting or trailing $ character.
-        if (piece.data()[0] == u'$' || piece.data()[piece.size() - 1] == u'$') {
+        if (piece.data()[0] == '$' || piece.data()[piece.size() - 1] == '$') {
             return false;
         }
 
-        if (findNonAlphaNumericAndNotInSet(piece, u"$_") != piece.end()) {
+        if (findNonAlphaNumericAndNotInSet(piece, "$_") != piece.end()) {
             return false;
         }
     }
     return pieces >= 2;
 }
 
-bool isJavaPackageName(const StringPiece16& str) {
+bool isJavaPackageName(const StringPiece& str) {
     if (str.empty()) {
         return false;
     }
 
     size_t pieces = 0;
-    for (const StringPiece16& piece : tokenize(str, u'.')) {
+    for (const StringPiece& piece : tokenize(str, '.')) {
         pieces++;
         if (piece.empty()) {
             return false;
         }
 
-        if (piece.data()[0] == u'_' || piece.data()[piece.size() - 1] == u'_') {
+        if (piece.data()[0] == '_' || piece.data()[piece.size() - 1] == '_') {
             return false;
         }
 
-        if (findNonAlphaNumericAndNotInSet(piece, u"_") != piece.end()) {
+        if (findNonAlphaNumericAndNotInSet(piece, "_") != piece.end()) {
             return false;
         }
     }
     return pieces >= 1;
 }
 
-Maybe<std::u16string> getFullyQualifiedClassName(const StringPiece16& package,
-                                                 const StringPiece16& className) {
+Maybe<std::string> getFullyQualifiedClassName(const StringPiece& package,
+                                              const StringPiece& className) {
     if (className.empty()) {
         return {};
     }
@@ -175,9 +170,9 @@ Maybe<std::u16string> getFullyQualifiedClassName(const StringPiece16& package,
         return {};
     }
 
-    std::u16string result(package.data(), package.size());
-    if (className.data()[0] != u'.') {
-        result += u'.';
+    std::string result(package.data(), package.size());
+    if (className.data()[0] != '.') {
+        result += '.';
     }
 
     result.append(className.data(), className.size());
@@ -187,23 +182,23 @@ Maybe<std::u16string> getFullyQualifiedClassName(const StringPiece16& package,
     return result;
 }
 
-static size_t consumeDigits(const char16_t* start, const char16_t* end) {
-    const char16_t* c = start;
-    for (; c != end && *c >= u'0' && *c <= u'9'; c++) {}
+static size_t consumeDigits(const char* start, const char* end) {
+    const char* c = start;
+    for (; c != end && *c >= '0' && *c <= '9'; c++) {}
     return static_cast<size_t>(c - start);
 }
 
-bool verifyJavaStringFormat(const StringPiece16& str) {
-    const char16_t* c = str.begin();
-    const char16_t* const end = str.end();
+bool verifyJavaStringFormat(const StringPiece& str) {
+    const char* c = str.begin();
+    const char* const end = str.end();
 
     size_t argCount = 0;
     bool nonpositional = false;
     while (c != end) {
-        if (*c == u'%' && c + 1 < end) {
+        if (*c == '%' && c + 1 < end) {
             c++;
 
-            if (*c == u'%') {
+            if (*c == '%') {
                 c++;
                 continue;
             }
@@ -213,11 +208,11 @@ bool verifyJavaStringFormat(const StringPiece16& str) {
             size_t numDigits = consumeDigits(c, end);
             if (numDigits > 0) {
                 c += numDigits;
-                if (c != end && *c != u'$') {
+                if (c != end && *c != '$') {
                     // The digits were a size, but not a positional argument.
                     nonpositional = true;
                 }
-            } else if (*c == u'<') {
+            } else if (*c == '<') {
                 // Reusing last argument, bad idea since positions can be moved around
                 // during translation.
                 nonpositional = true;
@@ -225,7 +220,7 @@ bool verifyJavaStringFormat(const StringPiece16& str) {
                 c++;
 
                 // Optionally we can have a $ after
-                if (c != end && *c == u'$') {
+                if (c != end && *c == '$') {
                     c++;
                 }
             } else {
@@ -233,13 +228,13 @@ bool verifyJavaStringFormat(const StringPiece16& str) {
             }
 
             // Ignore size, width, flags, etc.
-            while (c != end && (*c == u'-' ||
-                    *c == u'#' ||
-                    *c == u'+' ||
-                    *c == u' ' ||
-                    *c == u',' ||
-                    *c == u'(' ||
-                    (*c >= u'0' && *c <= '9'))) {
+            while (c != end && (*c == '-' ||
+                    *c == '#' ||
+                    *c == '+' ||
+                    *c == ' ' ||
+                    *c == ',' ||
+                    *c == '(' ||
+                    (*c >= '0' && *c <= '9'))) {
                 c++;
             }
 
@@ -286,11 +281,11 @@ bool verifyJavaStringFormat(const StringPiece16& str) {
     return true;
 }
 
-static Maybe<char16_t> parseUnicodeCodepoint(const char16_t** start, const char16_t* end) {
-    char16_t code = 0;
+static Maybe<std::string> parseUnicodeCodepoint(const char** start, const char* end) {
+    char32_t code = 0;
     for (size_t i = 0; i < 4 && *start != end; i++, (*start)++) {
-        char16_t c = **start;
-        int a;
+        char c = **start;
+        char32_t a;
         if (c >= '0' && c <= '9') {
             a = c - '0';
         } else if (c >= 'a' && c <= 'f') {
@@ -298,51 +293,60 @@ static Maybe<char16_t> parseUnicodeCodepoint(const char16_t** start, const char1
         } else if (c >= 'A' && c <= 'F') {
             a = c - 'A' + 10;
         } else {
-            return make_nothing<char16_t>();
+            return {};
         }
         code = (code << 4) | a;
     }
-    return make_value(code);
+
+    ssize_t len = utf32_to_utf8_length(&code, 1);
+    if (len < 0) {
+        return {};
+    }
+
+    std::string resultUtf8;
+    resultUtf8.resize(len);
+    utf32_to_utf8(&code, 1, &*resultUtf8.begin(), len + 1);
+    return resultUtf8;
 }
 
-StringBuilder& StringBuilder::append(const StringPiece16& str) {
+StringBuilder& StringBuilder::append(const StringPiece& str) {
     if (!mError.empty()) {
         return *this;
     }
 
-    const char16_t* const end = str.end();
-    const char16_t* start = str.begin();
-    const char16_t* current = start;
+    const char* const end = str.end();
+    const char* start = str.begin();
+    const char* current = start;
     while (current != end) {
         if (mLastCharWasEscape) {
             switch (*current) {
-                case u't':
-                    mStr += u'\t';
+                case 't':
+                    mStr += '\t';
                     break;
-                case u'n':
-                    mStr += u'\n';
+                case 'n':
+                    mStr += '\n';
                     break;
-                case u'#':
-                    mStr += u'#';
+                case '#':
+                    mStr += '#';
                     break;
-                case u'@':
-                    mStr += u'@';
+                case '@':
+                    mStr += '@';
                     break;
-                case u'?':
-                    mStr += u'?';
+                case '?':
+                    mStr += '?';
                     break;
-                case u'"':
-                    mStr += u'"';
+                case '"':
+                    mStr += '"';
                     break;
-                case u'\'':
-                    mStr += u'\'';
+                case '\'':
+                    mStr += '\'';
                     break;
-                case u'\\':
-                    mStr += u'\\';
+                case '\\':
+                    mStr += '\\';
                     break;
-                case u'u': {
+                case 'u': {
                     current++;
-                    Maybe<char16_t> c = parseUnicodeCodepoint(&current, end);
+                    Maybe<std::string> c = parseUnicodeCodepoint(&current, end);
                     if (!c) {
                         mError = "invalid unicode escape sequence";
                         return *this;
@@ -358,7 +362,7 @@ StringBuilder& StringBuilder::append(const StringPiece16& str) {
             }
             mLastCharWasEscape = false;
             start = current + 1;
-        } else if (*current == u'"') {
+        } else if (*current == '"') {
             if (!mQuote && mTrailingSpace) {
                 // We found an opening quote, and we have
                 // trailing space, so we should append that
@@ -367,7 +371,7 @@ StringBuilder& StringBuilder::append(const StringPiece16& str) {
                     // We had trailing whitespace, so
                     // replace with a single space.
                     if (!mStr.empty()) {
-                        mStr += u' ';
+                        mStr += ' ';
                     }
                     mTrailingSpace = false;
                 }
@@ -375,17 +379,17 @@ StringBuilder& StringBuilder::append(const StringPiece16& str) {
             mQuote = !mQuote;
             mStr.append(start, current - start);
             start = current + 1;
-        } else if (*current == u'\'' && !mQuote) {
+        } else if (*current == '\'' && !mQuote) {
             // This should be escaped.
             mError = "unescaped apostrophe";
             return *this;
-        } else if (*current == u'\\') {
+        } else if (*current == '\\') {
             // This is an escape sequence, convert to the real value.
             if (!mQuote && mTrailingSpace) {
                 // We had trailing whitespace, so
                 // replace with a single space.
                 if (!mStr.empty()) {
-                    mStr += u' ';
+                    mStr += ' ';
                 }
                 mTrailingSpace = false;
             }
@@ -394,7 +398,7 @@ StringBuilder& StringBuilder::append(const StringPiece16& str) {
             mLastCharWasEscape = true;
         } else if (!mQuote) {
             // This is not quoted text, so look for whitespace.
-            if (isspace16(*current)) {
+            if (isspace(*current)) {
                 // We found whitespace, see if we have seen some
                 // before.
                 if (!mTrailingSpace) {
@@ -410,7 +414,7 @@ StringBuilder& StringBuilder::append(const StringPiece16& str) {
                 // We saw trailing space before, so replace all
                 // that trailing space with one space.
                 if (!mStr.empty()) {
-                    mStr += u' ';
+                    mStr += ' ';
                 }
                 mTrailingSpace = false;
             }
@@ -441,10 +445,8 @@ std::string utf16ToUtf8(const StringPiece16& utf16) {
     }
 
     std::string utf8;
-    // Make room for '\0' explicitly.
-    utf8.resize(utf8Length + 1);
-    utf16_to_utf8(utf16.data(), utf16.length(), &*utf8.begin(), utf8Length + 1);
     utf8.resize(utf8Length);
+    utf16_to_utf8(utf16.data(), utf16.length(), &*utf8.begin(), utf8Length + 1);
     return utf8;
 }
 
@@ -467,15 +469,58 @@ std::unique_ptr<uint8_t[]> copy(const BigBuffer& buffer) {
     return data;
 }
 
-bool extractResFilePathParts(const StringPiece16& path, StringPiece16* outPrefix,
-                             StringPiece16* outEntry, StringPiece16* outSuffix) {
-    if (!stringStartsWith<char16_t>(path, u"res/")) {
+typename Tokenizer::iterator& Tokenizer::iterator::operator++() {
+    const char* start = mToken.end();
+    const char* end = mStr.end();
+    if (start == end) {
+        mEnd = true;
+        mToken.assign(mToken.end(), 0);
+        return *this;
+    }
+
+    start += 1;
+    const char* current = start;
+    while (current != end) {
+        if (*current == mSeparator) {
+            mToken.assign(start, current - start);
+            return *this;
+        }
+        ++current;
+    }
+    mToken.assign(start, end - start);
+    return *this;
+}
+
+bool Tokenizer::iterator::operator==(const iterator& rhs) const {
+    // We check equality here a bit differently.
+    // We need to know that the addresses are the same.
+    return mToken.begin() == rhs.mToken.begin() && mToken.end() == rhs.mToken.end() &&
+            mEnd == rhs.mEnd;
+}
+
+bool Tokenizer::iterator::operator!=(const iterator& rhs) const {
+    return !(*this == rhs);
+}
+
+Tokenizer::iterator::iterator(StringPiece s, char sep, StringPiece tok, bool end) :
+        mStr(s), mSeparator(sep), mToken(tok), mEnd(end) {
+}
+
+Tokenizer::Tokenizer(StringPiece str, char sep) :
+        mBegin(++iterator(str, sep, StringPiece(str.begin() - 1, 0), false)),
+        mEnd(str, sep, StringPiece(str.end(), 0), true) {
+}
+
+bool extractResFilePathParts(const StringPiece& path, StringPiece* outPrefix,
+                             StringPiece* outEntry, StringPiece* outSuffix) {
+    const StringPiece resPrefix("res/");
+    if (!stringStartsWith(path, resPrefix)) {
         return false;
     }
 
-    StringPiece16::const_iterator lastOccurence = path.end();
-    for (auto iter = path.begin() + StringPiece16(u"res/").size(); iter != path.end(); ++iter) {
-        if (*iter == u'/') {
+    StringPiece::const_iterator lastOccurence = path.end();
+    for (auto iter = path.begin() + resPrefix.size(); iter != path.end(); ++iter) {
+        if (*iter == '/') {
             lastOccurence = iter;
         }
     }
@@ -484,11 +529,29 @@ bool extractResFilePathParts(const StringPiece16& path, StringPiece16* outPrefix
         return false;
     }
 
-    auto iter = std::find(lastOccurence, path.end(), u'.');
-    *outSuffix = StringPiece16(iter, path.end() - iter);
-    *outEntry = StringPiece16(lastOccurence + 1, iter - lastOccurence - 1);
-    *outPrefix = StringPiece16(path.begin(), lastOccurence - path.begin() + 1);
+    auto iter = std::find(lastOccurence, path.end(), '.');
+    *outSuffix = StringPiece(iter, path.end() - iter);
+    *outEntry = StringPiece(lastOccurence + 1, iter - lastOccurence - 1);
+    *outPrefix = StringPiece(path.begin(), lastOccurence - path.begin() + 1);
     return true;
+}
+
+StringPiece16 getString16(const android::ResStringPool& pool, size_t idx) {
+    size_t len;
+    const char16_t* str = pool.stringAt(idx, &len);
+    if (str != nullptr) {
+        return StringPiece16(str, len);
+    }
+    return StringPiece16();
+}
+
+std::string getString(const android::ResStringPool& pool, size_t idx) {
+    size_t len;
+    const char* str = pool.string8At(idx, &len);
+    if (str != nullptr) {
+        return std::string(str, len);
+    }
+    return utf16ToUtf8(getString16(pool, idx));
 }
 
 } // namespace util
