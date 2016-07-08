@@ -12036,6 +12036,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             case ActivityManager.BUGREPORT_OPTION_REMOTE:
                 service = "bugreportremote";
                 break;
+            case ActivityManager.BUGREPORT_OPTION_WEAR:
+                service = "bugreportwear";
+                break;
         }
         if (service == null) {
             throw new IllegalArgumentException("Provided bugreport type is not correct, value: "
