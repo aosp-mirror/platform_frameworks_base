@@ -109,6 +109,10 @@ public class TetherInterfaceStateMachine extends StateMachine {
         setInitialState(mInitialState);
     }
 
+    public int interfaceType() {
+        return mInterfaceType;
+    }
+
     // configured when we start tethering and unconfig'd on error or conclusion
     private boolean configureIfaceIp(boolean enabled) {
         if (VDBG) Log.d(TAG, "configureIfaceIp(" + enabled + ")");
