@@ -1282,8 +1282,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     }
 
     @Override
-    public WallpaperInfo getWallpaperInfo() {
-        int userId = UserHandle.getCallingUserId();
+    public WallpaperInfo getWallpaperInfo(int userId) {
+        userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
+                Binder.getCallingUid(), userId, false, true, "getWallpaperIdForUser", null);
         synchronized (mLock) {
             WallpaperData wallpaper = mWallpaperMap.get(userId);
             if (wallpaper != null && wallpaper.connection != null) {
