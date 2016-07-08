@@ -103,6 +103,7 @@ public abstract class BaseActivity extends Activity
 
     abstract void onTaskFinished(Uri... uris);
     abstract void refreshDirectory(int anim);
+    abstract void openRootSettings(RootInfo root);
     /** Allows sub-classes to include information in a newly created State instance. */
     abstract void includeState(State initialState);
 
@@ -287,15 +288,6 @@ public abstract class BaseActivity extends Activity
 
             case R.id.menu_file_size:
                 setDisplayFileSize(!LocalPreferences.getDisplayFileSize(this));
-                return true;
-
-            case R.id.menu_settings:
-                Metrics.logUserAction(this, Metrics.USER_ACTION_SETTINGS);
-
-                final RootInfo root = getCurrentRoot();
-                final Intent intent = new Intent(DocumentsContract.ACTION_DOCUMENT_ROOT_SETTINGS);
-                intent.setDataAndType(root.getUri(), DocumentsContract.Root.MIME_TYPE_ITEM);
-                startActivity(intent);
                 return true;
 
             default:

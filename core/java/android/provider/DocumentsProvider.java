@@ -730,6 +730,23 @@ public abstract class DocumentsProvider extends ContentProvider {
             throws FileNotFoundException {
 
         final Context context = getContext();
+        final Bundle out = new Bundle();
+
+        if (METHOD_EJECT_ROOT.equals(method)) {
+            // Given that certain system apps can hold MOUNT_UNMOUNT permission, but only apps
+            // signed with platform signature can hold MANAGE_DOCUMENTS, we are going to check for
+            // MANAGE_DOCUMENTS here instead
+            getContext().enforceCallingPermission(
+                    android.Manifest.permission.MANAGE_DOCUMENTS, null);
+            final Uri rootUri = extras.getParcelable(DocumentsContract.EXTRA_URI);
+            final String rootId = DocumentsContract.getRootId(rootUri);
+            final boolean ejected = ejectRoot(rootId);
+
+            out.putBoolean(DocumentsContract.EXTRA_RESULT, ejected);
+
+            return out;
+        }
+
         final Uri documentUri = extras.getParcelable(DocumentsContract.EXTRA_URI);
         final String authority = documentUri.getAuthority();
         final String documentId = DocumentsContract.getDocumentId(documentUri);
@@ -738,8 +755,6 @@ public abstract class DocumentsProvider extends ContentProvider {
             throw new SecurityException(
                     "Requested authority " + authority + " doesn't match provider " + mAuthority);
         }
-
-        final Bundle out = new Bundle();
 
         // If the URI is a tree URI performs some validation.
         enforceTree(documentUri);
@@ -858,17 +873,6 @@ public abstract class DocumentsProvider extends ContentProvider {
 
             // It's responsibility of the provider to revoke any grants, as the document may be
             // still attached to another parents.
-        } else if (METHOD_EJECT_ROOT.equals(method)) {
-            // Given that certain system apps can hold MOUNT_UNMOUNT permission, but only apps
-            // signed with platform signature can hold MANAGE_DOCUMENTS, we are going to check for
-            // MANAGE_DOCUMENTS here instead
-            getContext().enforceCallingPermission(
-                    android.Manifest.permission.MANAGE_DOCUMENTS, null);
-            final Uri rootUri = extras.getParcelable(DocumentsContract.EXTRA_URI);
-            final String rootId = DocumentsContract.getRootId(rootUri);
-            final boolean ejected = ejectRoot(rootId);
-
-            out.putBoolean(DocumentsContract.EXTRA_RESULT, ejected);
         } else {
             throw new UnsupportedOperationException("Method not supported " + method);
         }

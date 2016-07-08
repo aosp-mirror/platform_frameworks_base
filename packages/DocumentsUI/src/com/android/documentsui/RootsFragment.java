@@ -33,16 +33,26 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Looper;
+import android.provider.DocumentsContract.Root;
+import android.provider.DocumentsContract;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.text.format.Formatter;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.View.OnDragListener;
+import android.view.View.OnGenericMotionListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
@@ -60,6 +70,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 
 /**
  * Display list of known storage backend roots.
@@ -96,6 +108,22 @@ public class RootsFragment extends Fragment implements ItemDragListener.DragHost
         final View view = inflater.inflate(R.layout.fragment_roots, container, false);
         mList = (ListView) view.findViewById(R.id.roots_list);
         mList.setOnItemClickListener(mItemListener);
+        // For right-clicks, we want to trap the click and not pass it to OnClickListener
+        // For all other clicks, we will pass the events down
+        mList.setOnGenericMotionListener(
+                new OnGenericMotionListener() {
+            @Override
+            public boolean onGenericMotion(View v, MotionEvent event) {
+                if (Events.isMouseEvent(event)
+                        && event.getButtonState() == MotionEvent.BUTTON_SECONDARY) {
+                    registerForContextMenu(v);
+                    v.showContextMenu(event.getX(), event.getY());
+                    unregisterForContextMenu(v);
+                    return true;
+                }
+                return false;
+            }
+        });
         mList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         return view;
     }
@@ -190,6 +218,10 @@ public class RootsFragment extends Fragment implements ItemDragListener.DragHost
         startActivity(intent);
     }
 
+    private BaseActivity getBaseActivity() {
+        return (BaseActivity) getActivity();
+    }
+
     @Override
     public void runOnUiThread(Runnable runnable) {
         getActivity().runOnUiThread(runnable);
@@ -216,6 +248,69 @@ public class RootsFragment extends Fragment implements ItemDragListener.DragHost
         // SpacerView doesn't have DragListener so this view is guaranteed to be a RootItemView.
         RootItemView itemView = (RootItemView) v;
         itemView.setHighlight(highlight);
+    }
+
+    @Override
+    public void onCreateContextMenu(
+            ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        AdapterContextMenuInfo adapterMenuInfo = (AdapterContextMenuInfo) menuInfo;
+        final Item item = mAdapter.getItem(adapterMenuInfo.position);
+        if (item instanceof RootItem) {
+            RootItem rootItem = (RootItem) item;
+            MenuInflater inflater = getActivity().getMenuInflater();
+            inflater.inflate(R.menu.root_context_menu, menu);
+            (getBaseActivity()).getMenuManager().updateRootContextMenu(menu, rootItem.root);
+        }
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterContextMenuInfo adapterMenuInfo = (AdapterContextMenuInfo) item.getMenuInfo();
+        final RootItem rootItem = (RootItem) mAdapter.getItem(adapterMenuInfo.position);
+        switch(item.getItemId()) {
+            case R.id.menu_eject_root:
+                final View unmountIcon = adapterMenuInfo.targetView.findViewById(R.id.unmount_icon);
+                ejectClicked(unmountIcon, rootItem.root);
+                return true;
+            case R.id.menu_settings:
+                final RootInfo root = rootItem.root;
+                getBaseActivity().openRootSettings(root);
+                return true;
+            default:
+                if (DEBUG) Log.d(TAG, "Unhandled menu item selected: " + item);
+                return false;
+        }
+    }
+
+    private static void ejectClicked(View ejectIcon, RootInfo root) {
+        assert(ejectIcon != null);
+        assert(ejectIcon.getContext() instanceof BaseActivity);
+        ejectIcon.setEnabled(false);
+        root.ejecting = true;
+        ejectRoot(
+                ejectIcon,
+                root.authority,
+                root.rootId,
+                new Consumer<Boolean>() {
+                    @Override
+                    public void accept(Boolean ejected) {
+                        ejectIcon.setEnabled(!ejected);
+                        root.ejecting = false;
+                    }
+                });
+    }
+
+    static void ejectRoot(
+            View ejectIcon, String authority, String rootId, Consumer<Boolean> listener) {
+        BooleanSupplier predicate = () -> {
+            return !(ejectIcon.getVisibility() == View.VISIBLE);
+        };
+        new EjectRootTask(predicate::getAsBoolean,
+                authority,
+                rootId,
+                ejectIcon.getContext(),
+                listener).executeOnExecutor(ProviderExecutor.forAuthority(authority));
     }
 
     private OnItemClickListener mItemListener = new OnItemClickListener() {
@@ -290,11 +385,25 @@ public class RootsFragment extends Fragment implements ItemDragListener.DragHost
             final ImageView icon = (ImageView) convertView.findViewById(android.R.id.icon);
             final TextView title = (TextView) convertView.findViewById(android.R.id.title);
             final TextView summary = (TextView) convertView.findViewById(android.R.id.summary);
+            final ImageView unmountIcon = (ImageView) convertView.findViewById(R.id.unmount_icon);
 
             final Context context = convertView.getContext();
             icon.setImageDrawable(root.loadDrawerIcon(context));
             title.setText(root.title);
 
+            if (root.supportsEject()) {
+                unmountIcon.setVisibility(View.VISIBLE);
+                unmountIcon.setImageDrawable(root.loadEjectIcon(context));
+                unmountIcon.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View unmountIcon) {
+                        RootsFragment.ejectClicked(unmountIcon, root);
+                    }
+                });
+            } else {
+                unmountIcon.setVisibility(View.GONE);
+                unmountIcon.setOnClickListener(null);
+            }
             // Show available space if no summary
             String summaryText = root.summary;
             if (TextUtils.isEmpty(summaryText) && root.availableBytes >= 0) {

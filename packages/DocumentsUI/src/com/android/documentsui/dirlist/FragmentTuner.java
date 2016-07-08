@@ -16,7 +16,6 @@
 
 package com.android.documentsui.dirlist;
 
-import static com.android.documentsui.State.ACTION_BROWSE;
 import static com.android.documentsui.State.ACTION_CREATE;
 import static com.android.documentsui.State.ACTION_GET_CONTENT;
 import static com.android.documentsui.State.ACTION_OPEN;
@@ -25,13 +24,9 @@ import static com.android.documentsui.State.ACTION_PICK_COPY_DESTINATION;
 
 import android.content.Context;
 import android.provider.DocumentsContract.Document;
-import android.view.Menu;
-import android.view.MenuItem;
 
 import com.android.documentsui.BaseActivity;
-import com.android.documentsui.Menus;
 import com.android.documentsui.MimePredicate;
-import com.android.documentsui.R;
 import com.android.documentsui.State;
 import com.android.documentsui.dirlist.DirectoryFragment.ResultType;
 

@@ -94,6 +94,9 @@ public class RootInfo implements Durable, Parcelable, Comparable<RootInfo> {
     public String[] derivedMimeTypes;
     public int derivedIcon;
     public @RootType int derivedType;
+    // Currently, we are not persisting this and we should be asking Provider whether a Root
+    // is in the process of eject. Provider does not have this available yet.
+    public transient boolean ejecting;
 
     public RootInfo() {
         reset();
@@ -110,6 +113,7 @@ public class RootInfo implements Durable, Parcelable, Comparable<RootInfo> {
         documentId = null;
         availableBytes = -1;
         mimeTypes = null;
+        ejecting = false;
 
         derivedMimeTypes = null;
         derivedIcon = 0;
@@ -298,6 +302,10 @@ public class RootInfo implements Durable, Parcelable, Comparable<RootInfo> {
         return (flags & Root.FLAG_SUPPORTS_SEARCH) != 0;
     }
 
+    public boolean supportsEject() {
+        return (flags & Root.FLAG_SUPPORTS_EJECT) != 0;
+    }
+
     public boolean isAdvanced() {
         return (flags & Root.FLAG_ADVANCED) != 0;
     }
@@ -332,6 +340,10 @@ public class RootInfo implements Durable, Parcelable, Comparable<RootInfo> {
         } else {
             return IconUtils.loadPackageIcon(context, authority, icon);
         }
+    }
+
+    public Drawable loadEjectIcon(Context context) {
+        return IconUtils.applyTintColor(context, R.drawable.ic_eject, R.color.item_eject_icon);
     }
 
     @Override

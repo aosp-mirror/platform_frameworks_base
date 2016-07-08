@@ -17,8 +17,11 @@
 package com.android.documentsui;
 
 import android.annotation.Nullable;
+import android.provider.DocumentsContract.Root;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import com.android.documentsui.model.RootInfo;
 
 public abstract class MenuManager {
 
@@ -94,6 +97,14 @@ public abstract class MenuManager {
         delete.setVisible(true);
     }
 
+    public void updateRootContextMenu(Menu menu, RootInfo root) {
+        MenuItem settings = menu.findItem(R.id.menu_settings);
+        MenuItem eject = menu.findItem(R.id.menu_eject_root);
+
+        updateSettings(settings, root);
+        updateEject(eject, root);
+    }
+
     void updateModePicker(MenuItem grid, MenuItem list, DirectoryDetails directoryDetails) {
         grid.setVisible(mState.derivedMode != State.MODE_GRID);
         list.setVisible(mState.derivedMode != State.MODE_LIST);
@@ -120,6 +131,14 @@ public abstract class MenuManager {
 
     void updateSettings(MenuItem settings, DirectoryDetails directoryDetails) {
         settings.setVisible(false);
+    }
+
+    void updateSettings(MenuItem settings, RootInfo root) {
+        settings.setVisible(false);
+    }
+
+    void updateEject(MenuItem eject, RootInfo root) {
+        eject.setVisible(false);
     }
 
     void updateNewWindow(MenuItem newWindow, DirectoryDetails directoryDetails) {

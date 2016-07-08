@@ -16,16 +16,11 @@
 
 package com.android.documentsui;
 
-import static com.android.documentsui.State.ACTION_CREATE;
-import static com.android.documentsui.State.ACTION_GET_CONTENT;
-import static com.android.documentsui.State.ACTION_OPEN;
-import static com.android.documentsui.State.ACTION_OPEN_TREE;
-import static com.android.documentsui.State.ACTION_PICK_COPY_DESTINATION;
-
+import android.provider.DocumentsContract.Root;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.android.documentsui.MenuManager.DirectoryDetails;
+import com.android.documentsui.model.RootInfo;
 
 final class FilesMenuManager extends MenuManager {
 
@@ -39,6 +34,18 @@ final class FilesMenuManager extends MenuManager {
 
         // It hides icon if searching in progress
         mSearchManager.updateMenu();
+    }
+
+    @Override
+    void updateSettings(MenuItem settings, RootInfo root) {
+        settings.setVisible(true);
+        settings.setEnabled(root.hasSettings());
+    }
+
+    @Override
+    void updateEject(MenuItem eject, RootInfo root) {
+        eject.setVisible(true);
+        eject.setEnabled(((root.flags & Root.FLAG_SUPPORTS_EJECT) > 0) && !root.ejecting);
     }
 
     @Override

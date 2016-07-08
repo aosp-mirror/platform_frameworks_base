@@ -230,10 +230,22 @@ public class FilesActivity extends BaseActivity {
                     dir.pasteFromClipboard();
                 }
                 break;
+            case R.id.menu_settings:
+                final RootInfo root = getCurrentRoot();
+                openRootSettings(root);
+                break;
             default:
                 return super.onOptionsItemSelected(item);
         }
         return true;
+    }
+
+    @Override
+    void openRootSettings(RootInfo root) {
+        Metrics.logUserAction(this, Metrics.USER_ACTION_SETTINGS);
+        final Intent intent = new Intent(DocumentsContract.ACTION_DOCUMENT_ROOT_SETTINGS);
+        intent.setDataAndType(root.getUri(), DocumentsContract.Root.MIME_TYPE_ITEM);
+        startActivity(intent);
     }
 
     private void createNewWindow() {

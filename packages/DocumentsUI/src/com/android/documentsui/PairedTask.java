@@ -20,58 +20,20 @@ import android.app.Activity;
 import android.os.AsyncTask;
 
 /**
- * An {@link AsyncTask} that guards work with checks that a paired {@link Activity}
+ * An {@link CheckedTask} that guards work with checks that a paired {@link Activity}
  * is still alive. Instances of this class make no progress.
- *
- * <p>Use this type of task for greater safety when executing tasks that might complete
- * after an Activity is destroyed.
- *
- * <p>Also useful as tasks can be static, limiting scope, but still have access to
- * the owning class (by way the A template and the mActivity field).
  *
  * @template Owner Activity type.
  * @template Input input type
  * @template Output output type
  */
 abstract class PairedTask<Owner extends Activity, Input, Output>
-        extends AsyncTask<Input, Void, Output> {
+        extends CheckedTask<Input, Output> {
 
     protected final Owner mOwner;
 
     public PairedTask(Owner owner) {
+        super(owner::isDestroyed);
         mOwner = owner;
-    }
-
-    /** Called prior to run being executed. Analogous to {@link AsyncTask#onPreExecute} */
-    void prepare() {}
-
-    /** Analogous to {@link AsyncTask#doInBackground} */
-    abstract Output run(Input... input);
-
-    /** Analogous to {@link AsyncTask#onPostExecute} */
-    abstract void finish(Output output);
-
-    @Override
-    final protected void onPreExecute() {
-        if (mOwner.isDestroyed()) {
-            return;
-        }
-        prepare();
-    }
-
-    @Override
-    final protected Output doInBackground(Input... input) {
-        if (mOwner.isDestroyed()) {
-            return null;
-        }
-        return run(input);
-    }
-
-    @Override
-    final protected void onPostExecute(Output result) {
-        if (mOwner.isDestroyed()) {
-            return;
-        }
-        finish(result);
     }
 }
