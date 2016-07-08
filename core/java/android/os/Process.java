@@ -971,6 +971,9 @@ public class Process {
      * priority.
      * If the thread is a thread group leader, that is it's gettid() == getpid(),
      * then the other threads in the same thread group are _not_ affected.
+     *
+     * Does not set cpuset for some historical reason, just calls
+     * libcutils::set_sched_policy().
      */
     public static final native void setThreadGroup(int tid, int group)
             throws IllegalArgumentException, SecurityException;
@@ -992,6 +995,8 @@ public class Process {
      * priority threads alone.  group == THREAD_GROUP_BG_NONINTERACTIVE moves all
      * threads, regardless of priority, to the background scheduling group.
      * group == THREAD_GROUP_FOREGROUND is not allowed.
+     *
+     * Always sets cpusets.
      */
     public static final native void setProcessGroup(int pid, int group)
             throws IllegalArgumentException, SecurityException;
