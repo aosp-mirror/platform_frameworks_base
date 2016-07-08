@@ -284,9 +284,6 @@ public final class SystemServer {
             // we've defined it before booting further.
             Build.ensureFingerprintProperty();
 
-            // Initialize Environment for the system user.
-            Environment.init();
-
             // Within the system server, it is an error to access Environment paths without
             // explicitly specifying a user.
             Environment.setUserRequired(true);

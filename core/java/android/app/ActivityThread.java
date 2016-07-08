@@ -6057,7 +6057,7 @@ public final class ActivityThread {
         // StrictMode) on debug builds, but using DropBox, not logs.
         CloseGuard.setEnabled(false);
 
-        Environment.init();
+        Environment.initForCurrentUser();
 
         // Set the reporter for event logging in libcore
         EventLogger.setReporter(new EventLoggingReporter());
