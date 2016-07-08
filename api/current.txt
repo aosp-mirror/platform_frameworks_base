@@ -52598,9 +52598,7 @@ package java.security {
 
   public static class KeyStore.PasswordProtection implements javax.security.auth.Destroyable java.security.KeyStore.ProtectionParameter {
     ctor public KeyStore.PasswordProtection(char[]);
-    method public synchronized void destroy() throws javax.security.auth.DestroyFailedException;
     method public synchronized char[] getPassword();
-    method public synchronized boolean isDestroyed();
   }
 
   public static final class KeyStore.PrivateKeyEntry implements java.security.KeyStore.Entry {
@@ -62346,8 +62344,8 @@ package javax.security.auth {
   }
 
   public abstract interface Destroyable {
-    method public abstract void destroy() throws javax.security.auth.DestroyFailedException;
-    method public abstract boolean isDestroyed();
+    method public default void destroy() throws javax.security.auth.DestroyFailedException;
+    method public default boolean isDestroyed();
   }
 
   public final class PrivateCredentialPermission extends java.security.Permission {
