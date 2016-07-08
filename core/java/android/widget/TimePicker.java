@@ -18,6 +18,7 @@ package android.widget;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.annotation.Widget;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -250,6 +251,30 @@ public class TimePicker extends FrameLayout {
         return mDelegate.dispatchPopulateAccessibilityEvent(event);
     }
 
+    /** @hide */
+    @TestApi
+    public View getHourView() {
+        return mDelegate.getHourView();
+    }
+
+    /** @hide */
+    @TestApi
+    public View getMinuteView() {
+        return mDelegate.getMinuteView();
+    }
+
+    /** @hide */
+    @TestApi
+    public View getAmView() {
+        return mDelegate.getAmView();
+    }
+
+    /** @hide */
+    @TestApi
+    public View getPmView() {
+        return mDelegate.getPmView();
+    }
+
     /**
      * A delegate interface that defined the public API of the TimePicker. Allows different
      * TimePicker implementations. This would need to be implemented by the TimePicker delegates
@@ -277,6 +302,18 @@ public class TimePicker extends FrameLayout {
 
         boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event);
         void onPopulateAccessibilityEvent(AccessibilityEvent event);
+
+        /** @hide */
+        @TestApi View getHourView();
+
+        /** @hide */
+        @TestApi View getMinuteView();
+
+        /** @hide */
+        @TestApi View getAmView();
+
+        /** @hide */
+        @TestApi View getPmView();
     }
 
     static String[] getAmPmStrings(Context context) {
