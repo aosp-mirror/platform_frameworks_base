@@ -8659,6 +8659,22 @@ public final class Settings {
         public static final String DEVICE_DEMO_MODE = "device_demo_mode";
 
         /**
+         * Retail mode specific settings. This is encoded as a key=value list, separated by commas.
+         * Ex: "user_inactivity_timeout_ms=30000,warning_dialog_timeout_ms=10000". The following
+         * keys are supported:
+         *
+         * <pre>
+         * user_inactivity_timeout_ms  (long)
+         * warning_dialog_timeout_ms   (long)
+         * </pre>
+         * <p>
+         * Type: string
+         *
+         * @hide
+         */
+        public static final String RETAIL_DEMO_MODE_CONSTANTS = "retail_demo_mode_constants";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
