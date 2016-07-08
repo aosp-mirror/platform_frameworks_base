@@ -20,6 +20,8 @@
 #include "xml/XmlActionExecutor.h"
 #include "xml/XmlDom.h"
 
+#include <unordered_set>
+
 namespace aapt {
 
 /**
@@ -27,21 +29,14 @@ namespace aapt {
  */
 static bool nameIsJavaClassName(xml::Element* el, xml::Attribute* attr,
                                 SourcePathDiagnostics* diag) {
-    std::u16string className = attr->value;
-    if (className.find(u'.') == std::u16string::npos) {
-        // There is no '.', so add one to the beginning.
-        className = u".";
-        className += attr->value;
-    }
-
     // We allow unqualified class names (ie: .HelloActivity)
     // Since we don't know the package name, we can just make a fake one here and
     // the test will be identical as long as the real package name is valid too.
     Maybe<std::u16string> fullyQualifiedClassName =
-            util::getFullyQualifiedClassName(u"a", className);
+            util::getFullyQualifiedClassName(u"a", attr->value);
 
     StringPiece16 qualifiedClassName = fullyQualifiedClassName
-            ? fullyQualifiedClassName.value() : className;
+            ? fullyQualifiedClassName.value() : attr->value;
     if (!util::isJavaClassName(qualifiedClassName)) {
         diag->error(DiagMessage(el->lineNumber)
                     << "attribute 'android:name' in <"
@@ -230,9 +225,12 @@ public:
 
     void visit(xml::Element* el) override {
         for (xml::Attribute& attr : el->attributes) {
-            if (Maybe<std::u16string> newValue =
-                    util::getFullyQualifiedClassName(mPackage, attr.value)) {
-                attr.value = std::move(newValue.value());
+            if (attr.namespaceUri == xml::kSchemaAndroid
+                    && mClassAttributes.find(attr.name) != mClassAttributes.end()) {
+                if (Maybe<std::u16string> newValue =
+                        util::getFullyQualifiedClassName(mPackage, attr.value)) {
+                    attr.value = std::move(newValue.value());
+                }
             }
         }
 
@@ -242,6 +240,7 @@ public:
 
 private:
     StringPiece16 mPackage;
+    std::unordered_set<StringPiece16> mClassAttributes = { u"name" };
 };
 
 static bool renameManifestPackage(const StringPiece16& packageOverride, xml::Element* manifestEl) {
