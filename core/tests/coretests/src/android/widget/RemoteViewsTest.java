@@ -14,13 +14,7 @@
  * limitations under the License
  */
 
-package android.view;
-
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+package android.widget;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -29,12 +23,15 @@ import android.graphics.drawable.Drawable;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RemoteViews;
-import android.widget.TextView;
+import android.view.View;
 
 import com.android.frameworks.coretests.R;
+
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
