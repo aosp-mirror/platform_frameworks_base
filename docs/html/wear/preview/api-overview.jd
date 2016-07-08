@@ -25,6 +25,7 @@ page.image=images/cards/card-n-apis_2x.png
             <li><a href="#remote-input">Remote Input</a></li>
             <li><a href="#bridging">Bridging Mode</a></li>
             <li><a href="#imf">Input Method Framework</a></li>
+            <li><a href="#wrist-gestures">Wrist Gestures</a></li>
           </ol>
         </li>
 
@@ -79,11 +80,10 @@ The navigation and action drawers provide users with new ways to interact with a
   watch face using the API.
 </p>
 
-<p>For examples of how to use this feature,
+<p>For information about this API,
 see <a href="{@docRoot}wear/preview/features/complications.html">
  Watch Face Complications</a>.
 </p>
-
 
 <h3 id="drawers">Navigation and Action drawers</h3>
 
@@ -233,6 +233,24 @@ This allows users to enter text on Wear using the system default IME or third pa
 Input Method Framework</a>.
 </p>
 
+<h3 id="wrist-gestures">Wrist Gestures</h3>
+
+<p>
+  Wrist gestures can enable quick, one-handed interactions with your app
+  when use of a touch screen is inconvenient. The following
+  <a href="https://support.google.com/androidwear/answer/6312406">wrist gestures</a>
+  are available for use by apps:
+</p>
+
+<ul>
+  <li>Flick wrist out</li>
+  <li>Flick wrist in</li>
+</ul>
+
+<p>For more information, see
+<a href="{@docRoot}wear/preview/features/gestures.html">
+ Wrist Gestures</a>.
+</p>
 
 <h2 id="stand-alone">Standalone Devices</h2>
 
