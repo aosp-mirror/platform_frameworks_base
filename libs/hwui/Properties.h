@@ -253,7 +253,7 @@ enum class StencilClipDebug {
 enum class RenderPipelineType {
     OpenGL = 0,
     SkiaGL,
-    Vulkan,
+    SkiaVulkan,
     NotInitialized = 128
 };
 
