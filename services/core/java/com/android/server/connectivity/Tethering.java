@@ -270,14 +270,16 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                     trackNewTetherableInterface(iface, interfaceType);
                 }
             } else {
-                if (interfaceType == ConnectivityManager.TETHERING_USB) {
-                    // ignore usb0 down after enabling RNDIS
-                    // we will handle disconnect in interfaceRemoved instead
-                    if (VDBG) Log.d(TAG, "ignore interface down for " + iface);
-                } else if (tetherState != null) {
+                if (interfaceType == ConnectivityManager.TETHERING_BLUETOOTH) {
                     tetherState.mStateMachine.sendMessage(
                             TetherInterfaceStateMachine.CMD_INTERFACE_DOWN);
                     mTetherStates.remove(iface);
+                } else {
+                    // Ignore usb0 down after enabling RNDIS.
+                    // We will handle disconnect in interfaceRemoved.
+                    // Similarly, ignore interface down for WiFi.  We monitor WiFi AP status
+                    // through the WifiManager.WIFI_AP_STATE_CHANGED_ACTION intent.
+                    if (VDBG) Log.d(TAG, "ignore interface down for " + iface);
                 }
             }
         }
