@@ -265,6 +265,11 @@ public class KeyButtonView extends ImageView implements ButtonDispatcher.ButtonI
     public void setImageDrawable(@Nullable Drawable drawable) {
         super.setImageDrawable(drawable);
     }
+
+    @Override
+    public void setLandscape(boolean landscape) {
+        //no op
+    }
 }
 
 
