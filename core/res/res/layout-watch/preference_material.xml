@@ -29,34 +29,42 @@
 
     <LinearLayout
         android:id="@+id/icon_frame"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="-4dp"
-        android:minWidth="32dp"
-        android:gravity="start|center_vertical"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:gravity="center"
         android:orientation="horizontal"
-        android:paddingEnd="8dp"
-        android:paddingTop="4dp"
-        android:paddingBottom="4dp">
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp">
         <com.android.internal.widget.PreferenceImageView
             android:id="@+id/icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:maxWidth="24dp"
-            android:maxHeight="24dp" />
+            android:maxWidth="40dp"
+            android:maxHeight="40dp" />
     </LinearLayout>
+
+    <!-- Preference should place its actual preference widget here. -->
+    <LinearLayout android:id="@+id/widget_frame"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp" />
 
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:paddingTop="16dp"
-        android:paddingBottom="16dp">
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp">
 
         <TextView android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:maxLines="2"
+            android:maxLines="3"
             android:textAppearance="?attr/textAppearanceListItem"
             android:ellipsize="end" />
 
@@ -70,13 +78,4 @@
             android:maxLines="10" />
 
     </RelativeLayout>
-
-    <!-- Preference should place its actual preference widget here. -->
-    <LinearLayout android:id="@+id/widget_frame"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:gravity="end|center_vertical"
-        android:paddingStart="4dp"
-        android:orientation="vertical" />
-
 </LinearLayout>
