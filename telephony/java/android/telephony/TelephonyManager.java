@@ -5538,5 +5538,22 @@ public class TelephonyManager {
         }
         return 0;
     }
+
+    /**
+     * Policy control of data connection. Usually used when data limit is passed.
+     * @param enabled True if enabling the data, otherwise disabling.
+     * @param subId sub id
+     * @hide
+     */
+    public void setPolicyDataEnabled(boolean enabled, int subId) {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                service.setPolicyDataEnabled(enabled, subId);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#setPolicyDataEnabled", e);
+        }
+    }
 }
 
