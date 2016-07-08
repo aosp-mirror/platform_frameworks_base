@@ -188,12 +188,6 @@ public:
      */
     Rect clipRect;
 
-    /**
-     * If the layer can be rendered as a mesh, this is non-null.
-     */
-    TextureVertex* mesh = nullptr;
-    GLsizei meshElementCount = 0;
-
 private:
     Caches& caches;
 
