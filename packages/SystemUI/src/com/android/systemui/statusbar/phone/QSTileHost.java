@@ -60,7 +60,6 @@ import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.NextAlarmController;
-import com.android.systemui.statusbar.policy.NightModeController;
 import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
@@ -71,7 +70,6 @@ import com.android.systemui.statusbar.policy.SecurityController;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
-import com.android.systemui.tuner.NightModeTile;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 
@@ -111,7 +109,6 @@ public class QSTileHost implements QSTile.Host, Tunable {
     private final TileServices mServices;
 
     private final List<Callback> mCallbacks = new ArrayList<>();
-    private final NightModeController mNightModeController;
     private final AutoTileManager mAutoTiles;
     private final ManagedProfileController mProfileController;
     private final NextAlarmController mNextAlarmController;
@@ -144,7 +141,6 @@ public class QSTileHost implements QSTile.Host, Tunable {
         mBattery = battery;
         mIconController = iconController;
         mNextAlarmController = nextAlarmController;
-        mNightModeController = new NightModeController(mContext, true);
         mProfileController = new ManagedProfileController(this);
 
         final HandlerThread ht = new HandlerThread(QSTileHost.class.getSimpleName(),
@@ -308,10 +304,6 @@ public class QSTileHost implements QSTile.Host, Tunable {
         return mIconController;
     }
 
-    public NightModeController getNightModeController() {
-        return mNightModeController;
-    }
-
     public ManagedProfileController getManagedProfileController() {
         return mProfileController;
     }
@@ -448,8 +440,6 @@ public class QSTileHost implements QSTile.Host, Tunable {
         else if (tileSpec.equals("user")) return new UserTile(this);
         else if (tileSpec.equals("battery")) return new BatteryTile(this);
         else if (tileSpec.equals("saver")) return new DataSaverTile(this);
-        else if (tileSpec.equals(NightModeTile.NIGHT_MODE_SPEC))
-            return new NightModeTile(this);
         // Intent tiles.
         else if (tileSpec.startsWith(IntentTile.PREFIX)) return IntentTile.create(this,tileSpec);
         else if (tileSpec.startsWith(CustomTile.PREFIX)) return CustomTile.create(this,tileSpec);

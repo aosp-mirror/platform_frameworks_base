@@ -39,7 +39,6 @@ import com.android.systemui.statusbar.phone.ManagedProfileController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.CastController;
-import com.android.systemui.statusbar.policy.NightModeController;
 import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
@@ -460,7 +459,6 @@ public abstract class QSTile<TState extends State> {
         UserInfoController getUserInfoController();
         BatteryController getBatteryController();
         TileServices getTileServices();
-        NightModeController getNightModeController();
         void removeTile(String tileSpec);
         ManagedProfileController getManagedProfileController();
 
