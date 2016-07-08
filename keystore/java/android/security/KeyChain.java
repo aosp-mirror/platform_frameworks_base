@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.net.Uri;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Process;
@@ -192,7 +193,8 @@ public final class KeyChain {
      * </ul>
      *
      * @deprecated Use {@link #ACTION_KEYCHAIN_CHANGED}, {@link #ACTION_STORAGE_CHANGED} or
-     * {@link #ACTION_KEY_ACCESS_CHANGED}.
+     * {@link #ACTION_KEY_ACCESS_CHANGED}. Apps that target a version higher than
+     * {@link Build.VERSION_CODES#N_MR1} will not receive this broadcast.
      */
     public static final String ACTION_STORAGE_CHANGED = "android.security.STORAGE_CHANGED";
 
