@@ -62,34 +62,17 @@ public class Environment {
     private static final File DIR_ODM_ROOT = getDirectory(ENV_ODM_ROOT, "/odm");
     private static final File DIR_VENDOR_ROOT = getDirectory(ENV_VENDOR_ROOT, "/vendor");
 
-    // NoPreloadHolder to separate shared data from user-specific data, and to be able to initialize
-    // Environment without side effect (allowing a lazy init of the data where possible).
-    private static class NoPreloadHolder {
-        public final static UserEnvironment sCurrentUser;
-        public static boolean sUserRequired;
+    private static UserEnvironment sCurrentUser;
+    private static boolean sUserRequired;
 
-        static {
-            sCurrentUser = new UserEnvironment(UserHandle.myUserId());
-        }
-
-        // Empty function to be able to trigger static initialization.
-        public static void init() {
-        }
-
-        // Disallow allocation.
-        private NoPreloadHolder() {
-        }
+    static {
+        initForCurrentUser();
     }
 
     /** {@hide} */
-    public static void init() {
-        NoPreloadHolder.init();
-
-        // Check for expected outcome. We only allow one initialization, this will trigger if
-        // somebody tried to re-initialize.
-        if (NoPreloadHolder.sCurrentUser.mUserId != UserHandle.myUserId()) {
-            throw new IllegalStateException();
-        }
+    public static void initForCurrentUser() {
+        final int userId = UserHandle.myUserId();
+        sCurrentUser = new UserEnvironment(userId);
     }
 
     /** {@hide} */
@@ -445,7 +428,7 @@ public class Environment {
      */
     public static File getExternalStorageDirectory() {
         throwIfUserRequired();
-        return NoPreloadHolder.sCurrentUser.getExternalDirs()[0];
+        return sCurrentUser.getExternalDirs()[0];
     }
 
     /** {@hide} */
@@ -629,7 +612,7 @@ public class Environment {
      */
     public static File getExternalStoragePublicDirectory(String type) {
         throwIfUserRequired();
-        return NoPreloadHolder.sCurrentUser.buildExternalStoragePublicDirs(type)[0];
+        return sCurrentUser.buildExternalStoragePublicDirs(type)[0];
     }
 
     /**
@@ -638,7 +621,7 @@ public class Environment {
      */
     public static File[] buildExternalStorageAndroidDataDirs() {
         throwIfUserRequired();
-        return NoPreloadHolder.sCurrentUser.buildExternalStorageAndroidDataDirs();
+        return sCurrentUser.buildExternalStorageAndroidDataDirs();
     }
 
     /**
@@ -647,7 +630,7 @@ public class Environment {
      */
     public static File[] buildExternalStorageAppDataDirs(String packageName) {
         throwIfUserRequired();
-        return NoPreloadHolder.sCurrentUser.buildExternalStorageAppDataDirs(packageName);
+        return sCurrentUser.buildExternalStorageAppDataDirs(packageName);
     }
 
     /**
@@ -656,7 +639,7 @@ public class Environment {
      */
     public static File[] buildExternalStorageAppMediaDirs(String packageName) {
         throwIfUserRequired();
-        return NoPreloadHolder.sCurrentUser.buildExternalStorageAppMediaDirs(packageName);
+        return sCurrentUser.buildExternalStorageAppMediaDirs(packageName);
     }
 
     /**
@@ -665,7 +648,7 @@ public class Environment {
      */
     public static File[] buildExternalStorageAppObbDirs(String packageName) {
         throwIfUserRequired();
-        return NoPreloadHolder.sCurrentUser.buildExternalStorageAppObbDirs(packageName);
+        return sCurrentUser.buildExternalStorageAppObbDirs(packageName);
     }
 
     /**
@@ -674,7 +657,7 @@ public class Environment {
      */
     public static File[] buildExternalStorageAppFilesDirs(String packageName) {
         throwIfUserRequired();
-        return NoPreloadHolder.sCurrentUser.buildExternalStorageAppFilesDirs(packageName);
+        return sCurrentUser.buildExternalStorageAppFilesDirs(packageName);
     }
 
     /**
@@ -683,7 +666,7 @@ public class Environment {
      */
     public static File[] buildExternalStorageAppCacheDirs(String packageName) {
         throwIfUserRequired();
-        return NoPreloadHolder.sCurrentUser.buildExternalStorageAppCacheDirs(packageName);
+        return sCurrentUser.buildExternalStorageAppCacheDirs(packageName);
     }
 
     /**
@@ -787,7 +770,7 @@ public class Environment {
      *         {@link #MEDIA_BAD_REMOVAL}, or {@link #MEDIA_UNMOUNTABLE}.
      */
     public static String getExternalStorageState() {
-        final File externalDir = NoPreloadHolder.sCurrentUser.getExternalDirs()[0];
+        final File externalDir = sCurrentUser.getExternalDirs()[0];
         return getExternalStorageState(externalDir);
     }
 
@@ -828,7 +811,7 @@ public class Environment {
      */
     public static boolean isExternalStorageRemovable() {
         if (isStorageDisabled()) return false;
-        final File externalDir = NoPreloadHolder.sCurrentUser.getExternalDirs()[0];
+        final File externalDir = sCurrentUser.getExternalDirs()[0];
         return isExternalStorageRemovable(externalDir);
     }
 
@@ -867,7 +850,7 @@ public class Environment {
      */
     public static boolean isExternalStorageEmulated() {
         if (isStorageDisabled()) return false;
-        final File externalDir = NoPreloadHolder.sCurrentUser.getExternalDirs()[0];
+        final File externalDir = sCurrentUser.getExternalDirs()[0];
         return isExternalStorageEmulated(externalDir);
     }
 
@@ -902,11 +885,11 @@ public class Environment {
 
     /** {@hide} */
     public static void setUserRequired(boolean userRequired) {
-        NoPreloadHolder.sUserRequired = userRequired;
+        sUserRequired = userRequired;
     }
 
     private static void throwIfUserRequired() {
-        if (NoPreloadHolder.sUserRequired) {
+        if (sUserRequired) {
             Log.wtf(TAG, "Path requests must specify a user by using UserEnvironment",
                     new Throwable());
         }
