@@ -788,11 +788,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mBackdropFront = (ImageView) mBackdrop.findViewById(R.id.backdrop_front);
         mBackdropBack = (ImageView) mBackdrop.findViewById(R.id.backdrop_back);
 
+        if (ENABLE_LOCKSCREEN_WALLPAPER) {
+            mLockscreenWallpaper = new LockscreenWallpaper(mContext, this, mHandler);
+        }
+
         ScrimView scrimBehind = (ScrimView) mStatusBarWindow.findViewById(R.id.scrim_behind);
         ScrimView scrimInFront = (ScrimView) mStatusBarWindow.findViewById(R.id.scrim_in_front);
         View headsUpScrim = mStatusBarWindow.findViewById(R.id.heads_up_scrim);
         mScrimController = SystemUIFactory.getInstance().createScrimController(
-                scrimBehind, scrimInFront, headsUpScrim);
+                scrimBehind, scrimInFront, headsUpScrim, mLockscreenWallpaper);
         if (mScrimSrcModeEnabled) {
             Runnable runnable = new Runnable() {
                 @Override
@@ -821,10 +825,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                         R.id.keyguard_indication_text),
                 mKeyguardBottomArea.getLockIcon());
         mKeyguardBottomArea.setKeyguardIndicationController(mKeyguardIndicationController);
-
-        if (ENABLE_LOCKSCREEN_WALLPAPER) {
-            mLockscreenWallpaper = new LockscreenWallpaper(mContext, this, mHandler);
-        }
 
         // set the initial view visibility
         setAreThereNotifications();
@@ -3513,6 +3513,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         setControllerUsers();
         clearCurrentMediaNotification();
         mLockscreenWallpaper.setCurrentUser(newUserId);
+        mScrimController.setCurrentUser(newUserId);
         updateMediaMetaData(true, false);
     }
 

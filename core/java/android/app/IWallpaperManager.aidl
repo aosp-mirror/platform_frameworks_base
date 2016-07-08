@@ -72,7 +72,7 @@ interface IWallpaperManager {
      * information about that wallpaper.  Otherwise, if it is a static image,
      * simply return null.
      */
-    WallpaperInfo getWallpaperInfo();
+    WallpaperInfo getWallpaperInfo(int userId);
 
     /**
      * Clear the system wallpaper.

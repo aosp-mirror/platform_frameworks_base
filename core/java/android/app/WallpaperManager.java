@@ -51,6 +51,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.WindowManagerGlobal;
@@ -783,7 +784,7 @@ public class WallpaperManager {
                 Log.w(TAG, "WallpaperService not running");
                 throw new RuntimeException(new DeadSystemException());
             } else {
-                return sGlobals.mService.getWallpaperInfo();
+                return sGlobals.mService.getWallpaperInfo(UserHandle.myUserId());
             }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
