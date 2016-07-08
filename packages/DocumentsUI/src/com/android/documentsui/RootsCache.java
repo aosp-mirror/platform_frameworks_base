@@ -36,6 +36,7 @@ import android.os.Handler;
 import android.os.SystemClock;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Root;
+import android.provider.DocumentsProvider;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 
@@ -350,11 +351,20 @@ public class RootsCache {
      * waiting for all the other roots to come back.
      */
     public RootInfo getRootOneshot(String authority, String rootId) {
+        return getRootOneshot(authority, rootId, false);
+    }
+
+    /**
+     * Return the requested {@link RootInfo}, but only loading the roots of the requested authority.
+     * It always fetches from {@link DocumentsProvider} if forceRefresh is true, which is used to
+     * get the most up-to-date free space before starting copy operations.
+     */
+    public RootInfo getRootOneshot(String authority, String rootId, boolean forceRefresh) {
         synchronized (mLock) {
-            RootInfo root = getRootLocked(authority, rootId);
+            RootInfo root = forceRefresh ? null : getRootLocked(authority, rootId);
             if (root == null) {
-                mRoots.putAll(authority,
-                        loadRootsForAuthority(mContext.getContentResolver(), authority, false));
+                mRoots.putAll(authority, loadRootsForAuthority(
+                                mContext.getContentResolver(), authority, forceRefresh));
                 root = getRootLocked(authority, rootId);
             }
             return root;

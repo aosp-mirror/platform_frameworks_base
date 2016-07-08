@@ -29,8 +29,8 @@ import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.util.Log;
 
-import com.android.documentsui.UrisSupplier;
 import com.android.documentsui.R;
+import com.android.documentsui.UrisSupplier;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 
@@ -96,9 +96,35 @@ final class MoveJob extends CopyJob {
         return super.setUp();
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * Only check space for moves across authorities. For now we don't know if the doc in
+     * {@link #mSrcs} is in the same root of destination, and if it's optimized move in the same
+     * root it should succeed regardless of free space, but it's for sure a failure if there is no
+     * enough free space if docs are moved from another authority.
+     */
     @Override
-    public void start() {
-        super.start();
+    boolean checkSpace() {
+        long size = 0;
+        for (DocumentInfo src : mSrcs) {
+            if (!src.authority.equals(stack.root.authority)) {
+                if (src.isDirectory()) {
+                    try {
+                        size += calculateFileSizesRecursively(getClient(src), src.derivedUri);
+                    } catch (RemoteException|ResourceException e) {
+                        Log.w(TAG, "Failed to obtain client for %s" + src.derivedUri + ".", e);
+
+                        // Failed to calculate size, but move may still succeed.
+                        return true;
+                    }
+                } else {
+                    size += src.size;
+                }
+            }
+        }
+
+        return checkSpace(size);
     }
 
     void processDocument(DocumentInfo src, DocumentInfo srcParent, DocumentInfo dest)
