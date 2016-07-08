@@ -2744,6 +2744,7 @@ public class AudioManager {
      * to be notified.
      * Use {@link AudioManager#getActiveRecordingConfigurations()} to query the current
      * configuration.
+     * @see AudioRecordingConfiguration
      */
     public static abstract class AudioRecordingCallback {
         /**
@@ -2850,6 +2851,7 @@ public class AudioManager {
      * Returns the current active audio recording configurations of the device.
      * @return a non-null list of recording configurations. An empty list indicates there is
      *     no recording active when queried.
+     * @see AudioRecordingConfiguration
      */
     public @NonNull List<AudioRecordingConfiguration> getActiveRecordingConfigurations() {
         final IAudioService service = getService();
