@@ -754,6 +754,26 @@
     -->
     <integer name="config_defaultNightMode">1</integer>
 
+    <!-- Control whether Night display is available. This should only be enabled on devices
+         with HWC 2.0 or higher. -->
+    <bool name="config_nightDisplayAvailable">false</bool>
+
+    <!-- Default mode to control how Night display is automatically activated.
+         One of the following values (see NightDisplayController.java):
+             0 - AUTO_MODE_DISABLED
+             1 - AUTO_MODE_CUSTOM
+             2 - AUTO_MODE_TWILIGHT
+    -->
+    <integer name="config_defaultNightDisplayAutoMode">1</integer>
+
+    <!-- Default time when Night display is automatically activated.
+         Represented as milliseconds from midnight (e.g. 79200000 == 10pm). -->
+    <integer name="config_defaultNightDisplayCustomStartTime">79200000</integer>
+
+    <!-- Default time when Night display is automatically deactivated.
+         Represented as milliseconds from midnight (e.g. 21600000 == 6am). -->
+    <integer name="config_defaultNightDisplayCustomEndTime">21600000</integer>
+
     <!-- Indicate whether to allow the device to suspend when the screen is off
          due to the proximity sensor.  This resource should only be set to true
          if the sensor HAL correctly handles the proximity sensor as a wake-up source.
