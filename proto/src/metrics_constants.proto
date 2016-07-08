@@ -2367,6 +2367,10 @@ message MetricsEvent {
     // ACTION: Settings -> Support -> "Travel Abroad" Button -> Tolled Phone
     ACTION_SUPPORT_DIAL_TOLLED = 487;
 
+    // OPEN: Settings > Display > Night display
+    // CATEGORY: SETTINGS
+    NIGHT_DISPLAY_SETTINGS = 488;
+
     // ---- End N-MR1 Constants, all N-MR1 constants go above this line ----
 
     // ------- Begin N Keyboard Shortcuts Helper -----

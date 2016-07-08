@@ -2666,4 +2666,8 @@
   <java-symbol type="drawable" name="ic_doc_video" />
   <java-symbol type="drawable" name="ic_doc_generic" />
 
+  <java-symbol type="bool" name="config_nightDisplayAvailable" />
+  <java-symbol type="integer" name="config_defaultNightDisplayAutoMode" />
+  <java-symbol type="integer" name="config_defaultNightDisplayCustomStartTime" />
+  <java-symbol type="integer" name="config_defaultNightDisplayCustomEndTime" />
 </resources>
