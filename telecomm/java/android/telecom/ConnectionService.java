@@ -556,6 +556,9 @@ public abstract class ConnectionService extends Service {
                 case Connection.STATE_DIALING:
                     mAdapter.setDialing(id);
                     break;
+                case Connection.STATE_PULLING_CALL:
+                    mAdapter.setPulling(id);
+                    break;
                 case Connection.STATE_DISCONNECTED:
                     // Handled in onDisconnected()
                     break;

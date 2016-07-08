@@ -143,6 +143,21 @@ final class ConnectionServiceAdapter implements DeathRecipient {
     }
 
     /**
+     * Sets a call's state to pulling (e.g. a call with {@link Connection#PROPERTY_IS_EXTERNAL_CALL}
+     * is being pulled to the local device.
+     *
+     * @param callId The unique ID of the call whose state is changing to dialing.
+     */
+    void setPulling(String callId) {
+        for (IConnectionServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.setPulling(callId);
+            } catch (RemoteException e) {
+            }
+        }
+    }
+
+    /**
      * Sets a call's state to disconnected.
      *
      * @param callId The unique ID of the call whose state is changing to disconnected.
