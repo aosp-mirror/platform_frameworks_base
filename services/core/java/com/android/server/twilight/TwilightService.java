@@ -556,7 +556,7 @@ public final class TwilightService extends SystemService {
         public void onChange(boolean selfChange) {
             super.onChange(selfChange);
             int value = Secure.getIntForUser(getContext().getContentResolver(),
-                    Secure.TWILIGHT_MODE, Secure.TWILIGHT_MODE_LOCKED_OFF, mCurrentUser);
+                    Secure.TWILIGHT_MODE, Secure.TWILIGHT_MODE_AUTO, mCurrentUser);
             if (value == Secure.TWILIGHT_MODE_LOCKED_OFF) {
                 setLockedState(new TwilightState(false, 0));
             } else if (value == Secure.TWILIGHT_MODE_LOCKED_ON) {
