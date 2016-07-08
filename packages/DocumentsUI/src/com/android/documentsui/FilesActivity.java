@@ -91,7 +91,7 @@ public class FilesActivity extends BaseActivity {
             }
         };
 
-        RootsFragment.show(getFragmentManager(), null);
+        RootsFragment.show(getFragmentManager(), this::openRootSettings);
 
         final Intent intent = getIntent();
         final Uri uri = intent.getData();
@@ -241,7 +241,6 @@ public class FilesActivity extends BaseActivity {
         return true;
     }
 
-    @Override
     void openRootSettings(RootInfo root) {
         Metrics.logUserAction(this, Metrics.USER_ACTION_SETTINGS);
         final Intent intent = new Intent(DocumentsContract.ACTION_DOCUMENT_ROOT_SETTINGS);

@@ -103,7 +103,6 @@ public abstract class BaseActivity extends Activity
 
     abstract void onTaskFinished(Uri... uris);
     abstract void refreshDirectory(int anim);
-    abstract void openRootSettings(RootInfo root);
     /** Allows sub-classes to include information in a newly created State instance. */
     abstract void includeState(State initialState);
 

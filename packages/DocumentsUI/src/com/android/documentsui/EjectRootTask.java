@@ -23,25 +23,30 @@ import android.net.Uri;
 import android.provider.DocumentsContract;
 import android.util.Log;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
-final class EjectRootTask
-        extends CheckedTask<Void, Boolean> {
+final class EjectRootTask extends CheckedTask<Void, Boolean> {
     private final String mAuthority;
     private final String mRootId;
-    private final Consumer<Boolean> mListener;
+    private final Consumer<Boolean> mCallback;
     private Context mContext;
 
-    public EjectRootTask(Check check,
+    /**
+     * @param ejectCanceledCheck The method reference we use to see whether eject should be stopped
+     * at any point
+     * @param finishCallback The end callback necessary when the eject task finishes
+     */
+    public EjectRootTask(Context context,
             String authority,
             String rootId,
-            Context context,
-            Consumer<Boolean> listener) {
-        super(check);
+            BooleanSupplier ejectCanceledCheck,
+            Consumer<Boolean> finishCallback) {
+        super(ejectCanceledCheck::getAsBoolean);
         mAuthority = authority;
         mRootId = rootId;
         mContext = context;
-        mListener = listener;
+        mCallback = finishCallback;
     }
 
     @Override
@@ -65,6 +70,6 @@ final class EjectRootTask
 
     @Override
     protected void finish(Boolean ejected) {
-        mListener.accept(ejected);
+        mCallback.accept(ejected);
     }
 }

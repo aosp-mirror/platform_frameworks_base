@@ -84,8 +84,16 @@ public class RootsFragment extends Fragment implements ItemDragListener.DragHost
     private ListView mList;
     private RootsAdapter mAdapter;
     private LoaderCallbacks<Collection<RootInfo>> mCallbacks;
+    private Consumer<RootInfo> mOpenSettings = (RootInfo) -> {
+        throw new UnsupportedOperationException("Can't open settings.");
+    };
 
-    public static void show(FragmentManager fm, Intent includeApps) {
+    public static void show(FragmentManager fm, Consumer<RootInfo> openSettings) {
+        RootsFragment fragment = show(fm, (Intent) null);
+        fragment.mOpenSettings = openSettings;
+    }
+
+    public static RootsFragment show(FragmentManager fm, Intent includeApps) {
         final Bundle args = new Bundle();
         args.putParcelable(EXTRA_INCLUDE_APPS, includeApps);
 
@@ -95,6 +103,8 @@ public class RootsFragment extends Fragment implements ItemDragListener.DragHost
         final FragmentTransaction ft = fm.beginTransaction();
         ft.replace(R.id.container_roots, fragment);
         ft.commitAllowingStateLoss();
+
+        return fragment;
     }
 
     public static RootsFragment get(FragmentManager fm) {
@@ -108,8 +118,12 @@ public class RootsFragment extends Fragment implements ItemDragListener.DragHost
         final View view = inflater.inflate(R.layout.fragment_roots, container, false);
         mList = (ListView) view.findViewById(R.id.roots_list);
         mList.setOnItemClickListener(mItemListener);
-        // For right-clicks, we want to trap the click and not pass it to OnClickListener
-        // For all other clicks, we will pass the events down
+        // ListView does not have right-click specific listeners, so we will have a
+        // GenericMotionListener to listen for it.
+        // Currently, right click is viewed the same as long press, so we will have to quickly
+        // register for context menu when we receive a right click event, and quickly unregister
+        // it afterwards to prevent context menus popping up upon long presses.
+        // All other motion events will then get passed to OnItemClickListener.
         mList.setOnGenericMotionListener(
                 new OnGenericMotionListener() {
             @Override
@@ -270,12 +284,11 @@ public class RootsFragment extends Fragment implements ItemDragListener.DragHost
         final RootItem rootItem = (RootItem) mAdapter.getItem(adapterMenuInfo.position);
         switch(item.getItemId()) {
             case R.id.menu_eject_root:
-                final View unmountIcon = adapterMenuInfo.targetView.findViewById(R.id.unmount_icon);
-                ejectClicked(unmountIcon, rootItem.root);
+                final View ejectIcon = adapterMenuInfo.targetView.findViewById(R.id.eject_icon);
+                ejectClicked(ejectIcon, rootItem.root);
                 return true;
             case R.id.menu_settings:
-                final RootInfo root = rootItem.root;
-                getBaseActivity().openRootSettings(root);
+                mOpenSettings.accept(rootItem.root);
                 return true;
             default:
                 if (DEBUG) Log.d(TAG, "Unhandled menu item selected: " + item);
@@ -286,6 +299,7 @@ public class RootsFragment extends Fragment implements ItemDragListener.DragHost
     private static void ejectClicked(View ejectIcon, RootInfo root) {
         assert(ejectIcon != null);
         assert(ejectIcon.getContext() instanceof BaseActivity);
+        assert (!root.ejecting);
         ejectIcon.setEnabled(false);
         root.ejecting = true;
         ejectRoot(
@@ -306,10 +320,10 @@ public class RootsFragment extends Fragment implements ItemDragListener.DragHost
         BooleanSupplier predicate = () -> {
             return !(ejectIcon.getVisibility() == View.VISIBLE);
         };
-        new EjectRootTask(predicate::getAsBoolean,
+        new EjectRootTask(ejectIcon.getContext(),
                 authority,
                 rootId,
-                ejectIcon.getContext(),
+                predicate,
                 listener).executeOnExecutor(ProviderExecutor.forAuthority(authority));
     }
 
@@ -385,24 +399,24 @@ public class RootsFragment extends Fragment implements ItemDragListener.DragHost
             final ImageView icon = (ImageView) convertView.findViewById(android.R.id.icon);
             final TextView title = (TextView) convertView.findViewById(android.R.id.title);
             final TextView summary = (TextView) convertView.findViewById(android.R.id.summary);
-            final ImageView unmountIcon = (ImageView) convertView.findViewById(R.id.unmount_icon);
+            final ImageView ejectIcon = (ImageView) convertView.findViewById(R.id.eject_icon);
 
             final Context context = convertView.getContext();
             icon.setImageDrawable(root.loadDrawerIcon(context));
             title.setText(root.title);
 
             if (root.supportsEject()) {
-                unmountIcon.setVisibility(View.VISIBLE);
-                unmountIcon.setImageDrawable(root.loadEjectIcon(context));
-                unmountIcon.setOnClickListener(new OnClickListener() {
+                ejectIcon.setVisibility(View.VISIBLE);
+                ejectIcon.setImageDrawable(root.loadEjectIcon(context));
+                ejectIcon.setOnClickListener(new OnClickListener() {
                     @Override
                     public void onClick(View unmountIcon) {
                         RootsFragment.ejectClicked(unmountIcon, root);
                     }
                 });
             } else {
-                unmountIcon.setVisibility(View.GONE);
-                unmountIcon.setOnClickListener(null);
+                ejectIcon.setVisibility(View.GONE);
+                ejectIcon.setOnClickListener(null);
             }
             // Show available space if no summary
             String summaryText = root.summary;

@@ -77,7 +77,7 @@
         android:duplicateParentState="true">
 
         <ImageView
-            android:id="@+id/unmount_icon"
+            android:id="@+id/eject_icon"
             android:layout_width="@dimen/root_icon_size"
             android:layout_height="match_parent"
             android:scaleType="centerInside"

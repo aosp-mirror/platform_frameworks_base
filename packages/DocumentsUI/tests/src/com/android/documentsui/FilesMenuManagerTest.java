@@ -266,11 +266,21 @@ public final class FilesMenuManagerTest {
     }
 
     @Test
-    public void testRootContextMenu_canEject() {
+    public void testRootContextMenu_eject() {
         testRootInfo.flags = Root.FLAG_SUPPORTS_EJECT;
         FilesMenuManager mgr = new FilesMenuManager(testSearchManager, state);
         mgr.updateRootContextMenu(testMenu, testRootInfo);
 
         eject.assertEnabled();
+    }
+
+    @Test
+    public void testRootContextMenu_ejectInProcess() {
+        testRootInfo.flags = Root.FLAG_SUPPORTS_EJECT;
+        testRootInfo.ejecting = true;
+        FilesMenuManager mgr = new FilesMenuManager(testSearchManager, state);
+        mgr.updateRootContextMenu(testMenu, testRootInfo);
+
+        eject.assertDisabled();
     }
 }

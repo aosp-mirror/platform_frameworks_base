@@ -97,7 +97,7 @@ public class DocumentsActivity extends BaseActivity {
                    mState.action == ACTION_CREATE ||
                    mState.action == ACTION_OPEN_TREE ||
                    mState.action == ACTION_PICK_COPY_DESTINATION) {
-            RootsFragment.show(getFragmentManager(), null);
+            RootsFragment.show(getFragmentManager(), (Intent) null);
         }
 
         if (mState.restored) {
@@ -230,11 +230,6 @@ public class DocumentsActivity extends BaseActivity {
         }
 
         return true;
-    }
-
-    @Override
-    void openRootSettings(RootInfo root) {
-        throw new UnsupportedOperationException();
     }
 
     @Override

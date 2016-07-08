@@ -16,7 +16,6 @@
 
 package com.android.documentsui;
 
-import android.provider.DocumentsContract.Root;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -45,7 +44,7 @@ final class FilesMenuManager extends MenuManager {
     @Override
     void updateEject(MenuItem eject, RootInfo root) {
         eject.setVisible(true);
-        eject.setEnabled(((root.flags & Root.FLAG_SUPPORTS_EJECT) > 0) && !root.ejecting);
+        eject.setEnabled(root.supportsEject() && !root.ejecting);
     }
 
     @Override
