@@ -1336,59 +1336,6 @@
     <!-- Notification: Gear: Content description for the gear. [CHAR LIMIT=NONE] -->
     <string name="notification_gear_accessibility"><xliff:g id="app_name" example="YouTube">%1$s</xliff:g> notification controls</string>
 
-    <!-- SysUI Tuner: Color and appearance screen title [CHAR LIMIT=50] -->
-    <string name="color_and_appearance">Color and appearance</string>
-
-    <!-- SysUI Tuner: Name of the night mode feature [CHAR LIMIT=30] -->
-    <string name="night_mode">Night mode</string>
-
-    <!-- SysUI Tuner: Name of calibrate display dialog [CHAR LIMIT=30] -->
-    <string name="calibrate_display">Calibrate display</string>
-
-    <!-- SysUI Tuner: Summary of night mode when its on [CHAR LIMIT=NONE] -->
-    <string name="night_mode_on">On</string>
-
-    <!-- SysUI Tuner: Summary of night mode when its off [CHAR LIMIT=NONE] -->
-    <string name="night_mode_off">Off</string>
-
-    <!-- SysUI Tuner: Label for switch to turn on night mode automatically [CHAR LIMIT=50] -->
-    <string name="turn_on_automatically">Turn on automatically</string>
-
-    <!-- SysUI Tuner: Summary for switch to turn on night mode automatically [CHAR LIMIT=NONE] -->
-    <string name="turn_on_auto_summary">Switch into Night Mode as appropriate for location and time of day</string>
-
-    <!-- SysUI Tuner: Label for section controlling what night mode does [CHAR LIMIT=60] -->
-    <string name="when_night_mode_on">When Night Mode is on</string>
-
-    <!-- SysUI Tuner: Switch controlling whether dark theme is turned on with night mode [CHAR LIMIT=45] -->
-    <string name="use_dark_theme">Use dark theme for Android OS</string>
-
-    <!-- SysUI Tuner: Switch controlling whether tint is changed with night mode [CHAR LIMIT=45] -->
-    <string name="adjust_tint">Adjust tint</string>
-
-    <!-- SysUI Tuner: Switch controlling whether brightness is changed with night mode [CHAR LIMIT=45] -->
-    <string name="adjust_brightness">Adjust brightness</string>
-
-    <!-- SysUI Tuner: Disclaimer about using dark theme with night mode [CHAR LIMIT=NONE] -->
-    <string name="night_mode_disclaimer">The dark theme is applied to
-        core areas of Android OS that are normally displayed in a light theme,
-        such as Settings.</string>
-
-    <!-- Button to apply settings [CHAR LIMIT=30] -->
-    <string name="color_apply">Apply</string>
-
-    <!-- Title of warning dialog about bad color settings. [CHAR LIMIT=30] -->
-    <string name="color_revert_title">Confirm settings</string>
-
-    <!-- Message warning user about custom color settings [CHAR LIMIT=NONE] -->
-    <string name="color_revert_message">Some color settings can make this
-        device unusable. Click OK to confirm these color settings,
-        otherwise these settings will reset after 10 seconds.</string>
-
-    <string name="color_modification_r" translatable="false">R</string>
-    <string name="color_modification_g" translatable="false">G</string>
-    <string name="color_modification_b" translatable="false">B</string>
-
     <!-- Title of the battery settings detail panel [CHAR LIMIT=20] -->
     <string name="battery_panel_title">Battery usage</string>
 
