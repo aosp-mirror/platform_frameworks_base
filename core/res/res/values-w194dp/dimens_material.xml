@@ -14,10 +14,7 @@
      limitations under the License.
 -->
 <resources>
-    <dimen name="dialog_padding_material">@dimen/screen_percentage_15</dimen>
-    <dimen name="preference_fragment_padding_vertical_material">@dimen/screen_percentage_15</dimen>
-
-    <dimen name="list_item_padding_horizontal_material">@dimen/screen_percentage_15</dimen>
-    <dimen name="list_item_padding_start_material">@dimen/screen_percentage_15</dimen>
-    <dimen name="list_item_padding_end_material">@dimen/screen_percentage_10</dimen>
+    <dimen name="screen_percentage_05">9.7dp</dimen>
+    <dimen name="screen_percentage_10">19.4dp</dimen>
+    <dimen name="screen_percentage_15">29.1dp</dimen>
 </resources>
