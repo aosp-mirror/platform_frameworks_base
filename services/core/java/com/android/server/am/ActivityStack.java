@@ -1614,6 +1614,28 @@ final class ActivityStack {
         final ActivityStack focusedStack = mStackSupervisor.getFocusedStack();
         final int focusedStackId = focusedStack.mStackId;
 
+        final TaskRecord topFocusedTask = focusedStack.topTask();
+        final boolean isOnTopLauncherFocused = topFocusedTask != null &&
+                topFocusedTask.isOnTopLauncher();
+        if (isOnTopLauncherFocused) {
+            // When an on-top launcher is focused, we should find out whether the freeform stack or
+            // the fullscreen stack appears first underneath and has activities to show, and then
+            // make it visible.
+            boolean behindFullscreenOrFreeForm = false;
+            for (int stackBehindFocusedIndex = mStacks.indexOf(focusedStack) - 1;
+                 stackBehindFocusedIndex >= 0; stackBehindFocusedIndex--) {
+                ActivityStack stack = mStacks.get(stackBehindFocusedIndex);
+                if ((stack.mStackId == FREEFORM_WORKSPACE_STACK_ID
+                        || stack.mStackId == FULLSCREEN_WORKSPACE_STACK_ID)
+                        && stack.topRunningActivityLocked() != null) {
+                    if (stackIndex == stackBehindFocusedIndex) {
+                        return !behindFullscreenOrFreeForm ? STACK_VISIBLE : STACK_INVISIBLE;
+                    }
+                    behindFullscreenOrFreeForm = true;
+                }
+            }
+        }
+
         if (mStackId == FULLSCREEN_WORKSPACE_STACK_ID
                 && hasVisibleBehindActivity() && focusedStackId == HOME_STACK_ID
                 && !focusedStack.topActivity().fullscreen) {
@@ -1803,7 +1825,28 @@ final class ActivityStack {
                 // status of an activity in a previous task affects other.
                 behindFullscreenActivity = stackVisibility == STACK_INVISIBLE;
             } else if (mStackId == HOME_STACK_ID) {
-                if (task.isHomeTask()) {
+                if (task.isOnTopLauncher()) {
+                    if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "On-top launcher: at " + task
+                            + " stackInvisible=" + stackInvisible
+                            + " behindFullscreenActivity=" + behindFullscreenActivity);
+                    // When an on-top launcher is visible, (e.g. it's on the top of the home stack),
+                    // other tasks in the home stack could be visible if and only if:
+                    // - some app is running in the docked stack;
+                    // - no app is running in either the fullscreen stack or the freefrom stack.
+                    final ActivityStack dockedStack = mStackSupervisor.getStack(DOCKED_STACK_ID);
+                    final ActivityStack fullscreenStack = mStackSupervisor.getStack(
+                            FULLSCREEN_WORKSPACE_STACK_ID);
+                    final ActivityStack freeformStack = mStackSupervisor.getStack(
+                            FREEFORM_WORKSPACE_STACK_ID);
+                    final boolean dockedStackEmpty = dockedStack == null ||
+                            dockedStack.topRunningActivityLocked() == null;
+                    final boolean fullscreenStackEmpty = fullscreenStack == null ||
+                            fullscreenStack.topRunningActivityLocked() == null;
+                    final boolean freeformStackEmpty = freeformStack == null ||
+                            freeformStack.topRunningActivityLocked() == null;
+                    behindFullscreenActivity = dockedStackEmpty || !fullscreenStackEmpty ||
+                            !freeformStackEmpty;
+                } else if (task.isHomeTask()) {
                     if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Home task: at " + task
                             + " stackInvisible=" + stackInvisible
                             + " behindFullscreenActivity=" + behindFullscreenActivity);

@@ -61,6 +61,7 @@ public class WindowLayersController {
     private ArrayDeque<WindowState> mPinnedWindows = new ArrayDeque<>();
     private ArrayDeque<WindowState> mDockedWindows = new ArrayDeque<>();
     private ArrayDeque<WindowState> mInputMethodWindows = new ArrayDeque<>();
+    private ArrayDeque<WindowState> mOnTopLauncherWindows = new ArrayDeque<>();
     private WindowState mDockDivider = null;
     private ArrayDeque<WindowState> mReplacingWindows = new ArrayDeque<>();
 
@@ -165,6 +166,7 @@ public class WindowLayersController {
         mPinnedWindows.clear();
         mInputMethodWindows.clear();
         mDockedWindows.clear();
+        mOnTopLauncherWindows.clear();
         mReplacingWindows.clear();
         mDockDivider = null;
     }
@@ -181,7 +183,14 @@ public class WindowLayersController {
             mInputMethodWindows.add(w);
             return;
         }
-        final TaskStack stack = w.getStack();
+        final Task task = w.getTask();
+        if (task == null) {
+            return;
+        }
+        if (task.isOnTopLauncher()) {
+            mOnTopLauncherWindows.add(w);
+        }
+        final TaskStack stack = task.mStack;
         if (stack == null) {
             return;
         }
@@ -202,7 +211,13 @@ public class WindowLayersController {
 
         layer = assignAndIncreaseLayerIfNeeded(mDockDivider, layer);
 
-        if (mDockDivider != null && mDockDivider.isVisibleLw()) {
+        boolean onTopLauncherVisible = !mOnTopLauncherWindows.isEmpty();
+        while (!mOnTopLauncherWindows.isEmpty()) {
+            layer = assignAndIncreaseLayerIfNeeded(mOnTopLauncherWindows.remove(), layer);
+        }
+
+        // Make sure IME windows are showing above the dock divider and on-top launcher windows.
+        if ((mDockDivider != null && mDockDivider.isVisibleLw()) || onTopLauncherVisible) {
             while (!mInputMethodWindows.isEmpty()) {
                 final WindowState w = mInputMethodWindows.remove();
                 // Only ever move IME windows up, else we brake IME for windows above the divider.
