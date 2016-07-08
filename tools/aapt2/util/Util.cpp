@@ -175,11 +175,11 @@ Maybe<std::u16string> getFullyQualifiedClassName(const StringPiece16& package,
         return {};
     }
 
+    std::u16string result(package.data(), package.size());
     if (className.data()[0] != u'.') {
-        return {};
+        result += u'.';
     }
 
-    std::u16string result(package.data(), package.size());
     result.append(className.data(), className.size());
     if (!isJavaClassName(result)) {
         return {};
