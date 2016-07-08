@@ -54,8 +54,6 @@ Layer::~Layer() {
     if (texture.mId) {
         texture.deleteTexture();
     }
-
-    delete[] mesh;
 }
 
 void Layer::onGlContextLost() {
