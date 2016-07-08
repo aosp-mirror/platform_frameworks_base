@@ -53,6 +53,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     private static final long WAKE_AND_UNLOCK_SCRIM_FADEOUT_DURATION_MS = 200;
 
+    // Duration of the Keyguard dismissal animation in case the user is currently locked. This is to
+    // make everything a bit slower to bridge a gap until the user is unlocked and home screen has
+    // dranw its first frame.
+    private static final long KEYGUARD_DISMISS_DURATION_LOCKED = 2000;
+
     private static String TAG = "StatusBarKeyguardViewManager";
 
     protected final Context mContext;
@@ -274,9 +279,12 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     /**
      * Hides the keyguard view
      */
-    public void hide(long startTime, final long fadeoutDuration) {
+    public void hide(long startTime, long fadeoutDuration) {
         mShowing = false;
 
+        if (!KeyguardUpdateMonitor.getInstance(mContext).isUserUnlocked()) {
+            fadeoutDuration = KEYGUARD_DISMISS_DURATION_LOCKED;
+        }
         long uptimeMillis = SystemClock.uptimeMillis();
         long delay = Math.max(0, startTime + HIDE_TIMING_CORRECTION_MS - uptimeMillis);
 
