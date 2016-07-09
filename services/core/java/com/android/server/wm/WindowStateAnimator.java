@@ -17,7 +17,6 @@
 package com.android.server.wm;
 
 import static android.app.ActivityManager.StackId;
-import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
 import static android.view.WindowManager.LayoutParams.FLAG_SCALED;
@@ -261,8 +260,8 @@ class WindowStateAnimator {
         }
 
         mWin = win;
-        mAttachedWinAnimator = win.mAttachedWindow == null
-                ? null : win.mAttachedWindow.mWinAnimator;
+        mAttachedWinAnimator = !win.isChildWindow()
+                ? null : win.mParentWindow.mWinAnimator;
         mAppAnimator = win.mAppToken == null ? null : win.mAppToken.mAppAnimator;
         mSession = win.mSession;
         mAttrType = win.mAttrs.type;
@@ -1161,7 +1160,7 @@ class WindowStateAnimator {
 
         // Initialize the decor rect to the entire frame.
         if (w.isDockedResizing() ||
-                (w.isChildWindow() && w.mAttachedWindow.isDockedResizing())) {
+                (w.isChildWindow() && w.mParentWindow.isDockedResizing())) {
 
             // If we are resizing with the divider, the task bounds might be smaller than the
             // stack bounds. The system decor is used to clip to the task bounds, which we don't
@@ -2048,7 +2047,7 @@ class WindowStateAnimator {
         mDeferTransactionUntilFrame = frameNumber;
         mDeferTransactionTime = System.currentTimeMillis();
         mSurfaceController.deferTransactionUntil(
-                mWin.mAttachedWindow.mWinAnimator.mSurfaceController.getHandle(),
+                mWin.mParentWindow.mWinAnimator.mSurfaceController.getHandle(),
                 frameNumber);
     }
 
@@ -2068,7 +2067,7 @@ class WindowStateAnimator {
             mDeferTransactionUntilFrame = -1;
         } else {
             mSurfaceController.deferTransactionUntil(
-                    mWin.mAttachedWindow.mWinAnimator.mSurfaceController.getHandle(),
+                    mWin.mParentWindow.mWinAnimator.mSurfaceController.getHandle(),
                     mDeferTransactionUntilFrame);
         }
     }
@@ -2154,8 +2153,8 @@ class WindowStateAnimator {
             frameRect.set(x, y, x+width, y+height);
             transform.mapRect(frameRect);
 
-            w.mAttrs.x = (int) frameRect.left - w.mAttachedWindow.mFrame.left;
-            w.mAttrs.y = (int) frameRect.top - w.mAttachedWindow.mFrame.top;
+            w.mAttrs.x = (int) frameRect.left - w.mParentWindow.mFrame.left;
+            w.mAttrs.y = (int) frameRect.top - w.mParentWindow.mFrame.top;
             w.mAttrs.width = (int) Math.ceil(frameRect.width());
             w.mAttrs.height = (int) Math.ceil(frameRect.height());
 

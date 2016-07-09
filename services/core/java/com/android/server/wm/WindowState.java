@@ -150,7 +150,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     // modified they will need to be locked.
     final WindowManager.LayoutParams mAttrs = new WindowManager.LayoutParams();
     final DeathRecipient mDeathRecipient;
-    final WindowState mAttachedWindow;
+    final WindowState mParentWindow;
     final WindowList mChildWindows = new WindowList();
     final int mBaseLayer;
     final int mSubLayer;
@@ -504,7 +504,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     boolean mSeamlesslyRotated = false;
 
     WindowState(WindowManagerService service, Session s, IWindow c, WindowToken token,
-           WindowState attachedWindow, int appOp, int seq, WindowManager.LayoutParams a,
+           WindowState parentWindow, int appOp, int seq, WindowManager.LayoutParams a,
            int viewVisibility, final DisplayContent displayContent) {
         mService = service;
         mSession = s;
@@ -541,7 +541,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             c.asBinder().linkToDeath(deathRecipient, 0);
         } catch (RemoteException e) {
             mDeathRecipient = null;
-            mAttachedWindow = null;
+            mParentWindow = null;
             mLayoutAttached = false;
             mIsImWindow = false;
             mIsWallpaper = false;
@@ -559,13 +559,13 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             // The multiplier here is to reserve space for multiple
             // windows in the same type layer.
             mBaseLayer = mPolicy.windowTypeToLayerLw(
-                    attachedWindow.mAttrs.type) * WindowManagerService.TYPE_LAYER_MULTIPLIER
+                    parentWindow.mAttrs.type) * WindowManagerService.TYPE_LAYER_MULTIPLIER
                     + WindowManagerService.TYPE_LAYER_OFFSET;
             mSubLayer = mPolicy.subWindowTypeToLayerLw(a.type);
-            mAttachedWindow = attachedWindow;
-            if (DEBUG_ADD_REMOVE) Slog.v(TAG, "Adding " + this + " to " + mAttachedWindow);
+            mParentWindow = parentWindow;
+            if (DEBUG_ADD_REMOVE) Slog.v(TAG, "Adding " + this + " to " + mParentWindow);
 
-            final WindowList childWindows = mAttachedWindow.mChildWindows;
+            final WindowList childWindows = mParentWindow.mChildWindows;
             final int numChildWindows = childWindows.size();
             if (numChildWindows == 0) {
                 childWindows.add(this);
@@ -590,9 +590,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
             mLayoutAttached = mAttrs.type !=
                     WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
-            mIsImWindow = attachedWindow.mAttrs.type == TYPE_INPUT_METHOD
-                    || attachedWindow.mAttrs.type == TYPE_INPUT_METHOD_DIALOG;
-            mIsWallpaper = attachedWindow.mAttrs.type == TYPE_WALLPAPER;
+            mIsImWindow = parentWindow.mAttrs.type == TYPE_INPUT_METHOD
+                    || parentWindow.mAttrs.type == TYPE_INPUT_METHOD_DIALOG;
+            mIsWallpaper = parentWindow.mAttrs.type == TYPE_WALLPAPER;
             mIsFloatingLayer = mIsImWindow || mIsWallpaper;
         } else {
             // The multiplier here is to reserve space for multiple
@@ -601,7 +601,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     * WindowManagerService.TYPE_LAYER_MULTIPLIER
                     + WindowManagerService.TYPE_LAYER_OFFSET;
             mSubLayer = 0;
-            mAttachedWindow = null;
+            mParentWindow = null;
             mLayoutAttached = false;
             mIsImWindow = mAttrs.type == TYPE_INPUT_METHOD
                     || mAttrs.type == TYPE_INPUT_METHOD_DIALOG;
@@ -611,7 +611,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
         WindowState appWin = this;
         while (appWin.isChildWindow()) {
-            appWin = appWin.mAttachedWindow;
+            appWin = appWin.mParentWindow;
         }
         WindowToken appToken = appWin.mToken;
         while (appToken.appWindowToken == null) {
@@ -1040,7 +1040,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     public int getBaseType() {
         WindowState win = this;
         while (win.isChildWindow()) {
-            win = win.mAttachedWindow;
+            win = win.mParentWindow;
         }
         return win.mAttrs.type;
     }
@@ -1406,7 +1406,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return mHasSurface && (mContentChanged || mMovedByResize)
                 && !mAnimatingExit && mService.okToDisplay()
                 && (mFrame.top != mLastFrame.top || mFrame.left != mLastFrame.left)
-                && (mAttachedWindow == null || !mAttachedWindow.hasMoved());
+                && (!isChildWindow() || !mParentWindow.hasMoved());
     }
 
     boolean isObscuringFullscreen(final DisplayInfo displayInfo) {
@@ -1451,8 +1451,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         disposeInputChannel();
 
         if (isChildWindow()) {
-            if (DEBUG_ADD_REMOVE) Slog.v(TAG, "Removing " + this + " from " + mAttachedWindow);
-            mAttachedWindow.mChildWindows.remove(this);
+            if (DEBUG_ADD_REMOVE) Slog.v(TAG, "Removing " + this + " from " + mParentWindow);
+            mParentWindow.mChildWindows.remove(this);
         }
         mWinAnimator.destroyDeferredSurfaceLocked();
         mWinAnimator.destroySurfaceLocked();
@@ -2170,7 +2170,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         // Attached windows are evaluated based on the window that they are attached to.
         WindowState win = this;
         while (win.isChildWindow()) {
-            win = win.mAttachedWindow;
+            win = win.mParentWindow;
         }
         if (win.mAttrs.type < WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW
                 && win.mAppToken != null && win.mAppToken.showForAllUsers) {
@@ -2549,7 +2549,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     pw.print(" h="); pw.println(mLastRequestedHeight);
         }
         if (isChildWindow() || mLayoutAttached) {
-            pw.print(prefix); pw.print("mAttachedWindow="); pw.print(mAttachedWindow);
+            pw.print(prefix); pw.print("mParentWindow="); pw.print(mParentWindow);
                     pw.print(" mLayoutAttached="); pw.println(mLayoutAttached);
         }
         if (mIsImWindow || mIsWallpaper || mIsFloatingLayer) {
@@ -2838,7 +2838,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     boolean isChildWindow() {
-        return mAttachedWindow != null;
+        return mParentWindow != null;
     }
 
     boolean layoutInParentFrame() {

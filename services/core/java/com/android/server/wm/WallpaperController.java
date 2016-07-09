@@ -661,9 +661,9 @@ class WallpaperController {
             while (wallpaperTargetIndex > 0) {
                 WindowState wb = windows.get(wallpaperTargetIndex - 1);
                 if (wb.mBaseLayer < maxLayer &&
-                        wb.mAttachedWindow != wallpaperTarget &&
-                        (wallpaperTarget.mAttachedWindow == null ||
-                                wb.mAttachedWindow != wallpaperTarget.mAttachedWindow) &&
+                        wb.mParentWindow != wallpaperTarget &&
+                        (wallpaperTarget.mParentWindow == null ||
+                                wb.mParentWindow != wallpaperTarget.mParentWindow) &&
                         (wb.mAttrs.type != TYPE_APPLICATION_STARTING
                                 || wallpaperTarget.mToken == null
                                 || wb.mToken != wallpaperTarget.mToken)) {
