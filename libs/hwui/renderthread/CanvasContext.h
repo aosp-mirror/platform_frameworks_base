@@ -24,6 +24,7 @@
 #include "FrameInfoVisualizer.h"
 #include "FrameMetricsReporter.h"
 #include "IContextFactory.h"
+#include "IRenderPipeline.h"
 #include "LayerUpdateQueue.h"
 #include "RenderNode.h"
 #include "thread/Task.h"
@@ -56,11 +57,7 @@ class RenderState;
 namespace renderthread {
 
 class EglManager;
-
-enum SwapBehavior {
-    kSwap_default,
-    kSwap_discardBuffer,
-};
+class Frame;
 
 // This per-renderer class manages the bridge between the global EGL context
 // and the render surface.
@@ -164,7 +161,7 @@ public:
 
 private:
     CanvasContext(RenderThread& thread, bool translucent, RenderNode* rootRenderNode,
-            IContextFactory* contextFactory);
+            IContextFactory* contextFactory, std::unique_ptr<IRenderPipeline> renderPipeline);
 
     friend class RegisterFrameCallbackTask;
     // TODO: Replace with something better for layer & other GL object
@@ -179,21 +176,20 @@ private:
 
     bool isSwapChainStuffed();
 
+    SkRect computeDirtyRect(const Frame& frame, SkRect* dirty);
+
     EGLint mLastFrameWidth = 0;
     EGLint mLastFrameHeight = 0;
 
     RenderThread& mRenderThread;
-    EglManager& mEglManager;
     sp<Surface> mNativeSurface;
-    EGLSurface mEglSurface = EGL_NO_SURFACE;
     // stopped indicates the CanvasContext will reject actual redraw operations,
     // and defer repaint until it is un-stopped
     bool mStopped = false;
     // CanvasContext is dirty if it has received an update that it has not
     // painted onto its surface.
     bool mIsDirty = false;
-    bool mBufferPreserved = false;
-    SwapBehavior mSwapBehavior = kSwap_default;
+    SwapBehavior mSwapBehavior = SwapBehavior::kSwap_default;
     struct SwapHistory {
         SkRect damage;
         nsecs_t vsyncTime;
@@ -238,6 +234,7 @@ private:
 
     std::vector< sp<FuncTask> > mFrameFences;
     sp<TaskProcessor<bool> > mFrameWorkProcessor;
+    std::unique_ptr<IRenderPipeline> mRenderPipeline;
 };
 
 } /* namespace renderthread */

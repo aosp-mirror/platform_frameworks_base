@@ -24,6 +24,7 @@ hwui_src_files := \
     renderstate/Stencil.cpp \
     renderstate/TextureState.cpp \
     renderthread/CanvasContext.cpp \
+    renderthread/OpenGLPipeline.cpp \
     renderthread/DrawFrameTask.cpp \
     renderthread/EglManager.cpp \
     renderthread/RenderProxy.cpp \
