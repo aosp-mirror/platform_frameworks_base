@@ -38,6 +38,23 @@ public class MainActivity extends AppCompatActivity {
     private static final String EXTRA_PATH = "activity_path";
     private static final String CATEGORY_HWUI_TEST = "com.android.test.uibench.TEST";
 
+    public static class TestListFragment extends ListFragment {
+        @Override
+        @SuppressWarnings("unchecked")
+        public void onListItemClick(ListView l, View v, int position, long id) {
+            Map<String, Object> map = (Map<String, Object>)l.getItemAtPosition(position);
+
+            Intent intent = (Intent) map.get("intent");
+            startActivity(intent);
+        }
+
+        @Override
+        public void onViewCreated(View view, Bundle savedInstanceState) {
+            super.onViewCreated(view, savedInstanceState);
+            getListView().setTextFilterEnabled(true);
+        }
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,22 +71,7 @@ public class MainActivity extends AppCompatActivity {
 
         FragmentManager fm = getSupportFragmentManager();
         if (fm.findFragmentById(android.R.id.content) == null) {
-            ListFragment listFragment = new ListFragment() {
-                @Override
-                @SuppressWarnings("unchecked")
-                public void onListItemClick(ListView l, View v, int position, long id) {
-                    Map<String, Object> map = (Map<String, Object>)l.getItemAtPosition(position);
-
-                    Intent intent = (Intent) map.get("intent");
-                    startActivity(intent);
-                }
-
-                @Override
-                public void onViewCreated(View view, Bundle savedInstanceState) {
-                    super.onViewCreated(view, savedInstanceState);
-                    getListView().setTextFilterEnabled(true);
-                }
-            };
+            ListFragment listFragment = new TestListFragment();
             listFragment.setListAdapter(new SimpleAdapter(this, getData(path),
                     android.R.layout.simple_list_item_1, new String[] { "title" },
                     new int[] { android.R.id.text1 }));
