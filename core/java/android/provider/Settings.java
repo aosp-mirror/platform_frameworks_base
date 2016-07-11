@@ -6303,19 +6303,35 @@ public final class Settings {
                 "automatic_storage_manager_last_run";
 
         /**
-         * Whether Downloads folder backup is enabled and should run on the device.
-         *
-         * @hide
-         */
-        public static final String DOWNLOADS_BACKUP_ENABLED = "downloads_backup_enabled";
-
-        /**
          * Whether SystemUI navigation keys is enabled.
          * @hide
          */
         public static final String SYSTEM_NAVIGATION_KEYS_ENABLED =
                 "system_navigation_keys_enabled";
 
+        /**
+         * Whether Downloads folder backup is enabled and should run on the device.
+         *
+         * @hide
+         */
+        public static final String DOWNLOADS_BACKUP_ENABLED = "downloads_backup_enabled";
+        
+        /**
+         * Whether Downloads folder backup should only occur if the device is using a metered
+         * network.
+         *
+         * @hide
+         */
+        public static final String DOWNLOADS_BACKUP_ALLOW_METERED =
+                "downloads_backup_allow_metered";
+
+        /**
+         * Whether Downloads folder backup should only occur if the device is charging.
+         *
+         * @hide
+         */
+        public static final String DOWNLOADS_BACKUP_CHARGING_ONLY =
+                "downloads_backup_charging_only";
 
         /**
          * This are the settings to be backed up.
