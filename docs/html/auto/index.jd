@@ -507,7 +507,12 @@ nonavpage=true
                       width="120" height="120" class="img-logo" />
               </a>
             </div>
-
+			      <div class="col-5">
+              <a href=" http://www.lincoln.com/">
+                <img src="{@docRoot}auto/images/logos/auto/lincoln.png"
+                    width="120" height="120" class="img-logo" />
+              </a>
+            </div>
             <div class="col-5">
               <a href="http://www.mahindra.com/">
                   <img src="{@docRoot}auto/images/logos/auto/mahindra.png"
@@ -520,16 +525,22 @@ nonavpage=true
                       width="120" height="120" class="img-logo" />
               </a>
             </div>
+            </div>
+            <div class="cols cols-leftp">
             <div class="col-5">
               <a href="http://www.mazda.com/">
                   <img src="{@docRoot}auto/images/logos/auto/mazda.png"
                       width="120" height="120" class="img-logo" />
               </a>
             </div>
-            </div>
 
-              <div class="cols cols-leftp">
-              <div class="col-5">
+            <div class="col-5">
+              <a href="http://www.mercedes-benz.com/">
+                  <img src="{@docRoot}auto/images/logos/auto/mbenz.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
+            </div>
+             <div class="col-5">
               <a href="http://www.mitsubishi-motors.com/">
                   <img src="{@docRoot}auto/images/logos/auto/mitsubishi.png"
                       width="120" height="120" class="img-logo" />
@@ -542,20 +553,22 @@ nonavpage=true
                       width="120" height="120" class="img-logo" />
               </a>
             </div>
+            </div>
+            <div class="cols cols-leftp">
             <div class="col-5">
               <a href="http://www.opel.com/">
                   <img src="{@docRoot}auto/images/logos/auto/opel.png"
                       width="120" height="120" class="img-logo" />
               </a>
             </div>
+
             <div class="col-5">
               <a href="http://www.peugeot.com/">
                   <img src="{@docRoot}auto/images/logos/auto/peugeot.png"
                       width="120" height="120" class="img-logo" />
               </a>
             </div>
-            </div>
-            <div class="cols cols-leftp">
+           
             <div class="col-5">
               <a href="http://www.ramtrucks.com/">
                   <img src="{@docRoot}auto/images/logos/auto/ram.png"
@@ -569,27 +582,37 @@ nonavpage=true
                       width="120" height="120" class="img-logo" />
               </a>
             </div>
+            </div>
+            <div class="cols cols-leftp">
+            <div class="col-5">
+              <a href="http://www.renaultsamsungm.com/ ">
+                  <img src="{@docRoot}auto/images/logos/auto/rsm.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
+            </div>
+           
             <div class="col-5">
               <a href="http://www.seat.com/">
                   <img src="{@docRoot}auto/images/logos/auto/seat.png"
                       width="120" height="120" class="img-logo" />
               </a>
             </div>
+
             <div class="col-5">
               <a href="http://www.skoda-auto.com/">
                   <img src="{@docRoot}auto/images/logos/auto/skoda.png"
                       width="120" height="120" class="img-logo" />
               </a>
             </div>
-            </div>
-            <div class="cols cols-leftp">
+            
             <div class="col-5">
               <a href="http://www.smotor.com/">
                   <img src="{@docRoot}auto/images/logos/auto/ssangyong.png"
                       width="120" height="120" class="img-logo" />
               </a>
             </div>
-
+            </div>
+            <div class="cols cols-leftp">
             <div class="col-5">
               <a href="http://www.subaru-global.com/">
                   <img src="{@docRoot}auto/images/logos/auto/subaru.png"
@@ -597,13 +620,20 @@ nonavpage=true
               </a>
             </div>
 
-
             <div class="col-5">
               <a href="http://www.globalsuzuki.com/automobile/">
                   <img src="{@docRoot}auto/images/logos/auto/suzuki.png"
                       width="120" height="120" class="img-logo" />
               </a>
             </div>
+            
+            <div class="col-5">
+              <a href="http://www.tatamotors.com/">
+                  <img src="{@docRoot}auto/images/logos/auto/tata.png"
+                      width="120" height="120" class="img-logo" />
+              </a>
+            </div>
+
             <div class="col-5">
               <a href="http://www.vauxhall.co.uk/">
                   <img src="{@docRoot}auto/images/logos/auto/vauxhall.png"
@@ -618,7 +648,8 @@ nonavpage=true
                       width="120" height="120" class="img-logo" />
               </a>
             </div>
-
+			
+			
             <div class="col-5">
               <a href="http://www.volvocars.com/intl">
                   <img src="{@docRoot}auto/images/logos/auto/volvo.png"
