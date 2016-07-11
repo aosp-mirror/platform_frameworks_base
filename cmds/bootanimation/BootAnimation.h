@@ -130,6 +130,7 @@ private:
     Texture     mClock;
     int         mWidth;
     int         mHeight;
+    bool        mUseNpotTextures = false;
     EGLDisplay  mDisplay;
     EGLDisplay  mContext;
     EGLDisplay  mSurface;
