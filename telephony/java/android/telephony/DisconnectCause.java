@@ -206,6 +206,12 @@ public class DisconnectCause {
      */
     public static final int ANSWERED_ELSEWHERE = 52;
 
+    /**
+     * The call was terminated because the maximum allowable number of calls has been reached.
+     * {@hide}
+     */
+    public static final int MAXIMUM_NUMBER_OF_CALLS_REACHED = 53;
+
     //*********************************************************************************************
     // When adding a disconnect type:
     // 1) Please assign the new type the next id value below.
@@ -214,14 +220,14 @@ public class DisconnectCause {
     // 4) Update toString() with the newly added disconnect type.
     // 5) Update android.telecom.DisconnectCauseUtil with any mappings to a telecom.DisconnectCause.
     //
-    // NextId: 53
+    // NextId: 54
     //*********************************************************************************************
 
     /** Smallest valid value for call disconnect codes. */
     public static final int MINIMUM_VALID_VALUE = NOT_DISCONNECTED;
 
     /** Largest valid value for call disconnect codes. */
-    public static final int MAXIMUM_VALID_VALUE = ANSWERED_ELSEWHERE;
+    public static final int MAXIMUM_VALID_VALUE = MAXIMUM_NUMBER_OF_CALLS_REACHED;
 
     /** Private constructor to avoid class instantiation. */
     private DisconnectCause() {
@@ -335,6 +341,8 @@ public class DisconnectCause {
             return "CALL_PULLED";
         case ANSWERED_ELSEWHERE:
             return "ANSWERED_ELSEWHERE";
+        case MAXIMUM_NUMBER_OF_CALLS_REACHED:
+            return "MAXIMUM_NUMER_OF_CALLS_REACHED";
         default:
             return "INVALID: " + cause;
         }

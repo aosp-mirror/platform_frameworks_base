@@ -24,6 +24,7 @@ import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 
+import com.android.ims.ImsReasonInfo;
 import com.android.internal.telephony.ICarrierConfigLoader;
 
 /**
@@ -836,6 +837,25 @@ public class CarrierConfigManager {
     public static final String KEY_ALLOW_ADD_CALL_DURING_VIDEO_CALL_BOOL =
             "allow_add_call_during_video_call";
 
+    /**
+     * Defines operator-specific {@link com.android.ims.ImsReasonInfo} mappings.
+     *
+     * Format: "ORIGINAL_CODE|MESSAGE|NEW_CODE"
+     * Where {@code ORIGINAL_CODE} corresponds to a {@link ImsReasonInfo#getCode()} code,
+     * {@code MESSAGE} corresponds to an expected {@link ImsReasonInfo#getExtraMessage()} string,
+     * and {@code NEW_CODE} is the new {@code ImsReasonInfo#CODE_*} which this combination of
+     * original code and message shall be remapped to.
+     *
+     * Example: "501|call completion elsewhere|1014"
+     * When the {@link ImsReasonInfo#getCode()} is {@link ImsReasonInfo#CODE_USER_TERMINATED} and
+     * the {@link ImsReasonInfo#getExtraMessage()} is {@code "call completion elsewhere"},
+     * {@link ImsReasonInfo#CODE_ANSWERED_ELSEWHERE} shall be used as the {@link ImsReasonInfo}
+     * code instead.
+     * @hide
+     */
+    public static final String KEY_IMS_REASONINFO_MAPPING_STRING_ARRAY =
+            "ims_reasoninfo_mapping_string_array";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -992,6 +1012,8 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_DROP_VIDEO_CALL_WHEN_ANSWERING_AUDIO_CALL_BOOL, false);
         sDefaults.putBoolean(KEY_ALLOW_MERGE_WIFI_CALLS_WHEN_VOWIFI_OFF_BOOL, true);
         sDefaults.putBoolean(KEY_ALLOW_ADD_CALL_DURING_VIDEO_CALL_BOOL, true);
+
+        sDefaults.putStringArray(KEY_IMS_REASONINFO_MAPPING_STRING_ARRAY, null);
     }
 
     /**
