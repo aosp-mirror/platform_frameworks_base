@@ -93,13 +93,19 @@ lesson.</p>
         Activities</a> for more information.</p>
     </div>
   </div>
-  <li>Under <strong>Add an activity to &lt;<em>template</em>&gt;</strong>, select <strong>Blank
-    Activity</strong> and click <strong>Next</strong>.</li>
+  <li>Under <strong>Add an activity to &lt;<em>template</em>&gt;</strong>,
+  select <strong>Basic Activity</strong> and click <strong>Next</strong>.
+  </li>
+
   <li>Under <strong>Customize the Activity</strong>, change the
-    <strong>Activity Name</strong> to <em>MyActivity</em>. The <strong>Layout Name</strong> changes
-    to <em>activity_my</em>, and the <strong>Title</strong> to <em>MyActivity</em>. The
-    <strong>Menu Resource Name</strong> is <em>menu_my</em>.
-   <li>Click the <strong>Finish</strong> button to create the project.</li>
+  <strong>Activity Name</strong> to <em>MyActivity</em>. The <strong>Layout
+  Name</strong> changes to <em>activity_my</em>, and the <strong>Title</strong>
+  to <em>MyActivity</em>. The <strong>Menu Resource Name</strong> is
+  <em>menu_my</em>.
+  </li>
+
+  <li>Click the <strong>Finish</strong> button to create the project.
+  </li>
 </ol>
 
 <p>Your Android project is now a basic "Hello World" app that contains some default files. Take a
@@ -180,4 +186,6 @@ moment to review the most important of these:</p>
       string and color definitions.</dd>
 </dl>
 
-<p>To run the app, continue to the <a href="running-app.html">next lesson</a>.</p>
+<p>
+  To run the app, continue to the <a href="running-app.html">next lesson</a>.
+</p>
