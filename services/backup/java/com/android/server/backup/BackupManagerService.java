@@ -234,6 +234,7 @@ public class BackupManagerService {
     private static final int MSG_WIDGET_BROADCAST = 13;
     private static final int MSG_RUN_FULL_TRANSPORT_BACKUP = 14;
     private static final int MSG_REQUEST_BACKUP = 15;
+    private static final int MSG_SCHEDULE_BACKUP_PACKAGE = 16;
 
     // backup task state machine tick
     static final int MSG_BACKUP_RESTORE_STEP = 20;
@@ -1037,6 +1038,16 @@ public class BackupManagerService {
                 sendMessage(pbtMessage);
                 break;
             }
+
+            case MSG_SCHEDULE_BACKUP_PACKAGE:
+            {
+                String pkgName = (String)msg.obj;
+                if (MORE_DEBUG) {
+                    Slog.d(TAG, "MSG_SCHEDULE_BACKUP_PACKAGE " + pkgName);
+                }
+                dataChangedImpl(pkgName);
+                break;
+            }
             }
         }
     }
@@ -1216,7 +1227,7 @@ public class BackupManagerService {
 
         // Now that we know about valid backup participants, parse any
         // leftover journal files into the pending backup set
-        parseLeftoverJournals();
+        mBackupHandler.post(() -> parseLeftoverJournals());
 
         // Power management
         mWakelock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*backup*");
@@ -2161,7 +2172,7 @@ public class BackupManagerService {
                 int uid = pkg.applicationInfo.uid;
                 HashSet<String> set = mBackupParticipants.get(uid);
                 if (set == null) {
-                    set = new HashSet<String>();
+                    set = new HashSet<>();
                     mBackupParticipants.put(uid, set);
                 }
                 set.add(pkg.packageName);
@@ -2169,7 +2180,9 @@ public class BackupManagerService {
 
                 // Schedule a backup for it on general principles
                 if (MORE_DEBUG) Slog.i(TAG, "Scheduling backup for new app " + pkg.packageName);
-                dataChangedImpl(pkg.packageName);
+                Message msg = mBackupHandler
+                        .obtainMessage(MSG_SCHEDULE_BACKUP_PACKAGE, pkg.packageName);
+                mBackupHandler.sendMessage(msg);
             }
         }
     }
