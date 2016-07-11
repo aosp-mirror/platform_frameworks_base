@@ -17,6 +17,7 @@
 package com.android.internal.widget;
 
 import android.app.trust.IStrongAuthTracker;
+import com.android.internal.widget.ICheckCredentialProgressCallback;
 import com.android.internal.widget.VerifyCredentialResponse;
 
 /** {@hide} */
@@ -29,10 +30,12 @@ interface ILockSettings {
     String getString(in String key, in String defaultValue, in int userId);
     void setLockPattern(in String pattern, in String savedPattern, int userId);
     void resetKeyStore(int userId);
-    VerifyCredentialResponse checkPattern(in String pattern, int userId);
+    VerifyCredentialResponse checkPattern(in String pattern, int userId,
+            in ICheckCredentialProgressCallback progressCallback);
     VerifyCredentialResponse verifyPattern(in String pattern, long challenge, int userId);
     void setLockPassword(in String password, in String savedPassword, int userId);
-    VerifyCredentialResponse checkPassword(in String password, int userId);
+    VerifyCredentialResponse checkPassword(in String password, int userId,
+            in ICheckCredentialProgressCallback progressCallback);
     VerifyCredentialResponse verifyPassword(in String password, long challenge, int userId);
     VerifyCredentialResponse verifyTiedProfileChallenge(String password, boolean isPattern, long challenge, int userId);
     boolean checkVoldPassword(int userId);
