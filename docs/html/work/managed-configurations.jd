@@ -149,9 +149,9 @@ enterprise administrator to:</p>
 
   &lt;restriction
     android:key="downloadOnCellular"
-    android:title="App is allowed to download data via cellular"
+    android:title="@string/download_on_cell_title"
     android:restrictionType="bool"
-    android:description="If 'false', app can only download data via Wi-Fi"
+    android:description="@string/download_on_cell_description"
     android:defaultValue="true" /&gt;
 
 &lt;/restrictions&gt;
