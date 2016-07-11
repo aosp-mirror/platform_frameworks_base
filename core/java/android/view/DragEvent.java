@@ -102,8 +102,8 @@ import com.android.internal.view.IDragAndDropPermissions;
  *  </tr>
  *  <tr>
  *      <td>ACTION_DRAG_ENDED</td>
- *      <td style="text-align: center;">X</td>
- *      <td style="text-align: center;">X</td>
+ *      <td style="text-align: center;">&nbsp;</td>
+ *      <td style="text-align: center;">&nbsp;</td>
  *      <td style="text-align: center;">&nbsp;</td>
  *      <td style="text-align: center;">&nbsp;</td>
  *      <td style="text-align: center;">&nbsp;</td>
@@ -359,7 +359,7 @@ public class DragEvent implements Parcelable {
      * The drag handler or listener for a View can use the metadata in this object to decide if the
      * View can accept the dragged View object's data.
      * <p>
-     * This method returns valid data for all event actions.
+     * This method returns valid data for all event actions except for {@link #ACTION_DRAG_ENDED}.
      * @return The ClipDescription that was part of the ClipData sent to the system by startDrag().
      */
     public ClipDescription getClipDescription() {
@@ -377,7 +377,7 @@ public class DragEvent implements Parcelable {
      * The object is intended to provide local information about the drag and drop operation. For
      * example, it can indicate whether the drag and drop operation is a copy or a move.
      * <p>
-     *  This method returns valid data for all event actions.
+     *  This method returns valid data for all event actions except for {@link #ACTION_DRAG_ENDED}.
      * </p>
      * @return The local state object sent to the system by startDrag().
      */
