@@ -285,6 +285,16 @@ public class CarrierConfigManager {
     public static final String KEY_CARRIER_DEFAULT_WFC_IMS_ROAMING_ENABLED_BOOL =
             "carrier_default_wfc_ims_roaming_enabled_bool";
 
+    /**
+     * Flag indicating whether failed calls due to no service should prompt the user to enable
+     * WIFI calling.  When {@code true}, if the user attempts to establish a call when there is no
+     * service available, they are connected to WIFI, and WIFI calling is disabled, a different
+     * call failure message will be used to encourage the user to enable WIFI calling.
+     * @hide
+     */
+    public static final String KEY_CARRIER_PROMOTE_WFC_ON_CALL_FAIL_BOOL =
+            "carrier_promote_wfc_on_call_fail_bool";
+
     /** Flag specifying whether provisioning is required for VOLTE. */
     public static final String KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL
             = "carrier_volte_provisioning_required_bool";
@@ -843,6 +853,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CARRIER_WFC_SUPPORTS_WIFI_ONLY_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_DEFAULT_WFC_IMS_ENABLED_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_DEFAULT_WFC_IMS_ROAMING_ENABLED_BOOL, false);
+        sDefaults.putBoolean(KEY_CARRIER_PROMOTE_WFC_ON_CALL_FAIL_BOOL, false);
         sDefaults.putInt(KEY_CARRIER_DEFAULT_WFC_IMS_MODE_INT, 2);
         sDefaults.putBoolean(KEY_CARRIER_FORCE_DISABLE_ETWS_CMAS_TEST_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL, false);
