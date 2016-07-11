@@ -190,5 +190,15 @@
                 <category android:name="com.android.test.uibench.TEST" />
             </intent-filter>
         </activity>
+
+        <!-- Notification Shade -->
+        <activity
+            android:name=".NotificationShadeActivity"
+            android:label="Notification Shade">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
     </application>
 </manifest>

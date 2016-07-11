@@ -16,4 +16,5 @@
 <resources>
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="default_spacing">16dp</dimen>
+    <dimen name="notification_icon_size">16dp</dimen>
 </resources>
