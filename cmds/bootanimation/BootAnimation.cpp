@@ -839,9 +839,13 @@ bool BootAnimation::playAnimation(const Animation& animation)
                 break;
         }
 
-        // free the textures for this part
+    }
+
+    // Free textures created for looping parts now that the animation is done.
+    for (const Animation::Part& part : animation.parts) {
         if (part.count != 1) {
-            for (size_t j=0 ; j<fcount ; j++) {
+            const size_t fcount = part.frames.size();
+            for (size_t j = 0; j < fcount; j++) {
                 const Animation::Frame& frame(part.frames[j]);
                 glDeleteTextures(1, &frame.tid);
             }
