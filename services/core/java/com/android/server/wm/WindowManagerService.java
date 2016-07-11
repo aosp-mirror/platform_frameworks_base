@@ -6159,6 +6159,21 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @Override
+    public Bitmap screenshotWallpaper() {
+        if (!checkCallingPermission(Manifest.permission.READ_FRAME_BUFFER,
+                "screenshotWallpaper()")) {
+            throw new SecurityException("Requires READ_FRAME_BUFFER permission");
+        }
+        try {
+            Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "screenshotWallpaper");
+            return screenshotApplicationsInner(null, Display.DEFAULT_DISPLAY, -1, -1, true, 1f,
+                    Bitmap.Config.ARGB_8888, true);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+        }
+    }
+
     /**
      * Takes a snapshot of the screen.  In landscape mode this grabs the whole screen.
      * In portrait mode, it grabs the upper region of the screen based on the vertical dimension
@@ -6175,7 +6190,7 @@ public class WindowManagerService extends IWindowManager.Stub
             @Override
             public void run() {
                 Bitmap bm = screenshotApplicationsInner(null, Display.DEFAULT_DISPLAY, -1, -1,
-                        true, 1f, Bitmap.Config.ARGB_8888);
+                        true, 1f, Bitmap.Config.ARGB_8888, false);
                 try {
                     receiver.send(bm);
                 } catch (RemoteException e) {
@@ -6205,14 +6220,27 @@ public class WindowManagerService extends IWindowManager.Stub
         try {
             Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "screenshotApplications");
             return screenshotApplicationsInner(appToken, displayId, width, height, false,
-                    frameScale, Bitmap.Config.RGB_565);
+                    frameScale, Bitmap.Config.RGB_565, false);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
         }
     }
 
+    /**
+     * Takes a snapshot of the screen.  In landscape mode this grabs the whole screen.
+     * In portrait mode, it grabs the full screenshot.
+     *
+     * @param displayId the Display to take a screenshot of.
+     * @param width the width of the target bitmap
+     * @param height the height of the target bitmap
+     * @param includeFullDisplay true if the screen should not be cropped before capture
+     * @param frameScale the scale to apply to the frame, only used when width = -1 and height = -1
+     * @param config of the output bitmap
+     * @param wallpaperOnly true if only the wallpaper layer should be included in the screenshot
+     */
     Bitmap screenshotApplicationsInner(IBinder appToken, int displayId, int width, int height,
-            boolean includeFullDisplay, float frameScale, Bitmap.Config config) {
+            boolean includeFullDisplay, float frameScale, Bitmap.Config config,
+            boolean wallpaperOnly) {
         final DisplayContent displayContent;
         synchronized(mWindowMap) {
             displayContent = getDisplayContentLocked(displayId);
@@ -6239,7 +6267,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         boolean screenshotReady;
         int minLayer;
-        if (appToken == null) {
+        if (appToken == null && !wallpaperOnly) {
             screenshotReady = true;
             minLayer = 0;
         } else {
@@ -6279,11 +6307,20 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (ws.mLayer >= aboveAppLayer) {
                     continue;
                 }
+                if (wallpaperOnly && !ws.mIsWallpaper) {
+                    continue;
+                }
                 if (ws.mIsImWindow) {
                     if (!includeImeInScreenshot) {
                         continue;
                     }
                 } else if (ws.mIsWallpaper) {
+                    // If this is the wallpaper layer and we're only looking for the wallpaper layer
+                    // then the target window state is this one.
+                    if (wallpaperOnly) {
+                        appWin = ws;
+                    }
+
                     if (appWin == null) {
                         // We have not ran across the target window yet, so it is probably
                         // behind the wallpaper. This can happen when the keyguard is up and
@@ -6331,8 +6368,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 }
 
-                if (ws.mAppToken != null && ws.mAppToken.token == appToken &&
-                        ws.isDisplayedLw() && winAnim.getShown()) {
+                final boolean foundTargetWs =
+                        (ws.mAppToken != null && ws.mAppToken.token == appToken)
+                        || (appWin != null && wallpaperOnly);
+                if (foundTargetWs && ws.isDisplayedLw() && winAnim.getShown()) {
                     screenshotReady = true;
                 }
 
