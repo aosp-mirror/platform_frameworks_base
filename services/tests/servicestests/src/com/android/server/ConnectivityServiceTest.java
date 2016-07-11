@@ -1040,6 +1040,8 @@ public class ConnectivityServiceTest extends AndroidTestCase {
     enum CallbackState {
         NONE,
         AVAILABLE,
+        NETWORK_CAPABILITIES,
+        LINK_PROPERTIES,
         LOSING,
         LOST
     }
@@ -1072,18 +1074,21 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         }
         private final LinkedBlockingQueue<CallbackInfo> mCallbacks = new LinkedBlockingQueue<>();
 
-        private void setLastCallback(CallbackState state, Network network, Object o) {
+        protected void setLastCallback(CallbackState state, Network network, Object o) {
             mCallbacks.offer(new CallbackInfo(state, network, o));
         }
 
+        @Override
         public void onAvailable(Network network) {
             setLastCallback(CallbackState.AVAILABLE, network, null);
         }
 
+        @Override
         public void onLosing(Network network, int maxMsToLive) {
             setLastCallback(CallbackState.LOSING, network, maxMsToLive /* autoboxed int */);
         }
 
+        @Override
         public void onLost(Network network) {
             setLastCallback(CallbackState.LOST, network, null);
         }
@@ -1742,6 +1747,67 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         mCellNetworkAgent.disconnect();
         cellNetworkCallback.expectCallback(CallbackState.LOST, mCellNetworkAgent);
         defaultNetworkCallback.expectCallback(CallbackState.LOST, mCellNetworkAgent);
+    }
+
+    private class TestRequestUpdateCallback extends TestNetworkCallback {
+        @Override
+        public void onCapabilitiesChanged(Network network, NetworkCapabilities netCap) {
+            setLastCallback(CallbackState.NETWORK_CAPABILITIES, network, netCap);
+        }
+
+        @Override
+        public void onLinkPropertiesChanged(Network network, LinkProperties linkProp) {
+            setLastCallback(CallbackState.LINK_PROPERTIES, network, linkProp);
+        }
+    }
+
+    @LargeTest
+    public void testRequestCallbackUpdates() throws Exception {
+        // File a network request for mobile.
+        final TestNetworkCallback cellNetworkCallback = new TestRequestUpdateCallback();
+        final NetworkRequest cellRequest = new NetworkRequest.Builder()
+                .addTransportType(TRANSPORT_CELLULAR).build();
+        mCm.requestNetwork(cellRequest, cellNetworkCallback);
+
+        // Bring up the mobile network.
+        mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
+        mCellNetworkAgent.connect(true);
+
+        // We should get onAvailable().
+        cellNetworkCallback.expectCallback(CallbackState.AVAILABLE, mCellNetworkAgent);
+        // We should get onCapabilitiesChanged(), when the mobile network successfully validates.
+        cellNetworkCallback.expectCallback(CallbackState.NETWORK_CAPABILITIES, mCellNetworkAgent);
+        cellNetworkCallback.assertNoCallback();
+
+        // Update LinkProperties.
+        final LinkProperties lp = new LinkProperties();
+        lp.setInterfaceName("foonet_data0");
+        mCellNetworkAgent.sendLinkProperties(lp);
+        // We should get onLinkPropertiesChanged().
+        cellNetworkCallback.expectCallback(CallbackState.LINK_PROPERTIES, mCellNetworkAgent);
+        cellNetworkCallback.assertNoCallback();
+
+        // Register a garden variety default network request.
+        final TestNetworkCallback dfltNetworkCallback = new TestRequestUpdateCallback();
+        mCm.registerDefaultNetworkCallback(dfltNetworkCallback);
+        // Only onAvailable() is called; no other information is delivered.
+        dfltNetworkCallback.expectCallback(CallbackState.AVAILABLE, mCellNetworkAgent);
+        dfltNetworkCallback.assertNoCallback();
+
+        // Request a NetworkCapabilities update; only the requesting callback is notified.
+        mCm.requestNetworkCapabilities(dfltNetworkCallback);
+        dfltNetworkCallback.expectCallback(CallbackState.NETWORK_CAPABILITIES, mCellNetworkAgent);
+        cellNetworkCallback.assertNoCallback();
+        dfltNetworkCallback.assertNoCallback();
+
+        // Request a LinkProperties update; only the requesting callback is notified.
+        mCm.requestLinkProperties(dfltNetworkCallback);
+        dfltNetworkCallback.expectCallback(CallbackState.LINK_PROPERTIES, mCellNetworkAgent);
+        cellNetworkCallback.assertNoCallback();
+        dfltNetworkCallback.assertNoCallback();
+
+        mCm.unregisterNetworkCallback(dfltNetworkCallback);
+        mCm.unregisterNetworkCallback(cellNetworkCallback);
     }
 
     @SmallTest
