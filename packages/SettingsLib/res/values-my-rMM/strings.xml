@@ -204,7 +204,7 @@
     <string name="select_application" msgid="5156029161289091703">"အပလီကေးရှင်းရွေးချယ်ရန်"</string>
     <string name="no_application" msgid="2813387563129153880">"တခုမှမရှိ"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"အပြစ်ရှာဖွေ ဖယ်ရှားချက်ကိုစောင့်ရန်"</string>
-    <string name="wait_for_debugger_summary" msgid="1766918303462746804">"အမှားပြင်ဆင်ရှာဖွေသည့် အပလီကေးရှင်းသည် လုပ်ငန်းမစမှီ တွဲဖက်ရန် အမှားရှာဖွေမည့်သူကို စောင့်နေသည်။"</string>
+    <string name="wait_for_debugger_summary" msgid="1766918303462746804">"အမှားပြင်ဆင်ရှာဖွေသည့် အပလီကေးရှင်းသည် လုပ်ငန်းမစမီ တွဲဖက်ရန် အမှားရှာဖွေမည့်သူကို စောင့်နေသည်။"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"ထည့်သွင်းရန်"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"ရေးဆွဲခြင်း"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"ဟာ့ဒ်ဝဲ အရှိန်မြှင့် ပုံဖော်ခြင်း"</string>
@@ -217,11 +217,11 @@
     <string name="show_touches" msgid="2642976305235070316">"တို့ခြင်းများကို ပြပါ"</string>
     <string name="show_touches_summary" msgid="6101183132903926324">"တို့ခြင်းများအတွက် အမြင်ဖြင့် တုံ့ပြန်မှုပြပါ"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"surface အဆင့်မြှင့်မှုများပြပါ"</string>
-    <string name="show_screen_updates_summary" msgid="2569622766672785529">"အဆင့်မြှင့်နေစဉ် ဝင်းဒိုးမျက်နှာတပြင်လုံးကို အချက်ပြရန်"</string>
+    <string name="show_screen_updates_summary" msgid="2569622766672785529">"အပ်ဒိတ်လုပ်စဉ် ဝင်းဒိုးမျက်နှာပြင်တွင် အချက်ပြရန်"</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"GPUမြင်ကွင်းအဆင့်မြှင့်ခြင်းများပြရန်"</string>
     <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"GPU နှင့်ဆွဲစဉ် ၀င်းဒိုးအတွင်းပိုင်း လျှပ်တပြက်မြင်ကွင်းများ"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"ဟာ့ဒ်ဝဲအလွှာများအဆင်မြှင့်မှုကိုပြရန်"</string>
-    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"အဆင့်မြှင်ချိန် ဟာ့ဒ်ဝဲအလွှာများကို အစိမ်းရောင်ဖြင့်အချက်ပြရန်"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"အပ်ဒိတ်လုပ်ချိန် ဟာ့ဒ်ဝဲအလွှာများ အစိမ်းရောင်ပြပါ"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"GPU ပိုသုံးစွဲမှုအမှားရှာဖွေပြင်ဆင်ရန်"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"HWထပ်ဆင့်အရာများပိတ်ရန်"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"GPU ကိုမျက်နှာပြင်ခင်းကျင်းရာတွင် အမြဲသုံးပါ။"</string>
@@ -287,7 +287,7 @@
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"ပြောင်းရန်…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"ဖိုင်ကို လုံခြုံအောင်ပြုလုပ်ပြီးပါပြီ"</string>
     <string name="title_convert_fbe" msgid="1263622876196444453">"ဖိုင်အခြေပြုလုံခြုံအောင်ပြုလုပ်ခြင်းသို့ ပြောင်းလဲရန်"</string>
-    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"အချက်အလက်အပိုင်းကို ဖိုင်အခြေပြုလုံခြုံအောင်ပြုလုပ်ခြင်းသို့ ပြောင်းပါ။\n !!သတိ!! ၎င်းသည်သင့် အချက်အလက်များအားလုံးကို ဖျက်ပါမည်။ \n ဤလုပ်ဆောင်ချက်သည် ပထမအဆင့်တွင်သာ ရှိသေးပြီး မှန်ကန်စွာ လုပ်ဆောင်လိမ့်မည် မဟုတ်ပါ။\n ရှေ့ဆက်ရန် \'ရှင်းလင်းပြီး ပြောင်းလဲရန်…\' ကိုနှိပ်ပါ။"</string>
+    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"အချက်အလက်အပိုင်းကို ဖိုင်အခြေပြုလုံခြုံအောင်ပြုလုပ်ခြင်းသို့ ပြောင်းပါ။\n !!သတိ!! ၎င်းသည်သင့် အချက်အလက်များအားလုံးကို ဖျက်ပါမည်။ \n ဤလုပ်ဆောင်ချက်သည် ပထမအဆင့်တွင်သာ ရှိသေးပြီး မှန်ကန်စွာ လုပ်ဆောင်လိမ့်မည် မဟုတ်ပါ။\n ဆက်လုပ်ရန် \'ရှင်းလင်းပြီး ပြောင်းလဲရန်…\' ကိုနှိပ်ပါ။"</string>
     <string name="button_convert_fbe" msgid="5152671181309826405">"ရှင်းလင်းပြီး ပြောင်းလဲရန်…"</string>
     <string name="picture_color_mode" msgid="4560755008730283695">"ဓာတ်ပုံအရောင်မုဒ်"</string>
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"sRGB ကို အသုံးပြုပါ"</string>
