@@ -118,6 +118,12 @@ final class RemoteConnectionService {
         }
 
         @Override
+        public void setPulling(String callId) {
+            findConnectionForAction(callId, "setPulling")
+                    .setState(Connection.STATE_PULLING_CALL);
+        }
+
+        @Override
         public void setDisconnected(String callId, DisconnectCause disconnectCause) {
             if (mConnectionById.containsKey(callId)) {
                 findConnectionForAction(callId, "setDisconnected")

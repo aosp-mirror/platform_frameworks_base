@@ -1551,6 +1551,8 @@ public abstract class Connection extends Conferenceable {
                 return "RINGING";
             case STATE_DIALING:
                 return "DIALING";
+            case STATE_PULLING_CALL:
+                return "PULLING_CALL";
             case STATE_ACTIVE:
                 return "ACTIVE";
             case STATE_HOLDING:

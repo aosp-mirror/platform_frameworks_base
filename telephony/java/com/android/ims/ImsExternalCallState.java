@@ -19,6 +19,7 @@ package com.android.ims;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.telecom.Log;
 import android.telephony.Rlog;
 
 /*
@@ -130,7 +131,7 @@ public class ImsExternalCallState implements Parcelable {
     @Override
     public String toString() {
         return "ImsExternalCallState { mCallId = " + mCallId +
-                ", mAddress = " + mAddress +
+                ", mAddress = " + Log.pii(mAddress) +
                 ", mIsPullable = " + mIsPullable +
                 ", mCallState = " + mCallState +
                 ", mCallType = " + mCallType +

@@ -65,6 +65,7 @@ final class ConnectionServiceAdapterServant {
     private static final int MSG_REMOVE_EXTRAS = 25;
     private static final int MSG_ON_CONNECTION_EVENT = 26;
     private static final int MSG_SET_CONNECTION_PROPERTIES = 27;
+    private static final int MSG_SET_PULLING = 28;
 
     private final IConnectionServiceAdapter mDelegate;
 
@@ -100,6 +101,9 @@ final class ConnectionServiceAdapterServant {
                     break;
                 case MSG_SET_DIALING:
                     mDelegate.setDialing((String) msg.obj);
+                    break;
+                case MSG_SET_PULLING:
+                    mDelegate.setPulling((String) msg.obj);
                     break;
                 case MSG_SET_DISCONNECTED: {
                     SomeArgs args = (SomeArgs) msg.obj;
@@ -296,6 +300,11 @@ final class ConnectionServiceAdapterServant {
         @Override
         public void setDialing(String connectionId) {
             mHandler.obtainMessage(MSG_SET_DIALING, connectionId).sendToTarget();
+        }
+
+        @Override
+        public void setPulling(String connectionId) {
+            mHandler.obtainMessage(MSG_SET_PULLING, connectionId).sendToTarget();
         }
 
         @Override

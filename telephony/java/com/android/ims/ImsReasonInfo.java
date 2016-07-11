@@ -25,6 +25,7 @@ import android.os.Parcelable;
  * @hide
  */
 public class ImsReasonInfo implements Parcelable {
+
     /**
      * Specific code of each types
      */
@@ -282,6 +283,19 @@ public class ImsReasonInfo implements Parcelable {
      * Connection to the packet gateway is lost
      */
     public static final int CODE_EPDG_TUNNEL_LOST_CONNECTION = 1402;
+
+    /**
+     * The maximum number of calls allowed has been reached.  Used in a multi-endpoint scenario
+     * where the number of calls across all connected devices has reached the maximum.
+     */
+    public static final int CODE_MAXIMUM_NUMBER_OF_CALLS_REACHED = 1403;
+
+    /**
+     * Similar to {@link #CODE_LOCAL_CALL_DECLINE}, except indicates that a remote device has
+     * declined the call.  Used in a multi-endpoint scenario where a remote device declined an
+     * incoming call.
+     */
+    public static final int CODE_REMOTE_CALL_DECLINE = 1404;
 
     /**
      * Network string error messages.
