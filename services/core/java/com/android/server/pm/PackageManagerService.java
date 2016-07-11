@@ -13330,8 +13330,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 for (int curUser : users) {
                     long timeout = SystemClock.uptimeMillis() + 5000;
                     synchronized (conn) {
-                        long now = SystemClock.uptimeMillis();
-                        while (conn.mContainerService == null && now < timeout) {
+                        long now;
+                        while (conn.mContainerService == null &&
+                                (now = SystemClock.uptimeMillis()) < timeout) {
                             try {
                                 conn.wait(timeout - now);
                             } catch (InterruptedException e) {
