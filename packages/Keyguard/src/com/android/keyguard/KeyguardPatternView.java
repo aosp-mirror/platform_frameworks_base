@@ -55,9 +55,13 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
     // how many cells the user has to cross before we poke the wakelock
     private static final int MIN_PATTERN_BEFORE_POKE_WAKELOCK = 2;
 
+    // How much we scale up the duration of the disappear animation when the current user is locked
+    public static final float DISAPPEAR_MULTIPLIER_LOCKED = 1.5f;
+
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final AppearAnimationUtils mAppearAnimationUtils;
     private final DisappearAnimationUtils mDisappearAnimationUtils;
+    private final DisappearAnimationUtils mDisappearAnimationUtilsLocked;
 
     private CountDownTimer mCountdownTimer = null;
     private LockPatternUtils mLockPatternUtils;
@@ -109,6 +113,10 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
                 125, 1.2f /* translationScale */,
                 0.6f /* delayScale */, AnimationUtils.loadInterpolator(
                         mContext, android.R.interpolator.fast_out_linear_in));
+        mDisappearAnimationUtilsLocked = new DisappearAnimationUtils(context,
+                (long) (125 * DISAPPEAR_MULTIPLIER_LOCKED), 1.2f /* translationScale */,
+                0.6f /* delayScale */, AnimationUtils.loadInterpolator(
+                mContext, android.R.interpolator.fast_out_linear_in));
         mDisappearYTranslation = getResources().getDimensionPixelSize(
                 R.dimen.disappear_y_translation);
     }
@@ -239,11 +247,21 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
                     pattern,
                     userId,
                     new LockPatternChecker.OnCheckCallback() {
+
+                        @Override
+                        public void onEarlyMatched() {
+                            onPatternChecked(userId, true /* matched */, 0 /* timeoutMs */,
+                                    true /* isValidPattern */);
+                        }
+
                         @Override
                         public void onChecked(boolean matched, int timeoutMs) {
                             mLockPatternView.enableInput();
                             mPendingLockCheck = null;
-                            onPatternChecked(userId, matched, timeoutMs, true);
+                            if (!matched) {
+                                onPatternChecked(userId, false /* matched */, timeoutMs,
+                                        true /* isValidPattern */);
+                            }
                         }
                     });
             if (pattern.size() > MIN_PATTERN_BEFORE_POKE_WAKELOCK) {
@@ -390,25 +408,30 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
 
     @Override
     public boolean startDisappearAnimation(final Runnable finishRunnable) {
+        float durationMultiplier = mKeyguardUpdateMonitor.isUserUnlocked()
+                ? 1f
+                : DISAPPEAR_MULTIPLIER_LOCKED;
         mLockPatternView.clearPattern();
         enableClipping(false);
         setTranslationY(0);
-        AppearAnimationUtils.startTranslationYAnimation(this, 0 /* delay */, 300 /* duration */,
+        AppearAnimationUtils.startTranslationYAnimation(this, 0 /* delay */,
+                (long) (300 * durationMultiplier),
                 -mDisappearAnimationUtils.getStartTranslation(),
                 mDisappearAnimationUtils.getInterpolator());
-        mDisappearAnimationUtils.startAnimation2d(mLockPatternView.getCellStates(),
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        enableClipping(true);
-                        if (finishRunnable != null) {
-                            finishRunnable.run();
-                        }
+
+        DisappearAnimationUtils disappearAnimationUtils = mKeyguardUpdateMonitor.isUserUnlocked()
+                ? mDisappearAnimationUtils
+                : mDisappearAnimationUtilsLocked;
+        disappearAnimationUtils.startAnimation2d(mLockPatternView.getCellStates(),
+                () -> {
+                    enableClipping(true);
+                    if (finishRunnable != null) {
+                        finishRunnable.run();
                     }
                 }, KeyguardPatternView.this);
         if (!TextUtils.isEmpty(mSecurityMessageDisplay.getText())) {
             mDisappearAnimationUtils.createAnimation(mSecurityMessageDisplay, 0,
-                    200,
+                    (long) (200 * durationMultiplier),
                     - mDisappearAnimationUtils.getStartTranslation() * 3,
                     false /* appearing */,
                     mDisappearAnimationUtils.getInterpolator(),

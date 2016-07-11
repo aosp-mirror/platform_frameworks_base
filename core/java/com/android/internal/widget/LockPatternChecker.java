@@ -14,6 +14,13 @@ public final class LockPatternChecker {
      * Interface for a callback to be invoked after security check.
      */
     public interface OnCheckCallback {
+
+        /**
+         * Invoked as soon as possible we know that the credentials match. This will be called
+         * earlier than {@link #onChecked} but only if the credentials match.
+         */
+        default void onEarlyMatched() {}
+
         /**
          * Invoked when a security check is finished.
          *
@@ -92,7 +99,7 @@ public final class LockPatternChecker {
             @Override
             protected Boolean doInBackground(Void... args) {
                 try {
-                    return utils.checkPattern(pattern, userId);
+                    return utils.checkPattern(pattern, userId, callback::onEarlyMatched);
                 } catch (RequestThrottledException ex) {
                     mThrottleTimeout = ex.getTimeoutMs();
                     return false;
@@ -199,7 +206,7 @@ public final class LockPatternChecker {
             @Override
             protected Boolean doInBackground(Void... args) {
                 try {
-                    return utils.checkPassword(password, userId);
+                    return utils.checkPassword(password, userId, callback::onEarlyMatched);
                 } catch (RequestThrottledException ex) {
                     mThrottleTimeout = ex.getTimeoutMs();
                     return false;

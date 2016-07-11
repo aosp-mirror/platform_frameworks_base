@@ -31,6 +31,7 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationData;
@@ -47,10 +48,13 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     public static final long ANIMATION_DURATION = 220;
     public static final Interpolator KEYGUARD_FADE_OUT_INTERPOLATOR
             = new PathInterpolator(0f, 0, 0.7f, 1f);
+    public static final Interpolator KEYGUARD_FADE_OUT_INTERPOLATOR_LOCKED
+            = new PathInterpolator(0.3f, 0f, 0.8f, 1f);
     private static final float SCRIM_BEHIND_ALPHA = 0.62f;
     private static final float SCRIM_BEHIND_ALPHA_KEYGUARD = 0.45f;
     private static final float SCRIM_BEHIND_ALPHA_UNLOCKING = 0.2f;
     private static final float SCRIM_IN_FRONT_ALPHA = 0.75f;
+    private static final float SCRIM_IN_FRONT_ALPHA_LOCKED = 0.85f;
     private static final int TAG_KEY_ANIM = R.id.scrim;
     private static final int TAG_KEY_ANIM_TARGET = R.id.scrim_target;
     private static final int TAG_START_ALPHA = R.id.scrim_alpha_start;
@@ -60,6 +64,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     private final ScrimView mScrimInFront;
     private final UnlockMethodCache mUnlockMethodCache;
     private final View mHeadsUpScrim;
+    private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
     protected float mScrimBehindAlpha = SCRIM_BEHIND_ALPHA;
     protected float mScrimBehindAlphaKeyguard = SCRIM_BEHIND_ALPHA_KEYGUARD;
@@ -101,6 +106,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         mHeadsUpScrim = headsUpScrim;
         final Context context = scrimBehind.getContext();
         mUnlockMethodCache = UnlockMethodCache.getInstance(context);
+        mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(context);
         updateHeadsUpScrim(false);
     }
 
@@ -151,11 +157,19 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         mAnimateChange = true;
         mSkipFirstFrame = skipFirstFrame;
         mOnAnimationFinished = onAnimationFinished;
-        scheduleUpdate();
 
-        // No need to wait for the next frame to be drawn for this case - onPreDraw will execute
-        // the changes we just scheduled.
-        onPreDraw();
+        if (mKeyguardUpdateMonitor.isUserUnlocked()) {
+            scheduleUpdate();
+
+            // No need to wait for the next frame to be drawn for this case - onPreDraw will execute
+            // the changes we just scheduled.
+            onPreDraw();
+        } else {
+
+            // In case the user isn't unlocked, make sure to delay a bit because the system is hosed
+            // with too many things in this case, in order to not skip the initial frames.
+            mScrimInFront.postOnAnimationDelayed(this::scheduleUpdate, 16);
+        }
     }
 
     public void abortKeyguardFadingOut() {
@@ -200,6 +214,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         return mDozeInFrontAlpha;
     }
 
+    private float getScrimInFrontAlpha() {
+        return mKeyguardUpdateMonitor.isUserUnlocked()
+                ? SCRIM_IN_FRONT_ALPHA
+                : SCRIM_IN_FRONT_ALPHA_LOCKED;
+    }
+
     protected void scheduleUpdate() {
         if (mUpdatePending) return;
 
@@ -239,10 +259,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
             float fraction = 1 - behindFraction;
             fraction = (float) Math.pow(fraction, 0.8f);
             behindFraction = (float) Math.pow(behindFraction, 0.8f);
-            setScrimInFrontColor(fraction * SCRIM_IN_FRONT_ALPHA);
+            setScrimInFrontColor(fraction * getScrimInFrontAlpha());
             setScrimBehindColor(behindFraction * mScrimBehindAlphaKeyguard);
         } else if (mBouncerShowing && !mBouncerIsKeyguard) {
-            setScrimInFrontColor(SCRIM_IN_FRONT_ALPHA);
+            setScrimInFrontColor(getScrimInFrontAlpha());
             setScrimBehindColor(0f);
         } else if (mBouncerShowing) {
             setScrimInFrontColor(0f);
@@ -365,7 +385,13 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     }
 
     protected Interpolator getInterpolator() {
-        return mAnimateKeyguardFadingOut ? KEYGUARD_FADE_OUT_INTERPOLATOR : mInterpolator;
+        if (mAnimateKeyguardFadingOut && !mKeyguardUpdateMonitor.isUserUnlocked()) {
+            return KEYGUARD_FADE_OUT_INTERPOLATOR_LOCKED;
+        } else if (mAnimateKeyguardFadingOut) {
+            return KEYGUARD_FADE_OUT_INTERPOLATOR;
+        } else {
+            return mInterpolator;
+        }
     }
 
     @Override
