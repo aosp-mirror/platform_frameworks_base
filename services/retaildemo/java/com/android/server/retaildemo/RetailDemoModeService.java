@@ -231,8 +231,8 @@ public class RetailDemoModeService extends SystemService {
                 BackgroundThread.getHandler().post(new Runnable() {
                     @Override
                     public void run() {
-                        if (!deleteDemoFolderContents()) {
-                            Slog.w(TAG, "Failed to delete demo folder contents");
+                        if (!deletePreloadsFolderContents()) {
+                            Slog.w(TAG, "Failed to delete preloads folder contents");
                         }
                     }
                 });
@@ -388,8 +388,8 @@ public class RetailDemoModeService extends SystemService {
                 getContext().getContentResolver(), Settings.Global.DEVICE_PROVISIONED, 0) != 0;
     }
 
-    private boolean deleteDemoFolderContents() {
-        final File dir = Environment.getDataPreloadsDemoDirectory();
+    private boolean deletePreloadsFolderContents() {
+        final File dir = Environment.getDataPreloadsDirectory();
         Slog.i(TAG, "Deleting contents of " + dir);
         return FileUtils.deleteContents(dir);
     }
