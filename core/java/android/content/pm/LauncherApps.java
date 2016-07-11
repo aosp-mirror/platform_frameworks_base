@@ -164,17 +164,19 @@ public class LauncherApps {
         }
 
         /**
-         * Indicates that one or more shortcuts (which may be dynamic and/or pinned)
+         * Indicates that one or more shortcuts of any kinds (dynamic, pinned, or manifest)
          * have been added, updated or removed.
          *
          * <p>Only the applications that are allowed to access the shortcut information,
          * as defined in {@link #hasShortcutHostPermission()}, will receive it.
          *
          * @param packageName The name of the package that has the shortcuts.
-         * @param shortcuts all shortcuts from the package (dynamic, manifest and/or pinned).
-         *    Only "key" information will be provided, as defined in
+         * @param shortcuts all shortcuts from the package (dynamic, manifest and/or pinned) will
+         *    be passed. Only "key" information will be provided, as defined in
          *    {@link ShortcutInfo#hasKeyFieldsOnly()}.
          * @param user The UserHandle of the profile that generated the change.
+         *
+         * @see ShortcutManager
          */
         public void onShortcutsChanged(@NonNull String packageName,
                 @NonNull List<ShortcutInfo> shortcuts, @NonNull UserHandle user) {
@@ -222,7 +224,17 @@ public class LauncherApps {
 
         /**
          * Requests "key" fields only.  See {@link ShortcutInfo#hasKeyFieldsOnly()} for which
-         * fields are available.
+         * fields are available.  This allows quicker access to shortcut information in order to
+         * determine in-memory cache in the caller needs to be updated.
+         *
+         * <p>Typically, launcher applications cache all or most shortcuts' information
+         * in memory in order to show shortcuts without a delay.  When they want to update their
+         * cache (e.g. when their process restart), they can fetch all shortcuts' information with
+         * with this flag, then check {@link ShortcutInfo#getLastChangedTimestamp()} for each
+         * shortcut and issue a second call to fetch the non-key information of only updated
+         * shortcuts.
+         *
+         * @see ShortcutManager
          */
         public static final int FLAG_GET_KEY_FIELDS_ONLY = 1 << 2;
 
@@ -255,8 +267,8 @@ public class LauncherApps {
         }
 
         /**
-         * If non-zero, returns only shortcuts that have been added or updated since the timestamp,
-         * which is a milliseconds since the Epoch.
+         * If non-zero, returns only shortcuts that have been added or updated since the timestamp.
+         * Units are as per {@link System#currentTimeMillis()}.
          */
         public ShortcutQuery setChangedSince(long changedSince) {
             mChangedSince = changedSince;
@@ -273,7 +285,7 @@ public class LauncherApps {
 
         /**
          * If non-null, return only the specified shortcuts by ID.  When setting this field,
-         * a packange name must also be set with {@link #setPackage}.
+         * a package name must also be set with {@link #setPackage}.
          */
         public ShortcutQuery setShortcutIds(@Nullable List<String> shortcutIds) {
             mShortcutIds = shortcutIds;
@@ -291,7 +303,13 @@ public class LauncherApps {
         }
 
         /**
-         * Set query options.
+         * Set query options.  At least one of the {@code MATCH} flags should be set.  (Otherwise
+         * no shortcuts will be returned.)
+         *
+         * @see {@link #FLAG_MATCH_DYNAMIC}
+         * @see {@link #FLAG_MATCH_PINNED}
+         * @see {@link #FLAG_MATCH_MANIFEST}
+         * @see {@link #FLAG_GET_KEY_FIELDS_ONLY}
          */
         public ShortcutQuery setQueryFlags(@QueryFlags int queryFlags) {
             mQueryFlags = queryFlags;
@@ -460,10 +478,14 @@ public class LauncherApps {
      *
      * <p>Only the default launcher can access the shortcut information.
      *
-     * <p>Note when this method returns {@code false}, that may be a temporary situation because
+     * <p>Note when this method returns {@code false}, it may be a temporary situation because
      * the user is trying a new launcher application.  The user may decide to change the default
-     * launcher to the calling application again, so even if a launcher application loses
+     * launcher back to the calling application again, so even if a launcher application loses
      * this permission, it does <b>not</b> have to purge pinned shortcut information.
+     * Also in this situation, pinned shortcuts can still be started, even though the caller
+     * no longer has the shortcut host permission.
+     *
+     * @see ShortcutManager
      */
     public boolean hasShortcutHostPermission() {
         try {
@@ -474,7 +496,7 @@ public class LauncherApps {
     }
 
     /**
-     * Returns the IDs of {@link ShortcutInfo}s that match {@code query}.
+     * Returns {@link ShortcutInfo}s that match {@code query}.
      *
      * <p>Callers must be allowed to access the shortcut information, as defined in {@link
      * #hasShortcutHostPermission()}.
@@ -483,6 +505,8 @@ public class LauncherApps {
      * @param user The UserHandle of the profile.
      *
      * @return the IDs of {@link ShortcutInfo}s that match the query.
+     *
+     * @see ShortcutManager
      */
     @Nullable
     public List<ShortcutInfo> getShortcuts(@NonNull ShortcutQuery query,
@@ -523,6 +547,8 @@ public class LauncherApps {
      * @param packageName The target package name.
      * @param shortcutIds The IDs of the shortcut to be pinned.
      * @param user The UserHandle of the profile.
+     *
+     * @see ShortcutManager
      */
     public void pinShortcuts(@NonNull String packageName, @NonNull List<String> shortcutIds,
             @NonNull UserHandle user) {
@@ -586,11 +612,17 @@ public class LauncherApps {
     /**
      * Returns the icon for this shortcut, without any badging for the profile.
      *
+     * <p>Callers must be allowed to access the shortcut information, as defined in {@link
+     * #hasShortcutHostPermission()}.
+     *
      * @param density The preferred density of the icon, zero for default density. Use
      * density DPI values from {@link DisplayMetrics}.
+     *
+     * @return The drawable associated with the shortcut.
+     *
+     * @see ShortcutManager
      * @see #getShortcutBadgedIconDrawable(ShortcutInfo, int)
      * @see DisplayMetrics
-     * @return The drawable associated with the shortcut.
      */
     public Drawable getShortcutIconDrawable(@NonNull ShortcutInfo shortcut, int density) {
         if (shortcut.hasIconFile()) {
@@ -628,10 +660,15 @@ public class LauncherApps {
     /**
      * Returns the shortcut icon with badging appropriate for the profile.
      *
+     * <p>Callers must be allowed to access the shortcut information, as defined in {@link
+     * #hasShortcutHostPermission()}.
+     *
      * @param density Optional density for the icon, or 0 to use the default density. Use
-     * {@link DisplayMetrics} for DPI values.
-     * @see DisplayMetrics
      * @return A badged icon for the shortcut.
+     *
+     * @see ShortcutManager
+     * @see #getShortcutBadgedIconDrawable(ShortcutInfo, int)
+     * @see DisplayMetrics
      */
     public Drawable getShortcutBadgedIconDrawable(ShortcutInfo shortcut, int density) {
         final Drawable originalIcon = getShortcutIconDrawable(shortcut, density);
@@ -641,7 +678,7 @@ public class LauncherApps {
     }
 
     /**
-     * Launches a shortcut.
+     * Starts a shortcut.
      *
      * <p>Callers must be allowed to access the shortcut information, as defined in {@link
      * #hasShortcutHostPermission()}.
