@@ -13,6 +13,7 @@ trainingnavtop=true
     <li><a href="#permission">Get Permission</a></li>
     <li><a href="#register">Register Channels in the Database</a></li>
     <li><a href="#update">Update Channel Data</a></li>
+    <li><a href="#applink">Add App Link Information</a></li>
   </ol>
   <h2>Try It Out</h2>
   <ul>
@@ -22,10 +23,13 @@ trainingnavtop=true
 </div>
 </div>
 
-<p>Your TV input must provide Electronic Program Guide (EPG) data for at least one channel in its
-setup activity. You should also periodically update that data, with consideration for the size of
-the update and the processing thread that handles it. This lesson discusses creating and updating
-channel and program data on the system database with these considerations in mind.</p>
+<p>Your TV input must provide Electronic Program Guide (EPG) data for at least
+one channel in its setup activity. You should also periodically update that
+data, with consideration for the size of the update and the processing thread
+that handles it. Additionally, you can provide app links for channels
+that guide the user to related content and activities.
+This lesson discusses creating and updating channel and program data on the
+system database with these considerations in mind.</p>
 
 <p>&nbsp;</p>
 
@@ -69,6 +73,10 @@ addition to those above to better identify traditional broadcast channels:</p>
   <li>{@link android.media.tv.TvContract.Channels#COLUMN_TRANSPORT_STREAM_ID} - the transport stream
   ID</li>
 </ul>
+
+<p>If you want to provide app link details for your channels, you need to
+update some additional fields. For more information on app link fields, see
+<a href="#applink">Add App Link Information</a>.
 
 <p>For internet streaming based TV inputs, assign your own values to the above accordingly so that
 each channel can be identified uniquely.</p>
@@ -237,3 +245,111 @@ Android TV live TV sample app</a> for an example.</p>
 {@link android.os.HandlerThread} class, or you may implement your own using {@link android.os.Looper}
 and {@link android.os.Handler} classes.  See <a href="{@docRoot}guide/components/processes-and-threads.html">
 Processes and Threads</a> for more information.</p>
+
+<h2 id="applink">Add App Link Information</h2>
+
+<p>Channels can use <em>app links</em> to let users easily launch a related
+activity while they are watching channel content. Channel apps use
+app links to extend user engagement by launching activities that show
+related information or additional content. For example, you can use app links
+to do the following:</p>
+
+<ul>
+<li>Guide the user to discover and purchase related content.</li>
+<li>Provide additional information about currently playing content.</li>
+<li>While viewing episodic content, start viewing the next episode in a
+series.</li>
+<li>Let the user interact with content&mdash;for example, rate or review
+content&mdash;without interrupting content playback.</li>
+</ul>
+
+<p>App links are displayed when the user presses <b>Select</b> to show the
+TV menu while watching channel content.</p>
+
+<img alt="" src="{@docRoot}images/training/tv/tif/app-link.png"
+srcset="{@docRoot}images/training/tv/tif/app-link.png 1x,
+{@docRoot}images/training/tv/tif/app-link-2x.png 2x" id="figure1"/>
+<p class="img-caption"><strong>Figure 1.</strong> An example app link
+displayed on the <b>Channels</b> row while channel content is shown.</p>
+
+<p>When the user selects the app link, the system starts an activity using
+an intent URI specified by the channel app. Channel content continues to play
+while the app link activity is active. The user can return to the channel
+content by pressing <b>Back</b>.</p>
+
+<h3 id="card">Provide App Link Channel Data</h4>
+
+<p>Android TV automatically creates an app link for each channel,
+using information from the channel data. To provide app link information,
+specify the following details in your
+{@link android.media.tv.TvContract.Channels} fields:
+</p>
+
+<ul>
+<li>{@link android.media.tv.TvContract.Channels#COLUMN_APP_LINK_COLOR} - The
+accent color of the app link for this channel. For an example accent color,
+see figure 2, callout 3.
+</li>
+<li>{@link android.media.tv.TvContract.Channels#COLUMN_APP_LINK_ICON_URI} -
+The URI for the app badge icon of the app link for this channel. For an
+example app badge icon, see figure 2, callout 2.
+</li>
+<li>{@link android.media.tv.TvContract.Channels#COLUMN_APP_LINK_INTENT_URI} -
+The intent URI of the app link for this channel. You can create the URI
+using {@link android.content.Intent#toUri(int) toUri(int)} with
+{@link android.content.Intent#URI_INTENT_SCHEME URI_INTENT_SCHEME} and
+convert the URI back to the original intent with
+{@link android.content.Intent#parseUri parseUri()}.
+</li>
+<li>{@link android.media.tv.TvContract.Channels#COLUMN_APP_LINK_POSTER_ART_URI}
+- The URI for the poster art used as the background of the app link
+for this channel. For an example poster image, see figure 2, callout 1.</li>
+<li>{@link android.media.tv.TvContract.Channels#COLUMN_APP_LINK_TEXT} -
+The descriptive link text of the app link for this channel. For an example
+app link description, see the text in figure 2, callout 3.</li>
+</ul>
+
+<img alt="" src="{@docRoot}images/training/tv/tif/app-link-diagram.png"/>
+<p class="img-caption"><strong>Figure 2.</strong> App link details.</p>
+
+<p>If the channel data doesn't specify app link information, the system
+creates a default app link. The system chooses default details as follows:</p>
+
+<ul>
+<li>For the intent URI
+({@link android.media.tv.TvContract.Channels#COLUMN_APP_LINK_INTENT_URI}),
+the system uses the {@link android.content.Intent#ACTION_MAIN ACTION_MAIN}
+activity for the {@link android.content.Intent#CATEGORY_LEANBACK_LAUNCHER
+CATEGORY_LEANBACK_LAUNCHER} category, typically defined in the app manifest.
+If this activity is not defined, a non-functioning app link appears&mdash;if
+the user clicks it, nothing happens.</li>
+<li>For the descriptive text
+({@link android.media.tv.TvContract.Channels#COLUMN_APP_LINK_TEXT}), the system
+uses "Open <var>app-name</var>". If no viable app link intent URI is defined,
+the system uses "No link available".</li>
+<li>For the accent color
+({@link android.media.tv.TvContract.Channels#COLUMN_APP_LINK_COLOR}),
+the system uses the default app color.</li>
+<li>For the poster image
+({@link android.media.tv.TvContract.Channels#COLUMN_APP_LINK_POSTER_ART_URI}),
+the system uses the app's home screen banner. If the app doesn't provide a
+banner, the system uses a default TV app image.</li>
+<li>For the badge icon
+({@link android.media.tv.TvContract.Channels#COLUMN_APP_LINK_ICON_URI}), the
+system uses a badge that shows the app name. If the system is also using the
+app banner or default app image for the poster image, no app badge is shown.
+</li>
+</ul>
+
+<p>You specify app link details for your channels in your app's
+setup activity. You can update these app link details at any point, so
+if an app link needs to match channel changes, update app
+link details and call
+{@link android.content.ContentResolver#update(android.net.Uri,
+android.content.ContentValues, java.lang.String, java.lang.String[])
+ContentResolver.update()} as needed. For more details on updating
+channel data, see <a href="#update">Update Channel Data</a>.
+</p>
+
+
+
