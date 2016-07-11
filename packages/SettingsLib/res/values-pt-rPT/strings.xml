@@ -221,7 +221,7 @@
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"Depurar sobreposição GPU"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"Desativ. sobreposições HW"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"Utilizar sempre GPU para a composição do ecrã"</string>
-    <string name="simulate_color_space" msgid="6745847141353345872">"Simular espaço de cor"</string>
+    <string name="simulate_color_space" msgid="6745847141353345872">"Simular espaço da cor"</string>
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"Ativar vestígios OpenGL"</string>
     <string name="usb_audio_disable_routing" msgid="8114498436003102671">"Desativ. encam. áudio USB"</string>
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Desativar encam. auto. para periféricos áudio USB"</string>
