@@ -6429,6 +6429,30 @@ public class DevicePolicyManager {
         }
     }
 
+    /**
+     * @hide
+     * Writes that the provisioning configuration has been applied.
+     */
+    public void setDeviceProvisioningConfigApplied() {
+        try {
+            mService.setDeviceProvisioningConfigApplied();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * @return whether the provisioning configuration has been applied.
+     */
+    public boolean isDeviceProvisioningConfigApplied() {
+        try {
+            return mService.isDeviceProvisioningConfigApplied();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
     private void throwIfParentInstance(String functionName) {
         if (mParentInstance) {
             throw new SecurityException(functionName + " cannot be called on the parent instance");
