@@ -7267,22 +7267,17 @@ public class PackageManagerService extends IPackageManager.Stub {
         try {
             IMountService ms = PackageHelper.getMountService();
             if (ms != null) {
-                final boolean isUpgrade = isUpgrade();
-                boolean doTrim = isUpgrade;
-                if (doTrim) {
-                    Slog.w(TAG, "Running disk maintenance immediately due to system update");
-                } else {
-                    final long interval = android.provider.Settings.Global.getLong(
-                            mContext.getContentResolver(),
-                            android.provider.Settings.Global.FSTRIM_MANDATORY_INTERVAL,
-                            DEFAULT_MANDATORY_FSTRIM_INTERVAL);
-                    if (interval > 0) {
-                        final long timeSinceLast = System.currentTimeMillis() - ms.lastMaintenance();
-                        if (timeSinceLast > interval) {
-                            doTrim = true;
-                            Slog.w(TAG, "No disk maintenance in " + timeSinceLast
-                                    + "; running immediately");
-                        }
+                boolean doTrim = false;
+                final long interval = android.provider.Settings.Global.getLong(
+                        mContext.getContentResolver(),
+                        android.provider.Settings.Global.FSTRIM_MANDATORY_INTERVAL,
+                        DEFAULT_MANDATORY_FSTRIM_INTERVAL);
+                if (interval > 0) {
+                    final long timeSinceLast = System.currentTimeMillis() - ms.lastMaintenance();
+                    if (timeSinceLast > interval) {
+                        doTrim = true;
+                        Slog.w(TAG, "No disk maintenance in " + timeSinceLast
+                                + "; running immediately");
                     }
                 }
                 if (doTrim) {
