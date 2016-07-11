@@ -202,25 +202,25 @@ status_t BootAnimation::initTexture(const Animation::Frame& frame)
 
     switch (bitmap.colorType()) {
         case kN32_SkColorType:
-            if (tw != w || th != h) {
+            if (!mUseNpotTextures && (tw != w || th != h)) {
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tw, th, 0, GL_RGBA,
                         GL_UNSIGNED_BYTE, 0);
                 glTexSubImage2D(GL_TEXTURE_2D, 0,
                         0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, p);
             } else {
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tw, th, 0, GL_RGBA,
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA,
                         GL_UNSIGNED_BYTE, p);
             }
             break;
 
         case kRGB_565_SkColorType:
-            if (tw != w || th != h) {
+            if (!mUseNpotTextures && (tw != w || th != h)) {
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tw, th, 0, GL_RGB,
                         GL_UNSIGNED_SHORT_5_6_5, 0);
                 glTexSubImage2D(GL_TEXTURE_2D, 0,
                         0, 0, w, h, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, p);
             } else {
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tw, th, 0, GL_RGB,
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB,
                         GL_UNSIGNED_SHORT_5_6_5, p);
             }
             break;
@@ -693,6 +693,20 @@ bool BootAnimation::movie()
     }
     if (!anyPartHasClock) {
         mClockEnabled = false;
+    }
+
+    // Check if npot textures are supported
+    mUseNpotTextures = false;
+    String8 gl_extensions;
+    const char* exts = reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS));
+    if (!exts) {
+        glGetError();
+    } else {
+        gl_extensions.setTo(exts);
+        if ((gl_extensions.find("GL_ARB_texture_non_power_of_two") != -1) ||
+            (gl_extensions.find("GL_OES_texture_npot") != -1)) {
+            mUseNpotTextures = true;
+        }
     }
 
     // Blend required to draw time on top of animation frames.
