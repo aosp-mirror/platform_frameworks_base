@@ -222,11 +222,8 @@ public final class DocumentsMenuManagerTest {
         DocumentsMenuManager mgr = new DocumentsMenuManager(testSearchManager, state);
         mgr.updateRootContextMenu(testMenu, testRootInfo);
 
-        eject.assertVisible();
-        eject.assertDisabled();
-
-        settings.assertVisible();
-        settings.assertDisabled();
+        eject.assertInvisible();
+        settings.assertInvisible();
     }
 
     @Test
