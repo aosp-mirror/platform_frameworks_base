@@ -675,7 +675,7 @@ Services that cost you money: send SMS messages, directly call phone numbers
 <a name="manifest"></a>
 <h3>Enforcing Permissions in AndroidManifest.xml</h3>
 
-<p>TYou can apply high-level permissions restricting access to entire components
+<p>You can apply high-level permissions restricting access to entire components
 of the system or application through your
 <code>AndroidManifest.xml</code>. To do this, include an {@link
 android.R.attr#permission android:permission} attribute on the desired
