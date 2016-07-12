@@ -36,14 +36,14 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Сповіщення"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Низький рівень заряду акумулятора"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"Залишилося <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"Залишилося <xliff:g id="PERCENTAGE">%s</xliff:g>. Режим заощадження заряду акумулятора ввімкнено."</string>
+    <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"Залишилося <xliff:g id="PERCENTAGE">%s</xliff:g>. Увімкнено режим енергозбереження."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Заряджання USB не підтримується.\nВикористовуйте лише наданий у комплекті зарядний пристрій."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"Заряджання через USB не підтримується."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"Використовуйте лише зарядний пристрій, який постачається в комплекті."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"Налаштування"</string>
-    <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"Увімкнути режим заощадження заряду акумулятора?"</string>
+    <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"Увімкнути режим енергозбереження?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Увімкнути"</string>
-    <string name="battery_saver_start_action" msgid="5576697451677486320">"Увімкнути режим заощадження заряду акумулятора"</string>
+    <string name="battery_saver_start_action" msgid="5576697451677486320">"Увімкнути режим енергозбереження"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Налаштування"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Повертати екран автоматично"</string>
@@ -392,9 +392,9 @@
     <string name="user_remove_user_title" msgid="4681256956076895559">"Видалити користувача?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Усі додатки й дані цього користувача буде видалено."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Видалити"</string>
-    <string name="battery_saver_notification_title" msgid="237918726750955859">"Режим заощадження заряду акумулятора ввімкнено"</string>
+    <string name="battery_saver_notification_title" msgid="237918726750955859">"Режим енергозбереження ввімкнено"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Знижується продуктивність і обмежуються фонові дані"</string>
-    <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Вимкнути режим заощадження заряду акумулятора"</string>
+    <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Вимкнути режим енергозбереження"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> отримає доступ до всіх даних, які відображаються на вашому екрані."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Більше не показувати"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Очистити все"</string>
@@ -522,24 +522,9 @@
     <string name="notification_more_settings" msgid="816306283396553571">"Більше налаштувань"</string>
     <string name="notification_done" msgid="5279426047273930175">"Готово"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"Елементи керування сповіщеннями додатка <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"Колір і вигляд"</string>
-    <string name="night_mode" msgid="3540405868248625488">"Нічний режим"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"Калібрувати дисплей"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"Увімкнено"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"Вимкнено"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"Вмикати автоматично"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"Переходити на нічний режим відповідно до місцезнаходження та часу доби"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"Коли нічний режим увімкнено"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"Використати нічну тему для ОС Android"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"Налаштувати відтінок"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"Регулювати яскравість"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"Темна тема застосовується в основних областях ОС Android, які зазвичай відображаються у світлій темі, як-от у налаштуваннях."</string>
-    <string name="color_apply" msgid="9212602012641034283">"Застосувати"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"Підтвердити налаштування"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"Деякі налаштування кольорів можуть зробити цей пристрій непридатним для використання. Натисніть OK, щоб підтвердити налаштування, інакше їх буде скинуто через 10 секунд."</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Використання заряду"</string>
-    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Режим економії заряду акумулятора недоступний під час заряджання"</string>
-    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Режим економії заряду акумулятора"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Режим енергозбереження не можна ввімкнути під час заряджання"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Режим енергозбереження"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Знижується продуктивність і обмежується обмін даними у фоновому режимі"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"Кнопка <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Home"</string>

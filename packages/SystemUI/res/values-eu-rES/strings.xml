@@ -518,21 +518,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"Ezarpen gehiago"</string>
     <string name="notification_done" msgid="5279426047273930175">"Eginda"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioaren jakinarazpenak kontrolatzeko aukerak"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"Kolorea eta itxura"</string>
-    <string name="night_mode" msgid="3540405868248625488">"Gau modua"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"Kalibratu pantaila"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"Aktibatuta"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"Desaktibatuta"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"Aktibatu automatikoki"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"Aldatu Gau modura, kokapena eta ordua kontuan izanda"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"Gau modua aktibatuta dagoenean"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"Erabili gai iluna Android sistema eragilean"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"Doitu kolorea"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"Doitu distira"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"Gai iluna Android sistema eragileko eremu nagusietan aplikatzen da. Normalean gai argian bistaratzen dira eremu horiek, adibidez, Ezarpenak atalean."</string>
-    <string name="color_apply" msgid="9212602012641034283">"Aplikatu"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"Berretsi ezarpenak"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"Baliteke gailua kolore-ezarpen batzuekin ezin erabili izatea. Kolore-ezarpenak berresteko, sakatu Ados. Bestela, hamar segundoren buruan berrezarriko dira ezarpenak."</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Bateriaren erabilera"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Bateria-aurrezlea ez dago erabilgarri gailua kargatzen ari denean"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Bateria-aurrezlea"</string>

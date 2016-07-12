@@ -516,21 +516,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"تنظیمات بیشتر"</string>
     <string name="notification_done" msgid="5279426047273930175">"تمام"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"کنترل‌های اعلان <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"رنگ و ظاهر"</string>
-    <string name="night_mode" msgid="3540405868248625488">"حالت شب"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"درجه‌بندی نمایشگر"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"روشن"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"خاموش"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"روشن شدن خودکار"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"تغییر به حالت شب وقتی برای مکان و زمان روز مناسب است"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"وقتی حالت شب روشن است"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"‏استفاده از زمینه تیره برای سیستم‌عامل Android"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"تنظیم سایه‌رنگ"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"تنظیم روشنایی"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"‏زمینه تیره بر قسمت‌های اصلی سیستم‌عامل Android که به‌طور معمول با زمینه روشن نشان داده می‌شوند (مثل «تنظیمات») اعمال می‌شود."</string>
-    <string name="color_apply" msgid="9212602012641034283">"اعمال‌ کردن"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"تأیید تنظیمات"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"بعضی از تنظیمات رنگ می‌توانند این دستگاه را غیرقابل استفاده کنند. برای تأیید این تنظیمات رنگ روی «تأیید» کلیک کنید، در غیر این صورت این تغییرات بعد از ۱۰ ثانیه بازنشانی می‌شوند."</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"مصرف باتری"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"هنگام شارژ شدن، «بهینه‌سازی باتری» در دسترس نیست"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"بهینه‌سازی باتری"</string>

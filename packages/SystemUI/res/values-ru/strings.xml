@@ -522,21 +522,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"Другие настройки"</string>
     <string name="notification_done" msgid="5279426047273930175">"Готово"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"Управление уведомлениями (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"Цвета и стиль"</string>
-    <string name="night_mode" msgid="3540405868248625488">"Ночной режим"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"Калибровка дисплея"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"Включен"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"Отключен"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"Включать автоматически"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"Включать ночной режим с учетом местоположения и времени суток"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"В ночном режиме"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"Использовать темное оформление для Android"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"Изменять оттенок"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"Яркость"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"Темное оформление применяется к основным элементам системы Android (таким, как приложение \"Настройки\"), которые обычно показываются в светлом."</string>
-    <string name="color_apply" msgid="9212602012641034283">"Применить"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"Подтвердите настройки"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"Некоторые цветовые настройки могут затруднить работу с устройством. Чтобы применить выбранные параметры, нажмите \"ОК\". В противном случае они будут сброшены через 10 секунд."</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Уровень заряда"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Режим энергосбережения нельзя включить во время зарядки"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Режим энергосбережения"</string>

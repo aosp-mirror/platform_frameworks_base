@@ -518,21 +518,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"설정 더보기"</string>
     <string name="notification_done" msgid="5279426047273930175">"완료"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> 알림 관리"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"색상 및 모양"</string>
-    <string name="night_mode" msgid="3540405868248625488">"야간 모드"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"디스플레이 보정"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"사용"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"사용 안함"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"자동으로 사용 설정"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"위치 및 시간대에 맞게 야간 모드로 전환"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"야간 모드 사용 중일 때"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"Android OS용 어두운 테마 사용"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"농담 효과 조정"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"밝기 조정"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"설정 등 밝은 테마에서 일반적으로 표시되는 Android OS의 핵심 영역에 어두운 테마가 적용됩니다."</string>
-    <string name="color_apply" msgid="9212602012641034283">"적용"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"설정 확인"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"일부 색상 설정으로 인해 이 기기를 사용하지 못할 수 있습니다. 확인을 클릭하여 이러한 색상 설정을 확인하지 않으면 10초 후에 설정이 초기화됩니다."</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"배터리 사용량"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"충전하는 동안 배터리 세이버는 사용할 수 없습니다."</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"배터리 세이버"</string>
