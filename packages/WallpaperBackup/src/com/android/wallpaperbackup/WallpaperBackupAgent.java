@@ -40,22 +40,30 @@ import java.nio.charset.StandardCharsets;
 
 public class WallpaperBackupAgent extends BackupAgent {
     private static final String TAG = "WallpaperBackup";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
     // NB: must be kept in sync with WallpaperManagerService but has no
     // compile-time visibility.
 
     // Target filenames within the system's wallpaper directory
     static final String WALLPAPER = "wallpaper_orig";
+    static final String WALLPAPER_LOCK = "wallpaper_lock_orig";
     static final String WALLPAPER_INFO = "wallpaper_info.xml";
 
     // Names of our local-data stage files/links
     static final String IMAGE_STAGE = "wallpaper-stage";
+    static final String LOCK_IMAGE_STAGE = "wallpaper-lock-stage";
     static final String INFO_STAGE = "wallpaper-info-stage";
     static final String EMPTY_SENTINEL = "empty";
+    static final String QUOTA_SENTINEL = "quota";
 
-    private File mWallpaperInfo;    // wallpaper metadata file
-    private File mWallpaperFile;    // primary wallpaper image file
+    private File mWallpaperInfo;        // wallpaper metadata file
+    private File mWallpaperFile;        // primary wallpaper image file
+    private File mLockWallpaperFile;    // lock wallpaper image file
+
+    // If this file exists, it means we exceeded our quota last time
+    private File mQuotaFile;
+    private boolean mQuotaExceeded;
 
     private WallpaperManager mWm;
 
@@ -68,7 +76,14 @@ public class WallpaperBackupAgent extends BackupAgent {
         File wallpaperDir = Environment.getUserSystemDirectory(UserHandle.USER_SYSTEM);
         mWallpaperInfo = new File(wallpaperDir, WALLPAPER_INFO);
         mWallpaperFile = new File(wallpaperDir, WALLPAPER);
+        mLockWallpaperFile = new File(wallpaperDir, WALLPAPER_LOCK);
         mWm = (WallpaperManager) getSystemService(Context.WALLPAPER_SERVICE);
+
+        mQuotaFile = new File(getFilesDir(), QUOTA_SENTINEL);
+        mQuotaExceeded = mQuotaFile.exists();
+        if (DEBUG) {
+            Slog.v(TAG, "quota file " + mQuotaFile.getPath() + " exists=" + mQuotaExceeded);
+        }
     }
 
     @Override
@@ -77,6 +92,7 @@ public class WallpaperBackupAgent extends BackupAgent {
         final File filesDir = getFilesDir();
         final File infoStage = new File(filesDir, INFO_STAGE);
         final File imageStage = new File (filesDir, IMAGE_STAGE);
+        final File lockImageStage = new File (filesDir, LOCK_IMAGE_STAGE);
         final File empty = new File (filesDir, EMPTY_SENTINEL);
 
         try {
@@ -96,11 +112,18 @@ public class WallpaperBackupAgent extends BackupAgent {
                 // In case of prior muddled state
                 infoStage.delete();
                 imageStage.delete();
+                lockImageStage.delete();
 
                 Os.link(mWallpaperInfo.getCanonicalPath(), infoStage.getCanonicalPath());
                 fullBackupFile(infoStage, data);
                 Os.link(mWallpaperFile.getCanonicalPath(), imageStage.getCanonicalPath());
                 fullBackupFile(imageStage, data);
+
+                // Don't try to store the lock image if we overran our quota last time
+                if (!mQuotaExceeded) {
+                    Os.link(mLockWallpaperFile.getCanonicalPath(), lockImageStage.getCanonicalPath());
+                    fullBackupFile(lockImageStage, data);
+                }
             } else {
                 if (DEBUG) {
                     Slog.v(TAG, "Wallpaper not backup-eligible; writing no data");
@@ -114,6 +137,26 @@ public class WallpaperBackupAgent extends BackupAgent {
             }
             infoStage.delete();
             imageStage.delete();
+            lockImageStage.delete();
+
+            // Even if this time we had to back off on attempting to store the lock image
+            // due to exceeding the data quota, try again next time.  This will alternate
+            // between "try both" and "only store the primary image" until either there
+            // is no lock image to store, or the quota is raised, or both fit under the
+            // quota.
+            mQuotaFile.delete();
+        }
+    }
+
+    @Override
+    public void onQuotaExceeded(long backupDataBytes, long quotaBytes) {
+        if (DEBUG) {
+            Slog.i(TAG, "Quota exceeded (" + backupDataBytes + " vs " + quotaBytes + ')');
+        }
+        try (FileOutputStream f = new FileOutputStream(mQuotaFile)) {
+            f.write(0);
+        } catch (Exception e) {
+            Slog.w(TAG, "Unable to record quota-exceeded: " + e.getMessage());
         }
     }
 
@@ -124,30 +167,17 @@ public class WallpaperBackupAgent extends BackupAgent {
         if (DEBUG) {
             Slog.v(TAG, "onRestoreFinished()");
         }
-        final File infoStage = new File(getFilesDir(), INFO_STAGE);
-        final File imageStage = new File (getFilesDir(), IMAGE_STAGE);
+        final File filesDir = getFilesDir();
+        final File infoStage = new File(filesDir, INFO_STAGE);
+        final File imageStage = new File (filesDir, IMAGE_STAGE);
+        final File lockImageStage = new File (filesDir, LOCK_IMAGE_STAGE);
 
         try {
             // It is valid for the imagery to be absent; it means that we were not permitted
-            // to back up the original image on the source device.
-            if (imageStage.exists()) {
-                if (DEBUG) {
-                    Slog.v(TAG, "Got restored wallpaper; applying");
-                }
-
-                // Parse the restored info file to find the crop hint.  Note that this currently
-                // relies on a priori knowledge of the wallpaper info file schema.
-                Rect cropHint = parseCropHint(infoStage);
-                if (cropHint != null) {
-                    if (DEBUG) {
-                        Slog.v(TAG, "Restored crop hint " + cropHint + "; now writing data");
-                    }
-                    WallpaperManager wm = getSystemService(WallpaperManager.class);
-                    try (FileInputStream in = new FileInputStream(imageStage)) {
-                        wm.setStream(in, cropHint, true, WallpaperManager.FLAG_SYSTEM);
-                    } finally {} // auto-closes 'in'
-                }
-            }
+            // to back up the original image on the source device, or there was no user-supplied
+            // wallpaper image present.
+            restoreFromStage(imageStage, infoStage, "wp", WallpaperManager.FLAG_SYSTEM);
+            restoreFromStage(lockImageStage, infoStage, "kwp", WallpaperManager.FLAG_LOCK);
         } catch (Exception e) {
             Slog.e(TAG, "Unable to restore wallpaper: " + e.getMessage());
         } finally {
@@ -156,10 +186,31 @@ public class WallpaperBackupAgent extends BackupAgent {
             }
             infoStage.delete();
             imageStage.delete();
+            lockImageStage.delete();
         }
     }
 
-    private Rect parseCropHint(File wallpaperInfo) {
+    private void restoreFromStage(File stage, File info, String hintTag, int which)
+            throws IOException {
+        if (stage.exists()) {
+            if (DEBUG) {
+                Slog.v(TAG, "Got restored wallpaper; applying which=" + which);
+            }
+            // Parse the restored info file to find the crop hint.  Note that this currently
+            // relies on a priori knowledge of the wallpaper info file schema.
+            Rect cropHint = parseCropHint(info, hintTag);
+            if (cropHint != null) {
+                if (DEBUG) {
+                    Slog.v(TAG, "Restored crop hint " + cropHint + "; now writing data");
+                }
+                try (FileInputStream in = new FileInputStream(stage)) {
+                    mWm.setStream(in, cropHint, true, which);
+                } finally {} // auto-closes 'in'
+            }
+        }
+    }
+
+    private Rect parseCropHint(File wallpaperInfo, String sectionTag) {
         Rect cropHint = new Rect();
         try (FileInputStream stream = new FileInputStream(wallpaperInfo)) {
             XmlPullParser parser = Xml.newPullParser();
@@ -170,7 +221,7 @@ public class WallpaperBackupAgent extends BackupAgent {
                 type = parser.next();
                 if (type == XmlPullParser.START_TAG) {
                     String tag = parser.getName();
-                    if ("wp".equals(tag)) {
+                    if (sectionTag.equals(tag)) {
                         cropHint.left = getAttributeInt(parser, "cropLeft", 0);
                         cropHint.top = getAttributeInt(parser, "cropTop", 0);
                         cropHint.right = getAttributeInt(parser, "cropRight", 0);
