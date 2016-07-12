@@ -4662,6 +4662,13 @@ public class BackupManagerService {
                     }
                     cleanUpPipes(transportPipes);
                     cleanUpPipes(enginePipes);
+                    if (currentPackage.applicationInfo != null) {
+                        Slog.i(TAG, "Unbinding agent in " + packageName);
+                        addBackupTrace("unbinding " + packageName);
+                        try {
+                            mActivityManager.unbindBackupAgent(currentPackage.applicationInfo);
+                        } catch (RemoteException e) { /* can't happen; activity manager is local */ }
+                    }
                 }
             } catch (Exception e) {
                 backupRunStatus = BackupManager.ERROR_TRANSPORT_ABORTED;
