@@ -38,6 +38,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.IUidObserver;
 import android.app.usage.UsageStatsManagerInternal;
@@ -475,13 +476,6 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         void injectRestoreCallingIdentity(long token) {
             mInjectedCallingUid = (int) token;
         }
-
-        @Override
-        protected void startShortcutIntentAsPublisher(@NonNull Intent intent,
-                @NonNull String publisherPackage, Bundle startActivityOptions, int userId) {
-            // Just forward to startActivityAsUser() during unit tests.
-            mContext.startActivityAsUser(intent, startActivityOptions, UserHandle.of(userId));
-        }
     }
 
     protected class LauncherAppsTestable extends LauncherApps {
@@ -708,6 +702,17 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         mUnlockedUsers.put(USER_10, true);
         mUnlockedUsers.put(USER_11, true);
         mUnlockedUsers.put(USER_P0, true);
+
+        // Set up mMockActivityManagerInternal.
+        // By default, startActivityAsPackage() will simply forward to startActivityAsUser().
+        doAnswer(new AnswerWithSystemCheck<>(inv -> {
+            mServiceContext.startActivityAsUser(
+                    (Intent) inv.getArguments()[2],
+                    (Bundle) inv.getArguments()[3],
+                    UserHandle.of((Integer) inv.getArguments()[1]));
+            return ActivityManager.START_SUCCESS;
+        })).when(mMockActivityManagerInternal).startActivityAsPackage(anyString(), anyInt(),
+                any(Intent.class), any(Bundle.class));
 
         // Set up resources
         setUpAppResources();
@@ -1414,20 +1419,22 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     }
 
     protected void assertShortcutNotLaunchable(@NonNull String packageName,
-            @NonNull String shortcutId, int userId) {
+            @NonNull String shortcutId, int userId, Class<?> expectedException) {
         reset(mServiceContext);
+        Exception thrown = null;
         try {
             mLauncherApps.startShortcut(packageName, shortcutId, null, null,
                     UserHandle.of(userId));
-        } catch (SecurityException expected) {
-            // security exception is okay.
-            return;
+        } catch (Exception e) {
+            thrown = e;
         }
         // This shouldn't have been called.
         verify(mServiceContext, times(0)).startActivityAsUser(
                 any(Intent.class),
                 any(Bundle.class),
                 any(UserHandle.class));
+        assertNotNull("Exception was not thrown", thrown);
+        assertEquals("Exception type different", expectedException, thrown.getClass());
     }
 
     protected void assertBitmapDirectories(int userId, String... expectedDirectories) {
