@@ -468,8 +468,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
          *
          * The actual lists are populated when we scan the network types that
          * are supported on this device.
+         *
+         * Threading model:
+         *  - addSupportedType() is only called in the constructor
+         *  - add(), update(), remove() are only called from the ConnectivityService handler thread.
+         *    They are therefore not thread-safe with respect to each other.
+         *  - getNetworkForType() can be called at any time on binder threads. It is synchronized
+         *    on mTypeLists to be thread-safe with respect to a concurrent remove call.
+         *  - dump is thread-safe with respect to concurrent add and remove calls.
          */
-        private ArrayList<NetworkAgentInfo> mTypeLists[];
+        private final ArrayList<NetworkAgentInfo> mTypeLists[];
 
         public LegacyTypeTracker() {
             mTypeLists = (ArrayList<NetworkAgentInfo>[])
@@ -489,11 +497,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         public NetworkAgentInfo getNetworkForType(int type) {
-            if (isTypeSupported(type) && !mTypeLists[type].isEmpty()) {
-                return mTypeLists[type].get(0);
-            } else {
-                return null;
+            synchronized (mTypeLists) {
+                if (isTypeSupported(type) && !mTypeLists[type].isEmpty()) {
+                    return mTypeLists[type].get(0);
+                }
             }
+            return null;
         }
 
         private void maybeLogBroadcast(NetworkAgentInfo nai, DetailedState state, int type,
@@ -516,12 +525,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (list.contains(nai)) {
                 return;
             }
-
-            list.add(nai);
+            synchronized (mTypeLists) {
+                list.add(nai);
+            }
 
             // Send a broadcast if this is the first network of its type or if it's the default.
             final boolean isDefaultNetwork = isDefaultNetwork(nai);
-            if (list.size() == 1 || isDefaultNetwork) {
+            if ((list.size() == 1) || isDefaultNetwork) {
                 maybeLogBroadcast(nai, DetailedState.CONNECTED, type, isDefaultNetwork);
                 sendLegacyNetworkBroadcast(nai, DetailedState.CONNECTED, type);
             }
@@ -533,11 +543,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (list == null || list.isEmpty()) {
                 return;
             }
-
             final boolean wasFirstNetwork = list.get(0).equals(nai);
 
-            if (!list.remove(nai)) {
-                return;
+            synchronized (mTypeLists) {
+                if (!list.remove(nai)) {
+                    return;
+                }
             }
 
             final DetailedState state = DetailedState.DISCONNECTED;
@@ -572,8 +583,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             for (int type = 0; type < mTypeLists.length; type++) {
                 final ArrayList<NetworkAgentInfo> list = mTypeLists[type];
                 final boolean contains = (list != null && list.contains(nai));
-                final boolean isFirst = (list != null && list.size() > 0 && nai == list.get(0));
-                if (isFirst || (contains && isDefault)) {
+                final boolean isFirst = contains && (nai == list.get(0));
+                if (isFirst || contains && isDefault) {
                     maybeLogBroadcast(nai, state, type, isDefault);
                     sendLegacyNetworkBroadcast(nai, state, type);
                 }
@@ -598,10 +609,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
             pw.println();
             pw.println("Current state:");
             pw.increaseIndent();
-            for (int type = 0; type < mTypeLists.length; type++) {
-                if (mTypeLists[type] == null|| mTypeLists[type].size() == 0) continue;
-                for (NetworkAgentInfo nai : mTypeLists[type]) {
-                    pw.println(type + " " + naiToString(nai));
+            synchronized (mTypeLists) {
+                for (int type = 0; type < mTypeLists.length; type++) {
+                    if (mTypeLists[type] == null || mTypeLists[type].isEmpty()) continue;
+                    for (NetworkAgentInfo nai : mTypeLists[type]) {
+                        pw.println(type + " " + naiToString(nai));
+                    }
                 }
             }
             pw.decreaseIndent();
