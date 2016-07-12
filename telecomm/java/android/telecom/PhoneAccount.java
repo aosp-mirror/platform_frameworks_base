@@ -220,6 +220,7 @@ public final class PhoneAccount implements Parcelable {
     private final Icon mIcon;
     private final Bundle mExtras;
     private boolean mIsEnabled;
+    private String mGroupId;
 
     /**
      * Helper class for creating a {@link PhoneAccount}.
@@ -236,6 +237,7 @@ public final class PhoneAccount implements Parcelable {
         private Icon mIcon;
         private Bundle mExtras;
         private boolean mIsEnabled = false;
+        private String mGroupId = "";
 
         /**
          * Creates a builder with the specified {@link PhoneAccountHandle} and label.
@@ -263,6 +265,7 @@ public final class PhoneAccount implements Parcelable {
             mIcon = phoneAccount.getIcon();
             mIsEnabled = phoneAccount.isEnabled();
             mExtras = phoneAccount.getExtras();
+            mGroupId = phoneAccount.getGroupId();
         }
 
         /**
@@ -387,6 +390,27 @@ public final class PhoneAccount implements Parcelable {
         }
 
         /**
+         * Sets the group Id of the {@link PhoneAccount}. When a new {@link PhoneAccount} is
+         * registered to Telecom, it will replace another {@link PhoneAccount} that is already
+         * registered in Telecom and take on the current user defaults and enabled status. There can
+         * only be one {@link PhoneAccount} with a non-empty group number registered to Telecom at a
+         * time. By default, there is no group Id for a {@link PhoneAccount} (an empty String). Only
+         * grouped {@link PhoneAccount}s with the same {@link ConnectionService} can be replaced.
+         * @param groupId The group Id of the {@link PhoneAccount} that will replace any other
+         * registered {@link PhoneAccount} in Telecom with the same Group Id.
+         * @return The builder
+         * @hide
+         */
+        public Builder setGroupId(String groupId) {
+            if (groupId != null) {
+                mGroupId = groupId;
+            } else {
+                mGroupId = "";
+            }
+            return this;
+        }
+
+        /**
          * Creates an instance of a {@link PhoneAccount} based on the current builder settings.
          *
          * @return The {@link PhoneAccount}.
@@ -408,7 +432,8 @@ public final class PhoneAccount implements Parcelable {
                     mShortDescription,
                     mSupportedUriSchemes,
                     mExtras,
-                    mIsEnabled);
+                    mIsEnabled,
+                    mGroupId);
         }
     }
 
@@ -423,7 +448,8 @@ public final class PhoneAccount implements Parcelable {
             CharSequence shortDescription,
             List<String> supportedUriSchemes,
             Bundle extras,
-            boolean isEnabled) {
+            boolean isEnabled,
+            String groupId) {
         mAccountHandle = account;
         mAddress = address;
         mSubscriptionAddress = subscriptionAddress;
@@ -435,6 +461,7 @@ public final class PhoneAccount implements Parcelable {
         mSupportedUriSchemes = Collections.unmodifiableList(supportedUriSchemes);
         mExtras = extras;
         mIsEnabled = isEnabled;
+        mGroupId = groupId;
     }
 
     public static Builder builder(
@@ -564,6 +591,21 @@ public final class PhoneAccount implements Parcelable {
     }
 
     /**
+     * A non-empty {@link String} representing the group that A {@link PhoneAccount} is in or an
+     * empty {@link String} if the {@link PhoneAccount} is not in a group. If this
+     * {@link PhoneAccount} is in a group, this new {@link PhoneAccount} will replace a registered
+     * {@link PhoneAccount} that is in the same group. When the {@link PhoneAccount} is replaced,
+     * its user defined defaults and enabled status will also pass to this new {@link PhoneAccount}.
+     * Only {@link PhoneAccount}s that share the same {@link ConnectionService} can be replaced.
+     *
+     * @return A non-empty String Id if this {@link PhoneAccount} belongs to a group.
+     * @hide
+     */
+    public String getGroupId() {
+        return mGroupId;
+    }
+
+    /**
      * Determines if the {@link PhoneAccount} supports calls to/from addresses with a specified URI
      * scheme.
      *
@@ -644,6 +686,7 @@ public final class PhoneAccount implements Parcelable {
         }
         out.writeByte((byte) (mIsEnabled ? 1 : 0));
         out.writeBundle(mExtras);
+        out.writeString(mGroupId);
     }
 
     public static final Creator<PhoneAccount> CREATOR
@@ -687,6 +730,7 @@ public final class PhoneAccount implements Parcelable {
         }
         mIsEnabled = in.readByte() == 1;
         mExtras = in.readBundle();
+        mGroupId = in.readString();
     }
 
     @Override
@@ -704,6 +748,8 @@ public final class PhoneAccount implements Parcelable {
         }
         sb.append(" Extras: ");
         sb.append(mExtras);
+        sb.append(" GroupId: ");
+        sb.append(Log.pii(mGroupId));
         sb.append("]");
         return sb.toString();
     }
