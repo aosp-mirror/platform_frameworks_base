@@ -188,15 +188,16 @@ final class HdmiCecController {
             int curAddress = (startAddress + i) % NUM_LOGICAL_ADDRESS;
             if (curAddress != Constants.ADDR_UNREGISTERED
                     && deviceType == HdmiUtils.getTypeFromAddress(curAddress)) {
-                int failedPollingCount = 0;
+                boolean acked = false;
                 for (int j = 0; j < HdmiConfig.ADDRESS_ALLOCATION_RETRY; ++j) {
-                    if (!sendPollMessage(curAddress, curAddress, 1)) {
-                        failedPollingCount++;
+                    if (sendPollMessage(curAddress, curAddress, 1)) {
+                        acked = true;
+                        break;
                     }
                 }
-
-                // Pick logical address if failed ratio is more than a half of all retries.
-                if (failedPollingCount * 2 >  HdmiConfig.ADDRESS_ALLOCATION_RETRY) {
+                // If sending <Polling Message> failed, it becomes new logical address for the
+                // device because no device uses it as logical address of the device.
+                if (!acked) {
                     logicalAddress = curAddress;
                     break;
                 }
@@ -469,12 +470,14 @@ final class HdmiCecController {
         assertRunOnIoThread();
         for (int i = 0; i < retryCount; ++i) {
             // <Polling Message> is a message which has empty body.
-            // If sending <Polling Message> failed (NAK), it becomes
-            // new logical address for the device because no device uses
-            // it as logical address of the device.
-            if (nativeSendCecCommand(mNativePtr, sourceAddress, destinationAddress, EMPTY_BODY)
-                    == Constants.SEND_RESULT_SUCCESS) {
+            int ret =
+                    nativeSendCecCommand(mNativePtr, sourceAddress, destinationAddress, EMPTY_BODY);
+            if (ret == Constants.SEND_RESULT_SUCCESS) {
                 return true;
+            } else if (ret != Constants.SEND_RESULT_NAK) {
+                // Unusual failure
+                HdmiLogger.warning("Failed to send a polling message(%d->%d) with return code %d",
+                        sourceAddress, destinationAddress, ret);
             }
         }
         return false;
