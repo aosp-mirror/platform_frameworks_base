@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -688,6 +689,9 @@ public class LauncherApps {
      * @param sourceBounds The Rect containing the source bounds of the clicked icon.
      * @param startActivityOptions Options to pass to startActivity.
      * @param user The UserHandle of the profile.
+     *
+     * @throws android.content.ActivityNotFoundException failed to start shortcut. (e.g.
+     * the shortcut no longer exists, is disabled, the intent receiver activity doesn't exist, etc)
      */
     public void startShortcut(@NonNull String packageName, @NonNull String shortcutId,
             @Nullable Rect sourceBounds, @Nullable Bundle startActivityOptions,
@@ -705,6 +709,9 @@ public class LauncherApps {
      * @param shortcut The target shortcut.
      * @param sourceBounds The Rect containing the source bounds of the clicked icon.
      * @param startActivityOptions Options to pass to startActivity.
+     *
+     * @throws android.content.ActivityNotFoundException failed to start shortcut. (e.g.
+     * the shortcut no longer exists, is disabled, the intent receiver activity doesn't exist, etc)
      */
     public void startShortcut(@NonNull ShortcutInfo shortcut,
             @Nullable Rect sourceBounds, @Nullable Bundle startActivityOptions) {
@@ -717,8 +724,12 @@ public class LauncherApps {
             @Nullable Rect sourceBounds, @Nullable Bundle startActivityOptions,
             int userId) {
         try {
-            mService.startShortcut(mContext.getPackageName(), packageName, shortcutId,
+            final boolean success =
+                    mService.startShortcut(mContext.getPackageName(), packageName, shortcutId,
                     sourceBounds, startActivityOptions, userId);
+            if (!success) {
+                throw new ActivityNotFoundException("Shortcut could not be started");
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -51,7 +51,7 @@ interface ILauncherApps {
             in List shortcutIds, in ComponentName componentName, int flags, in UserHandle user);
     void pinShortcuts(String callingPackage, String packageName, in List<String> shortcutIds,
             in UserHandle user);
-    void startShortcut(String callingPackage, String packageName, String id,
+    boolean startShortcut(String callingPackage, String packageName, String id,
             in Rect sourceBounds, in Bundle startActivityOptions, int userId);
 
     int getShortcutIconResId(String callingPackage, String packageName, String id,

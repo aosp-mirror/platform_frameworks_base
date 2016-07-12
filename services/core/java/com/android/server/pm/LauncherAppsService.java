@@ -19,19 +19,18 @@ package com.android.server.pm;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
-import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
-import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ILauncherApps;
 import android.content.pm.IOnAppsChangedListener;
 import android.content.pm.IPackageManager;
+import android.content.pm.LauncherApps;
 import android.content.pm.LauncherApps.ShortcutQuery;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -439,7 +438,7 @@ public class LauncherAppsService extends SystemService {
         }
 
         @Override
-        public void startShortcut(String callingPackage, String packageName, String shortcutId,
+        public boolean startShortcut(String callingPackage, String packageName, String shortcutId,
                 Rect sourceBounds, Bundle startActivityOptions, int userId) {
             verifyCallingPackage(callingPackage);
             ensureInUserProfiles(userId, "Cannot start activity for unrelated profile " + userId);
@@ -458,39 +457,36 @@ public class LauncherAppsService extends SystemService {
             final Intent intent = mShortcutServiceInternal.createShortcutIntent(getCallingUserId(),
                     callingPackage, packageName, shortcutId, userId);
             if (intent == null) {
-                return;
+                return false;
             }
             // Note the target activity doesn't have to be exported.
 
             prepareIntentForLaunch(intent, sourceBounds);
 
-            startShortcutIntentAsPublisher(
+            return startShortcutIntentAsPublisher(
                     intent, packageName, startActivityOptions, userId);
         }
 
-        @VisibleForTesting
-        protected void startShortcutIntentAsPublisher(@NonNull Intent intent,
+        private boolean startShortcutIntentAsPublisher(@NonNull Intent intent,
                 @NonNull String publisherPackage, Bundle startActivityOptions, int userId) {
-
+            final int code;
+            final long ident = injectClearCallingIdentity();
             try {
-                final IIntentSender intentSender;
-
-                final long ident = Binder.clearCallingIdentity();
-                try {
-                    intentSender = mActivityManagerInternal.getActivityIntentSenderAsPackage(
-                            publisherPackage, userId, /* requestCode= */ 0,
-                            intent, PendingIntent.FLAG_ONE_SHOT,
-                            /* options= */ startActivityOptions);
-                } finally {
-                    Binder.restoreCallingIdentity(ident);
+                code = mActivityManagerInternal.startActivityAsPackage(publisherPackage,
+                        userId, intent, startActivityOptions);
+                if (code >= ActivityManager.START_SUCCESS) {
+                    return true; // Success
+                } else {
+                    Log.e(TAG, "Couldn't start activity, code=" + code);
                 }
-
-                // Negative result means a failure.
-                ActivityManagerNative.getDefault().sendIntentSender(
-                        intentSender, 0, null, null, null, null, null);
-
-            } catch (RemoteException e) {
-                return;
+                return code >= ActivityManager.START_SUCCESS;
+            } catch (SecurityException e) {
+                if (DEBUG) {
+                    Slog.d(TAG, "SecurityException while launching intent", e);
+                }
+                return false;
+            } finally {
+                injectRestoreCallingIdentity(ident);
             }
         }
 
