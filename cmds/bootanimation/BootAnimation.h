@@ -30,7 +30,6 @@ class SkBitmap;
 
 namespace android {
 
-class AudioPlayer;
 class Surface;
 class SurfaceComposerClient;
 class SurfaceControl;
@@ -98,7 +97,8 @@ private:
             SortedVector<Frame> frames;
             bool playUntilComplete;
             float backgroundColor[3];
-            FileMap* audioFile;
+            uint8_t* audioData;
+            int audioLength;
             Animation* animation;
         };
         int fps;
@@ -124,7 +124,6 @@ private:
     void checkExit();
 
     sp<SurfaceComposerClient>       mSession;
-    sp<AudioPlayer>                 mAudioPlayer;
     AssetManager mAssets;
     Texture     mAndroid[2];
     Texture     mClock;

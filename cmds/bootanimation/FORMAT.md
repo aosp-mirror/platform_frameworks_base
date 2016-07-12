@@ -67,34 +67,8 @@ If the file is not present, each frame is assumed to be the same size as the ani
 
 ## audio.wav
 
-Each part may optionally play a `wav` sample when it starts. To enable this for an animation,
-you must also include a `audio_conf.txt` file in the ZIP archive. Its format is as follows:
-
-    card=<ALSA card number>
-    device=<ALSA device number>
-    period_size=<period size>
-    period_count=<period count>
-
-This header is followed by zero or more mixer settings, each with the format:
-
-    mixer "<name>" = <value list>
-
-Here's an example `audio_conf.txt` from Shamu:
-
-    card=0
-    device=15
-    period_size=1024
-    period_count=4
-
-    mixer "QUAT_MI2S_RX Audio Mixer MultiMedia5" = 1
-    mixer "Playback Channel Map" = 0 220 157 195 0 0 0 0
-    mixer "QUAT_MI2S_RX Channels" = Two
-    mixer "BOOST_STUB Right Mixer right" = 1
-    mixer "BOOST_STUB Left Mixer left" = 1
-    mixer "Compress Playback 9 Volume" = 80 80
-
-You will probably need to get these mixer names and values out of `audio_platform_info.xml`
-and `mixer_paths.xml` for your device.
+Each part may optionally play a `wav` sample when it starts. To enable this, add a file
+with the name `audio.wav` in the part directory.
 
 ## exiting
 
