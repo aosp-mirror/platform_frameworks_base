@@ -312,6 +312,10 @@ public class Cat extends Drawable {
         logCatAction(context, "egg_neko_add");
     }
 
+    public void logRename(Context context) {
+        logCatAction(context, "egg_neko_rename");
+    }
+
     public void logRemove(Context context) {
         logCatAction(context, "egg_neko_remove");
     }
