@@ -449,6 +449,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private static final int MAX_NETWORK_REQUEST_LOGS = 20;
     private final LocalLog mNetworkRequestInfoLogs = new LocalLog(MAX_NETWORK_REQUEST_LOGS);
 
+    // NetworkInfo blocked and unblocked String log entries
+    // TODO: consider reducing memory usage. Each log line is ~40 2B chars, for a total of ~8kB.
+    private static final int MAX_NETWORK_INFO_LOGS = 100;
+    private final LocalLog mNetworkInfoBlockingLogs = new LocalLog(MAX_NETWORK_INFO_LOGS);
+
     // Array of <Network,ReadOnlyLocalLogs> tracking network validation and results
     private static final int MAX_VALIDATION_LOGS = 10;
     private static class ValidationLog {
@@ -1013,7 +1018,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private void maybeLogBlockedNetworkInfo(NetworkInfo ni, int uid) {
-        if (ni == null || !LOGD_BLOCKED_NETWORKINFO) return;
+        if (ni == null || !LOGD_BLOCKED_NETWORKINFO) {
+            return;
+        }
         boolean removed = false;
         boolean added = false;
         synchronized (mBlockedAppUids) {
@@ -1023,8 +1030,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 removed = true;
             }
         }
-        if (added) log("Returning blocked NetworkInfo to uid=" + uid);
-        else if (removed) log("Returning unblocked NetworkInfo to uid=" + uid);
+        if (added) {
+            log("Returning blocked NetworkInfo to uid=" + uid);
+            mNetworkInfoBlockingLogs.log("BLOCKED " + uid);
+        } else if (removed) {
+            log("Returning unblocked NetworkInfo to uid=" + uid);
+            mNetworkInfoBlockingLogs.log("UNBLOCKED " + uid);
+        }
     }
 
     /**
@@ -2026,6 +2038,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
             pw.println("mNetworkRequestInfoLogs (most recent first):");
             pw.increaseIndent();
             mNetworkRequestInfoLogs.reverseDump(fd, pw, args);
+            pw.decreaseIndent();
+
+            pw.println();
+            pw.println("mNetworkInfoBlockingLogs (most recent first):");
+            pw.increaseIndent();
+            mNetworkInfoBlockingLogs.reverseDump(fd, pw, args);
             pw.decreaseIndent();
         }
     }
