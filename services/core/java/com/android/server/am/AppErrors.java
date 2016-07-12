@@ -58,6 +58,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Set;
 import java.util.concurrent.Semaphore;
 
 import static com.android.server.Watchdog.NATIVE_STACKS_OF_INTEREST;
@@ -386,8 +387,8 @@ class AppErrors {
                     } catch (IllegalArgumentException e) {
                         // Hmm, that didn't work, app might have crashed before creating a
                         // recents entry. Let's see if we have a safe-to-restart intent.
-                        if (task.intent.getCategories().contains(
-                                Intent.CATEGORY_LAUNCHER)) {
+                        final Set<String> cats = task.intent.getCategories();
+                        if (cats != null && cats.contains(Intent.CATEGORY_LAUNCHER)) {
                             mService.startActivityInPackage(task.mCallingUid,
                                     task.mCallingPackage, task.intent,
                                     null, null, null, 0, 0,
