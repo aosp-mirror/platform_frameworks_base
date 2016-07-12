@@ -22,10 +22,12 @@
 
 namespace audioplay {
 
-void create();
+// Initializes the engine with an example of the type of WAV clip to play.
+// All buffers passed to playClip are assumed to be in the same format.
+bool create(const uint8_t* exampleClipBuf, int exampleClipBufSize);
 
-// Play a WAV pointed to by buf.  All clips are assumed to be in the same format.
-// playClip should not be called while a clip is still playing.
+// Plays a WAV contained in buf.
+// Should not be called while a clip is still playing.
 bool playClip(const uint8_t* buf, int size);
 void setPlaying(bool isPlaying);
 void destroy();
