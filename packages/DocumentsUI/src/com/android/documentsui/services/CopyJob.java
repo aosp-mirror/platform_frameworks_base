@@ -55,7 +55,7 @@ import com.android.documentsui.DocumentsApplication;
 import com.android.documentsui.Metrics;
 import com.android.documentsui.R;
 import com.android.documentsui.RootsCache;
-import com.android.documentsui.UrisSupplier;
+import com.android.documentsui.clipping.UrisSupplier;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.RootInfo;

@@ -40,7 +40,7 @@ import android.os.RemoteException;
 import android.provider.DocumentsContract;
 import android.util.Log;
 
-import com.android.documentsui.UrisSupplier;
+import com.android.documentsui.clipping.UrisSupplier;
 import com.android.documentsui.FilesActivity;
 import com.android.documentsui.Metrics;
 import com.android.documentsui.OperationDialogFragment;

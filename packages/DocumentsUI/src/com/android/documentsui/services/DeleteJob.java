@@ -26,7 +26,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 
-import com.android.documentsui.UrisSupplier;
+import com.android.documentsui.clipping.UrisSupplier;
 import com.android.documentsui.Metrics;
 import com.android.documentsui.R;
 import com.android.documentsui.model.DocumentInfo;
