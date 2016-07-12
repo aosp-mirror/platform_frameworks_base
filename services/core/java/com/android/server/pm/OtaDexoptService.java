@@ -213,9 +213,19 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         // Use the package manager install and install lock here for the OTA dex optimizer.
         PackageDexOptimizer optimizer = new OTADexoptPackageDexOptimizer(
                 collectingInstaller, mPackageManagerService.mInstallLock, mContext);
+        // Make sure that core apps are optimized according to their own "reason".
+        // If the core apps are not preopted in the B OTA, and REASON_AB_OTA is not speed
+        // (by default is speed-profile) they will be interepreted/JITed. This in itself is not a
+        // problem as we will end up doing profile guided compilation. However, some core apps may
+        // be loaded by system server which doesn't JIT and we need to make sure we don't
+        // interpret-only
+        int compilationReason = nextPackage.coreApp
+                ? PackageManagerService.REASON_CORE_APP
+                : PackageManagerService.REASON_AB_OTA;
+
         optimizer.performDexOpt(nextPackage, nextPackage.usesLibraryFiles,
                 null /* ISAs */, false /* checkProfiles */,
-                getCompilerFilterForReason(PackageManagerService.REASON_AB_OTA));
+                getCompilerFilterForReason(compilationReason));
 
         mCommandsForCurrentPackage = collectingConnection.commands;
         if (mCommandsForCurrentPackage.isEmpty()) {
