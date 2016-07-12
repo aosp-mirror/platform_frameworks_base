@@ -16,7 +16,262 @@ page.tags="preview", "developer preview"
   Wear Developer Google+ community</a>.
 </p>
 
-<h2 id="dp">Developer Preview 1</h2>
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+
+<ul>
+  <li><a href="#general">General Advisories</a></li>
+  <li><a href="#deprecations">Deprecations</a></li>
+  <li><a href="#dp2">Developer Preview 2</a></li>
+  <li><a href="#dp1">Developer Preview 1</a></li>
+</ul>
+
+</div>
+</div>
+
+<h2 id="general">General Advisories</h2>
+
+<p>
+  The developer preview is for <strong>app developers and other early
+  adopters</strong> and is available for daily use, development, or
+  compatibility testing. Please be aware of these general notes about the
+  release:
+</p>
+
+<ul>
+  <li>The developer preview may have various <strong>stability issues</strong> on
+    supported devices. Users may encounter system instability, such as kernel
+    panics and crashes.
+  </li>
+  <li>Some apps <strong>may not function as expected</strong> on the new
+  platform version. This includes Google’s apps and other apps.
+  </li>
+</ul>
+
+<h2 id="deprecations">Deprecations</h2>
+
+<p>The following fields are deprecated in the preview:</p>
+
+<ul>
+  <li>The <code>Notification.WearableExtender#setCustomSizePreset(int)</code>
+  method no longer accepts <code>SIZE_FULL_SCREEN</code> and this value is now
+  undefined.
+  </li>
+  <li>The <code>Notification.WearableExtender#setContentIcon(int)</code> method
+  is deprecated.
+  </li>
+</ul>
+
+<h2 id="dp2">Developer Preview 2</h2>
+
+<div class="wrap">
+  <div class="cols">
+    <div class="col-6of12">
+      <p><em>Date: July 2016<br />
+      Builds: Wearable Support 2.0.0-alpha2, NVD83H<br/>
+      Emulator support: x86 & ARM (32-bit)<br/>
+      </em></p>
+    </div>
+  </div>
+</div>
+
+<h3 id="new-in-fdp2">
+  <strong>New in Preview 2</strong>
+</h3>
+
+<h4 id="platform-version-24">
+  Platform API Version
+</h4>
+
+<p>
+  The Android Platform API version is incremented to 24 to match Android Nougat.
+  You can update the following in your Android Wear 2.0 Preview project
+  to <strong>24</strong>:
+</p>
+
+<ul>
+  <li><code>compileSdkVersion</code></li>
+  <li><code>targetSdkVersion</code></li>
+</ul>
+
+<h4 id="wearable-drawers">
+  Wearable drawers
+</h4>
+
+<p>
+  The following are feature additions for <a href=
+  "{@docRoot}wear/preview/features/ui-nav-actions.html">
+  wearable drawers</a>:
+</p>
+
+<ul>
+  <li>Drawer peeking is now supported in the <code>onCreate()</code> method
+  of your app's activity.
+  </li>
+
+  <li>The automatic drawer peeking behavior is
+  inverted. Now the bottom drawer peeks when the user scrolls down the view
+  and top drawer peeks when the user scrolls to the top of the view
+  (previously scrolling down did not show peek view).
+  </li>
+
+  <li>Two new attributes, <code>peek_view</code> and
+  <code>drawer_content</code>, are added to
+  <code>WearableDrawerView</code> to specify contents of custom drawers and
+  peek view in your XML layout (previously, custom drawer contents were
+  specified only through Java code).
+  </li>
+
+  <li>The Navigation drawer now displays page indicator dots.
+  </li>
+
+  <li>Peek views now close automatically after one second.
+  </li>
+
+  <li>The <code>WearableNavigationDrawer</code> now automatically closes
+  after five seconds or when an item is tapped.
+  </li>
+
+  <li>There is improved drawer handling (size and margins) for devices with chins:
+    <ul>
+      <li>Size: The bottom drawer is slightly smaller when there is a
+      chin.
+      </li>
+      <li>Margins: <code>WearableDrawerLayout</code> sets its bottom margin
+      size equal to the size of the chin, so that the bottom drawer is
+      fully visible.
+      </li>
+    </ul>
+  <li>The navigation drawer contents are now updated when
+        <code><a href="{@docRoot}reference/android/widget/ArrayAdapter.html#notifyDataSetChanged()">
+        notifyDataSetChanged</a></code> is called on the adapter.
+  </li>
+
+    <li>In your <code>WearableActionDrawer</code>, when there is only one
+      action, its icon is shown in the peek view and the action is executed
+      when the peek view is tapped.
+    </li>
+
+    <li>When the peek view of your <code>WearableActionDrawer</code> has
+      more than one action, both the first action and the overflow icons are
+      shown.
+    </li>
+</ul>
+
+<h4 id="gestures">
+  Wrist gestures
+</h4>
+
+<p>
+  Wrist gestures can enable quick, one-handed interactions with your app.
+  For example, a user can
+  scroll through notifications with one hand while holding a cup of water
+  with the other. For more information, see <a href=
+  "{@docRoot}wear/preview/features/gestures.html">
+  Wrist Gestures</a>.
+</p>
+
+<h3 id="known-issues-2">
+  <strong>Known Issues</strong>
+</h3>
+
+<h4 id="notifications-2">
+  Notifications
+</h4>
+
+<ul>
+  <li>This preview release does not include support for notification
+  groups.
+  </li>
+
+  <li>The user interface for the action drawer can sometimes have a
+  transparent background.
+  </li>
+
+  <li>The system does not generate Smart Reply responses even if
+  <code>setAllowGeneratedReplies(true)</code> is set.
+  </li>
+</ul>
+
+<h4 id="complications-2">
+  Complications
+</h4>
+
+<ul>
+  <li>When tapping on the music complication on a watch face, Play Music
+  crashes if the Apps launcher provider is used.
+  </li>
+</ul>
+
+<h4 id="system-user-interface-2">
+  System User Interface
+</h4>
+
+<ul>
+  <li>Pressing the hardware button in ambient mode triggers active mode
+  with the app launcher instead of active mode only.
+  </li>
+
+  <li>Double pressing the power hardware button while on the launcher
+  causes the watch screen to turn black.
+  </li>
+
+  <li>Dismissing multiple notifications can cause app to forcibly close.
+  </li>
+
+  <li>Turning screen lock to off (Enable and disable) functionality is not
+  reliable.
+  </li>
+
+  <li>The "Ok Google" detection and voice transcription may not work
+  reliably. Additionally, Search does not retrieve results.
+  </li>
+
+  <li>Tapping Google keyboard English (United States) displays a "Settings
+  under construction" message.
+  </li>
+
+  <li>First calendar event notification must be dismissed in order to show
+  the rest of the event card.
+  </li>
+
+  <li>Unable to turn off the Wi-Fi on a wearable.
+  </li>
+</ul>
+
+<h4 id="companion-app-2">
+  Companion App
+</h4>
+
+<ul>
+  <li>An actions card is shown in the Android Wear companion app, even
+  though there are no actions.
+  </li>
+</ul>
+
+<h4 id="devices-2">
+  Devices
+</h4>
+
+<ul>
+  <li>On the Huawei Watch, selecting the language, followed by multiple
+  acknowledgement dialogues results in a black screen.
+  </li>
+
+  <li>On the LG Watch Urbane 2nd Edition, when answering a call from the watch, the
+  watch does not provide audio from the caller.
+  </li>
+
+  <li>On the LG Watch Urbane 2nd Edition,
+  please do the following to prevent battery drain:
+  Turn on Airplane mode (to disable the cellular radio) and then
+  turn on Bluetooth.
+  </li>
+</ul>
+
+<h2 id="dp1">Developer Preview 1</h2>
 
 <div class="wrap">
   <div class="cols">
@@ -29,35 +284,9 @@ page.tags="preview", "developer preview"
   </div>
 </div>
 
-
-<h3 id="general_advisories">General advisories</h3>
-
-<p>
-  This Developer Preview release is for app developers only and is designed for
-  use in compatibility testing and early development only.
-</p>
-
-<h4 id="deprecations">Deprecations</h4>
-
-
-<p>The following fields are deprecated in the Preview:</p>
-
-<ul>
-  <li>The <code>Notification.WearableExtender#setCustomSizePreset(int)</code>
-  method no longer accepts <code>SIZE_FULL_SCREEN</code> and this value is now
-  undefined.
-  </li>
-
-  <li>The <code>Notification.WearableExtender#setContentIcon(int)</code> method
-  is deprecated.
-  </li>
-</ul>
-
 <h3 id="known_issues">Known Issues</h3>
 
-
 <h4 id="notifications">Notifications</h4>
-
 
 <ul>
   <li>This preview release does not include support for notification groups,
@@ -74,17 +303,16 @@ page.tags="preview", "developer preview"
   </li>
 </ul>
 
-
 <h4 id="complications">Complications</h4>
 
 <ul>
-  <li>Battery information is not synchronized between watch face and drop down
-  quick menu.
+  <li>Battery information is not synchronized between the
+  watch face and the drop-down Quick menu.
   </li>
-  <li>Play music crashes when tapping on music complication in watch face.
+  <li>When tapping on the music complication on a watch face, Play Music
+      crashes if the Apps launcher provider is used.
   </li>
 </ul>
-
 
 <h4 id="system_user_interface">System User Interface</h4>
 
@@ -114,18 +342,15 @@ page.tags="preview", "developer preview"
   </li>
 </ul>
 
-
 <h4 id="companion_app">Companion App</h4>
 
 <ul>
-  <li>'More actions' via Companion app shows a blank screen on phone running
-  nyc-release and watch running feldspar-release.
-  </li>
-  <li>Select watch face on companion wear app will not change watch face on
-  wearable.
-  </li>
+   <li>Selecting a watch face on the companion app will not change the watch face on
+   wearable.</li>
+   <li>An actions card is shown in the Android Wear companion app, even
+   though there are no actions.
+   </li>
 </ul>
-
 
 <h4 id="devices">Devices</h4>
 
@@ -133,7 +358,8 @@ page.tags="preview", "developer preview"
   <li>On the Huawei Watch, selecting the language, followed by multiple
   acknowledgement dialogues results in a black screen.
   </li>
-  <li>On the LG Watch Urbane LTE, when answering call from the watch, the watch
+  <li>On the LG Watch Urbane 2nd Edition, when
+  answering a call from the watch, the watch
   does not provide audio from the caller.
   </li>
 </ul>
