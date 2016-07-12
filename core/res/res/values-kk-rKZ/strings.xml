@@ -1217,7 +1217,7 @@
     <string name="forward_intent_to_work" msgid="621480743856004612">"Осы қолданбаны жұмыс профиліңізде пайдаланып жатырсыз"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Енгізу әдісі"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Синх"</string>
-    <string name="accessibility_binding_label" msgid="4148120742096474641">"Қол жетімділік"</string>
+    <string name="accessibility_binding_label" msgid="4148120742096474641">"Арнайы мүмкіндіктер"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Артқы фоны"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Артқы фонын өзгерту"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Хабар бақылағыш"</string>
