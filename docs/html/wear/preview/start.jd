@@ -107,10 +107,10 @@ page.image=images/cards/card-n-sdk_2x.png
 
       <tr>
         <td>
-          <a href="http://storage.googleapis.com/androiddevelopers/shareables/wear-preview/wearable-support-preview-1-docs.zip">wearable-support-preview-1-docs.zip</a>
+          <a href="http://storage.googleapis.com/androiddevelopers/shareables/wear-preview/wearable-support-preview-2-docs.zip">wearable-support-preview-2-docs.zip</a>
         </td>
-        <td>MD5: 02f9dc7714c00076b323c9081655c3b2<br>
-            SHA-1: 075f3821ee9b66a919a0e8086f79c12bc9576fb2
+        <td>MD5: afb770c9c5c0431bbcbdde186f1eae06<br>
+            SHA-1: 81d681e61cee01f222ea82e83297d23c4e55b8f3
         </td>
       </tr>
     </table>
@@ -146,16 +146,26 @@ page.image=images/cards/card-n-sdk_2x.png
       plugin.
       </li>
 
-      <li>In the <code>build.gradle</code> file for the Wear module, in the
-      <code>dependencies</code> section, update the existing reference to the
+      <li>In the <code>build.gradle</code> file for the Wear module:
+      <ul>
+        <li>In the <code>android</code> section, update the
+        <code>compileSdkVersion</code> to 24.
+        </li>
+
+        <li>In the <code>android</code> section, update the
+        <code>targetSdkVersion</code> to 24.
+        </li>
+
+        <li>In the <code>dependencies</code> section, update
+      the existing reference to the
       Wearable Support Library (for example, <code>compile
       'com.google.android.support:wearable:1.4.0'</code>) by changing it to the
       following, which requires that your the Google Repository <a href=
       "#install_android_studio_and_the_latest_packages">is the latest
       version</a>:
-      <pre>
-compile 'com.google.android.support:wearable:2.0.0-alpha1'
-      </pre>
+      <code>compile 'com.google.android.support:wearable:2.0.0-alpha2'</code>
+        </li>
+      </ul>
       </li>
 
       <li>See the following page for setting up a watch or emulator with a
@@ -190,13 +200,24 @@ compile 'com.google.android.support:wearable:2.0.0-alpha1'
       wizard.
       </li>
 
-      <li>In the <code>build.gradle</code> file for the Wear module, in the
-      <code>dependencies</code> section, update the existing reference to the
-      Wearable Support Library (perhaps <code>compile
-      'com.google.android.support:wearable:1.4.0'</code>) to:
-      <pre>
-compile 'com.google.android.support:wearable:2.0.0-alpha1'
-      </pre>
+      <li>In the <code>build.gradle</code> file for the Wear module:
+      <ul>
+        <li>In the <code>android</code> section, update the
+        <code>compileSdkVersion</code> to 24.
+        </li>
+        <li>In the <code>android</code> section, update the
+        <code>targetSdkVersion</code> to 24.
+        </li>
+        <li>In the <code>dependencies</code> section, update
+      the existing reference to the
+      Wearable Support Library (for example, <code>compile
+      'com.google.android.support:wearable:1.4.0'</code>) by changing it to the
+      following, which requires that your the Google Repository <a href=
+      "#install_android_studio_and_the_latest_packages">is the latest
+      version</a>:
+      <code>compile 'com.google.android.support:wearable:2.0.0-alpha2'</code>
+        </li>
+      </ul>
       </li>
 
       <li>See the following page for setting up a watch or emulator with a
