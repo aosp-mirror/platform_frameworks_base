@@ -97,7 +97,7 @@ final class DeleteJob extends Job {
         try {
             final List<DocumentInfo> srcs = new ArrayList<>(this.srcs.getItemCount());
 
-            final Iterable<Uri> uris = this.srcs.getDocs(appContext);
+            final Iterable<Uri> uris = this.srcs.getUris(appContext);
 
             final ContentResolver resolver = appContext.getContentResolver();
             final DocumentInfo srcParent = DocumentInfo.fromUri(resolver, mSrcParent);

@@ -16,9 +16,12 @@
 
 package com.android.documentsui;
 
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.annotation.VisibleForTesting;
+import android.system.ErrnoException;
+import android.system.Os;
 import android.util.Log;
 
 import java.io.Closeable;
@@ -27,62 +30,157 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileLock;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Provides support for storing lists of documents identified by Uri.
  *
- * <li>Access to this object *must* be synchronized externally.
- * <li>All calls to this class are I/O intensive and must be wrapped in an AsyncTask.
+ * This class uses a ring buffer to recycle clip file slots, to mitigate the issue of clip file
+ * deletions.
  */
 public final class ClipStorage {
 
+    public static final int NO_SELECTION_TAG = -1;
+
+    static final String PREF_NAME = "ClipStoragePref";
+
+    @VisibleForTesting
+    static final int NUM_OF_SLOTS = 20;
+
     private static final String TAG = "ClipStorage";
 
+    private static final long STALENESS_THRESHOLD = TimeUnit.DAYS.toMillis(2);
+
+    private static final String NEXT_POS_TAG = "NextPosTag";
+    private static final String PRIMARY_DATA_FILE_NAME = "primary";
+
     private static final byte[] LINE_SEPARATOR = System.lineSeparator().getBytes();
-    public static final long NO_SELECTION_TAG = -1;
 
     private final File mOutDir;
+    private final SharedPreferences mPref;
+
+    private final File[] mSlots = new File[NUM_OF_SLOTS];
+    private int mNextPos;
 
     /**
      * @param outDir see {@link #prepareStorage(File)}.
      */
-    public ClipStorage(File outDir) {
+    public ClipStorage(File outDir, SharedPreferences pref) {
         assert(outDir.isDirectory());
         mOutDir = outDir;
+        mPref = pref;
+
+        mNextPos = mPref.getInt(NEXT_POS_TAG, 0);
     }
 
     /**
-     * Creates a clip tag.
+     * Tries to get the next available clip slot. It's guaranteed to return one. If none of
+     * slots is available, it returns the next slot of the most recently returned slot by this
+     * method.
      *
-     * NOTE: this tag doesn't guarantee perfect uniqueness, but should work well unless user creates
-     * clips more than hundreds of times per second.
+     * <p>This is not a perfect solution, but should be enough for most regular use. There are
+     * several situations this method may not work:
+     * <ul>
+     *     <li>Making {@link #NUM_OF_SLOTS} - 1 times of large drag and drop or moveTo/copyTo/delete
+     *     operations after cutting a primary clip, then the primary clip is overwritten.</li>
+     *     <li>Having more than {@link #NUM_OF_SLOTS} queued jumbo file operations, one or more clip
+     *     file may be overwritten.</li>
+     * </ul>
      */
-    public long createTag() {
-        return System.currentTimeMillis();
+    public synchronized int claimStorageSlot() {
+        int curPos = mNextPos;
+        for (int i = 0; i < NUM_OF_SLOTS; ++i, curPos = (curPos + 1) % NUM_OF_SLOTS) {
+            createSlotFile(curPos);
+
+            if (!mSlots[curPos].exists()) {
+                break;
+            }
+
+            // No file or only primary file exists, we deem it available.
+            if (mSlots[curPos].list().length <= 1) {
+                break;
+            }
+            // This slot doesn't seem available, but still need to check if it's a legacy of
+            // service being killed or a service crash etc. If it's stale, it's available.
+            else if(checkStaleFiles(curPos)) {
+                break;
+            }
+        }
+
+        prepareSlot(curPos);
+
+        mNextPos = (curPos + 1) % NUM_OF_SLOTS;
+        mPref.edit().putInt(NEXT_POS_TAG, mNextPos).commit();
+        return curPos;
+    }
+
+    private boolean checkStaleFiles(int pos) {
+        File slotData = toSlotDataFile(pos);
+
+        // No need to check if the file exists. File.lastModified() returns 0L if the file doesn't
+        // exist.
+        return slotData.lastModified() + STALENESS_THRESHOLD <= System.currentTimeMillis();
+    }
+
+    private void prepareSlot(int pos) {
+        assert(mSlots[pos] != null);
+
+        Files.deleteRecursively(mSlots[pos]);
+        mSlots[pos].mkdir();
+        assert(mSlots[pos].isDirectory());
     }
 
     /**
      * Returns a writer. Callers must close the writer when finished.
      */
-    public Writer createWriter(long tag) throws IOException {
-        File file = toTagFile(tag);
+    private Writer createWriter(int tag) throws IOException {
+        File file = toSlotDataFile(tag);
         return new Writer(file);
     }
 
-    @VisibleForTesting
-    public Reader createReader(long tag) throws IOException {
-        File file = toTagFile(tag);
+    /**
+     * Gets a {@link File} instance given a tag.
+     *
+     * This method creates a symbolic link in the slot folder to the data file as a reference
+     * counting method. When someone is done using this symlink, it's responsible to delete it.
+     * Therefore we can have a neat way to track how many things are still using this slot.
+     */
+    public File getFile(int tag) throws IOException {
+        createSlotFile(tag);
+
+        File primary = toSlotDataFile(tag);
+
+        String linkFileName = Integer.toString(mSlots[tag].list().length);
+        File link = new File(mSlots[tag], linkFileName);
+
+        try {
+            Os.symlink(primary.getAbsolutePath(), link.getAbsolutePath());
+        } catch (ErrnoException e) {
+            e.rethrowAsIOException();
+        }
+        return link;
+    }
+
+    /**
+     * Returns a Reader. Callers must close the reader when finished.
+     */
+    public Reader createReader(File file) throws IOException {
+        assert(file.getParentFile().getParentFile().equals(mOutDir));
         return new Reader(file);
     }
 
-    @VisibleForTesting
-    public void delete(long tag) throws IOException {
-        toTagFile(tag).delete();
+    private File toSlotDataFile(int pos) {
+        assert(mSlots[pos] != null);
+        return new File(mSlots[pos], PRIMARY_DATA_FILE_NAME);
     }
 
-    private File toTagFile(long tag) {
-        return new File(mOutDir, String.valueOf(tag));
+    private void createSlotFile(int pos) {
+        if (mSlots[pos] == null) {
+            mSlots[pos] = new File(mOutDir, Integer.toString(pos));
+        }
     }
 
     /**
@@ -96,27 +194,39 @@ public final class ClipStorage {
         return clipDir;
     }
 
-    public static boolean hasDocList(long tag) {
-        return tag != NO_SELECTION_TAG;
-    }
-
     private static File getClipDir(File cacheDir) {
         return new File(cacheDir, "clippings");
     }
 
     static final class Reader implements Iterable<Uri>, Closeable {
 
+        /**
+         * FileLock can't be held multiple times in a single JVM, but it's possible to have multiple
+         * readers reading the same clip file. Share the FileLock here so that it can be released
+         * when it's not needed.
+         */
+        private static final Map<String, FileLockEntry> sLocks = new HashMap<>();
+
+        private final String mCanonicalPath;
         private final Scanner mScanner;
-        private final FileLock mLock;
 
         private Reader(File file) throws IOException {
             FileInputStream inStream = new FileInputStream(file);
-
-            // Lock the file here so it won't pass this line until the corresponding writer is done
-            // writing.
-            mLock = inStream.getChannel().lock(0L, Long.MAX_VALUE, true);
-
             mScanner = new Scanner(inStream);
+
+            mCanonicalPath = file.getCanonicalPath(); // Resolve symlink
+            synchronized (sLocks) {
+                if (sLocks.containsKey(mCanonicalPath)) {
+                    // Read lock is already held by someone in this JVM, just increment the ref
+                    // count.
+                    sLocks.get(mCanonicalPath).mCount++;
+                } else {
+                    // No map entry, need to lock the file so it won't pass this line until the
+                    // corresponding writer is done writing.
+                    FileLock lock = inStream.getChannel().lock(0L, Long.MAX_VALUE, true);
+                    sLocks.put(mCanonicalPath, new FileLockEntry(1, lock, mScanner));
+                }
+            }
         }
 
         @Override
@@ -126,12 +236,21 @@ public final class ClipStorage {
 
         @Override
         public void close() throws IOException {
-            if (mLock != null) {
-                mLock.release();
-            }
+            synchronized (sLocks) {
+                FileLockEntry ref = sLocks.get(mCanonicalPath);
 
-            if (mScanner != null) {
-                mScanner.close();
+                assert(ref.mCount > 0);
+                if (--ref.mCount == 0) {
+                    // If ref count is 0 now, then there is no one who needs to hold the read lock.
+                    // Release the lock, and remove the entry.
+                    ref.mLock.release();
+                    ref.mScanner.close();
+                    sLocks.remove(mCanonicalPath);
+                }
+
+                if (mScanner != ref.mScanner) {
+                    mScanner.close();
+                }
             }
         }
     }
@@ -155,12 +274,28 @@ public final class ClipStorage {
         }
     }
 
+    private static final class FileLockEntry {
+        private int mCount;
+        private FileLock mLock;
+        // We need to keep this scanner here because if the scanner is closed, the file lock is
+        // closed too.
+        private Scanner mScanner;
+
+        private FileLockEntry(int count, FileLock lock, Scanner scanner) {
+            mCount = count;
+            mLock = lock;
+            mScanner = scanner;
+        }
+    }
+
     private static final class Writer implements Closeable {
 
         private final FileOutputStream mOut;
         private final FileLock mLock;
 
         private Writer(File file) throws IOException {
+            assert(!file.exists());
+
             mOut = new FileOutputStream(file);
 
             // Lock the file here so copy tasks would wait until everything is flushed to disk
@@ -192,9 +327,9 @@ public final class ClipStorage {
 
         private final ClipStorage mClipStorage;
         private final Iterable<Uri> mUris;
-        private final long mTag;
+        private final int mTag;
 
-        PersistTask(ClipStorage clipStorage, Iterable<Uri> uris, long tag) {
+        PersistTask(ClipStorage clipStorage, Iterable<Uri> uris, int tag) {
             mClipStorage = clipStorage;
             mUris = uris;
             mTag = tag;
@@ -202,7 +337,7 @@ public final class ClipStorage {
 
         @Override
         protected Void doInBackground(Void... params) {
-            try (ClipStorage.Writer writer = mClipStorage.createWriter(mTag)) {
+            try(Writer writer = mClipStorage.createWriter(mTag)){
                 for (Uri uri: mUris) {
                     assert(uri != null);
                     writer.write(uri);

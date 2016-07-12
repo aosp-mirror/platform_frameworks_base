@@ -19,9 +19,11 @@ package com.android.documentsui;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.provider.DocumentsContract;
+import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.MediumTest;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -42,6 +44,7 @@ import java.util.List;
 @MediumTest
 public class UrisSupplierTest {
 
+    private static final String PREF_NAME = "pref";
     private static final String AUTHORITY = "foo";
     private static final List<Uri> SHORT_URI_LIST = createList(3);
     private static final List<Uri> LONG_URI_LIST = createList(Shared.MAX_DOCS_IN_INTENT + 5);
@@ -49,6 +52,7 @@ public class UrisSupplierTest {
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
 
+    private SharedPreferences mPref;
     private TestScheduledExecutorService mExecutor;
     private ClipStorage mStorage;
 
@@ -57,7 +61,8 @@ public class UrisSupplierTest {
         mExecutor = new TestScheduledExecutorService();
         AsyncTask.setDefaultExecutor(mExecutor);
 
-        mStorage = new ClipStorage(folder.getRoot());
+        mPref = InstrumentationRegistry.getContext().getSharedPreferences(PREF_NAME, 0);
+        mStorage = new ClipStorage(folder.getRoot(), mPref);
     }
 
     @AfterClass
@@ -66,14 +71,14 @@ public class UrisSupplierTest {
     }
 
     @Test
-    public void testItemCountEquals_shortList() {
+    public void testItemCountEquals_shortList() throws Exception {
         UrisSupplier uris = createWithShortList();
 
         assertEquals(SHORT_URI_LIST.size(), uris.getItemCount());
     }
 
     @Test
-    public void testItemCountEquals_longList() {
+    public void testItemCountEquals_longList() throws Exception {
         UrisSupplier uris = createWithLongList();
 
         assertEquals(LONG_URI_LIST.size(), uris.getItemCount());
@@ -83,35 +88,35 @@ public class UrisSupplierTest {
     public void testGetDocsEquals_shortList() throws Exception {
         UrisSupplier uris = createWithShortList();
 
-        assertIterableEquals(SHORT_URI_LIST, uris.getDocs(mStorage));
+        assertIterableEquals(SHORT_URI_LIST, uris.getUris(mStorage));
     }
 
     @Test
     public void testGetDocsEquals_longList() throws Exception {
         UrisSupplier uris = createWithLongList();
 
-        assertIterableEquals(LONG_URI_LIST, uris.getDocs(mStorage));
+        assertIterableEquals(LONG_URI_LIST, uris.getUris(mStorage));
     }
 
     @Test
     public void testDispose_shortList() throws Exception {
         UrisSupplier uris = createWithShortList();
 
-        uris.dispose(mStorage);
+        uris.dispose();
     }
 
     @Test
     public void testDispose_longList() throws Exception {
         UrisSupplier uris = createWithLongList();
 
-        uris.dispose(mStorage);
+        uris.dispose();
     }
 
-    private UrisSupplier createWithShortList() {
+    private UrisSupplier createWithShortList() throws Exception {
         return UrisSupplier.create(SHORT_URI_LIST, mStorage);
     }
 
-    private UrisSupplier createWithLongList() {
+    private UrisSupplier createWithLongList() throws Exception {
         UrisSupplier uris =
                 UrisSupplier.create(LONG_URI_LIST, mStorage);
 
