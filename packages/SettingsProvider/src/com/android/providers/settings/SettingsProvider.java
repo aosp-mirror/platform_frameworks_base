@@ -1202,6 +1202,11 @@ public class SettingsProvider extends ContentProvider {
                 restriction = UserManager.DISALLOW_CONFIG_VPN;
                 break;
 
+            case Settings.Global.SAFE_BOOT_DISALLOWED:
+                if ("1".equals(value)) return false;
+                restriction = UserManager.DISALLOW_SAFE_BOOT;
+                break;
+
             default:
                 if (setting != null && setting.startsWith(Settings.Global.DATA_ROAMING)) {
                     if ("0".equals(value)) return false;
