@@ -549,6 +549,14 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                     .setContentType(info.getContentType())
                     .setPageCount(pageCount)
                     .build();
+
+            File file = mFileProvider.acquireFile(null);
+            try {
+                adjustedInfo.setDataSize(file.length());
+            } finally {
+                mFileProvider.releaseFile();
+            }
+
             mPrintJob.setDocumentInfo(adjustedInfo);
             mPrintJob.setPages(document.printedPages);
         }
@@ -3199,6 +3207,14 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                     .setContentType(oldDocInfo.getContentType())
                     .setPageCount(newPageCount)
                     .build();
+
+            File file = mFileProvider.acquireFile(null);
+            try {
+                newDocInfo.setDataSize(file.length());
+            } finally {
+                mFileProvider.releaseFile();
+            }
+
             mPrintJob.setDocumentInfo(newDocInfo);
         }
 
