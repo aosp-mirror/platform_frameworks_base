@@ -20443,12 +20443,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         }
     }
 
-    void onBeforeUserStartUninitialized(final int userId) {
-        synchronized (mPackages) {
-            if (mSettings.areDefaultRuntimePermissionsGrantedLPr(userId)) {
-                return;
-            }
-        }
+    void onNewUserCreated(final int userId) {
         mDefaultPermissionPolicy.grantDefaultPermissions(userId);
         // If permission review for legacy apps is required, we represent
         // dagerous permissions for such apps as always granted runtime
