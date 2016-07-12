@@ -223,8 +223,8 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
     </p>
 
     <p class="warning">
-      <strong>Warning:</strong> Installing a system image on a watch removes all data from the
-      watch, so you should back up your data first.
+      <strong>Warning:</strong> Installing a system image on a watch removes all
+      data from the watch, so you should back up your data first.
     </p>
 
     <h3 id="preview_system_images">
@@ -233,8 +233,13 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
 
     <p>
       The preview includes system images for testing your app. Based on your
-      device, you can download a preview system image from the following tables
-      and flash it to the corresponding device.
+      device, you can download a preview system image from one of the
+      following tables and flash it to the corresponding device.
+    </p>
+
+    <p>
+      To restore your device to its original state during the preview,
+      you can flash the appropriate retail system image, below, to the device.
     </p>
 
     <h4 id="preview_image_for_lge_watch_urbane_2nd_edition">
@@ -261,9 +266,9 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
         <td>
           Preview image for testing
         </td>
-        <td><a href="#top" onclick="onDownload(this)">nemo-nvd36i-factory-9cdd2ac0.tgz</a><br>
-          MD5: b33ba8e59780fbe5c83d8936b108640f<br>
-          SHA-1: 9cdd2ac01f2976cafe5a21958298dac159b7a325
+        <td><a href="#top" onclick="onDownload(this)">nemo-nvd83h-factory-48ac950c.tgz</a><br>
+          MD5: dd351884cce9fb5bf1bdec0a8e5f56e3<br>
+          SHA-1: 48ac950c48faef96a7770e3c1acb56d23a28d859
         </td>
       </tr>
 
@@ -302,9 +307,9 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
         <td>
           Preview image for testing
         </td>
-        <td><a href="#top" onclick="onDownload(this)">sturgeon-nvd36i-factory-2cbe5080.tgz</a><br>
-          MD5: ccc972cdc33cba778a2f624066ef5713<br>
-          SHA-1: 2cbe5080ded060ce43ba65ff27e2290b28981634
+        <td><a href="#top" onclick="onDownload(this)">sturgeon-nvd83h-factory-cb5a11ab.tgz</a><br>
+          MD5: 38c1047992b1d28f6833d9f6c8470cdc<br>
+          SHA-1: cb5a11ab0260ea3ca7da5894e73e41f70357da6b
         </td>
       </tr>
       <tr id="sturgeon-non-preview">
