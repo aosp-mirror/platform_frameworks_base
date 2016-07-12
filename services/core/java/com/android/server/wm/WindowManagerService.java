@@ -65,6 +65,7 @@ import android.os.SystemProperties;
 import android.os.SystemService;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.util.ArraySet;
@@ -7611,6 +7612,12 @@ public class WindowManagerService extends IWindowManager.Stub
             Slog.w(TAG, "Devices still not ready after waiting "
                    + INPUT_DEVICES_READY_FOR_SAFE_MODE_DETECTION_TIMEOUT_MILLIS
                    + " milliseconds before attempting to detect safe mode.");
+        }
+
+        UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        if (um != null && um.hasUserRestriction(UserManager.DISALLOW_SAFE_BOOT)) {
+            mSafeMode = false;
+            return false;
         }
 
         int menuState = mInputManager.getKeyCodeState(-1, InputDevice.SOURCE_ANY,
