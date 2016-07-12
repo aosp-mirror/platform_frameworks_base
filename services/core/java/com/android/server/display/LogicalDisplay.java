@@ -74,7 +74,7 @@ final class LogicalDisplay {
     private boolean mHasContent;
 
     private int mRequestedModeId;
-    private int mRequestedColorTransformId;
+    private int mRequestedColorMode;
 
     // The display offsets to apply to the display projection.
     private int mDisplayOffsetX;
@@ -236,11 +236,10 @@ final class LogicalDisplay {
             mBaseDisplayInfo.defaultModeId = deviceInfo.defaultModeId;
             mBaseDisplayInfo.supportedModes = Arrays.copyOf(
                     deviceInfo.supportedModes, deviceInfo.supportedModes.length);
-            mBaseDisplayInfo.colorTransformId = deviceInfo.colorTransformId;
-            mBaseDisplayInfo.defaultColorTransformId = deviceInfo.defaultColorTransformId;
-            mBaseDisplayInfo.supportedColorTransforms = Arrays.copyOf(
-                    deviceInfo.supportedColorTransforms,
-                    deviceInfo.supportedColorTransforms.length);
+            mBaseDisplayInfo.colorMode = deviceInfo.colorMode;
+            mBaseDisplayInfo.supportedColorModes = Arrays.copyOf(
+                    deviceInfo.supportedColorModes,
+                    deviceInfo.supportedColorModes.length);
             mBaseDisplayInfo.hdrCapabilities = deviceInfo.hdrCapabilities;
             mBaseDisplayInfo.logicalDensityDpi = deviceInfo.densityDpi;
             mBaseDisplayInfo.physicalXDpi = deviceInfo.xDpi;
@@ -282,12 +281,12 @@ final class LogicalDisplay {
         // Set the layer stack.
         device.setLayerStackInTransactionLocked(isBlanked ? BLANK_LAYER_STACK : mLayerStack);
 
-        // Set the color transform and mode.
+        // Set the color mode and mode.
         if (device == mPrimaryDisplayDevice) {
-            device.requestColorTransformAndModeInTransactionLocked(
-                    mRequestedColorTransformId, mRequestedModeId);
+            device.requestDisplayModesInTransactionLocked(
+                    mRequestedColorMode, mRequestedModeId);
         } else {
-            device.requestColorTransformAndModeInTransactionLocked(0, 0);  // Revert to default.
+            device.requestDisplayModesInTransactionLocked(0, 0);  // Revert to default.
         }
 
         // Only grab the display info now as it may have been changed based on the requests above.
@@ -391,15 +390,15 @@ final class LogicalDisplay {
     }
 
     /**
-     * Requests the given color transform.
+     * Requests the given color mode.
      */
-    public void setRequestedColorTransformIdLocked(int colorTransformId) {
-        mRequestedColorTransformId = colorTransformId;
+    public void setRequestedColorModeLocked(int colorMode) {
+        mRequestedColorMode = colorMode;
     }
 
-    /** Returns the pending requested color transform. */
-    public int getRequestedColorTransformIdLocked() {
-        return mRequestedColorTransformId;
+    /** Returns the pending requested color mode. */
+    public int getRequestedColorModeLocked() {
+        return mRequestedColorMode;
     }
 
     /**
@@ -429,7 +428,7 @@ final class LogicalDisplay {
         pw.println("mLayerStack=" + mLayerStack);
         pw.println("mHasContent=" + mHasContent);
         pw.println("mRequestedMode=" + mRequestedModeId);
-        pw.println("mRequestedColorTransformId=" + mRequestedColorTransformId);
+        pw.println("mRequestedColorMode=" + mRequestedColorMode);
         pw.println("mDisplayOffset=(" + mDisplayOffsetX + ", " + mDisplayOffsetY + ")");
         pw.println("mPrimaryDisplayDevice=" + (mPrimaryDisplayDevice != null ?
                 mPrimaryDisplayDevice.getNameLocked() : "null"));

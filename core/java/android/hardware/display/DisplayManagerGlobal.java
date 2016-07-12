@@ -354,9 +354,9 @@ public final class DisplayManagerGlobal {
         }
     }
 
-    public void requestColorTransform(int displayId, int colorTransformId) {
+    public void requestColorMode(int displayId, int colorMode) {
         try {
-            mDm.requestColorTransform(displayId, colorTransformId);
+            mDm.requestColorMode(displayId, colorMode);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
