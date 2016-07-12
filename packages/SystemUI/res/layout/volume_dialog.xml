@@ -48,6 +48,7 @@
             android:clickable="true"
             android:soundEffectsEnabled="false"
             android:src="@drawable/ic_volume_collapse_animation"
+            android:background="@drawable/ripple_drawable"
             tools:ignore="RtlHardcoded"
             android:layout_alignParentEnd="true"
             android:layout_alignParentTop="true"
