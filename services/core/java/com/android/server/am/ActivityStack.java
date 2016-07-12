@@ -2051,6 +2051,14 @@ final class ActivityStack {
         // We don't want to clear starting window for activities that aren't behind fullscreen
         // activities as we need to display their starting window until they are done initializing.
         boolean behindFullscreenActivity = false;
+
+        if (getStackVisibilityLocked(null) == STACK_INVISIBLE) {
+            // The stack is not visible, so no activity in it should be displaying a starting
+            // window. Mark all activities below top and behind fullscreen.
+            aboveTop = false;
+            behindFullscreenActivity = true;
+        }
+
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
             for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
