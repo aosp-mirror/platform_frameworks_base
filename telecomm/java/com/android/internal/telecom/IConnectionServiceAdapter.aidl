@@ -47,6 +47,8 @@ oneway interface IConnectionServiceAdapter {
 
     void setDialing(String callId);
 
+    void setPulling(String callId);
+
     void setDisconnected(String callId, in DisconnectCause disconnectCause);
 
     void setOnHold(String callId);
