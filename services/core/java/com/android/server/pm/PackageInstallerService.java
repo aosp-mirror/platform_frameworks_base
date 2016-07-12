@@ -666,23 +666,26 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
                         "Too many historical sessions for UID " + callingUid);
             }
 
-            final long createdMillis = System.currentTimeMillis();
             sessionId = allocateSessionIdLocked();
+        }
 
-            // We're staging to exactly one location
-            File stageDir = null;
-            String stageCid = null;
-            if ((params.installFlags & PackageManager.INSTALL_INTERNAL) != 0) {
-                final boolean isEphemeral =
-                        (params.installFlags & PackageManager.INSTALL_EPHEMERAL) != 0;
-                stageDir = buildStageDir(params.volumeUuid, sessionId, isEphemeral);
-            } else {
-                stageCid = buildExternalStageCid(sessionId);
-            }
+        final long createdMillis = System.currentTimeMillis();
+        // We're staging to exactly one location
+        File stageDir = null;
+        String stageCid = null;
+        if ((params.installFlags & PackageManager.INSTALL_INTERNAL) != 0) {
+            final boolean isEphemeral =
+                    (params.installFlags & PackageManager.INSTALL_EPHEMERAL) != 0;
+            stageDir = buildStageDir(params.volumeUuid, sessionId, isEphemeral);
+        } else {
+            stageCid = buildExternalStageCid(sessionId);
+        }
 
-            session = new PackageInstallerSession(mInternalCallback, mContext, mPm,
-                    mInstallThread.getLooper(), sessionId, userId, installerPackageName, callingUid,
-                    params, createdMillis, stageDir, stageCid, false, false);
+        session = new PackageInstallerSession(mInternalCallback, mContext, mPm,
+                mInstallThread.getLooper(), sessionId, userId, installerPackageName, callingUid,
+                params, createdMillis, stageDir, stageCid, false, false);
+
+        synchronized (mSessions) {
             mSessions.put(sessionId, session);
         }
 
