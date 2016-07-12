@@ -266,7 +266,7 @@ public class WallpaperManager {
     }
 
     static class Globals extends IWallpaperManagerCallback.Stub {
-        private IWallpaperManager mService;
+        private final IWallpaperManager mService;
         private Bitmap mCachedWallpaper;
         private int mCachedWallpaperUserId;
         private Bitmap mDefaultWallpaper;
@@ -293,16 +293,16 @@ public class WallpaperManager {
 
         public Bitmap peekWallpaperBitmap(Context context, boolean returnDefault,
                 @SetWallpaperFlags int which, int userId) {
-            synchronized (this) {
-                if (mService != null) {
-                    try {
-                        if (!mService.isWallpaperSupported(context.getOpPackageName())) {
-                            return null;
-                        }
-                    } catch (RemoteException e) {
-                        throw e.rethrowFromSystemServer();
+            if (mService != null) {
+                try {
+                    if (!mService.isWallpaperSupported(context.getOpPackageName())) {
+                        return null;
                     }
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
                 }
+            }
+            synchronized (this) {
                 if (mCachedWallpaper != null && mCachedWallpaperUserId == userId) {
                     return mCachedWallpaper;
                 }
@@ -317,17 +317,21 @@ public class WallpaperManager {
                 if (mCachedWallpaper != null) {
                     return mCachedWallpaper;
                 }
-                if (returnDefault) {
-                    if (mDefaultWallpaper == null) {
-                        mDefaultWallpaper = getDefaultWallpaperLocked(context, which);
-                    }
-                    return mDefaultWallpaper;
-                }
-                return null;
             }
+            if (returnDefault) {
+                Bitmap defaultWallpaper = mDefaultWallpaper;
+                if (defaultWallpaper == null) {
+                    defaultWallpaper = getDefaultWallpaper(context, which);
+                    synchronized (this) {
+                        mDefaultWallpaper = defaultWallpaper;
+                    }
+                }
+                return defaultWallpaper;
+            }
+            return null;
         }
 
-        public void forgetLoadedWallpaper() {
+        void forgetLoadedWallpaper() {
             synchronized (this) {
                 mCachedWallpaper = null;
                 mCachedWallpaperUserId = 0;
@@ -362,7 +366,7 @@ public class WallpaperManager {
             return null;
         }
 
-        private Bitmap getDefaultWallpaperLocked(Context context, @SetWallpaperFlags int which) {
+        private Bitmap getDefaultWallpaper(Context context, @SetWallpaperFlags int which) {
             InputStream is = openDefaultWallpaper(context, which);
             if (is != null) {
                 try {
