@@ -519,21 +519,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"更多設定"</string>
     <string name="notification_done" msgid="5279426047273930175">"完成"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」通知控制項"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"顏色和外觀"</string>
-    <string name="night_mode" msgid="3540405868248625488">"夜間模式"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"校準螢幕"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"已開啟"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"已關閉"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"自動開啟"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"在適當的位置和時間切換至「夜間模式」"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"「夜間模式」開啟時"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"在 Android OS 中使用深色主題背景"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"調整色調"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"調整亮度"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"系統會將深色主題背景套用至 Android OS 核心區域 (一般以淺色主題背景顯示)，例如「設定」。"</string>
-    <string name="color_apply" msgid="9212602012641034283">"套用"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"確認設定"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"部分顏色設定會令此裝置無法使用。請按一下 [確定] 加以確認，否則這些顏色設定將於 10 秒後重設。"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"電池用量"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"充電時無法使用「省電模式」"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"省電模式"</string>

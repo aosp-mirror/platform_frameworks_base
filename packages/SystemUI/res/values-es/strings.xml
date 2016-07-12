@@ -519,21 +519,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"Más ajustes"</string>
     <string name="notification_done" msgid="5279426047273930175">"Listo"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"Controles de notificaciones de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"Color y aspecto"</string>
-    <string name="night_mode" msgid="3540405868248625488">"Modo nocturno"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"Calibrar pantalla"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"Sí"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"No"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"Activar automáticamente"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"Cambiar al modo nocturno cuando proceda según la ubicación y la hora del día"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"Cuando el modo nocturno esté activado"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"Tema oscuro para sistema operativo Android"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"Ajustar tono"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"Ajustar brillo"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"El tema oscuro se aplica a las áreas principales del sistema operativo Android que normalmente se muestran con un tema claro, como la aplicación Ajustes."</string>
-    <string name="color_apply" msgid="9212602012641034283">"Aplicar"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"Confirmar configuración"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"Algunas opciones de configuración de color pueden hacer que el dispositivo no se pueda utilizar. Haz clic en Aceptar para confirmar esta configuración. Si no lo haces, se restablecerá esta configuración cuando transcurran 10 segundos."</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Uso de la batería"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Ahorro de batería no disponible mientras se carga el dispositivo"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Ahorro de batería"</string>

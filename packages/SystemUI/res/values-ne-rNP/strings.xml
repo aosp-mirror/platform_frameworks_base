@@ -517,21 +517,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"थप सेटिङहरू"</string>
     <string name="notification_done" msgid="5279426047273930175">"सम्पन्‍न भयो"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> का सूचनाका लागि नियन्त्रणहरू"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"रंग र रूप"</string>
-    <string name="night_mode" msgid="3540405868248625488">"रात्री मोड"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"प्रदर्शनको स्तर  मिलाउनुहोस्"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"सक्रिय"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"निष्क्रिय"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"स्वतः सक्रिय पार्नुहोस्"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"स्थान र दिनको समयको लागि उपयुक्त रात्री मोडमा स्विच गर्नुहोस्"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"रात्री मोड सक्रिय हुँदा"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"Android OS का लागि गाढा रंगको विषयवस्तु प्रयोग गर्नुहोस्"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"रङ्गलाई समायोजन गर्नुहोस्"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"चमकलाई समायोजन गर्नुहोस्"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"गहिरो रंगको विषयवस्तुलाई Android OS का त्यस्ता मुख्य क्षेत्रहरूमा लागू गरिन्छ जसलाई सामान्यतया हल्का रंगमा देखाइन्छ, जस्तै सेटिङहरू।"</string>
-    <string name="color_apply" msgid="9212602012641034283">"लागू गर्नुहोस्"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"सेटिङहरूको पुष्टि गर्नुहोस्"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"केही रङ सेटिङहरूले यस यन्त्रलाई अनुपयोगी बनाउन सक्छन्। यी रङ सेटिङहरू पुष्टि गर्न ठीक छ मा क्लिक गर्नुहोस्, अन्यथा यी सेटिङहरू १० सेकेण्डपछि रिसेट हुनेछन्।"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"ब्याट्री उपयोग"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"चार्ज गर्ने समयमा ब्याट्री सेभर उपलब्ध छैन"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"ब्याट्री सेभर"</string>

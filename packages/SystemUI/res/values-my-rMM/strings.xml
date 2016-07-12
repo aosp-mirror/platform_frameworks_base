@@ -24,7 +24,7 @@
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"စာရင်းမှ ဖယ်မည်"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"အက်ပ်အချက်အလက်များ"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"သင်၏ မကြာမီက မျက်နှာပြင်များ ဒီမှာ ပေါ်လာကြမည်"</string>
-    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"လတ်တလောအပ်ပလီကေးရှင်းများအား ဖယ်ထုတ်မည်"</string>
+    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"လတ်တလောအက်ပ်များအား ပယ်ရန်"</string>
     <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
       <item quantity="other">ခြုံကြည့်မှုထဲမှ မျက်နှာပြင် %d ခု</item>
       <item quantity="one">ခြုံကြည့်မှုထဲမှ မျက်နှာပြင် 1 ခု</item>
@@ -65,7 +65,7 @@
     <string name="usb_debugging_always" msgid="303335496705863070">"ဒီကွန်ပျူတာမှ အမြဲခွင့်ပြုရန်"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB အမှားပြင်ဆင်ခြင်း ခွင့်မပြုပါ"</string>
     <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"ဤစက်ပစ္စည်းသို့ လက်ရှိဝင်ရောက်ထားသည့် အသုံးပြုသူသည် USB အမှားပြင်ဆင်ခြင်း ဖွင့်၍မရပါ။ ဤအင်္ဂါရပ်ကို အသုံးပြုရန်၊ ကျေးဇူးပြု၍ ကြီးကြပ်သူသို့ပြောင်းပါ။"</string>
-    <string name="compat_mode_on" msgid="6623839244840638213">"ဖန်သားပြင်ပြည့် ချဲ့ခြင်း"</string>
+    <string name="compat_mode_on" msgid="6623839244840638213">"ဇူးမ်အပြည့်ဆွဲခြင်း"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"ဖန်သားပြင်အပြည့်ဆန့်ခြင်း"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"ဖန်သားပြင်ဓါတ်ပုံသိမ်းစဉ်.."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"ဖန်သားပြင်ဓါတ်ပုံရိုက်ခြင်းအား သိမ်းဆည်းပါမည်"</string>
@@ -97,8 +97,8 @@
     <string name="camera_label" msgid="7261107956054836961">"ကင်မရာ ဖွင့်ရန်"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"အလုပ်သစ်စီစဥ်မှုကို ရွေးပါ။"</string>
     <string name="cancel" msgid="6442560571259935130">"မလုပ်တော့"</string>
-    <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"အံ့ဝင်သောချုံ့ချဲ့ခလုတ်"</string>
-    <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"ဖန်သားပြင်ပေါ်တွင် အသေးမှအကြီးသို့ချဲ့ခြင်း"</string>
+    <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"အံဝင်ခွင်ကျ ဇူးမ်ခလုတ်"</string>
+    <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"ဖန်သားပြင်ပေါ်တွင် အသေးမှအကြီးသို့ ဇူးမ်ဆွဲခြင်း"</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"ဘလူးတုသ်ချိတ်ဆက်ထားမှု"</string>
     <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"ဘလူးတုသ်ချိတ်ဆက်မှုပြတ်တောက်သည်"</string>
     <string name="accessibility_no_battery" msgid="358343022352820946">"ဘက်ထရီမရှိပါ။"</string>
@@ -171,10 +171,10 @@
     <!-- no translation found for accessibility_casting (6887382141726543668) -->
     <skip />
     <string name="accessibility_work_mode" msgid="2478631941714607225">"အလုပ် မုဒ်"</string>
-    <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"<xliff:g id="APP">%s</xliff:g>ကို ပယ်လိုက်ရန်"</string>
+    <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"<xliff:g id="APP">%s</xliff:g> ကို ပယ်ရန်"</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> ထုတ်ထားသည်။"</string>
     <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"မကြာသေးမီက အပလီကေးရှင်းများအားလုံး ဖယ်ထုတ်ပြီးပါပြီ။"</string>
-    <string name="accessibility_recents_item_open_app_info" msgid="5107479759905883540">"<xliff:g id="APP">%s</xliff:g> အက်ပ်အချက်အလက်ကို ဖွင့်ပါ။"</string>
+    <string name="accessibility_recents_item_open_app_info" msgid="5107479759905883540">"<xliff:g id="APP">%s</xliff:g> အပလီကေးရှင်းအချက်အလက်ကို ဖွင့်ပါ။"</string>
     <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"<xliff:g id="APP">%s</xliff:g>ကို စတင်နေသည်။"</string>
     <string name="accessibility_recents_task_header" msgid="1437183540924535457">"<xliff:g id="APP">%1$s</xliff:g><xliff:g id="ACTIVITY_LABEL">%2$s</xliff:g>"</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"အကြောင်းကြားချက်ကိုဖယ်ရှားပြီး"</string>
@@ -320,7 +320,7 @@
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"အလုပ် မုဒ်"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"မကြာမီကဖွင့်ထားသည်များ မရှိပါ"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"သင်အားလုံးကို ရှင်းလင်းပြီးပါပြီ"</string>
-    <string name="recents_app_info_button_label" msgid="2890317189376000030">"အက်ပ်အင်ဖို"</string>
+    <string name="recents_app_info_button_label" msgid="2890317189376000030">"အပလီကေးရှင်းအင်ဖို"</string>
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"မျက်နှာပြင် ပင်ထိုးမှု"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"ရှာဖွေရန်"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> ကို မစနိုင်ပါ။"</string>
@@ -450,7 +450,7 @@
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s။ အသံပြန်ဖွင့်ရန် တို့ပါ။"</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s။ တုန်ခါမှုကို သတ်မှတ်ရန် တို့ပါ။ အများသုံးစွဲနိုင်မှု ဝန်ဆောင်မှုများကို အသံပိတ်ထားနိုင်ပါသည်။"</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s။ အသံပိတ်ရန် တို့ပါ။ အများသုံးစွဲနိုင်မှု ဝန်ဆောင်မှုများကို အသံပိတ်ထားနိုင်ပါသည်။"</string>
-    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"အသံအတိုးအလျှော့ခလုတ် %s ပြသထားပါသည်။ ပယ်ဖျက်ရန် ပွတ်ဆွဲပါ။"</string>
+    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"အသံအတိုးအလျှော့ခလုတ် %s ပြသထားပါသည်။ ပယ်ရန် အပေါ်သို့ပွတ်ဆွဲပါ။"</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"အသံအတိုးအလျှော့ခလုတ်များကို ဝှက်ထားပါသည်"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"စနစ် UI ဖမ်းစက်"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"မြုတ်ထားသည့် ဘက်ထရီ ရာခိုင်နှုန်းကို ပြပါ"</string>
@@ -517,21 +517,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"နောက်ထပ် ဆက်တင်များ"</string>
     <string name="notification_done" msgid="5279426047273930175">"ပြီးပါပြီ"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> အကြောင်းကြားချက် ထိန်းချုပ်မှုများ"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"အရောင်နှင့် အပြင်အဆင်"</string>
-    <string name="night_mode" msgid="3540405868248625488">"ညသုံးမုဒ်"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"ပြသမှုအချိန်အဆကို ညှိပါ"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"ဖွင့်ပါ"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"ပိတ်ပါ"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"အလိုအလျောက် ဖွင့်ပါ"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"တည်နေရာနှင့် တစ်ရက်တာအချိန်နှင့် သင့်လျော်သလို ညသုံးမုဒ်သို့ ပြောင်းပါ"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"ညသုံမုဒ်ဖွင့်ထားစဉ်"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"Android OS အတွက်အရောင်ရင့်အပြင်အဆင်ကို သုံးပါ"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"အရောင်မွဲမှုကို ချိန်ပါ"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"အလင်းအမှောင်ချိန်ပါ"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"အရောင်ရင့်အပြင်အဆင်သည် ဆက်တင်များကဲ့သို့ ပုံမှန်အားဖြင့် အရောင်ဖျော့အပြင်အဆင်အဖြစ်ရှိသည့် Android OS ၏အဓိကနေရာများကို ပြောင်းလဲပေးပါသည်။"</string>
-    <string name="color_apply" msgid="9212602012641034283">"အသုံးပြုပါ"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"ဆက်တင်များကို အတည်ပြုပါ"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"အချို့သော အရောင်ဆက်တက်များက ဤကိရိယာကို သုံးမရအောင် လုပ်ပစ်နိုင်ပါသည်။ ဤအရောင် ဆက်တင်များကို အတည်ပြုရန် အိုကေကို နှိပ်ပါ၊ သို့မဟုတ် ဤဆက်တင်များကို ၁၀ စက္ကန့် အကြာတွင် ပြန်ညှိလိုက်ပါမည်။"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"ဘက်ထရီ အသုံးပြုမှု"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"အားသွင်းနေချိန်မှာ Battery Saver ကို သုံးမရပါ"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Battery Saver"</string>
@@ -556,7 +541,7 @@
     <string name="keyboard_key_media_fast_forward" msgid="3849417047738200605">"ရှေ့သို့ရစ်ပါ"</string>
     <string name="keyboard_key_page_up" msgid="5654098530106845603">"အပေါ်စာမျက်နှာသို့သွားပါ"</string>
     <string name="keyboard_key_page_down" msgid="8720502083731906136">"အောက်စာမျက်နှာသို့သွားပါ"</string>
-    <string name="keyboard_key_forward_del" msgid="1391451334716490176">"ဖျက်ပါ"</string>
+    <string name="keyboard_key_forward_del" msgid="1391451334716490176">"ဖျက်ရန်"</string>
     <string name="keyboard_key_move_home" msgid="2765693292069487486">"ပင်မ"</string>
     <string name="keyboard_key_move_end" msgid="5901174332047975247">"ပြီးပါပြီ"</string>
     <string name="keyboard_key_insert" msgid="8530501581636082614">"ထည့်ပါ"</string>
@@ -600,7 +585,7 @@
     <string name="menu_ime" msgid="4943221416525250684">"မန်နယူး / ကီးဘုတ်ပြောင်းစနစ်"</string>
     <string name="select_button" msgid="1597989540662710653">"ပေါင်းထည့်ရန် ခလုတ်ကိုရွေးပါ"</string>
     <string name="add_button" msgid="4134946063432258161">"ခလုတ်ပေါင်းထည့်ပါ"</string>
-    <string name="save" msgid="2311877285724540644">"သိမ်းဆည်းပါ"</string>
+    <string name="save" msgid="2311877285724540644">"သိမ်းရန်"</string>
     <string name="reset" msgid="2448168080964209908">"ပြန်လည်သတ်မှတ်ရန်"</string>
     <string name="no_home_title" msgid="1563808595146071549">"ပင်မခလုတ်မတွေ့ပါ"</string>
     <string name="no_home_message" msgid="5408485011659260911">"ဤစက်ပစ္စည်းကိုရွှေ့လျားနိုင်ရန် ပင်မခလုတ် လိုအပ်ပါသည်။ မသိမ်းဆည်းမီ ပင်မခလုတ်ကို ပေါင်းထည့်ပါ။"</string>
