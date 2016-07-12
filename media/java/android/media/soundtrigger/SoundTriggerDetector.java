@@ -15,6 +15,7 @@
  */
 
 package android.media.soundtrigger;
+import static android.hardware.soundtrigger.SoundTrigger.STATUS_OK;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -243,27 +244,29 @@ public final class SoundTriggerDetector {
 
         boolean allowMultipleTriggers =
                 (recognitionFlags & RECOGNITION_FLAG_ALLOW_MULTIPLE_TRIGGERS) != 0;
+        int status = STATUS_OK;
         try {
-            mSoundTriggerService.startRecognition(new ParcelUuid(mSoundModelId),
+            status = mSoundTriggerService.startRecognition(new ParcelUuid(mSoundModelId),
                     mRecognitionCallback, new RecognitionConfig(captureTriggerAudio,
                         allowMultipleTriggers, null, null));
         } catch (RemoteException e) {
             return false;
         }
-        return true;
+        return status == STATUS_OK;
     }
 
     /**
      * Stops recognition for the associated model.
      */
     public boolean stopRecognition() {
+        int status = STATUS_OK;
         try {
-            mSoundTriggerService.stopRecognition(new ParcelUuid(mSoundModelId),
+            status = mSoundTriggerService.stopRecognition(new ParcelUuid(mSoundModelId),
                     mRecognitionCallback);
         } catch (RemoteException e) {
             return false;
         }
-        return true;
+        return status == STATUS_OK;
     }
 
     /**
