@@ -39,6 +39,7 @@ import android.view.MenuItem;
 import com.android.documentsui.MenuManager.DirectoryDetails;
 import com.android.documentsui.OperationDialogFragment.DialogType;
 import com.android.documentsui.RecentsProvider.ResumeColumns;
+import com.android.documentsui.clipping.DocumentClipper;
 import com.android.documentsui.dirlist.AnimationView;
 import com.android.documentsui.dirlist.DirectoryFragment;
 import com.android.documentsui.dirlist.FragmentTuner;

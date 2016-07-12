@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2016 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.documentsui;
+package com.android.documentsui.clipping;
 
 import android.content.ClipData;
 import android.content.ClipDescription;
@@ -27,6 +27,7 @@ import android.provider.DocumentsContract;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.android.documentsui.Shared;
 import com.android.documentsui.dirlist.MultiSelectManager.Selection;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
@@ -59,7 +60,7 @@ public final class DocumentClipper {
     private final ClipStorage mClipStorage;
     private final ClipboardManager mClipboard;
 
-    DocumentClipper(Context context, ClipStorage storage) {
+    public DocumentClipper(Context context, ClipStorage storage) {
         mContext = context;
         mClipStorage = storage;
         mClipboard = context.getSystemService(ClipboardManager.class);

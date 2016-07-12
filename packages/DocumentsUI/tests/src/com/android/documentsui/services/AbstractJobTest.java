@@ -27,7 +27,7 @@ import android.os.RemoteException;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.MediumTest;
 
-import com.android.documentsui.UrisSupplier;
+import com.android.documentsui.clipping.UrisSupplier;
 import com.android.documentsui.DocumentsProviderHelper;
 import com.android.documentsui.StubProvider;
 import com.android.documentsui.model.DocumentInfo;

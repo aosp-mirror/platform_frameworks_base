@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.documentsui;
+package com.android.documentsui.clipping;
 
-import static com.android.documentsui.DocumentClipper.OP_JUMBO_SELECTION_SIZE;
-import static com.android.documentsui.DocumentClipper.OP_JUMBO_SELECTION_TAG;
+import static com.android.documentsui.clipping.DocumentClipper.OP_JUMBO_SELECTION_SIZE;
+import static com.android.documentsui.clipping.DocumentClipper.OP_JUMBO_SELECTION_TAG;
 
 import android.content.ClipData;
 import android.content.Context;
@@ -28,6 +28,8 @@ import android.os.PersistableBundle;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 
+import com.android.documentsui.DocumentsApplication;
+import com.android.documentsui.Shared;
 import com.android.documentsui.dirlist.MultiSelectManager.Selection;
 import com.android.documentsui.services.FileOperation;
 
@@ -110,7 +112,7 @@ public abstract class UrisSupplier implements Parcelable {
         private final File mFile;
         private final int mSelectionSize;
 
-        private final transient AtomicReference<ClipStorage.Reader> mReader =
+        private final transient AtomicReference<ClipStorageReader> mReader =
                 new AtomicReference<>();
 
         private JumboUrisSupplier(ClipData clipData, Context context) throws IOException {
@@ -143,7 +145,7 @@ public abstract class UrisSupplier implements Parcelable {
 
         @Override
         Iterable<Uri> getUris(ClipStorage storage) throws IOException {
-            ClipStorage.Reader reader = mReader.getAndSet(storage.createReader(mFile));
+            ClipStorageReader reader = mReader.getAndSet(storage.createReader(mFile));
             if (reader != null) {
                 reader.close();
                 mReader.get().close();
@@ -156,7 +158,7 @@ public abstract class UrisSupplier implements Parcelable {
         @Override
         public void dispose() {
             try {
-                ClipStorage.Reader reader = mReader.get();
+                ClipStorageReader reader = mReader.get();
                 if (reader != null) {
                     reader.close();
                 }

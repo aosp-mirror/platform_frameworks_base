@@ -27,7 +27,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.VisibleForTesting;
 
-import com.android.documentsui.UrisSupplier;
+import com.android.documentsui.clipping.UrisSupplier;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.services.FileOperationService.OpType;
 

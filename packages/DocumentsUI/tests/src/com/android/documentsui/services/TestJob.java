@@ -23,7 +23,7 @@ import android.app.Notification;
 import android.app.Notification.Builder;
 import android.content.Context;
 
-import com.android.documentsui.UrisSupplier;
+import com.android.documentsui.clipping.UrisSupplier;
 import com.android.documentsui.R;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;

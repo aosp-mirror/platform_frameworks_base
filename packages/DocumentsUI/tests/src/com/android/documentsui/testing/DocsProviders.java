@@ -18,7 +18,7 @@ package com.android.documentsui.testing;
 
 import android.net.Uri;
 
-import com.android.documentsui.UrisSupplier;
+import com.android.documentsui.clipping.UrisSupplier;
 
 import java.util.List;
 

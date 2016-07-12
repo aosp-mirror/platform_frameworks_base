@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.documentsui;
+package com.android.documentsui.clipping;
 
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -24,15 +24,13 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.util.Log;
 
+import com.android.documentsui.Files;
+
 import java.io.Closeable;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileLock;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -45,7 +43,7 @@ public final class ClipStorage {
 
     public static final int NO_SELECTION_TAG = -1;
 
-    static final String PREF_NAME = "ClipStoragePref";
+    public static final String PREF_NAME = "ClipStoragePref";
 
     @VisibleForTesting
     static final int NUM_OF_SLOTS = 20;
@@ -90,7 +88,7 @@ public final class ClipStorage {
      *     file may be overwritten.</li>
      * </ul>
      */
-    public synchronized int claimStorageSlot() {
+    synchronized int claimStorageSlot() {
         int curPos = mNextPos;
         for (int i = 0; i < NUM_OF_SLOTS; ++i, curPos = (curPos + 1) % NUM_OF_SLOTS) {
             createSlotFile(curPos);
@@ -167,9 +165,9 @@ public final class ClipStorage {
     /**
      * Returns a Reader. Callers must close the reader when finished.
      */
-    public Reader createReader(File file) throws IOException {
+    ClipStorageReader createReader(File file) throws IOException {
         assert(file.getParentFile().getParentFile().equals(mOutDir));
-        return new Reader(file);
+        return new ClipStorageReader(file);
     }
 
     private File toSlotDataFile(int pos) {
@@ -186,7 +184,7 @@ public final class ClipStorage {
     /**
      * Provides initialization of the clip data storage directory.
      */
-    static File prepareStorage(File cacheDir) {
+    public static File prepareStorage(File cacheDir) {
         File clipDir = getClipDir(cacheDir);
         clipDir.mkdir();
 
@@ -196,96 +194,6 @@ public final class ClipStorage {
 
     private static File getClipDir(File cacheDir) {
         return new File(cacheDir, "clippings");
-    }
-
-    static final class Reader implements Iterable<Uri>, Closeable {
-
-        /**
-         * FileLock can't be held multiple times in a single JVM, but it's possible to have multiple
-         * readers reading the same clip file. Share the FileLock here so that it can be released
-         * when it's not needed.
-         */
-        private static final Map<String, FileLockEntry> sLocks = new HashMap<>();
-
-        private final String mCanonicalPath;
-        private final Scanner mScanner;
-
-        private Reader(File file) throws IOException {
-            FileInputStream inStream = new FileInputStream(file);
-            mScanner = new Scanner(inStream);
-
-            mCanonicalPath = file.getCanonicalPath(); // Resolve symlink
-            synchronized (sLocks) {
-                if (sLocks.containsKey(mCanonicalPath)) {
-                    // Read lock is already held by someone in this JVM, just increment the ref
-                    // count.
-                    sLocks.get(mCanonicalPath).mCount++;
-                } else {
-                    // No map entry, need to lock the file so it won't pass this line until the
-                    // corresponding writer is done writing.
-                    FileLock lock = inStream.getChannel().lock(0L, Long.MAX_VALUE, true);
-                    sLocks.put(mCanonicalPath, new FileLockEntry(1, lock, mScanner));
-                }
-            }
-        }
-
-        @Override
-        public Iterator iterator() {
-            return new Iterator(mScanner);
-        }
-
-        @Override
-        public void close() throws IOException {
-            synchronized (sLocks) {
-                FileLockEntry ref = sLocks.get(mCanonicalPath);
-
-                assert(ref.mCount > 0);
-                if (--ref.mCount == 0) {
-                    // If ref count is 0 now, then there is no one who needs to hold the read lock.
-                    // Release the lock, and remove the entry.
-                    ref.mLock.release();
-                    ref.mScanner.close();
-                    sLocks.remove(mCanonicalPath);
-                }
-
-                if (mScanner != ref.mScanner) {
-                    mScanner.close();
-                }
-            }
-        }
-    }
-
-    private static final class Iterator implements java.util.Iterator {
-        private final Scanner mScanner;
-
-        private Iterator(Scanner scanner) {
-            mScanner = scanner;
-        }
-
-        @Override
-        public boolean hasNext() {
-            return mScanner.hasNextLine();
-        }
-
-        @Override
-        public Uri next() {
-            String line = mScanner.nextLine();
-            return Uri.parse(line);
-        }
-    }
-
-    private static final class FileLockEntry {
-        private int mCount;
-        private FileLock mLock;
-        // We need to keep this scanner here because if the scanner is closed, the file lock is
-        // closed too.
-        private Scanner mScanner;
-
-        private FileLockEntry(int count, FileLock lock, Scanner scanner) {
-            mCount = count;
-            mLock = lock;
-            mScanner = scanner;
-        }
     }
 
     private static final class Writer implements Closeable {

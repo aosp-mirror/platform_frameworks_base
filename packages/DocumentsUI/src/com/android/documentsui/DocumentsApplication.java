@@ -28,6 +28,9 @@ import android.net.Uri;
 import android.os.RemoteException;
 import android.text.format.DateUtils;
 
+import com.android.documentsui.clipping.ClipStorage;
+import com.android.documentsui.clipping.DocumentClipper;
+
 public class DocumentsApplication extends Application {
     private static final long PROVIDER_ANR_TIMEOUT = 20 * DateUtils.SECOND_IN_MILLIS;
 

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.documentsui;
+package com.android.documentsui.clipping;
 
-import static com.android.documentsui.ClipStorage.NUM_OF_SLOTS;
+import static com.android.documentsui.clipping.ClipStorage.NUM_OF_SLOTS;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -29,7 +29,6 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.android.documentsui.ClipStorage.Reader;
 import com.android.documentsui.testing.TestScheduledExecutorService;
 
 import org.junit.AfterClass;
@@ -89,7 +88,7 @@ public class ClipStorageTest {
         List<Uri> uris = new ArrayList<>();
 
         File copy = mStorage.getFile(mTag);
-        try(Reader provider = mStorage.createReader(copy)) {
+        try(ClipStorageReader provider = mStorage.createReader(copy)) {
             for (Uri uri : provider) {
                 uris.add(uri);
             }
@@ -98,7 +97,7 @@ public class ClipStorageTest {
     }
 
     @Test
-    public void testGetTag_NoAvailableSlot() throws Exception {
+    public void testClaimStorageSlot_NoAvailableSlot() throws Exception {
         int firstTag = mStorage.claimStorageSlot();
         writeAll(firstTag, TEST_URIS);
         mStorage.getFile(firstTag);
@@ -119,8 +118,8 @@ public class ClipStorageTest {
 
         File copy = mStorage.getFile(mTag);
         File copy2 = mStorage.getFile(mTag);
-        try(Reader reader = mStorage.createReader(copy)) {
-            try(Reader reader2 = mStorage.createReader(copy2)){
+        try(ClipStorageReader reader = mStorage.createReader(copy)) {
+            try(ClipStorageReader reader2 = mStorage.createReader(copy2)){
                 Iterator<Uri> iter = reader.iterator();
                 Iterator<Uri> iter2 = reader2.iterator();
 
