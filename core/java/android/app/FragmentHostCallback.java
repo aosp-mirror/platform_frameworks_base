@@ -54,7 +54,8 @@ public abstract class FragmentHostCallback<E> extends FragmentContainer {
     private boolean mLoadersStarted;
 
     public FragmentHostCallback(Context context, Handler handler, int windowAnimations) {
-        this(null /*activity*/, context, handler, windowAnimations);
+        this((context instanceof Activity) ? (Activity)context : null, context,
+                chooseHandler(context, handler), windowAnimations);
     }
 
     FragmentHostCallback(Activity activity) {
@@ -67,6 +68,19 @@ public abstract class FragmentHostCallback<E> extends FragmentContainer {
         mContext = context;
         mHandler = handler;
         mWindowAnimations = windowAnimations;
+    }
+
+    /**
+     * Used internally in {@link #FragmentHostCallback(Context, Handler, int)} to choose
+     * the Activity's handler or the provided handler.
+     */
+    private static Handler chooseHandler(Context context, Handler handler) {
+        if (handler == null && context instanceof Activity) {
+            Activity activity = (Activity) context;
+            return activity.mHandler;
+        } else {
+            return handler;
+        }
     }
 
     /**

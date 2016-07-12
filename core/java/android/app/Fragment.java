@@ -31,6 +31,8 @@ import android.content.res.TypedArray;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.transition.Transition;
@@ -375,15 +377,6 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
 
     int mState = INITIALIZING;
 
-    // Non-null if the fragment's view hierarchy is currently animating away,
-    // meaning we need to wait a bit on completely destroying it.  This is the
-    // animation that is running.
-    Animator mAnimatingAway;
-
-    // If mAnimatingAway != null, this is the state we should move to once the
-    // animation is done.
-    int mStateAfterAnimating;
-
     // When instantiated from saved state, this is the saved state.
     Bundle mSavedFragmentState;
     SparseArray<Parcelable> mSavedViewState;
@@ -478,15 +471,6 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     // Used to verify that subclasses call through to super class.
     boolean mCalled;
 
-    // If app has requested a specific animation, this is the one to use.
-    int mNextAnim;
-
-    // If app has requested a specific transition, this is the one to use.
-    int mNextTransition;
-
-    // If app has requested a specific transition style, this is the one to use.
-    int mNextTransitionStyle;
-
     // The parent container of the fragment after dynamically added to UI.
     ViewGroup mContainer;
 
@@ -504,17 +488,15 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     boolean mLoadersStarted;
     boolean mCheckedForLoaderManager;
 
-    private Transition mEnterTransition = null;
-    private Transition mReturnTransition = USE_DEFAULT_TRANSITION;
-    private Transition mExitTransition = null;
-    private Transition mReenterTransition = USE_DEFAULT_TRANSITION;
-    private Transition mSharedElementEnterTransition = null;
-    private Transition mSharedElementReturnTransition = USE_DEFAULT_TRANSITION;
-    private Boolean mAllowReturnTransitionOverlap;
-    private Boolean mAllowEnterTransitionOverlap;
+    // The animation and transition information for the fragment. This will be null
+    // unless the elements are explicitly accessed and should remain null for Fragments
+    // without Views.
+    AnimationInfo mAnimationInfo;
 
-    SharedElementCallback mEnterTransitionCallback = SharedElementCallback.NULL_CALLBACK;
-    SharedElementCallback mExitTransitionCallback = SharedElementCallback.NULL_CALLBACK;
+    // True if the View was added, and its animation has yet to be run. This could
+    // also indicate that the fragment view hasn't been made visible, even if there is no
+    // animation for this fragment.
+    boolean mIsNewlyAdded;
 
     // True if mHidden has been changed and the animation should be scheduled.
     boolean mHiddenChanged;
@@ -1399,26 +1381,41 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
 
         TypedArray a = context.obtainStyledAttributes(attrs,
                 com.android.internal.R.styleable.Fragment);
-        mEnterTransition = loadTransition(context, a, mEnterTransition, null,
-                com.android.internal.R.styleable.Fragment_fragmentEnterTransition);
-        mReturnTransition = loadTransition(context, a, mReturnTransition, USE_DEFAULT_TRANSITION,
-                com.android.internal.R.styleable.Fragment_fragmentReturnTransition);
-        mExitTransition = loadTransition(context, a, mExitTransition, null,
-                com.android.internal.R.styleable.Fragment_fragmentExitTransition);
-        mReenterTransition = loadTransition(context, a, mReenterTransition, USE_DEFAULT_TRANSITION,
-                com.android.internal.R.styleable.Fragment_fragmentReenterTransition);
-        mSharedElementEnterTransition = loadTransition(context, a, mSharedElementEnterTransition,
-                null, com.android.internal.R.styleable.Fragment_fragmentSharedElementEnterTransition);
-        mSharedElementReturnTransition = loadTransition(context, a, mSharedElementReturnTransition,
+        setEnterTransition(loadTransition(context, a, getEnterTransition(), null,
+                com.android.internal.R.styleable.Fragment_fragmentEnterTransition));
+        setReturnTransition(loadTransition(context, a, getReturnTransition(),
                 USE_DEFAULT_TRANSITION,
-                com.android.internal.R.styleable.Fragment_fragmentSharedElementReturnTransition);
-        if (mAllowEnterTransitionOverlap == null) {
-            mAllowEnterTransitionOverlap = a.getBoolean(
-                    com.android.internal.R.styleable.Fragment_fragmentAllowEnterTransitionOverlap, true);
+                com.android.internal.R.styleable.Fragment_fragmentReturnTransition));
+        setExitTransition(loadTransition(context, a, getExitTransition(), null,
+                com.android.internal.R.styleable.Fragment_fragmentExitTransition));
+
+        setReenterTransition(loadTransition(context, a, getReenterTransition(),
+                USE_DEFAULT_TRANSITION,
+                com.android.internal.R.styleable.Fragment_fragmentReenterTransition));
+        setSharedElementEnterTransition(loadTransition(context, a,
+                getSharedElementEnterTransition(), null,
+                com.android.internal.R.styleable.Fragment_fragmentSharedElementEnterTransition));
+        setSharedElementReturnTransition(loadTransition(context, a,
+                getSharedElementReturnTransition(), USE_DEFAULT_TRANSITION,
+                com.android.internal.R.styleable.Fragment_fragmentSharedElementReturnTransition));
+        boolean isEnterSet;
+        boolean isReturnSet;
+        if (mAnimationInfo == null) {
+            isEnterSet = false;
+            isReturnSet = false;
+        } else {
+            isEnterSet = mAnimationInfo.mAllowEnterTransitionOverlap != null;
+            isReturnSet = mAnimationInfo.mAllowReturnTransitionOverlap != null;
         }
-        if (mAllowReturnTransitionOverlap == null) {
-            mAllowReturnTransitionOverlap = a.getBoolean(
-                    com.android.internal.R.styleable.Fragment_fragmentAllowReturnTransitionOverlap, true);
+        if (!isEnterSet) {
+            setAllowEnterTransitionOverlap(a.getBoolean(
+                    com.android.internal.R.styleable.Fragment_fragmentAllowEnterTransitionOverlap,
+                    true));
+        }
+        if (!isReturnSet) {
+            setAllowReturnTransitionOverlap(a.getBoolean(
+                    com.android.internal.R.styleable.Fragment_fragmentAllowReturnTransitionOverlap,
+                    true));
         }
         a.recycle();
 
@@ -1943,16 +1940,12 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      */
     public void setEnterSharedElementCallback(SharedElementCallback callback) {
         if (callback == null) {
+            if (mAnimationInfo == null) {
+                return; // already a null callback
+            }
             callback = SharedElementCallback.NULL_CALLBACK;
         }
-        mEnterTransitionCallback = callback;
-    }
-
-    /**
-     * @hide
-     */
-    public void setEnterSharedElementTransitionCallback(SharedElementCallback callback) {
-        setEnterSharedElementCallback(callback);
+        ensureAnimationInfo().mEnterTransitionCallback = callback;
     }
 
     /**
@@ -1964,16 +1957,12 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      */
     public void setExitSharedElementCallback(SharedElementCallback callback) {
         if (callback == null) {
+            if (mAnimationInfo == null) {
+                return; // already a null callback
+            }
             callback = SharedElementCallback.NULL_CALLBACK;
         }
-        mExitTransitionCallback = callback;
-    }
-
-    /**
-     * @hide
-     */
-    public void setExitSharedElementTransitionCallback(SharedElementCallback callback) {
-        setExitSharedElementCallback(callback);
+        ensureAnimationInfo().mExitTransitionCallback = callback;
     }
 
     /**
@@ -1988,7 +1977,9 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * @attr ref android.R.styleable#Fragment_fragmentEnterTransition
      */
     public void setEnterTransition(Transition transition) {
-        mEnterTransition = transition;
+        if (shouldChangeTransition(transition, null)) {
+            ensureAnimationInfo().mEnterTransition = transition;
+        }
     }
 
     /**
@@ -2002,7 +1993,10 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * @attr ref android.R.styleable#Fragment_fragmentEnterTransition
      */
     public Transition getEnterTransition() {
-        return mEnterTransition;
+        if (mAnimationInfo == null) {
+            return null;
+        }
+        return mAnimationInfo.mEnterTransition;
     }
 
     /**
@@ -2020,7 +2014,9 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * @attr ref android.R.styleable#Fragment_fragmentExitTransition
      */
     public void setReturnTransition(Transition transition) {
-        mReturnTransition = transition;
+        if (shouldChangeTransition(transition, USE_DEFAULT_TRANSITION)) {
+            ensureAnimationInfo().mReturnTransition = transition;
+        }
     }
 
     /**
@@ -2037,8 +2033,11 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * @attr ref android.R.styleable#Fragment_fragmentExitTransition
      */
     public Transition getReturnTransition() {
-        return mReturnTransition == USE_DEFAULT_TRANSITION ? getEnterTransition()
-                : mReturnTransition;
+        if (mAnimationInfo == null) {
+            return null;
+        }
+        return mAnimationInfo.mReturnTransition == USE_DEFAULT_TRANSITION ? getEnterTransition()
+                : mAnimationInfo.mReturnTransition;
     }
 
     /**
@@ -2055,7 +2054,9 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * @attr ref android.R.styleable#Fragment_fragmentExitTransition
      */
     public void setExitTransition(Transition transition) {
-        mExitTransition = transition;
+        if (shouldChangeTransition(transition, null)) {
+            ensureAnimationInfo().mExitTransition = transition;
+        }
     }
 
     /**
@@ -2072,7 +2073,10 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * @attr ref android.R.styleable#Fragment_fragmentExitTransition
      */
     public Transition getExitTransition() {
-        return mExitTransition;
+        if (mAnimationInfo == null) {
+            return null;
+        }
+        return mAnimationInfo.mExitTransition;
     }
 
     /**
@@ -2089,7 +2093,9 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * @attr ref android.R.styleable#Fragment_fragmentReenterTransition
      */
     public void setReenterTransition(Transition transition) {
-        mReenterTransition = transition;
+        if (shouldChangeTransition(transition, USE_DEFAULT_TRANSITION)) {
+            ensureAnimationInfo().mReenterTransition = transition;
+        }
     }
 
     /**
@@ -2106,8 +2112,11 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * @attr ref android.R.styleable#Fragment_fragmentReenterTransition
      */
     public Transition getReenterTransition() {
-        return mReenterTransition == USE_DEFAULT_TRANSITION ? getExitTransition()
-                : mReenterTransition;
+        if (mAnimationInfo == null) {
+            return null;
+        }
+        return mAnimationInfo.mReenterTransition == USE_DEFAULT_TRANSITION ? getExitTransition()
+                : mAnimationInfo.mReenterTransition;
     }
 
     /**
@@ -2121,7 +2130,9 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * @attr ref android.R.styleable#Fragment_fragmentSharedElementEnterTransition
      */
     public void setSharedElementEnterTransition(Transition transition) {
-        mSharedElementEnterTransition = transition;
+        if (shouldChangeTransition(transition, null)) {
+            ensureAnimationInfo().mSharedElementEnterTransition = transition;
+        }
     }
 
     /**
@@ -2135,7 +2146,10 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * @attr ref android.R.styleable#Fragment_fragmentSharedElementEnterTransition
      */
     public Transition getSharedElementEnterTransition() {
-        return mSharedElementEnterTransition;
+        if (mAnimationInfo == null) {
+            return null;
+        }
+        return mAnimationInfo.mSharedElementEnterTransition;
     }
 
     /**
@@ -2152,7 +2166,9 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * @attr ref android.R.styleable#Fragment_fragmentSharedElementReturnTransition
      */
     public void setSharedElementReturnTransition(Transition transition) {
-        mSharedElementReturnTransition = transition;
+        if (shouldChangeTransition(transition, USE_DEFAULT_TRANSITION)) {
+            ensureAnimationInfo().mSharedElementReturnTransition = transition;
+        }
     }
 
     /**
@@ -2169,8 +2185,12 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * @attr ref android.R.styleable#Fragment_fragmentSharedElementReturnTransition
      */
     public Transition getSharedElementReturnTransition() {
-        return mSharedElementReturnTransition == USE_DEFAULT_TRANSITION ?
-                getSharedElementEnterTransition() : mSharedElementReturnTransition;
+        if (mAnimationInfo == null) {
+            return null;
+        }
+        return mAnimationInfo.mSharedElementReturnTransition == USE_DEFAULT_TRANSITION
+                ? getSharedElementEnterTransition()
+                : mAnimationInfo.mSharedElementReturnTransition;
     }
 
     /**
@@ -2183,7 +2203,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * @attr ref android.R.styleable#Fragment_fragmentAllowEnterTransitionOverlap
      */
     public void setAllowEnterTransitionOverlap(boolean allow) {
-        mAllowEnterTransitionOverlap = allow;
+        ensureAnimationInfo().mAllowEnterTransitionOverlap = allow;
     }
 
     /**
@@ -2196,7 +2216,8 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * @attr ref android.R.styleable#Fragment_fragmentAllowEnterTransitionOverlap
      */
     public boolean getAllowEnterTransitionOverlap() {
-        return (mAllowEnterTransitionOverlap == null) ? true : mAllowEnterTransitionOverlap;
+        return (mAnimationInfo == null || mAnimationInfo.mAllowEnterTransitionOverlap == null)
+                ? true : mAnimationInfo.mAllowEnterTransitionOverlap;
     }
 
     /**
@@ -2209,7 +2230,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * @attr ref android.R.styleable#Fragment_fragmentAllowReturnTransitionOverlap
      */
     public void setAllowReturnTransitionOverlap(boolean allow) {
-        mAllowReturnTransitionOverlap = allow;
+        ensureAnimationInfo().mAllowReturnTransitionOverlap = allow;
     }
 
     /**
@@ -2222,7 +2243,90 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * @attr ref android.R.styleable#Fragment_fragmentAllowReturnTransitionOverlap
      */
     public boolean getAllowReturnTransitionOverlap() {
-        return (mAllowReturnTransitionOverlap == null) ? true : mAllowReturnTransitionOverlap;
+        return (mAnimationInfo == null || mAnimationInfo.mAllowReturnTransitionOverlap == null)
+                ? true : mAnimationInfo.mAllowReturnTransitionOverlap;
+    }
+
+    /**
+     * Postpone the entering Fragment transition until {@link #startPostponedEnterTransition()}
+     * or {@link FragmentManager#executePendingTransactions()} has been called.
+     * <p>
+     * This method gives the Fragment the ability to delay Fragment animations
+     * until all data is loaded. Until then, the added, shown, and
+     * attached Fragments will be INVISIBLE and removed, hidden, and detached Fragments won't
+     * be have their Views removed. The transaction runs when all postponed added Fragments in the
+     * transaction have called {@link #startPostponedEnterTransition()}.
+     * <p>
+     * This method should be called before being added to the FragmentTransaction or
+     * in {@link #onCreate(Bundle), {@link #onAttach(Context)}, or
+     * {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)}}.
+     * {@link #startPostponedEnterTransition()} must be called to allow the Fragment to
+     * start the transitions.
+     * <p>
+     * When a FragmentTransaction is started that may affect a postponed FragmentTransaction,
+     * based on which containers are in their operations, the postponed FragmentTransaction
+     * will have its start triggered. The early triggering may result in faulty or nonexistent
+     * animations in the postponed transaction. FragmentTransactions that operate only on
+     * independent containers will not interfere with each other's postponement.
+     * <p>
+     * Calling postponeEnterTransition on Fragments with a null View will not postpone the
+     * transition. Likewise, postponement only works if FragmentTransaction optimizations are
+     * enabled.
+     *
+     * @see Activity#postponeEnterTransition()
+     * @see FragmentTransaction#setAllowOptimization(boolean)
+     */
+    public void postponeEnterTransition() {
+        ensureAnimationInfo().mEnterTransitionPostponed = true;
+    }
+
+    /**
+     * Begin postponed transitions after {@link #postponeEnterTransition()} was called.
+     * If postponeEnterTransition() was called, you must call startPostponedEnterTransition()
+     * or {@link FragmentManager#executePendingTransactions()} to complete the FragmentTransaction.
+     * If postponement was interrupted with {@link FragmentManager#executePendingTransactions()},
+     * before {@code startPostponedEnterTransition()}, animations may not run or may execute
+     * improperly.
+     *
+     * @see Activity#startPostponedEnterTransition()
+     */
+    public void startPostponedEnterTransition() {
+        if (mFragmentManager == null || mFragmentManager.mHost == null) {
+                ensureAnimationInfo().mEnterTransitionPostponed = false;
+        } else if (Looper.myLooper() != mFragmentManager.mHost.getHandler().getLooper()) {
+            mFragmentManager.mHost.getHandler().
+                    postAtFrontOfQueue(this::callStartTransitionListener);
+        } else {
+            callStartTransitionListener();
+        }
+    }
+
+    /**
+     * Calls the start transition listener. This must be called on the UI thread.
+     */
+    private void callStartTransitionListener() {
+        final OnStartEnterTransitionListener listener;
+        if (mAnimationInfo == null) {
+            listener = null;
+        } else {
+            mAnimationInfo.mEnterTransitionPostponed = false;
+            listener = mAnimationInfo.mStartEnterTransitionListener;
+            mAnimationInfo.mStartEnterTransitionListener = null;
+        }
+        if (listener != null) {
+            listener.onStartEnterTransition();
+        }
+    }
+
+    /**
+     * Returns true if mAnimationInfo is not null or the transition differs from the default value.
+     * This is broken out to ensure mAnimationInfo is properly locked when checking.
+     */
+    private boolean shouldChangeTransition(Transition transition, Transition defaultValue) {
+        if (transition == defaultValue) {
+            return mAnimationInfo != null;
+        }
+        return true;
     }
 
     /**
@@ -2283,8 +2387,8 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
             writer.print(" mTargetRequestCode=");
             writer.println(mTargetRequestCode);
         }
-        if (mNextAnim != 0) {
-            writer.print(prefix); writer.print("mNextAnim="); writer.println(mNextAnim);
+        if (getNextAnim() != 0) {
+            writer.print(prefix); writer.print("mNextAnim="); writer.println(getNextAnim());
         }
         if (mContainer != null) {
             writer.print(prefix); writer.print("mContainer="); writer.println(mContainer);
@@ -2292,10 +2396,11 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
         if (mView != null) {
             writer.print(prefix); writer.print("mView="); writer.println(mView);
         }
-        if (mAnimatingAway != null) {
-            writer.print(prefix); writer.print("mAnimatingAway="); writer.println(mAnimatingAway);
+        if (getAnimatingAway() != null) {
+            writer.print(prefix); writer.print("mAnimatingAway=");
+            writer.println(getAnimatingAway());
             writer.print(prefix); writer.print("mStateAfterAnimating=");
-            writer.println(mStateAfterAnimating);
+            writer.println(getStateAfterAnimating());
         }
         if (mLoaderManager != null) {
             writer.print(prefix); writer.println("Loader Manager:");
@@ -2622,6 +2727,23 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
         }
     }
 
+    void setOnStartEnterTransitionListener(OnStartEnterTransitionListener listener) {
+        ensureAnimationInfo();
+        if (listener == mAnimationInfo.mStartEnterTransitionListener) {
+            return;
+        }
+        if (listener != null && mAnimationInfo.mStartEnterTransitionListener != null) {
+            throw new IllegalStateException("Trying to set a replacement " +
+                    "startPostponedEnterTransition on " + this);
+        }
+        if (mAnimationInfo.mEnterTransitionPostponed) {
+            mAnimationInfo.mStartEnterTransitionListener = listener;
+        }
+        if (listener != null) {
+            listener.startListening();
+        }
+    }
+
     private static Transition loadTransition(Context context, TypedArray typedArray,
             Transition currentValue, Transition defaultValue, int id) {
         if (currentValue != defaultValue) {
@@ -2640,4 +2762,147 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
         return transition;
     }
 
+    private AnimationInfo ensureAnimationInfo() {
+        if (mAnimationInfo == null) {
+            mAnimationInfo = new AnimationInfo();
+        }
+        return mAnimationInfo;
+    }
+
+    int getNextAnim() {
+        if (mAnimationInfo == null) {
+            return 0;
+        }
+        return mAnimationInfo.mNextAnim;
+    }
+
+    void setNextAnim(int animResourceId) {
+        if (mAnimationInfo == null && animResourceId == 0) {
+            return; // no change!
+        }
+        ensureAnimationInfo().mNextAnim = animResourceId;
+    }
+
+    int getNextTransition() {
+        if (mAnimationInfo == null) {
+            return 0;
+        }
+        return mAnimationInfo.mNextTransition;
+    }
+
+    void setNextTransition(int nextTransition, int nextTransitionStyle) {
+        if (mAnimationInfo == null && nextTransition == 0 && nextTransitionStyle == 0) {
+            return; // no change!
+        }
+        ensureAnimationInfo();
+        mAnimationInfo.mNextTransition = nextTransition;
+        mAnimationInfo.mNextTransitionStyle = nextTransitionStyle;
+    }
+
+    int getNextTransitionStyle() {
+        if (mAnimationInfo == null) {
+            return 0;
+        }
+        return mAnimationInfo.mNextTransitionStyle;
+    }
+
+    SharedElementCallback getEnterTransitionCallback() {
+        if (mAnimationInfo == null) {
+            return SharedElementCallback.NULL_CALLBACK;
+        }
+        return mAnimationInfo.mEnterTransitionCallback;
+    }
+
+    SharedElementCallback getExitTransitionCallback() {
+        if (mAnimationInfo == null) {
+            return SharedElementCallback.NULL_CALLBACK;
+        }
+        return mAnimationInfo.mExitTransitionCallback;
+    }
+
+    Animator getAnimatingAway() {
+        if (mAnimationInfo == null) {
+            return null;
+        }
+        return mAnimationInfo.mAnimatingAway;
+    }
+
+    void setAnimatingAway(Animator animator) {
+        ensureAnimationInfo().mAnimatingAway = animator;
+    }
+
+    int getStateAfterAnimating() {
+        if (mAnimationInfo == null) {
+            return 0;
+        }
+        return mAnimationInfo.mStateAfterAnimating;
+    }
+
+    void setStateAfterAnimating(int state) {
+        ensureAnimationInfo().mStateAfterAnimating = state;
+    }
+
+    boolean isPostponed() {
+        if (mAnimationInfo == null) {
+            return false;
+        }
+        return mAnimationInfo.mEnterTransitionPostponed;
+    }
+
+    /**
+     * Used internally to be notified when {@link #startPostponedEnterTransition()} has
+     * been called. This listener will only be called once and then be removed from the
+     * listeners.
+     */
+    interface OnStartEnterTransitionListener {
+        void onStartEnterTransition();
+        void startListening();
+    }
+
+    /**
+     * Contains all the animation and transition information for a fragment. This will only
+     * be instantiated for Fragments that have Views.
+     */
+    static class AnimationInfo {
+        // Non-null if the fragment's view hierarchy is currently animating away,
+        // meaning we need to wait a bit on completely destroying it.  This is the
+        // animation that is running.
+        Animator mAnimatingAway;
+
+        // If mAnimatingAway != null, this is the state we should move to once the
+        // animation is done.
+        int mStateAfterAnimating;
+
+        // If app has requested a specific animation, this is the one to use.
+        int mNextAnim;
+
+        // If app has requested a specific transition, this is the one to use.
+        int mNextTransition;
+
+        // If app has requested a specific transition style, this is the one to use.
+        int mNextTransitionStyle;
+
+        private Transition mEnterTransition = null;
+        private Transition mReturnTransition = USE_DEFAULT_TRANSITION;
+        private Transition mExitTransition = null;
+        private Transition mReenterTransition = USE_DEFAULT_TRANSITION;
+        private Transition mSharedElementEnterTransition = null;
+        private Transition mSharedElementReturnTransition = USE_DEFAULT_TRANSITION;
+        private Boolean mAllowReturnTransitionOverlap;
+        private Boolean mAllowEnterTransitionOverlap;
+
+        SharedElementCallback mEnterTransitionCallback = SharedElementCallback.NULL_CALLBACK;
+        SharedElementCallback mExitTransitionCallback = SharedElementCallback.NULL_CALLBACK;
+
+        // True when postponeEnterTransition has been called and startPostponeEnterTransition
+        // hasn't been called yet.
+        boolean mEnterTransitionPostponed;
+
+        // Listener to wait for startPostponeEnterTransition. After being called, it will
+        // be set to null
+        OnStartEnterTransitionListener mStartEnterTransitionListener;
+
+        // True if the View was added, and its animation has yet to be run.
+        boolean mIsNewlyAdded;
+    }
 }
