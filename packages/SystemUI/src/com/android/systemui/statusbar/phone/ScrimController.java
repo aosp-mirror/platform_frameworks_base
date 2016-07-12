@@ -51,8 +51,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     public static final Interpolator KEYGUARD_FADE_OUT_INTERPOLATOR_LOCKED
             = new PathInterpolator(0.3f, 0f, 0.8f, 1f);
     private static final float SCRIM_BEHIND_ALPHA = 0.62f;
-    private static final float SCRIM_BEHIND_ALPHA_KEYGUARD = 0.45f;
-    private static final float SCRIM_BEHIND_ALPHA_UNLOCKING = 0.2f;
+    protected static final float SCRIM_BEHIND_ALPHA_KEYGUARD = 0.45f;
+    protected static final float SCRIM_BEHIND_ALPHA_UNLOCKING = 0.2f;
     private static final float SCRIM_IN_FRONT_ALPHA = 0.75f;
     private static final float SCRIM_IN_FRONT_ALPHA_LOCKED = 0.85f;
     private static final int TAG_KEY_ANIM = R.id.scrim;
@@ -112,6 +112,13 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
 
     public void setKeyguardShowing(boolean showing) {
         mKeyguardShowing = showing;
+        scheduleUpdate();
+    }
+
+    protected void setScrimBehindValues(float scrimBehindAlphaKeyguard,
+            float scrimBehindAlphaUnlocking) {
+        mScrimBehindAlphaKeyguard = scrimBehindAlphaKeyguard;
+        mScrimBehindAlphaUnlocking = scrimBehindAlphaUnlocking;
         scheduleUpdate();
     }
 
@@ -561,5 +568,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         layoutParams.height = mHeadsUpScrim.getResources().getDimensionPixelSize(
                 R.dimen.heads_up_scrim_height);
         mHeadsUpScrim.setLayoutParams(layoutParams);
+    }
+
+    public void setCurrentUser(int currentUser) {
+        // Don't care in the base class.
     }
 }
