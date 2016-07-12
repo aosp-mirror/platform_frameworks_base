@@ -27,9 +27,9 @@
     <string name="menu_search" msgid="3816712084502856974">"ရှာဖွေရန်"</string>
     <string name="menu_settings" msgid="8239065133341597825">"သိုလှောင်မှု ဆက်တင်များ"</string>
     <string name="menu_open" msgid="432922957274920903">"ဖွင့်ရန်"</string>
-    <string name="menu_save" msgid="2394743337684426338">"သိမ်းပါ"</string>
+    <string name="menu_save" msgid="2394743337684426338">"သိမ်းရန်"</string>
     <string name="menu_share" msgid="3075149983979628146">"မျှဝေခြင်း"</string>
-    <string name="menu_delete" msgid="8138799623850614177">"ဖျက်ပစ်ရန်"</string>
+    <string name="menu_delete" msgid="8138799623850614177">"ဖျက်ရန်"</string>
     <string name="menu_select_all" msgid="8323579667348729928">"အားလုံးကို ရွေးရန်"</string>
     <string name="menu_copy" msgid="3612326052677229148">"…သို့ကူးယူရန်"</string>
     <string name="menu_move" msgid="1828090633118079817">"...သို့ ရွှေ့ရန်"</string>
@@ -111,6 +111,8 @@
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"ဤနေရာတွင် ရွေးချယ်ထားသည့် ဖိုင်များကို ကူးထည့်၍မရပါ။"</string>
     <string name="menu_rename" msgid="7678802479104285353">"အမည်ပြောင်းရန်"</string>
     <string name="rename_error" msgid="4203041674883412606">"စာရွက်စာတမ်းကို အမည်ပြောင်းခြင်း မအောင်မြင်ပါ"</string>
+    <!-- no translation found for menu_eject_root (2768224615494227325) -->
+    <skip />
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"အချို့ဖိုင်များကို ပြောင်းလဲထားသည်"</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"<xliff:g id="APPNAME"><b>^1</b></xliff:g> ကို <xliff:g id="STORAGE"><i>^3</i></xliff:g> ရှိ <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> လမ်းညွှန်အား အသုံးပြုခွင့်ပေးမလား။"</string>
     <string name="open_external_dialog_request_primary_volume" msgid="6635562535713428688">"<xliff:g id="APPNAME"><b>^1</b></xliff:g> အား <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> စာရင်းကို အသုံးပြုခွင့်ပေးမလား။"</string>
