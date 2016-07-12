@@ -797,7 +797,7 @@ public class BackupManagerService {
                                 queue, oldJournal, null, null, false);
                         Message pbtMessage = obtainMessage(MSG_BACKUP_RESTORE_STEP, pbt);
                         sendMessage(pbtMessage);
-                    } catch (RemoteException e) {
+                    } catch (Exception e) {
                         // unable to ask the transport its dir name -- transient failure, since
                         // the above check succeeded.  Try again next time.
                         Slog.e(TAG, "Transport became unavailable attempting backup");
@@ -940,7 +940,7 @@ public class BackupManagerService {
                     }
                     if (sets == null) EventLog.writeEvent(EventLogTags.RESTORE_TRANSPORT_FAILURE);
                 } catch (Exception e) {
-                    Slog.e(TAG, "Error from transport getting set list");
+                    Slog.e(TAG, "Error from transport getting set list: " + e.getMessage());
                 } finally {
                     if (params.observer != null) {
                         try {
@@ -948,7 +948,7 @@ public class BackupManagerService {
                         } catch (RemoteException re) {
                             Slog.e(TAG, "Unable to report listing to observer");
                         } catch (Exception e) {
-                            Slog.e(TAG, "Restore observer threw", e);
+                            Slog.e(TAG, "Restore observer threw: " + e.getMessage());
                         }
                     }
 
@@ -1770,8 +1770,10 @@ public class BackupManagerService {
                 }
                 return; // done; don't fall through to the error case
             }
-        } catch (RemoteException e) {
+        } catch (Exception e) {
             // transport threw when asked its name; fall through to the lookup-failed case
+            Slog.e(TAG, "Transport " + transportName + " failed to report name: "
+                    + e.getMessage());
         }
 
         // The named transport doesn't exist or threw.  This operation is
@@ -1859,7 +1861,7 @@ public class BackupManagerService {
                             System.currentTimeMillis() + delay, mRunInitIntent);
                 }
             }
-        } catch (RemoteException e) {
+        } catch (Exception e) {
             // the transport threw when asked its file naming prefs; declare it invalid
             Slog.e(TAG, "Unable to register transport as " + name);
             mTransportNames.remove(component);
@@ -2065,8 +2067,9 @@ public class BackupManagerService {
                 IBackupTransport transport = IBackupTransport.Stub.asInterface(service);
                 registerTransport(transport.name(), name, transport);
                 EventLog.writeEvent(EventLogTags.BACKUP_TRANSPORT_LIFECYCLE, name, 1);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Unable to register transport " + component);
+            } catch (Exception e) {
+                Slog.e(TAG, "Unable to register transport " + component
+                        + ": " + e.getMessage());
                 EventLog.writeEvent(EventLogTags.BACKUP_TRANSPORT_LIFECYCLE, name, 0);
             }
         }
@@ -2529,8 +2532,8 @@ public class BackupManagerService {
         String dirName;
         try {
             dirName = transport.transportDirName();
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Transport became unavailable while attempting backup");
+        } catch (Exception e) {
+            Slog.e(TAG, "Transport unavailable while attempting backup: " + e.getMessage());
             sendBackupFinished(observer, BackupManager.ERROR_TRANSPORT_ABORTED);
             return BackupManager.ERROR_TRANSPORT_ABORTED;
         }
@@ -2974,9 +2977,10 @@ public class BackupManagerService {
                 try {
                     mCurrentToken = mTransport.getCurrentRestoreSet();
                     writeRestoreTokens();
-                } catch (RemoteException e) {
+                } catch (Exception e) {
                     // nothing for it at this point, unfortunately, but this will be
                     // recorded the next time we fully succeed.
+                    Slog.e(TAG, "Transport threw reporting restore set: " + e.getMessage());
                     addBackupTrace("transport threw returning token");
                 }
             }
@@ -3001,7 +3005,7 @@ public class BackupManagerService {
                             }
                         }
                     } catch (Exception e) {
-                        Slog.w(TAG, "Failed to query transport name heading for init", e);
+                        Slog.w(TAG, "Failed to query transport name for init: " + e.getMessage());
                         // swallow it and proceed; we don't rely on this
                     }
                     clearMetadata();
@@ -3367,8 +3371,8 @@ public class BackupManagerService {
                     try {
                         long quota = mTransport.getBackupQuota(mCurrentPackage.packageName, false);
                         mAgentBinder.doQuotaExceeded(size, quota);
-                    } catch (RemoteException e) {
-                        Slog.e(TAG, "Unable to contact backup agent for quota exceeded");
+                    } catch (Exception e) {
+                        Slog.e(TAG, "Unable to notify about quota exceeded: " + e.getMessage());
                     }
                 }
                 nextState = (mQueue.isEmpty()) ? BackupState.FINAL : BackupState.RUNNING_QUEUE;
@@ -3406,7 +3410,7 @@ public class BackupManagerService {
             try {
                 delay = mTransport.requestBackupTime();
             } catch (Exception e) {
-                Slog.w(TAG, "Unable to contact transport for recommended backoff");
+                Slog.w(TAG, "Unable to contact transport for recommended backoff: " + e.getMessage());
                 delay = 0;  // use the scheduler's default
             }
             KeyValueBackupJob.schedule(mContext, delay);
@@ -5004,7 +5008,7 @@ public class BackupManagerService {
                 return false;
             }
         } catch (Exception e) {
-            Slog.w(TAG, "Unable to contact transport");
+            Slog.w(TAG, "Unable to get transport name: " + e.getMessage());
             return false;
         }
 
@@ -8228,9 +8232,9 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 // Success; cache the metadata and continue as expected with the
                 // next state already enqueued
 
-            } catch (RemoteException e) {
+            } catch (Exception e) {
                 // If we lost the transport at any time, halt
-                Slog.e(TAG, "Unable to contact transport for restore");
+                Slog.e(TAG, "Unable to contact transport for restore: " + e.getMessage());
                 mStatus = BackupTransport.TRANSPORT_ERROR;
                 mBackupHandler.removeMessages(MSG_BACKUP_RESTORE_STEP, this);
                 executeNextState(UnifiedRestoreState.FINAL);
@@ -8327,8 +8331,9 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                     nextState = UnifiedRestoreState.RUNNING_QUEUE;
                     return;
                 }
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Can't get next target from transport; ending restore");
+            } catch (Exception e) {
+                Slog.e(TAG, "Can't get next restore target from transport; halting: "
+                        + e.getMessage());
                 EventLog.writeEvent(EventLogTags.RESTORE_TRANSPORT_FAILURE);
                 nextState = UnifiedRestoreState.FINAL;
                 return;
@@ -8638,11 +8643,11 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                     EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE,
                             mCurrentPackage.packageName, "I/O error on pipes");
                     status = BackupTransport.AGENT_ERROR;
-                } catch (RemoteException e) {
-                    // The transport went away; terminate the whole operation.  Closing
+                } catch (Exception e) {
+                    // The transport threw; terminate the whole operation.  Closing
                     // the sockets will wake up the engine and it will then tidy up the
                     // remote end.
-                    Slog.e(TAG, "Transport failed during restore");
+                    Slog.e(TAG, "Transport failed during restore: " + e.getMessage());
                     EventLog.writeEvent(EventLogTags.RESTORE_TRANSPORT_FAILURE);
                     status = BackupTransport.TRANSPORT_ERROR;
                 } finally {
@@ -8680,9 +8685,10 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                         // level is immaterial; we need to tell the transport to bail
                         try {
                             mTransport.abortFullRestore();
-                        } catch (RemoteException e) {
+                        } catch (Exception e) {
                             // transport itself is dead; make sure we handle this as a
                             // fatal error
+                            Slog.e(TAG, "Transport threw from abortFullRestore: " + e.getMessage());
                             status = BackupTransport.TRANSPORT_ERROR;
                         }
 
@@ -9030,16 +9036,15 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 // Tell the transport to remove all the persistent storage for the app
                 // TODO - need to handle failures
                 mTransport.clearBackupData(mPackage);
-            } catch (RemoteException e) {
-                // can't happen; the transport is local
             } catch (Exception e) {
-                Slog.e(TAG, "Transport threw attempting to clear data for " + mPackage);
+                Slog.e(TAG, "Transport threw clearing data for " + mPackage + ": " + e.getMessage());
             } finally {
                 try {
                     // TODO - need to handle failures
                     mTransport.finishBackup();
-                } catch (RemoteException e) {
-                    // can't happen; the transport is local
+                } catch (Exception e) {
+                    // Nothing we can do here, alas
+                    Slog.e(TAG, "Unable to mark clear operation finished: " + e.getMessage());
                 }
 
                 // Last but not least, release the cpu
@@ -9098,8 +9103,6 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                                 System.currentTimeMillis() + delay, mRunInitIntent);
                     }
                 }
-            } catch (RemoteException e) {
-                // can't happen; the transports are local
             } catch (Exception e) {
                 Slog.e(TAG, "Unexpected error performing init", e);
             } finally {
@@ -9787,8 +9790,9 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                     if (MORE_DEBUG) Slog.d(TAG, "getConfigurationIntent() returning config intent "
                             + intent);
                     return intent;
-                } catch (RemoteException e) {
+                } catch (Exception e) {
                     /* fall through to return null */
+                    Slog.e(TAG, "Unable to get configuration intent from transport: " + e.getMessage());
                 }
             }
         }
@@ -9812,8 +9816,9 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                     final String text = transport.currentDestinationString();
                     if (MORE_DEBUG) Slog.d(TAG, "getDestinationString() returning " + text);
                     return text;
-                } catch (RemoteException e) {
+                } catch (Exception e) {
                     /* fall through to return null */
+                    Slog.e(TAG, "Unable to get string from transport: " + e.getMessage());
                 }
             }
         }
@@ -9834,8 +9839,9 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                     if (MORE_DEBUG) Slog.d(TAG, "getDataManagementIntent() returning intent "
                             + intent);
                     return intent;
-                } catch (RemoteException e) {
+                } catch (Exception e) {
                     /* fall through to return null */
+                    Slog.e(TAG, "Unable to get management intent from transport: " + e.getMessage());
                 }
             }
         }
@@ -9856,8 +9862,9 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                     final String text = transport.dataManagementLabel();
                     if (MORE_DEBUG) Slog.d(TAG, "getDataManagementLabel() returning " + text);
                     return text;
-                } catch (RemoteException e) {
+                } catch (Exception e) {
                     /* fall through to return null */
+                    Slog.e(TAG, "Unable to get management label from transport: " + e.getMessage());
                 }
             }
         }
@@ -9950,9 +9957,9 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 msg.obj = new RestoreParams(transport, dirName, null,
                         restoreSet, packageName, token);
                 mBackupHandler.sendMessage(msg);
-            } catch (RemoteException e) {
-                // Binding to the transport broke; back off and proceed with the installation.
-                Slog.e(TAG, "Unable to contact transport");
+            } catch (Exception e) {
+                // Calling into the transport broke; back off and proceed with the installation.
+                Slog.e(TAG, "Unable to contact transport: " + e.getMessage());
                 skip = true;
             }
         }
@@ -10073,8 +10080,8 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 try {
                     return transport.isAppEligibleForBackup(packageInfo,
                         appGetsFullBackup(packageInfo));
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Unable to contact transport");
+                } catch (Exception e) {
+                    Slog.e(TAG, "Unable to ask about eligibility: " + e.getMessage());
                 }
             }
             // If transport is not present we couldn't tell that the package is not eligible.
@@ -10176,9 +10183,9 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             String dirName;
             try {
                 dirName = mRestoreTransport.transportDirName();
-            } catch (RemoteException e) {
+            } catch (Exception e) {
                 // Transport went AWOL; fail.
-                Slog.e(TAG, "Unable to contact transport for restore");
+                Slog.e(TAG, "Unable to get transport dir for restore: " + e.getMessage());
                 return -1;
             }
 
@@ -10258,9 +10265,9 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             String dirName;
             try {
                 dirName = mRestoreTransport.transportDirName();
-            } catch (RemoteException e) {
+            } catch (Exception e) {
                 // Transport went AWOL; fail.
-                Slog.e(TAG, "Unable to contact transport for restore");
+                Slog.e(TAG, "Unable to get transport name for restoreSome: " + e.getMessage());
                 return -1;
             }
 
@@ -10348,9 +10355,9 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 String dirName;
                 try {
                     dirName = mRestoreTransport.transportDirName();
-                } catch (RemoteException e) {
+                } catch (Exception e) {
                     // Transport went AWOL; fail.
-                    Slog.e(TAG, "Unable to contact transport for restore");
+                    Slog.e(TAG, "Unable to get transport dir for restorePackage: " + e.getMessage());
                     return -1;
                 }
 
