@@ -283,19 +283,15 @@ include $(BUILD_NATIVE_TEST)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE_PATH := $(TARGET_OUT_DATA)/local/tmp
-LOCAL_MODULE:= hwuitest
+LOCAL_MODULE:= hwuimacro
 LOCAL_MODULE_TAGS := tests
-LOCAL_MODULE_CLASS := EXECUTABLES
 LOCAL_MULTILIB := both
-LOCAL_MODULE_STEM_32 := hwuitest
-LOCAL_MODULE_STEM_64 := hwuitest64
 LOCAL_CFLAGS := $(hwui_cflags)
 LOCAL_C_INCLUDES := $(hwui_c_includes)
 
 # set to libhwui_static_debug to skip actual GL commands
 LOCAL_WHOLE_STATIC_LIBRARIES := libhwui_static
 LOCAL_SHARED_LIBRARIES := libmemunreachable
-LOCAL_STATIC_LIBRARIES := libgoogle-benchmark
 
 LOCAL_SRC_FILES += \
     $(hwui_test_common_src_files) \
@@ -303,7 +299,7 @@ LOCAL_SRC_FILES += \
     tests/macrobench/main.cpp
 
 include $(LOCAL_PATH)/hwui_static_deps.mk
-include $(BUILD_EXECUTABLE)
+include $(BUILD_NATIVE_BENCHMARK)
 
 # ------------------------
 # Micro-bench app

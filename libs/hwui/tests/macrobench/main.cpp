@@ -49,7 +49,7 @@ void run(const TestScene::Info& info, const TestScene::Options& opts,
 
 static void printHelp() {
     printf(R"(
-USAGE: hwuitest [OPTIONS] <TESTNAME>
+USAGE: hwuimacro [OPTIONS] <TESTNAME>
 
 OPTIONS:
   -c, --count=NUM      NUM loops a test should run (example, number of frames)
@@ -63,6 +63,10 @@ OPTIONS:
                        moving average frametime. Weight is optional, default is 10
   --cpuset=name        Adds the test to the specified cpuset before running
                        Not supported on all devices and needs root
+  --offscreen          Render tests off device screen. This option is on by default
+  --onscreen           Render tests on device screen. By default tests
+                       are offscreen rendered
+  --benchmark_format   Set output format. Possible values are tabular, json, csv
 )");
 }
 
@@ -150,6 +154,7 @@ enum {
     ReportFrametime,
     CpuSet,
     BenchmarkFormat,
+    Onscreen,
     Offscreen,
 };
 }
@@ -163,6 +168,7 @@ static const struct option LONG_OPTIONS[] = {
     { "report-frametime", optional_argument, nullptr, LongOpts::ReportFrametime },
     { "cpuset", required_argument, nullptr, LongOpts::CpuSet },
     { "benchmark_format", required_argument, nullptr, LongOpts::BenchmarkFormat },
+    { "onscreen", no_argument, nullptr, LongOpts::Onscreen },
     { "offscreen", no_argument, nullptr, LongOpts::Offscreen },
     { 0, 0, 0, 0 }
 };
@@ -247,6 +253,10 @@ void parseOptions(int argc, char* argv[]) {
             }
             break;
 
+        case LongOpts::Onscreen:
+            gOpts.renderOffscreen = false;
+            break;
+
         case LongOpts::Offscreen:
             gOpts.renderOffscreen = true;
             break;
@@ -274,22 +284,18 @@ void parseOptions(int argc, char* argv[]) {
     if (optind < argc) {
         do {
             const char* test = argv[optind++];
-            if (!strcmp(test, "all")) {
-                for (auto& iter : TestScene::testMap()) {
-                    gRunTests.push_back(iter.second);
-                }
+            auto pos = TestScene::testMap().find(test);
+            if (pos == TestScene::testMap().end()) {
+                fprintf(stderr, "Unknown test '%s'\n", test);
+                exit(EXIT_FAILURE);
             } else {
-                auto pos = TestScene::testMap().find(test);
-                if (pos == TestScene::testMap().end()) {
-                    fprintf(stderr, "Unknown test '%s'\n", test);
-                    exit(EXIT_FAILURE);
-                } else {
-                    gRunTests.push_back(pos->second);
-                }
+                gRunTests.push_back(pos->second);
             }
         } while (optind < argc);
     } else {
-        gRunTests.push_back(TestScene::testMap()["shadowgrid"]);
+        for (auto& iter : TestScene::testMap()) {
+            gRunTests.push_back(iter.second);
+        }
     }
 }
 
