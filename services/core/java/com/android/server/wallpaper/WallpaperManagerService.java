@@ -85,6 +85,7 @@ import android.view.WindowManager;
 
 import com.android.internal.R;
 import com.android.internal.content.PackageMonitor;
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.JournaledFile;
 import com.android.server.EventLogTags;
@@ -166,7 +167,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
      * Observes the wallpaper for changes and notifies all IWallpaperServiceCallbacks
      * that the wallpaper has changed. The CREATE is triggered when there is no
      * wallpaper set and is created for the first time. The CLOSE_WRITE is triggered
-     * everytime the wallpaper is changed.
+     * every time the wallpaper is changed.
      */
     private class WallpaperObserver extends FileObserver {
 
@@ -175,7 +176,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         final File mWallpaperDir;
         final File mWallpaperFile;
         final File mWallpaperLockFile;
-        final File mWallpaperInfoFile;
 
         public WallpaperObserver(WallpaperData wallpaper) {
             super(getWallpaperDir(wallpaper.userId).getAbsolutePath(),
@@ -185,7 +185,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
             mWallpaper = wallpaper;
             mWallpaperFile = new File(mWallpaperDir, WALLPAPER);
             mWallpaperLockFile = new File(mWallpaperDir, WALLPAPER_LOCK_ORIG);
-            mWallpaperInfoFile = new File(mWallpaperDir, WALLPAPER_INFO);
         }
 
         private WallpaperData dataForEvent(boolean sysChanged, boolean lockChanged) {
@@ -943,10 +942,28 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         mLockWallpaperMap.remove(userId);
     }
 
-    void onUnlockUser(int userId) {
+    void onUnlockUser(final int userId) {
         synchronized (mLock) {
             if (mCurrentUserId == userId && mWaitingForUnlock) {
                 switchUser(userId, null);
+
+                // Make sure that the SELinux labeling of all the relevant files is correct.
+                // This corrects for mislabeling bugs that might have arisen from move-to
+                // operations involving the wallpaper files.  This isn't timing-critical,
+                // so we do it in the background to avoid holding up the user unlock operation.
+                Runnable relabeler = new Runnable() {
+                    @Override
+                    public void run() {
+                        final File wallpaperDir = getWallpaperDir(userId);
+                        for (String filename : sPerUserFiles) {
+                            File f = new File(wallpaperDir, filename);
+                            if (f.exists()) {
+                                SELinux.restorecon(f);
+                            }
+                        }
+                    }
+                };
+                BackgroundThread.getHandler().post(relabeler);
             }
         }
     }
