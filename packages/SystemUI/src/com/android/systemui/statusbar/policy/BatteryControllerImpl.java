@@ -89,14 +89,18 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
 
     @Override
     public void addStateChangedCallback(BatteryController.BatteryStateChangeCallback cb) {
-        mChangeCallbacks.add(cb);
+        synchronized (mChangeCallbacks) {
+            mChangeCallbacks.add(cb);
+        }
         cb.onBatteryLevelChanged(mLevel, mPluggedIn, mCharging);
         cb.onPowerSaveChanged(mPowerSave);
     }
 
     @Override
     public void removeStateChangedCallback(BatteryController.BatteryStateChangeCallback cb) {
-        mChangeCallbacks.remove(cb);
+        synchronized (mChangeCallbacks) {
+            mChangeCallbacks.remove(cb);
+        }
     }
 
     @Override
@@ -171,16 +175,20 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     }
 
     protected void fireBatteryLevelChanged() {
-        final int N = mChangeCallbacks.size();
-        for (int i = 0; i < N; i++) {
-            mChangeCallbacks.get(i).onBatteryLevelChanged(mLevel, mPluggedIn, mCharging);
+        synchronized (mChangeCallbacks) {
+            final int N = mChangeCallbacks.size();
+            for (int i = 0; i < N; i++) {
+                mChangeCallbacks.get(i).onBatteryLevelChanged(mLevel, mPluggedIn, mCharging);
+            }
         }
     }
 
     private void firePowerSaveChanged() {
-        final int N = mChangeCallbacks.size();
-        for (int i = 0; i < N; i++) {
-            mChangeCallbacks.get(i).onPowerSaveChanged(mPowerSave);
+        synchronized (mChangeCallbacks) {
+            final int N = mChangeCallbacks.size();
+            for (int i = 0; i < N; i++) {
+                mChangeCallbacks.get(i).onPowerSaveChanged(mPowerSave);
+            }
         }
     }
 
