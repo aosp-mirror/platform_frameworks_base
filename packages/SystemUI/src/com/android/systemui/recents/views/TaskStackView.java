@@ -1552,11 +1552,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Bind the task view to the new task
         bindTaskView(tv, task);
 
-        // If the doze trigger has already fired, then update the state for this task view
-        if (mUIDozeTrigger.isAsleep() || Recents.getSystemServices().hasFreeformWorkspaceSupport()) {
-            tv.setNoUserInteractionState();
-        }
-
         // Set the new state for this view, including the callbacks and view clipping
         tv.setCallbacks(this);
         tv.setTouchEnabled(true);
@@ -1585,6 +1580,12 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     private void bindTaskView(TaskView tv, Task task) {
         // Rebind the task and request that this task's data be filled into the TaskView
         tv.onTaskBound(task, mTouchExplorationEnabled, mDisplayOrientation, mDisplayRect);
+
+        // If the doze trigger has already fired, then update the state for this task view
+        if (mUIDozeTrigger.isAsleep() ||
+                Recents.getSystemServices().hasFreeformWorkspaceSupport()) {
+            tv.setNoUserInteractionState();
+        }
 
         // Load the task data
         Recents.getTaskLoader().loadTaskData(task);

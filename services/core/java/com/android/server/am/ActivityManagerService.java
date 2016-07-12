@@ -13971,6 +13971,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         boolean dumpClient = false;
         boolean dumpCheckin = false;
         boolean dumpCheckinFormat = false;
+        boolean dumpVisibleStacks = false;
         String dumpPackage = null;
 
         int opti = 0;
@@ -13984,6 +13985,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 dumpAll = true;
             } else if ("-c".equals(opt)) {
                 dumpClient = true;
+            } else if ("-v".equals(opt)) {
+                dumpVisibleStacks = true;
             } else if ("-p".equals(opt)) {
                 if (opti < args.length) {
                     dumpPackage = args[opti];
@@ -14170,7 +14173,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 LockGuard.dump(fd, pw, args);
             } else {
                 // Dumping a single activity?
-                if (!dumpActivity(fd, pw, cmd, args, opti, dumpAll)) {
+                if (!dumpActivity(fd, pw, cmd, args, opti, dumpAll, dumpVisibleStacks)) {
                     ActivityManagerShellCommand shell = new ActivityManagerShellCommand(this, true);
                     int res = shell.exec(this, null, fd, null, args, new ResultReceiver(null));
                     if (res < 0) {
@@ -15038,11 +15041,11 @@ public final class ActivityManagerService extends ActivityManagerNative
      *  - A hex number of the ActivityRecord object instance.
      */
     protected boolean dumpActivity(FileDescriptor fd, PrintWriter pw, String name, String[] args,
-            int opti, boolean dumpAll) {
+            int opti, boolean dumpAll, boolean dumpVisibleStacks) {
         ArrayList<ActivityRecord> activities;
 
         synchronized (this) {
-            activities = mStackSupervisor.getDumpActivitiesLocked(name);
+            activities = mStackSupervisor.getDumpActivitiesLocked(name, dumpVisibleStacks);
         }
 
         if (activities.size() <= 0) {

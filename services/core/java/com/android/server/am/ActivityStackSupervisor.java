@@ -3152,8 +3152,27 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 pw.println(" mLockTaskModeTasks" + mLockTaskModeTasks);
     }
 
-    ArrayList<ActivityRecord> getDumpActivitiesLocked(String name) {
-        return mFocusedStack.getDumpActivitiesLocked(name);
+    /**
+     * Dumps the activities matching the given {@param name} in the either the focused stack
+     * or all visible stacks if {@param dumpVisibleStacks} is true.
+     */
+    ArrayList<ActivityRecord> getDumpActivitiesLocked(String name, boolean dumpVisibleStacks) {
+        if (dumpVisibleStacks) {
+            ArrayList<ActivityRecord> activities = new ArrayList<>();
+            int numDisplays = mActivityDisplays.size();
+            for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+                ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
+                for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
+                    ActivityStack stack = stacks.get(stackNdx);
+                    if (stack.getStackVisibilityLocked(null) == STACK_VISIBLE) {
+                        activities.addAll(stack.getDumpActivitiesLocked(name));
+                    }
+                }
+            }
+            return activities;
+        } else {
+            return mFocusedStack.getDumpActivitiesLocked(name);
+        }
     }
 
     static boolean printThisActivity(PrintWriter pw, ActivityRecord activity, String dumpPackage,
