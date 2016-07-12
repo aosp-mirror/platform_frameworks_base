@@ -2510,6 +2510,8 @@ public class DevicePolicyManager {
     /**
      * Result code for {@link #setStorageEncryption} and {@link #getStorageEncryptionStatus}:
      * indicating that encryption is active.
+     * <p>
+     * Also see {@link #ENCRYPTION_STATUS_ACTIVE_PER_USER}.
      */
     public static final int ENCRYPTION_STATUS_ACTIVE = 3;
 
@@ -2522,7 +2524,11 @@ public class DevicePolicyManager {
 
     /**
      * Result code for {@link #getStorageEncryptionStatus}:
-     * indicating that encryption is active and the encryption key is tied to the user.
+     * indicating that encryption is active and the encryption key is tied to the user or profile.
+     * <p>
+     * This value is only returned to apps targeting API level 24 and above. For apps targeting
+     * earlier API levels, {@link #ENCRYPTION_STATUS_ACTIVE} is returned, even if the
+     * encryption key is specific to the user or profile.
      */
     public static final int ENCRYPTION_STATUS_ACTIVE_PER_USER = 5;
 
@@ -2649,7 +2655,7 @@ public class DevicePolicyManager {
     /**
      * Called by an application that is administering the device to
      * determine the current encryption status of the device.
-     *
+     * <p>
      * Depending on the returned status code, the caller may proceed in different
      * ways.  If the result is {@link #ENCRYPTION_STATUS_UNSUPPORTED}, the
      * storage system does not support encryption.  If the
@@ -2657,13 +2663,14 @@ public class DevicePolicyManager {
      * #ACTION_START_ENCRYPTION} to begin the process of encrypting or decrypting the
      * storage.  If the result is {@link #ENCRYPTION_STATUS_ACTIVE_DEFAULT_KEY}, the
      * storage system has enabled encryption but no password is set so further action
-     * may be required.  If the result is {@link #ENCRYPTION_STATUS_ACTIVATING} or
-     * {@link #ENCRYPTION_STATUS_ACTIVE}, no further action is required.
+     * may be required.  If the result is {@link #ENCRYPTION_STATUS_ACTIVATING},
+     * {@link #ENCRYPTION_STATUS_ACTIVE} or {@link #ENCRYPTION_STATUS_ACTIVE_PER_USER},
+     * no further action is required.
      *
      * @return current status of encryption. The value will be one of
      * {@link #ENCRYPTION_STATUS_UNSUPPORTED}, {@link #ENCRYPTION_STATUS_INACTIVE},
      * {@link #ENCRYPTION_STATUS_ACTIVATING}, {@link #ENCRYPTION_STATUS_ACTIVE_DEFAULT_KEY},
-     * or {@link #ENCRYPTION_STATUS_ACTIVE}.
+     * {@link #ENCRYPTION_STATUS_ACTIVE}, or {@link #ENCRYPTION_STATUS_ACTIVE_PER_USER}.
      */
     public int getStorageEncryptionStatus() {
         throwIfParentInstance("getStorageEncryptionStatus");
