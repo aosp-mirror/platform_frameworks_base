@@ -39,5 +39,5 @@
     <string name="bugreport_info_name" msgid="4414036021935139527">"ဖိုင်အမည်"</string>
     <string name="bugreport_info_title" msgid="2306030793918239804">"ချွတ်ယွင်းချက် ခေါင်းစဉ်"</string>
     <string name="bugreport_info_description" msgid="5072835127481627722">"ချွတ်ယွင်းချက် အကျဉ်းချုပ်"</string>
-    <string name="save" msgid="4781509040564835759">"သိမ်းဆည်းပါ"</string>
+    <string name="save" msgid="4781509040564835759">"သိမ်းရန်"</string>
 </resources>
