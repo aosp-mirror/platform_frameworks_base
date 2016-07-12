@@ -936,7 +936,7 @@ public class StorageManager {
                 final BufferedReader reader = new BufferedReader(new InputStreamReader(fis));) {
             return Long.parseLong(reader.readLine());
         } catch (Exception e) {
-            Slog.w("Could not read " + path, e);
+            Slog.w(TAG, "Could not read " + path, e);
             return 0;
         }
     }
