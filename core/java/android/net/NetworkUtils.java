@@ -45,11 +45,18 @@ public class NetworkUtils {
     public native static void attachDhcpFilter(FileDescriptor fd) throws SocketException;
 
     /**
-     * Attaches a socket filter that accepts ICMP6 router advertisement packets to the given socket.
+     * Attaches a socket filter that accepts ICMPv6 router advertisements to the given socket.
      * @param fd the socket's {@link FileDescriptor}.
      * @param packetType the hardware address type, one of ARPHRD_*.
      */
     public native static void attachRaFilter(FileDescriptor fd, int packetType) throws SocketException;
+
+    /**
+     * Configures a socket for receiving ICMPv6 router solicitations and sending advertisements.
+     * @param fd the socket's {@link FileDescriptor}.
+     * @param ifIndex the interface index.
+     */
+    public native static void setupRaSocket(FileDescriptor fd, int ifIndex) throws SocketException;
 
     /**
      * Binds the current process to the network designated by {@code netId}.  All sockets created
