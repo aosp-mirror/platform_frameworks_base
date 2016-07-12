@@ -22,7 +22,8 @@
     android:id="@+id/volume_dialog_row"
     android:paddingEnd="@dimen/volume_dialog_padding_end"
     android:orientation="vertical"
-    android:paddingBottom="@dimen/volume_row_padding_bottom" >
+    android:paddingBottom="@dimen/volume_row_padding_bottom"
+    android:animateLayoutChanges="true">
 
     <TextView
         android:id="@+id/volume_row_header"
