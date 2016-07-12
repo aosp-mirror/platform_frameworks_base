@@ -517,21 +517,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"තව සැකසීම්"</string>
     <string name="notification_done" msgid="5279426047273930175">"නිමයි"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> දැනුම්දීම් පාලන"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"වර්ණය සහ පෙනුම"</string>
-    <string name="night_mode" msgid="3540405868248625488">"රාත්‍රී ප්‍රකාරය"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"සංදර්ශකය ක්‍රමාංකනය කරන්න"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"ක්‍රියාත්මකයි"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"ක්‍රියාවිරහිතයි"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"ස්වයංක්‍රියව ක්‍රියාත්මක කරන්න"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"ස්ථානය සහ දවසේ වේලාවට ගැළපෙන ලෙස රාත්‍රී ප්‍රකාරයට මාරු වන්න"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"රාත්‍රී ප්‍රකාරය ක්‍රියාත්මක විට"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"Android OS සඳහා අඳුරු තේමාව භාවිත කරන්න"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"පැහැය සීරුමාරු කරන්න"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"දීප්තිය සීරුමාරු කරන්න"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"සැකසීම් වැනි, සාමාන්‍යයෙන් ලා පැහැ තේමාවක සංදර්ශනය වන Android OS හි මූලික ප්‍රදේශවලට අඳුරු තේමාව යෙදේ."</string>
-    <string name="color_apply" msgid="9212602012641034283">"යොදන්න"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"සැකසීම් තහවුරු කරන්න"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"සමහර වර්ණ සැකසීම් මෙම උපාංගය භාවිත කළ නොහැකි තත්ත්වයට පත් කළ හැකිය. මෙම වර්ණ සැකසීම් තහවුරු කිරීමට හරි ක්ලික් කරන්න, නැතහොත් මෙම සැකසීම් තත්පර 10කට පසුව යළි සකසනු ඇත."</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"බැටරි භාවිතය"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ආරෝපණය අතරතුර බැටරි සුරැකුම ලබා ගත නොහැකිය."</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"බැටරි සුරැකුම"</string>

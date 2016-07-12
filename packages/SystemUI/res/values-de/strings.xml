@@ -519,21 +519,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"Weitere Einstellungen"</string>
     <string name="notification_done" msgid="5279426047273930175">"Fertig"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g>-Benachrichtigungseinstellungen"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"Farbe und Darstellung"</string>
-    <string name="night_mode" msgid="3540405868248625488">"Nachtmodus"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"Bildschirm kalibrieren"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"An"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"Aus"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"Automatisch aktivieren"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"Abhängig von Standort und Tageszeit in den Nachtmodus wechseln"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"Bei aktiviertem Nachtmodus"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"Dunkles Design unter Android OS verwenden"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"Farbton anpassen"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"Helligkeit anpassen"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"Das dunkle Design wird unter Android OS in allen Hauptbereichen übernommen, die normalerweise hell dargestellt werden, wie beispielsweise Einstellungen."</string>
-    <string name="color_apply" msgid="9212602012641034283">"Übernehmen"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"Einstellungen bestätigen"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"Einige Farbeinstellungen können dazu führen, dass das Gerät nicht mehr genutzt werden kann. Klicke auf \"OK\", um diese Farbeinstellungen zu bestätigen. Anderenfalls werden diese Einstellungen in 10 Sekunden zurückgesetzt."</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Akkunutzung"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Der Energiesparmodus ist beim Aufladen nicht verfügbar."</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Energiesparmodus"</string>

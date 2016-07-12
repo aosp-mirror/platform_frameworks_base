@@ -519,21 +519,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"Citi iestatījumi"</string>
     <string name="notification_done" msgid="5279426047273930175">"Gatavs"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> paziņojumu vadīklas"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"Krāsas un izskats"</string>
-    <string name="night_mode" msgid="3540405868248625488">"Nakts režīms"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"Ekrāna kalibrēšana"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"Ieslēgts"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"Izslēgts"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"Ieslēgt automātiski"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"Pārslēgt uz nakts režīmu atbilstoši atrašanās vietai un diennakts laikam"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"Ja ir ieslēgts nakts režīms"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"Izmantot tumšo motīvu operētājsistēmai Android"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"Regulēt toni"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"Regulēt spilgtumu"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"Tumšais motīvs tiek lietots galvenajos operētājsistēmas Android elementos, kas parasti tiek rādīti ar gaišu motīvu, piemēram, lietotnē Iestatījumi."</string>
-    <string name="color_apply" msgid="9212602012641034283">"Lietot"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"Iestatījumu apstiprināšana"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"Noteiktu krāsu iestatījumu dēļ šī ierīce var kļūt nelietojama. Lai apstiprinātu šos krāsu iestatījumus, noklikšķiniet uz Labi. Ja to neizdarīsiet, pēc 10 sekundēm šie iestatījumi tiks atiestatīti."</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Akumulatora lietojums"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Akumulatora jaudas taupīšanas režīms uzlādes laikā nav pieejams."</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Akumulatora jaudas taupīšanas režīms"</string>

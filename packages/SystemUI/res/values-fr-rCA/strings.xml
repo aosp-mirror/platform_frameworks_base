@@ -519,21 +519,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"Plus de paramètres"</string>
     <string name="notification_done" msgid="5279426047273930175">"Terminé"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"Commandes de notification pour <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"Couleur et apparence"</string>
-    <string name="night_mode" msgid="3540405868248625488">"Mode Nuit"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"Calibrer l\'affichage"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"Activé"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"Désactivé"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"Activer automatiquement"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"Passer en mode Nuit en fonction de la position et de l\'heure de la journée"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"Lorsque le mode Nuit est activé"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"Utiliser thème foncé pour Android"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"Ajuster la coloration"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"Régler la luminosité"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"Le thème foncé est appliqué à des zones essentielles de la plateforme Android qui sont habituellement affichées dans un thème clair, comme les paramètres."</string>
-    <string name="color_apply" msgid="9212602012641034283">"Appliquer"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"Confirmer les paramètres"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"Certains paramètres de couleurs peuvent rendre cet appareil inutilisable. Cliquez sur « OK » pour valider ces paramètres, sinon ils seront réinitialisés après 10 secondes."</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Utilisation de la pile"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Le mode Économie d\'énergie n\'est pas accessible pendant la charge"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Économie d\'énergie"</string>

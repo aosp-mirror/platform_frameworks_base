@@ -517,21 +517,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"ਹੋਰ ਸੈਟਿੰਗਾਂ"</string>
     <string name="notification_done" msgid="5279426047273930175">"ਹੋ ਗਿਆ"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਸੂਚਨਾ ਕੰਟਰੋਲ"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"ਰੰਗ ਅਤੇ ਵਿਖਾਲਾ"</string>
-    <string name="night_mode" msgid="3540405868248625488">"ਰਾਤ ਮੋਡ"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"ਡਿਸਪਲੇ ਨੂੰ ਕੈਲੀਬ੍ਰੇਟ ਕਰੋ"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"ਚਾਲੂ"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"ਬੰਦ"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"ਸਵੈਚਾਲਿਤ ਤੌਰ \'ਤੇ ਚਾਲੂ ਕਰੋ"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"ਟਿਕਾਣੇ ਅਤੇ ਦਿਨ ਦੇ ਸਮੇਂ ਲਈ ਢੁਕਵੇਂ ਰਾਤ ਮੋਡ \'ਤੇ ਸਵਿੱਚ ਕਰੋ"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"ਜਦੋਂ ਰਾਤ ਮੋਡ ਚਾਲੂ ਹੋਵੇ"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"Android OS ਲਈ ਗੂੜ੍ਹੇ ਥੀਮ ਦੀ ਵਰਤੋਂ ਕਰੋ"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"ਟਿੰਟ ਨੂੰ ਵਿਵਸਥਿਤ ਕਰੋ"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"ਚਮਕ ਨੂੰ ਵਿਵਸਥਿਤ ਕਰੋ"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"ਗੂੜ੍ਹੇ ਥੀਮ ਨੂੰ Android OS ਦੇ ਉਹਨਾਂ ਮੁੱਖ ਖੇਤਰਾਂ \'ਤੇ ਲਾਗੂ ਕੀਤਾ ਜਾਂਦਾ ਹੈ ਜੋ ਆਮ ਤੌਰ \'ਤੇ ਇੱਕ ਹਲਕੇ ਥੀਮ ਵਿੱਚ ਵਿਖਾਏ ਜਾਂਦੇ ਹਨ, ਜਿਵੇਂ ਕਿ ਸੈਟਿੰਗਾਂ।"</string>
-    <string name="color_apply" msgid="9212602012641034283">"ਲਾਗੂ ਕਰੋ"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"ਸੈਟਿੰਗਾਂ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"ਕੁਝ ਰੰਗ ਸੈਟਿੰਗਾਂ ਇਸ ਡੀਵਾਈਸ ਨੂੰ ਬੇਕਾਰ ਕਰ ਸਕਦੀਆਂ ਹਨ। ਇਹਨਾਂ ਰੰਗ ਸੈਟਿੰਗਾਂ ਦੀ ਪੁਸ਼ਟੀ ਕਰਨ ਲਈ ਠੀਕ \'ਤੇ ਕਲਿੱਕ ਕਰੋ, ਨਹੀਂ ਤਾਂ ਇਹ ਸੈਟਿੰਗਾਂ 10 ਸਕਿੰਟ ਬਾਅਦ ਮੁੜ-ਸੈੱਟ ਹੋ ਜਾਣਗੀਆਂ।"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"ਬੈਟਰੀ ਵਰਤੋਂ"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ਬੈਟਰੀ ਸੇਵਰ ਚਾਰਜਿੰਗ ਦੌਰਾਨ ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"ਬੈਟਰੀ ਸੇਵਰ"</string>

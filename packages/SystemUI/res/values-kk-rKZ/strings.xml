@@ -517,21 +517,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"Қосымша параметрлер"</string>
     <string name="notification_done" msgid="5279426047273930175">"Дайын"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> хабарландыруларды басқару элементтері"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"Түс және сыртқы түрі"</string>
-    <string name="night_mode" msgid="3540405868248625488">"Түнгі режим"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"Дисплейді калибрлеу"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"Қосулы"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"Өшірулі"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"Автоматты түрде қосу"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"Орынға және күн уақытына тиісті түнгі режимге ауысу"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"Түнгі режим қосулы кезде"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"Android ОЖ үшін күңгірт тақырыпты пайдалану"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"Реңкті реттеу"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"Жарықтықты реттеу"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"Күңгірт тақырып Android операциялық жүйесінің әдетте \"Параметрлер\" сияқты ашық тақырыпта көрсетілетін негізгі аумақтарына қолданылады."</string>
-    <string name="color_apply" msgid="9212602012641034283">"Қолдану"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"Параметрлерді растау"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"Кейбір түс параметрлері бұл құрылғыны пайдалану мүмкін емес етуі мүмкін. Бұл түс параметрлерін растау үшін OK түймесін басыңыз, әйтпесе параметрлер 10 секундтан кейін ысырылады."</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Батареяны пайдалану"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Зарядтау кезінде Батарея үнемдегіш қол жетімді емес"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Батарея үнемдегіш"</string>

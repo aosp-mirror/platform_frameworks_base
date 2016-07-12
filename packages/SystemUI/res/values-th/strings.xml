@@ -517,21 +517,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"การตั้งค่าเพิ่มเติม"</string>
     <string name="notification_done" msgid="5279426047273930175">"เสร็จสิ้น"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"ส่วนควบคุมการแจ้งเตือนของ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"สีและลักษณะที่ปรากฏ"</string>
-    <string name="night_mode" msgid="3540405868248625488">"โหมดกลางคืน"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"ปรับเทียบการแสดงผล"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"เปิด"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"ปิด"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"เปิดอัตโนมัติ"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"เปลี่ยนเป็นโหมดกลางคืนตามความเหมาะสมกับสถานที่และเวลาของวัน"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"เมื่อเปิดโหมดกลางคืน"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"ใช้ธีมสีเข้มสำหรับ Android OS"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"ปรับการแต้มสี"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"ปรับความสว่าง"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"ใช้ธีมสีเข้มในบริเวณสำคัญของระบบปฏิบัติการ Android ซึ่งปกติแล้วจะแสดงด้วยธีมสีอ่อน เช่น การตั้งค่า"</string>
-    <string name="color_apply" msgid="9212602012641034283">"ใช้"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"ยืนยันการตั้งค่า"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"การตั้งค่าสีบางอย่างอาจทำให้อุปกรณ์นี้ใช้งานไม่ได้ คลิกตกลงเพื่อยืนยันการตั้งค่าสีเหล่านี้ มิฉะนั้นระบบจะรีเซ็ตการตั้งค่าหลังจาก 10 วินาที"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"การใช้งานแบตเตอรี่"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ไม่สามารถใช้โหมดประหยัดแบตเตอรี่ระหว่างการชาร์จ"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"โหมดประหยัดแบตเตอรี่"</string>

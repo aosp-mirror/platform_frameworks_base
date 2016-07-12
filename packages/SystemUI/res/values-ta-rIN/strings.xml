@@ -517,21 +517,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"மேலும் அமைப்புகள்"</string>
     <string name="notification_done" msgid="5279426047273930175">"முடிந்தது"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> அறிவிப்புக் கட்டுப்பாடுகள்"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"வண்ணமும் தோற்றமும்"</string>
-    <string name="night_mode" msgid="3540405868248625488">"இரவுப் பயன்முறை"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"திரையை அளவுத்திருத்தம் செய்"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"இயக்கத்தில்"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"முடக்கத்தில்"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"தானாகவே இயக்கு"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"இருப்பிடம் மற்றும் நேரத்தின்படி இரவுப் பயன்முறைக்கு மாற்று"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"இரவுப் பயன்முறை இயக்கப்பட்டிருக்கும் போது"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"Android OSக்காக அடர் தீமினைப் பயன்படுத்து"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"டிண்ட்டைச் சரிசெய்"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"ஒளிர்வைச் சரிசெய்"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"வழக்கமாக வெளிர் தீமில் காட்டப்படுகிற Android OS இன் முக்கிய பகுதிகளில் (எ.கா. அமைப்புகள்) அடர் தீம் பயன்படுத்தப்படுகிறது."</string>
-    <string name="color_apply" msgid="9212602012641034283">"பயன்படுத்து"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"அமைப்புகளை உறுதிப்படுத்து"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"சில வண்ண அமைப்புகள் இந்தச் சாதனத்தைப் பயன்படுத்த முடியாதபடி செய்யலாம். இந்த வண்ண அமைப்புகளை உறுதிப்படுத்த, சரி என்பதைக் கிளிக் செய்யவும், இல்லையெனில் இந்த அமைப்புகள் 10 வினாடிகளுக்குப் பின் மீட்டமைக்கப்படும்."</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"பேட்டரி உபயோகம்"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"சார்ஜ் செய்யும் போது பேட்டரி சேமிப்பானைப் பயன்படுத்த முடியாது"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"பேட்டரி சேமிப்பான்"</string>

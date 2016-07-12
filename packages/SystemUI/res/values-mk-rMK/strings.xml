@@ -517,21 +517,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"Повеќе поставки"</string>
     <string name="notification_done" msgid="5279426047273930175">"Готово"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"Контроли за известувања на <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"Боја и изглед"</string>
-    <string name="night_mode" msgid="3540405868248625488">"Ноќен режим"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"Калибрирај го екранот"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"Вклучено"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"Исклучено"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"Вклучи автоматски"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"Префрли во Ноќен режим како што е соодветно за локацијата и времето во денот"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"Кога Ноќниот режим е вклучен"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"Користете ја темната тема за ОС Android"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"Приспособи ја бојата"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"Приспособи ја осветленоста"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"Темната тема се применува на основните области на Android OS што обично се прикажуваат во светла тема, како Поставки."</string>
-    <string name="color_apply" msgid="9212602012641034283">"Примени"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"Потврдете ги поставките"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"Некои поставки на боите може да го направат уредот неупотреблив. Кликнете на Во ред за да ги потврдите овие поставки на боите, инаку тие поставки ќе се ресетираат по 10 секунди."</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Користење батерија"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Штедачот на батерија не е достапен при полнење"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Штедач на батерија"</string>

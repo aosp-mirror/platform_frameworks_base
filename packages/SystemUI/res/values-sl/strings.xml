@@ -523,21 +523,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"Več nastavitev"</string>
     <string name="notification_done" msgid="5279426047273930175">"Dokončano"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"Kontrolniki obvestil za aplikacijo <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"Barva in videz"</string>
-    <string name="night_mode" msgid="3540405868248625488">"Nočni način"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"Umerjanje zaslona"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"Vklopljeno"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"Izklopljeno"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"Samodejni vklop"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"Preklop v nočni način, kot je ustrezno glede na lokacijo in uro v dnevu"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"Ko je vklopljen nočni način"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"Uporaba temne teme za sistem Android"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"Prilagodi odtenek"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"Prilagodi svetlost"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"Za osrednja področja sistema Android, ki so običajno prikazana v svetli temi, na primer nastavitve, je uporabljena temna tema."</string>
-    <string name="color_apply" msgid="9212602012641034283">"Uporabi"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"Potrditev nastavitev"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"Zaradi nekaterih barvnih nastavitev lahko postane ta naprava neuporabna. Kliknite »V redu«, če želite potrditi te barvne nastavitve. V nasprotnem primeru se bodo čez 10 sekund ponastavile na prvotno vrednost."</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Poraba akumulatorja"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Varčevanje z energijo akumulatorja med polnjenjem ni na voljo"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Varčevanje z energijo akumulatorja"</string>

@@ -253,10 +253,10 @@
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"通知设置"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g>设置"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"屏幕会自动旋转。"</string>
-    <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"屏幕锁定为横向模式。"</string>
+    <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"屏幕锁定为横屏模式。"</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"屏幕锁定为纵向模式。"</string>
     <string name="accessibility_rotation_lock_off_changed" msgid="8134601071026305153">"屏幕将会自动旋转。"</string>
-    <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"屏幕现已锁定为横向模式。"</string>
+    <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"屏幕现已锁定为横屏模式。"</string>
     <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"屏幕现已锁定为纵向模式。"</string>
     <string name="dessert_case" msgid="1295161776223959221">"甜品盒"</string>
     <string name="start_dreams" msgid="5640361424498338327">"屏保"</string>
@@ -517,21 +517,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"更多设置"</string>
     <string name="notification_done" msgid="5279426047273930175">"完成"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g>通知设置"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"颜色和外观"</string>
-    <string name="night_mode" msgid="3540405868248625488">"夜间模式"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"校准显示屏"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"开启"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"关闭"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"自动开启"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"根据地点和时间适时切换到夜间模式"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"夜间模式开启时"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"对 Android 操作系统使用深色主题背景"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"调整色调"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"调整亮度"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"系统会将深色主题背景应用于 Android 操作系统的核心区域（通常以浅色主题背景显示），例如“设置”部分。"</string>
-    <string name="color_apply" msgid="9212602012641034283">"应用"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"确认设置"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"部分颜色设置可能会导致此设备无法使用。请点击“确定”确认这些颜色设置，否则，系统将在 10 秒后重置这些设置。"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"电池使用情况"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"充电过程中无法使用省电模式"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"省电模式"</string>
@@ -555,7 +540,7 @@
     <string name="keyboard_key_media_rewind" msgid="2654808213360820186">"快退"</string>
     <string name="keyboard_key_media_fast_forward" msgid="3849417047738200605">"快进"</string>
     <string name="keyboard_key_page_up" msgid="5654098530106845603">"向上翻页"</string>
-    <string name="keyboard_key_page_down" msgid="8720502083731906136">"向下翻页"</string>
+    <string name="keyboard_key_page_down" msgid="8720502083731906136">"PgDn"</string>
     <string name="keyboard_key_forward_del" msgid="1391451334716490176">"删除"</string>
     <string name="keyboard_key_move_home" msgid="2765693292069487486">"Home"</string>
     <string name="keyboard_key_move_end" msgid="5901174332047975247">"End"</string>

@@ -517,21 +517,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"Higit pang mga setting"</string>
     <string name="notification_done" msgid="5279426047273930175">"Tapos Na"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"Mga kontrol sa notification ng <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"Kulay at hitsura"</string>
-    <string name="night_mode" msgid="3540405868248625488">"Night mode"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"I-calibrate ang display"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"Naka-on"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"Naka-off"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"Awtomatikong i-on"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"Lumipat sa Night Mode kapag naaangkop sa lokasyon at oras"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"Kapag naka-on ang Night Mode"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"Gumamit ng madilim na tema para sa Android OS"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"Isaayos ang tint"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"Isaayos ang liwanag"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"Ilalapat ang madilim na tema sa mga mahalagang bahagi ng Android OS na karaniwang ipinapakita nang may maliwanag na tema, gaya ng Mga Setting."</string>
-    <string name="color_apply" msgid="9212602012641034283">"Ilapat"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"Kumpirmahin ang mga setting"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"Maaaring hindi magamit ang device na ito dahil sa ilang setting ng kulay. I-click ang OK upang kumpirmahin ang mga setting ng kulay na ito, kung hindi ay mare-reset ang mga setting na ito pagkatapos ng 10 segundo."</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Paggamit ng baterya"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Hindi available ang Pangtipid sa Baterya kapag nagcha-charge"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Pangtipid sa Baterya"</string>
