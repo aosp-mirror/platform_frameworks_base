@@ -8975,6 +8975,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    @Override
+    public boolean isDeviceProvisioned() {
+        return !TextUtils.isEmpty(mInjector.systemPropertiesGet(PROPERTY_DEVICE_OWNER_PRESENT));
+    }
+
     private void removePackageIfRequired(final String packageName, final int userId) {
         if (!packageHasActiveAdmins(packageName, userId)) {
             // Will not do anything if uninstall was not requested or was already started.

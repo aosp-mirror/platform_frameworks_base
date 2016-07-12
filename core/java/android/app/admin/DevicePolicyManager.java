@@ -6416,6 +6416,19 @@ public class DevicePolicyManager {
         }
     }
 
+    /**
+     * @hide
+     * @return whether {@link android.provider.Settings.Global#DEVICE_PROVISIONED} has ever been set
+     * to 1.
+     */
+    public boolean isDeviceProvisioned() {
+        try {
+            return mService.isDeviceProvisioned();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
     private void throwIfParentInstance(String functionName) {
         if (mParentInstance) {
             throw new SecurityException(functionName + " cannot be called on the parent instance");
