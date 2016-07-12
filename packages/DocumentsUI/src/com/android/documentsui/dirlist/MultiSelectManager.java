@@ -158,6 +158,11 @@ public final class MultiSelectManager {
         return dest;
     }
 
+    public void replaceSelection(Iterable<String> ids) {
+        clearSelection();
+        setItemsSelected(ids, true);
+    }
+
     /**
      * Returns an unordered array of selected positions, including any
      * provisional selection currently in effect.

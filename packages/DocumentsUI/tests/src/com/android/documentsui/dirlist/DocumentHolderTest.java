@@ -20,6 +20,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Rect;
 import android.os.SystemClock;
+import android.support.test.filters.Suppress;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.view.KeyEvent;
@@ -37,6 +38,7 @@ public class DocumentHolderTest extends AndroidTestCase {
     DocumentHolder mHolder;
     TestListener mListener;
 
+    @Override
     public void setUp() throws Exception {
         Context context = getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
@@ -46,28 +48,20 @@ public class DocumentHolderTest extends AndroidTestCase {
         };
 
         mListener = new TestListener();
-        mHolder.addEventListener(mListener);
+        mHolder.addKeyEventListener(mListener);
 
         mHolder.itemView.requestLayout();
         mHolder.itemView.invalidate();
     }
 
-    public void testClickActivates() {
-        click();
-        mListener.assertSelected();
+    @Suppress
+    public void testIsInSelectionHotspot() {
+        fail();
     }
 
-    public void testTapActivates() {
-        tap();
-        mListener.assertActivated();
-    }
-
-    public void click() {
-        mHolder.onSingleTapUp(createEvent(MotionEvent.TOOL_TYPE_MOUSE));
-    }
-
-    public void tap() {
-        mHolder.onSingleTapUp(createEvent(MotionEvent.TOOL_TYPE_FINGER));
+    @Suppress
+    public void testDelegatesKeyEvents() {
+        fail();
     }
 
     public MotionEvent createEvent(int tooltype) {
@@ -105,32 +99,7 @@ public class DocumentHolderTest extends AndroidTestCase {
                 );
     }
 
-    private class TestListener implements DocumentHolder.EventListener {
-        private boolean mActivated = false;
-        private boolean mSelected = false;
-
-        public void assertActivated() {
-            assertTrue(mActivated);
-            assertFalse(mSelected);
-        }
-
-        public void assertSelected() {
-            assertTrue(mSelected);
-            assertFalse(mActivated);
-        }
-
-        @Override
-        public boolean onActivate(DocumentHolder doc) {
-            mActivated = true;
-            return true;
-        }
-
-        @Override
-        public boolean onSelect(DocumentHolder doc) {
-            mSelected = true;
-            return true;
-        }
-
+    private class TestListener implements DocumentHolder.KeyboardEventListener {
         @Override
         public boolean onKey(DocumentHolder doc, int keyCode, KeyEvent event) {
             return false;

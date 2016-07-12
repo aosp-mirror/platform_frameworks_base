@@ -24,28 +24,31 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.android.documentsui.Events;
+import com.android.documentsui.Events.InputEvent;
 import com.android.documentsui.R;
 import com.android.documentsui.State;
+import com.android.documentsui.dirlist.UserInputHandler.DocumentDetails;
 
 public abstract class DocumentHolder
         extends RecyclerView.ViewHolder
-        implements View.OnKeyListener {
+        implements View.OnKeyListener,
+        DocumentDetails {
 
     static final float DISABLED_ALPHA = 0.3f;
 
+    @Deprecated  // Public access is deprecated, use #getModelId.
     public @Nullable String modelId;
 
     final Context mContext;
     final @ColorInt int mDefaultBgColor;
     final @ColorInt int mSelectedBgColor;
 
-    DocumentHolder.EventListener mEventListener;
-    private View.OnKeyListener mKeyListener;
+    // See #addKeyEventListener for details on the need for this field.
+    KeyboardEventListener mKeyEventListener;
+
     private View mSelectionHotspot;
 
 
@@ -73,6 +76,11 @@ public abstract class DocumentHolder
      * @param state
      */
     public abstract void bind(Cursor cursor, String modelId, State state);
+
+    @Override
+    public String getModelId() {
+        return modelId;
+    }
 
     /**
      * Makes the associated item view appear selected. Note that this merely affects the appearance
@@ -107,54 +115,36 @@ public abstract class DocumentHolder
 
     @Override
     public boolean onKey(View v, int keyCode, KeyEvent event) {
-        // Event listener should always be set.
-        assert(mEventListener != null);
-
-        return mEventListener.onKey(this,  keyCode,  event);
+        assert(mKeyEventListener != null);
+        return mKeyEventListener.onKey(this,  keyCode,  event);
     }
 
-    public void addEventListener(DocumentHolder.EventListener listener) {
-        // Just handle one for now; switch to a list if necessary.
-        assert(mEventListener == null);
-        mEventListener = listener;
+    /**
+     * Installs a delegate to receive keyboard input events. This arrangement is necessitated
+     * by the fact that a single listener cannot listen to all keyboard events
+     * on RecyclerView (our parent view). Not sure why this is, but have been
+     * assured it is the case.
+     *
+     * <p>Ideally we'd not involve DocumentHolder in propagation of events like this.
+     */
+    public void addKeyEventListener(KeyboardEventListener listener) {
+        assert(mKeyEventListener == null);
+        mKeyEventListener = listener;
     }
 
-    public void addOnKeyListener(View.OnKeyListener listener) {
-        // Just handle one for now; switch to a list if necessary.
-        assert(mKeyListener == null);
-        mKeyListener = listener;
+    @Override
+    public boolean isInSelectionHotspot(InputEvent event) {
+        // Do everything in global coordinates - it makes things simpler.
+        int[] coords = new int[2];
+        mSelectionHotspot.getLocationOnScreen(coords);
+        Rect rect = new Rect(coords[0], coords[1], coords[0] + mSelectionHotspot.getWidth(),
+                coords[1] + mSelectionHotspot.getHeight());
+
+        // If the tap occurred within the icon rect, consider it a selection.
+        return rect.contains((int) event.getRawX(), (int) event.getRawY());
     }
 
-    public boolean onSingleTapUp(MotionEvent event) {
-        if (Events.isMouseEvent(event)) {
-            // Mouse clicks select.
-            // TODO:  && input.isPrimaryButtonPressed(), but it is returning false.
-            if (mEventListener != null) {
-                return mEventListener.onSelect(this);
-            }
-        } else if (Events.isTouchEvent(event)) {
-            // Touch events select if they occur in the selection hotspot, otherwise they activate.
-            if (mEventListener == null) {
-                return false;
-            }
-
-            // Do everything in global coordinates - it makes things simpler.
-            int[] coords = new int[2];
-            mSelectionHotspot.getLocationOnScreen(coords);
-            Rect rect = new Rect(coords[0], coords[1], coords[0] + mSelectionHotspot.getWidth(),
-                    coords[1] + mSelectionHotspot.getHeight());
-
-            // If the tap occurred within the icon rect, consider it a selection.
-            if (rect.contains((int) event.getRawX(), (int) event.getRawY())) {
-                return mEventListener.onSelect(this);
-            } else {
-                return mEventListener.onActivate(this);
-            }
-        }
-        return false;
-    }
-
-    static void setEnabledRecursive(View itemView, boolean enabled) {
+        static void setEnabledRecursive(View itemView, boolean enabled) {
         if (itemView == null) return;
         if (itemView.isEnabled() == enabled) return;
         itemView.setEnabled(enabled);
@@ -174,23 +164,9 @@ public abstract class DocumentHolder
 
     /**
      * Implement this in order to be able to respond to events coming from DocumentHolders.
+     * TODO: Make this bubble up logic events rather than having imperative commands.
      */
-    interface EventListener {
-        /**
-         * Handles activation events on the document holder.
-         *
-         * @param doc The target DocumentHolder
-         * @return Whether the event was handled.
-         */
-        public boolean onActivate(DocumentHolder doc);
-
-        /**
-         * Handles selection events on the document holder.
-         *
-         * @param doc The target DocumentHolder
-         * @return Whether the event was handled.
-         */
-        public boolean onSelect(DocumentHolder doc);
+    interface KeyboardEventListener {
 
         /**
          * Handles key events on the document holder.

@@ -178,6 +178,11 @@ public class BandController extends RecyclerView.OnScrollListener {
     }
 
     private boolean handleEvent(MotionInputEvent e) {
+        // Don't start, or extend bands on right click.
+        if (e.isSecondaryButtonPressed()) {
+            return false;
+        }
+
         if (!e.isMouseEvent() && isActive()) {
             // Weird things happen if we keep up band select
             // when touch events happen.

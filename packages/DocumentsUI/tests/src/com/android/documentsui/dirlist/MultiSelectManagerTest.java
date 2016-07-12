@@ -26,7 +26,6 @@ import com.android.documentsui.dirlist.MultiSelectManager.Selection;
 
 import com.google.common.collect.Lists;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -34,13 +33,7 @@ import java.util.Set;
 @SmallTest
 public class MultiSelectManagerTest extends AndroidTestCase {
 
-    private static final List<String> items;
-    static {
-        items = new ArrayList<String>();
-        for (int i = 0; i < 100; ++i) {
-            items.add(Integer.toString(i));
-        }
-    }
+    private static final List<String> items = TestData.create(100);
 
     private MultiSelectManager mManager;
     private TestCallback mCallback;

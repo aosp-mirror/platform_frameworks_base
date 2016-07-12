@@ -34,20 +34,21 @@ final class ListeningGestureDetector extends GestureDetector
         implements OnItemTouchListener, OnTouchListener {
 
     private DragStartHelper mDragHelper;
-    private GestureListener mGestureListener;
+    private UserInputHandler mInputHandler;
 
     public ListeningGestureDetector(
-            Context context, DragStartHelper dragHelper, GestureListener listener) {
-        super(context, listener);
+            Context context, DragStartHelper dragHelper, UserInputHandler handler) {
+        super(context, handler);
         mDragHelper = dragHelper;
-        mGestureListener = listener;
-        setOnDoubleTapListener(listener);
+        mInputHandler = handler;
+        setOnDoubleTapListener(handler);
     }
 
     @Override
     public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
+        // TODO: If possible, move this into UserInputHandler.
         if (e.getAction() == MotionEvent.ACTION_DOWN && Events.isMouseEvent(e)) {
-            mGestureListener.setLastButtonState(e.getButtonState());
+            mInputHandler.setLastButtonState(e.getButtonState());
         }
 
         // Detect drag events. When a drag is detected, intercept the rest of the gesture.
@@ -78,7 +79,7 @@ final class ListeningGestureDetector extends GestureDetector
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         if (event.getButtonState() == MotionEvent.BUTTON_SECONDARY) {
-            return mGestureListener.onRightClick(event);
+            return mInputHandler.onSingleRightClickUp(event);
         }
         return false;
     }
