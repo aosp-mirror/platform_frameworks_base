@@ -118,6 +118,8 @@
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"Izabrane datoteke ne mogu da se nalepe na ovoj lokaciji."</string>
     <string name="menu_rename" msgid="7678802479104285353">"Preimenuj"</string>
     <string name="rename_error" msgid="4203041674883412606">"Preimenovanje dokumenta nije uspelo"</string>
+    <!-- no translation found for menu_eject_root (2768224615494227325) -->
+    <skip />
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Neke datoteke su konvertovane"</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"Želite li da aplikaciji <xliff:g id="APPNAME"><b>^1</b></xliff:g> odobrite pristup direktorijumu <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> na memorijskom prostoru <xliff:g id="STORAGE"><i>^3</i></xliff:g>?"</string>
     <string name="open_external_dialog_request_primary_volume" msgid="6635562535713428688">"Želite da dozvolite da <xliff:g id="APPNAME"><b>^1</b></xliff:g> pristupa direktorijumu <xliff:g id="DIRECTORY"><i>^2</i></xliff:g>?"</string>
