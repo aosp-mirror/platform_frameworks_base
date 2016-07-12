@@ -241,7 +241,10 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
     LayerType layerType = properties().effectiveLayerType();
     // If we are not a layer OR we cannot be rendered (eg, view was detached)
     // we need to destroy any Layers we may have had previously
-    if (CC_LIKELY(layerType != LayerType::RenderLayer) || CC_UNLIKELY(!isRenderable())) {
+    if (CC_LIKELY(layerType != LayerType::RenderLayer)
+            || CC_UNLIKELY(!isRenderable())
+            || CC_UNLIKELY(properties().getWidth() == 0)
+            || CC_UNLIKELY(properties().getHeight() == 0)) {
         if (CC_UNLIKELY(mLayer)) {
             destroyLayer(mLayer);
             mLayer = nullptr;
