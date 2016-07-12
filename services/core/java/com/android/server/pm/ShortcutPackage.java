@@ -1185,8 +1185,8 @@ class ShortcutPackage extends ShortcutPackageItem {
     private static void saveShortcut(XmlSerializer out, ShortcutInfo si, boolean forBackup)
             throws IOException, XmlPullParserException {
         if (forBackup) {
-            if (!si.isPinned()) {
-                return; // Backup only pinned icons.
+            if (!(si.isPinned() && si.isEnabled())) {
+                return; // We only backup pinned shortcuts that are enabled.
             }
         }
         out.startTag(null, TAG_SHORTCUT);
