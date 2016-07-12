@@ -24,6 +24,7 @@ import java.util.Date;
  * This object is immutable.
  */
 public class TwilightState {
+
     private final boolean mIsNight;
     private final float mAmount;
 
