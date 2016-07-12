@@ -580,7 +580,7 @@ public class ApfTest extends AndroidTestCase {
 
         public TestApfFilter(IpManager.Callback ipManagerCallback, boolean multicastFilter,
                 IpConnectivityLog log) throws Exception {
-            super(new ApfCapabilities(2, 1000, ARPHRD_ETHER), NetworkInterface.getByName("lo"),
+            super(new ApfCapabilities(2, 1536, ARPHRD_ETHER), NetworkInterface.getByName("lo"),
                     ipManagerCallback, multicastFilter, log);
         }
 
@@ -618,6 +618,7 @@ public class ApfTest extends AndroidTestCase {
     }
 
     private static final int ETH_HEADER_LEN = 14;
+    private static final int ETH_DEST_ADDR_OFFSET = 0;
     private static final int ETH_ETHERTYPE_OFFSET = 12;
     private static final byte[] ETH_BROADCAST_MAC_ADDRESS = new byte[]{
         (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff };
@@ -676,9 +677,18 @@ public class ApfTest extends AndroidTestCase {
             4,    // Protocol size: 4
             0, 1  // Opcode: request (1)
     };
+    private static final byte[] ARP_IPV4_REPLY_HEADER = new byte[]{
+            0, 1, // Hardware type: Ethernet (1)
+            8, 0, // Protocol type: IP (0x0800)
+            6,    // Hardware size: 6
+            4,    // Protocol size: 4
+            0, 2  // Opcode: reply (2)
+    };
     private static final int ARP_TARGET_IP_ADDRESS_OFFSET = ETH_HEADER_LEN + 24;
 
     private static final byte[] MOCK_IPV4_ADDR = new byte[]{10, 0, 0, 1};
+    private static final byte[] ANOTHER_IPV4_ADDR = new byte[]{10, 0, 0, 2};
+    private static final byte[] IPV4_ANY_HOST_ADDR = new byte[]{0, 0, 0, 0};
 
     @LargeTest
     public void testApfFilterIPv4() throws Exception {
@@ -801,49 +811,79 @@ public class ApfTest extends AndroidTestCase {
         apfFilter.shutdown();
     }
 
-    private void verifyArpFilter(MockIpManagerCallback ipManagerCallback, ApfFilter apfFilter,
-            LinkProperties linkProperties, int filterResult) {
-        ipManagerCallback.resetApfProgramWait();
-        apfFilter.setLinkProperties(linkProperties);
-        byte[] program = ipManagerCallback.getApfProgram();
-        ByteBuffer packet = ByteBuffer.wrap(new byte[100]);
-        packet.putShort(ETH_ETHERTYPE_OFFSET, (short)ETH_P_ARP);
-        assertPass(program, packet.array(), 0);
-        packet.position(ARP_HEADER_OFFSET);
-        packet.put(ARP_IPV4_REQUEST_HEADER);
-        assertVerdict(filterResult, program, packet.array(), 0);
-        packet.position(ARP_TARGET_IP_ADDRESS_OFFSET);
-        packet.put(MOCK_IPV4_ADDR);
-        assertPass(program, packet.array(), 0);
+    private byte[] getProgram(MockIpManagerCallback cb, ApfFilter filter, LinkProperties lp) {
+        cb.resetApfProgramWait();
+        filter.setLinkProperties(lp);
+        return cb.getApfProgram();
+    }
+
+    private void verifyArpFilter(byte[] program, int filterResult) {
+        // Verify ARP request packet
+        assertPass(program, arpRequestBroadcast(MOCK_IPV4_ADDR), 0);
+        assertVerdict(filterResult, program, arpRequestBroadcast(ANOTHER_IPV4_ADDR), 0);
+        assertDrop(program, arpRequestBroadcast(IPV4_ANY_HOST_ADDR), 0);
+
+        // Verify unicast ARP reply packet is always accepted.
+        assertPass(program, arpReplyUnicast(MOCK_IPV4_ADDR), 0);
+        assertPass(program, arpReplyUnicast(ANOTHER_IPV4_ADDR), 0);
+        assertPass(program, arpReplyUnicast(IPV4_ANY_HOST_ADDR), 0);
+
+        // Verify GARP reply packets are always filtered
+        assertDrop(program, garpReply(), 0);
     }
 
     @LargeTest
     public void testApfFilterArp() throws Exception {
         MockIpManagerCallback ipManagerCallback = new MockIpManagerCallback();
         ApfFilter apfFilter = new TestApfFilter(ipManagerCallback, ALLOW_MULTICAST, mLog);
-        byte[] program = ipManagerCallback.getApfProgram();
 
-        // Verify initially ARP filter is off
-        ByteBuffer packet = ByteBuffer.wrap(new byte[100]);
-        packet.putShort(ETH_ETHERTYPE_OFFSET, (short)ETH_P_ARP);
-        assertPass(program, packet.array(), 0);
-        packet.position(ARP_HEADER_OFFSET);
-        packet.put(ARP_IPV4_REQUEST_HEADER);
-        assertPass(program, packet.array(), 0);
-        packet.position(ARP_TARGET_IP_ADDRESS_OFFSET);
-        packet.put(MOCK_IPV4_ADDR);
-        assertPass(program, packet.array(), 0);
+        // Verify initially ARP request filter is off, and GARP filter is on.
+        verifyArpFilter(ipManagerCallback.getApfProgram(), PASS);
 
         // Inform ApfFilter of our address and verify ARP filtering is on
+        LinkAddress linkAddress = new LinkAddress(InetAddress.getByAddress(MOCK_IPV4_ADDR), 24);
         LinkProperties lp = new LinkProperties();
-        assertTrue(lp.addLinkAddress(
-                new LinkAddress(InetAddress.getByAddress(MOCK_IPV4_ADDR), 24)));
-        verifyArpFilter(ipManagerCallback, apfFilter, lp, DROP);
+        assertTrue(lp.addLinkAddress(linkAddress));
+        verifyArpFilter(getProgram(ipManagerCallback, apfFilter, lp), DROP);
 
         // Inform ApfFilter of loss of IP and verify ARP filtering is off
-        verifyArpFilter(ipManagerCallback, apfFilter, new LinkProperties(), PASS);
+        verifyArpFilter(getProgram(ipManagerCallback, apfFilter, new LinkProperties()), PASS);
 
         apfFilter.shutdown();
+    }
+
+    private static byte[] arpRequestBroadcast(byte[] tip) {
+        ByteBuffer packet = ByteBuffer.wrap(new byte[100]);
+        packet.putShort(ETH_ETHERTYPE_OFFSET, (short)ETH_P_ARP);
+        packet.position(ETH_DEST_ADDR_OFFSET);
+        packet.put(ETH_BROADCAST_MAC_ADDRESS);
+        packet.position(ARP_HEADER_OFFSET);
+        packet.put(ARP_IPV4_REQUEST_HEADER);
+        packet.position(ARP_TARGET_IP_ADDRESS_OFFSET);
+        packet.put(tip);
+        return packet.array();
+    }
+
+    private static byte[] arpReplyUnicast(byte[] tip) {
+        ByteBuffer packet = ByteBuffer.wrap(new byte[100]);
+        packet.putShort(ETH_ETHERTYPE_OFFSET, (short)ETH_P_ARP);
+        packet.position(ARP_HEADER_OFFSET);
+        packet.put(ARP_IPV4_REPLY_HEADER);
+        packet.position(ARP_TARGET_IP_ADDRESS_OFFSET);
+        packet.put(tip);
+        return packet.array();
+    }
+
+    private static byte[] garpReply() {
+        ByteBuffer packet = ByteBuffer.wrap(new byte[100]);
+        packet.putShort(ETH_ETHERTYPE_OFFSET, (short)ETH_P_ARP);
+        packet.position(ETH_DEST_ADDR_OFFSET);
+        packet.put(ETH_BROADCAST_MAC_ADDRESS);
+        packet.position(ARP_HEADER_OFFSET);
+        packet.put(ARP_IPV4_REPLY_HEADER);
+        packet.position(ARP_TARGET_IP_ADDRESS_OFFSET);
+        packet.put(IPV4_ANY_HOST_ADDR);
+        return packet.array();
     }
 
     // Verify that the last program pushed to the IpManager.Callback properly filters the
