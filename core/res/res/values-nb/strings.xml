@@ -1201,7 +1201,7 @@
     <string name="ime_action_search" msgid="658110271822807811">"Søk"</string>
     <string name="ime_action_send" msgid="2316166556349314424">"Send"</string>
     <string name="ime_action_next" msgid="3138843904009813834">"Neste"</string>
-    <string name="ime_action_done" msgid="8971516117910934605">"Utført"</string>
+    <string name="ime_action_done" msgid="8971516117910934605">"Ferdig"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"Forrige"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"Utfør"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"Ring nummeret\n<xliff:g id="NUMBER">%s</xliff:g>"</string>
