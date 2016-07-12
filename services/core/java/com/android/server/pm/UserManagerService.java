@@ -2304,6 +2304,7 @@ public class UserManagerService extends IUserManager.Stub {
             synchronized (mRestrictionsLock) {
                 mBaseUserRestrictions.append(userId, restrictions);
             }
+            mPm.onNewUserCreated(userId);
             Intent addedIntent = new Intent(Intent.ACTION_USER_ADDED);
             addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
             mContext.sendBroadcastAsUser(addedIntent, UserHandle.ALL,
@@ -2873,10 +2874,6 @@ public class UserManagerService extends IUserManager.Stub {
         if (userId != UserHandle.USER_SYSTEM) {
             synchronized (mRestrictionsLock) {
                 applyUserRestrictionsLR(userId);
-            }
-            UserInfo userInfo = getUserInfoNoChecks(userId);
-            if (userInfo != null && !userInfo.isInitialized()) {
-                mPm.onBeforeUserStartUninitialized(userId);
             }
         }
 
