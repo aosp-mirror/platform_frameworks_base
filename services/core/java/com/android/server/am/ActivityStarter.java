@@ -1023,6 +1023,7 @@ class ActivityStarter {
             // as the first operation, in case the activity will be resumed as a result of later
             // operations.
             if ((mLaunchFlags & FLAG_ACTIVITY_CLEAR_TOP) != 0
+                    || isDocumentLaunchesIntoExisting(mLaunchFlags)
                     || mLaunchSingleInstance || mLaunchSingleTask) {
                 // In this situation we want to remove all activities from the task up to the one
                 // being started. In most cases this means we are resetting the task to its initial
@@ -2038,5 +2039,10 @@ class ActivityStarter {
                 mPendingActivityLaunches.remove(palNdx);
             }
         }
+    }
+
+    static boolean isDocumentLaunchesIntoExisting(int flags) {
+        return (flags & Intent.FLAG_ACTIVITY_NEW_DOCUMENT) != 0 &&
+                (flags & Intent.FLAG_ACTIVITY_MULTIPLE_TASK) == 0;
     }
 }
