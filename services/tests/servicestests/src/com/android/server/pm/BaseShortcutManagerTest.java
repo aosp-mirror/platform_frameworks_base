@@ -1480,10 +1480,28 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         return new File(si.getBitmapPath()).getName();
     }
 
+    /**
+     * @return all shortcuts stored internally for the caller.  This reflects the *internal* view
+     * of shortcuts, which may be different from what {@link #getCallerVisibleShortcuts} would
+     * return, because getCallerVisibleShortcuts() will get shortcuts from the proper "front door"
+     * which performs some extra checks, like {@link ShortcutPackage#onRestored}.
+     */
     protected List<ShortcutInfo> getCallerShortcuts() {
         final ShortcutPackage p = mService.getPackageShortcutForTest(
                 getCallingPackage(), getCallingUserId());
         return p == null ? null : p.getAllShortcutsForTest();
+    }
+
+    /**
+     * @return all shortcuts owned by caller that are actually visible via ShortcutManager.
+     * See also {@link #getCallerShortcuts}.
+     */
+    protected List<ShortcutInfo> getCallerVisibleShortcuts() {
+        final ArrayList<ShortcutInfo> ret = new ArrayList<>();
+        ret.addAll(mManager.getDynamicShortcuts());
+        ret.addAll(mManager.getPinnedShortcuts());
+        ret.addAll(mManager.getManifestShortcuts());
+        return ret;
     }
 
     protected ShortcutInfo getCallerShortcut(String shortcutId) {
@@ -1696,6 +1714,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
             mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("s2", "s5"), HANDLE_USER_P0);
         });
+
+        // Note LAUNCHER_3 has allowBackup=false.
         runWithCaller(LAUNCHER_3, USER_0, () -> {
             mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("s3"), HANDLE_USER_0);
             mLauncherApps.pinShortcuts(CALLING_PACKAGE_2, list("s3", "s4"), HANDLE_USER_0);

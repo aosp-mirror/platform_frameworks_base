@@ -4635,8 +4635,10 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         final ShortcutUser user0 = mService.getUserShortcutsLocked(USER_0);
         assertExistsAndShadow(user0.getAllPackagesForTest().get(CALLING_PACKAGE_1));
         assertExistsAndShadow(user0.getAllPackagesForTest().get(CALLING_PACKAGE_2));
-        assertExistsAndShadow(user0.getAllLaunchersForTest().get(PackageWithUser.of(USER_0, LAUNCHER_1)));
-        assertExistsAndShadow(user0.getAllLaunchersForTest().get(PackageWithUser.of(USER_0, LAUNCHER_2)));
+        assertExistsAndShadow(user0.getAllLaunchersForTest().get(
+                PackageWithUser.of(USER_0, LAUNCHER_1)));
+        assertExistsAndShadow(user0.getAllLaunchersForTest().get(
+                PackageWithUser.of(USER_0, LAUNCHER_2)));
 
         assertNull(user0.getAllPackagesForTest().get(CALLING_PACKAGE_3));
         assertNull(user0.getAllLaunchersForTest().get(PackageWithUser.of(USER_0, LAUNCHER_3)));
@@ -4644,90 +4646,98 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
         installPackage(USER_0, CALLING_PACKAGE_1);
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
-            assertEquals(0, mManager.getDynamicShortcuts().size());
-            assertShortcutIds(assertAllPinned(
-                    mManager.getPinnedShortcuts()),
-                    "s1", "s2");
+            assertWith(getCallerVisibleShortcuts())
+                    .selectDynamic()
+                    .isEmpty()
+
+                    .revertToOriginalList()
+                    .selectPinned()
+                    .haveIds("s1", "s2");
         });
 
         installPackage(USER_0, LAUNCHER_1);
         runWithCaller(LAUNCHER_1, USER_0, () -> {
-            assertShortcutIds(assertAllPinned(
-                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_1), HANDLE_USER_0)),
-                    "s1");
-            assertShortcutIds(assertAllPinned(
-                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_2), HANDLE_USER_0))
-                    /* empty, not restored */ );
-            assertShortcutIds(assertAllPinned(
-                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_3), HANDLE_USER_0))
-                    /* empty, not restored */ );
+            assertWith(mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_1), HANDLE_USER_0))
+                    .areAllPinned()
+                    .haveIds("s1");
 
-            assertEquals(0, mLauncherApps.getShortcuts(QUERY_ALL, HANDLE_USER_P0).size());
+            assertWith(mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_2), HANDLE_USER_0))
+                    .isEmpty();
+
+            assertWith(mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_3), HANDLE_USER_0))
+                    .isEmpty();
+
+            assertWith(mLauncherApps.getShortcuts(QUERY_ALL, HANDLE_USER_P0))
+                    .isEmpty();
         });
 
         installPackage(USER_0, CALLING_PACKAGE_2);
         runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
-            assertEquals(0, mManager.getDynamicShortcuts().size());
-            assertShortcutIds(assertAllPinned(
-                    mManager.getPinnedShortcuts()),
-                    "s1", "s2", "s3");
+            assertWith(getCallerVisibleShortcuts())
+                    .selectDynamic()
+                    .isEmpty()
+
+                    .revertToOriginalList()
+                    .selectPinned()
+                    .haveIds("s1", "s2", "s3");
         });
 
         runWithCaller(LAUNCHER_1, USER_0, () -> {
-            assertShortcutIds(assertAllPinned(
-                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_1), HANDLE_USER_0)),
-                    "s1");
-            assertShortcutIds(assertAllPinned(
-                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_2), HANDLE_USER_0)),
-                    "s1", "s2");
-            assertShortcutIds(assertAllPinned(
-                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_3), HANDLE_USER_0))
-                    /* empty, not restored */ );
+            assertWith(mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_1), HANDLE_USER_0))
+                    .areAllPinned()
+                    .haveIds("s1");
 
-            assertEquals(0, mLauncherApps.getShortcuts(QUERY_ALL, HANDLE_USER_P0).size());
+            assertWith(mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_2), HANDLE_USER_0))
+                    .areAllPinned()
+                    .haveIds("s1", "s2");
+
+            assertWith(mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_3), HANDLE_USER_0))
+                    .isEmpty();
+
+            assertWith(mLauncherApps.getShortcuts(QUERY_ALL, HANDLE_USER_P0))
+                    .isEmpty();
         });
 
         // 3 shouldn't be backed up, so no pinned shortcuts.
         installPackage(USER_0, CALLING_PACKAGE_3);
         runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
-            assertEquals(0, mManager.getDynamicShortcuts().size());
-            assertEquals(0, mManager.getPinnedShortcuts().size());
+            assertWith(getCallerVisibleShortcuts())
+                    .isEmpty();
         });
 
         // Launcher on a different profile shouldn't be restored.
         runWithCaller(LAUNCHER_1, USER_P0, () -> {
-            assertEquals(0,
-                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_1), HANDLE_USER_0)
-                            .size());
-            assertEquals(0,
-                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_2), HANDLE_USER_0)
-                            .size());
-            assertShortcutIds(assertAllPinned(
-                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_3), HANDLE_USER_0))
-                    /* wasn't restored, so still empty */ );
+            assertWith(mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_1), HANDLE_USER_0))
+                    .isEmpty();
+            assertWith(mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_2), HANDLE_USER_0))
+                    .isEmpty();
+            assertWith(mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_3), HANDLE_USER_0))
+                    .isEmpty();
         });
 
         // Package on a different profile, no restore.
         installPackage(USER_P0, CALLING_PACKAGE_1);
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
-            assertEquals(0, mManager.getDynamicShortcuts().size());
-            assertEquals(0, mManager.getPinnedShortcuts().size());
+            assertWith(getCallerVisibleShortcuts())
+                    .isEmpty();
         });
 
         // Restore launcher 2 on user 0.
         installPackage(USER_0, LAUNCHER_2);
         runWithCaller(LAUNCHER_2, USER_0, () -> {
-            assertShortcutIds(assertAllPinned(
-                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_1), HANDLE_USER_0)),
-                    "s2");
-            assertShortcutIds(assertAllPinned(
-                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_2), HANDLE_USER_0)),
-                    "s2", "s3");
-            assertShortcutIds(assertAllPinned(
-                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_3), HANDLE_USER_0))
-                    /* wasn't restored, so still empty */ );
+            assertWith(mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_1), HANDLE_USER_0))
+                    .areAllPinned()
+                    .haveIds("s2");
 
-            assertEquals(0, mLauncherApps.getShortcuts(QUERY_ALL, HANDLE_USER_P0).size());
+            assertWith(mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_2), HANDLE_USER_0))
+                    .areAllPinned()
+                    .haveIds("s2", "s3");
+
+            assertWith(mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_3), HANDLE_USER_0))
+                    .isEmpty();
+
+            assertWith(mLauncherApps.getShortcuts(QUERY_ALL, HANDLE_USER_P0))
+                    .isEmpty();
         });
 
 
@@ -4735,33 +4745,33 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         // make sure they still have the same result.
         installPackage(USER_0, CALLING_PACKAGE_1);
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
-            assertEquals(0, mManager.getDynamicShortcuts().size());
-            assertShortcutIds(assertAllPinned(
-                    mManager.getPinnedShortcuts()),
-                    "s1", "s2");
+            assertWith(getCallerVisibleShortcuts())
+                    .areAllPinned()
+                    .haveIds("s1", "s2");
         });
 
         installPackage(USER_0, LAUNCHER_1);
         runWithCaller(LAUNCHER_1, USER_0, () -> {
-            assertShortcutIds(assertAllPinned(
-                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_1), HANDLE_USER_0)),
-                    "s1");
-            assertShortcutIds(assertAllPinned(
-                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_2), HANDLE_USER_0)),
-                    "s1", "s2");
-            assertShortcutIds(assertAllPinned(
-                    mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_3), HANDLE_USER_0))
-                    /* wasn't restored, so still empty */ );
+            assertWith(mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_1), HANDLE_USER_0))
+                    .areAllPinned()
+                    .haveIds("s1");
 
-            assertEquals(0, mLauncherApps.getShortcuts(QUERY_ALL, HANDLE_USER_P0).size());
+            assertWith(mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_2), HANDLE_USER_0))
+                    .areAllPinned()
+                    .haveIds("s1", "s2");
+
+            assertWith(mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_3), HANDLE_USER_0))
+                    .isEmpty();
+
+            assertWith(mLauncherApps.getShortcuts(QUERY_ALL, HANDLE_USER_P0))
+                    .isEmpty();
         });
 
         installPackage(USER_0, CALLING_PACKAGE_2);
         runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
-            assertEquals(0, mManager.getDynamicShortcuts().size());
-            assertShortcutIds(assertAllPinned(
-                    mManager.getPinnedShortcuts()),
-                    "s1", "s2", "s3");
+            assertWith(getCallerVisibleShortcuts())
+                    .areAllPinned()
+                    .haveIds("s1", "s2", "s3");
         });
     }
 
@@ -5080,6 +5090,112 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_3), HANDLE_USER_0))
                     /* empty */);
         });
+    }
+
+    public void testBackupAndRestore_disabled() {
+        prepareCrossProfileDataSet();
+
+        // Before doing backup & restore, disable s1.
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            mManager.disableShortcuts(list("s1"));
+        });
+
+        backupAndRestore();
+
+        // Below is copied from checkBackupAndRestore_success.
+
+        // Make sure non-system user is not restored.
+        final ShortcutUser userP0 = mService.getUserShortcutsLocked(USER_P0);
+        assertEquals(0, userP0.getAllPackagesForTest().size());
+        assertEquals(0, userP0.getAllLaunchersForTest().size());
+
+        // Make sure only "allowBackup" apps are restored, and are shadow.
+        final ShortcutUser user0 = mService.getUserShortcutsLocked(USER_0);
+        assertExistsAndShadow(user0.getAllPackagesForTest().get(CALLING_PACKAGE_1));
+        assertExistsAndShadow(user0.getAllPackagesForTest().get(CALLING_PACKAGE_2));
+        assertExistsAndShadow(user0.getAllLaunchersForTest().get(
+                PackageWithUser.of(USER_0, LAUNCHER_1)));
+        assertExistsAndShadow(user0.getAllLaunchersForTest().get(
+                PackageWithUser.of(USER_0, LAUNCHER_2)));
+
+        assertNull(user0.getAllPackagesForTest().get(CALLING_PACKAGE_3));
+        assertNull(user0.getAllLaunchersForTest().get(PackageWithUser.of(USER_0, LAUNCHER_3)));
+        assertNull(user0.getAllLaunchersForTest().get(PackageWithUser.of(USER_P0, LAUNCHER_1)));
+
+        installPackage(USER_0, CALLING_PACKAGE_1);
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertWith(getCallerVisibleShortcuts())
+                    .areAllEnabled() // disabled shortcuts shouldn't be restored.
+
+                    .selectDynamic()
+                    .isEmpty()
+
+                    .revertToOriginalList()
+                    .selectPinned()
+                    // s1 is not restored.
+                    .haveIds("s2");
+        });
+
+        installPackage(USER_0, LAUNCHER_1);
+        runWithCaller(LAUNCHER_1, USER_0, () -> {
+            // Note, s1 was pinned by launcher 1, but was disabled, so isn't restored.
+            assertWith(mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_1), HANDLE_USER_0))
+                    .isEmpty();
+
+            assertWith(mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_2), HANDLE_USER_0))
+                    .isEmpty();
+
+            assertWith(mLauncherApps.getShortcuts(buildAllQuery(CALLING_PACKAGE_3), HANDLE_USER_0))
+                    .isEmpty();
+
+            assertWith(mLauncherApps.getShortcuts(QUERY_ALL, HANDLE_USER_P0))
+                    .isEmpty();
+        });
+    }
+
+
+    public void testBackupAndRestore_manifestNotRestored() {
+        // Publish two manifest shortcuts.
+        addManifestShortcutResource(
+                new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
+                R.xml.shortcut_2);
+        updatePackageVersion(CALLING_PACKAGE_1, 1);
+        mInternal.onPackageBroadcast(
+                genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
+
+        // Pin from launcher 1.
+        runWithCaller(LAUNCHER_1, USER_0, () -> {
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("ms1", "ms2"), HANDLE_USER_0);
+        });
+
+        // Update and now ms2 is gone -> disabled.
+        addManifestShortcutResource(
+                new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
+                R.xml.shortcut_1);
+        updatePackageVersion(CALLING_PACKAGE_1, 1);
+        mInternal.onPackageBroadcast(
+                genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
+
+        // Make sure the manifest shortcuts have been published.
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertWith(getCallerShortcuts())
+                    .areAllPinned()
+                    .haveIds("ms1", "ms2")
+
+                    .selectByIds("ms1")
+                    .areAllManifest()
+                    .areAllEnabled()
+
+                    .revertToOriginalList()
+                    .selectByIds("ms2")
+                    .areAllNotManifest()
+                    .areAllDisabled();
+        });
+
+        // Now do the regular backup & restore test.
+        // The existence of the manifest shortcuts shouldn't affect the result.
+        prepareCrossProfileDataSet();
+        backupAndRestore();
     }
 
     public void testSaveAndLoad_crossProfile() {
