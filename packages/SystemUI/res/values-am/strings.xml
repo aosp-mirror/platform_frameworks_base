@@ -516,21 +516,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"ተጨማሪ ቅንብሮች"</string>
     <string name="notification_done" msgid="5279426047273930175">"ተከናውኗል"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> ማሳወቂያ ቁጥጥሮች"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"ቀለም እና መልክ"</string>
-    <string name="night_mode" msgid="3540405868248625488">"የሌሊት ሁነታ"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"ማሳያን ይለኩ"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"በርቷል"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"ጠፍቷል"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"በራስ-ሰር አብራ"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"ለአካባቢው እና ለሰዓቱ ተገቢ በሆነ መልኩ ወደ የማታ ሁነታ ለውጥ"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"የማታ ሁነታ  ሲበራ"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"ለAndroid ስርዓተ ክወና ጨለማ ገጽታን ተጠቀም"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"ቅልም አስተካክል"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"ብሩህነት አስተካክል"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"ጨለማ ገጽታው እንደ ቅንብሮች ያሉ በመደበኛነት በብርሃን ገጽታ በሚታዩ የAndroid ስርዓተ ክወና ዋና ክፍሎች ላይ ይተገበራል።"</string>
-    <string name="color_apply" msgid="9212602012641034283">"ተግብር"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"ቅንብሮችን ያረጋግጡ"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"አንዳንድ የቀለም ቅንብሮች ይህን መሣሪያ የማይጠቅም ሊያደርጉት ይችላሉ። እነዚህን የቀለም ቅንብሮች ለማረጋገጥ እሺ የሚለውን ጠቅ ያድርጉ፣ አለበለዚያ እነዚህ ቅንብሮች ከ10 ሰከንዶች በኋላ ዳግም ይጀምራሉ።"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"የባትሪ አጠቃቀም"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ኃይል በሚሞላበት ጊዜ ባትሪ ቆጣቢ አይገኝም"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"ባትሪ ቆጣቢ"</string>

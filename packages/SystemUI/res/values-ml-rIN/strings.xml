@@ -516,21 +516,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"കൂടുതൽ ക്രമീകരണം"</string>
     <string name="notification_done" msgid="5279426047273930175">"പൂർത്തിയായി"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> അറിയിപ്പ് നിയന്ത്രണങ്ങൾ"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"വർണ്ണവും രൂപഭാവവും"</string>
-    <string name="night_mode" msgid="3540405868248625488">"നൈറ്റ് മോഡ്"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"ഡിസ്പ്ലേ കാലിബ്രേറ്റുചെയ്യുക"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"ഓൺ"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"ഓഫ്"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"സ്വയമേവ ഓണാക്കുക"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"ലൊക്കേഷനും ദിവസത്തിലെ സമയത്തിനും അനുയോജ്യമായ തരത്തിൽ നൈറ്റ് മോഡിലേക്ക് സ്വിച്ചുചെയ്യുക"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"നൈറ്റ് മോഡ് ഓണായിരിക്കുമ്പോൾ"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"Android OS-നുള്ള ഇരുണ്ട തീം ഉപയോഗിക്കുക"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"ടിന്റ് ക്രമപ്പെടുത്തുക"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"തെളിച്ചം ക്രമപ്പെടുത്തുക"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"ക്രമീകരണം പോലെയുള്ള, ഒരു ലൈറ്റ് തീമിൽ സാധാരണ ഗതിയിൽ പ്രദർശിപ്പിക്കപ്പെടുന്ന Android OS-ന്റെ അടിസ്ഥാന ഇടങ്ങളിലേക്ക്, ഇരുണ്ട തീം പ്രയോഗിക്കുന്നു."</string>
-    <string name="color_apply" msgid="9212602012641034283">"ബാധകമാക്കുക"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"ക്രമീകരണം സ്ഥിരീകരിക്കുക"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"ചില വർണ്ണ ക്രമീകരണത്തിന് ഈ ഉപകരണത്തെ ഉപയോഗരഹിതമാക്കാനാകും. ഈ വർണ്ണ ക്രമീകരണം സ്ഥിരീകരിക്കുന്നതിന് ശരി എന്നതിൽ ക്ലിക്കുചെയ്യുക, അല്ലെങ്കിൽ 10 സെക്കൻഡിന് ശേഷം ഈ ക്രമീകരണം പുനഃക്രമീകരിക്കപ്പെടും."</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"ബാറ്ററി ഉപയോഗം"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ചാർജുചെയ്യുന്ന സമയത്ത് ബാറ്ററി സേവർ ലഭ്യമല്ല"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"ബാറ്ററി സേവർ"</string>

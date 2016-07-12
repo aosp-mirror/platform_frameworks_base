@@ -516,21 +516,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"మరిన్ని సెట్టింగ్‌లు"</string>
     <string name="notification_done" msgid="5279426047273930175">"పూర్తయింది"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> నోటిఫికేషన్ నియంత్రణలు"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"రంగు మరియు కనిపించే తీరు"</string>
-    <string name="night_mode" msgid="3540405868248625488">"రాత్రి మోడ్"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"డిస్‌ప్లేని క్రమాంకనం చేయండి"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"ఆన్‌లో ఉంది"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"ఆఫ్‌లో ఉంది"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"స్వయంచాలకంగా ఆన్ చేయి"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"స్థానం మరియు రోజులో సమయానికి తగినట్లుగా రాత్రి మోడ్‌కి మారుస్తుంది"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"రాత్రి మోడ్ ఆన్‌లో ఉన్నప్పుడు"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"Android OS కోసం ముదురు రంగు థీమ్ ఉపయోగించండి"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"లేత రంగును సర్దుబాటు చేయండి"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"ప్రకాశాన్ని సర్దుబాటు చేయండి"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"సాధారణంగా లేత రంగు థీమ్‌లో ప్రదర్శించబడే సెట్టింగ్‌ల వంటి Android OS ప్రధాన అంశాలకు ముదురు రంగు థీమ్ వర్తింపజేయబడుతుంది."</string>
-    <string name="color_apply" msgid="9212602012641034283">"వర్తింపజేయి"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"సెట్టింగ్‌లను నిర్ధారించండి"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"కొన్ని రంగు సెట్టింగ్‌ల వలన ఈ పరికరం ఉపయోగించలేని విధంగా అయిపోవచ్చు. ఈ రంగు సెట్టింగ్‌లను నిర్ధారించడానికి సరే క్లిక్ చేయండి లేదంటే ఈ సెట్టింగ్‌లు 10 సెకన్ల తర్వాత రీసెట్ చేయబడతాయి."</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"బ్యాటరీ వినియోగం"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ఛార్జ్ అవుతున్న సమయంలో బ్యాటరీ సేవర్ అందుబాటులో ఉండదు"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"బ్యాటరీ సేవర్"</string>

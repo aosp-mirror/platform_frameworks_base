@@ -516,21 +516,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"Fler inställningar"</string>
     <string name="notification_done" msgid="5279426047273930175">"Klar"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"Inställningar för <xliff:g id="APP_NAME">%1$s</xliff:g>-aviseringar"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"Färg och utseende"</string>
-    <string name="night_mode" msgid="3540405868248625488">"Nattläge"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"Kalibrera skärmen"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"Aktiverat"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"Inaktiverat"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"Aktivera automatiskt"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"Byt till Nattläge vid passande platser och tider på dygnet"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"När Nattläget är aktiverat"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"Använd mörkt tema för Android OS"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"Justera ton"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"Justera ljusstyrka"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"Det mörka temat används för kärnfunktioner i Android OS som brukar visas med ett ljust tema, t.ex. inställningarna."</string>
-    <string name="color_apply" msgid="9212602012641034283">"Verkställ"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"Bekräfta inställningarna"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"Vissa färginställningar kan göra den här enheten oanvändbar. Klicka på OK om du vill bekräfta färginställningarna, annars återställs inställningarna efter 10 sekunder."</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Batteriförbrukning"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Batterisparläget är inte tillgängligt vid laddning"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Batterisparläge"</string>

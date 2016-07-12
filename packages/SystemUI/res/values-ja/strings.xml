@@ -518,21 +518,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"詳細設定"</string>
     <string name="notification_done" msgid="5279426047273930175">"完了"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」の通知の管理"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"色と表示"</string>
-    <string name="night_mode" msgid="3540405868248625488">"夜間モード"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"表示の調整"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"ON"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"OFF"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"自動的に ON"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"場所や時間に応じて夜間モードに切り替えます"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"夜間モードが ON のとき"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"Android OS でダークテーマを使用"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"ティントを調整"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"明るさを調整"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"通常ライトテーマで表示される Android OS の主要領域（設定など）にダークテーマが適用されます。"</string>
-    <string name="color_apply" msgid="9212602012641034283">"適用"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"設定の確認"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"一部の色設定を適用すると、この端末を使用できなくなることがあります。この色設定を確認するには、[OK] をクリックしてください。確認しない場合、10 秒後に設定はリセットされます。"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"電池の使用状況"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"充電中はバッテリー セーバーは利用できません"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"バッテリー セーバー"</string>

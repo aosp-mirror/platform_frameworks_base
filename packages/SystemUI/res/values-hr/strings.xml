@@ -518,21 +518,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"Više postavki"</string>
     <string name="notification_done" msgid="5279426047273930175">"Gotovo"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"Kontrole obavijesti za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"Boja i izgled"</string>
-    <string name="night_mode" msgid="3540405868248625488">"Noćni način rada"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"Kalibriranje zaslona"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"Uključeno"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"Isključeno"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"Uključi automatski"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"Prebacivanje na noćni način rada prema lokaciji i dobu dana"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"Kada je noćni način rada uključen"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"Koristi tamnu temu za OS Android"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"Prilagodi nijansu"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"Prilagodi svjetlinu"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"Tamna se tema primjenjuje na glavna područja OS-a Android, kao što su, primjerice, postavke, koja se inače prikazuju u svijetloj temi."</string>
-    <string name="color_apply" msgid="9212602012641034283">"Primijeni"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"Potvrdite postavke"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"Neke postavke boja mogu učiniti uređaj neupotrebljivim. Kliknite U redu da biste potvrdili postavke boja jer će se u suprotnom poništiti za 10 sekundi."</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Potrošnja baterije"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Štednja baterije nije dostupna tijekom punjenja"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Štednja baterije"</string>

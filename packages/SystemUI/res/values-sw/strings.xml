@@ -516,21 +516,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"Mipangilio zaidi"</string>
     <string name="notification_done" msgid="5279426047273930175">"Nimemaliza"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"Vidhibiti vya arifa za <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"Rangi na mwonekano"</string>
-    <string name="night_mode" msgid="3540405868248625488">"Hali ya usiku"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"Rekebisha onyesho"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"Imewashwa"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"Imezimwa"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"Washa kiotomatiki"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"Badilisha kuwa Hali ya Usiku kulingana na mahali na wakati"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"Hali ya Usiku inapowashwa"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"Tumia mandhari ya giza katika Mfumo wa Uendeshaji wa Android"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"Rekebisha kivulivuli"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"Rekebisha mwangaza"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"Mandhari yenye giza yametumika katika maeneo muhimu ya Mfumo wa Uendeshaji wa Android ambayo kwa kawaida huonyeshwa katika mandhari yenye mwangaza, kama vile Mipangilio."</string>
-    <string name="color_apply" msgid="9212602012641034283">"Tumia"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"Thibitisha mipangilio"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"Baadhi ya mipangilio ya rangi inaweza kufanya kifaa hiki kisitumike. Bofya Sawa ili uthibitishe mipangilio hii ya rangi, vinginevyo, mipangilio hii itajiweka upya baada ya sekunde 10."</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"Matumizi ya betri"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Kiokoa Betri hakipatikani unapochaji betri"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Kiokoa Betri"</string>

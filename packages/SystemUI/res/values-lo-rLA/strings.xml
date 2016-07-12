@@ -516,21 +516,6 @@
     <string name="notification_more_settings" msgid="816306283396553571">"​ການ​ຕັ້ງ​ຄ່າ​ເພີ່ມ​ເຕີມ"</string>
     <string name="notification_done" msgid="5279426047273930175">"ສຳເລັດແລ້ວ"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"ການຄວບຄຸມການແຈ້ງເຕືອນ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="color_and_appearance" msgid="1254323855964993144">"ສີ ແລະ ລັກສະນະ"</string>
-    <string name="night_mode" msgid="3540405868248625488">"ໂໝດກາງຄືນ"</string>
-    <string name="calibrate_display" msgid="5974642573432039217">"ປັບໜ້າຈໍ"</string>
-    <string name="night_mode_on" msgid="5597545513026541108">"ເປີດ"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"ປິດ"</string>
-    <string name="turn_on_automatically" msgid="4167565356762016083">"ເປີດ​ໃຊ້​ອັດ​ຕະ​ໂນ​ມັດ"</string>
-    <string name="turn_on_auto_summary" msgid="2190994512406701520">"ສະລັບໄປໃຊ້ໂໝດກາງຄືນຕາມຄວາມເໝາະສົມກັບສະຖານທີ່ ແລະ ເວລາໃນແຕ່ລະມື້"</string>
-    <string name="when_night_mode_on" msgid="2969436026899172821">"ເມື່ອເປີດໂໝດກາງຄືນ"</string>
-    <string name="use_dark_theme" msgid="2900938704964299312">"ໃຊ້ຮູບແບບສີສັນແບບມືດສຳລັບ Android OS"</string>
-    <string name="adjust_tint" msgid="3398569573231409878">"ປັບແຕ່ງໂທນສີ"</string>
-    <string name="adjust_brightness" msgid="980039329808178246">"ປັບແຕ່ງຄວາມສະຫວ່າງ"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"ຮູບແບບສີສັນມືດແມ່ນນຳໃຊ້ກັບພື້ນທີ່ຫຼັກຂອງ Android OS ທີ່ປົກກະຕິຈະສະແດງເປັນຮູບແບບສີສັນແຈ້ງ ເຊັ່ນ: ການຕັ້ງຄ່າ."</string>
-    <string name="color_apply" msgid="9212602012641034283">"ນຳໃຊ້"</string>
-    <string name="color_revert_title" msgid="4746666545480534663">"ຢືນ​ຢັນ​ການ​ຕັ້ງ​ຄ່າ"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"ບາງການຕັ້ງຄ່າສີສາມາດເຮັດໃຫ້ອຸປະກອນນີ້ບໍ່ສາມາດໃຊ້ໄດ້. ຄລິກ ຕົກລົງ ເພື່ອຢືນຢັນການຕັ້ງຄ່າສີເຫຼົ່ານີ້, ຖ້າບໍ່ດັ່ງນັ້ນ ການຕັ້ງຄ່າເຫຼົ່ານີ້ຈະຕັ້ງຄືນໃໝ່ ຫຼັງຈາກ 10 ວິນາທີ."</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"ການໃຊ້ແບັດເຕີຣີ"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ຕົວປະຢັດແບັດເຕີຣີບໍ່ມີໃຫ້ນຳໃຊ້ໃນລະຫວ່າງການສາກ"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"ຕົວປະຢັດ​ແບັດເຕີຣີ"</string>
