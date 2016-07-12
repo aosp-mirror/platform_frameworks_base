@@ -165,9 +165,10 @@ public abstract class ActivityManagerInternal {
             int userId);
 
     /**
-     * Create an {@link IIntentSender} to start an activity, as if {@code packageName} on
-     * user {@code userId} created it.
+     * Start an activity {@code intent} as if {@code packageName} on user {@code userId} did it.
+     *
+     * @return error codes used by {@link IActivityManager#startActivity} and its siblings.
      */
-    public abstract IIntentSender getActivityIntentSenderAsPackage(String packageName,
-            int userId, int requestCode, Intent intent, int flags, Bundle bOptions);
+    public abstract int startActivityAsPackage(String packageName,
+            int userId, Intent intent, Bundle bOptions);
 }

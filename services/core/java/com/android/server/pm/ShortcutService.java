@@ -2271,6 +2271,7 @@ public class ShortcutService extends IShortcutService.Stub {
                         launcherUserId, callingPackage, packageName, shortcutId, userId);
                 // "si == null" should suffice here, but check the flags too just to make sure.
                 if (si == null || !si.isEnabled() || !si.isAlive()) {
+                    Log.e(TAG, "Shortcut " + shortcutId + " does not exist or disabled");
                     return null;
                 }
                 return si.getIntent();

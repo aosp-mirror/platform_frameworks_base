@@ -21815,11 +21815,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         @Override
-        public IIntentSender getActivityIntentSenderAsPackage(
-                String packageName, int userId, int requestCode, Intent intent,
-                int flags, Bundle bOptions) {
-            String resolvedType = intent != null ? intent.resolveTypeIfNeeded(
-                    mContext.getContentResolver()) : null;
+        public int startActivityAsPackage(String packageName, int userId, Intent intent,
+                Bundle bOptions) {
+            Preconditions.checkNotNull(intent, "intent");
+            final String resolvedType = intent.resolveTypeIfNeeded(mContext.getContentResolver());
 
             // UID of the package on user userId.
             // "= 0" is needed because otherwise catch(RemoteException) would make it look like
@@ -21833,11 +21832,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
 
             synchronized (ActivityManagerService.this) {
-                return getIntentSenderLocked(
-                        ActivityManager.INTENT_SENDER_ACTIVITY, packageName, packageUid,
-                        UserHandle.getUserId(packageUid), /*token*/ null, /*resultWho*/ null,
-                        requestCode, new Intent[] {intent}, new String[]{resolvedType},
-                        flags, bOptions);
+                return startActivityInPackage(packageUid, packageName, intent, resolvedType,
+                        /*resultTo*/ null, /*resultWho*/ null, /*requestCode*/ 0, /*startFlags*/ 0,
+                        bOptions, userId, /*container*/ null, /*inTask*/ null);
             }
         }
     }
