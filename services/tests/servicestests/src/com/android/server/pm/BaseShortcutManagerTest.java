@@ -104,6 +104,7 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected static final String TAG = "ShortcutManagerTest";
@@ -382,9 +383,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
         @Override
         void injectPostToHandler(Runnable r) {
-            final long token = mContext.injectClearCallingIdentity();
-            r.run();
-            mContext.injectRestoreCallingIdentity(token);
+            runOnHandler(r);
         }
 
         @Override
@@ -400,9 +399,14 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
 
         @Override
-        void wtf(String message, Exception e) {
+        void wtf(String message, Throwable th) {
             // During tests, WTF is fatal.
-            fail(message + "  exception: " + e);
+            fail(message + "  exception: " + th + "\n" + Log.getStackTraceString(th));
+        }
+
+        @Override
+        boolean injectCheckPendingTaskWaitThread() {
+            return true;
         }
     }
 
@@ -452,9 +456,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
         @Override
         void postToPackageMonitorHandler(Runnable r) {
-            final long token = mContext.injectClearCallingIdentity();
-            r.run();
-            mContext.injectRestoreCallingIdentity(token);
+            runOnHandler(r);
         }
 
         @Override
@@ -496,6 +498,9 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
     public static class ShortcutActivity3 extends Activity {
     }
+
+    protected Looper mLooper;
+    protected Handler mHandler;
 
     protected ServiceContext mServiceContext;
     protected ClientContext mClientContext;
@@ -615,6 +620,10 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected final HashMap<String, LinkedHashMap<ComponentName, Integer>> mActivityMetadataResId
             = new HashMap<>();
 
+    protected final Map<Integer, UserInfo> mUserInfos = new HashMap<>();
+    protected final Map<Integer, Boolean> mRunningUsers = new HashMap<>();
+    protected final Map<Integer, Boolean> mUnlockedUsers = new HashMap<>();
+
     static {
         QUERY_ALL.setQueryFlags(
                 ShortcutQuery.FLAG_GET_ALL_KINDS);
@@ -623,6 +632,9 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+
+        mLooper = Looper.getMainLooper();
+        mHandler = new Handler(mLooper);
 
         mServiceContext = spy(new ServiceContext());
         mClientContext = new ClientContext();
@@ -667,29 +679,37 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         deleteAllSavedFiles();
 
         // Set up users.
-        doAnswer(inv -> {
-                assertSystem();
-                return USER_INFO_0;
-        }).when(mMockUserManager).getUserInfo(eq(USER_0));
+        when(mMockUserManager.getUserInfo(anyInt())).thenAnswer(new AnswerWithSystemCheck<>(
+                inv -> mUserInfos.get((Integer) inv.getArguments()[0])));
 
-        doAnswer(inv -> {
-                assertSystem();
-                return USER_INFO_10;
-        }).when(mMockUserManager).getUserInfo(eq(USER_10));
+        mUserInfos.put(USER_0, USER_INFO_0);
+        mUserInfos.put(USER_10, USER_INFO_10);
+        mUserInfos.put(USER_11, USER_INFO_11);
+        mUserInfos.put(USER_P0, USER_INFO_P0);
 
-        doAnswer(inv -> {
-                assertSystem();
-                return USER_INFO_11;
-        }).when(mMockUserManager).getUserInfo(eq(USER_11));
+        // Set up isUserRunning and isUserUnlocked.
+        when(mMockUserManager.isUserRunning(anyInt())).thenAnswer(new AnswerWithSystemCheck<>(
+                        inv -> mRunningUsers.get((Integer) inv.getArguments()[0])));
 
-        doAnswer(inv -> {
-                assertSystem();
-                return USER_INFO_P0;
-        }).when(mMockUserManager).getUserInfo(eq(USER_P0));
+        when(mMockUserManager.isUserUnlocked(anyInt())).thenAnswer(new AnswerWithSystemCheck<>(
+                        inv -> {
+                            final int userId = (Integer) inv.getArguments()[0];
+                            return mRunningUsers.get(userId) && mUnlockedUsers.get(userId);
+                        }));
 
-        // User 0 is always running.
-        when(mMockUserManager.isUserRunning(eq(USER_0))).thenAnswer(new AnswerIsUserRunning(true));
+        // User 0 is always running
+        mRunningUsers.put(USER_0, true);
+        mRunningUsers.put(USER_10, false);
+        mRunningUsers.put(USER_11, false);
+        mRunningUsers.put(USER_P0, false);
 
+        // Unlock all users by default.
+        mUnlockedUsers.put(USER_0, true);
+        mUnlockedUsers.put(USER_10, true);
+        mUnlockedUsers.put(USER_11, true);
+        mUnlockedUsers.put(USER_P0, true);
+
+        // Set up resources
         setUpAppResources();
 
         // Start the service.
@@ -705,18 +725,18 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     /**
      * Returns a boolean but also checks if the current UID is SYSTEM_UID.
      */
-    protected class AnswerIsUserRunning implements Answer<Boolean> {
-        protected final boolean mAnswer;
+    protected class AnswerWithSystemCheck<T> implements Answer<T> {
+        private final Function<InvocationOnMock, T> mChecker;
 
-        protected AnswerIsUserRunning(boolean answer) {
-            mAnswer = answer;
+        public AnswerWithSystemCheck(Function<InvocationOnMock, T> checker) {
+            mChecker = checker;
         }
 
         @Override
-        public Boolean answer(InvocationOnMock invocation) throws Throwable {
-            assertEquals("isUserRunning() must be called on SYSTEM UID.",
+        public T answer(InvocationOnMock invocation) throws Throwable {
+            assertEquals("Must be called on SYSTEM UID.",
                     Process.SYSTEM_UID, mInjectedCallingUid);
-            return mAnswer;
+            return mChecker.apply(invocation);
         }
     }
 
@@ -805,7 +825,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         LocalServices.removeServiceForTest(ShortcutServiceInternal.class);
 
         // Instantiate targets.
-        mService = new ShortcutServiceTestable(mServiceContext, Looper.getMainLooper());
+        mService = new ShortcutServiceTestable(mServiceContext, mLooper);
         mManager = new ShortcutManagerTestable(mClientContext, mService);
 
         mInternal = LocalServices.getService(ShortcutServiceInternal.class);
@@ -828,6 +848,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
     protected void shutdownServices() {
         if (mService != null) {
+            mService.getPendingTasksForTest().waitOnAllTasks();
+
             // Flush all the unsaved data from the previous instance.
             mService.saveDirtyInfo();
 
@@ -842,6 +864,15 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         mLauncherAppImpl = null;
         mLauncherApps = null;
         mLauncherAppsMap.clear();
+    }
+
+    protected void runOnHandler(Runnable r) {
+        final long token = mServiceContext.injectClearCallingIdentity();
+        try {
+            r.run();
+        } finally {
+            mServiceContext.injectRestoreCallingIdentity(token);
+        }
     }
 
     protected void addPackage(String packageName, int uid, int version) {

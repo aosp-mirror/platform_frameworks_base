@@ -73,4 +73,11 @@ public abstract class ShortcutServiceInternal {
      * any locks in this method.
      */
     public abstract void onSystemLocaleChangedNoLock();
+
+    /**
+     * Called by PM before sending package broadcasts to other components.  PM doesn't hold the PM
+     * lock, but do not take any locks in here anyway, and don't do any heavy tasks, as doing so
+     * would slow down all the package broadcasts.
+     */
+    public abstract void onPackageBroadcast(Intent intent);
 }
