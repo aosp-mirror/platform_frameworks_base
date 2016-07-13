@@ -1024,7 +1024,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // Detect user pressing the power button in panic when an application has
         // taken over the whole screen.
         boolean panic = mImmersiveModeConfirmation.onPowerKeyDown(interactive,
-                SystemClock.elapsedRealtime(), isImmersiveMode(mLastSystemUiFlags));
+                SystemClock.elapsedRealtime(), isImmersiveMode(mLastSystemUiFlags),
+                isNavBarEmpty(mLastSystemUiFlags));
         if (panic) {
             mHandler.post(mHiddenNavPanic);
         }
@@ -7591,7 +7592,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (win != null && oldImmersiveMode != newImmersiveMode) {
             final String pkg = win.getOwningPackage();
             mImmersiveModeConfirmation.immersiveModeChangedLw(pkg, newImmersiveMode,
-                    isUserSetupComplete());
+                    isUserSetupComplete(), isNavBarEmpty(win.getSystemUiVisibility()));
         }
 
         vis = mNavigationBarController.updateVisibilityLw(transientNavBarAllowed, oldVis, vis);
@@ -7648,6 +7649,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 && (vis & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0
                 && (vis & flags) != 0
                 && canHideNavigationBar();
+    }
+
+    private static boolean isNavBarEmpty(int systemUiFlags) {
+        final int disableNavigationBar = (View.STATUS_BAR_DISABLE_HOME
+                | View.STATUS_BAR_DISABLE_BACK
+                | View.STATUS_BAR_DISABLE_RECENT);
+
+        return (systemUiFlags & disableNavigationBar) == disableNavigationBar;
     }
 
     /**
