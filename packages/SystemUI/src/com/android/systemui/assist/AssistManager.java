@@ -47,7 +47,7 @@ public class AssistManager {
     private static final long TIMEOUT_SERVICE = 2500;
     private static final long TIMEOUT_ACTIVITY = 1000;
 
-    private final Context mContext;
+    protected final Context mContext;
     private final WindowManager mWindowManager;
     private final AssistDisclosure mAssistDisclosure;
 
