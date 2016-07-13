@@ -404,11 +404,6 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
             // During tests, WTF is fatal.
             fail(message + "  exception: " + th + "\n" + Log.getStackTraceString(th));
         }
-
-        @Override
-        boolean injectCheckPendingTaskWaitThread() {
-            return true;
-        }
     }
 
     /** ShortcutManager with injection override methods. */
@@ -853,8 +848,6 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
     protected void shutdownServices() {
         if (mService != null) {
-            mService.getPendingTasksForTest().waitOnAllTasks();
-
             // Flush all the unsaved data from the previous instance.
             mService.saveDirtyInfo();
 
