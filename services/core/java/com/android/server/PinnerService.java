@@ -41,6 +41,7 @@ import android.system.StructStat;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.os.BackgroundThread;
 
+import dalvik.system.DexFile;
 import dalvik.system.VMRuntime;
 
 import java.util.ArrayList;
@@ -240,12 +241,6 @@ public final class PinnerService extends SystemService {
         }
         mPinnedCameraFiles.add(pf);
 
-        //find the location of the odex based on the location of the APK
-        int lastPeriod = camAPK.lastIndexOf('.');
-        int lastSlash = camAPK.lastIndexOf('/', lastPeriod);
-        String base = camAPK.substring(0, lastSlash);
-        String appName = camAPK.substring(lastSlash + 1, lastPeriod);
-
         // determine the ABI from either ApplicationInfo or Build
         String arch = "arm";
         if (cameraInfo.primaryCpuAbi != null
@@ -256,8 +251,18 @@ public final class PinnerService extends SystemService {
                 arch = arch + "64";
             }
         }
-        String odex = base + "/oat/" + arch + "/" + appName + ".odex";
-        //not all apps have odex files, so not pinning the odex is not a fatal error
+
+        // get the path to the odex or oat file
+        String baseCodePath = cameraInfo.getBaseCodePath();
+        String odex = null;
+        try {
+            odex = DexFile.getDexFileOutputPath(baseCodePath, arch);
+        } catch (IOException ioe) {}
+        if (odex == null) {
+            return true;
+        }
+
+        //not pinning the oat/odex is not a fatal error
         pf = pinFile(odex, 0, 0, MAX_CAMERA_PIN_SIZE);
         if (pf != null) {
             mPinnedCameraFiles.add(pf);
@@ -265,6 +270,7 @@ public final class PinnerService extends SystemService {
                 Slog.i(TAG, "Pinned " + pf.mFilename);
             }
         }
+
         return true;
     }
 
