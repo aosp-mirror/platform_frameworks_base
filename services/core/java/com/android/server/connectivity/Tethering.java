@@ -69,6 +69,7 @@ import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 import com.android.server.IoThread;
 import com.android.server.connectivity.tethering.IControlsTethering;
+import com.android.server.connectivity.tethering.IPv6TetheringCoordinator;
 import com.android.server.connectivity.tethering.TetherInterfaceStateMachine;
 import com.android.server.net.BaseNetworkObserver;
 
@@ -1143,7 +1144,8 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         // Because we excise interfaces immediately from mTetherStates, we must maintain mNotifyList
         // so that the garbage collector does not clean up the state machine before it has a chance
         // to tear itself down.
-        private ArrayList<TetherInterfaceStateMachine> mNotifyList;
+        private final ArrayList<TetherInterfaceStateMachine> mNotifyList;
+        private final IPv6TetheringCoordinator mIPv6TetheringCoordinator;
 
         private int mMobileApnReserved = ConnectivityManager.TYPE_NONE;
         private NetworkCallback mMobileUpstreamCallback;
@@ -1171,6 +1173,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
             addState(mSetDnsForwardersErrorState);
 
             mNotifyList = new ArrayList<>();
+            mIPv6TetheringCoordinator = new IPv6TetheringCoordinator(mNotifyList);
             setInitialState(mInitialState);
         }
 

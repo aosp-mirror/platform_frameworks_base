@@ -20,6 +20,7 @@ import android.net.ConnectivityManager;
 import android.net.INetworkStatsService;
 import android.net.InterfaceConfiguration;
 import android.net.LinkAddress;
+import android.net.LinkProperties;
 import android.net.NetworkUtils;
 import android.os.INetworkManagementService;
 import android.os.Looper;
@@ -73,6 +74,8 @@ public class TetherInterfaceStateMachine extends StateMachine {
     public static final int CMD_SET_DNS_FORWARDERS_ERROR    = BASE_IFACE + 11;
     // the upstream connection has changed
     public static final int CMD_TETHER_CONNECTION_CHANGED   = BASE_IFACE + 12;
+    // new IPv6 tethering parameters need to be processed
+    public static final int CMD_IPV6_TETHER_UPDATE          = BASE_IFACE + 13;
 
     private final State mInitialState;
     private final State mTetheredState;
@@ -84,6 +87,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
 
     private final String mIfaceName;
     private final int mInterfaceType;
+    private final IPv6TetheringInterfaceServices mIPv6TetherSvc;
 
     private int mLastError;
     private String mMyUpstreamIfaceName;  // may change over time
@@ -97,6 +101,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
         mTetherController = tetherController;
         mIfaceName = ifaceName;
         mInterfaceType = interfaceType;
+        mIPv6TetherSvc = new IPv6TetheringInterfaceServices(mIfaceName, mNMService);
         mLastError = ConnectivityManager.TETHER_ERROR_NO_ERROR;
 
         mInitialState = new InitialState();
@@ -107,6 +112,10 @@ public class TetherInterfaceStateMachine extends StateMachine {
         addState(mUnavailableState);
 
         setInitialState(mInitialState);
+    }
+
+    public int interfaceType() {
+        return mInterfaceType;
     }
 
     // configured when we start tethering and unconfig'd on error or conclusion
@@ -175,6 +184,10 @@ public class TetherInterfaceStateMachine extends StateMachine {
                 case CMD_INTERFACE_DOWN:
                     transitionTo(mUnavailableState);
                     break;
+                case CMD_IPV6_TETHER_UPDATE:
+                    mIPv6TetherSvc.updateUpstreamIPv6LinkProperties(
+                            (LinkProperties) message.obj);
+                    break;
                 default:
                     retValue = false;
                     break;
@@ -200,6 +213,11 @@ public class TetherInterfaceStateMachine extends StateMachine {
                 transitionTo(mInitialState);
                 return;
             }
+
+            if (!mIPv6TetherSvc.start()) {
+                Log.e(TAG, "Failed to start IPv6TetheringInterfaceServices");
+            }
+
             if (DBG) Log.d(TAG, "Tethered " + mIfaceName);
             mTetherController.notifyInterfaceStateChange(
                     mIfaceName, TetherInterfaceStateMachine.this,
@@ -211,6 +229,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
             // Note that at this point, we're leaving the tethered state.  We can fail any
             // of these operations, but it doesn't really change that we have to try them
             // all in sequence.
+            mIPv6TetherSvc.stop();
             cleanupUpstream();
 
             try {
@@ -286,6 +305,10 @@ public class TetherInterfaceStateMachine extends StateMachine {
                         }
                     }
                     mMyUpstreamIfaceName = newUpstreamIfaceName;
+                    break;
+                case CMD_IPV6_TETHER_UPDATE:
+                    mIPv6TetherSvc.updateUpstreamIPv6LinkProperties(
+                            (LinkProperties) message.obj);
                     break;
                 case CMD_IP_FORWARDING_ENABLE_ERROR:
                 case CMD_IP_FORWARDING_DISABLE_ERROR:
