@@ -112,7 +112,7 @@ other.
 </p>
 <br/>
 
-  <img src="{@docRoot}performance/images/cold-launch.png">
+  <img src="{@docRoot}topic/performance/images/cold-launch.png">
   <p class="img-caption">
     <strong>Figure 1.</strong> A visual representation of the important parts of
     a cold application launch.
@@ -262,7 +262,7 @@ the {@code Displayed} time.
 </p>
 <br/>
 
-  <img src="{@docRoot}performance/images/displayed-logcat.png">
+  <img src="{@docRoot}topic/performance/images/displayed-logcat.png">
   <p class="img-caption">
     <strong>Figure 2.</strong> Disabling filters, and
     finding the {@code Displayed} value in logcat.
