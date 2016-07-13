@@ -149,7 +149,7 @@ public class LockPatternUtils {
     private DevicePolicyManager mDevicePolicyManager;
     private ILockSettings mLockSettingsService;
     private UserManager mUserManager;
-    private final Handler mHandler = new Handler();
+    private final Handler mHandler;
 
     /**
      * Use {@link TrustManager#isTrustUsuallyManaged(int)}.
@@ -231,6 +231,9 @@ public class LockPatternUtils {
     public LockPatternUtils(Context context) {
         mContext = context;
         mContentResolver = context.getContentResolver();
+
+        Looper looper = Looper.myLooper();
+        mHandler = looper != null ? new Handler(looper) : null;
     }
 
     private ILockSettings getLockSettings() {
@@ -1512,6 +1515,10 @@ public class LockPatternUtils {
         if (callback == null) {
             return null;
         } else {
+            if (mHandler == null) {
+                throw new IllegalStateException("Must construct LockPatternUtils on a looper thread"
+                        + " to use progress callbacks.");
+            }
             return new ICheckCredentialProgressCallback.Stub() {
 
                 @Override
