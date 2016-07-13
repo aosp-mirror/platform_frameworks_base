@@ -225,7 +225,8 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
 
         optimizer.performDexOpt(nextPackage, nextPackage.usesLibraryFiles,
                 null /* ISAs */, false /* checkProfiles */,
-                getCompilerFilterForReason(compilationReason));
+                getCompilerFilterForReason(compilationReason),
+                null /* CompilerStats.PackageStats */);
 
         mCommandsForCurrentPackage = collectingConnection.commands;
         if (mCommandsForCurrentPackage.isEmpty()) {
@@ -271,7 +272,8 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
                 mPackageManagerService.mInstaller, mPackageManagerService.mInstallLock, mContext);
         optimizer.performDexOpt(nextPackage, nextPackage.usesLibraryFiles, null /* ISAs */,
                 false /* checkProfiles */,
-                getCompilerFilterForReason(PackageManagerService.REASON_AB_OTA));
+                getCompilerFilterForReason(PackageManagerService.REASON_AB_OTA),
+                mPackageManagerService.getOrCreateCompilerPackageStats(nextPackage));
     }
 
     private void moveAbArtifacts(Installer installer) {
