@@ -18696,7 +18696,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         synchronized(this) {
             final long origId = Binder.clearCallingIdentity();
-            updateConfigurationLocked(values, null, false, true, userId);
+            updateConfigurationLocked(values, null, false, true, userId, false /* deferResume */);
             Binder.restoreCallingIdentity(origId);
         }
     }
@@ -18764,11 +18764,16 @@ public final class ActivityManagerService extends ActivityManagerNative
         updateConfigurationLocked(configuration, null, false);
     }
 
-    boolean updateConfigurationLocked(Configuration values,
-            ActivityRecord starting, boolean initLocale) {
+    boolean updateConfigurationLocked(Configuration values, ActivityRecord starting,
+            boolean initLocale) {
+        return updateConfigurationLocked(values, starting, initLocale, false /* deferResume */);
+    }
+
+    boolean updateConfigurationLocked(Configuration values, ActivityRecord starting,
+            boolean initLocale, boolean deferResume) {
         // pass UserHandle.USER_NULL as userId because we don't persist configuration for any user
-        return updateConfigurationLocked(values, starting, initLocale, false,
-                UserHandle.USER_NULL);
+        return updateConfigurationLocked(values, starting, initLocale, false /* persistent */,
+                UserHandle.USER_NULL, deferResume);
     }
 
     // To cache the list of supported system locales
@@ -18784,8 +18789,8 @@ public final class ActivityManagerService extends ActivityManagerNative
      * @param userId is only used when persistent parameter is set to true to persist configuration
      *               for that particular user
      */
-    private boolean updateConfigurationLocked(Configuration values,
-            ActivityRecord starting, boolean initLocale, boolean persistent, int userId) {
+    private boolean updateConfigurationLocked(Configuration values, ActivityRecord starting,
+            boolean initLocale, boolean persistent, int userId, boolean deferResume) {
         int changes = 0;
 
         if (mWindowManager != null) {
@@ -18913,7 +18918,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     for (int stackId : resizedStacks) {
                         final Rect newBounds = mWindowManager.getBoundsForNewConfiguration(stackId);
                         mStackSupervisor.resizeStackLocked(
-                                stackId, newBounds, null, null, false, false, !DEFER_RESUME);
+                                stackId, newBounds, null, null, false, false, deferResume);
                     }
                 }
             }
@@ -21810,7 +21815,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             Preconditions.checkNotNull(values, "Configuration must not be null");
             Preconditions.checkArgumentNonnegative(userId, "userId " + userId + " not supported");
             synchronized (ActivityManagerService.this) {
-                updateConfigurationLocked(values, null, false, true, userId);
+                updateConfigurationLocked(values, null, false, true, userId,
+                        false /* deferResume */);
             }
         }
 
