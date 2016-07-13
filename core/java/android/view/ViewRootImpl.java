@@ -1731,7 +1731,7 @@ public final class ViewRootImpl implements ViewParent,
             }
 
             boolean hwInitialized = false;
-            boolean framesChanged = false;
+            boolean contentInsetsChanged = false;
             boolean hadSurface = mSurface.isValid();
 
             try {
@@ -1771,7 +1771,7 @@ public final class ViewRootImpl implements ViewParent,
 
                 final boolean overscanInsetsChanged = !mPendingOverscanInsets.equals(
                         mAttachInfo.mOverscanInsets);
-                boolean contentInsetsChanged = !mPendingContentInsets.equals(
+                contentInsetsChanged = !mPendingContentInsets.equals(
                         mAttachInfo.mContentInsets);
                 final boolean visibleInsetsChanged = !mPendingVisibleInsets.equals(
                         mAttachInfo.mVisibleInsets);
@@ -1819,19 +1819,6 @@ public final class ViewRootImpl implements ViewParent,
                     mAttachInfo.mVisibleInsets.set(mPendingVisibleInsets);
                     if (DEBUG_LAYOUT) Log.v(mTag, "Visible insets changing to: "
                             + mAttachInfo.mVisibleInsets);
-                }
-
-                // If any of the insets changed, do a forceLayout on the view so that the
-                // measure cache is cleared. We might have a pending MSG_RESIZED_REPORT
-                // that is supposed to take care of it, but since pending insets are
-                // already modified here, it won't detect the frame change after this.
-                framesChanged = overscanInsetsChanged
-                        || contentInsetsChanged
-                        || stableInsetsChanged
-                        || visibleInsetsChanged
-                        || outsetsChanged;
-                if (mAdded && mView != null && framesChanged) {
-                    forceLayout(mView);
                 }
 
                 if (!hadSurface) {
@@ -2017,7 +2004,7 @@ public final class ViewRootImpl implements ViewParent,
                 boolean focusChangedDueToTouchMode = ensureTouchModeLocally(
                         (relayoutResult&WindowManagerGlobal.RELAYOUT_RES_IN_TOUCH_MODE) != 0);
                 if (focusChangedDueToTouchMode || mWidth != host.getMeasuredWidth()
-                        || mHeight != host.getMeasuredHeight() || framesChanged ||
+                        || mHeight != host.getMeasuredHeight() || contentInsetsChanged ||
                         updatedConfiguration) {
                     int childWidthMeasureSpec = getRootMeasureSpec(mWidth, lp.width);
                     int childHeightMeasureSpec = getRootMeasureSpec(mHeight, lp.height);
@@ -2026,7 +2013,7 @@ public final class ViewRootImpl implements ViewParent,
                             + mWidth + " measuredWidth=" + host.getMeasuredWidth()
                             + " mHeight=" + mHeight
                             + " measuredHeight=" + host.getMeasuredHeight()
-                            + " framesChanged=" + framesChanged);
+                            + " coveredInsetsChanged=" + contentInsetsChanged);
 
                      // Ask host how big it wants to be
                     performMeasure(childWidthMeasureSpec, childHeightMeasureSpec);
