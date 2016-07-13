@@ -1193,3 +1193,5 @@ redirects:
   to: http://tools.android.com/tech-docs/new-build-system/gradle-experimental/experimental-to-stable-gradle
 - from: /r/studio-ui/sdk-manager.html
   to: https://developer.android.com/studio/intro/update.html#sdk-manager
+- from: /r/studio-ui/newjclass.html
+  to: /studio/write/index.html
