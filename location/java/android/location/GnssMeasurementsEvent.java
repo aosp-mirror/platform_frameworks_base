@@ -98,13 +98,13 @@ public final class GnssMeasurementsEvent implements Parcelable {
             throw new InvalidParameterException("Parameter 'clock' must not be null.");
         }
         if (measurements == null || measurements.length == 0) {
-            throw new InvalidParameterException(
-                    "Parameter 'measurements' must not be null or empty.");
+            mReadOnlyMeasurements = Collections.emptyList();
+        } else {
+            Collection<GnssMeasurement> measurementCollection = Arrays.asList(measurements);
+            mReadOnlyMeasurements = Collections.unmodifiableCollection(measurementCollection);
         }
 
         mClock = clock;
-        Collection<GnssMeasurement> measurementCollection = Arrays.asList(measurements);
-        mReadOnlyMeasurements = Collections.unmodifiableCollection(measurementCollection);
     }
 
     /**
