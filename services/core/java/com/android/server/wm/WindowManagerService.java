@@ -545,7 +545,7 @@ public class WindowManagerService extends IWindowManager.Stub
     SparseArray<DisplayContent> mDisplayContents = new SparseArray<>(2);
 
     int mRotation = 0;
-    int mForcedAppOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+    int mLastOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
     boolean mAltOrientation = false;
 
     private boolean mKeyguardWaitingForActivityDrawn;
@@ -3521,13 +3521,16 @@ public class WindowManagerService extends IWindowManager.Stub
                 // can re-appear and inflict its own orientation on us.  Keep the
                 // orientation stable until this all settles down.
                 return mLastWindowForcedOrientation;
-            } else if (mPolicy.isKeyguardLocked()
-                    && mLastKeyguardForcedOrientation != SCREEN_ORIENTATION_UNSPECIFIED) {
-                // Use the last orientation the keyguard forced while the display is frozen with the
-                // keyguard locked.
+            } else if (mPolicy.isKeyguardLocked()) {
+                // Use the last orientation the while the display is frozen with the
+                // keyguard locked. This could be the keyguard forced orientation or
+                // from a SHOW_WHEN_LOCKED window. We don't want to check the show when
+                // locked window directly though as things aren't stable while
+                // the display is frozen, for example the window could be momentarily unavailable
+                // due to activity relaunch.
                 if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Display is frozen while keyguard locked, "
-                        + "return " + mLastKeyguardForcedOrientation);
-                return mLastKeyguardForcedOrientation;
+                        + "return " + mLastOrientation);
+                return mLastOrientation;
             }
         } else {
             // TODO(multidisplay): Change to the correct display.
@@ -3657,12 +3660,12 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
         if (DEBUG_ORIENTATION) Slog.v(TAG_WM,
-                "No app is requesting an orientation, return " + mForcedAppOrientation);
+                "No app is requesting an orientation, return " + mLastOrientation);
         // The next app has not been requested to be visible, so we keep the current orientation
         // to prevent freezing/unfreezing the display too early unless we are in multi-window, in
         // which we don't let the app customize the orientation unless it was the home task that
         // is handled above.
-        return inMultiWindow ? SCREEN_ORIENTATION_UNSPECIFIED : mForcedAppOrientation;
+        return inMultiWindow ? SCREEN_ORIENTATION_UNSPECIFIED : mLastOrientation;
     }
 
     @Override
@@ -3745,8 +3748,8 @@ public class WindowManagerService extends IWindowManager.Stub
         long ident = Binder.clearCallingIdentity();
         try {
             int req = getOrientationLocked();
-            if (req != mForcedAppOrientation) {
-                mForcedAppOrientation = req;
+            if (req != mLastOrientation) {
+                mLastOrientation = req;
                 //send a message to Policy indicating orientation change to take
                 //action like disabling/enabling sensors etc.,
                 mPolicy.setCurrentOrientationLw(req);
@@ -6622,13 +6625,13 @@ public class WindowManagerService extends IWindowManager.Stub
         //       an orientation that has different metrics than it expected.
         //       eg. Portrait instead of Landscape.
 
-        int rotation = mPolicy.rotationForOrientationLw(mForcedAppOrientation, mRotation);
+        int rotation = mPolicy.rotationForOrientationLw(mLastOrientation, mRotation);
         boolean altOrientation = !mPolicy.rotationHasCompatibleMetricsLw(
-                mForcedAppOrientation, rotation);
+                mLastOrientation, rotation);
 
         if (DEBUG_ORIENTATION) {
-            Slog.v(TAG_WM, "Application requested orientation "
-                    + mForcedAppOrientation + ", got rotation " + rotation
+            Slog.v(TAG_WM, "Selected orientation "
+                    + mLastOrientation + ", got rotation " + rotation
                     + " which has " + (altOrientation ? "incompatible" : "compatible")
                     + " metrics");
         }
@@ -6642,7 +6645,7 @@ public class WindowManagerService extends IWindowManager.Stub
             Slog.v(TAG_WM,
                 "Rotation changed to " + rotation + (altOrientation ? " (alt)" : "")
                 + " from " + mRotation + (mAltOrientation ? " (alt)" : "")
-                + ", forceApp=" + mForcedAppOrientation);
+                + ", lastOrientation=" + mLastOrientation);
         }
 
         int oldRotation = mRotation;
@@ -10487,7 +10490,7 @@ public class WindowManagerService extends IWindowManager.Stub
             pw.print("  mRotation="); pw.print(mRotation);
                     pw.print(" mAltOrientation="); pw.println(mAltOrientation);
             pw.print("  mLastWindowForcedOrientation="); pw.print(mLastWindowForcedOrientation);
-                    pw.print(" mForcedAppOrientation="); pw.println(mForcedAppOrientation);
+                    pw.print(" mLastOrientation="); pw.println(mLastOrientation);
             pw.print("  mDeferredRotationPauseCount="); pw.println(mDeferredRotationPauseCount);
             pw.print("  Animation settings: disabled="); pw.print(mAnimationsDisabled);
                     pw.print(" window="); pw.print(mWindowAnimationScaleSetting);
