@@ -645,11 +645,11 @@ public class SoundTriggerTestService extends Service {
         }
 
         public void onAvailabilityChanged(int status) {
-            postMessage(mModelInfo.name + "Availability changed to: " + status);
+            postMessage(mModelInfo.name + " availability changed to: " + status);
         }
 
         public void onDetected(SoundTriggerDetector.EventPayload event) {
-            postMessage(mModelInfo.name + "onDetected(): " + eventPayloadToString(event));
+            postMessage(mModelInfo.name + " onDetected(): " + eventPayloadToString(event));
             synchronized (SoundTriggerTestService.this) {
                 if (mUserActivity != null) {
                     mUserActivity.handleDetection(mModelInfo.modelUuid);
@@ -661,7 +661,7 @@ public class SoundTriggerTestService extends Service {
         }
 
         public void onError() {
-            postMessage(mModelInfo.name + "onError()");
+            postMessage(mModelInfo.name + " onError()");
             setModelState(mModelInfo, "Error");
         }
 
@@ -671,7 +671,7 @@ public class SoundTriggerTestService extends Service {
         }
 
         public void onRecognitionResumed() {
-            postMessage(mModelInfo.name + "onRecognitionResumed()");
+            postMessage(mModelInfo.name + " onRecognitionResumed()");
             setModelState(mModelInfo, "Resumed");
         }
     }
