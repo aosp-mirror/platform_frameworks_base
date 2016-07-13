@@ -236,7 +236,6 @@ public class MediaSessionService extends SystemService implements Monitor {
     }
 
     private void updateUser() {
-        int userId = ActivityManager.getCurrentUser();
         synchronized (mLock) {
             UserManager manager = (UserManager) getContext().getSystemService(Context.USER_SERVICE);
             int currentUser = ActivityManager.getCurrentUser();
