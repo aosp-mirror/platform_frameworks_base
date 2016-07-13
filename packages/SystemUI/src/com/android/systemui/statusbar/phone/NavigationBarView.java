@@ -99,6 +99,8 @@ public class NavigationBarView extends LinearLayout {
     private final SparseArray<ButtonDispatcher> mButtonDisatchers = new SparseArray<>();
     private Configuration mConfiguration;
 
+    private NavigationBarInflaterView mNavigationInflaterView;
+
     private class NavTransitionListener implements TransitionListener {
         private boolean mBackTransitioning;
         private boolean mHomeAppearing;
@@ -472,9 +474,10 @@ public class NavigationBarView extends LinearLayout {
 
     @Override
     public void onFinishInflate() {
+        mNavigationInflaterView = (NavigationBarInflaterView) findViewById(
+                R.id.navigation_inflater);
         updateRotatedViews();
-        ((NavigationBarInflaterView) findViewById(R.id.navigation_inflater)).setButtonDispatchers(
-                mButtonDisatchers);
+        mNavigationInflaterView.setButtonDispatchers(mButtonDisatchers);
 
         getImeSwitchButton().setOnClickListener(mImeSwitcherClickListener);
 
@@ -530,6 +533,7 @@ public class NavigationBarView extends LinearLayout {
         }
         mCurrentView = mRotatedViews[rot];
         mCurrentView.setVisibility(View.VISIBLE);
+        mNavigationInflaterView.setAlternativeOrder(rot == Surface.ROTATION_90);
         for (int i = 0; i < mButtonDisatchers.size(); i++) {
             mButtonDisatchers.valueAt(i).setCurrentView(mCurrentView);
         }
