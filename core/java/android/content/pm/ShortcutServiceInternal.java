@@ -67,10 +67,4 @@ public abstract class ShortcutServiceInternal {
 
     public abstract boolean hasShortcutHostPermission(int launcherUserId,
             @NonNull String callingPackage);
-
-    /**
-     * Called by AM when the system locale changes *within the AM lock*.  ABSOLUTELY do not take
-     * any locks in this method.
-     */
-    public abstract void onSystemLocaleChangedNoLock();
 }

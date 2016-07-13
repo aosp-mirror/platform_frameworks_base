@@ -47,6 +47,8 @@ import android.test.suitebuilder.annotation.SmallTest;
 import com.android.frameworks.servicestests.R;
 import com.android.server.pm.ShortcutService.ConfigConstants;
 
+import java.util.Locale;
+
 /**
  * Tests for ShortcutService and ShortcutManager.
  *
@@ -1331,13 +1333,12 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         mService.saveDirtyInfo();
         initService();
 
-        final long origSequenceNumber = mService.getLocaleChangeSequenceNumber();
-
-        mInternal.onSystemLocaleChangedNoLock();
-        assertEquals(origSequenceNumber + 1, mService.getLocaleChangeSequenceNumber());
+        mInjectedLocale = Locale.CHINA;
+        mService.mReceiver.onReceive(mServiceContext, new Intent(Intent.ACTION_LOCALE_CHANGED));
 
         // Note at this point only user-0 is loaded, and the counters are reset for this user,
-        // but it will work for other users too, because we persist when
+        // but it will work for other users too because we check the locale change at any
+        // API entry point.
 
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
             assertEquals(3, mManager.getRemainingCallCount());
@@ -1358,11 +1359,28 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
             assertEquals(3, mManager.getRemainingCallCount());
         });
 
+        // Make sure even if we receive ACTION_LOCALE_CHANGED, if the locale hasn't actually
+        // changed, we don't reset throttling.
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            mManager.updateShortcuts(list());
+            assertEquals(2, mManager.getRemainingCallCount());
+        });
+
+        mService.mReceiver.onReceive(mServiceContext, new Intent(Intent.ACTION_LOCALE_CHANGED));
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertEquals(2, mManager.getRemainingCallCount()); // Still 2.
+        });
+
         mService.saveDirtyInfo();
         initService();
 
-        // Make sure the counter is persisted.
-        assertEquals(origSequenceNumber + 1, mService.getLocaleChangeSequenceNumber());
+        // The locale should be persisted, so it still shouldn't reset throttling.
+        mService.mReceiver.onReceive(mServiceContext, new Intent(Intent.ACTION_LOCALE_CHANGED));
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertEquals(2, mManager.getRemainingCallCount()); // Still 2.
+        });
     }
 
     public void testThrottling_foreground() throws Exception {
