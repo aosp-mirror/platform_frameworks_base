@@ -370,7 +370,7 @@ public class WindowAnimator {
                                 && !mPostKeyguardExitAnimation.hasEnded()
                                 && !winAnimator.mKeyguardGoingAwayAnimation
                                 && win.hasDrawnLw()
-                                && win.mAttachedWindow == null
+                                && !win.isChildWindow()
                                 && !win.mIsImWindow
                                 && displayId == Display.DEFAULT_DISPLAY;
 
@@ -388,7 +388,7 @@ public class WindowAnimator {
                         if (DEBUG_KEYGUARD || DEBUG_VISIBILITY) Slog.v(TAG,
                                 "Now policy shown: " + win);
                         if ((mBulkUpdateParams & SET_FORCE_HIDING_CHANGED) != 0
-                                && win.mAttachedWindow == null) {
+                                && !win.isChildWindow()) {
                             if (unForceHiding == null) {
                                 unForceHiding = new ArrayList<>();
                             }

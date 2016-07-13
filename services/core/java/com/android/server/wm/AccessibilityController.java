@@ -389,7 +389,7 @@ final class AccessibilityController {
             if (spec != null && !spec.isNop()) {
                 WindowManagerPolicy policy = mWindowManagerService.mPolicy;
                 final int windowType = windowState.mAttrs.type;
-                if (!policy.isTopLevelWindow(windowType) && windowState.mAttachedWindow != null
+                if (!policy.isTopLevelWindow(windowType) && windowState.isChildWindow()
                         && !policy.canMagnifyWindow(windowType)) {
                     return null;
                 }
@@ -1205,9 +1205,8 @@ final class AccessibilityController {
             window.title = windowState.mAttrs.accessibilityTitle;
             window.accessibilityIdOfAnchor = windowState.mAttrs.accessibilityIdOfAnchor;
 
-            WindowState attachedWindow = windowState.mAttachedWindow;
-            if (attachedWindow != null) {
-                window.parentToken = attachedWindow.mClient.asBinder();
+            if (windowState.isChildWindow()) {
+                window.parentToken = windowState.mParentWindow.mClient.asBinder();
             }
 
             window.focused = windowState.isFocused();

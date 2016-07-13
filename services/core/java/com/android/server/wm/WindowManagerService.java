@@ -1365,7 +1365,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (displayContent == null) {
             return;
         }
-        final WindowState attached = win.mAttachedWindow;
+        final WindowState attached = win.mParentWindow;
 
         WindowList tokenWindowList = getTokenWindowsOnDisplay(token, displayContent);
 
@@ -1426,7 +1426,7 @@ public class WindowManagerService extends IWindowManager.Stub
     private void addWindowToListInOrderLocked(final WindowState win, boolean addToToken) {
         if (DEBUG_FOCUS) Slog.d(TAG_WM, "addWindowToListInOrderLocked: win=" + win +
                 " Callers=" + Debug.getCallers(4));
-        if (win.mAttachedWindow == null) {
+        if (!win.isChildWindow()) {
             final WindowToken token = win.mToken;
             int tokenWindowsPos = 0;
             if (token.appWindowToken != null) {
@@ -1714,7 +1714,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mInputMethodWindow != null) {
                 while (pos < windows.size()) {
                     WindowState wp = windows.get(pos);
-                    if (wp == mInputMethodWindow || wp.mAttachedWindow == mInputMethodWindow) {
+                    if (wp == mInputMethodWindow || wp.mParentWindow == mInputMethodWindow) {
                         pos++;
                         continue;
                     }
@@ -2711,7 +2711,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (win == null) {
                     return;
                 }
-                if (win.mAttachedWindow == null) {
+                if (!win.isChildWindow()) {
                     throw new IllegalArgumentException(
                             "repositionChild called but window is not"
                             + "attached to a parent win=" + win);
@@ -3096,7 +3096,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // resizing (as we only have one full-screen surface). So there is no need
             // to preserve and destroy windows which are attached to another, they
             // will keep their surface and its size may change over time.
-            if (win.mHasSurface && win.mAttachedWindow == null) {
+            if (win.mHasSurface && !win.isChildWindow()) {
                 winAnimator.preserveSurfaceLocked();
                 result |= WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME;
             }

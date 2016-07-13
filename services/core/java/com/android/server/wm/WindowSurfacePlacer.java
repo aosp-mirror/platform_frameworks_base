@@ -665,7 +665,7 @@ class WindowSurfacePlacer {
                         WindowState w = windows.get(i);
                         if (w.mHasSurface) {
                             mService.mPolicy.applyPostLayoutPolicyLw(w, w.mAttrs,
-                                    w.mAttachedWindow);
+                                    w.mParentWindow);
                         }
                     }
                     displayContent.pendingLayoutChanges |=
@@ -1041,7 +1041,7 @@ class WindowSurfacePlacer {
                     }
                     win.mLayoutNeeded = false;
                     win.prelayout();
-                    mService.mPolicy.layoutWindowLw(win, win.mAttachedWindow);
+                    mService.mPolicy.layoutWindowLw(win, win.mParentWindow);
                     win.mLayoutSeq = seq;
                     if (DEBUG_LAYOUT) Slog.v(TAG,
                             "  LAYOUT: mFrame=" + win.mFrame + " mContainingFrame="
