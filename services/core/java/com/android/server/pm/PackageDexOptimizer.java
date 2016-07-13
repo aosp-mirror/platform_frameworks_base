@@ -90,7 +90,8 @@ class PackageDexOptimizer {
      * synchronized on {@link #mInstallLock}.
      */
     int performDexOpt(PackageParser.Package pkg, String[] sharedLibraries,
-            String[] instructionSets, boolean checkProfiles, String targetCompilationFilter) {
+            String[] instructionSets, boolean checkProfiles, String targetCompilationFilter,
+            CompilerStats.PackageStats packageStats) {
         synchronized (mInstallLock) {
             final boolean useLock = mSystemReady;
             if (useLock) {
@@ -99,7 +100,7 @@ class PackageDexOptimizer {
             }
             try {
                 return performDexOptLI(pkg, sharedLibraries, instructionSets, checkProfiles,
-                        targetCompilationFilter);
+                        targetCompilationFilter, packageStats);
             } finally {
                 if (useLock) {
                     mDexoptWakeLock.release();
@@ -150,7 +151,8 @@ class PackageDexOptimizer {
     }
 
     private int performDexOptLI(PackageParser.Package pkg, String[] sharedLibraries,
-            String[] targetInstructionSets, boolean checkProfiles, String targetCompilerFilter) {
+            String[] targetInstructionSets, boolean checkProfiles, String targetCompilerFilter,
+            CompilerStats.PackageStats packageStats) {
         final String[] instructionSets = targetInstructionSets != null ?
                 targetInstructionSets : getAppDexInstructionSets(pkg.applicationInfo);
 
@@ -254,10 +256,17 @@ class PackageDexOptimizer {
                         | DEXOPT_BOOTCOMPLETE);
 
                 try {
+                    long startTime = System.currentTimeMillis();
+
                     mInstaller.dexopt(path, sharedGid, pkg.packageName, dexCodeInstructionSet,
                             dexoptNeeded, oatDir, dexFlags, targetCompilerFilter, pkg.volumeUuid,
                             sharedLibrariesPath);
                     performedDexOpt = true;
+
+                    if (packageStats != null) {
+                        long endTime = System.currentTimeMillis();
+                        packageStats.setCompileTime(path, (int)(endTime - startTime));
+                    }
                 } catch (InstallerException e) {
                     Slog.w(TAG, "Failed to dexopt", e);
                     successfulDexOpt = false;
