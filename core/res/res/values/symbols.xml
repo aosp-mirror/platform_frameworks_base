@@ -2641,6 +2641,9 @@
   <!-- Package name for the device provisioning package -->
   <java-symbol type="string" name="config_deviceProvisioningPackage" />
 
+  <!-- Colon separated list of package names that should be granted DND access -->
+  <java-symbol type="string" name="config_defaultDndAccessPackages" />
+
   <!-- Used for MimeIconUtils. -->
   <java-symbol type="drawable" name="ic_doc_apk" />
   <java-symbol type="drawable" name="ic_doc_audio" />

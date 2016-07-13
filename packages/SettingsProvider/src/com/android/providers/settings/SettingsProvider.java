@@ -2085,7 +2085,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 128;
+            private static final int SETTINGS_VERSION = 129;
 
             private final int mUserId;
 
@@ -2343,6 +2343,37 @@ public class SettingsProvider extends ContentProvider {
                 if (currentVersion == 127) {
                     // version 127 is no longer used.
                     currentVersion = 128;
+                }
+
+                if (currentVersion == 128) {
+                    // Version 128: Allow OEMs to grant DND access to default apps. Note that
+                    // the new apps are appended to the list of already approved apps.
+                    final SettingsState systemSecureSettings =
+                            getSecureSettingsLocked(userId);
+
+                    final Setting policyAccess = systemSecureSettings.getSettingLocked(
+                            Settings.Secure.ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES);
+                    String defaultPolicyAccess = getContext().getResources().getString(
+                            com.android.internal.R.string.config_defaultDndAccessPackages);
+                    if (!TextUtils.isEmpty(defaultPolicyAccess)) {
+                        if (policyAccess.isNull()) {
+                            systemSecureSettings.insertSettingLocked(
+                                    Settings.Secure.ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES,
+                                    defaultPolicyAccess,
+                                    SettingsState.SYSTEM_PACKAGE_NAME);
+                        } else {
+                            StringBuilder currentSetting =
+                                    new StringBuilder(policyAccess.getValue());
+                            currentSetting.append(":");
+                            currentSetting.append(defaultPolicyAccess);
+                            systemSecureSettings.updateSettingLocked(
+                                    Settings.Secure.ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES,
+                                    currentSetting.toString(),
+                                    SettingsState.SYSTEM_PACKAGE_NAME);
+                        }
+                    }
+
+                    currentVersion = 129;
                 }
 
                 // vXXX: Add new settings above this point.
