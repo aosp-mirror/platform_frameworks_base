@@ -2668,4 +2668,7 @@
   <java-symbol type="integer" name="config_defaultNightDisplayAutoMode" />
   <java-symbol type="integer" name="config_defaultNightDisplayCustomStartTime" />
   <java-symbol type="integer" name="config_defaultNightDisplayCustomEndTime" />
+
+  <!-- Default first user restrictions -->
+  <java-symbol type="array" name="config_defaultFirstUserRestrictions" />
 </resources>

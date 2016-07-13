@@ -157,11 +157,10 @@ public class PersistentDataBlockService extends SystemService {
         }
     }
 
-    private void enforceFactoryResetAllowed() {
-        final boolean isOemUnlockRestricted = UserManager.get(mContext)
-                .hasUserRestriction(UserManager.DISALLOW_FACTORY_RESET);
-        if (isOemUnlockRestricted) {
-            throw new SecurityException("OEM unlock is disallowed by DISALLOW_FACTORY_RESET");
+    private void enforceUserRestriction(String userRestriction) {
+        if (UserManager.get(mContext).hasUserRestriction(userRestriction)) {
+            throw new SecurityException(
+                    "OEM unlock is disallowed by user restriction: " + userRestriction);
         }
     }
 
@@ -467,13 +466,9 @@ public class PersistentDataBlockService extends SystemService {
             enforceIsAdmin();
 
             if (enabled) {
-                // Do not allow oem unlock to be enabled if it has been disallowed.
-                if (Settings.Global.getInt(getContext().getContentResolver(),
-                        Settings.Global.OEM_UNLOCK_DISALLOWED, 0) == 1) {
-                    throw new SecurityException(
-                            "OEM unlock has been disallowed by OEM_UNLOCK_DISALLOWED.");
-                }
-                enforceFactoryResetAllowed();
+                // Do not allow oem unlock to be enabled if it's disallowed by a user restriction.
+                enforceUserRestriction(UserManager.DISALLOW_OEM_UNLOCK);
+                enforceUserRestriction(UserManager.DISALLOW_FACTORY_RESET);
             }
             synchronized (mLock) {
                 doSetOemUnlockEnabledLocked(enabled);

@@ -603,6 +603,17 @@ public class UserManager {
     public static final String DISALLOW_SET_USER_ICON = "no_set_user_icon";
 
     /**
+     * Specifies if a user is not allowed to enable the oem unlock setting. The default value is
+     * <code>false</code>.
+     *
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     * @hide
+     */
+    public static final String DISALLOW_OEM_UNLOCK = "no_oem_unlock";
+
+    /**
      * Allows apps in the parent profile to handle web links from the managed profile.
      *
      * This user restriction has an effect only in a managed profile.
