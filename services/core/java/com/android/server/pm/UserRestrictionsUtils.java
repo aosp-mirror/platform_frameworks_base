@@ -104,7 +104,8 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_RUN_IN_BACKGROUND,
             UserManager.DISALLOW_DATA_ROAMING,
             UserManager.DISALLOW_SET_USER_ICON,
-            UserManager.DISALLOW_SET_WALLPAPER
+            UserManager.DISALLOW_SET_WALLPAPER,
+            UserManager.DISALLOW_OEM_UNLOCK
     });
 
     /**
@@ -138,7 +139,8 @@ public class UserRestrictionsUtils {
      */
     private static final Set<String> IMMUTABLE_BY_OWNERS = Sets.newArraySet(
             UserManager.DISALLOW_RECORD_AUDIO,
-            UserManager.DISALLOW_WALLPAPER
+            UserManager.DISALLOW_WALLPAPER,
+            UserManager.DISALLOW_OEM_UNLOCK
     );
 
     /**
@@ -426,6 +428,7 @@ public class UserRestrictionsUtils {
                             newValue ? 1 : 0);
                     break;
                 case UserManager.DISALLOW_FACTORY_RESET:
+                case UserManager.DISALLOW_OEM_UNLOCK:
                     if (newValue) {
                         PersistentDataBlockManager manager = (PersistentDataBlockManager) context
                                 .getSystemService(Context.PERSISTENT_DATA_BLOCK_SERVICE);
