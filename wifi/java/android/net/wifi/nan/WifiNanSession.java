@@ -16,6 +16,7 @@
 
 package android.net.wifi.nan;
 
+import android.annotation.Nullable;
 import android.net.wifi.RttManager;
 import android.util.Log;
 
@@ -166,6 +167,7 @@ public class WifiNanSession {
      *                 {@link android.net.wifi.RttManager.RttParams#bssid} member must be set to
      *                 a peer ID - not to a MAC address.
      * @param listener The listener to receive the results of the ranging session.
+     * @hide (RTT API isn't public yet so can't unhide here)
      */
     public void startRanging(RttManager.RttParams[] params, RttManager.RttListener listener) {
         if (mTerminated) {
@@ -179,6 +181,45 @@ public class WifiNanSession {
             }
 
             mgr.startRanging(mSessionId, params, listener);
+        }
+    }
+
+    /**
+     * Create a {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(String)}  for a
+     * WiFi NAN data-path connection to the specified peer. The peer ID is in the context of a
+     * previous match or received message in this session.
+     *
+     * @param role The role of this device:
+     * {@link WifiNanManager#WIFI_NAN_DATA_PATH_ROLE_INITIATOR} or
+     * {@link WifiNanManager#WIFI_NAN_DATA_PATH_ROLE_RESPONDER}
+     * @param peerId The peer ID obtained through
+     * {@link WifiNanSessionCallback#onMatch(int, byte[], int, byte[], int)} or
+     * {@link WifiNanSessionCallback#onMessageReceived(int, byte[], int)}. On the RESPONDER a
+     *               value of 0 is permitted which matches any peer.
+     * @param token An arbitrary token (message) to be passed to the peer as part of the
+     *              data-path setup process. On the RESPONDER a null token is permitted and
+     *              matches any peer token - an empty token requires the peer token to be empty
+     *              as well.
+     * @param tokenLength The number of significant (usable) bytes from the {@code token} parameter.
+     * @return A string to be used to construct
+     * {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(String)} to pass to {@link
+     * android.net.ConnectivityManager#requestNetwork(NetworkRequest,
+     * ConnectivityManager.NetworkCallback)}
+     * [or other varierties of that API].
+     */
+    public String createNetworkSpecifier(@WifiNanManager.DataPathRole int role, int peerId,
+            @Nullable byte[] token, int tokenLength) {
+        if (mTerminated) {
+            Log.w(TAG, "createNetworkSpecifier: called on terminated session");
+            return null;
+        } else {
+            WifiNanManager mgr = mMgr.get();
+            if (mgr == null) {
+                Log.w(TAG, "createNetworkSpecifier: called post GC on WifiNanManager");
+                return null;
+            }
+
+            return mgr.createNetworkSpecifier(role, mSessionId, peerId, token, tokenLength);
         }
     }
 }
