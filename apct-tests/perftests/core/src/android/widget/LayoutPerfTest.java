@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.app.Activity;
+import android.os.Looper;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 import android.perftests.utils.StubActivity;
@@ -42,6 +43,7 @@ import static android.perftests.utils.LayoutUtils.requestLayoutForAllNodes;
 import static android.view.View.MeasureSpec.AT_MOST;
 import static android.view.View.MeasureSpec.EXACTLY;
 import static android.view.View.MeasureSpec.UNSPECIFIED;
+import static org.junit.Assert.assertTrue;
 
 @LargeTest
 @RunWith(Parameterized.class)
@@ -77,6 +79,11 @@ public class LayoutPerfTest {
     @Test
     @UiThreadTest
     public void testLayoutPerf() {
+        assertTrue("We should be running on the main thread",
+                Looper.getMainLooper().getThread() == Thread.currentThread());
+        assertTrue("We should be running on the main thread",
+                Looper.myLooper() == Looper.getMainLooper());
+
         Activity activity = mActivityRule.getActivity();
         activity.setContentView(mLayoutId);
 
