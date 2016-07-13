@@ -47,10 +47,12 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.speech.RecognizerIntent;
 import android.text.TextUtils;
@@ -67,6 +69,7 @@ import com.android.server.Watchdog.Monitor;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -97,7 +100,9 @@ public class MediaSessionService extends SystemService implements Monitor {
     private ContentResolver mContentResolver;
     private SettingsObserver mSettingsObserver;
 
-    private int mCurrentUserId = -1;
+    // List of user IDs running in the foreground.
+    // Multiple users can be in the foreground if the work profile is on.
+    private final List<Integer> mCurrentUserIdList = new ArrayList<>();
 
     // Used to notify system UI when remote volume was changed. TODO find a
     // better way to handle this.
@@ -181,22 +186,26 @@ public class MediaSessionService extends SystemService implements Monitor {
     }
 
     @Override
-    public void onStartUser(int userHandle) {
+    public void onStartUser(int userId) {
+        if (DEBUG) Log.d(TAG, "onStartUser: " + userId);
         updateUser();
     }
 
     @Override
-    public void onSwitchUser(int userHandle) {
+    public void onSwitchUser(int userId) {
+        if (DEBUG) Log.d(TAG, "onSwitchUser: " + userId);
         updateUser();
     }
 
     @Override
-    public void onStopUser(int userHandle) {
+    public void onStopUser(int userId) {
+        if (DEBUG) Log.d(TAG, "onStopUser: " + userId);
         synchronized (mLock) {
-            UserRecord user = mUserRecords.get(userHandle);
+            UserRecord user = mUserRecords.get(userId);
             if (user != null) {
                 destroyUserLocked(user);
             }
+            updateUser();
         }
     }
 
@@ -228,18 +237,23 @@ public class MediaSessionService extends SystemService implements Monitor {
 
     private void updateUser() {
         synchronized (mLock) {
-            int userId = ActivityManager.getCurrentUser();
-            if (mCurrentUserId != userId) {
-                final int oldUserId = mCurrentUserId;
-                mCurrentUserId = userId; // do this first
-
-                UserRecord oldUser = mUserRecords.get(oldUserId);
-                if (oldUser != null) {
-                    oldUser.stopLocked();
+            UserManager manager = (UserManager) getContext().getSystemService(Context.USER_SERVICE);
+            int currentUser = ActivityManager.getCurrentUser();
+            int[] userIds = manager.getEnabledProfileIds(currentUser);
+            mCurrentUserIdList.clear();
+            if (userIds != null && userIds.length > 0) {
+                for (int userId : userIds) {
+                    mCurrentUserIdList.add(userId);
                 }
-
-                UserRecord newUser = getOrCreateUser(userId);
-                newUser.startLocked();
+            } else {
+                // This shouldn't happen.
+                Log.w(TAG, "Failed to get enabled profiles.");
+                mCurrentUserIdList.add(currentUser);
+            }
+            for (int userId : mCurrentUserIdList) {
+                if (mUserRecords.get(userId) == null) {
+                    mUserRecords.put(userId, new UserRecord(getContext(), userId));
+                }
             }
         }
     }
@@ -272,7 +286,6 @@ public class MediaSessionService extends SystemService implements Monitor {
      * @param user The user to dispose of
      */
     private void destroyUserLocked(UserRecord user) {
-        user.stopLocked();
         user.destroyLocked();
         mUserRecords.remove(user.mUserId);
     }
@@ -436,9 +449,9 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
 
         mAllSessions.add(session);
-        mPriorityStack.addSession(session);
+        mPriorityStack.addSession(session, mCurrentUserIdList.contains(userId));
 
-        UserRecord user = getOrCreateUser(userId);
+        UserRecord user = mUserRecords.get(userId);
         user.addSessionLocked(session);
 
         mHandler.post(MessageHandler.MSG_SESSIONS_CHANGED, userId, 0);
@@ -447,15 +460,6 @@ public class MediaSessionService extends SystemService implements Monitor {
             Log.d(TAG, "Created session for package " + callerPackageName + " with tag " + tag);
         }
         return session;
-    }
-
-    private UserRecord getOrCreateUser(int userId) {
-        UserRecord user = mUserRecords.get(userId);
-        if (user == null) {
-            user = new UserRecord(getContext(), userId);
-            mUserRecords.put(userId, user);
-        }
-        return user;
     }
 
     private int findIndexOfSessionsListenerLocked(IActiveSessionsListener listener) {
@@ -536,13 +540,6 @@ public class MediaSessionService extends SystemService implements Monitor {
             restoreMediaButtonReceiver();
         }
 
-        public void startLocked() {
-        }
-
-        public void stopLocked() {
-            // nothing for now
-        }
-
         public void destroyLocked() {
             for (int i = mSessions.size() - 1; i >= 0; i--) {
                 MediaSessionRecord session = mSessions.get(i);
@@ -578,7 +575,7 @@ public class MediaSessionService extends SystemService implements Monitor {
 
         private void restoreMediaButtonReceiver() {
             String receiverName = Settings.Secure.getStringForUser(mContentResolver,
-                    Settings.System.MEDIA_BUTTON_RECEIVER, UserHandle.USER_CURRENT);
+                    Settings.System.MEDIA_BUTTON_RECEIVER, mUserId);
             if (!TextUtils.isEmpty(receiverName)) {
                 ComponentName eventReceiver = ComponentName.unflattenFromString(receiverName);
                 if (eventReceiver == null) {
@@ -767,12 +764,22 @@ public class MediaSessionService extends SystemService implements Monitor {
                 synchronized (mLock) {
                     // If we don't have a media button receiver to fall back on
                     // include non-playing sessions for dispatching
-                    UserRecord ur = mUserRecords.get(mCurrentUserId);
-                    boolean useNotPlayingSessions = (ur == null) ||
-                            (ur.mLastMediaButtonReceiver == null
-                                && ur.mRestoredMediaButtonReceiver == null);
-                    MediaSessionRecord session = mPriorityStack
-                            .getDefaultMediaButtonSession(mCurrentUserId, useNotPlayingSessions);
+                    boolean useNotPlayingSessions = true;
+                    for (int userId : mCurrentUserIdList) {
+                        UserRecord ur = mUserRecords.get(userId);
+                        if (ur.mLastMediaButtonReceiver != null
+                                || ur.mRestoredMediaButtonReceiver != null) {
+                            useNotPlayingSessions = false;
+                            break;
+                        }
+                    }
+
+                    if (DEBUG) {
+                        Log.d(TAG, "dispatchMediaKeyEvent, useNotPlayingSessions="
+                                + useNotPlayingSessions);
+                    }
+                    MediaSessionRecord session = mPriorityStack.getDefaultMediaButtonSession(
+                            mCurrentUserIdList, useNotPlayingSessions);
                     if (isVoiceKey(keyEvent.getKeyCode())) {
                         handleVoiceKeyEventLocked(keyEvent, needWakeLock, session);
                     } else {
@@ -786,13 +793,11 @@ public class MediaSessionService extends SystemService implements Monitor {
 
         @Override
         public void dispatchAdjustVolume(int suggestedStream, int delta, int flags) {
-            final int pid = Binder.getCallingPid();
-            final int uid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
                     MediaSessionRecord session = mPriorityStack
-                            .getDefaultVolumeSession(mCurrentUserId);
+                            .getDefaultVolumeSession(mCurrentUserIdList);
                     dispatchAdjustVolumeLocked(suggestedStream, delta, flags, session);
                 }
             } finally {
@@ -899,7 +904,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                 }
             } else {
                 session.adjustVolume(direction, flags, getContext().getPackageName(),
-                        UserHandle.myUserId(), true);
+                        Process.SYSTEM_UID, true);
             }
         }
 
@@ -946,13 +951,16 @@ public class MediaSessionService extends SystemService implements Monitor {
                 // won't release it later
                 session.sendMediaButton(keyEvent,
                         needWakeLock ? mKeyEventReceiver.mLastTimeoutId : -1,
-                        mKeyEventReceiver, getContext().getApplicationInfo().uid,
+                        mKeyEventReceiver, Process.SYSTEM_UID,
                         getContext().getPackageName());
             } else {
                 // Launch the last PendingIntent we had with priority
-                UserRecord user = mUserRecords.get(mCurrentUserId);
-                if (user != null && (user.mLastMediaButtonReceiver != null
-                        || user.mRestoredMediaButtonReceiver != null)) {
+                for (int userId : mCurrentUserIdList) {
+                    UserRecord user = mUserRecords.get(userId);
+                    if (user.mLastMediaButtonReceiver == null
+                            && user.mRestoredMediaButtonReceiver == null) {
+                        continue;
+                    }
                     if (DEBUG) {
                         Log.d(TAG, "Sending media key to last known PendingIntent "
                                 + user.mLastMediaButtonReceiver + " or restored Intent "
@@ -972,30 +980,30 @@ public class MediaSessionService extends SystemService implements Monitor {
                         } else {
                             mediaButtonIntent.setComponent(user.mRestoredMediaButtonReceiver);
                             getContext().sendBroadcastAsUser(mediaButtonIntent,
-                                    new UserHandle(mCurrentUserId));
+                                    UserHandle.of(userId));
                         }
                     } catch (CanceledException e) {
                         Log.i(TAG, "Error sending key event to media button receiver "
                                 + user.mLastMediaButtonReceiver, e);
                     }
-                } else {
-                    if (DEBUG) {
-                        Log.d(TAG, "Sending media key ordered broadcast");
-                    }
-                    if (needWakeLock) {
-                        mMediaEventWakeLock.acquire();
-                    }
-                    // Fallback to legacy behavior
-                    Intent keyIntent = new Intent(Intent.ACTION_MEDIA_BUTTON, null);
-                    keyIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-                    keyIntent.putExtra(Intent.EXTRA_KEY_EVENT, keyEvent);
-                    if (needWakeLock) {
-                        keyIntent.putExtra(EXTRA_WAKELOCK_ACQUIRED,
-                                WAKELOCK_RELEASE_ON_FINISHED);
-                    }
-                    getContext().sendOrderedBroadcastAsUser(keyIntent, UserHandle.CURRENT,
-                            null, mKeyEventDone, mHandler, Activity.RESULT_OK, null, null);
+                    return;
                 }
+                if (DEBUG) {
+                    Log.d(TAG, "Sending media key ordered broadcast");
+                }
+                if (needWakeLock) {
+                    mMediaEventWakeLock.acquire();
+                }
+                // Fallback to legacy behavior
+                Intent keyIntent = new Intent(Intent.ACTION_MEDIA_BUTTON, null);
+                keyIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+                keyIntent.putExtra(Intent.EXTRA_KEY_EVENT, keyEvent);
+                if (needWakeLock) {
+                    keyIntent.putExtra(EXTRA_WAKELOCK_ACQUIRED, WAKELOCK_RELEASE_ON_FINISHED);
+                }
+                // Send broadcast only to the full user.
+                getContext().sendOrderedBroadcastAsUser(keyIntent, UserHandle.CURRENT,
+                        null, mKeyEventDone, mHandler, Activity.RESULT_OK, null, null);
             }
         }
 
@@ -1025,6 +1033,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                 if (voiceIntent != null) {
                     voiceIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                             | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+                    if (DEBUG) Log.d(TAG, "voiceIntent: " + voiceIntent);
                     getContext().startActivityAsUser(voiceIntent, UserHandle.CURRENT);
                 }
             } catch (ActivityNotFoundException e) {
