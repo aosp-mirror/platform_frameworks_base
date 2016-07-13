@@ -60,7 +60,7 @@ public:
     virtual uint32_t dirtyMask();
     bool isInfinite() { return mIsInfinite; }
     void setVectorDrawable(VectorDrawableRoot* vd) { mVectorDrawable = vd; }
-    VectorDrawableRoot* getVectorDrawable() const { return mVectorDrawable; }
+    VectorDrawableRoot* getVectorDrawable() const { return mVectorDrawable.get(); }
     AnimationListener* getOneShotListener() { return mOneShotListener.get(); }
     void clearOneShotListener() { mOneShotListener = nullptr; }
     uint32_t getRequestId() const { return mRequestId; }
@@ -78,7 +78,7 @@ private:
     std::vector< std::unique_ptr<PropertyAnimator> > mAnimators;
     float mLastFraction = 0.0f;
     bool mInitialized = false;
-    VectorDrawableRoot* mVectorDrawable = nullptr;
+    sp<VectorDrawableRoot> mVectorDrawable;
     bool mIsInfinite = false;
     // This request id gets incremented (on UI thread only) when a new request to modfiy the
     // lifecycle of an animation happens, namely when start/end/reset/reverse is called.
