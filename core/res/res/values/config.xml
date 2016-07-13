@@ -2531,6 +2531,9 @@
     <!-- Package name for the device provisioning package. -->
     <string name="config_deviceProvisioningPackage"></string>
 
+    <!-- Colon separated list of package names that should be granted DND access -->
+    <string name="config_defaultDndAccessPackages" translatable="false">com.android.camera2</string>
+
     <!-- User restrictions set when the first user is created.
          Note: Also update appropriate overlay files. -->
     <string-array translatable="false" name="config_defaultFirstUserRestrictions">
