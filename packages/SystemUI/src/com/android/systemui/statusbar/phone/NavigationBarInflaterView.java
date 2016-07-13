@@ -280,7 +280,7 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
             params.width = (int) (params.width * size);
         }
         parent.addView(v);
-        addToDispatchers(v);
+        addToDispatchers(v, landscape);
         View lastView = landscape ? mLastRot90 : mLastRot0;
         if (lastView != null) {
             v.setAccessibilityTraversalAfter(lastView.getId());
@@ -327,16 +327,16 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
         return buttonSpec.substring(0, buttonSpec.indexOf(SIZE_MOD_START));
     }
 
-    private void addToDispatchers(View v) {
+    private void addToDispatchers(View v, boolean landscape) {
         if (mButtonDispatchers != null) {
             final int indexOfKey = mButtonDispatchers.indexOfKey(v.getId());
             if (indexOfKey >= 0) {
-                mButtonDispatchers.valueAt(indexOfKey).addView(v);
+                mButtonDispatchers.valueAt(indexOfKey).addView(v, landscape);
             } else if (v instanceof ViewGroup) {
                 final ViewGroup viewGroup = (ViewGroup)v;
                 final int N = viewGroup.getChildCount();
                 for (int i = 0; i < N; i++) {
-                    addToDispatchers(viewGroup.getChildAt(i));
+                    addToDispatchers(viewGroup.getChildAt(i), landscape);
                 }
             }
         }
