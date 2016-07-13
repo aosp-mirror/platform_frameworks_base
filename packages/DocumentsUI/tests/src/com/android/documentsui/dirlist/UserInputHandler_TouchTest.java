@@ -36,7 +36,7 @@ import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
-public final class UserInputHandler_MouseTest {
+public final class UserInputHandler_TouchTest {
 
     private static final List<String> ITEMS = TestData.create(100);
 
@@ -78,32 +78,40 @@ public final class UserInputHandler_MouseTest {
                 mActivateHandler::test,
                 mDeleteHandler::test);
 
-        mEvent = TestEvent.builder().mouse();
+        mEvent = TestEvent.builder();
     }
 
     @Test
-    public void testConfirmedClick_StartsSelection() {
-        mInputHandler.onSingleTapConfirmed(mEvent.at(11).build());
-        mSelection.assertSelection(11);
-    }
-
-    @Test
-    public void testUnconfirmedClick_AddsToExistingSelection() {
-        mInputHandler.onSingleTapConfirmed(mEvent.at(7).build());
-
+    public void testTap_ActivatesWhenNoExistingSelection() {
         mInputHandler.onSingleTapUp(mEvent.at(11).build());
-        mSelection.assertSelection(7, 11);
-    }
-
-    @Test
-    public void testDoubleClick_Activates() {
-        mInputHandler.onDoubleTap(mEvent.at(11).build());
         mActivateHandler.assertLastArgument(mEvent.build());
     }
 
     @Test
-    public void testClickOff_ClearsSelection() {
-        mInputHandler.onSingleTapConfirmed(mEvent.at(11).build());
+    public void testLongPress_StartsSelectionMode() {
+        mInputHandler.onLongPress(mEvent.at(7).build());
+        mSelection.assertSelection(7);
+    }
+
+    @Test
+    public void testLongPress_SecondPressExtendsSelection() {
+        mInputHandler.onLongPress(mEvent.at(7).build());
+        mInputHandler.onLongPress(mEvent.at(99).build());
+        mInputHandler.onLongPress(mEvent.at(13).build());
+        mSelection.assertSelection(7, 13, 99);
+    }
+
+    @Test
+    public void testTap_UnselectsSelectedItem() {
+        mInputHandler.onLongPress(mEvent.at(7).build());
+        mInputHandler.onSingleTapUp(mEvent.at(7).build());
+        mSelection.assertNoSelection();
+    }
+
+    @Test
+    public void testTapOff_ClearsSelection() {
+        mInputHandler.onLongPress(mEvent.at(7).build());
+        mInputHandler.onSingleTapUp(mEvent.at(11).build());
         mInputHandler.onSingleTapUp(mEvent.at(RecyclerView.NO_POSITION).build());
         mSelection.assertNoSelection();
     }

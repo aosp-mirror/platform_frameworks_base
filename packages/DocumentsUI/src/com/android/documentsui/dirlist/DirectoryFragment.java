@@ -142,7 +142,7 @@ public class DirectoryFragment extends Fragment
     private Model mModel;
     private MultiSelectManager mSelectionMgr;
     private Model.UpdateListener mModelUpdateListener = new ModelUpdateListener();
-    private UserInputHandler mInputHandler;
+    private UserInputHandler<InputEvent> mInputHandler;
     private SelectionModeListener mSelectionModeListener;
     private FocusManager mFocusManager;
 
@@ -280,7 +280,7 @@ public class DirectoryFragment extends Fragment
         // Make sure this is done after the RecyclerView is set up.
         mFocusManager = new FocusManager(context, mRecView, mModel);
 
-        mInputHandler = new UserInputHandler(
+        mInputHandler = new UserInputHandler<>(
                 mSelectionMgr,
                 mFocusManager,
                 new Function<MotionEvent, InputEvent>() {
