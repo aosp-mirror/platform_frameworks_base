@@ -42,7 +42,7 @@ TEST(RenderProperties, layerValidity) {
     props.setLeftTopRightBottom(0, 0, maxTextureSize + 1, maxTextureSize + 1);
     ASSERT_FALSE(props.fitsOnLayer());
 
-    // Too small - can't have 0 dimen layer
+    // Too small, but still 'fits'. Not fitting is an error case, so don't report empty as such.
     props.setLeftTopRightBottom(0, 0, 100, 0);
-    ASSERT_FALSE(props.fitsOnLayer());
+    ASSERT_TRUE(props.fitsOnLayer());
 }
