@@ -264,7 +264,6 @@ public final class AudioFormat implements Parcelable {
      */
     public static final int ENCODING_IEC61937 = 13;
     /** Audio data format: DOLBY TRUEHD compressed
-     * @hide
      **/
     public static final int ENCODING_DOLBY_TRUEHD = 14;
 
