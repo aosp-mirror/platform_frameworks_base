@@ -66,7 +66,7 @@ public class ShortcutManagerTest3 extends BaseShortcutManagerTest {
     private void publishManifestShortcuts(ComponentName activity, int resId) {
         addManifestShortcutResource(activity, resId);
         updatePackageVersion(CALLING_PACKAGE, 1);
-        mInternal.onPackageBroadcast(
+        mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageAddIntent(CALLING_PACKAGE, USER_0));
     }
 
