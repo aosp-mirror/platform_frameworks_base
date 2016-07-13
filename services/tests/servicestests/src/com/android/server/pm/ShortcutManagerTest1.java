@@ -62,7 +62,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import android.Manifest.permission;
 import android.app.ActivityManager;
@@ -1298,7 +1297,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
                 R.xml.shortcut_3);
         updatePackageVersion(CALLING_PACKAGE_1, 1);
-        mInternal.onPackageBroadcast(genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
+        mService.mPackageMonitor.onReceive(getTestContext(),
+                genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
 
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
             assertTrue(mManager.setDynamicShortcuts(list(
@@ -1316,7 +1316,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
                 R.xml.shortcut_2);
         updatePackageVersion(CALLING_PACKAGE_1, 1);
-        mInternal.onPackageBroadcast(genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
+        mService.mPackageMonitor.onReceive(getTestContext(),
+                genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
 
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
             assertTrue(mManager.setDynamicShortcuts(list(
@@ -2814,7 +2815,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
                     R.xml.shortcut_2);
             updatePackageVersion(CALLING_PACKAGE_1, 1);
-            mInternal.onPackageBroadcast(
+            mService.mPackageMonitor.onReceive(getTestContext(),
                     genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
         }).assertCallbackCalledForPackageAndUser(CALLING_PACKAGE_1, HANDLE_USER_0)
                 .areAllManifest()
@@ -2851,7 +2852,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
                 R.xml.shortcut_0);
         updatePackageVersion(CALLING_PACKAGE_1, 1);
-        mInternal.onPackageBroadcast(
+        mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
 
         assertForLauncherCallback(mLauncherApps, () -> {
@@ -3471,7 +3472,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
                 R.xml.shortcut_2);
         updatePackageVersion(CALLING_PACKAGE_1, 1);
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
 
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
@@ -3488,7 +3489,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
                 R.xml.shortcut_1);
         updatePackageVersion(CALLING_PACKAGE_1, 1);
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
 
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
@@ -3850,7 +3851,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
                 R.xml.shortcut_1);
         updatePackageVersion(CALLING_PACKAGE_1, 1);
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
             assertWith(getCallerShortcuts())
@@ -3890,7 +3891,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertTrue(bitmapDirectoryExists(CALLING_PACKAGE_3, USER_10));
 
         uninstallPackage(USER_0, CALLING_PACKAGE_1);
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageDeleteIntent(CALLING_PACKAGE_1, USER_0));
 
         assertNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "s1", USER_0));
@@ -3910,7 +3911,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         mRunningUsers.put(USER_10, true);
 
         uninstallPackage(USER_10, CALLING_PACKAGE_2);
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageDeleteIntent(CALLING_PACKAGE_2, USER_10));
 
         assertNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "s1", USER_0));
@@ -4001,7 +4002,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertTrue(bitmapDirectoryExists(CALLING_PACKAGE_2, USER_10));
         assertTrue(bitmapDirectoryExists(CALLING_PACKAGE_3, USER_10));
 
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageDataClear(CALLING_PACKAGE_1, USER_0));
 
         assertNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "s1", USER_0));
@@ -4020,7 +4021,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
         mRunningUsers.put(USER_10, true);
 
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageDataClear(CALLING_PACKAGE_2, USER_10));
 
         assertNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "s1", USER_0));
@@ -4047,7 +4048,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
                 R.xml.shortcut_2);
         updatePackageVersion(CALLING_PACKAGE_1, 1);
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageAddIntent(CALLING_PACKAGE_1, USER_10));
 
         runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
@@ -4068,7 +4069,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         });
 
         // Clear data
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageDataClear(CALLING_PACKAGE_1, USER_10));
 
         // Only manifest shortcuts will remain, and are no longer pinned.
@@ -4133,9 +4134,9 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         reset(c0);
         reset(c10);
 
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageUpdateIntent(CALLING_PACKAGE_1, USER_0));
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageUpdateIntent(CALLING_PACKAGE_1, USER_10));
 
         waitOnMainThread();
@@ -4156,7 +4157,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         updatePackageVersion(CALLING_PACKAGE_1, 1);
 
         // Then send the broadcast, to only user-0.
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageUpdateIntent(CALLING_PACKAGE_1, USER_0));
 
         waitOnMainThread();
@@ -4221,7 +4222,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         updatePackageVersion(CALLING_PACKAGE_2, 10);
 
         // Then send the broadcast, to only user-0.
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageUpdateIntent(CALLING_PACKAGE_2, USER_0));
         mService.handleUnlockUser(USER_10);
 
@@ -4245,7 +4246,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         updatePackageVersion(CALLING_PACKAGE_3, 100);
 
         // Then send the broadcast, to only user-0.
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageUpdateIntent(CALLING_PACKAGE_3, USER_0));
         mService.handleUnlockUser(USER_10);
 
@@ -4327,7 +4328,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
         // Update the package.
         updatePackageVersion(CALLING_PACKAGE_1, 1);
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageUpdateIntent(CALLING_PACKAGE_1, USER_0));
 
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
@@ -4356,7 +4357,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         mRunningUsers.put(USER_10, true);
 
         updatePackageVersion(CALLING_PACKAGE_1, 1);
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageAddIntent(CALLING_PACKAGE_1, USER_10));
 
         runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
@@ -4388,7 +4389,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         });
 
         // First, no changes.
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageChangedIntent(CALLING_PACKAGE_1, USER_10));
 
         runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
@@ -4411,7 +4412,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
         // Disable activity 1
         mEnabledActivityChecker = (activity, userId) -> !ACTIVITY1.equals(activity);
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageChangedIntent(CALLING_PACKAGE_1, USER_10));
 
         runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
@@ -4431,7 +4432,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         // Re-enable activity 1.
         // Manifest shortcuts will be re-published, but dynamic ones are not.
         mEnabledActivityChecker = (activity, userId) -> true;
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageChangedIntent(CALLING_PACKAGE_1, USER_10));
 
         runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
@@ -4455,7 +4456,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         // Disable activity 2
         // Because "ms1-alt" and "s2" are both pinned, they will remain, but disabled.
         mEnabledActivityChecker = (activity, userId) -> !ACTIVITY2.equals(activity);
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageChangedIntent(CALLING_PACKAGE_1, USER_10));
 
         runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
@@ -4518,7 +4519,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         setCaller(LAUNCHER_1, USER_0);
         assertForLauncherCallback(mLauncherApps, () -> {
             updatePackageVersion(CALLING_PACKAGE_1, 1);
-            mInternal.onPackageBroadcast(
+                    mService.mPackageMonitor.onReceive(getTestContext(),
                     genPackageUpdateIntent(CALLING_PACKAGE_1, USER_0));
         }).assertCallbackCalledForPackageAndUser(CALLING_PACKAGE_1, HANDLE_USER_0)
                 // Make sure the launcher gets callbacks.
@@ -5634,7 +5635,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
                 R.xml.shortcut_1);
         updatePackageVersion(CALLING_PACKAGE_1, 1);
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
 
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
@@ -5655,7 +5656,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 new ComponentName(CALLING_PACKAGE_2, ShortcutActivity.class.getName()),
                 R.xml.shortcut_5);
         updatePackageVersion(CALLING_PACKAGE_2, 1);
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageAddIntent(CALLING_PACKAGE_2, USER_0));
 
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
@@ -5692,7 +5693,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 new ComponentName(CALLING_PACKAGE_2, ShortcutActivity.class.getName()),
                 R.xml.shortcut_2);
         updatePackageLastUpdateTime(CALLING_PACKAGE_2, 1);
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageAddIntent(CALLING_PACKAGE_2, USER_0));
 
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
@@ -5729,7 +5730,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         mRunningUsers.put(USER_10, false);
         mUnlockedUsers.put(USER_10, false);
 
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageAddIntent(CALLING_PACKAGE_2, USER_10));
         runWithCaller(CALLING_PACKAGE_2, USER_10, () -> {
             assertEmpty(mManager.getManifestShortcuts());
@@ -5739,7 +5740,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         // Try again, but the user is locked, so still ignored.
         mRunningUsers.put(USER_10, true);
 
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageAddIntent(CALLING_PACKAGE_2, USER_10));
         runWithCaller(CALLING_PACKAGE_2, USER_10, () -> {
             assertEmpty(mManager.getManifestShortcuts());
@@ -5750,7 +5751,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         mUnlockedUsers.put(USER_10, true);
 
         // Send PACKAGE_ADD broadcast to have Package 2 on user-10 publish manifest shortcuts.
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageAddIntent(CALLING_PACKAGE_2, USER_10));
 
         runWithCaller(CALLING_PACKAGE_2, USER_10, () -> {
@@ -5791,7 +5792,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 R.xml.shortcut_5_reverse);
 
         updatePackageLastUpdateTime(CALLING_PACKAGE_2, 1);
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageAddIntent(CALLING_PACKAGE_2, USER_0));
 
         runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
@@ -5819,7 +5820,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 new ComponentName(CALLING_PACKAGE_2, ShortcutActivity2.class.getName()),
                 R.xml.shortcut_0);
         updatePackageLastUpdateTime(CALLING_PACKAGE_2, 1);
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageAddIntent(CALLING_PACKAGE_2, USER_0));
 
         // No manifest shortcuts, and pinned ones are disabled.
@@ -5850,7 +5851,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
                 R.xml.shortcut_error_1);
         updatePackageVersion(CALLING_PACKAGE_1, 1);
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
 
         // Only the valid one is published.
@@ -5865,7 +5866,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
                 R.xml.shortcut_error_2);
         updatePackageVersion(CALLING_PACKAGE_1, 1);
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
 
         // Only the valid one is published.
@@ -5880,7 +5881,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
                 R.xml.shortcut_error_3);
         updatePackageVersion(CALLING_PACKAGE_1, 1);
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
 
         // Only the valid one is published.
@@ -5896,7 +5897,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
                 R.xml.shortcut_error_4);
         updatePackageVersion(CALLING_PACKAGE_1, 1);
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
 
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
@@ -5924,7 +5925,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
                 R.xml.shortcut_5);
         updatePackageVersion(CALLING_PACKAGE_1, 1);
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
 
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
@@ -5962,7 +5963,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
                 R.xml.shortcut_error_4);
         updatePackageVersion(CALLING_PACKAGE_1, 1);
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
 
         // Make sure 3, 4 and 5 still exist but disabled.
@@ -6010,7 +6011,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
                 R.xml.shortcut_5);
         updatePackageVersion(CALLING_PACKAGE_1, 1);
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
 
         // Only the valid one is published.
@@ -6115,7 +6116,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
                 R.xml.shortcut_2);
         updatePackageVersion(CALLING_PACKAGE_1, 1);
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
 
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
@@ -6212,7 +6213,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
                 R.xml.shortcut_1);
         updatePackageVersion(CALLING_PACKAGE_1, 1);
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
 
         // Only the valid one is published.
@@ -6231,7 +6232,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
                 R.xml.shortcut_1_disable);
         updatePackageVersion(CALLING_PACKAGE_1, 1);
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
 
         // Because shortcut 1 wasn't pinned, it'll just go away.
@@ -6252,7 +6253,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
                 R.xml.shortcut_1);
         updatePackageVersion(CALLING_PACKAGE_1, 1);
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
 
         // Only the valid one is published.
@@ -6275,7 +6276,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
                 R.xml.shortcut_1_disable);
         updatePackageVersion(CALLING_PACKAGE_1, 1);
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
 
         // Because shortcut 1 was pinned, it'll still exist as pinned, but disabled.
@@ -6308,7 +6309,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
                 R.xml.shortcut_2_duplicate);
         updatePackageVersion(CALLING_PACKAGE_1, 1);
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
 
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
@@ -6338,7 +6339,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 new ComponentName(CALLING_PACKAGE_1, ShortcutActivity2.class.getName()),
                 R.xml.shortcut_5);
         updatePackageVersion(CALLING_PACKAGE_1, 1);
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
 
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
@@ -6410,7 +6411,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
                 R.xml.shortcut_5);
         updatePackageVersion(CALLING_PACKAGE_1, 1);
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
 
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
@@ -6460,7 +6461,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
                 R.xml.shortcut_2);
         updatePackageVersion(CALLING_PACKAGE_1, 1);
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
 
         runWithCaller(LAUNCHER_1, USER_0, () -> {
@@ -6471,7 +6472,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
                 R.xml.shortcut_1);
         updatePackageVersion(CALLING_PACKAGE_1, 1);
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
 
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
@@ -6553,7 +6554,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
                 R.xml.shortcut_5);
         updatePackageVersion(CALLING_PACKAGE_1, 1);
-        mInternal.onPackageBroadcast(
+                mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
 
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
@@ -6623,7 +6624,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
                     R.xml.shortcut_2);
             updatePackageVersion(CALLING_PACKAGE_1, 1);
-            mInternal.onPackageBroadcast(
+                    mService.mPackageMonitor.onReceive(getTestContext(),
                     genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
             assertEquals(2, mManager.getManifestShortcuts().size());
 
@@ -6749,7 +6750,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
                     R.xml.shortcut_2);
             updatePackageVersion(CALLING_PACKAGE_1, 1);
-            mInternal.onPackageBroadcast(
+                    mService.mPackageMonitor.onReceive(getTestContext(),
                     genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
 
             assertEquals(2, mManager.getManifestShortcuts().size());
@@ -6898,7 +6899,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
                     R.xml.shortcut_1);
             updatePackageVersion(CALLING_PACKAGE_1, 1);
-            mInternal.onPackageBroadcast(
+                    mService.mPackageMonitor.onReceive(getTestContext(),
                     genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
             assertEquals(1, mManager.getManifestShortcuts().size());
 
@@ -6918,7 +6919,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     new ComponentName(CALLING_PACKAGE_1, ShortcutActivity2.class.getName()),
                     R.xml.shortcut_1_alt);
             updatePackageVersion(CALLING_PACKAGE_1, 1);
-            mInternal.onPackageBroadcast(
+                    mService.mPackageMonitor.onReceive(getTestContext(),
                     genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
             assertEquals(3, mManager.getManifestShortcuts().size());
 
@@ -6938,7 +6939,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     new ComponentName(CALLING_PACKAGE_1, ShortcutActivity2.class.getName()),
                     R.xml.shortcut_5_alt); // manifest has 5, but max is 3, so a2 will have 3.
             updatePackageVersion(CALLING_PACKAGE_1, 1);
-            mInternal.onPackageBroadcast(
+                    mService.mPackageMonitor.onReceive(getTestContext(),
                     genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
             assertEquals(5, mManager.getManifestShortcuts().size());
 
@@ -6957,7 +6958,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     new ComponentName(CALLING_PACKAGE_1, ShortcutActivity2.class.getName()),
                     R.xml.shortcut_0);
             updatePackageVersion(CALLING_PACKAGE_1, 1);
-            mInternal.onPackageBroadcast(
+                    mService.mPackageMonitor.onReceive(getTestContext(),
                     genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
             assertEquals(0, mManager.getManifestShortcuts().size());
 
