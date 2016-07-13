@@ -72,6 +72,8 @@ static const char LAST_TIME_CHANGED_FILE_NAME[] = "last_time_change";
 static const char LAST_TIME_CHANGED_FILE_PATH[] = "/data/system/time/last_time_change";
 static const char ACCURATE_TIME_FLAG_FILE_NAME[] = "time_is_accurate";
 static const char ACCURATE_TIME_FLAG_FILE_PATH[] = "/data/system/time/time_is_accurate";
+// Java timestamp format. Don't show the clock if the date is before 2000-01-01 00:00:00.
+static const long long ACCURATE_TIME_EPOCH = 946684800000;
 static const char EXIT_PROP_NAME[] = "service.bootanim.exit";
 static const int ANIM_ENTRY_NAME_MAX = 256;
 
@@ -932,8 +934,9 @@ bool BootAnimation::updateIsTimeAccurate() {
         clock_gettime(CLOCK_REALTIME, &now);
         // Match the Java timestamp format
         long long rtcNow = (now.tv_sec * 1000LL) + (now.tv_nsec / 1000000LL);
-        if (lastChangedTime > rtcNow - MAX_TIME_IN_PAST
-            && lastChangedTime < rtcNow + MAX_TIME_IN_FUTURE) {
+        if (ACCURATE_TIME_EPOCH < rtcNow
+            && lastChangedTime > (rtcNow - MAX_TIME_IN_PAST)
+            && lastChangedTime < (rtcNow + MAX_TIME_IN_FUTURE)) {
             mTimeIsAccurate = true;
         }
       }
