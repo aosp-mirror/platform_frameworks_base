@@ -1189,7 +1189,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
             Configuration config = mWindowManager.updateOrientationFromAppTokens(
                     mService.mConfiguration,
                     r.mayFreezeScreenLocked(app) ? r.appToken : null);
-            mService.updateConfigurationLocked(config, r, false);
+            // Deferring resume here because we're going to launch new activity shortly.
+            // We don't want to perform a redundant launch of the same record while ensuring
+            // configurations and trying to resume top activity of focused stack.
+            mService.updateConfigurationLocked(config, r, false, true /* deferResume */);
         }
 
         r.app = app;
@@ -2004,7 +2007,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             boolean preserveWindows, boolean allowResizeInDockedMode, boolean deferResume) {
         if (stackId == DOCKED_STACK_ID) {
             resizeDockedStackLocked(bounds, tempTaskBounds, tempTaskInsetBounds, null, null,
-                    preserveWindows);
+                    preserveWindows, deferResume);
             return;
         }
         final ActivityStack stack = getStack(stackId);
@@ -2154,8 +2157,16 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     void resizeDockedStackLocked(Rect dockedBounds, Rect tempDockedTaskBounds,
-            Rect tempDockedTaskInsetBounds,
-            Rect tempOtherTaskBounds, Rect tempOtherTaskInsetBounds, boolean preserveWindows) {
+            Rect tempDockedTaskInsetBounds, Rect tempOtherTaskBounds, Rect tempOtherTaskInsetBounds,
+            boolean preserveWindows) {
+        resizeDockedStackLocked(dockedBounds, tempDockedTaskBounds, tempDockedTaskInsetBounds,
+                tempOtherTaskBounds, tempOtherTaskInsetBounds, preserveWindows,
+                false /* deferResume */);
+    }
+
+    void resizeDockedStackLocked(Rect dockedBounds, Rect tempDockedTaskBounds,
+            Rect tempDockedTaskInsetBounds, Rect tempOtherTaskBounds, Rect tempOtherTaskInsetBounds,
+            boolean preserveWindows, boolean deferResume) {
 
         if (!mAllowDockedStackResize) {
             // Docked stack resize currently disabled.
@@ -2198,11 +2209,13 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     if (StackId.isResizeableByDockedStack(i) && getStack(i) != null) {
                         resizeStackLocked(i, tempRect, tempOtherTaskBounds,
                                 tempOtherTaskInsetBounds, preserveWindows,
-                                true /* allowResizeInDockedMode */, !DEFER_RESUME);
+                                true /* allowResizeInDockedMode */, deferResume);
                     }
                 }
             }
-            stack.ensureVisibleActivitiesConfigurationLocked(r, preserveWindows);
+            if (!deferResume) {
+                stack.ensureVisibleActivitiesConfigurationLocked(r, preserveWindows);
+            }
         } finally {
             mAllowDockedStackResize = true;
             mWindowManager.continueSurfaceLayout();
