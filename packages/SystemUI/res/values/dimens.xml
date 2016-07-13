@@ -375,6 +375,8 @@
 
     <!-- The font size of the date in QS -->
     <dimen name="qs_date_collapsed_size">14sp</dimen>
+    <!-- Amount the date/time move when emergency calls only is present -->
+    <dimen name="qs_date_time_translation">8dp</dimen>
 
     <!-- Battery level text padding end when in expanded QS and on Keyguard -->
     <dimen name="battery_level_padding_end">2dp</dimen>
