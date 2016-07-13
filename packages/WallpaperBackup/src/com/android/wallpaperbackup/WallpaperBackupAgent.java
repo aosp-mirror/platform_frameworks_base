@@ -114,13 +114,17 @@ public class WallpaperBackupAgent extends BackupAgent {
                 imageStage.delete();
                 lockImageStage.delete();
 
-                Os.link(mWallpaperInfo.getCanonicalPath(), infoStage.getCanonicalPath());
-                fullBackupFile(infoStage, data);
-                Os.link(mWallpaperFile.getCanonicalPath(), imageStage.getCanonicalPath());
-                fullBackupFile(imageStage, data);
+                if (mWallpaperInfo.exists()) {
+                    Os.link(mWallpaperInfo.getCanonicalPath(), infoStage.getCanonicalPath());
+                    fullBackupFile(infoStage, data);
+                }
+                if (mWallpaperFile.exists()) {
+                    Os.link(mWallpaperFile.getCanonicalPath(), imageStage.getCanonicalPath());
+                    fullBackupFile(imageStage, data);
+                }
 
                 // Don't try to store the lock image if we overran our quota last time
-                if (!mQuotaExceeded) {
+                if (mLockWallpaperFile.exists() && !mQuotaExceeded) {
                     Os.link(mLockWallpaperFile.getCanonicalPath(), lockImageStage.getCanonicalPath());
                     fullBackupFile(lockImageStage, data);
                 }
@@ -130,7 +134,7 @@ public class WallpaperBackupAgent extends BackupAgent {
                 }
             }
         } catch (Exception e) {
-            Slog.e(TAG, "Unable to back up wallpaper: " + e.getMessage());
+            Slog.e(TAG, "Unable to back up wallpaper", e);
         } finally {
             if (DEBUG) {
                 Slog.v(TAG, "Removing backup stage links");
@@ -173,6 +177,9 @@ public class WallpaperBackupAgent extends BackupAgent {
         final File lockImageStage = new File (filesDir, LOCK_IMAGE_STAGE);
 
         try {
+            // First off, revert to the factory state
+            mWm.clear(WallpaperManager.FLAG_SYSTEM | WallpaperManager.FLAG_LOCK);
+
             // It is valid for the imagery to be absent; it means that we were not permitted
             // to back up the original image on the source device, or there was no user-supplied
             // wallpaper image present.
