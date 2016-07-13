@@ -33,7 +33,7 @@ page.tags=filtering,features,google play filters,permissions
     <p style="color:#669999;padding-top:1em;">Google Play Filtering</p>
     <p style="padding-top:1em;">Google Play uses the <code>&lt;uses-feature&gt;</code>
     elements declared in your app manifest to filter your app from devices
-    that do not meet it's hardware and software feature requirements. </p>
+    that do not meet its hardware and software feature requirements. </p>
 
 <p style="margin-top:1em;">By specifying the features that your application requires,
 you enable Google Play to present your application only to users whose
@@ -150,23 +150,21 @@ device compatibility.</p>
   <dd>
     Boolean value that indicates whether the application requires the feature
     specified in <code>android:name</code>.
-  </dd>
-</dl>
-<ul>
-<li>When you declare <code>android:required="true"</code> for a feature,
-you are specifying that the application <em>cannot function, or is not
-designed to function</em>, when the specified feature is not present on the
-device. </li>
+    <ul>
+    <li>When you declare <code>android:required="true"</code> for a feature,
+    you are specifying that the application <em>cannot function, or is not
+    designed to function</em>, when the specified feature is not present on the
+    device. </li>
 
-<li>When you declare <code>android:required="false"</code> for a feature, it
-means that the application <em>prefers to use the feature</em> if present on
-the device, but that it <em>is designed to function without the specified
-feature</em>, if necessary. </li>
+    <li>When you declare <code>android:required="false"</code> for a feature, it
+    means that the application <em>prefers to use the feature</em> if present on
+    the device, but that it <em>is designed to function without the specified
+    feature</em>, if necessary. </li>
 
-</ul>
+    </ul>
 
-<p>The default value for <code>android:required</code> if not declared is
-<code>"true"</code>.</p>
+    <p>The default value for <code>android:required</code> if not declared is
+    <code>"true"</code>.</p>
   </dd>
 
   <dt><a name="glEsVersion"></a><code>android:glEsVersion</code></dt>
