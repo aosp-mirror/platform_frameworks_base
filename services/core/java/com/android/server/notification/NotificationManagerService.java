@@ -1851,7 +1851,7 @@ public class NotificationManagerService extends SystemService {
             enforceSystemOrSystemUIOrVolume("INotificationManager.setZenMode");
             final long identity = Binder.clearCallingIdentity();
             try {
-                mZenModeHelper.setManualZenMode(mode, conditionId, reason);
+                mZenModeHelper.setManualZenMode(mode, conditionId, null, reason);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -1928,7 +1928,7 @@ public class NotificationManagerService extends SystemService {
             if (zen == -1) throw new IllegalArgumentException("Invalid filter: " + filter);
             final long identity = Binder.clearCallingIdentity();
             try {
-                mZenModeHelper.setManualZenMode(zen, null, "setInterruptionFilter");
+                mZenModeHelper.setManualZenMode(zen, null, pkg, "setInterruptionFilter");
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
