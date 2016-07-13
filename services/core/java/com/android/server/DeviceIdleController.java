@@ -973,13 +973,12 @@ public class DeviceIdleController extends SystemService
                 cancelSensingTimeoutAlarmLocked();
             }
         }
-        if (result == AnyMotionDetector.RESULT_MOVED) {
-            if (DEBUG) Slog.d(TAG, "RESULT_MOVED received.");
+        if ((result == AnyMotionDetector.RESULT_MOVED) ||
+            (result == AnyMotionDetector.RESULT_UNKNOWN)) {
             synchronized (this) {
-                handleMotionDetectedLocked(mConstants.INACTIVE_TIMEOUT, "sense_motion");
+                handleMotionDetectedLocked(mConstants.INACTIVE_TIMEOUT, "non_stationary");
             }
         } else if (result == AnyMotionDetector.RESULT_STATIONARY) {
-            if (DEBUG) Slog.d(TAG, "RESULT_STATIONARY received.");
             if (mState == STATE_SENSING) {
                 // If we are currently sensing, it is time to move to locating.
                 synchronized (this) {
