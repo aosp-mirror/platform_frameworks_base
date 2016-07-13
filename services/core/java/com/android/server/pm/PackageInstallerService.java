@@ -182,6 +182,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
      */
     private final Random mRandom = new SecureRandom();
 
+    /** All sessions allocated */
+    @GuardedBy("mSessions")
+    private final SparseBooleanArray mAllocatedSessions = new SparseBooleanArray();
+
     @GuardedBy("mSessions")
     private final SparseArray<PackageInstallerSession> mSessions = new SparseArray<>();
 
@@ -365,6 +369,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
                             // keep details around for dumpsys.
                             mHistoricalSessions.put(session.sessionId, session);
                         }
+                        mAllocatedSessions.put(session.sessionId, true);
                     }
                 }
             }
@@ -768,8 +773,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         int sessionId;
         do {
             sessionId = mRandom.nextInt(Integer.MAX_VALUE - 1) + 1;
-            if (mSessions.get(sessionId) == null && mHistoricalSessions.get(sessionId) == null
-                    && !mLegacySessions.get(sessionId, false)) {
+            if (!mAllocatedSessions.get(sessionId, false)) {
+                mAllocatedSessions.put(sessionId, true);
                 return sessionId;
             }
         } while (n++ < 32);
