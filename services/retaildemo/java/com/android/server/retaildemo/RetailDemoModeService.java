@@ -327,6 +327,9 @@ public class RetailDemoModeService extends SystemService {
         um.setUserRestriction(UserManager.DISALLOW_USB_FILE_TRANSFER, true, user);
         um.setUserRestriction(UserManager.DISALLOW_MODIFY_ACCOUNTS, true, user);
         um.setUserRestriction(UserManager.DISALLOW_CONFIG_BLUETOOTH, true, user);
+        // Disallow rebooting in safe mode - controlled by user 0
+        getUserManager().setUserRestriction(UserManager.DISALLOW_SAFE_BOOT, true,
+                UserHandle.SYSTEM);
         Settings.Secure.putIntForUser(getContext().getContentResolver(),
                 Settings.Secure.SKIP_FIRST_USE_HINTS, 1, userInfo.id);
         Settings.Secure.putIntForUser(getContext().getContentResolver(),
