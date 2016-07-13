@@ -37,11 +37,11 @@ import com.android.internal.logging.MetricsProto;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
-import com.android.systemui.qs.QSAnimator;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QSPanel.Callback;
 import com.android.systemui.qs.QuickQSPanel;
 import com.android.systemui.qs.TouchAnimator;
+import com.android.systemui.qs.TouchAnimator.Builder;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.NextAlarmController.NextAlarmChangeCallback;
@@ -84,13 +84,13 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     private ImageView mMultiUserAvatar;
 
 
-    private TouchAnimator mSecondHalfAnimator;
-    private TouchAnimator mFirstHalfAnimator;
+    private TouchAnimator mAnimator;
     protected TouchAnimator mSettingsAlpha;
     private float mExpansionAmount;
     protected QSTileHost mHost;
     protected View mEdit;
     private boolean mShowFullAlarm;
+    private float mDateTimeTranslation;
 
     public QuickStatusBarHeader(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -111,6 +111,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         mDateTimeGroup = (ViewGroup) findViewById(R.id.date_time_group);
         mDateTimeGroup.setPivotX(0);
         mDateTimeGroup.setPivotY(0);
+        mDateTimeTranslation = getResources().getDimension(R.dimen.qs_date_time_translation);
         mShowFullAlarm = getResources().getBoolean(R.bool.quick_settings_show_full_alarm);
 
         mExpandIndicator = (ExpandableIndicator) findViewById(R.id.expand_indicator);
@@ -152,15 +153,13 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         FontSizeUtils.updateFontSize(mAlarmStatus, R.dimen.qs_date_collapsed_size);
         FontSizeUtils.updateFontSize(mEmergencyOnly, R.dimen.qs_emergency_calls_only_text_size);
 
-        mSecondHalfAnimator = new TouchAnimator.Builder()
+        Builder builder = new Builder()
                 .addFloat(mShowFullAlarm ? mAlarmStatus : findViewById(R.id.date), "alpha", 0, 1)
-                .addFloat(mEmergencyOnly, "alpha", 0, 1)
-                .build();
+                .addFloat(mEmergencyOnly, "alpha", 0, 1);
         if (mShowFullAlarm) {
-            mFirstHalfAnimator = new TouchAnimator.Builder()
-                    .addFloat(mAlarmStatusCollapsed, "alpha", 1, 0)
-                    .build();
+            builder.addFloat(mAlarmStatusCollapsed, "alpha", 1, 0);
         }
+        mAnimator = builder.build();
 
         updateSettingsAnimator();
     }
@@ -223,10 +222,8 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     @Override
     public void setExpansion(float headerExpansionFraction) {
         mExpansionAmount = headerExpansionFraction;
-        mSecondHalfAnimator.setPosition(headerExpansionFraction);
-        if (mShowFullAlarm) {
-            mFirstHalfAnimator.setPosition(headerExpansionFraction);
-        }
+        updateDateTimePosition();
+        mAnimator.setPosition(headerExpansionFraction);
         mSettingsAlpha.setPosition(headerExpansionFraction);
 
         updateAlarmVisibilities();
@@ -264,6 +261,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
 
     protected void updateVisibilities() {
         updateAlarmVisibilities();
+        updateDateTimePosition();
         mEmergencyOnly.setVisibility(mExpanded && mShowEmergencyCallsOnly
                 ? View.VISIBLE : View.INVISIBLE);
         mSettingsContainer.findViewById(R.id.tuner_icon).setVisibility(
@@ -272,6 +270,11 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         mMultiUserSwitch.setVisibility(mExpanded && mMultiUserSwitch.hasMultipleUsers() && !isDemo
                 ? View.VISIBLE : View.INVISIBLE);
         mEdit.setVisibility(isDemo || !mExpanded ? View.INVISIBLE : View.VISIBLE);
+    }
+
+    private void updateDateTimePosition() {
+        mDateTimeAlarmGroup.setTranslationY(mShowEmergencyCallsOnly
+                ? mExpansionAmount * mDateTimeTranslation : 0);
     }
 
     private void updateListeners() {
