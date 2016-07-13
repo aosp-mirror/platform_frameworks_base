@@ -218,6 +218,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private static final String ATTR_SETUP_COMPLETE = "setup-complete";
     private static final String ATTR_PROVISIONING_STATE = "provisioning-state";
     private static final String ATTR_PERMISSION_POLICY = "permission-policy";
+    private static final String ATTR_DEVICE_PROVISIONING_CONFIG_APPLIED =
+            "device-provisioning-config-applied";
 
     private static final String ATTR_DELEGATED_CERT_INSTALLER = "delegated-cert-installer";
     private static final String ATTR_APPLICATION_RESTRICTIONS_MANAGER
@@ -416,6 +418,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         boolean mUserSetupComplete = false;
         int mUserProvisioningState;
         int mPermissionPolicy;
+
+        boolean mDeviceProvisioningConfigApplied = false;
 
         final ArrayMap<ComponentName, ActiveAdmin> mAdminMap = new ArrayMap<>();
         final ArrayList<ActiveAdmin> mAdminList = new ArrayList<>();
@@ -2173,6 +2177,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.attribute(null, ATTR_SETUP_COMPLETE,
                         Boolean.toString(true));
             }
+            if (policy.mDeviceProvisioningConfigApplied) {
+                out.attribute(null, ATTR_DEVICE_PROVISIONING_CONFIG_APPLIED,
+                        Boolean.toString(true));
+            }
             if (policy.mUserProvisioningState != DevicePolicyManager.STATE_USER_UNMANAGED) {
                 out.attribute(null, ATTR_PROVISIONING_STATE,
                         Integer.toString(policy.mUserProvisioningState));
@@ -2332,6 +2340,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             String userSetupComplete = parser.getAttributeValue(null, ATTR_SETUP_COMPLETE);
             if (userSetupComplete != null && Boolean.toString(true).equals(userSetupComplete)) {
                 policy.mUserSetupComplete = true;
+            }
+            String deviceProvisioningConfigApplied = parser.getAttributeValue(null,
+                    ATTR_DEVICE_PROVISIONING_CONFIG_APPLIED);
+            if (deviceProvisioningConfigApplied != null
+                    && Boolean.toString(true).equals(deviceProvisioningConfigApplied)) {
+                policy.mDeviceProvisioningConfigApplied = true;
             }
             String provisioningState = parser.getAttributeValue(null, ATTR_PROVISIONING_STATE);
             if (!TextUtils.isEmpty(provisioningState)) {
@@ -9045,5 +9059,24 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         // The removed admin might have disabled camera, so update user
         // restrictions.
         pushUserRestrictions(userHandle);
+    }
+
+    @Override
+    public void setDeviceProvisioningConfigApplied() {
+        enforceManageUsers();
+        synchronized (this) {
+            DevicePolicyData policy = getUserData(UserHandle.USER_SYSTEM);
+            policy.mDeviceProvisioningConfigApplied = true;
+            saveSettingsLocked(UserHandle.USER_SYSTEM);
+        }
+    }
+
+    @Override
+    public boolean isDeviceProvisioningConfigApplied() {
+        enforceManageUsers();
+        synchronized (this) {
+            final DevicePolicyData policy = getUserData(UserHandle.USER_SYSTEM);
+            return policy.mDeviceProvisioningConfigApplied;
+        }
     }
 }

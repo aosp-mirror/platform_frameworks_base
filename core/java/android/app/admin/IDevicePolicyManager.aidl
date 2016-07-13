@@ -303,4 +303,6 @@ interface IDevicePolicyManager {
     void uninstallPackageWithActiveAdmins(String packageName);
 
     boolean isDeviceProvisioned();
+    boolean isDeviceProvisioningConfigApplied();
+    void setDeviceProvisioningConfigApplied();
 }
