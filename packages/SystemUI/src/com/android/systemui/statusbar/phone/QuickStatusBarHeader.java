@@ -315,7 +315,8 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     public void onClick(View v) {
         if (v == mSettingsButton) {
             MetricsLogger.action(mContext,
-                    MetricsProto.MetricsEvent.ACTION_QS_EXPANDED_SETTINGS_LAUNCH);
+                    mExpanded ? MetricsProto.MetricsEvent.ACTION_QS_EXPANDED_SETTINGS_LAUNCH
+                            : MetricsProto.MetricsEvent.ACTION_QS_COLLAPSED_SETTINGS_LAUNCH);
             if (mSettingsButton.isTunerClick()) {
                 if (TunerService.isTunerEnabled(mContext)) {
                     TunerService.showResetRequest(mContext, new Runnable() {
