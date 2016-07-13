@@ -3498,7 +3498,7 @@ public class MediaPlayer extends PlayerBase
          * @param extra an extra code, specific to the info. Typically
          * implementation dependent.
          * @return True if the method handled the info, false if it didn't.
-         * Returning false, or not having an OnErrorListener at all, will
+         * Returning false, or not having an OnInfoListener at all, will
          * cause the info to be discarded.
          */
         boolean onInfo(MediaPlayer mp, int what, int extra);
