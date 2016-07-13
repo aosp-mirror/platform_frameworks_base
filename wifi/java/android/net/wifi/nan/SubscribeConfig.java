@@ -413,8 +413,8 @@ public class SubscribeConfig implements Parcelable {
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
         public Builder setServiceSpecificInfo(@NonNull String serviceSpecificInfoStr) {
-            mServiceSpecificInfoLength = serviceSpecificInfoStr.length();
             mServiceSpecificInfo = serviceSpecificInfoStr.getBytes();
+            mServiceSpecificInfoLength = mServiceSpecificInfo.length;
             return this;
         }
 
