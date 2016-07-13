@@ -604,7 +604,7 @@ public class AppTransition implements Dump {
             float scaleH = mTmpRect.height() / (float) appHeight;
             Animation scale = new ScaleAnimation(scaleW, 1, scaleH, 1,
                     computePivot(mTmpRect.left, scaleW),
-                    computePivot(mTmpRect.right, scaleH));
+                    computePivot(mTmpRect.top, scaleH));
             scale.setInterpolator(mDecelerateInterpolator);
 
             Animation alpha = new AlphaAnimation(0, 1);
@@ -1615,8 +1615,7 @@ public class AppTransition implements Dump {
         if (isTransitionSet()) {
             clear();
             mNextAppTransitionType = NEXT_TRANSIT_TYPE_SCALE_UP;
-            putDefaultNextAppTransitionCoordinates(startX, startY, startX + startWidth,
-                    startY + startHeight, null);
+            putDefaultNextAppTransitionCoordinates(startX, startY, startWidth, startHeight, null);
             postAnimationCallback();
         }
     }
