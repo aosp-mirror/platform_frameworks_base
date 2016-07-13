@@ -9123,15 +9123,6 @@ public final class Settings {
         public static final String ENABLE_CELLULAR_ON_BOOT = "enable_cellular_on_boot";
 
         /**
-         * Whether toggling OEM unlock is disallowed. If disallowed, it is not possible to enable or
-         * disable OEM unlock.
-         * <p>
-         * Type: int (0: allow OEM unlock setting. 1: disallow OEM unlock)
-         * @hide
-         */
-        public static final String OEM_UNLOCK_DISALLOWED = "oem_unlock_disallowed";
-
-        /**
          * The maximum allowed notification enqueue rate in Hertz.
          *
          * Should be a float, and includes both posts and updates.
