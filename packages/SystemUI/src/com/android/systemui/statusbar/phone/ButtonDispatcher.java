@@ -49,6 +49,13 @@ public class ButtonDispatcher {
         mViews.clear();
     }
 
+    void addView(View view, boolean landscape) {
+        addView(view);
+        if (view instanceof ButtonInterface) {
+            ((ButtonInterface) view).setLandscape(landscape);
+        }
+    }
+
     void addView(View view) {
         mViews.add(view);
         view.setOnClickListener(mClickListener);
@@ -178,5 +185,7 @@ public class ButtonDispatcher {
         void setImageDrawable(@Nullable Drawable drawable);
 
         void abortCurrentGesture();
+
+        void setLandscape(boolean landscape);
     }
 }
