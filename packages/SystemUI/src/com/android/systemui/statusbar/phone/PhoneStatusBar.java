@@ -883,9 +883,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mLightStatusBarController = new LightStatusBarController(mIconController,
                 mBatteryController);
         mKeyguardMonitor = new KeyguardMonitor(mContext);
+        mUserSwitcherController = new UserSwitcherController(mContext, mKeyguardMonitor,
+                mHandler, this);
         if (UserManager.get(mContext).isUserSwitcherEnabled()) {
-            mUserSwitcherController = new UserSwitcherController(mContext, mKeyguardMonitor,
-                    mHandler, this);
             createUserSwitcher();
         }
 
