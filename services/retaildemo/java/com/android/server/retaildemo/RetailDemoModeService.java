@@ -321,8 +321,6 @@ public class RetailDemoModeService extends SystemService {
     private void setupDemoUser(UserInfo userInfo) {
         UserManager um = getUserManager();
         UserHandle user = UserHandle.of(userInfo.id);
-        LockPatternUtils lockPatternUtils = new LockPatternUtils(getContext());
-        lockPatternUtils.setLockScreenDisabled(true, userInfo.id);
         um.setUserRestriction(UserManager.DISALLOW_CONFIG_WIFI, true, user);
         um.setUserRestriction(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, true, user);
         um.setUserRestriction(UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS, true, user);
@@ -496,6 +494,9 @@ public class RetailDemoModeService extends SystemService {
         mAmi.updatePersistentConfigurationForUser(getSystemUsersConfiguration(), userId);
         turnOffAllFlashLights();
         muteVolumeStreams();
+        // Disable lock screen for demo users.
+        LockPatternUtils lockPatternUtils = new LockPatternUtils(getContext());
+        lockPatternUtils.setLockScreenDisabled(true, userId);
         mNm.notifyAsUser(TAG, 1, createResetNotification(), UserHandle.of(userId));
 
         synchronized (mActivityLock) {
