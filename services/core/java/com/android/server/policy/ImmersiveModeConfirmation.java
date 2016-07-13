@@ -134,7 +134,7 @@ public class ImmersiveModeConfirmation {
     }
 
     public void immersiveModeChangedLw(String pkg, boolean isImmersiveMode,
-            boolean userSetupComplete) {
+            boolean userSetupComplete, boolean navBarEmpty) {
         mHandler.removeMessages(H.SHOW);
         if (isImmersiveMode) {
             final boolean disabled = PolicyControl.disableImmersiveConfirmation(pkg);
@@ -144,6 +144,7 @@ public class ImmersiveModeConfirmation {
                     && (DEBUG_SHOW_EVERY_TIME || !mConfirmed)
                     && userSetupComplete
                     && !mVrModeEnabled
+                    && !navBarEmpty
                     && !UserManager.isDeviceInDemoMode(mContext)) {
                 mHandler.sendEmptyMessageDelayed(H.SHOW, mShowDelayMs);
             }
@@ -152,12 +153,13 @@ public class ImmersiveModeConfirmation {
         }
     }
 
-    public boolean onPowerKeyDown(boolean isScreenOn, long time, boolean inImmersiveMode) {
+    public boolean onPowerKeyDown(boolean isScreenOn, long time, boolean inImmersiveMode,
+            boolean navBarEmpty) {
         if (!isScreenOn && (time - mPanicTime < mPanicThresholdMs)) {
             // turning the screen back on within the panic threshold
             return mClingWindow == null;
         }
-        if (isScreenOn && inImmersiveMode) {
+        if (isScreenOn && inImmersiveMode && !navBarEmpty) {
             // turning the screen off, remember if we were in immersive mode
             mPanicTime = time;
         } else {
