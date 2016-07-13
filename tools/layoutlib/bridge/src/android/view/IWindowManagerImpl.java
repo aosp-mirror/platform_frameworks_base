@@ -590,4 +590,9 @@ public class IWindowManagerImpl implements IWindowManager {
 
     @Override
     public void removeWallpaperInputConsumer() throws RemoteException {}
+
+    @Override
+    public Bitmap screenshotWallpaper() throws RemoteException {
+        return null;
+    }
 }
