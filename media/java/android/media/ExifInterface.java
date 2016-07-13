@@ -1323,26 +1323,6 @@ public class ExifInterface {
     }
 
     /**
-     * Returns the long array value of the specified tag. If there is no such tag
-     * in the image file or the value cannot be parsed as an array of long, return null.
-     *
-     * @param tag the name of the tag.
-     */
-    public long[] getAttributeLongArray(String tag) {
-        ExifAttribute exifAttribute = getExifAttribute(tag);
-        if (exifAttribute == null) {
-            return null;
-        }
-
-        try {
-            return (long[]) exifAttribute.getValue(mExifByteOrder);
-        } catch (NumberFormatException e) {
-            Log.w(TAG, "Invalid value for " + tag, e);
-            return null;
-        }
-    }
-
-    /**
      * Set the value of the specified tag.
      *
      * @param tag the name of the tag.
@@ -1553,7 +1533,7 @@ public class ExifInterface {
             }
 
             // Process JPEG input stream
-            getJpegAttributes(in);
+            getJpegAttributes(in, IFD_TIFF_HINT);
         } catch (IOException e) {
             // Ignore exceptions in order to keep the compatibility with the old versions of
             // ExifInterface.
@@ -1899,8 +1879,16 @@ public class ExifInterface {
         }
     }
 
-    // Loads EXIF attributes from a JPEG input stream.
-    private void getJpegAttributes(InputStream inputStream) throws IOException {
+    /**
+     * Loads EXIF attributes from a JPEG input stream.
+     *
+     * @param inputStream The input stream that starts with the JPEG data.
+     * @param imageTypes The image type from which to retrieve metadata. Use IFD_TIFF_HINT for
+     *                   primary image, IFD_PREVIEW_HINT for preview image, and
+     *                   IFD_THUMBNAIL_HINT for thumbnail image.
+     * @throws IOException If the data contains invalid JPEG markers, offsets, or length values.
+     */
+    private void getJpegAttributes(InputStream inputStream, int imageType) throws IOException {
         // See JPEG File Interchange Format Specification, "JFIF Specification"
         if (DEBUG) {
             Log.d(TAG, "getJpegAttributes starting with: " + inputStream);
@@ -2006,9 +1994,9 @@ public class ExifInterface {
                     if (dataInputStream.skipBytes(1) != 1) {
                         throw new IOException("Invalid SOFx");
                     }
-                    mAttributes[IFD_TIFF_HINT].put(TAG_IMAGE_LENGTH, ExifAttribute.createULong(
+                    mAttributes[imageType].put(TAG_IMAGE_LENGTH, ExifAttribute.createULong(
                             dataInputStream.readUnsignedShort(), mExifByteOrder));
-                    mAttributes[IFD_TIFF_HINT].put(TAG_IMAGE_WIDTH, ExifAttribute.createULong(
+                    mAttributes[imageType].put(TAG_IMAGE_WIDTH, ExifAttribute.createULong(
                             dataInputStream.readUnsignedShort(), mExifByteOrder));
                     length -= 5;
                     break;
@@ -2030,7 +2018,9 @@ public class ExifInterface {
 
     private void getRawAttributes(InputStream in) throws IOException {
         int bytesRead = 0;
-        byte[] exifBytes = new byte[in.available()];
+        int totalBytes = in.available();
+        byte[] exifBytes = new byte[totalBytes];
+        in.mark(in.available());
         in.read(exifBytes);
 
         ByteOrderAwarenessDataInputStream dataInputStream =
@@ -2042,12 +2032,28 @@ public class ExifInterface {
         // Read TIFF image file directories. See JEITA CP-3451C Section 4.5.2. Figure 6.
         readImageFileDirectory(dataInputStream, IFD_PREVIEW_HINT);
 
+        // Check if the preview image data should be a primary image data.
+        // The 0th IFD (first to be parsed) is presumed to be a preview image data, with a SubIFD
+        // that is a primary image data.
+        // But if the 0th IFD does not have a SubIFD, then it must be a primary image data since
+        // a primary image data must exist, but a preview image data does not have to.
+        if (mAttributes[IFD_TIFF_HINT].isEmpty() && !mAttributes[IFD_PREVIEW_HINT].isEmpty()) {
+            mAttributes[IFD_TIFF_HINT] = mAttributes[IFD_PREVIEW_HINT];
+            mAttributes[IFD_PREVIEW_HINT] = new HashMap();
+        }
+
+        // Update TAG_IMAGE_WIDTH and TAG_IMAGE_LENGTH for primary image.
+        updatePrimaryImageSizeValues(in);
+
         // Check if the preview image data should be a thumbnail image data.
-        // In a RAW file, there may be a Preview image, which is smaller than a Primary image but
-        // larger than a Thumbnail image. Normally, the Preview image can be considered a thumbnail
-        // image if its size meets the requirements. Therefore, when a Thumbnail image has not yet
-        // been found, we should check if the Preview image can be one.
+        // In a RAW file, there may be a preview image, which is smaller than a primary image but
+        // larger than a thumbnail image. Normally, the preview image can be considered a thumbnail
+        // image if its size meets the requirements. Therefore, when a thumbnail image has not yet
+        // been found, we should check if the preview image can be one.
         if (!mAttributes[IFD_PREVIEW_HINT].isEmpty() && mAttributes[IFD_THUMBNAIL_HINT].isEmpty()) {
+            // Update preview image size if necessary
+            retrieveJpegImageSize(in, IFD_PREVIEW_HINT);
+
             if (isThumbnail(mAttributes[IFD_PREVIEW_HINT])) {
                 mAttributes[IFD_THUMBNAIL_HINT] = mAttributes[IFD_PREVIEW_HINT];
                 mAttributes[IFD_PREVIEW_HINT] = new HashMap();
@@ -2057,8 +2063,6 @@ public class ExifInterface {
         // Process thumbnail.
         processThumbnail(dataInputStream, bytesRead, exifBytes.length);
 
-        // Update TAG_IMAGE_WIDTH and TAG_IMAGE_LENGTH.
-        updateImageSizeValues();
     }
 
     // Stores a new JPEG image with EXIF attributes into a given output stream.
@@ -2375,49 +2379,85 @@ public class ExifInterface {
         }
     }
 
-    // Processes Thumbnail based on Compression Value
+    /**
+     * JPEG compressed images do not contain IMAGE_LENGTH & IMAGE_WIDTH tags.
+     * This value uses JpegInterchangeFormat(JPEG data offset) value, and calls getJpegAttributes()
+     * to locate SOF(Start of Frame) marker and update the image length & width values.
+     * See JEITA CP-3451C Table 5 and Section 4.8.1. B.
+     */
+    private void retrieveJpegImageSize(InputStream in, int imageType) throws IOException {
+        // Check if image already has IMAGE_LENGTH & IMAGE_WIDTH values
+        ExifAttribute imageLengthAttribute =
+                (ExifAttribute) mAttributes[imageType].get(TAG_IMAGE_LENGTH);
+        ExifAttribute imageWidthAttribute =
+                (ExifAttribute) mAttributes[imageType].get(TAG_IMAGE_WIDTH);
+
+        if (imageLengthAttribute == null || imageWidthAttribute == null) {
+            // Find if offset for JPEG data exists
+            ExifAttribute jpegInterchangeFormatAttribute =
+                    (ExifAttribute) mAttributes[imageType].get(TAG_JPEG_INTERCHANGE_FORMAT);
+            if (jpegInterchangeFormatAttribute != null) {
+                int jpegInterchangeFormat =
+                        jpegInterchangeFormatAttribute.getIntValue(mExifByteOrder);
+
+                // Skip to the JPEG data offset
+                in.reset();
+                in.mark(in.available());
+                if (in.skip(jpegInterchangeFormat) != jpegInterchangeFormat) {
+                    Log.d(TAG, "Invalid JPEG offset");
+                }
+
+                // Searches for SOF marker in JPEG data and updates IMAGE_LENGTH & IMAGE_WIDTH tags
+                getJpegAttributes(in, imageType);
+            }
+        }
+    }
+
+    // Processes thumbnail based on Compression Value
     private void processThumbnail(ByteOrderAwarenessDataInputStream dataInputStream,
             int exifOffsetFromBeginning, int exifBytesLength) throws IOException {
-        if (mAttributes[IFD_THUMBNAIL_HINT].containsKey(TAG_COMPRESSION)) {
-            ExifAttribute compressionAttribute =
-                    (ExifAttribute) mAttributes[IFD_THUMBNAIL_HINT].get(TAG_COMPRESSION);
+        HashMap thumbnailData = mAttributes[IFD_THUMBNAIL_HINT];
+        ExifAttribute compressionAttribute = (ExifAttribute) thumbnailData.get(TAG_COMPRESSION);
+        if (compressionAttribute != null) {
             int compressionValue = compressionAttribute.getIntValue(mExifByteOrder);
             switch (compressionValue) {
                 case DATA_UNCOMPRESSED: {
-                    // TODO: add implementation for reading Uncompressed Thumbnail Data (b/28156704)
+                    // TODO: add implementation for reading uncompressed thumbnail data (b/28156704)
                     Log.d(TAG, "Uncompressed thumbnail data cannot be processed");
                     break;
                 }
                 case DATA_JPEG: {
-                    String jpegInterchangeFormatString =
-                            getAttribute(JPEG_INTERCHANGE_FORMAT_TAG.name);
-                    String jpegInterchangeFormatLengthString =
-                            getAttribute(JPEG_INTERCHANGE_FORMAT_LENGTH_TAG.name);
-                    if (jpegInterchangeFormatString != null
-                            && jpegInterchangeFormatLengthString != null) {
-                        try {
-                            int jpegInterchangeFormat =
-                                    Integer.parseInt(jpegInterchangeFormatString);
-                            int jpegInterchangeFormatLength =
-                                    Integer.parseInt(jpegInterchangeFormatLengthString);
-                            retrieveJPEGThumbnail(dataInputStream, jpegInterchangeFormat,
-                                    jpegInterchangeFormatLength, exifOffsetFromBeginning,
-                                    exifBytesLength);
-                        } catch (NumberFormatException e) {
-                            // Ignore corrupted format/formatLength values
-                        }
+                    ExifAttribute jpegInterchangeFormatAttribute =
+                            (ExifAttribute) thumbnailData.get(TAG_JPEG_INTERCHANGE_FORMAT);
+                    ExifAttribute jpegInterchangeFormatLengthAttribute =
+                            (ExifAttribute) thumbnailData.get(TAG_JPEG_INTERCHANGE_FORMAT_LENGTH);
+                    if (jpegInterchangeFormatAttribute != null
+                            && jpegInterchangeFormatLengthAttribute != null) {
+                        int jpegInterchangeFormat =
+                                jpegInterchangeFormatAttribute.getIntValue(mExifByteOrder);
+                        int jpegInterchangeFormatLength =
+                                jpegInterchangeFormatLengthAttribute.getIntValue(mExifByteOrder);
+                        retrieveJPEGThumbnail(dataInputStream, jpegInterchangeFormat,
+                                jpegInterchangeFormatLength, exifOffsetFromBeginning,
+                                exifBytesLength);
                     }
                     break;
                 }
                 case DATA_JPEG_COMPRESSED: {
-                    long[] stripOffsetsArray = getAttributeLongArray(TAG_STRIP_OFFSETS);
-                    long[] stripByteCountsArray = getAttributeLongArray(TAG_STRIP_BYTE_COUNTS);
-                    if (stripOffsetsArray != null && stripByteCountsArray != null) {
+                    ExifAttribute stripOffsetsAttribute =
+                            (ExifAttribute) thumbnailData.get(TAG_STRIP_OFFSETS);
+                    ExifAttribute stripByteCountsAttribute =
+                            (ExifAttribute) thumbnailData.get(TAG_STRIP_BYTE_COUNTS);
+                    if (stripOffsetsAttribute != null && stripByteCountsAttribute != null) {
+                        long[] stripOffsetsArray =
+                                (long[]) stripOffsetsAttribute.getValue(mExifByteOrder);
+                        long[] stripByteCountsArray =
+                                (long[]) stripByteCountsAttribute.getValue(mExifByteOrder);
                         if (stripOffsetsArray.length == 1) {
                             int stripOffsetsSum = (int) Arrays.stream(stripOffsetsArray).sum();
-                            int stripByteCountSum = (int) Arrays.stream(stripByteCountsArray).sum();
+                            int stripByteCountsSum = (int) Arrays.stream(stripByteCountsArray).sum();
                             retrieveJPEGThumbnail(dataInputStream, stripOffsetsSum,
-                                    stripByteCountSum, exifOffsetFromBeginning,
+                                    stripByteCountsSum, exifOffsetFromBeginning,
                                     exifBytesLength);
                         } else {
                             // TODO: implement method to read multiple strips (b/29737797)
@@ -2433,7 +2473,7 @@ public class ExifInterface {
         }
     }
 
-    // Retrieves Thumbnail for JPEG Compression
+    // Retrieves thumbnail for JPEG Compression
     private void retrieveJPEGThumbnail(ByteOrderAwarenessDataInputStream dataInputStream,
             int thumbnailOffset, int thumbnailLength, int exifOffsetFromBeginning,
             int exifBytesLength) throws IOException {
@@ -2471,7 +2511,6 @@ public class ExifInterface {
     private boolean isThumbnail(HashMap map) throws IOException {
         ExifAttribute imageLengthAttribute = (ExifAttribute) map.get(TAG_IMAGE_LENGTH);
         ExifAttribute imageWidthAttribute = (ExifAttribute) map.get(TAG_IMAGE_WIDTH);
-
         if (imageLengthAttribute != null && imageWidthAttribute != null) {
             int imageLengthValue = imageLengthAttribute.getIntValue(mExifByteOrder);
             int imageWidthValue = imageWidthAttribute.getIntValue(mExifByteOrder);
@@ -2483,14 +2522,22 @@ public class ExifInterface {
     }
 
     /**
-     * Raw images often store extra pixels around the edges of the final image, which results in
-     * larger values for TAG_IMAGE_WIDTH and TAG_IMAGE_LENGTH tags.
+     * If image is uncompressed, ImageWidth/Length tags are used to store size info.
+     * However, uncompressed images often store extra pixels around the edges of the final image,
+     * which results in larger values for TAG_IMAGE_WIDTH and TAG_IMAGE_LENGTH tags.
      * This method corrects those tag values by checking first the values of TAG_DEFAULT_CROP_SIZE
-     * and then TAG_PIXEL_X_DIMENSION & TAG_PIXEL_Y_DIMENSION.
-     * See DNG Specification 1.4.0.0. Section 4 (DefaultCropSize) & JEITA CP-3451 p26.
+     * See DNG Specification 1.4.0.0. Section 4. (DefaultCropSize)
+     *
+     * If image is JPEG compressed, PixelXDimension/PixelYDimension tags are used for size info.
+     * However, an image may have padding at the right end or bottom end of the image to make sure
+     * that the values are multiples of 64. If so, the increased value will be saved in the
+     * SOF(Start of Frame). In order to assure that valid image size values are stored, this method
+     * checks TAG_PIXEL_X_DIMENSION & TAG_PIXEL_Y_DIMENSION and updates values if necessary.
+     * See JEITA CP-3451C Table 5 and Section 4.8.1. B.
      * */
-    private void updateImageSizeValues() throws IOException {
-        // Checks for the NewSubfileType tag and returns if the image is not original resolution.
+    private void updatePrimaryImageSizeValues(InputStream in) throws IOException {
+        // Checks for the NewSubfileType tag and returns if the image is not original resolution,
+        // which means that it is not the primary imiage
         ExifAttribute newSubfileTypeAttribute =
                 (ExifAttribute) mAttributes[IFD_TIFF_HINT].get(TAG_NEW_SUBFILE_TYPE);
         if (newSubfileTypeAttribute != null) {
@@ -2501,13 +2548,17 @@ public class ExifInterface {
             }
         }
 
+        // Uncompressed image valid image size values
         ExifAttribute defaultCropSizeAttribute =
                 (ExifAttribute) mAttributes[IFD_TIFF_HINT].get(TAG_DEFAULT_CROP_SIZE);
+        // Compressed image valid image size values
         ExifAttribute pixelXDimAttribute =
                 (ExifAttribute) mAttributes[IFD_EXIF_HINT].get(TAG_PIXEL_X_DIMENSION);
         ExifAttribute pixelYDimAttribute =
                 (ExifAttribute) mAttributes[IFD_EXIF_HINT].get(TAG_PIXEL_Y_DIMENSION);
+
         if (defaultCropSizeAttribute != null) {
+            // Update for uncompressed image
             ExifAttribute defaultCropSizeXAttribute, defaultCropSizeYAttribute;
             if (defaultCropSizeAttribute.format == IFD_FORMAT_URATIONAL) {
                 Rational[] defaultCropSizeValue =
@@ -2526,9 +2577,15 @@ public class ExifInterface {
             }
             mAttributes[IFD_TIFF_HINT].put(TAG_IMAGE_WIDTH, defaultCropSizeXAttribute);
             mAttributes[IFD_TIFF_HINT].put(TAG_IMAGE_LENGTH, defaultCropSizeYAttribute);
-        } else if (pixelXDimAttribute != null && pixelYDimAttribute != null) {
-            mAttributes[IFD_TIFF_HINT].put(TAG_IMAGE_WIDTH, pixelXDimAttribute);
-            mAttributes[IFD_TIFF_HINT].put(TAG_IMAGE_LENGTH, pixelYDimAttribute);
+        } else {
+            // Update for JPEG image
+            if (pixelXDimAttribute != null && pixelYDimAttribute != null) {
+                mAttributes[IFD_TIFF_HINT].put(TAG_IMAGE_WIDTH, pixelXDimAttribute);
+                mAttributes[IFD_TIFF_HINT].put(TAG_IMAGE_LENGTH, pixelYDimAttribute);
+            } else {
+                // Update image size values from SOF marker if necessary
+                retrieveJpegImageSize(in, IFD_TIFF_HINT);
+            }
         }
     }
 
@@ -2582,9 +2639,9 @@ public class ExifInterface {
                     ExifAttribute.createULong(0, mExifByteOrder));
         }
         if (mHasThumbnail) {
-            mAttributes[IFD_TIFF_HINT].put(JPEG_INTERCHANGE_FORMAT_TAG.name,
+            mAttributes[IFD_THUMBNAIL_HINT].put(JPEG_INTERCHANGE_FORMAT_TAG.name,
                     ExifAttribute.createULong(0, mExifByteOrder));
-            mAttributes[IFD_TIFF_HINT].put(JPEG_INTERCHANGE_FORMAT_LENGTH_TAG.name,
+            mAttributes[IFD_THUMBNAIL_HINT].put(JPEG_INTERCHANGE_FORMAT_LENGTH_TAG.name,
                     ExifAttribute.createULong(mThumbnailLength, mExifByteOrder));
         }
 
@@ -2612,7 +2669,7 @@ public class ExifInterface {
         }
         if (mHasThumbnail) {
             int thumbnailOffset = position;
-            mAttributes[IFD_TIFF_HINT].put(JPEG_INTERCHANGE_FORMAT_TAG.name,
+            mAttributes[IFD_THUMBNAIL_HINT].put(JPEG_INTERCHANGE_FORMAT_TAG.name,
                     ExifAttribute.createULong(thumbnailOffset, mExifByteOrder));
             mThumbnailOffset = exifOffsetFromBeginning + thumbnailOffset;
             position += mThumbnailLength;
@@ -2818,8 +2875,12 @@ public class ExifInterface {
         }
 
         public void seek(long byteCount) throws IOException {
-            mPosition = 0L;
-            reset();
+            if (mPosition > byteCount) {
+                mPosition = 0L;
+                reset();
+            } else {
+                byteCount -= mPosition;
+            }
             if (skip(byteCount) != byteCount) {
                 throw new IOException("Couldn't seek up to the byteCount");
             }
