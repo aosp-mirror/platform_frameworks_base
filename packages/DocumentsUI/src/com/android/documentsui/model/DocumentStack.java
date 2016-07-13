@@ -42,11 +42,20 @@ public class DocumentStack extends LinkedList<DocumentInfo> implements Durable, 
     public DocumentStack() {};
 
     /**
+     * Creates an instance, and pushes all docs to it in the same order as they're passed as
+     * parameters, i.e. the last document will be at the top of the stack.
+     */
+    public DocumentStack(RootInfo root, DocumentInfo... docs) {
+        for (DocumentInfo doc : docs) {
+            push(doc);
+        }
+
+        this.root = root;
+    }
+
+    /**
      * Makes a new copy, and pushes all docs to the new copy in the same order as they're passed
      * as parameters, i.e. the last document will be at the top of the stack.
-     *
-     * @param src
-     * @param docs
      */
     public DocumentStack(DocumentStack src, DocumentInfo... docs) {
         super(src);

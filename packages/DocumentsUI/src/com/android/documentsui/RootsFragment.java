@@ -24,6 +24,7 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.LoaderManager.LoaderCallbacks;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
@@ -33,16 +34,14 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Looper;
-import android.provider.DocumentsContract.Root;
-import android.provider.DocumentsContract;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.text.format.Formatter;
 import android.util.Log;
 import android.view.ContextMenu;
+import android.view.DragEvent;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -60,7 +59,11 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.android.documentsui.CheckedTask.Check;
+import com.android.documentsui.clipping.DocumentClipper;
+import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.RootInfo;
+import com.android.documentsui.services.FileOperations;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -80,6 +83,20 @@ public class RootsFragment extends Fragment implements ItemDragListener.DragHost
 
     private static final String TAG = "RootsFragment";
     private static final String EXTRA_INCLUDE_APPS = "includeApps";
+
+    private final OnDragListener mDragListener = new ItemDragListener<RootsFragment>(this) {
+        @Override
+        public boolean handleDropEventChecked(View v, DragEvent event) {
+            final int position = (Integer) v.getTag(R.id.item_position_tag);
+            final Item item = mAdapter.getItem(position);
+
+            assert(item.isDropTarget());
+
+            BaseActivity activity = getBaseActivity();
+            return item.dropOn(event.getClipData(), activity, RootsFragment.this::isDetached,
+                    activity.fileOpCallback);
+        }
+    };
 
     private ListView mList;
     private RootsAdapter mAdapter;
@@ -165,8 +182,8 @@ public class RootsFragment extends Fragment implements ItemDragListener.DragHost
 
                 Intent handlerAppIntent = getArguments().getParcelable(EXTRA_INCLUDE_APPS);
 
-                mAdapter = new RootsAdapter(context, result, handlerAppIntent, state,
-                        new ItemDragListener<>(RootsFragment.this));
+                mAdapter =
+                        new RootsAdapter(context, result, handlerAppIntent, state, mDragListener);
                 mList.setAdapter(mAdapter);
 
                 onCurrentRootChanged();
@@ -247,12 +264,12 @@ public class RootsFragment extends Fragment implements ItemDragListener.DragHost
      * In RootsFragment we open the hovered root.
      */
     @Override
-    public void onViewHovered(View view) {
+    public void onViewHovered(View v) {
         // SpacerView doesn't have DragListener so this view is guaranteed to be a RootItemView.
-        RootItemView itemView = (RootItemView) view;
+        RootItemView itemView = (RootItemView) v;
         itemView.drawRipple();
 
-        final int position = (Integer) view.getTag(R.id.item_position_tag);
+        final int position = (Integer) v.getTag(R.id.item_position_tag);
         final Item item = mAdapter.getItem(position);
         item.open(this);
     }
@@ -374,6 +391,11 @@ public class RootsFragment extends Fragment implements ItemDragListener.DragHost
         abstract boolean isDropTarget();
 
         abstract void open(RootsFragment fragment);
+
+        boolean dropOn(ClipData data, Context context, Check check,
+                FileOperations.Callback callback) {
+            return false;
+        }
     }
 
     private static class RootItem extends Item {
@@ -439,6 +461,14 @@ public class RootsFragment extends Fragment implements ItemDragListener.DragHost
             BaseActivity activity = BaseActivity.get(fragment);
             Metrics.logRootVisited(fragment.getActivity(), root);
             activity.onRootPicked(root);
+        }
+
+        @Override
+        boolean dropOn(
+                ClipData data, Context context, Check check, FileOperations.Callback callback) {
+            ProviderExecutor executor = ProviderExecutor.forAuthority(root.authority);
+            new DropOnRootTask(data, root, context, check, callback).executeOnExecutor(executor);
+            return true;
         }
     }
 
@@ -515,6 +545,38 @@ public class RootsFragment extends Fragment implements ItemDragListener.DragHost
             DocumentsActivity activity = DocumentsActivity.get(fragment);
             Metrics.logAppVisited(fragment.getActivity(), info);
             activity.onAppPicked(info);
+        }
+    }
+
+    private static class DropOnRootTask extends CheckedTask<Void, DocumentInfo> {
+        private ClipData mData;
+        private RootInfo mDstRoot;
+        private Context mContext;
+        private FileOperations.Callback mCallback;
+
+        private DropOnRootTask(ClipData data, RootInfo dstRoot, Context context, Check check,
+                FileOperations.Callback callback) {
+            super(check);
+            mData = data;
+            mDstRoot = dstRoot;
+            mContext = context;
+            mCallback = callback;
+        }
+
+        @Override
+        public DocumentInfo run(Void... args) {
+            return mDstRoot.getRootDocumentBlocking(mContext);
+        }
+
+        @Override
+        public void finish(DocumentInfo doc) {
+            if (doc != null) {
+                DocumentClipper clipper =
+                        DocumentsApplication.getDocumentClipper(mContext);
+                clipper.copyFromClipData(mDstRoot, doc, mData, mCallback);
+            } else {
+                Log.e(TAG, "Failed to get doc.");
+            }
         }
     }
 

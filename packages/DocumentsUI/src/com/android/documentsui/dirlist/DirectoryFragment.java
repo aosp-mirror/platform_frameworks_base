@@ -184,35 +184,6 @@ public class DirectoryFragment extends Fragment
     private DirectoryDragListener mOnDragListener;
     private MenuManager mMenuManager;
 
-    /**
-     * A callback to show snackbar at the beginning of moving and copying.
-     */
-    private final FileOperations.Callback mFileOpCallback = (status, opType, docCount) -> {
-        if (status == FileOperations.Callback.STATUS_REJECTED) {
-            Snackbars.showPasteFailed(getActivity());
-            return;
-        }
-
-        if (docCount == 0) {
-            // Nothing has been pasted, so there is no need to show a snackbar.
-            return;
-        }
-
-        switch (opType) {
-            case FileOperationService.OPERATION_MOVE:
-                Snackbars.showMove(getActivity(), docCount);
-                break;
-            case FileOperationService.OPERATION_COPY:
-                Snackbars.showCopy(getActivity(), docCount);
-                break;
-            case FileOperationService.OPERATION_DELETE:
-                // We don't show anything for deletion.
-                break;
-            default:
-                throw new UnsupportedOperationException("Unsupported Operation: " + opType);
-        }
-    };
-
     @Override
     public View onCreateView(
             LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -423,7 +394,8 @@ public class DirectoryFragment extends Fragment
 
         operation.setDestination(data.getParcelableExtra(Shared.EXTRA_STACK));
 
-        FileOperations.start(getContext(), operation, mFileOpCallback);
+        BaseActivity activity = getBaseActivity();
+        FileOperations.start(activity, operation, activity.fileOpCallback);
     }
 
     protected boolean onRightClick(InputEvent e) {
@@ -1021,7 +993,8 @@ public class DirectoryFragment extends Fragment
                                         .withSrcParent(srcParent.derivedUri)
                                         .build();
 
-                                FileOperations.start(getActivity(), operation, mFileOpCallback);
+                                BaseActivity activity = getBaseActivity();
+                                FileOperations.start(activity, operation, activity.fileOpCallback);
                             }
                         })
                     .setNegativeButton(android.R.string.cancel, null)
@@ -1234,7 +1207,8 @@ public class DirectoryFragment extends Fragment
 
         BaseActivity activity = (BaseActivity) getActivity();
         DocumentInfo destination = activity.getCurrentDirectory();
-        mClipper.copyFromClipboard(destination, activity.getDisplayState().stack, mFileOpCallback);
+        mClipper.copyFromClipboard(
+                destination, activity.getDisplayState().stack, activity.fileOpCallback);
         getActivity().invalidateOptionsMenu();
     }
 
@@ -1347,7 +1321,7 @@ public class DirectoryFragment extends Fragment
                 src == null ? Metrics.USER_ACTION_DRAG_N_DROP_MULTI_WINDOW
                         : Metrics.USER_ACTION_DRAG_N_DROP);
 
-        mClipper.copyFromClipData(dst, getDisplayState().stack, clipData, mFileOpCallback);
+        mClipper.copyFromClipData(dst, getDisplayState().stack, clipData, activity.fileOpCallback);
         return true;
     }
 

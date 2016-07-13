@@ -60,6 +60,8 @@ import com.android.documentsui.dirlist.Model;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.RootInfo;
+import com.android.documentsui.services.FileOperationService;
+import com.android.documentsui.services.FileOperations;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -70,6 +72,32 @@ import java.util.concurrent.Executor;
 
 public abstract class BaseActivity extends Activity
         implements SearchManagerListener, NavigationViewManager.Environment {
+
+    public final FileOperations.Callback fileOpCallback = (status, opType, docCount) -> {
+        if (status == FileOperations.Callback.STATUS_REJECTED) {
+            Snackbars.showPasteFailed(this);
+            return;
+        }
+
+        if (docCount == 0) {
+            // Nothing has been pasted, so there is no need to show a snackbar.
+            return;
+        }
+
+        switch (opType) {
+            case FileOperationService.OPERATION_MOVE:
+                Snackbars.showMove(this, docCount);
+                break;
+            case FileOperationService.OPERATION_COPY:
+                Snackbars.showCopy(this, docCount);
+                break;
+            case FileOperationService.OPERATION_DELETE:
+                // We don't show anything for deletion.
+                break;
+            default:
+                throw new UnsupportedOperationException("Unsupported Operation: " + opType);
+        }
+    };
 
     private static final String BENCHMARK_TESTING_PACKAGE = "com.android.documentsui.appperftests";
 
@@ -706,17 +734,6 @@ public abstract class BaseActivity extends Activity
         mNavDrawerHasFocus = !mNavDrawerHasFocus;
     }
 
-    DocumentInfo getRootDocumentBlocking(RootInfo root) {
-        try {
-            final Uri uri = DocumentsContract.buildDocumentUri(
-                    root.authority, root.documentId);
-            return DocumentInfo.fromUri(getContentResolver(), uri);
-        } catch (FileNotFoundException e) {
-            Log.w(mTag, "Failed to find root", e);
-            return null;
-        }
-    }
-
     /**
      * Pops the top entry off the directory stack, and returns the user to the previous directory.
      * If the directory stack only contains one item, this method does nothing.
@@ -780,7 +797,7 @@ public abstract class BaseActivity extends Activity
 
         @Override
         protected DocumentInfo run(Void... params) {
-            return mOwner.getRootDocumentBlocking(mRoot);
+            return mRoot.getRootDocumentBlocking(mOwner);
         }
 
         @Override
@@ -816,7 +833,7 @@ public abstract class BaseActivity extends Activity
             final RootInfo defaultRoot = mOwner.mRoots.getDefaultRootBlocking(mOwner.mState);
             assert(defaultRoot != null);
             if (!defaultRoot.isRecents()) {
-                mDefaultRootDocument = mOwner.getRootDocumentBlocking(defaultRoot);
+                mDefaultRootDocument = defaultRoot.getRootDocumentBlocking(mOwner);
             }
             return defaultRoot;
         }

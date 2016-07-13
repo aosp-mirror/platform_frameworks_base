@@ -519,7 +519,7 @@ public class FilesActivity extends BaseActivity {
             } catch (FileNotFoundException e) {
                 Log.e(TAG, "Failed to resolve DocumentInfo from Uri: " + uri);
             }
-            mState.stack.add(mOwner.getRootDocumentBlocking(root));
+            mState.stack.add(root.getRootDocumentBlocking(mOwner));
             return null;
         }
 
