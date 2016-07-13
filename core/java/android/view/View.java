@@ -3744,7 +3744,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Flag indicating that a drag can cross window boundaries.  When
      * {@link #startDragAndDrop(ClipData, DragShadowBuilder, Object, int)} is called
-     * with this flag set, all visible applications will be able to participate
+     * with this flag set, all visible applications with targetSdkVersion >=
+     * {@link android.os.Build.VERSION_CODES#N API 24} will be able to participate
      * in the drag operation and receive the dragged content.
      *
      * If this is the only flag set, then the drag recipient will only have access to text data
