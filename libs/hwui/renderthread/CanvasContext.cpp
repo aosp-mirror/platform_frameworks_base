@@ -30,6 +30,7 @@
 #include "renderstate/RenderState.h"
 #include "renderstate/Stencil.h"
 #include "protos/hwui.pb.h"
+#include "OpenGLPipeline.h"
 #include "utils/GLUtils.h"
 #include "utils/TimeUtils.h"
 
@@ -65,9 +66,11 @@ CanvasContext* CanvasContext::create(RenderThread& thread,
         bool translucent, RenderNode* rootRenderNode, IContextFactory* contextFactory) {
 
     auto renderType = Properties::getRenderPipelineType();
+
     switch (renderType) {
         case RenderPipelineType::OpenGL:
-            return new CanvasContext(thread, translucent, rootRenderNode, contextFactory);
+            return new CanvasContext(thread, translucent, rootRenderNode, contextFactory,
+                    std::make_unique<OpenGLPipeline>(thread));
         case RenderPipelineType::SkiaGL:
             //TODO: implement SKIA GL
             LOG_ALWAYS_FATAL("skiaGL canvas type not implemented.");
@@ -84,14 +87,15 @@ CanvasContext* CanvasContext::create(RenderThread& thread,
 }
 
 CanvasContext::CanvasContext(RenderThread& thread, bool translucent,
-        RenderNode* rootRenderNode, IContextFactory* contextFactory)
+        RenderNode* rootRenderNode, IContextFactory* contextFactory,
+        std::unique_ptr<IRenderPipeline> renderPipeline)
         : mRenderThread(thread)
-        , mEglManager(thread.eglManager())
         , mOpaque(!translucent)
         , mAnimationContext(contextFactory->createAnimationContext(mRenderThread.timeLord()))
         , mJankTracker(thread.timeLord().frameIntervalNanos())
         , mProfiler(mFrames)
-        , mContentDrawBounds(0, 0, 0, 0) {
+        , mContentDrawBounds(0, 0, 0, 0)
+        , mRenderPipeline(std::move(renderPipeline)) {
     mRenderNodes.emplace_back(rootRenderNode);
     mRenderThread.renderState().registerCanvasContext(this);
     mProfiler.setDensity(mRenderThread.mainDisplayInfo().density);
@@ -115,24 +119,15 @@ void CanvasContext::setSurface(Surface* surface) {
 
     mNativeSurface = surface;
 
-    if (mEglSurface != EGL_NO_SURFACE) {
-        mEglManager.destroySurface(mEglSurface);
-        mEglSurface = EGL_NO_SURFACE;
-    }
-
-    if (surface) {
-        mEglSurface = mEglManager.createSurface(surface);
-    }
+    bool hasSurface = mRenderPipeline->setSurface(surface, mSwapBehavior);
 
     mFrameNumber = -1;
 
-    if (mEglSurface != EGL_NO_SURFACE) {
-        const bool preserveBuffer = (mSwapBehavior != kSwap_discardBuffer);
-        mBufferPreserved = mEglManager.setPreserveBuffer(mEglSurface, preserveBuffer);
-        mHaveNewSurface = true;
-        mSwapHistory.clear();
+    if (hasSurface) {
+         mHaveNewSurface = true;
+         mSwapHistory.clear();
     } else {
-        mRenderThread.removeFrameCallback(this);
+         mRenderThread.removeFrameCallback(this);
     }
 }
 
@@ -157,9 +152,7 @@ void CanvasContext::setStopped(bool stopped) {
         mStopped = stopped;
         if (mStopped) {
             mRenderThread.removeFrameCallback(this);
-            if (mEglManager.isCurrent(mEglSurface)) {
-                mEglManager.makeCurrent(EGL_NO_SURFACE);
-            }
+            mRenderPipeline->onStop();
         } else if (mIsDirty && hasSurface()) {
             mRenderThread.postFrameCallback(this);
         }
@@ -184,14 +177,23 @@ void CanvasContext::setOpaque(bool opaque) {
 bool CanvasContext::makeCurrent() {
     if (mStopped) return false;
 
-    // TODO: Figure out why this workaround is needed, see b/13913604
-    // In the meantime this matches the behavior of GLRenderer, so it is not a regression
-    EGLint error = 0;
-    mHaveNewSurface |= mEglManager.makeCurrent(mEglSurface, &error);
-    if (error) {
-        setSurface(nullptr);
+    auto result = mRenderPipeline->makeCurrent();
+    switch (result) {
+        case MakeCurrentResult::AlreadyCurrent:
+            return true;
+        case MakeCurrentResult::Failed:
+            mHaveNewSurface = true;
+            setSurface(nullptr);
+            return false;
+        case MakeCurrentResult::Succeeded:
+            mHaveNewSurface = true;
+            return true;
+        default:
+            LOG_ALWAYS_FATAL("unexpected result %d from IRenderPipeline::makeCurrent",
+                    (int32_t) result);
     }
-    return !error;
+
+    return true;
 }
 
 static bool wasSkipped(FrameInfo* info) {
@@ -328,9 +330,6 @@ void CanvasContext::notifyFramePending() {
 }
 
 void CanvasContext::draw() {
-    LOG_ALWAYS_FATAL_IF(mEglSurface == EGL_NO_SURFACE,
-            "drawRenderNode called on a context with no surface!");
-
     SkRect dirty;
     mDamageAccumulator.finish(&dirty);
 
@@ -342,98 +341,27 @@ void CanvasContext::draw() {
 
     mCurrentFrameInfo->markIssueDrawCommandsStart();
 
-    Frame frame = mEglManager.beginFrame(mEglSurface);
+    Frame frame = mRenderPipeline->getFrame();
 
-    if (frame.width() != mLastFrameWidth || frame.height() != mLastFrameHeight) {
-        // can't rely on prior content of window if viewport size changes
-        dirty.setEmpty();
-        mLastFrameWidth = frame.width();
-        mLastFrameHeight = frame.height();
-    } else if (mHaveNewSurface || frame.bufferAge() == 0) {
-        // New surface needs a full draw
-        dirty.setEmpty();
-    } else {
-        if (!dirty.isEmpty() && !dirty.intersect(0, 0, frame.width(), frame.height())) {
-            ALOGW("Dirty " RECT_STRING " doesn't intersect with 0 0 %d %d ?",
-                    SK_RECT_ARGS(dirty), frame.width(), frame.height());
-            dirty.setEmpty();
-        }
-        profiler().unionDirty(&dirty);
-    }
+    SkRect windowDirty = computeDirtyRect(frame, &dirty);
 
-    if (dirty.isEmpty()) {
-        dirty.set(0, 0, frame.width(), frame.height());
-    }
-
-    // At this point dirty is the area of the screen to update. However,
-    // the area of the frame we need to repaint is potentially different, so
-    // stash the screen area for later
-    SkRect screenDirty(dirty);
-
-    // If the buffer age is 0 we do a full-screen repaint (handled above)
-    // If the buffer age is 1 the buffer contents are the same as they were
-    // last frame so there's nothing to union() against
-    // Therefore we only care about the > 1 case.
-    if (frame.bufferAge() > 1) {
-        if (frame.bufferAge() > (int) mSwapHistory.size()) {
-            // We don't have enough history to handle this old of a buffer
-            // Just do a full-draw
-            dirty.set(0, 0, frame.width(), frame.height());
-        } else {
-            // At this point we haven't yet added the latest frame
-            // to the damage history (happens below)
-            // So we need to damage
-            for (int i = mSwapHistory.size() - 1;
-                    i > ((int) mSwapHistory.size()) - frame.bufferAge(); i--) {
-                dirty.join(mSwapHistory[i].damage);
-            }
-        }
-    }
-
-    mEglManager.damageFrame(frame, dirty);
-
-    auto& caches = Caches::getInstance();
-    FrameBuilder frameBuilder(dirty, frame.width(), frame.height(), mLightGeometry, caches);
-
-    frameBuilder.deferLayers(mLayerUpdateQueue);
-    mLayerUpdateQueue.clear();
-
-    frameBuilder.deferRenderNodeScene(mRenderNodes, mContentDrawBounds);
-
-    BakedOpRenderer renderer(caches, mRenderThread.renderState(),
-            mOpaque, mLightInfo);
-    frameBuilder.replayBakedOps<BakedOpDispatcher>(renderer);
-    profiler().draw(&renderer);
-    bool drew = renderer.didDraw();
-
-    // post frame cleanup
-    caches.clearGarbage();
-    caches.pathCache.trim();
-    caches.tessellationCache.trim();
-
-#if DEBUG_MEMORY_USAGE
-    mCaches.dumpMemoryUsage();
-#else
-    if (CC_UNLIKELY(Properties::debugLevel & kDebugMemory)) {
-        caches.dumpMemoryUsage();
-    }
-#endif
+    bool drew = mRenderPipeline->draw(frame, windowDirty, dirty, mLightGeometry, &mLayerUpdateQueue,
+            mContentDrawBounds, mOpaque, mLightInfo, mRenderNodes, &(profiler()));
 
     waitOnFences();
 
-    GL_CHECKPOINT(LOW);
+    bool requireSwap = false;
+    bool didSwap = mRenderPipeline->swapBuffers(frame, drew, windowDirty, mCurrentFrameInfo,
+            &requireSwap);
 
-    // Even if we decided to cancel the frame, from the perspective of jank
-    // metrics the frame was swapped at this point
-    mCurrentFrameInfo->markSwapBuffers();
     mIsDirty = false;
 
-    if (drew || mEglManager.damageRequiresSwap()) {
-        if (CC_UNLIKELY(!mEglManager.swapBuffers(frame, screenDirty))) {
+    if (requireSwap) {
+        if (!didSwap) { //some error happened
             setSurface(nullptr);
         }
         SwapHistory& swap = mSwapHistory.next();
-        swap.damage = screenDirty;
+        swap.damage = windowDirty;
         swap.swapCompletedTime = systemTime(CLOCK_MONOTONIC);
         swap.vsyncTime = mRenderThread.timeLord().latestVsync();
         mHaveNewSurface = false;
@@ -469,7 +397,7 @@ void CanvasContext::draw() {
 
 // Called by choreographer to do an RT-driven animation
 void CanvasContext::doFrame() {
-    if (CC_UNLIKELY(mEglSurface == EGL_NO_SURFACE)) return;
+    if (!mRenderPipeline->isSurfaceReady()) return;
     prepareAndDraw(nullptr);
 }
 
@@ -519,7 +447,7 @@ void CanvasContext::freePrefetchedLayers(TreeObserver* observer) {
 
 void CanvasContext::buildLayer(RenderNode* node, TreeObserver* observer) {
     ATRACE_CALL();
-    if (!mEglManager.hasEglContext()) return;
+    if (!mRenderPipeline->isContextReady()) return;
 
     // buildLayer() will leave the tree in an unknown state, so we must stop drawing
     stopDrawing();
@@ -536,37 +464,24 @@ void CanvasContext::buildLayer(RenderNode* node, TreeObserver* observer) {
     // purposes when the frame is actually drawn
     node->setPropertyFieldsDirty(RenderNode::GENERIC);
 
-    static const std::vector< sp<RenderNode> > emptyNodeList;
-    auto& caches = Caches::getInstance();
-    FrameBuilder frameBuilder(mLayerUpdateQueue, mLightGeometry, caches);
-    mLayerUpdateQueue.clear();
-    BakedOpRenderer renderer(caches, mRenderThread.renderState(),
-            mOpaque, mLightInfo);
-    LOG_ALWAYS_FATAL_IF(renderer.didDraw(), "shouldn't draw in buildlayer case");
-    frameBuilder.replayBakedOps<BakedOpDispatcher>(renderer);
+    mRenderPipeline->renderLayers(mLightGeometry, &mLayerUpdateQueue, mOpaque, mLightInfo);
 
     node->incStrong(nullptr);
     mPrefetchedLayers.insert(node);
 }
 
 bool CanvasContext::copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap) {
-    layer->apply();
-    return Readback::copyTextureLayerInto(mRenderThread, *(layer->backingLayer()), bitmap)
-            == CopyResult::Success;
+    return mRenderPipeline->copyLayerInto(layer, bitmap);
 }
 
 void CanvasContext::destroyHardwareResources(TreeObserver* observer) {
     stopDrawing();
-    if (mEglManager.hasEglContext()) {
+    if (mRenderPipeline->isContextReady()) {
         freePrefetchedLayers(observer);
         for (const sp<RenderNode>& node : mRenderNodes) {
             node->destroyHardwareResources(observer);
         }
-        Caches& caches = Caches::getInstance();
-        // Make sure to release all the textures we were owning as there won't
-        // be another draw
-        caches.textureCache.resetMarkInUse(this);
-        mRenderThread.renderState().flush(Caches::FlushMode::Layers);
+        mRenderPipeline->onDestroyHardwareResources();
     }
 }
 
@@ -584,8 +499,7 @@ void CanvasContext::trimMemory(RenderThread& thread, int level) {
 }
 
 Layer* CanvasContext::createTextureLayer() {
-    mEglManager.initialize();
-    return LayerRenderer::createTextureLayer(mRenderThread.renderState());
+    return mRenderPipeline->createTextureLayer();
 }
 
 void CanvasContext::setTextureAtlas(RenderThread& thread,
@@ -665,8 +579,8 @@ void CanvasContext::waitOnFences() {
 
 class CanvasContext::FuncTaskProcessor : public TaskProcessor<bool> {
 public:
-    explicit FuncTaskProcessor(Caches& caches)
-            : TaskProcessor<bool>(&caches.tasks) {}
+    explicit FuncTaskProcessor(TaskManager* taskManager)
+            : TaskProcessor<bool>(taskManager) {}
 
     virtual void onProcess(const sp<Task<bool> >& task) override {
         FuncTask* t = static_cast<FuncTask*>(task.get());
@@ -677,7 +591,7 @@ public:
 
 void CanvasContext::enqueueFrameWork(std::function<void()>&& func) {
     if (!mFrameWorkProcessor.get()) {
-        mFrameWorkProcessor = new FuncTaskProcessor(Caches::getInstance());
+        mFrameWorkProcessor = new FuncTaskProcessor(mRenderPipeline->getTaskManager());
     }
     sp<FuncTask> task(new FuncTask());
     task->func = func;
@@ -696,6 +610,56 @@ int64_t CanvasContext::getFrameNumber() {
 bool CanvasContext::isSkiaEnabled() {
     auto renderType = Properties::getRenderPipelineType();
     return RenderPipelineType::SkiaGL == renderType || RenderPipelineType::Vulkan == renderType;
+}
+
+SkRect CanvasContext::computeDirtyRect(const Frame& frame, SkRect* dirty) {
+    if (frame.width() != mLastFrameWidth || frame.height() != mLastFrameHeight) {
+        // can't rely on prior content of window if viewport size changes
+        dirty->setEmpty();
+        mLastFrameWidth = frame.width();
+        mLastFrameHeight = frame.height();
+    } else if (mHaveNewSurface || frame.bufferAge() == 0) {
+        // New surface needs a full draw
+        dirty->setEmpty();
+    } else {
+        if (!dirty->isEmpty() && !dirty->intersect(0, 0, frame.width(), frame.height())) {
+            ALOGW("Dirty " RECT_STRING " doesn't intersect with 0 0 %d %d ?",
+                    SK_RECT_ARGS(*dirty), frame.width(), frame.height());
+            dirty->setEmpty();
+        }
+        profiler().unionDirty(dirty);
+    }
+
+    if (dirty->isEmpty()) {
+        dirty->set(0, 0, frame.width(), frame.height());
+    }
+
+    // At this point dirty is the area of the window to update. However,
+    // the area of the frame we need to repaint is potentially different, so
+    // stash the screen area for later
+    SkRect windowDirty(*dirty);
+
+    // If the buffer age is 0 we do a full-screen repaint (handled above)
+    // If the buffer age is 1 the buffer contents are the same as they were
+    // last frame so there's nothing to union() against
+    // Therefore we only care about the > 1 case.
+    if (frame.bufferAge() > 1) {
+        if (frame.bufferAge() > (int) mSwapHistory.size()) {
+            // We don't have enough history to handle this old of a buffer
+            // Just do a full-draw
+            dirty->set(0, 0, frame.width(), frame.height());
+        } else {
+            // At this point we haven't yet added the latest frame
+            // to the damage history (happens below)
+            // So we need to damage
+            for (int i = mSwapHistory.size() - 1;
+                    i > ((int) mSwapHistory.size()) - frame.bufferAge(); i--) {
+                dirty->join(mSwapHistory[i].damage);
+            }
+        }
+    }
+
+    return windowDirty;
 }
 
 } /* namespace renderthread */
