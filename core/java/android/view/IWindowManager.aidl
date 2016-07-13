@@ -306,6 +306,11 @@ interface IWindowManager
     boolean isRotationFrozen();
 
     /**
+     * Screenshot the current wallpaper layer, including the whole screen.
+     */
+    Bitmap screenshotWallpaper();
+
+    /**
      * Used only for assist -- request a screenshot of the current application.
      */
     boolean requestAssistScreenshot(IAssistScreenshotReceiver receiver);
