@@ -488,4 +488,43 @@ public class TlvBufferUtils {
             };
         }
     }
+
+    /**
+     * Validates that a (T)LV array is constructed correctly. I.e. that its specified Length
+     * fields correctly fill the specified length (and do not overshoot).
+     *
+     * @param array The (T)LV array to verify.
+     * @param length The number of bytes in the array to consider (starting at offset 0).
+     * @param typeSize The size (in bytes) of the type field. Valid values are 0, 1, or 2.
+     * @param lengthSize The size (in bytes) of the length field. Valid values are 1 or 2.
+     * @return A boolean indicating whether the array is valid (true) or invalid (false).
+     */
+    public static boolean isValid(byte[] array, int length, int typeSize, int lengthSize) {
+        if (typeSize < 0 || typeSize > 2) {
+            throw new IllegalArgumentException(
+                    "Invalid arguments - typeSize must be 0, 1, or 2: typeSize=" + typeSize);
+        }
+        if (lengthSize <= 0 || lengthSize > 2) {
+            throw new IllegalArgumentException(
+                    "Invalid arguments - lengthSize must be 1 or 2: lengthSize=" + lengthSize);
+        }
+        if (length < 0 || length > array.length) {
+            throw new IllegalArgumentException(
+                    "Invalid arguments - length must be non-negative and <= array.length: length="
+                            + length + ", array.length=" + array.length);
+        }
+
+        int nextTlvIndex = 0;
+        while (nextTlvIndex + typeSize + lengthSize <= length) {
+            nextTlvIndex += typeSize;
+            if (lengthSize == 1) {
+                nextTlvIndex += lengthSize + array[nextTlvIndex];
+            } else {
+                nextTlvIndex += lengthSize + Memory.peekShort(array, nextTlvIndex,
+                        ByteOrder.BIG_ENDIAN);
+            }
+        }
+
+        return nextTlvIndex == length;
+    }
 }
