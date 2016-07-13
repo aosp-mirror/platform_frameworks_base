@@ -246,7 +246,9 @@ public class EnabledComponentsObserver implements SettingChangeListener {
         Intent queryIntent = new Intent(serviceName);
         List<ResolveInfo> installedServices = pm.queryIntentServicesAsUser(
                 queryIntent,
-                PackageManager.GET_SERVICES | PackageManager.GET_META_DATA,
+                PackageManager.GET_SERVICES | PackageManager.GET_META_DATA |
+                                    PackageManager.MATCH_DIRECT_BOOT_AWARE |
+                                    PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
                 userId);
         if (installedServices != null) {
             for (int i = 0, count = installedServices.size(); i < count; i++) {
