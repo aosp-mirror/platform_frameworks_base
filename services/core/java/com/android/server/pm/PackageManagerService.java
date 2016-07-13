@@ -159,6 +159,7 @@ import android.content.pm.PermissionInfo;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.Signature;
 import android.content.pm.UserInfo;
 import android.content.pm.VerifierDeviceIdentity;
@@ -11438,6 +11439,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                     } else {
                         resolvedUserIds = userIds;
                     }
+                    final ShortcutServiceInternal shortcutService =
+                            LocalServices.getService(ShortcutServiceInternal.class);
+
                     for (int id : resolvedUserIds) {
                         final Intent intent = new Intent(action,
                                 pkg != null ? Uri.fromParts("package", pkg, null) : null);
@@ -11461,6 +11465,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                             Slog.d(TAG, "Sending to user " + id + ": "
                                     + intent.toShortString(false, true, false, false)
                                     + " " + intent.getExtras(), here);
+                        }
+                        // TODO b/29385425 Consider making lifecycle callbacks for this.
+                        if (shortcutService != null) {
+                            shortcutService.onPackageBroadcast(intent);
                         }
                         am.broadcastIntent(null, intent, null, finishedReceiver,
                                 0, null, null, null, android.app.AppOpsManager.OP_NONE,

@@ -49,6 +49,7 @@ import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Canvas;
 import android.graphics.RectF;
 import android.graphics.drawable.Icon;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.FileUtils;
@@ -81,7 +82,6 @@ import android.view.IWindowManager;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Preconditions;
@@ -122,9 +122,6 @@ import java.util.function.Predicate;
 
 /**
  * TODO:
- * - Deal with the async nature of PACKAGE_ADD.  Basically when a publisher does anything after
- *   it's upgraded, the manager should make sure the upgrade process has been executed.
- *
  * - getIconMaxWidth()/getIconMaxHeight() should use xdpi and ydpi.
  *   -> But TypedValue.applyDimension() doesn't differentiate x and y..?
  *
@@ -304,6 +301,8 @@ public class ShortcutService extends IShortcutService.Stub {
 
     private final AtomicBoolean mBootCompleted = new AtomicBoolean();
 
+    private final ShortcutPendingTasks mPendingTasks;
+
     private static final int PACKAGE_MATCH_FLAGS =
             PackageManager.MATCH_DIRECT_BOOT_AWARE
                     | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
@@ -377,14 +376,39 @@ public class ShortcutService extends IShortcutService.Stub {
         mUsageStatsManagerInternal = Preconditions.checkNotNull(
                 LocalServices.getService(UsageStatsManagerInternal.class));
 
+        mPendingTasks = new ShortcutPendingTasks(
+                this::injectPostToHandler,
+                this::injectCheckPendingTaskWaitThread,
+                throwable -> wtf(throwable.getMessage(), throwable));
+
         if (onlyForPackageManagerApis) {
             return; // Don't do anything further.  For unit tests only.
         }
 
-        mPackageMonitor.register(context, looper, UserHandle.ALL, /* externalStorage= */ false);
-
         injectRegisterUidObserver(mUidObserver, ActivityManager.UID_OBSERVER_PROCSTATE
                 | ActivityManager.UID_OBSERVER_GONE);
+    }
+
+    /**
+     * Check whether {@link ShortcutPendingTasks#waitOnAllTasks()} can be called on the current
+     * thread.
+     *
+     * During unit tests, all tasks are executed synchronously which makes the lock held check would
+     * misfire, so we override this method to always return true.
+     */
+    @VisibleForTesting
+    boolean injectCheckPendingTaskWaitThread() {
+        // We shouldn't wait while holding mLock.  We should never do this so wtf().
+        if (Thread.holdsLock(mLock)) {
+            wtf("waitOnAllTasks() called while holding the lock");
+            return false;
+        }
+        // This shouldn't be called on the handler thread either.
+        if (Thread.currentThread() == mHandler.getLooper().getThread()) {
+            wtf("waitOnAllTasks() called on handler thread");
+            return false;
+        }
+        return true;
     }
 
     void logDurationStat(int statId, long start) {
@@ -1492,6 +1516,8 @@ public class ShortcutService extends IShortcutService.Stub {
             @UserIdInt int userId) {
         verifyCaller(packageName, userId);
 
+        mPendingTasks.waitOnAllTasks();
+
         final List<ShortcutInfo> newShortcuts = (List<ShortcutInfo>) shortcutInfoList.getList();
         final int size = newShortcuts.size();
 
@@ -1540,6 +1566,8 @@ public class ShortcutService extends IShortcutService.Stub {
     public boolean updateShortcuts(String packageName, ParceledListSlice shortcutInfoList,
             @UserIdInt int userId) {
         verifyCaller(packageName, userId);
+
+        mPendingTasks.waitOnAllTasks();
 
         final List<ShortcutInfo> newShortcuts = (List<ShortcutInfo>) shortcutInfoList.getList();
         final int size = newShortcuts.size();
@@ -1619,6 +1647,8 @@ public class ShortcutService extends IShortcutService.Stub {
             @UserIdInt int userId) {
         verifyCaller(packageName, userId);
 
+        mPendingTasks.waitOnAllTasks();
+
         final List<ShortcutInfo> newShortcuts = (List<ShortcutInfo>) shortcutInfoList.getList();
         final int size = newShortcuts.size();
 
@@ -1669,6 +1699,8 @@ public class ShortcutService extends IShortcutService.Stub {
         verifyCaller(packageName, userId);
         Preconditions.checkNotNull(shortcutIds, "shortcutIds must be provided");
 
+        mPendingTasks.waitOnAllTasks();
+
         synchronized (mLock) {
             final ShortcutPackage ps = getPackageShortcutsLocked(packageName, userId);
 
@@ -1696,6 +1728,8 @@ public class ShortcutService extends IShortcutService.Stub {
         verifyCaller(packageName, userId);
         Preconditions.checkNotNull(shortcutIds, "shortcutIds must be provided");
 
+        mPendingTasks.waitOnAllTasks();
+
         synchronized (mLock) {
             final ShortcutPackage ps = getPackageShortcutsLocked(packageName, userId);
 
@@ -1715,6 +1749,8 @@ public class ShortcutService extends IShortcutService.Stub {
             @UserIdInt int userId) {
         verifyCaller(packageName, userId);
         Preconditions.checkNotNull(shortcutIds, "shortcutIds must be provided");
+
+        mPendingTasks.waitOnAllTasks();
 
         synchronized (mLock) {
             final ShortcutPackage ps = getPackageShortcutsLocked(packageName, userId);
@@ -1738,6 +1774,8 @@ public class ShortcutService extends IShortcutService.Stub {
     public void removeAllDynamicShortcuts(String packageName, @UserIdInt int userId) {
         verifyCaller(packageName, userId);
 
+        mPendingTasks.waitOnAllTasks();
+
         synchronized (mLock) {
             getPackageShortcutsLocked(packageName, userId).deleteAllDynamicShortcuts();
         }
@@ -1750,6 +1788,9 @@ public class ShortcutService extends IShortcutService.Stub {
     public ParceledListSlice<ShortcutInfo> getDynamicShortcuts(String packageName,
             @UserIdInt int userId) {
         verifyCaller(packageName, userId);
+
+        mPendingTasks.waitOnAllTasks();
+
         synchronized (mLock) {
             return getShortcutsWithQueryLocked(
                     packageName, userId, ShortcutInfo.CLONE_REMOVE_FOR_CREATOR,
@@ -1761,6 +1802,9 @@ public class ShortcutService extends IShortcutService.Stub {
     public ParceledListSlice<ShortcutInfo> getManifestShortcuts(String packageName,
             @UserIdInt int userId) {
         verifyCaller(packageName, userId);
+
+        mPendingTasks.waitOnAllTasks();
+
         synchronized (mLock) {
             return getShortcutsWithQueryLocked(
                     packageName, userId, ShortcutInfo.CLONE_REMOVE_FOR_CREATOR,
@@ -1772,6 +1816,9 @@ public class ShortcutService extends IShortcutService.Stub {
     public ParceledListSlice<ShortcutInfo> getPinnedShortcuts(String packageName,
             @UserIdInt int userId) {
         verifyCaller(packageName, userId);
+
+        mPendingTasks.waitOnAllTasks();
+
         synchronized (mLock) {
             return getShortcutsWithQueryLocked(
                     packageName, userId, ShortcutInfo.CLONE_REMOVE_FOR_CREATOR,
@@ -1801,6 +1848,8 @@ public class ShortcutService extends IShortcutService.Stub {
     public int getRemainingCallCount(String packageName, @UserIdInt int userId) {
         verifyCaller(packageName, userId);
 
+        mPendingTasks.waitOnAllTasks();
+
         synchronized (mLock) {
             return mMaxUpdatesPerInterval
                     - getPackageShortcutsLocked(packageName, userId).getApiCallCount();
@@ -1810,6 +1859,8 @@ public class ShortcutService extends IShortcutService.Stub {
     @Override
     public long getRateLimitResetTime(String packageName, @UserIdInt int userId) {
         verifyCaller(packageName, userId);
+
+        mPendingTasks.waitOnAllTasks();
 
         synchronized (mLock) {
             return getNextResetTimeLocked();
@@ -1828,6 +1879,8 @@ public class ShortcutService extends IShortcutService.Stub {
     @Override
     public void reportShortcutUsed(String packageName, String shortcutId, int userId) {
         verifyCaller(packageName, userId);
+
+        mPendingTasks.waitOnAllTasks();
 
         Preconditions.checkNotNull(shortcutId);
 
@@ -1861,6 +1914,8 @@ public class ShortcutService extends IShortcutService.Stub {
     public void resetThrottling() {
         enforceSystemOrShell();
 
+        mPendingTasks.waitOnAllTasks();
+
         resetThrottlingInner(getCallingUserId());
     }
 
@@ -1893,6 +1948,9 @@ public class ShortcutService extends IShortcutService.Stub {
         if (DEBUG) {
             Slog.d(TAG, "onApplicationActive: package=" + packageName + "  userid=" + userId);
         }
+
+        mPendingTasks.waitOnAllTasks();
+
         enforceResetThrottlingPermission();
         resetPackageThrottling(packageName, userId);
     }
@@ -2055,6 +2113,14 @@ public class ShortcutService extends IShortcutService.Stub {
                 @Nullable String packageName, @Nullable List<String> shortcutIds,
                 @Nullable ComponentName componentName,
                 int queryFlags, int userId) {
+
+            // When this method is called from onShortcutChangedInner() in LauncherApps,
+            // we're on the handler thread.  Do not try to wait on tasks.  Not waiting for pending
+            // tasks on this specific case should be fine.
+            if (Thread.currentThread() != mHandler.getLooper().getThread()) {
+                mPendingTasks.waitOnAllTasks();
+            }
+
             final ArrayList<ShortcutInfo> ret = new ArrayList<>();
             final boolean cloneKeyFieldOnly =
                     ((queryFlags & ShortcutQuery.FLAG_GET_KEY_FIELDS_ONLY) != 0);
@@ -2133,6 +2199,8 @@ public class ShortcutService extends IShortcutService.Stub {
             Preconditions.checkStringNotEmpty(packageName, "packageName");
             Preconditions.checkStringNotEmpty(shortcutId, "shortcutId");
 
+            mPendingTasks.waitOnAllTasks();
+
             synchronized (mLock) {
                 getLauncherShortcutsLocked(callingPackage, userId, launcherUserId)
                         .attemptToRestoreIfNeededAndSave();
@@ -2170,6 +2238,8 @@ public class ShortcutService extends IShortcutService.Stub {
             Preconditions.checkStringNotEmpty(packageName, "packageName");
             Preconditions.checkNotNull(shortcutIds, "shortcutIds");
 
+            mPendingTasks.waitOnAllTasks();
+
             synchronized (mLock) {
                 final ShortcutLauncher launcher =
                         getLauncherShortcutsLocked(callingPackage, userId, launcherUserId);
@@ -2189,6 +2259,8 @@ public class ShortcutService extends IShortcutService.Stub {
             // Calling permission must be checked by LauncherAppsImpl.
             Preconditions.checkStringNotEmpty(packageName, "packageName can't be empty");
             Preconditions.checkStringNotEmpty(shortcutId, "shortcutId can't be empty");
+
+            mPendingTasks.waitOnAllTasks();
 
             synchronized (mLock) {
                 getLauncherShortcutsLocked(callingPackage, userId, launcherUserId)
@@ -2220,6 +2292,8 @@ public class ShortcutService extends IShortcutService.Stub {
             Preconditions.checkNotNull(packageName, "packageName");
             Preconditions.checkNotNull(shortcutId, "shortcutId");
 
+            mPendingTasks.waitOnAllTasks();
+
             synchronized (mLock) {
                 getLauncherShortcutsLocked(callingPackage, userId, launcherUserId)
                         .attemptToRestoreIfNeededAndSave();
@@ -2243,6 +2317,8 @@ public class ShortcutService extends IShortcutService.Stub {
             Preconditions.checkNotNull(callingPackage, "callingPackage");
             Preconditions.checkNotNull(packageName, "packageName");
             Preconditions.checkNotNull(shortcutId, "shortcutId");
+
+            mPendingTasks.waitOnAllTasks();
 
             synchronized (mLock) {
                 getLauncherShortcutsLocked(callingPackage, userId, launcherUserId)
@@ -2304,8 +2380,17 @@ public class ShortcutService extends IShortcutService.Stub {
                 if (DEBUG) {
                     Slog.d(TAG, "onSystemLocaleChangedNoLock: " + mLocaleChangeSequenceNumber.get());
                 }
-                injectPostToHandler(() -> handleLocaleChanged());
+                mPendingTasks.addTask(() -> handleLocaleChanged());
             }
+        }
+
+        @Override
+        public void onPackageBroadcast(Intent intent) {
+            if (DEBUG) {
+                Slog.d(TAG, "onPackageBroadcast");
+            }
+            mPendingTasks.addTask(() -> ShortcutService.this.onPackageBroadcast(
+                    new Intent(intent)));
         }
     }
 
@@ -2323,58 +2408,49 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
-    /**
-     * Package event callbacks.
-     */
-    @VisibleForTesting
-    final PackageMonitor mPackageMonitor = new PackageMonitor() {
-
-        private boolean isUserUnlocked() {
-            return mUserManager.isUserUnlocked(getChangingUserId());
+    private void onPackageBroadcast(Intent intent) {
+        final int userId  = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
+        if (userId == UserHandle.USER_NULL) {
+            Slog.w(TAG, "Intent broadcast does not contain user handle: " + intent);
+            return;
         }
 
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // clearCallingIdentity is not needed normally, but need to do it for the unit test.
-            final long token = injectClearCallingIdentity();
-            try {
-                super.onReceive(context, intent);
-            } finally {
-                injectRestoreCallingIdentity(token);
+        final String action = intent.getAction();
+
+        if (!mUserManager.isUserUnlocked(userId)) {
+            if (DEBUG) {
+                Slog.d(TAG, "Ignoring package broadcast " + action + " for locked/stopped user "
+                        + userId);
             }
+            return;
         }
 
-        @Override
-        public void onPackageAdded(String packageName, int uid) {
-            if (!isUserUnlocked()) return;
-            handlePackageAdded(packageName, getChangingUserId());
+        final Uri intentUri = intent.getData();
+        final String packageName = (intentUri != null) ? intentUri.getSchemeSpecificPart() : null;
+        if (packageName == null) {
+            Slog.w(TAG, "Intent broadcast does not contain package name: " + intent);
+            return;
         }
 
-        @Override
-        public void onPackageUpdateFinished(String packageName, int uid) {
-            if (!isUserUnlocked()) return;
-            handlePackageUpdateFinished(packageName, getChangingUserId());
-        }
+        final boolean replacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
 
-        @Override
-        public void onPackageRemoved(String packageName, int uid) {
-            if (!isUserUnlocked()) return;
-            handlePackageRemoved(packageName, getChangingUserId());
-        }
+        if (Intent.ACTION_PACKAGE_ADDED.equals(action)) {
+            if (replacing) {
+                handlePackageUpdateFinished(packageName, userId);
+            } else {
+                handlePackageAdded(packageName, userId);
+            }
+        } else if (Intent.ACTION_PACKAGE_REMOVED.equals(action)) {
+            if (!replacing) {
+                handlePackageRemoved(packageName, userId);
+            }
+        } else if (Intent.ACTION_PACKAGE_CHANGED.equals(action)) {
+            handlePackageChanged(packageName, userId);
 
-        @Override
-        public void onPackageDataCleared(String packageName, int uid) {
-            if (!isUserUnlocked()) return;
-            handlePackageDataCleared(packageName, getChangingUserId());
+        } else if (Intent.ACTION_PACKAGE_DATA_CLEARED.equals(action)) {
+            handlePackageDataCleared(packageName, userId);
         }
-
-        @Override
-        public boolean onPackageChanged(String packageName, int uid, String[] components) {
-            if (!isUserUnlocked()) return false;
-            handlePackageChanged(packageName, getChangingUserId());
-            return false; // We don't need to receive onSomePackagesChanged(), so just false.
-        }
-    };
+    }
 
     /**
      * Called when a user is unlocked.
@@ -3021,6 +3097,9 @@ public class ShortcutService extends IShortcutService.Stub {
                 pw.println(Log.getStackTraceString(mLastWtfStacktrace));
             }
 
+            pw.println();
+            mPendingTasks.dump(pw, "  ");
+
             for (int i = 0; i < mUsers.size(); i++) {
                 pw.println();
                 mUsers.valueAt(i).dump(pw, "  ");
@@ -3069,6 +3148,8 @@ public class ShortcutService extends IShortcutService.Stub {
 
         enforceShell();
 
+        mPendingTasks.waitOnAllTasks();
+
         final int status = (new MyShellCommand()).exec(this, in, out, err, args, resultReceiver);
 
         resultReceiver.send(status, null);
@@ -3095,10 +3176,6 @@ public class ShortcutService extends IShortcutService.Stub {
                     case "--user":
                         if (takeUser) {
                             mUserId = UserHandle.parseUserArg(getNextArgRequired());
-                            if (!mUserManager.isUserUnlocked(mUserId)) {
-                                throw new CommandException(
-                                        "User " + mUserId + " is not running or locked");
-                            }
                             break;
                         }
                         // fallthrough
@@ -3424,6 +3501,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
     @VisibleForTesting
     ShortcutPackage getPackageShortcutForTest(String packageName, int userId) {
+        mPendingTasks.waitOnAllTasks();
         synchronized (mLock) {
             final ShortcutUser user = mUsers.get(userId);
             if (user == null) return null;
@@ -3434,8 +3512,12 @@ public class ShortcutService extends IShortcutService.Stub {
 
     @VisibleForTesting
     ShortcutInfo getPackageShortcutForTest(String packageName, String shortcutId, int userId) {
+        mPendingTasks.waitOnAllTasks();
         synchronized (mLock) {
-            final ShortcutPackage pkg = getPackageShortcutForTest(packageName, userId);
+            final ShortcutUser user = mUsers.get(userId);
+            if (user == null) return null;
+
+            final ShortcutPackage pkg = user.getAllPackagesForTest().get(packageName);
             if (pkg == null) return null;
 
             return pkg.findShortcutById(shortcutId);
@@ -3469,5 +3551,13 @@ public class ShortcutService extends IShortcutService.Stub {
         synchronized (this) {
             forEachLoadedUserLocked(u -> u.forAllPackageItems(ShortcutPackageItem::verifyStates));
         }
+    }
+
+    ShortcutPendingTasks getPendingTasksForTest() {
+        return mPendingTasks;
+    }
+
+    Object getLockForTest() {
+        return mLock;
     }
 }
