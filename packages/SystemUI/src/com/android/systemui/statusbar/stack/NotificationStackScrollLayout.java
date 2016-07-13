@@ -2347,6 +2347,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (hasAddEvent) {
             // This child was just added lets remove all events.
             mHeadsUpChangeAnimations.removeAll(mTmpList);
+            ((ExpandableNotificationRow ) child).setHeadsupDisappearRunning(false);
         }
         mTmpList.clear();
         return hasAddEvent;
@@ -3093,6 +3094,16 @@ public class NotificationStackScrollLayout extends ViewGroup
         requestChildrenUpdate();
         runAnimationFinishedRunnables();
         clearViewOverlays();
+        clearHeadsUpDisappearRunning();
+    }
+
+    private void clearHeadsUpDisappearRunning() {
+        for (int i = 0; i < getChildCount(); i++) {
+            View view = getChildAt(i);
+            if (view instanceof ExpandableNotificationRow) {
+                ((ExpandableNotificationRow) view).setHeadsupDisappearRunning(false);
+            }
+        }
     }
 
     private void clearViewOverlays() {
