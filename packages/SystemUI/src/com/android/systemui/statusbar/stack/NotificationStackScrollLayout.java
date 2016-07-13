@@ -2347,6 +2347,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (hasAddEvent) {
             // This child was just added lets remove all events.
             mHeadsUpChangeAnimations.removeAll(mTmpList);
+            ((ExpandableNotificationRow ) child).setHeadsupDisappearRunning(false);
         }
         mTmpList.clear();
         return hasAddEvent;
@@ -2604,6 +2605,10 @@ public class NotificationStackScrollLayout extends ViewGroup
                 type = row.wasJustClicked()
                         ? AnimationEvent.ANIMATION_TYPE_HEADS_UP_DISAPPEAR_CLICK
                         : AnimationEvent.ANIMATION_TYPE_HEADS_UP_DISAPPEAR;
+                if (row.isChildInGroup()) {
+                    // We can otherwise get stuck in there if it was just isolated
+                    row.setHeadsupDisappearRunning(false);
+                }
             } else {
                 StackViewState viewState = mCurrentStackScrollState.getViewStateForView(row);
                 if (viewState == null) {
@@ -3093,6 +3098,22 @@ public class NotificationStackScrollLayout extends ViewGroup
         requestChildrenUpdate();
         runAnimationFinishedRunnables();
         clearViewOverlays();
+        clearHeadsUpDisappearRunning();
+    }
+
+    private void clearHeadsUpDisappearRunning() {
+        for (int i = 0; i < getChildCount(); i++) {
+            View view = getChildAt(i);
+            if (view instanceof ExpandableNotificationRow) {
+                ExpandableNotificationRow row = (ExpandableNotificationRow) view;
+                row.setHeadsupDisappearRunning(false);
+                if (row.isSummaryWithChildren()) {
+                    for (ExpandableNotificationRow child : row.getNotificationChildren()) {
+                        child.setHeadsupDisappearRunning(false);
+                    }
+                }
+            }
+        }
     }
 
     private void clearViewOverlays() {
