@@ -1112,48 +1112,23 @@ class ActivityStarter {
                 ? mSourceRecord.task : null;
 
         // Should this be considered a new task?
+        int result = START_SUCCESS;
         if (mStartActivity.resultTo == null && mInTask == null && !mAddingToTask
                 && (mLaunchFlags & FLAG_ACTIVITY_NEW_TASK) != 0) {
             newTask = true;
-            setTaskFromReuseOrCreateNewTask(taskToAffiliate);
-
-            if (mSupervisor.isLockTaskModeViolation(mStartActivity.task)) {
-                Slog.e(TAG, "Attempted Lock Task Mode violation mStartActivity=" + mStartActivity);
-                return START_RETURN_LOCK_TASK_MODE_VIOLATION;
-            }
-            if (!mMovedOtherTask) {
-                // If stack id is specified in activity options, usually it means that activity is
-                // launched not from currently focused stack (e.g. from SysUI or from shell) - in
-                // that case we check the target stack.
-                updateTaskReturnToType(mStartActivity.task, mLaunchFlags,
-                        preferredLaunchStackId != INVALID_STACK_ID ? mTargetStack : topStack);
-            }
+            result = setTaskFromReuseOrCreateNewTask(
+                    taskToAffiliate, preferredLaunchStackId, topStack);
         } else if (mSourceRecord != null) {
-            if (mSupervisor.isLockTaskModeViolation(mSourceRecord.task)) {
-                Slog.e(TAG, "Attempted Lock Task Mode violation mStartActivity=" + mStartActivity);
-                return START_RETURN_LOCK_TASK_MODE_VIOLATION;
-            }
-
-            final int result = setTaskFromSourceRecord();
-            if (result != START_SUCCESS) {
-                return result;
-            }
+            result = setTaskFromSourceRecord();
         } else if (mInTask != null) {
-            // The caller is asking that the new activity be started in an explicit
-            // task it has provided to us.
-            if (mSupervisor.isLockTaskModeViolation(mInTask)) {
-                Slog.e(TAG, "Attempted Lock Task Mode violation mStartActivity=" + mStartActivity);
-                return START_RETURN_LOCK_TASK_MODE_VIOLATION;
-            }
-
-            final int result = setTaskFromInTask();
-            if (result != START_SUCCESS) {
-                return result;
-            }
+            result = setTaskFromInTask();
         } else {
             // This not being started from an existing activity, and not part of a new task...
             // just put it in the top task, though these days this case should never happen.
             setTaskToCurrentTopOrCreateNewTask();
+        }
+        if (result != START_SUCCESS) {
+            return result;
         }
 
         mService.grantUriPermissionFromIntentLocked(mCallingUid, mStartActivity.packageName,
@@ -1174,12 +1149,6 @@ class ActivityStarter {
 
         mTargetStack.startActivityLocked(mStartActivity, newTask, mKeepCurTransition, mOptions);
         if (mDoResume) {
-            if (!mLaunchTaskBehind) {
-                // TODO(b/26381750): Remove this code after verification that all the decision
-                // points above moved targetStack to the front which will also set the focus
-                // activity.
-                mService.setFocusedActivityLocked(mStartActivity, "startedActivity");
-            }
             final ActivityRecord topTaskActivity = mStartActivity.task.topRunningActivityLocked();
             if (!mTargetStack.isFocusable()
                     || (topTaskActivity != null && topTaskActivity.mTaskOverlay
@@ -1654,9 +1623,13 @@ class ActivityStarter {
         mSupervisor.updateUserStackLocked(mStartActivity.userId, mTargetStack);
     }
 
-    private void setTaskFromReuseOrCreateNewTask(TaskRecord taskToAffiliate) {
-        mTargetStack = computeStackFocus(mStartActivity, true, mLaunchBounds, mLaunchFlags,
-                mOptions);
+    private int setTaskFromReuseOrCreateNewTask(
+            TaskRecord taskToAffiliate, int preferredLaunchStackId, ActivityStack topStack) {
+        mTargetStack = computeStackFocus(
+                mStartActivity, true, mLaunchBounds, mLaunchFlags, mOptions);
+
+        // Do no move the target stack to front yet, as we might bail if
+        // isLockTaskModeViolation fails below.
 
         if (mReuseTask == null) {
             final TaskRecord task = mTargetStack.createTaskRecord(
@@ -1680,9 +1653,31 @@ class ActivityStarter {
         } else {
             mStartActivity.setTask(mReuseTask, taskToAffiliate);
         }
+
+        if (mSupervisor.isLockTaskModeViolation(mStartActivity.task)) {
+            Slog.e(TAG, "Attempted Lock Task Mode violation mStartActivity=" + mStartActivity);
+            return START_RETURN_LOCK_TASK_MODE_VIOLATION;
+        }
+
+        if (!mMovedOtherTask) {
+            // If stack id is specified in activity options, usually it means that activity is
+            // launched not from currently focused stack (e.g. from SysUI or from shell) - in
+            // that case we check the target stack.
+            updateTaskReturnToType(mStartActivity.task, mLaunchFlags,
+                    preferredLaunchStackId != INVALID_STACK_ID ? mTargetStack : topStack);
+        }
+        if (mDoResume) {
+            mTargetStack.moveToFront("reuseOrNewTask");
+        }
+        return START_SUCCESS;
     }
 
     private int setTaskFromSourceRecord() {
+        if (mSupervisor.isLockTaskModeViolation(mSourceRecord.task)) {
+            Slog.e(TAG, "Attempted Lock Task Mode violation mStartActivity=" + mStartActivity);
+            return START_RETURN_LOCK_TASK_MODE_VIOLATION;
+        }
+
         final TaskRecord sourceTask = mSourceRecord.task;
         // We only want to allow changing stack if the target task is not the top one,
         // otherwise we would move the launching task to the other side, rather than show
@@ -1699,14 +1694,15 @@ class ActivityStarter {
             mSupervisor.moveTaskToStackLocked(sourceTask.taskId, mTargetStack.mStackId,
                     ON_TOP, FORCE_FOCUS, "launchToSide", !ANIMATE);
         }
-        if (mDoResume) {
-            mTargetStack.moveToFront("sourceStackToFront");
-        }
+
         final TaskRecord topTask = mTargetStack.topTask();
         if (topTask != sourceTask && !mAvoidMoveToFront) {
             mTargetStack.moveTaskToFrontLocked(sourceTask, mNoAnimation, mOptions,
                     mStartActivity.appTimeTracker, "sourceTaskToFront");
+        } else if (mDoResume) {
+            mTargetStack.moveToFront("sourceStackToFront");
         }
+
         if (!mAddingToTask && (mLaunchFlags & FLAG_ACTIVITY_CLEAR_TOP) != 0) {
             // In this case, we are adding the activity to an existing task, but the caller has
             // asked to clear that task if the activity is already running.
@@ -1751,6 +1747,13 @@ class ActivityStarter {
     }
 
     private int setTaskFromInTask() {
+        // The caller is asking that the new activity be started in an explicit
+        // task it has provided to us.
+        if (mSupervisor.isLockTaskModeViolation(mInTask)) {
+            Slog.e(TAG, "Attempted Lock Task Mode violation mStartActivity=" + mStartActivity);
+            return START_RETURN_LOCK_TASK_MODE_VIOLATION;
+        }
+
         if (mLaunchBounds != null) {
             mInTask.updateOverrideConfiguration(mLaunchBounds);
             int stackId = mInTask.getLaunchStackId();
