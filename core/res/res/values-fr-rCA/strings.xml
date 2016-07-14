@@ -1024,6 +1024,8 @@
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Optimisation du stockage."</string>
     <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Installation de la m. à niveau d\'Android"</string>
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Il se peut que certaines applications ne fonctionnent pas correctement jusqu\'à ce que la mise à niveau soit terminée"</string>
+    <!-- no translation found for app_upgrading_toast (3008139776215597053) -->
+    <skip />
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Optimisation de l\'application <xliff:g id="NUMBER_0">%1$d</xliff:g> sur <xliff:g id="NUMBER_1">%2$d</xliff:g>…"</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Préparation de <xliff:g id="APPNAME">%1$s</xliff:g> en cours…"</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Lancement des applications…"</string>
