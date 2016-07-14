@@ -742,6 +742,12 @@ class AppErrors {
             mService.updateCpuStatsNow();
         }
 
+        // Unless configured otherwise, swallow ANRs in background processes & kill the process.
+        boolean showBackground = Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.ANR_SHOW_BACKGROUND, 0) != 0;
+
+        boolean isSilentANR;
+
         synchronized (mService) {
             // PowerManager.reboot() can block for a long time, so ignore ANRs while shutting down.
             if (mService.mShuttingDown) {
@@ -766,25 +772,29 @@ class AppErrors {
             // Dump thread traces as quickly as we can, starting with "interesting" processes.
             firstPids.add(app.pid);
 
-            int parentPid = app.pid;
-            if (parent != null && parent.app != null && parent.app.pid > 0) {
-                parentPid = parent.app.pid;
-            }
-            if (parentPid != app.pid) firstPids.add(parentPid);
+            // Don't dump other PIDs if it's a background ANR
+            isSilentANR = !showBackground && !app.isInterestingToUserLocked() && app.pid != MY_PID;
+            if (!isSilentANR) {
+                int parentPid = app.pid;
+                if (parent != null && parent.app != null && parent.app.pid > 0) {
+                    parentPid = parent.app.pid;
+                }
+                if (parentPid != app.pid) firstPids.add(parentPid);
 
-            if (MY_PID != app.pid && MY_PID != parentPid) firstPids.add(MY_PID);
+                if (MY_PID != app.pid && MY_PID != parentPid) firstPids.add(MY_PID);
 
-            for (int i = mService.mLruProcesses.size() - 1; i >= 0; i--) {
-                ProcessRecord r = mService.mLruProcesses.get(i);
-                if (r != null && r.thread != null) {
-                    int pid = r.pid;
-                    if (pid > 0 && pid != app.pid && pid != parentPid && pid != MY_PID) {
-                        if (r.persistent) {
-                            firstPids.add(pid);
-                            if (DEBUG_ANR) Slog.i(TAG, "Adding persistent proc: " + r);
-                        } else {
-                            lastPids.put(pid, Boolean.TRUE);
-                            if (DEBUG_ANR) Slog.i(TAG, "Adding ANR proc: " + r);
+                for (int i = mService.mLruProcesses.size() - 1; i >= 0; i--) {
+                    ProcessRecord r = mService.mLruProcesses.get(i);
+                    if (r != null && r.thread != null) {
+                        int pid = r.pid;
+                        if (pid > 0 && pid != app.pid && pid != parentPid && pid != MY_PID) {
+                            if (r.persistent) {
+                                firstPids.add(pid);
+                                if (DEBUG_ANR) Slog.i(TAG, "Adding persistent proc: " + r);
+                            } else {
+                                lastPids.put(pid, Boolean.TRUE);
+                                if (DEBUG_ANR) Slog.i(TAG, "Adding ANR proc: " + r);
+                            }
                         }
                     }
                 }
@@ -807,10 +817,18 @@ class AppErrors {
             info.append("Parent: ").append(parent.shortComponentName).append("\n");
         }
 
-        final ProcessCpuTracker processCpuTracker = new ProcessCpuTracker(true);
+        ProcessCpuTracker processCpuTracker = new ProcessCpuTracker(true);
 
-        File tracesFile = mService.dumpStackTraces(true, firstPids, processCpuTracker, lastPids,
-                NATIVE_STACKS_OF_INTEREST);
+        String[] nativeProcs = NATIVE_STACKS_OF_INTEREST;
+        // don't dump native PIDs for background ANRs
+        File tracesFile = null;
+        if (isSilentANR) {
+            tracesFile = mService.dumpStackTraces(true, firstPids, null, lastPids,
+                null);
+        } else {
+            tracesFile = mService.dumpStackTraces(true, firstPids, processCpuTracker, lastPids,
+                nativeProcs);
+        }
 
         String cpuInfo = null;
         if (ActivityManagerService.MONITOR_CPU_USAGE) {
@@ -854,14 +872,10 @@ class AppErrors {
             }
         }
 
-        // Unless configured otherwise, swallow ANRs in background processes & kill the process.
-        boolean showBackground = Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.ANR_SHOW_BACKGROUND, 0) != 0;
-
         synchronized (mService) {
             mService.mBatteryStatsService.noteProcessAnr(app.processName, app.uid);
 
-            if (!showBackground && !app.isInterestingToUserLocked() && app.pid != MY_PID) {
+            if (isSilentANR) {
                 app.kill("bg anr", true);
                 return;
             }
