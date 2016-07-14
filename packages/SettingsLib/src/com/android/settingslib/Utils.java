@@ -169,7 +169,7 @@ public class Utils {
      * Determine whether a package is a "system package", in which case certain things (like
      * disabling notifications or disabling the package altogether) should be disallowed.
      */
-    public static boolean isSystemPackage(PackageManager pm, PackageInfo pkg) {
+    public static boolean isSystemPackage(Resources resources, PackageManager pm, PackageInfo pkg) {
         if (sSystemSignature == null) {
             sSystemSignature = new Signature[]{ getSystemSignature(pm) };
         }
@@ -187,7 +187,8 @@ public class Utils {
                 || pkg.packageName.equals(sPermissionControllerPackageName)
                 || pkg.packageName.equals(sServicesSystemSharedLibPackageName)
                 || pkg.packageName.equals(sSharedSystemSharedLibPackageName)
-                || pkg.packageName.equals(PrintManager.PRINT_SPOOLER_PACKAGE_NAME);
+                || pkg.packageName.equals(PrintManager.PRINT_SPOOLER_PACKAGE_NAME)
+                || isDeviceProvisioningPackage(resources, pkg.packageName);
     }
 
     private static Signature getFirstSignature(PackageInfo pkg) {
@@ -204,5 +205,15 @@ public class Utils {
         } catch (NameNotFoundException e) {
         }
         return null;
+    }
+
+    /**
+     * Returns {@code true} if the supplied package is the device provisioning app. Otherwise,
+     * returns {@code false}.
+     */
+    public static boolean isDeviceProvisioningPackage(Resources resources, String packageName) {
+        String deviceProvisioningPackage = resources.getString(
+                com.android.internal.R.string.config_deviceProvisioningPackage);
+        return deviceProvisioningPackage != null && deviceProvisioningPackage.equals(packageName);
     }
 }
