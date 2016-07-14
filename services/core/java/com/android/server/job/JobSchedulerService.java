@@ -1556,6 +1556,11 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 }
             }
 
+            if ((job.getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0) {
+                getContext().enforceCallingOrSelfPermission(
+                        android.Manifest.permission.CONNECTIVITY_INTERNAL, TAG);
+            }
+
             long ident = Binder.clearCallingIdentity();
             try {
                 return JobSchedulerService.this.schedule(job, uid);
