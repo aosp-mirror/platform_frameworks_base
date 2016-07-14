@@ -789,6 +789,13 @@ public class CarrierConfigManager {
     public static final int CDMA_ROAMING_MODE_ANY = 2;
 
     /**
+     * Report IMEI as device id even if it's a CDMA/LTE phone.
+     *
+     * @hide
+     */
+    public static final String KEY_FORCE_IMEI_BOOL = "force_imei_bool";
+
+    /**
      * The families of Radio Access Technologies that will get clustered and ratcheted,
      * ie, we will report transitions up within the family, but not down until we change
      * cells.  This prevents flapping between base technologies and higher techs that are
@@ -995,6 +1002,7 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_MMS_USER_AGENT_STRING, "");
         sDefaults.putBoolean(KEY_ALLOW_NON_EMERGENCY_CALLS_IN_ECM_BOOL, true);
         sDefaults.putBoolean(KEY_USE_RCS_PRESENCE_BOOL, false);
+        sDefaults.putBoolean(KEY_FORCE_IMEI_BOOL, false);
         sDefaults.putInt(KEY_CDMA_ROAMING_MODE_INT, CDMA_ROAMING_MODE_RADIO_DEFAULT);
 
         // Carrier Signalling Receivers
