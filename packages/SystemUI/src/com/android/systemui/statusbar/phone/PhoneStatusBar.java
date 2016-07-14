@@ -2586,7 +2586,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     @Override
     public void handleSystemNavigationKey(int key) {
         if (SPEW) Log.d(TAG, "handleSystemNavigationKey: " + key);
-        if (!panelsEnabled()) {
+        if (!panelsEnabled() || !mKeyguardMonitor.isDeviceInteractive()) {
             return;
         }
 
