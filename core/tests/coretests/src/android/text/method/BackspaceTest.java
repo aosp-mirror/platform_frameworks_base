@@ -170,6 +170,18 @@ public class BackspaceTest extends KeyListenerTestCase {
         backspace(state, 0);
         state.assertEquals("|");
 
+        state.setByString("U+1F469 U+200D U+1F373 |");
+        backspace(state, 0);
+        state.assertEquals("|");
+
+        state.setByString("U+1F487 U+200D U+2640 |");
+        backspace(state, 0);
+        state.assertEquals("|");
+
+        state.setByString("U+1F487 U+200D U+2640 U+FE0F |");
+        backspace(state, 0);
+        state.assertEquals("|");
+
         state.setByString("U+1F468 U+200D U+2764 U+FE0F U+200D U+1F48B U+200D U+1F468 |");
         backspace(state, 0);
         state.assertEquals("|");
