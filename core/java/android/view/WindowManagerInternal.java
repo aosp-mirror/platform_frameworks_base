@@ -287,4 +287,9 @@ public abstract class WindowManagerInternal {
      * @return True if and only if the docked divider is currently in resize mode.
      */
     public abstract boolean isDockedDividerResizing();
+
+    /**
+     * Requests the window manager to recompute the windows for accessibility.
+     */
+    public abstract void computeWindowsForAccessibility();
 }

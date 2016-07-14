@@ -115,6 +115,16 @@ final class AccessibilityController {
         }
     }
 
+    public void performComputeChangedWindowsNotLocked() {
+        WindowsForAccessibilityObserver observer = null;
+        synchronized (mWindowManagerService) {
+            observer = mWindowsForAccessibilityObserver;
+        }
+        if (observer != null) {
+            observer.performComputeChangedWindowsNotLocked();
+        }
+    }
+
     public void setMagnificationSpecLocked(MagnificationSpec spec) {
         if (mDisplayMagnifier != null) {
             mDisplayMagnifier.setMagnificationSpecLocked(spec);

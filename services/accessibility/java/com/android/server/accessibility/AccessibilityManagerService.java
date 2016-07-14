@@ -426,6 +426,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     @Override
     public boolean sendAccessibilityEvent(AccessibilityEvent event, int userId) {
+        boolean dispatchEvent = false;
+
         synchronized (mLock) {
             // We treat calls from a profile as if made by its parent as profiles
             // share the accessibility state of the parent. The call below
@@ -440,15 +442,31 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 mSecurityPolicy.updateActiveAndAccessibilityFocusedWindowLocked(event.getWindowId(),
                         event.getSourceNodeId(), event.getEventType(), event.getAction());
                 mSecurityPolicy.updateEventSourceLocked(event);
-                notifyAccessibilityServicesDelayedLocked(event, false);
-                notifyAccessibilityServicesDelayedLocked(event, true);
+                dispatchEvent = true;
             }
             if (mHasInputFilter && mInputFilter != null) {
                 mMainHandler.obtainMessage(MainHandler.MSG_SEND_ACCESSIBILITY_EVENT_TO_INPUT_FILTER,
                         AccessibilityEvent.obtain(event)).sendToTarget();
             }
-            event.recycle();
         }
+
+        if (dispatchEvent) {
+            // Make sure clients receiving this event will be able to get the
+            // current state of the windows as the window manager may be delaying
+            // the computation for performance reasons.
+            if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
+                    && mWindowsForAccessibilityCallback != null) {
+                WindowManagerInternal wm = LocalServices.getService(WindowManagerInternal.class);
+                wm.computeWindowsForAccessibility();
+            }
+            synchronized (mLock) {
+                notifyAccessibilityServicesDelayedLocked(event, false);
+                notifyAccessibilityServicesDelayedLocked(event, true);
+            }
+        }
+
+        event.recycle();
+
         return (OWN_PROCESS_ID != Binder.getCallingPid());
     }
 
