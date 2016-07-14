@@ -819,7 +819,7 @@ public class WifiNanManager {
                             originalCallback.onConnectFail(msg.arg1);
                             break;
                         case CALLBACK_IDENTITY_CHANGED:
-                            originalCallback.onIdentityChanged();
+                            originalCallback.onIdentityChanged((byte[]) msg.obj);
                             break;
                         case CALLBACK_RANGING_SUCCESS: {
                             RttManager.RttListener listener = getAndRemoveRangingListener(msg.arg1);
@@ -875,10 +875,11 @@ public class WifiNanManager {
         }
 
         @Override
-        public void onIdentityChanged() {
-            if (VDBG) Log.v(TAG, "onIdentityChanged");
+        public void onIdentityChanged(byte[] mac) {
+            if (VDBG) Log.v(TAG, "onIdentityChanged: mac=" + new String(HexEncoding.encode(mac)));
 
             Message msg = mHandler.obtainMessage(CALLBACK_IDENTITY_CHANGED);
+            msg.obj = mac;
             mHandler.sendMessage(msg);
         }
 
