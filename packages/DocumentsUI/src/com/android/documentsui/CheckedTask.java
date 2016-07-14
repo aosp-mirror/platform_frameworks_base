@@ -73,6 +73,7 @@ abstract class CheckedTask<Input, Output>
         finish(result);
     }
 
+    @FunctionalInterface
     interface Check {
         boolean stop();
     }

@@ -31,6 +31,7 @@ import com.android.documentsui.Shared;
 import com.android.documentsui.dirlist.MultiSelectManager.Selection;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
+import com.android.documentsui.model.RootInfo;
 import com.android.documentsui.services.FileOperation;
 import com.android.documentsui.services.FileOperationService;
 import com.android.documentsui.services.FileOperationService.OpType;
@@ -233,16 +234,42 @@ public final class DocumentClipper {
     }
 
     /**
-     * Copies documents from given clip data.
+     * Copied documents from given clip data to a root directory.
+     * @param root the root which root directory to copy to
+     * @param destination the root directory
+     * @param clipData the clipData to copy from
+     * @param callback callback to notify when operation finishes
+     */
+    public void copyFromClipData(
+            final RootInfo root,
+            final DocumentInfo destination,
+            final @Nullable ClipData clipData,
+            final FileOperations.Callback callback) {
+        DocumentStack dstStack = new DocumentStack(root, destination);
+        copyFromClipData(dstStack, clipData, callback);
+    }
+
+    /**
+     * Copies documents from given clip data to a folder.
      *
-     * @param destination destination document
-     * @param docStack the document stack to the destination folder
-     * @param clipData the clipData to copy from, or null to copy from clipboard
+     * @param destination destination folder
+     * @param docStack the document stack to the destination folder (not including the destination
+     *                 folder)
+     * @param clipData the clipData to copy from
      * @param callback callback to notify when operation finishes
      */
     public void copyFromClipData(
             final DocumentInfo destination,
-            DocumentStack docStack,
+            final DocumentStack docStack,
+            final @Nullable ClipData clipData,
+            final FileOperations.Callback callback) {
+
+        DocumentStack dstStack = new DocumentStack(docStack, destination);
+        copyFromClipData(dstStack, clipData, callback);
+    }
+
+    private void copyFromClipData(
+            final DocumentStack dstStack,
             final @Nullable ClipData clipData,
             final FileOperations.Callback callback) {
 
@@ -254,20 +281,18 @@ public final class DocumentClipper {
         PersistableBundle bundle = clipData.getDescription().getExtras();
         @OpType int opType = getOpType(bundle);
         try {
-            UrisSupplier uris = UrisSupplier.create(clipData, mContext);
-            if (!canCopy(destination)) {
+            if (!canCopy(dstStack.peek())) {
                 callback.onOperationResult(
-                        FileOperations.Callback.STATUS_REJECTED, opType, 0);
+                        FileOperations.Callback.STATUS_REJECTED, getOpType(clipData), 0);
                 return;
             }
 
+            UrisSupplier uris = UrisSupplier.create(clipData, mContext);
             if (uris.getItemCount() == 0) {
                 callback.onOperationResult(
                         FileOperations.Callback.STATUS_ACCEPTED, opType, 0);
                 return;
             }
-
-            DocumentStack dstStack = new DocumentStack(docStack, destination);
 
             String srcParentString = bundle.getString(SRC_PARENT_KEY);
             Uri srcParent = srcParentString == null ? null : Uri.parse(srcParentString);

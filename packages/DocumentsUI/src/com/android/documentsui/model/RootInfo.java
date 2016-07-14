@@ -23,6 +23,7 @@ import static com.android.documentsui.model.DocumentInfo.getCursorLong;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
 
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
@@ -39,6 +40,7 @@ import com.android.documentsui.R;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -344,6 +346,19 @@ public class RootInfo implements Durable, Parcelable, Comparable<RootInfo> {
 
     public Drawable loadEjectIcon(Context context) {
         return IconUtils.applyTintColor(context, R.drawable.ic_eject, R.color.item_eject_icon);
+    }
+
+    /**
+     * Gets the {@link DocumentInfo} of the root folder of this root.
+     */
+    public @Nullable DocumentInfo getRootDocumentBlocking(Context context) {
+        try {
+            final Uri uri = DocumentsContract.buildDocumentUri(authority, documentId);
+            return DocumentInfo.fromUri(context.getContentResolver(), uri);
+        } catch (FileNotFoundException e) {
+            Log.w(TAG, "Failed to find root", e);
+            return null;
+        }
     }
 
     @Override

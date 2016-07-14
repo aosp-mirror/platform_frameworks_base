@@ -22,7 +22,6 @@ import android.util.Log;
 import android.view.DragEvent;
 import android.view.View;
 import android.view.View.OnDragListener;
-import android.view.ViewConfiguration;
 
 import com.android.documentsui.ItemDragListener.DragHost;
 import com.android.internal.annotations.VisibleForTesting;
@@ -39,7 +38,7 @@ public class ItemDragListener<H extends DragHost> implements OnDragListener {
     private static final String TAG = "ItemDragListener";
 
     @VisibleForTesting
-    static final int SPRING_TIMEOUT = ViewConfiguration.getLongPressTimeout();
+    static final int SPRING_TIMEOUT = 1000;
 
     protected final H mDragHost;
     private final Timer mHoverTimer;
@@ -82,7 +81,7 @@ public class ItemDragListener<H extends DragHost> implements OnDragListener {
         TimerTask task = createOpenTask(v);
         assert (task != null);
         v.setTag(R.id.drag_hovering_tag, task);
-        mHoverTimer.schedule(task, ViewConfiguration.getLongPressTimeout());
+        mHoverTimer.schedule(task, SPRING_TIMEOUT);
     }
 
     private void handleLocationEvent(View v, float x, float y) {
