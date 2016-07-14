@@ -1444,6 +1444,10 @@ public class ShortcutService extends IShortcutService.Stub {
                     shortcut.getPackage().equals(shortcut.getActivity().getPackageName()),
                     "Cannot publish shortcut: activity " + shortcut.getActivity() + " does not"
                     + " belong to package " + shortcut.getPackage());
+            Preconditions.checkState(
+                    injectIsMainActivity(shortcut.getActivity(), shortcut.getUserId()),
+                    "Cannot publish shortcut: activity " + shortcut.getActivity() + " is not"
+                            + " main activity");
         }
 
         if (!forUpdate) {
