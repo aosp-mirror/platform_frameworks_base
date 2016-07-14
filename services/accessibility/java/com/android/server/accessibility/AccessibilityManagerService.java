@@ -1422,7 +1422,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         updateTouchExplorationLocked(userState);
         updatePerformGesturesLocked(userState);
         updateEnhancedWebAccessibilityLocked(userState);
-        updateDisplayColorAdjustmentSettingsLocked(userState);
+        updateDisplayDaltonizerLocked(userState);
+        updateDisplayInversionLocked(userState);
         updateMagnificationLocked(userState);
         updateSoftKeyboardShowModeLocked(userState);
         scheduleUpdateInputFilter(userState);
@@ -1539,7 +1540,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         somethingChanged |= readEnhancedWebAccessibilityEnabledChangedLocked(userState);
         somethingChanged |= readDisplayMagnificationEnabledSettingLocked(userState);
         somethingChanged |= readAutoclickEnabledSettingLocked(userState);
-        somethingChanged |= readDisplayColorAdjustmentSettingsLocked(userState);
 
         return somethingChanged;
     }
@@ -1600,18 +1600,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
              return true;
          }
          return false;
-    }
-
-    private boolean readDisplayColorAdjustmentSettingsLocked(UserState userState) {
-        final boolean displayAdjustmentsEnabled = DisplayAdjustmentUtils.hasAdjustments(mContext,
-                userState.mUserId);
-        if (displayAdjustmentsEnabled != userState.mHasDisplayColorAdjustment) {
-            userState.mHasDisplayColorAdjustment = displayAdjustmentsEnabled;
-            return true;
-        }
-        // If display adjustment is enabled, always assume there was a change in
-        // the adjustment settings.
-        return displayAdjustmentsEnabled;
     }
 
     private boolean readHighTextContrastEnabledSettingLocked(UserState userState) {
@@ -1730,8 +1718,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         return false;
     }
 
-    private void updateDisplayColorAdjustmentSettingsLocked(UserState userState) {
-        DisplayAdjustmentUtils.applyAdjustments(mContext, userState.mUserId);
+    private void updateDisplayDaltonizerLocked(UserState userState) {
+        DisplayAdjustmentUtils.applyDaltonizerSetting(mContext, userState.mUserId);
+    }
+
+    private void updateDisplayInversionLocked(UserState userState) {
+        DisplayAdjustmentUtils.applyInversionSetting(mContext, userState.mUserId);
     }
 
     private void updateMagnificationLocked(UserState userState) {
@@ -4184,7 +4176,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         public boolean mIsAutoclickEnabled;
         public boolean mIsPerformGesturesEnabled;
         public boolean mIsFilterKeyEventsEnabled;
-        public boolean mHasDisplayColorAdjustment;
         public boolean mAccessibilityFocusOnlyInActiveWindow;
 
         private Service mUiAutomationService;
@@ -4300,9 +4291,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         private final Uri mDisplayDaltonizerUri = Settings.Secure.getUriFor(
                 Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER);
 
-        private final Uri mDisplayColorMatrixUri = Settings.Secure.getUriFor(
-                Settings.Secure.ACCESSIBILITY_DISPLAY_COLOR_MATRIX);
-
         private final Uri mHighTextContrastUri = Settings.Secure.getUriFor(
                 Settings.Secure.ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED);
 
@@ -4333,8 +4321,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     mDisplayDaltonizerEnabledUri, false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(
                     mDisplayDaltonizerUri, false, this, UserHandle.USER_ALL);
-            contentResolver.registerContentObserver(
-                    mDisplayColorMatrixUri, false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(
                     mHighTextContrastUri, false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(
@@ -4377,14 +4363,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     if (readEnhancedWebAccessibilityEnabledChangedLocked(userState)) {
                         onUserStateChangedLocked(userState);
                     }
-                } else if (mDisplayInversionEnabledUri.equals(uri)
-                        || mDisplayDaltonizerEnabledUri.equals(uri)
+                } else if (mDisplayDaltonizerEnabledUri.equals(uri)
                         || mDisplayDaltonizerUri.equals(uri)) {
-                    if (readDisplayColorAdjustmentSettingsLocked(userState)) {
-                        updateDisplayColorAdjustmentSettingsLocked(userState);
-                    }
-                } else if (mDisplayColorMatrixUri.equals(uri)) {
-                    updateDisplayColorAdjustmentSettingsLocked(userState);
+                    updateDisplayDaltonizerLocked(userState);
+                } else if (mDisplayInversionEnabledUri.equals(uri)) {
+                    updateDisplayInversionLocked(userState);
                 } else if (mHighTextContrastUri.equals(uri)) {
                     if (readHighTextContrastEnabledSettingLocked(userState)) {
                         onUserStateChangedLocked(userState);
