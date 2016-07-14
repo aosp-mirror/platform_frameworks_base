@@ -166,6 +166,9 @@ public class JobInfo implements Parcelable {
      * network restrictions for the requesting app. Note that this flag alone
      * doesn't actually place your {@link JobService} in the foreground; you
      * still need to post the notification yourself.
+     * <p>
+     * To use this flag, the caller must hold the
+     * {@link android.Manifest.permission#CONNECTIVITY_INTERNAL} permission.
      *
      * @hide
      */
