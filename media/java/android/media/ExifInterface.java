@@ -349,11 +349,44 @@ public class ExifInterface {
     public static final String TAG_THUMBNAIL_IMAGE_WIDTH = "ThumbnailImageWidth";
     /** Type is int. DNG Specification 1.4.0.0. Section 4 */
     public static final String TAG_DEFAULT_CROP_SIZE = "DefaultCropSize";
-    /** Type is int. ORF Specification. http://www.exiv2.org/tags-olympus.html */
-    public static final String TAG_THUMBNAIL_IMAGE = "ThumbnailImage";
-    public static final String TAG_PREVIEW_IMAGE_START = "PreviewImageStart";
-    public static final String TAG_PREVIEW_IMAGE_LENGTH = "PreviewImageLength";
-    public static final String TAG_ASPECT_FRAME = "AspectFrame";
+    /** Type is undefined. See Olympus MakerNote tags in http://www.exiv2.org/tags-olympus.html. */
+    public static final String TAG_ORF_THUMBNAIL_IMAGE = "ThumbnailImage";
+    /** Type is int. See Olympus Camera Settings tags in http://www.exiv2.org/tags-olympus.html. */
+    public static final String TAG_ORF_PREVIEW_IMAGE_START = "PreviewImageStart";
+    /** Type is int. See Olympus Camera Settings tags in http://www.exiv2.org/tags-olympus.html. */
+    public static final String TAG_ORF_PREVIEW_IMAGE_LENGTH = "PreviewImageLength";
+    /** Type is int. See Olympus Image Processing tags in http://www.exiv2.org/tags-olympus.html. */
+    public static final String TAG_ORF_ASPECT_FRAME = "AspectFrame";
+    /**
+     * Type is int. See PanasonicRaw tags in
+     * http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/PanasonicRaw.html
+     */
+    public static final String TAG_RW2_SENSOR_BOTTOM_BORDER = "SensorBottomBorder";
+    /**
+     * Type is int. See PanasonicRaw tags in
+     * http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/PanasonicRaw.html
+     */
+    public static final String TAG_RW2_SENSOR_LEFT_BORDER = "SensorLeftBorder";
+    /**
+     * Type is int. See PanasonicRaw tags in
+     * http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/PanasonicRaw.html
+     */
+    public static final String TAG_RW2_SENSOR_RIGHT_BORDER = "SensorRightBorder";
+    /**
+     * Type is int. See PanasonicRaw tags in
+     * http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/PanasonicRaw.html
+     */
+    public static final String TAG_RW2_SENSOR_TOP_BORDER = "SensorTopBorder";
+    /**
+     * Type is int. See PanasonicRaw tags in
+     * http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/PanasonicRaw.html
+     */
+    public static final String TAG_RW2_ISO = "ISO";
+    /**
+     * Type is undefined. See PanasonicRaw tags in
+     * http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/PanasonicRaw.html
+     */
+    public static final String TAG_RW2_JPG_FROM_RAW = "JpgFromRaw";
 
     /**
      * Private tags used for pointing the other IFD offsets.
@@ -365,10 +398,10 @@ public class ExifInterface {
     private static final String TAG_GPS_INFO_IFD_POINTER = "GPSInfoIFDPointer";
     private static final String TAG_INTEROPERABILITY_IFD_POINTER = "InteroperabilityIFDPointer";
     private static final String TAG_SUB_IFD_POINTER = "SubIFDPointer";
-    // Proprietary pointer tags used for ORF file format.
+    // Proprietary pointer tags used for ORF files.
     // See http://www.exiv2.org/tags-olympus.html
-    private static final String TAG_CAMERA_SETTINGS_IFD_POINTER = "CameraSettingsIFDPointer";
-    private static final String TAG_IMAGE_PROCESSING_IFD_POINTER = "ImageProcessingIFDPointer";
+    private static final String TAG_ORF_CAMERA_SETTINGS_IFD_POINTER = "CameraSettingsIFDPointer";
+    private static final String TAG_ORF_IMAGE_PROCESSING_IFD_POINTER = "ImageProcessingIFDPointer";
 
     // Private tags used for thumbnail information.
     private static final String TAG_HAS_THUMBNAIL = "HasThumbnail";
@@ -416,6 +449,14 @@ public class ExifInterface {
             (byte) 0x49, (byte) 0x49}; // "OLYMPUS\0II"
     private static final int ORF_MAKER_NOTE_HEADER_1_SIZE = 8;
     private static final int ORF_MAKER_NOTE_HEADER_2_SIZE = 12;
+
+    // See http://fileformats.archiveteam.org/wiki/RW2
+    private static final short RW2_SIGNATURE = 0x0055;
+
+    // See http://fileformats.archiveteam.org/wiki/Pentax_PEF
+    private static final String PEF_SIGNATURE = "PENTAX";
+    // See http://www.exiv2.org/makernote.html#R11
+    private static final int PEF_MAKER_NOTE_SKIP_SIZE = 6;
 
     private static SimpleDateFormat sFormatter;
 
@@ -923,7 +964,15 @@ public class ExifInterface {
             new ExifTag(TAG_REFERENCE_BLACK_WHITE, 532, IFD_FORMAT_URATIONAL),
             new ExifTag(TAG_COPYRIGHT, 33432, IFD_FORMAT_STRING),
             new ExifTag(TAG_EXIF_IFD_POINTER, 34665, IFD_FORMAT_ULONG),
-            new ExifTag(TAG_GPS_INFO_IFD_POINTER, 34853, IFD_FORMAT_ULONG)
+            new ExifTag(TAG_GPS_INFO_IFD_POINTER, 34853, IFD_FORMAT_ULONG),
+            // RW2 file tags
+            // See http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/PanasonicRaw.html)
+            new ExifTag(TAG_RW2_SENSOR_TOP_BORDER, 4, IFD_FORMAT_ULONG),
+            new ExifTag(TAG_RW2_SENSOR_LEFT_BORDER, 5, IFD_FORMAT_ULONG),
+            new ExifTag(TAG_RW2_SENSOR_BOTTOM_BORDER, 6, IFD_FORMAT_ULONG),
+            new ExifTag(TAG_RW2_SENSOR_RIGHT_BORDER, 7, IFD_FORMAT_ULONG),
+            new ExifTag(TAG_RW2_ISO, 23, IFD_FORMAT_USHORT),
+            new ExifTag(TAG_RW2_JPG_FROM_RAW, 46, IFD_FORMAT_UNDEFINED)
     };
 
     // Primary image IFD Exif Private tags (See JEITA CP-3451C Section 4.6.8 Tag Support Levels)
@@ -1073,16 +1122,20 @@ public class ExifInterface {
 
     // ORF file tags (See http://www.exiv2.org/tags-olympus.html)
     private static final ExifTag[] ORF_MAKER_NOTE_TAGS = new ExifTag[] {
-            new ExifTag(TAG_THUMBNAIL_IMAGE, 256, IFD_FORMAT_UNDEFINED),
-            new ExifTag(TAG_CAMERA_SETTINGS_IFD_POINTER, 8224, IFD_FORMAT_ULONG),
-            new ExifTag(TAG_IMAGE_PROCESSING_IFD_POINTER, 8256, IFD_FORMAT_ULONG)
+            new ExifTag(TAG_ORF_THUMBNAIL_IMAGE, 256, IFD_FORMAT_UNDEFINED),
+            new ExifTag(TAG_ORF_CAMERA_SETTINGS_IFD_POINTER, 8224, IFD_FORMAT_ULONG),
+            new ExifTag(TAG_ORF_IMAGE_PROCESSING_IFD_POINTER, 8256, IFD_FORMAT_ULONG)
     };
     private static final ExifTag[] ORF_CAMERA_SETTINGS_TAGS = new ExifTag[] {
-            new ExifTag(TAG_PREVIEW_IMAGE_START, 257, IFD_FORMAT_ULONG),
-            new ExifTag(TAG_PREVIEW_IMAGE_LENGTH, 258, IFD_FORMAT_ULONG)
+            new ExifTag(TAG_ORF_PREVIEW_IMAGE_START, 257, IFD_FORMAT_ULONG),
+            new ExifTag(TAG_ORF_PREVIEW_IMAGE_LENGTH, 258, IFD_FORMAT_ULONG)
     };
     private static final ExifTag[] ORF_IMAGE_PROCESSING_TAGS = new ExifTag[] {
-            new ExifTag(TAG_ASPECT_FRAME, 4371, IFD_FORMAT_USHORT)
+            new ExifTag(TAG_ORF_ASPECT_FRAME, 4371, IFD_FORMAT_USHORT)
+    };
+    // PEF file tag (See http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/Pentax.html)
+    private static final ExifTag[] PEF_TAGS = new ExifTag[] {
+            new ExifTag(TAG_COLOR_SPACE, 55, IFD_FORMAT_USHORT)
     };
 
     // See JEITA CP-3451C Section 4.6.3: Exif-specific IFD.
@@ -1098,11 +1151,12 @@ public class ExifInterface {
     private static final int ORF_MAKER_NOTE_HINT = 6;
     private static final int ORF_CAMERA_SETTINGS_HINT = 7;
     private static final int ORF_IMAGE_PROCESSING_HINT = 8;
+    private static final int PEF_HINT = 9;
     // List of Exif tag groups
     private static final ExifTag[][] EXIF_TAGS = new ExifTag[][] {
             IFD_TIFF_TAGS, IFD_EXIF_TAGS, IFD_GPS_TAGS, IFD_INTEROPERABILITY_TAGS,
             IFD_THUMBNAIL_TAGS, IFD_TIFF_TAGS, ORF_MAKER_NOTE_TAGS, ORF_CAMERA_SETTINGS_TAGS,
-            ORF_IMAGE_PROCESSING_TAGS
+            ORF_IMAGE_PROCESSING_TAGS, PEF_TAGS
     };
     // List of tags for pointing to the other image file directory offset.
     private static final ExifTag[] EXIF_POINTER_TAGS = new ExifTag[] {
@@ -1110,8 +1164,8 @@ public class ExifInterface {
             new ExifTag(TAG_EXIF_IFD_POINTER, 34665, IFD_FORMAT_ULONG),
             new ExifTag(TAG_GPS_INFO_IFD_POINTER, 34853, IFD_FORMAT_ULONG),
             new ExifTag(TAG_INTEROPERABILITY_IFD_POINTER, 40965, IFD_FORMAT_ULONG),
-            new ExifTag(TAG_CAMERA_SETTINGS_IFD_POINTER, 8224, IFD_FORMAT_BYTE),
-            new ExifTag(TAG_IMAGE_PROCESSING_IFD_POINTER, 8256, IFD_FORMAT_BYTE)
+            new ExifTag(TAG_ORF_CAMERA_SETTINGS_IFD_POINTER, 8224, IFD_FORMAT_BYTE),
+            new ExifTag(TAG_ORF_IMAGE_PROCESSING_IFD_POINTER, 8256, IFD_FORMAT_BYTE)
     };
     // List of indices of the indicated tag groups according to the EXIF_POINTER_TAGS
     private static final int[] EXIF_POINTER_TAG_HINTS = new int[] {
@@ -1211,6 +1265,7 @@ public class ExifInterface {
     private int mOrfMakerNoteOffset;
     private int mOrfThumbnailOffset;
     private int mOrfThumbnailLength;
+    private int mRw2JpgFromRawOffset;
 
     // Pattern to check non zero timestamp
     private static final Pattern sNonZeroTimePattern = Pattern.compile(".*[1-9].*");
@@ -1597,13 +1652,16 @@ public class ExifInterface {
                         getOrfAttributes(in);
                         break;
                     }
+                    case IMAGE_TYPE_RW2: {
+                        getRw2Attributes(in);
+                        break;
+                    }
                     case IMAGE_TYPE_ARW:
                     case IMAGE_TYPE_CR2:
                     case IMAGE_TYPE_DNG:
                     case IMAGE_TYPE_NEF:
                     case IMAGE_TYPE_NRW:
                     case IMAGE_TYPE_PEF:
-                    case IMAGE_TYPE_RW2:
                     case IMAGE_TYPE_SRW:
                     case IMAGE_TYPE_UNKNOWN: {
                         getRawAttributes(in);
@@ -1994,7 +2052,10 @@ public class ExifInterface {
             return IMAGE_TYPE_RAF;
         } else if (isOrfFormat(signatureCheckBytes)) {
             return IMAGE_TYPE_ORF;
+        } else if (isRw2Format(signatureCheckBytes)) {
+            return IMAGE_TYPE_RW2;
         }
+        // Certain file formats (PEF) are identified in readImageFileDirectory()
         return IMAGE_TYPE_UNKNOWN;
     }
 
@@ -2045,6 +2106,25 @@ public class ExifInterface {
 
         short orfSignature = signatureInputStream.readShort();
         if (orfSignature == ORF_SIGNATURE_1 || orfSignature == ORF_SIGNATURE_2) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * RW2 is TIFF-based, but stores 0x55 signature byte instead of 0x42 at the header
+     * See http://lclevy.free.fr/raw/
+     */
+    private boolean isRw2Format(byte[] signatureCheckBytes) throws IOException {
+        ByteOrderAwarenessDataInputStream signatureInputStream =
+                new ByteOrderAwarenessDataInputStream(signatureCheckBytes);
+        // Read byte order
+        mExifByteOrder = readByteOrder(signatureInputStream);
+        // Set byte order
+        signatureInputStream.setByteOrder(mExifByteOrder);
+
+        short signatureByte = signatureInputStream.readShort();
+        if (signatureByte == RW2_SIGNATURE) {
             return true;
         }
         return false;
@@ -2137,7 +2217,7 @@ public class ExifInterface {
                     if (DEBUG) {
                         Log.d(TAG, "readExifSegment with a byte array (length: " + length + ")");
                     }
-                    // Save offset values for retrieveJPEGThumbnail() function
+                    // Save offset values for createJpegThumbnailBitmap() function
                     mExifOffset = bytesRead;
 
                     byte[] bytes = new byte[length];
@@ -2245,6 +2325,32 @@ public class ExifInterface {
             if (isThumbnail(mAttributes[IFD_PREVIEW_HINT])) {
                 mAttributes[IFD_THUMBNAIL_HINT] = mAttributes[IFD_PREVIEW_HINT];
                 mAttributes[IFD_PREVIEW_HINT] = new HashMap();
+            }
+        }
+
+        if (mMimeType == IMAGE_TYPE_PEF) {
+            // PEF files contain a MakerNote data, which contains the data for ColorSpace tag.
+            // See http://lclevy.free.fr/raw/ and piex.cc PefGetPreviewData()
+            ExifAttribute makerNoteAttribute =
+                    (ExifAttribute) mAttributes[IFD_EXIF_HINT].get(TAG_MAKER_NOTE);
+            if (makerNoteAttribute != null) {
+                // Create an ordered DataInputStream for MakerNote
+                ByteOrderAwarenessDataInputStream makerNoteDataInputStream =
+                        new ByteOrderAwarenessDataInputStream(makerNoteAttribute.bytes);
+                makerNoteDataInputStream.setByteOrder(mExifByteOrder);
+
+                // Seek to MakerNote data
+                makerNoteDataInputStream.seek(PEF_MAKER_NOTE_SKIP_SIZE);
+
+                // Read IFD data from MakerNote
+                readImageFileDirectory(makerNoteDataInputStream, PEF_HINT);
+
+                // Update ColorSpace tag
+                ExifAttribute colorSpaceAttribute =
+                        (ExifAttribute) mAttributes[PEF_HINT].get(TAG_COLOR_SPACE);
+                if (colorSpaceAttribute != null) {
+                    mAttributes[IFD_EXIF_HINT].put(TAG_COLOR_SPACE, colorSpaceAttribute);
+                }
             }
         }
     }
@@ -2369,12 +2475,13 @@ public class ExifInterface {
 
             // Retrieve & update preview image offset & length values
             ExifAttribute imageLengthAttribute = (ExifAttribute)
-                    mAttributes[ORF_CAMERA_SETTINGS_HINT].get(TAG_PREVIEW_IMAGE_START);
+                    mAttributes[ORF_CAMERA_SETTINGS_HINT].get(TAG_ORF_PREVIEW_IMAGE_START);
             ExifAttribute bitsPerSampleAttribute = (ExifAttribute)
-                    mAttributes[ORF_CAMERA_SETTINGS_HINT].get(TAG_PREVIEW_IMAGE_LENGTH);
+                    mAttributes[ORF_CAMERA_SETTINGS_HINT].get(TAG_ORF_PREVIEW_IMAGE_LENGTH);
 
             if (imageLengthAttribute != null && bitsPerSampleAttribute != null) {
-                mAttributes[IFD_PREVIEW_HINT].put(TAG_JPEG_INTERCHANGE_FORMAT, imageLengthAttribute);
+                mAttributes[IFD_PREVIEW_HINT].put(TAG_JPEG_INTERCHANGE_FORMAT,
+                        imageLengthAttribute);
                 mAttributes[IFD_PREVIEW_HINT].put(TAG_JPEG_INTERCHANGE_FORMAT_LENGTH,
                         bitsPerSampleAttribute);
             }
@@ -2382,8 +2489,8 @@ public class ExifInterface {
             // TODO: Check this behavior in other ORF files
             // Retrieve primary image length & width values
             // See piex.cc GetOlympusPreviewImage()
-            ExifAttribute aspectFrameAttribute =
-                    (ExifAttribute) mAttributes[ORF_IMAGE_PROCESSING_HINT].get(TAG_ASPECT_FRAME);
+            ExifAttribute aspectFrameAttribute = (ExifAttribute)
+                    mAttributes[ORF_IMAGE_PROCESSING_HINT].get(TAG_ORF_ASPECT_FRAME);
             if (aspectFrameAttribute != null) {
                 int[] aspectFrameValues = new int[4];
                 aspectFrameValues = (int[]) aspectFrameAttribute.getValue(mExifByteOrder);
@@ -2405,6 +2512,59 @@ public class ExifInterface {
                     mAttributes[IFD_TIFF_HINT].put(TAG_IMAGE_WIDTH, primaryImageWidthAttribute);
                     mAttributes[IFD_TIFF_HINT].put(TAG_IMAGE_LENGTH, primaryImageLengthAttribute);
                 }
+            }
+        }
+    }
+
+    // RW2 contains the primary image data in IFD0 and the preview and/or thumbnail image data in
+    // the JpgFromRaw tag
+    // See https://libopenraw.freedesktop.org/wiki/Panasonic_RAW/ and piex.cc Rw2GetPreviewData()
+    private void getRw2Attributes(InputStream in) throws IOException {
+        // Retrieve primary image data
+        getRawAttributes(in);
+
+        // Retrieve preview and/or thumbnail image data
+        ExifAttribute jpgFromRawAttribute =
+                (ExifAttribute) mAttributes[IFD_TIFF_HINT].get(TAG_RW2_JPG_FROM_RAW);
+        if (jpgFromRawAttribute != null) {
+            getJpegAttributes(in, mRw2JpgFromRawOffset, IFD_PREVIEW_HINT);
+        }
+
+        // Set ISO tag value if necessary
+        ExifAttribute rw2IsoAttribute =
+                (ExifAttribute) mAttributes[IFD_TIFF_HINT].get(TAG_RW2_ISO);
+        ExifAttribute exifIsoAttribute =
+                (ExifAttribute) mAttributes[IFD_EXIF_HINT].get(TAG_ISO_SPEED_RATINGS);
+        if (rw2IsoAttribute != null && exifIsoAttribute == null) {
+            // Place this attribute only if it doesn't exist
+            mAttributes[IFD_EXIF_HINT].put(TAG_ISO_SPEED_RATINGS, rw2IsoAttribute);
+        }
+    }
+
+    // PEF is TIFF-based and contains 3 IFDs. It also contains a MakerNote data, which contains the
+    // ColorSpace tag data.
+    // See http://lclevy.free.fr/raw/ and piex.cc PefGetPreviewData()
+    private void getPefAttributes(InputStream in) throws IOException {
+        // Retrieve ColorSpace tag
+        ExifAttribute makerNoteAttribute =
+                (ExifAttribute) mAttributes[IFD_EXIF_HINT].get(TAG_MAKER_NOTE);
+        if (makerNoteAttribute != null) {
+            // Create an ordered DataInputStream for MakerNote
+            ByteOrderAwarenessDataInputStream makerNoteDataInputStream =
+                    new ByteOrderAwarenessDataInputStream(makerNoteAttribute.bytes);
+            makerNoteDataInputStream.setByteOrder(mExifByteOrder);
+
+            // Seek to MakerNote data
+            makerNoteDataInputStream.seek(PEF_MAKER_NOTE_SKIP_SIZE);
+
+            // Read IFD data from MakerNote
+            readImageFileDirectory(makerNoteDataInputStream, PEF_HINT);
+
+            // Update ColorSpace tag
+            ExifAttribute colorSpaceAttribute =
+                    (ExifAttribute) mAttributes[PEF_HINT].get(TAG_COLOR_SPACE);
+            if (colorSpaceAttribute != null) {
+                mAttributes[IFD_EXIF_HINT].put(TAG_COLOR_SPACE, colorSpaceAttribute);
             }
         }
     }
@@ -2575,7 +2735,7 @@ public class ExifInterface {
 
         // Check start code
         int startCode = dataInputStream.readUnsignedShort();
-        if (mMimeType != IMAGE_TYPE_ORF && startCode != START_CODE) {
+        if (mMimeType != IMAGE_TYPE_ORF && mMimeType != IMAGE_TYPE_RW2 && startCode != START_CODE) {
             throw new IOException("Invalid start code: " + Integer.toHexString(startCode));
         }
 
@@ -2619,7 +2779,7 @@ public class ExifInterface {
             long nextEntryOffset = dataInputStream.peek() + 4;
 
             // Look up a corresponding tag from tag number
-            final ExifTag tag = (ExifTag) sExifTagMapsForReading[hint].get(tagNumber);
+            ExifTag tag = (ExifTag) sExifTagMapsForReading[hint].get(tagNumber);
 
             if (DEBUG) {
                 Log.d(TAG, String.format("hint: %d, tagNumber: %d, tagName: %s, dataFormat: %d, " +
@@ -2651,7 +2811,7 @@ public class ExifInterface {
                     if (tag.name == TAG_MAKER_NOTE) {
                         // Save offset value for reading thumbnail
                         mOrfMakerNoteOffset = offset;
-                    } else if (hint == ORF_MAKER_NOTE_HINT && tag.name == TAG_THUMBNAIL_IMAGE) {
+                    } else if (hint == ORF_MAKER_NOTE_HINT && tag.name == TAG_ORF_THUMBNAIL_IMAGE) {
                         // Retrieve & update values for thumbnail offset and length values for ORF
                         mOrfThumbnailOffset = offset;
                         mOrfThumbnailLength = numberOfComponents;
@@ -2668,6 +2828,10 @@ public class ExifInterface {
                                 jpegInterchangeFormatAttribute);
                         mAttributes[IFD_THUMBNAIL_HINT].put(TAG_JPEG_INTERCHANGE_FORMAT_LENGTH,
                                 jpegInterchangeFormatLengthAttribute);
+                    }
+                } else if (mMimeType == IMAGE_TYPE_RW2) {
+                    if (tag.name == TAG_RW2_JPG_FROM_RAW) {
+                        mRw2JpgFromRawOffset = offset;
                     }
                 }
                 if (offset + byteCount <= dataInputStream.mLength) {
@@ -2728,8 +2892,20 @@ public class ExifInterface {
 
             byte[] bytes = new byte[byteCount];
             dataInputStream.readFully(bytes);
-            mAttributes[hint].put(
-                    tag.name, new ExifAttribute(dataFormat, numberOfComponents, bytes));
+            ExifAttribute attribute = new ExifAttribute(dataFormat, numberOfComponents, bytes);
+            mAttributes[hint].put(tag.name, attribute);
+
+            // PEF files have a Make or Model tag that begins with "PENTAX" or a compression tag
+            // that is 65535.
+            // See http://fileformats.archiveteam.org/wiki/Pentax_PEF
+            if (((tag.name == TAG_MAKE || tag.name == TAG_MODEL)
+                    && attribute.getStringValue(mExifByteOrder).contains(PEF_SIGNATURE))
+                    || (tag.name == TAG_COMPRESSION
+                            && attribute.getIntValue(mExifByteOrder) == 65535)) {
+                mMimeType = IMAGE_TYPE_PEF;
+            }
+
+            // Seek to next tag offset
             if (dataInputStream.peek() != nextEntryOffset) {
                 dataInputStream.seek(nextEntryOffset);
             }
@@ -2744,7 +2920,10 @@ public class ExifInterface {
             // since the first IFD offset is at least 8.
             if (nextIfdOffset > 8 && nextIfdOffset < dataInputStream.mLength) {
                 dataInputStream.seek(nextIfdOffset);
-                readImageFileDirectory(dataInputStream, IFD_THUMBNAIL_HINT);
+                if (mAttributes[IFD_THUMBNAIL_HINT].isEmpty()) {
+                    // Do not overwrite thumbnail IFD data if it alreay exists.
+                    readImageFileDirectory(dataInputStream, IFD_THUMBNAIL_HINT);
+                }
             }
         }
     }
@@ -2776,10 +2955,12 @@ public class ExifInterface {
         }
     }
 
-    // Retrieves thumbnail based on Compression Value
+    // Sets thumbnail offset & length attributes based on JpegInterchangeFormat or StripOffsets tags
     private void setThumbnailData(InputStream in) throws IOException {
         HashMap thumbnailData = mAttributes[IFD_THUMBNAIL_HINT];
-        ExifAttribute compressionAttribute = (ExifAttribute) thumbnailData.get(TAG_COMPRESSION);
+
+        ExifAttribute compressionAttribute =
+                (ExifAttribute) thumbnailData.get(TAG_COMPRESSION);
         if (compressionAttribute != null) {
             int compressionValue = compressionAttribute.getIntValue(mExifByteOrder);
             switch (compressionValue) {
@@ -2789,64 +2970,79 @@ public class ExifInterface {
                     break;
                 }
                 case DATA_JPEG: {
-                    ExifAttribute jpegInterchangeFormatAttribute =
-                            (ExifAttribute) thumbnailData.get(TAG_JPEG_INTERCHANGE_FORMAT);
-                    ExifAttribute jpegInterchangeFormatLengthAttribute =
-                            (ExifAttribute) thumbnailData.get(TAG_JPEG_INTERCHANGE_FORMAT_LENGTH);
-                    if (jpegInterchangeFormatAttribute != null
-                            && jpegInterchangeFormatLengthAttribute != null) {
-                        int jpegInterchangeFormat =
-                                jpegInterchangeFormatAttribute.getIntValue(mExifByteOrder);
-                        int jpegInterchangeFormatLength =
-                                jpegInterchangeFormatLengthAttribute.getIntValue(mExifByteOrder);
-                        createJPEGThumbnailBitmap(in, jpegInterchangeFormat,
-                                jpegInterchangeFormatLength);
-                    }
+                    handleThumbnailFromJfif(in, thumbnailData);
                     break;
                 }
                 case DATA_JPEG_COMPRESSED: {
-                    ExifAttribute stripOffsetsAttribute =
-                            (ExifAttribute) thumbnailData.get(TAG_STRIP_OFFSETS);
-                    ExifAttribute stripByteCountsAttribute =
-                            (ExifAttribute) thumbnailData.get(TAG_STRIP_BYTE_COUNTS);
-                    if (stripOffsetsAttribute != null && stripByteCountsAttribute != null) {
-                        long[] stripOffsetsArray =
-                                (long[]) stripOffsetsAttribute.getValue(mExifByteOrder);
-                        long[] stripByteCountsArray =
-                                (long[]) stripByteCountsAttribute.getValue(mExifByteOrder);
-                        if (stripOffsetsArray.length == 1) {
-                            int stripOffsetsSum = (int) Arrays.stream(stripOffsetsArray).sum();
-                            int stripByteCountsSum = (int) Arrays.stream(stripByteCountsArray).sum();
-                            createJPEGThumbnailBitmap(in, stripOffsetsSum, stripByteCountsSum);
-                        } else {
-                            // TODO: implement method to read multiple strips (b/29737797)
-                            Log.d(TAG, "Multiple strip thumbnail data cannot be processed");
-                        }
-                    }
+                    handleThumbnailFromStrips(in, thumbnailData);
                     break;
                 }
                 default: {
                     break;
                 }
             }
+        } else {
+            // Thumbnail data may not contain Compression tag value
+            handleThumbnailFromJfif(in, thumbnailData);
         }
     }
 
-    // Retrieves thumbnail for JPEG Compression
-    private void createJPEGThumbnailBitmap(InputStream in, int thumbnailOffset, int thumbnailLength)
-            throws IOException {
-        if (DEBUG) {
-            Log.d(TAG, "Retrieving JPEG Thumbnail");
+    // Check JpegInterchangeFormat(JFIF) tags to retrieve thumbnail offset & length values and
+    // create a bitmap based on those values
+    private void handleThumbnailFromJfif(InputStream in, HashMap thumbnailData) throws IOException {
+        ExifAttribute jpegInterchangeFormatAttribute =
+                (ExifAttribute) thumbnailData.get(TAG_JPEG_INTERCHANGE_FORMAT);
+        ExifAttribute jpegInterchangeFormatLengthAttribute =
+                (ExifAttribute) thumbnailData.get(TAG_JPEG_INTERCHANGE_FORMAT_LENGTH);
+        if (jpegInterchangeFormatAttribute != null
+                && jpegInterchangeFormatLengthAttribute != null) {
+            int jpegInterchangeFormat =
+                    jpegInterchangeFormatAttribute.getIntValue(mExifByteOrder);
+            int jpegInterchangeFormatLength =
+                    jpegInterchangeFormatLengthAttribute.getIntValue(mExifByteOrder);
+            createJpegThumbnailBitmap(in, jpegInterchangeFormat, jpegInterchangeFormatLength);
         }
+    }
+
+    // Check StripOffsets & StripByteCounts tags to retrieve thumbnail offset & length values and
+    // create a bitmap based on those values
+    private void handleThumbnailFromStrips(InputStream in, HashMap thumbnailData)
+            throws IOException {
+        ExifAttribute stripOffsetsAttribute =
+                (ExifAttribute) thumbnailData.get(TAG_STRIP_OFFSETS);
+        ExifAttribute stripByteCountsAttribute =
+                (ExifAttribute) thumbnailData.get(TAG_STRIP_BYTE_COUNTS);
+        if (stripOffsetsAttribute != null && stripByteCountsAttribute != null) {
+            long[] stripOffsetsArray =
+                    (long[]) stripOffsetsAttribute.getValue(mExifByteOrder);
+            long[] stripByteCountsArray =
+                    (long[]) stripByteCountsAttribute.getValue(mExifByteOrder);
+            if (stripOffsetsArray.length == 1) {
+                int stripOffsetsSum = (int) Arrays.stream(stripOffsetsArray).sum();
+                int stripByteCountsSum = (int) Arrays.stream(stripByteCountsArray).sum();
+                createJpegThumbnailBitmap(in, stripOffsetsSum, stripByteCountsSum);
+            } else {
+                // TODO: implement method to read multiple strips (b/29737797)
+                Log.d(TAG, "Multiple strip thumbnail data cannot be processed");
+            }
+        }
+    }
+
+    // Creates a bitmap data based on thumbnail offset and length for JPEG Compression
+    private void createJpegThumbnailBitmap(InputStream in, int thumbnailOffset, int thumbnailLength)
+            throws IOException {
         // The following code limits the size of thumbnail size not to overflow EXIF data area.
         thumbnailLength = Math.min(thumbnailLength, in.available() - thumbnailOffset);
-        if (mMimeType == IMAGE_TYPE_JPEG || mMimeType == IMAGE_TYPE_RAF) {
+        if (mMimeType == IMAGE_TYPE_JPEG || mMimeType == IMAGE_TYPE_RAF
+                || mMimeType == IMAGE_TYPE_RW2) {
             thumbnailOffset += mExifOffset;
         } else if (mMimeType == IMAGE_TYPE_ORF) {
             // Update offset value since RAF files have IFD data preceding MakerNote data.
             thumbnailOffset += mOrfMakerNoteOffset;
         }
-        Log.d(TAG, "offset: " + thumbnailOffset);
+        if (DEBUG) {
+            Log.d(TAG, "Creating JPEG Thumbnail with offset: " + thumbnailOffset);
+        }
         if (thumbnailOffset > 0 && thumbnailLength > 0) {
             mHasThumbnail = true;
             mThumbnailOffset = thumbnailOffset;
@@ -2898,20 +3094,11 @@ public class ExifInterface {
      * SOF(Start of Frame). In order to assure that valid image size values are stored, this method
      * checks TAG_PIXEL_X_DIMENSION & TAG_PIXEL_Y_DIMENSION and updates values if necessary.
      * See JEITA CP-3451C Table 5 and Section 4.8.1. B.
+     *
+     * If image is a RW2 file, valid image sizes are stored in SensorBorder tags.
+     * See tiff_parser.cc GetFullDimension32()
      * */
     private void updatePrimaryImageSizeValues(InputStream in) throws IOException {
-        // Checks for the NewSubfileType tag and returns if the image is not original resolution,
-        // which means that it is not the primary imiage
-        ExifAttribute newSubfileTypeAttribute =
-                (ExifAttribute) mAttributes[IFD_TIFF_HINT].get(TAG_NEW_SUBFILE_TYPE);
-        if (newSubfileTypeAttribute != null) {
-            int newSubfileTypeValue = newSubfileTypeAttribute.getIntValue(mExifByteOrder);
-            if (newSubfileTypeValue != ORIGINAL_RESOLUTION_IMAGE) {
-                // TODO: Need to address case when NewSubFile value is REDUCED_RESOLUTION_IMAGE.
-                return;
-            }
-        }
-
         // Uncompressed image valid image size values
         ExifAttribute defaultCropSizeAttribute =
                 (ExifAttribute) mAttributes[IFD_TIFF_HINT].get(TAG_DEFAULT_CROP_SIZE);
@@ -2920,6 +3107,15 @@ public class ExifInterface {
                 (ExifAttribute) mAttributes[IFD_EXIF_HINT].get(TAG_PIXEL_X_DIMENSION);
         ExifAttribute pixelYDimAttribute =
                 (ExifAttribute) mAttributes[IFD_EXIF_HINT].get(TAG_PIXEL_Y_DIMENSION);
+        // RW2 image valid image size values
+        ExifAttribute topBorderAttribute =
+                (ExifAttribute) mAttributes[IFD_TIFF_HINT].get(TAG_RW2_SENSOR_TOP_BORDER);
+        ExifAttribute leftBorderAttribute =
+                (ExifAttribute) mAttributes[IFD_TIFF_HINT].get(TAG_RW2_SENSOR_LEFT_BORDER);
+        ExifAttribute bottomBorderAttribute =
+                (ExifAttribute) mAttributes[IFD_TIFF_HINT].get(TAG_RW2_SENSOR_BOTTOM_BORDER);
+        ExifAttribute rightBorderAttribute =
+                (ExifAttribute) mAttributes[IFD_TIFF_HINT].get(TAG_RW2_SENSOR_RIGHT_BORDER);
 
         if (defaultCropSizeAttribute != null) {
             // Update for uncompressed image
@@ -2941,6 +3137,23 @@ public class ExifInterface {
             }
             mAttributes[IFD_TIFF_HINT].put(TAG_IMAGE_WIDTH, defaultCropSizeXAttribute);
             mAttributes[IFD_TIFF_HINT].put(TAG_IMAGE_LENGTH, defaultCropSizeYAttribute);
+        } else if (topBorderAttribute != null && leftBorderAttribute != null &&
+                bottomBorderAttribute != null && rightBorderAttribute != null) {
+            // Update for RW2 image
+            int topBorderValue = topBorderAttribute.getIntValue(mExifByteOrder);
+            int bottomBorderValue = bottomBorderAttribute.getIntValue(mExifByteOrder);
+            int rightBorderValue = rightBorderAttribute.getIntValue(mExifByteOrder);
+            int leftBorderValue = leftBorderAttribute.getIntValue(mExifByteOrder);
+            if (bottomBorderValue > topBorderValue && rightBorderValue > leftBorderValue) {
+                int length = bottomBorderValue - topBorderValue;
+                int width = rightBorderValue - leftBorderValue;
+                ExifAttribute imageLengthAttribute =
+                        ExifAttribute.createUShort(length, mExifByteOrder);
+                ExifAttribute imageWidthAttribute =
+                        ExifAttribute.createUShort(width, mExifByteOrder);
+                mAttributes[IFD_TIFF_HINT].put(TAG_IMAGE_LENGTH, imageLengthAttribute);
+                mAttributes[IFD_TIFF_HINT].put(TAG_IMAGE_WIDTH, imageWidthAttribute);
+            }
         } else {
             // Update for JPEG image
             if (pixelXDimAttribute != null && pixelYDimAttribute != null) {
@@ -3439,6 +3652,21 @@ public class ExifInterface {
         public void writeUnsignedInt(long val) throws IOException {
             writeInt((int) val);
         }
+    }
+
+    // Checks if there is a match
+    private boolean containsMatch(byte[] mainBytes, byte[] findBytes) {
+        for (int i = 0; i < mainBytes.length - findBytes.length; i++) {
+            for (int j = 0; j < findBytes.length; j++) {
+                if (mainBytes[i + j] != findBytes[j]) {
+                    break;
+                }
+                if (j == findBytes.length - 1) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     // JNI methods for RAW formats.
