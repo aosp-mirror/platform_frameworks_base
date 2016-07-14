@@ -111,8 +111,7 @@
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"Δεν είναι δυνατή η επικόλληση των επιλεγμένων αρχείων σε αυτήν την τοποθεσία."</string>
     <string name="menu_rename" msgid="7678802479104285353">"Μετονομασία"</string>
     <string name="rename_error" msgid="4203041674883412606">"Αποτυχία μετονομασίας εγγράφου"</string>
-    <!-- no translation found for menu_eject_root (2768224615494227325) -->
-    <skip />
+    <string name="menu_eject_root" msgid="2768224615494227325">"Εξαγωγή"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Ορισμένα αρχεία μετατράπηκαν"</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"Να εκχωρηθεί στην εφαρμογή <xliff:g id="APPNAME"><b>^1</b></xliff:g> πρόσβαση στον κατάλογο <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> στον αποθηκευτικό χώρο <xliff:g id="STORAGE"><i>^3</i></xliff:g>;"</string>
     <string name="open_external_dialog_request_primary_volume" msgid="6635562535713428688">"Εκχώρηση πρόσβασης στην εφαρμογή <xliff:g id="APPNAME"><b>^1</b></xliff:g> στον κατάλογο <xliff:g id="DIRECTORY"><i>^2</i></xliff:g>;"</string>
