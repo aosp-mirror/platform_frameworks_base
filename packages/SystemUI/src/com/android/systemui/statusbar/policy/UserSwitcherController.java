@@ -99,6 +99,7 @@ public class UserSwitcherController {
     private Dialog mExitGuestDialog;
     private Dialog mAddUserDialog;
     private int mLastNonGuestUser = UserHandle.USER_SYSTEM;
+    private boolean mResumeUserOnGuestLogout = true;
     private boolean mSimpleUserSwitcher;
     private boolean mAddUsersWhenLocked;
     private boolean mPauseRefreshUsers;
@@ -318,6 +319,10 @@ public class UserSwitcherController {
         return mContext.getResources().getBoolean(R.bool.config_enableFullscreenUserSwitcher);
     }
 
+    public void setResumeUserOnGuestLogout(boolean resume) {
+        mResumeUserOnGuestLogout = resume;
+    }
+
     public void logoutCurrentUser() {
         int currentUser = ActivityManager.getCurrentUser();
         if (currentUser != UserHandle.USER_SYSTEM) {
@@ -420,7 +425,7 @@ public class UserSwitcherController {
 
     private void exitGuest(int id) {
         int newId = UserHandle.USER_SYSTEM;
-        if (mLastNonGuestUser != UserHandle.USER_SYSTEM) {
+        if (mResumeUserOnGuestLogout && mLastNonGuestUser != UserHandle.USER_SYSTEM) {
             UserInfo info = mUserManager.getUserInfo(mLastNonGuestUser);
             if (info != null && info.isEnabled() && info.supportsSwitchToByUser()) {
                 newId = info.id;
