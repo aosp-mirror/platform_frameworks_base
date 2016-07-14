@@ -93,7 +93,8 @@ public class ActivityManager {
     @IntDef({
             BUGREPORT_OPTION_FULL,
             BUGREPORT_OPTION_INTERACTIVE,
-            BUGREPORT_OPTION_REMOTE
+            BUGREPORT_OPTION_REMOTE,
+            BUGREPORT_OPTION_WEAR
     })
     public @interface BugreportMode {}
     /**
@@ -114,6 +115,11 @@ public class ActivityManager {
      * @hide
      */
     public static final int BUGREPORT_OPTION_REMOTE = 2;
+    /**
+     * Takes a bugreport on a wearable device.
+     * @hide
+     */
+    public static final int BUGREPORT_OPTION_WEAR = 3;
 
     /**
      * <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code
