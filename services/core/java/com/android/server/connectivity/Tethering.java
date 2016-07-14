@@ -591,13 +591,13 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         synchronized (mPublicSync) {
             TetherState tetherState = mTetherStates.get(iface);
             if (tetherState == null) {
-                Log.e(TAG, "Tried to Tether an unknown iface :" + iface + ", ignoring");
+                Log.e(TAG, "Tried to Tether an unknown iface: " + iface + ", ignoring");
                 return ConnectivityManager.TETHER_ERROR_UNKNOWN_IFACE;
             }
             // Ignore the error status of the interface.  If the interface is available,
             // the errors are referring to past tethering attempts anyway.
             if (tetherState.mLastState != IControlsTethering.STATE_AVAILABLE) {
-                Log.e(TAG, "Tried to Tether an unavailable iface :" + iface + ", ignoring");
+                Log.e(TAG, "Tried to Tether an unavailable iface: " + iface + ", ignoring");
                 return ConnectivityManager.TETHER_ERROR_UNAVAIL_IFACE;
             }
             tetherState.mStateMachine.sendMessage(TetherInterfaceStateMachine.CMD_TETHER_REQUESTED);
@@ -1018,15 +1018,29 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
      */
     class UpstreamNetworkCallback extends NetworkCallback {
         @Override
+        public void onAvailable(Network network) {
+            mTetherMasterSM.sendMessage(TetherMasterSM.EVENT_UPSTREAM_CALLBACK,
+                    UpstreamNetworkMonitor.EVENT_ON_AVAILABLE, 0, network);
+        }
+
+        @Override
+        public void onCapabilitiesChanged(Network network, NetworkCapabilities newNc) {
+            mTetherMasterSM.sendMessage(TetherMasterSM.EVENT_UPSTREAM_CALLBACK,
+                    UpstreamNetworkMonitor.EVENT_ON_CAPABILITIES, 0,
+                    new NetworkState(null, null, newNc, network, null, null));
+        }
+
+        @Override
         public void onLinkPropertiesChanged(Network network, LinkProperties newLp) {
-            mTetherMasterSM.sendMessage(
-                    TetherMasterSM.EVENT_UPSTREAM_LINKPROPERTIES_CHANGED,
+            mTetherMasterSM.sendMessage(TetherMasterSM.EVENT_UPSTREAM_CALLBACK,
+                    UpstreamNetworkMonitor.EVENT_ON_LINKPROPERTIES, 0,
                     new NetworkState(null, newLp, null, network, null, null));
         }
 
         @Override
         public void onLost(Network network) {
-            mTetherMasterSM.sendMessage(TetherMasterSM.EVENT_UPSTREAM_LOST, network);
+            mTetherMasterSM.sendMessage(TetherMasterSM.EVENT_UPSTREAM_CALLBACK,
+                    UpstreamNetworkMonitor.EVENT_ON_LOST, 0, network);
         }
     }
 
@@ -1045,6 +1059,11 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
      * could/should be moved here.
      */
     class UpstreamNetworkMonitor {
+        static final int EVENT_ON_AVAILABLE      = 1;
+        static final int EVENT_ON_CAPABILITIES   = 2;
+        static final int EVENT_ON_LINKPROPERTIES = 3;
+        static final int EVENT_ON_LOST           = 4;
+
         final HashMap<Network, NetworkState> mNetworkMap = new HashMap<>();
         NetworkCallback mDefaultNetworkCallback;
         NetworkCallback mDunTetheringCallback;
@@ -1079,33 +1098,107 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
             mNetworkMap.clear();
         }
 
-        // Returns true if these updated LinkProperties pertain to the current
-        // upstream network interface, false otherwise (or if there is not
-        // currently any upstream tethering interface).
-        boolean processLinkPropertiesChanged(NetworkState networkState) {
-            if (networkState == null ||
-                    networkState.network == null ||
-                    networkState.linkProperties == null) {
-                return false;
-            }
+        NetworkState lookup(Network network) {
+            return (network != null) ? mNetworkMap.get(network) : null;
+        }
 
-            mNetworkMap.put(networkState.network, networkState);
-
-            if (mCurrentUpstreamIface != null) {
-                for (String ifname : networkState.linkProperties.getAllInterfaceNames()) {
-                    if (mCurrentUpstreamIface.equals(ifname)) {
-                        return true;
+        NetworkState processCallback(int arg1, Object obj) {
+            switch (arg1) {
+                case EVENT_ON_AVAILABLE: {
+                    final Network network = (Network) obj;
+                    if (VDBG) {
+                        Log.d(TAG, "EVENT_ON_AVAILABLE for " + network);
                     }
+                    if (!mNetworkMap.containsKey(network)) {
+                        mNetworkMap.put(network,
+                                new NetworkState(null, null, null, network, null, null));
+                    }
+
+                    final ConnectivityManager cm = getConnectivityManager();
+
+                    if (mDefaultNetworkCallback != null) {
+                        cm.requestNetworkCapabilities(mDefaultNetworkCallback);
+                        cm.requestLinkProperties(mDefaultNetworkCallback);
+                    }
+
+                    // Requesting updates for mDunTetheringCallback is not
+                    // necessary. Because it's a listen, it will already have
+                    // heard all NetworkCapabilities and LinkProperties updates
+                    // since UpstreamNetworkMonitor was started. Because we
+                    // start UpstreamNetworkMonitor before chooseUpstreamType()
+                    // is ever invoked (it can register a DUN request) this is
+                    // mostly safe. However, if a DUN network is already up for
+                    // some reason (unlikely, because DUN is restricted and,
+                    // unless the DUN network is shared with another APN, only
+                    // the system can request it and this is the only part of
+                    // the system that requests it) we won't know its
+                    // LinkProperties or NetworkCapabilities.
+
+                    return mNetworkMap.get(network);
+                }
+                case EVENT_ON_CAPABILITIES: {
+                    final NetworkState ns = (NetworkState) obj;
+                    if (!mNetworkMap.containsKey(ns.network)) {
+                        // Ignore updates for networks for which we have not yet
+                        // received onAvailable() - which should never happen -
+                        // or for which we have already received onLost().
+                        return null;
+                    }
+                    if (VDBG) {
+                        Log.d(TAG, String.format("EVENT_ON_CAPABILITIES for %s: %s",
+                                ns.network, ns.networkCapabilities));
+                    }
+
+                    final NetworkState prev = mNetworkMap.get(ns.network);
+                    mNetworkMap.put(ns.network,
+                            new NetworkState(null, prev.linkProperties, ns.networkCapabilities,
+                                             ns.network, null, null));
+                    return mNetworkMap.get(ns.network);
+                }
+                case EVENT_ON_LINKPROPERTIES: {
+                    final NetworkState ns = (NetworkState) obj;
+                    if (!mNetworkMap.containsKey(ns.network)) {
+                        // Ignore updates for networks for which we have not yet
+                        // received onAvailable() - which should never happen -
+                        // or for which we have already received onLost().
+                        return null;
+                    }
+                    if (VDBG) {
+                        Log.d(TAG, String.format("EVENT_ON_LINKPROPERTIES for %s: %s",
+                                ns.network, ns.linkProperties));
+                    }
+
+                    final NetworkState prev = mNetworkMap.get(ns.network);
+                    mNetworkMap.put(ns.network,
+                            new NetworkState(null, ns.linkProperties, prev.networkCapabilities,
+                                             ns.network, null, null));
+                    return mNetworkMap.get(ns.network);
+                }
+                case EVENT_ON_LOST: {
+                    final Network network = (Network) obj;
+                    if (VDBG) {
+                        Log.d(TAG, "EVENT_ON_LOST for " + network);
+                    }
+                    return mNetworkMap.remove(network);
+                }
+                default:
+                    return null;
+            }
+        }
+    }
+
+    // Needed because the canonical source of upstream truth is just the
+    // upstream interface name, |mCurrentUpstreamIface|.  This is ripe for
+    // future simplification, once the upstream Network is canonical.
+    boolean pertainsToCurrentUpstream(NetworkState ns) {
+        if (ns != null && ns.linkProperties != null && mCurrentUpstreamIface != null) {
+            for (String ifname : ns.linkProperties.getAllInterfaceNames()) {
+                if (mCurrentUpstreamIface.equals(ifname)) {
+                    return true;
                 }
             }
-            return false;
         }
-
-        void processNetworkLost(Network network) {
-            if (network != null) {
-                mNetworkMap.remove(network);
-            }
-        }
+        return false;
     }
 
     class TetherMasterSM extends StateMachine {
@@ -1120,8 +1213,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         static final int CMD_RETRY_UPSTREAM                     = BASE_MASTER + 4;
         // Events from NetworkCallbacks that we process on the master state
         // machine thread on behalf of the UpstreamNetworkMonitor.
-        static final int EVENT_UPSTREAM_LINKPROPERTIES_CHANGED  = BASE_MASTER + 5;
-        static final int EVENT_UPSTREAM_LOST                    = BASE_MASTER + 6;
+        static final int EVENT_UPSTREAM_CALLBACK                = BASE_MASTER + 5;
 
         private State mInitialState;
         private State mTetherModeAliveState;
@@ -1278,6 +1370,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
             }
 
             protected void chooseUpstreamType(boolean tryCell) {
+                final ConnectivityManager cm = getConnectivityManager();
                 int upType = ConnectivityManager.TYPE_NONE;
                 String iface = null;
 
@@ -1292,8 +1385,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                     }
 
                     for (Integer netType : mUpstreamIfaceTypes) {
-                        NetworkInfo info =
-                                getConnectivityManager().getNetworkInfo(netType.intValue());
+                        NetworkInfo info = cm.getNetworkInfo(netType.intValue());
                         if ((info != null) && info.isConnected()) {
                             upType = netType.intValue();
                             break;
@@ -1334,9 +1426,9 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                         break;
                 }
 
+                Network network = null;
                 if (upType != ConnectivityManager.TYPE_NONE) {
-                    LinkProperties linkProperties =
-                            getConnectivityManager().getLinkProperties(upType);
+                    LinkProperties linkProperties = cm.getLinkProperties(upType);
                     if (linkProperties != null) {
                         // Find the interface with the default IPv4 route. It may be the
                         // interface described by linkProperties, or one of the interfaces
@@ -1353,7 +1445,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                     }
 
                     if (iface != null) {
-                        Network network = getConnectivityManager().getNetworkForType(upType);
+                        network = cm.getNetworkForType(upType);
                         if (network == null) {
                             Log.e(TAG, "No Network for upstream type " + upType + "!");
                         }
@@ -1361,6 +1453,13 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                     }
                 }
                 notifyTetheredOfNewUpstreamIface(iface);
+                NetworkState ns = mUpstreamNetworkMonitor.lookup(network);
+                if (ns != null && pertainsToCurrentUpstream(ns)) {
+                    // If we already have NetworkState for this network examine
+                    // it immediately, because there likely will be no second
+                    // EVENT_ON_AVAILABLE (it was already received).
+                    handleNewUpstreamNetworkState(ns);
+                }
             }
 
             protected void setDnsForwarders(final Network network, final LinkProperties lp) {
@@ -1392,6 +1491,10 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                     sm.sendMessage(TetherInterfaceStateMachine.CMD_TETHER_CONNECTION_CHANGED,
                             ifaceName);
                 }
+            }
+
+            protected void handleNewUpstreamNetworkState(NetworkState ns) {
+                mIPv6TetheringCoordinator.updateUpstreamNetworkState(ns);
             }
         }
 
@@ -1582,24 +1685,55 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                         chooseUpstreamType(mTryCell);
                         mTryCell = !mTryCell;
                         break;
-                    case EVENT_UPSTREAM_LINKPROPERTIES_CHANGED:
-                        NetworkState state = (NetworkState) message.obj;
-                        if (mUpstreamNetworkMonitor.processLinkPropertiesChanged(state)) {
-                            setDnsForwarders(state.network, state.linkProperties);
-                        } else if (mCurrentUpstreamIface == null) {
-                            // If we have no upstream interface, try to run through upstream
-                            // selection again.  If, for example, IPv4 connectivity has shown up
-                            // after IPv6 (e.g., 464xlat became available) we want the chance to
-                            // notice and act accordingly.
-                            chooseUpstreamType(false);
+                    case EVENT_UPSTREAM_CALLBACK: {
+                        // First: always update local state about every network.
+                        final NetworkState ns = mUpstreamNetworkMonitor.processCallback(
+                                message.arg1, message.obj);
+
+                        if (ns == null || !pertainsToCurrentUpstream(ns)) {
+                            // TODO: In future, this is where upstream evaluation and selection
+                            // could be handled for notifications which include sufficient data.
+                            // For example, after CONNECTIVITY_ACTION listening is removed, here
+                            // is where we could observe a Wi-Fi network becoming available and
+                            // passing validation.
+                            if (mCurrentUpstreamIface == null) {
+                                // If we have no upstream interface, try to run through upstream
+                                // selection again.  If, for example, IPv4 connectivity has shown up
+                                // after IPv6 (e.g., 464xlat became available) we want the chance to
+                                // notice and act accordingly.
+                                chooseUpstreamType(false);
+                            }
+                            break;
+                        }
+
+                        switch (message.arg1) {
+                            case UpstreamNetworkMonitor.EVENT_ON_AVAILABLE:
+                                // The default network changed, or DUN connected
+                                // before this callback was processed. Updates
+                                // for the current NetworkCapabilities and
+                                // LinkProperties have been requested (default
+                                // request) or are being sent shortly (DUN). Do
+                                // nothing until they arrive; if no updates
+                                // arrive there's nothing to do.
+                                break;
+                            case UpstreamNetworkMonitor.EVENT_ON_CAPABILITIES:
+                                handleNewUpstreamNetworkState(ns);
+                                break;
+                            case UpstreamNetworkMonitor.EVENT_ON_LINKPROPERTIES:
+                                setDnsForwarders(ns.network, ns.linkProperties);
+                                handleNewUpstreamNetworkState(ns);
+                                break;
+                            case UpstreamNetworkMonitor.EVENT_ON_LOST:
+                                // TODO: Re-evaluate possible upstreams. Currently upstream
+                                // reevaluation is triggered via received CONNECTIVITY_ACTION
+                                // broadcasts that result in being passed a
+                                // TetherMasterSM.CMD_UPSTREAM_CHANGED.
+                                break;
+                            default:
+                                break;
                         }
                         break;
-                    case EVENT_UPSTREAM_LOST:
-                        // TODO: Re-evaluate possible upstreams. Currently upstream reevaluation
-                        // is triggered via received CONNECTIVITY_ACTION broadcasts that result
-                        // in being passed a TetherMasterSM.CMD_UPSTREAM_CHANGED.
-                        mUpstreamNetworkMonitor.processNetworkLost((Network) message.obj);
-                        break;
+                    }
                     default:
                         retValue = false;
                         break;
