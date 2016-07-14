@@ -37,7 +37,17 @@ import java.util.concurrent.TimeUnit;
  * Provides support for storing lists of documents identified by Uri.
  *
  * This class uses a ring buffer to recycle clip file slots, to mitigate the issue of clip file
- * deletions.
+ * deletions. Below is the directory layout:
+ * [cache dir]
+ *      - [dir] 1
+ *      - [dir] 2
+ *      - ... to {@link #NUM_OF_SLOTS}
+ * When a clip data is actively being used:
+ * [cache dir]
+ *      - [dir] 1
+ *          - [file] primary
+ *          - [symlink] 1 > primary # copying to location X
+ *          - [symlink] 2 > primary # copying to location Y
  */
 public final class ClipStorage {
 
@@ -91,7 +101,7 @@ public final class ClipStorage {
     synchronized int claimStorageSlot() {
         int curPos = mNextPos;
         for (int i = 0; i < NUM_OF_SLOTS; ++i, curPos = (curPos + 1) % NUM_OF_SLOTS) {
-            createSlotFile(curPos);
+            createSlotFileObject(curPos);
 
             if (!mSlots[curPos].exists()) {
                 break;
@@ -103,7 +113,7 @@ public final class ClipStorage {
             }
             // This slot doesn't seem available, but still need to check if it's a legacy of
             // service being killed or a service crash etc. If it's stale, it's available.
-            else if(checkStaleFiles(curPos)) {
+            else if (checkStaleFiles(curPos)) {
                 break;
             }
         }
@@ -146,8 +156,8 @@ public final class ClipStorage {
      * counting method. When someone is done using this symlink, it's responsible to delete it.
      * Therefore we can have a neat way to track how many things are still using this slot.
      */
-    public File getFile(int tag) throws IOException {
-        createSlotFile(tag);
+    public synchronized File getFile(int tag) throws IOException {
+        createSlotFileObject(tag);
 
         File primary = toSlotDataFile(tag);
 
@@ -175,7 +185,7 @@ public final class ClipStorage {
         return new File(mSlots[pos], PRIMARY_DATA_FILE_NAME);
     }
 
-    private void createSlotFile(int pos) {
+    private void createSlotFileObject(int pos) {
         if (mSlots[pos] == null) {
             mSlots[pos] = new File(mOutDir, Integer.toString(pos));
         }
