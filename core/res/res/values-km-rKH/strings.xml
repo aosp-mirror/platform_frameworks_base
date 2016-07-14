@@ -975,7 +975,7 @@
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"កែសម្រួល​ជាមួយ​ %1$s"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"កែសម្រួល"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"ចែករំលែក​ជាមួយ"</string>
-    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"ចែករំលែក​ជាមួយ"</string>
+    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"ចែករំលែក​ជាមួយ %1$s"</string>
     <string name="whichSendApplicationLabel" msgid="4579076294675975354">"ចែករំលែក"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"ផ្ញើដោយប្រើ"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"ផ្ញើដោយប្រើ %1$s"</string>
