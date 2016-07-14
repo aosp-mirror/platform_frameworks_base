@@ -3523,6 +3523,8 @@ public class Notification implements Parcelable
             boolean validRemoteInput = false;
 
             int N = mActions.size();
+            boolean emphazisedMode = mN.fullScreenIntent != null;
+            big.setBoolean(R.id.actions, "setEmphasizedMode", emphazisedMode);
             if (N > 0) {
                 big.setViewVisibility(R.id.actions_container, View.VISIBLE);
                 big.setViewVisibility(R.id.actions, View.VISIBLE);
@@ -3533,7 +3535,8 @@ public class Notification implements Parcelable
                     Action action = mActions.get(i);
                     validRemoteInput |= hasValidRemoteInput(action);
 
-                    final RemoteViews button = generateActionButton(action);
+                    final RemoteViews button = generateActionButton(action, emphazisedMode,
+                            i % 2 != 0);
                     big.addView(R.id.actions, button);
                 }
             } else {
@@ -3698,11 +3701,13 @@ public class Notification implements Parcelable
 
 
 
-        private RemoteViews generateActionButton(Action action) {
+        private RemoteViews generateActionButton(Action action, boolean emphazisedMode,
+                boolean oddAction) {
             final boolean tombstone = (action.actionIntent == null);
             RemoteViews button = new BuilderRemoteViews(mContext.getApplicationInfo(),
-                    tombstone ? getActionTombstoneLayoutResource()
-                              : getActionLayoutResource());
+                    emphazisedMode ? getEmphasizedActionLayoutResource()
+                            : tombstone ? getActionTombstoneLayoutResource()
+                                    : getActionLayoutResource());
             final Icon ai = action.getIcon();
             button.setTextViewText(R.id.action0, processLegacyText(action.title));
             if (!tombstone) {
@@ -3712,8 +3717,18 @@ public class Notification implements Parcelable
             if (action.mRemoteInputs != null) {
                 button.setRemoteInputs(R.id.action0, action.mRemoteInputs);
             }
-            if (mN.color != COLOR_DEFAULT) {
-                button.setTextColor(R.id.action0, resolveContrastColor());
+            if (emphazisedMode) {
+                // change the background color
+                int color = resolveContrastColor();
+                if (oddAction) {
+                    color = NotificationColorUtil.lightenColor(color, 10);
+                }
+                button.setDrawableParameters(R.id.button_holder, true, -1, color,
+                        PorterDuff.Mode.SRC_ATOP, -1);
+            } else {
+                if (mN.color != COLOR_DEFAULT) {
+                    button.setTextColor(R.id.action0, resolveContrastColor());
+                }
             }
             return button;
         }
@@ -3981,6 +3996,10 @@ public class Notification implements Parcelable
 
         private int getActionLayoutResource() {
             return R.layout.notification_material_action;
+        }
+
+        private int getEmphasizedActionLayoutResource() {
+            return R.layout.notification_material_action_emphasized;
         }
 
         private int getActionTombstoneLayoutResource() {
