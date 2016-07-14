@@ -209,7 +209,7 @@ page.image=images/cards/card-n-downloads_2x.png
 <h2 id="device-preview">Thiết lập thiết bị phần cứng</h2>
 
 <p>
-  Bản N Developer Preview cung cấp các cập nhật hệ thống cho một loạt các thiết bị phần cứng 
+  Bản N Developer Preview cung cấp các cập nhật hệ thống cho một loạt các thiết bị phần cứng
   mà bạn có thể sử dụng để kiểm thử ứng dụng của bạn, từ điện thoại tới máy tính bảng và TV.
 </p>
 
@@ -220,8 +220,8 @@ page.image=images/cards/card-n-downloads_2x.png
 
 <ul>
   <li><strong>Đăng ký cập nhật hệ thống tự động qua vô tuyến cho thiết bị</strong> thông qua
-  <a href="https://g.co/androidbeta">Chương trình Android Beta</a>. Sau khi đăng ký, thiết bị của bạn sẽ nhận được 
-  qua sóng vô tuyến các cập nhật định kỳ về tất cả bản dựng theo mốc trong bản N Developer Preview. Cách tiếp cận này 
+  <a href="https://g.co/androidbeta">Chương trình Android Beta</a>. Sau khi đăng ký, thiết bị của bạn sẽ nhận được
+  qua sóng vô tuyến các cập nhật định kỳ về tất cả bản dựng theo mốc trong bản N Developer Preview. Cách tiếp cận này
   được khuyến khích bởi nó cho phép bạn chuyển tiếp liền mạch từ môi trường hiện tại của bạn
  qua nhiều bản phát hành khác nhau của N Developer Preview.</li>
   <li><strong>Tải xuống ảnh hệ thống của Developer Preview và flash thiết bị</strong>.
@@ -264,7 +264,7 @@ page.image=images/cards/card-n-downloads_2x.png
   flash thủ công nó vào thiết bị của bạn. Xem bảng dưới đây để tải xuống ảnh hệ thống
   cho thiết bị kiểm thử của bạn. Việc flash thủ công thiết bị sẽ hữu ích nếu bạn cần
   kiểm soát chính xác môi trường kiểm thử hoặc cần phải cài đặt lại thường xuyên,
-  chẳng hạn như cho kiểm thử tự động. 
+  chẳng hạn như cho kiểm thử tự động.
 </p>
 
 <!-- You can flash by ota or system image --><p>
@@ -286,10 +286,10 @@ page.image=images/cards/card-n-downloads_2x.png
 </p>
 
 <p>
-  Nếu bạn quyết định muốn nhận cập nhật qua vô tuyến sau khi đã flash thủ công thiết bị, 
+  Nếu bạn quyết định muốn nhận cập nhật qua vô tuyến sau khi đã flash thủ công thiết bị,
   tất cả những gì bạn cần làm là đăng ký <a href="https://g.co/androidbeta">Chương trình Android
   Beta</a> cho thiết bị. Bạn có thể đăng ký thiết bị bất cứ lúc nào để nhận được
-  bản cập nhật qua vô tuyến tiếp theo của Preview. 
+  bản cập nhật qua vô tuyến tiếp theo của Preview.
 </p>
 
 <table>
@@ -300,64 +300,73 @@ page.image=images/cards/card-n-downloads_2x.png
 
   <tr id="bullhead">
     <td>Nexus 5X <br>"bullhead"</td>
-    <td><a href="#top" onclick="onDownload(this)">bullhead-npc56p-preview-6c877a3d.tgz</a><br>
-      MD5: b5cf874021023b398f5b983b24913f5d<br>
-      SHA-1: 6c877a3d9fae7ec8a1678448e325b77b7a7b143a
+    <td><a href="#top" onclick="onDownload(this)"
+      >bullhead-npd90g-factory-7a0ca1bc.tgz</a><br>
+      MD5: e7a9a3061335c1e0c8be2588f13290af<br>
+      SHA-1: 7a0ca1bcfa51bbefde34243603bc79c7dec214a1
     </td>
   </tr>
 
   <tr id="shamu">
     <td>Nexus 6 <br>"shamu"</td>
-    <td><a href="#top" onclick="onDownload(this)">shamu-npc56p-preview-54b13c67.tgz</a><br>
-      MD5: af183638cf34e0eb944a1957d7696f60<br>
-      SHA-1: 54b13c6703d369cc79a8fd8728fe4103c6343973
+    <td><a href="#top" onclick="onDownload(this)"
+      >shamu-npd90g-factory-f7a4e3a9.tgz</a><br>
+      MD5: 2fb572ddcfca67bb1d741be97492a9ed<br>
+      SHA-1: f7a4e3a96c797827492998e855c8f9efbfc8559a
     </td>
   </tr>
 
   <tr id="angler">
     <td>Nexus 6P <br>"angler"</td>
-    <td><a href="#top" onclick="onDownload(this)">angler-npc56p-preview-85ffc1b1.tgz</a><br>
-      MD5: bc4934ea7bd325753eee1606d3725a24<br>
-      SHA-1: 85ffc1b1be402b1b96f9ba10929e86bba6c6c588
+    <td><a href="#top" onclick="onDownload(this)"
+      >angler-npd90g-factory-cd9ac81e.tgz</a><br>
+      MD5: 2370c30f3ef1d0684c1de5216a5d90fe<br>
+      SHA-1: cd9ac81ec7f4a646ac6054eecbf2ea4c4b89b054
     </td>
   </tr>
 
   <tr id="volantis">
     <td>Nexus 9 <br>"volantis"</td>
-    <td><a href="#top" onclick="onDownload(this)">volantis-npc56p-preview-0e8ec8ef.tgz</a><br>
-      MD5: c901334c6158351e945f188167ae56f4<br>
-      SHA-1: 0e8ec8ef98c7a8d4f58d15f90afc5176303efca4
+    <td><a href="#top" onclick="onDownload(this)"
+      >volantis-npd90g-factory-41b55406.tgz</a><br>
+      MD5: cefa78950141da2a7c75e887717e3c8f<br>
+      SHA-1: 41b554060263a7ef16e4be8422cbd6caca26e00f
     </td>
   </tr>
 
   <tr id="volantisg">
     <td>Nexus 9G <br>"volantisg"</td>
-    <td><a href="#top" onclick="onDownload(this)">volantisg-npc56p-preview-1bafdbfb.tgz</a><br>
-      MD5: 7bb95bebc478d7257cccb4652899d1b4<br>
-      SHA-1: 1bafdbfb502e979a9fe4c257a379c4c7af8a3ae6
+    <td><a href="#top" onclick="onDownload(this)"
+      >volantisg-npd90g-factory-610492be.tgz</a><br>
+      MD5: 2f36dc0d0fab02ab78be500677ec239f<br>
+      SHA-1: 610492bedfc4127023040ecb2c89239a78a900ad
     </td>
   </tr>
 
   <tr id="fugu">
     <td>Nexus Player <br>"fugu"</td>
-    <td><a href="#top" onclick="onDownload(this)">fugu-npc56r-preview-7027d5b6.tgz</a><br>
-      MD5: f5d3d8f75836ccfe4c70e8162e498be4<br>
-      SHA-1: 7027d5b662bceda4c80a91a0a14ef0e5a7ba795b
+    <td><a href="#top" onclick="onDownload(this)"
+      >fugu-npd90g-factory-0fe95694.tgz</a><br>
+      MD5: f4cb48f919e4c29c631de21416c612e2<br>
+      SHA-1: 0fe95694e7bc41e4c3ac0e4438cd77102a0aa8b4
     </td>
   </tr>
 
   <tr id="ryu">
     <td>Pixel C <br>"ryu"</td>
-    <td><a href="#top" onclick="onDownload(this)">ryu-npc56p-preview-335a86a4.tgz</a><br>
-      MD5: 4e21fb183bbbf467bee91598d587fd2e<br>
-      SHA-1: 335a86a435ee51f18464de343ad2e071c38f0e92
+    <td><a href="#top" onclick="onDownload(this)"
+      >ryu-npd90g-factory-f4da981c.tgz</a><br>
+      MD5: d9f0e40b6c20d274831e8a7d285fd887<br>
+      SHA-1: f4da981c70576133321e2858e52fe2c990e68a75
     </td>
   </tr>
+
   <tr id="seed">
     <td>General Mobile 4G (Android One) <br>"seed"</td>
-    <td><a href="#top" onclick="onDownload(this)">seed_l8150-npc56p-preview-82472ebc.tgz</a><br>
-      MD5: 983e083bc7cd0c4a2d39d6ebaa20202a<br>
-      SHA-1: 82472ebc9a6054a103f53cb400a1351913c95127
+    <td><a href="#top" onclick="onDownload(this)"
+      >seed_l8150-npd90g-factory-48f59c99.tgz</a><br>
+      MD5: 0ed565c509594072822d71c65b48ec8e<br>
+      SHA-1: 48f59c99ac43d1cd2f5656a283bb9868581663a8
     </td>
   </tr>
 
@@ -423,7 +432,7 @@ bộ giả lập.</p>
 
   <li>Nhấp vào tab <strong>SDK Tools</strong>, rồi chọn
     <strong>Android SDK Build Tools</strong>, <strong>Android SDK
-    Platform-Tools</strong>, và các hộp kiểm <strong>Android SDK Tools</strong> 
+    Platform-Tools</strong>, và các hộp kiểm <strong>Android SDK Tools</strong>
 .
   </li>
 
@@ -464,7 +473,7 @@ Android Studio 1.5.</p>
 
 <p class="note"><strong>Lưu ý:</strong>
   Nếu bạn hiện đang sử dụng Android Studio 2.0 Beta, một vấn đề đã được biết đến
- sẽ ngăn cản bạn tạo AVD bằng ảnh hệ thống của N Preview, vì vậy 
+ sẽ ngăn cản bạn tạo AVD bằng ảnh hệ thống của N Preview, vì vậy
   hiện bạn cần sử dụng preview của Android Studio 2.1 để tạo các AVD.
 </p>
 
