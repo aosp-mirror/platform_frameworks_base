@@ -95,6 +95,7 @@ import static com.android.server.pm.InstructionSets.getPreferredInstructionSet;
 import static com.android.server.pm.InstructionSets.getPrimaryInstructionSet;
 import static com.android.server.pm.PackageManagerServiceCompilerMapping.getCompilerFilterForReason;
 import static com.android.server.pm.PackageManagerServiceCompilerMapping.getFullCompilerFilter;
+import static com.android.server.pm.PackageManagerServiceCompilerMapping.getNonProfileGuidedCompilerFilter;
 import static com.android.server.pm.PermissionsState.PERMISSION_OPERATION_FAILURE;
 import static com.android.server.pm.PermissionsState.PERMISSION_OPERATION_SUCCESS;
 import static com.android.server.pm.PermissionsState.PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED;
@@ -2800,7 +2801,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                 }
 
-                int[] stats = performDexOpt(coreApps, false,
+                int[] stats = performDexOptUpgrade(coreApps, false,
                         getCompilerFilterForReason(REASON_CORE_APP));
 
                 final int elapsedTimeSeconds =
@@ -7324,7 +7325,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         final long startTime = System.nanoTime();
-        final int[] stats = performDexOpt(pkgs, mIsPreNUpgrade /* showDialog */,
+        final int[] stats = performDexOptUpgrade(pkgs, mIsPreNUpgrade /* showDialog */,
                     getCompilerFilterForReason(causeFirstBoot ? REASON_FIRST_BOOT : REASON_BOOT));
 
         final int elapsedTimeSeconds =
@@ -7343,7 +7344,7 @@ public class PackageManagerService extends IPackageManager.Stub {
      * which are (in order) {@code numberOfPackagesOptimized}, {@code numberOfPackagesSkipped}
      * and {@code numberOfPackagesFailed}.
      */
-    private int[] performDexOpt(List<PackageParser.Package> pkgs, boolean showDialog,
+    private int[] performDexOptUpgrade(List<PackageParser.Package> pkgs, boolean showDialog,
             String compilerFilter) {
 
         int numberOfPackagesVisited = 0;
@@ -7375,6 +7376,19 @@ public class PackageManagerService extends IPackageManager.Stub {
                                     numberOfPackagesVisited, numberOfPackagesToDexopt), true);
                 } catch (RemoteException e) {
                 }
+            }
+
+            // If the OTA updates a system app which was previously preopted to a non-preopted state
+            // the app might end up being verified at runtime. That's because by default the apps
+            // are verify-profile but for preopted apps there's no profile.
+            // Do a hacky check to ensure that if we have no profiles (a reasonable indication
+            // that before the OTA the app was preopted) the app gets compiled with a non-profile
+            // filter (by default interpret-only).
+            // Note that at this stage unused apps are already filtered.
+            if (isSystemApp(pkg) &&
+                    DexFile.isProfileGuidedCompilerFilter(compilerFilter) &&
+                    !Environment.getReferenceProfile(pkg.packageName).exists()) {
+                compilerFilter = getNonProfileGuidedCompilerFilter(compilerFilter);
             }
 
             // checkProfiles is false to avoid merging profiles during boot which
