@@ -28,7 +28,7 @@ oneway interface IWifiNanEventCallback
 {
     void onConnectSuccess();
     void onConnectFail(int reason);
-    void onIdentityChanged();
+    void onIdentityChanged(in byte[] mac);
 
     void onRangingSuccess(int rangingId, in RttManager.ParcelableRttResults results);
     void onRangingFailure(int rangingId, int reason, in String description);
