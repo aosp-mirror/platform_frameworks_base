@@ -1233,11 +1233,13 @@ public class AccountManagerService
             } finally {
                 db.endTransaction();
             }
-            sendAccountsChangedBroadcast(accounts.userId);
         }
         if (getUserManager().getUserInfo(accounts.userId).canHaveProfile()) {
             addAccountToLinkedRestrictedUsers(account, accounts.userId);
         }
+
+        // Only send LOGIN_ACCOUNTS_CHANGED when the database changed.
+        sendAccountsChangedBroadcast(accounts.userId);
         return true;
     }
 
@@ -1420,7 +1422,6 @@ public class AccountManagerService
         synchronized (accounts.cacheLock) {
             final SQLiteDatabase db = accounts.openHelper.getWritableDatabaseUserIsUnlocked();
             db.beginTransaction();
-            boolean isSuccessful = false;
             Account renamedAccount = new Account(newName, accountToRename.type);
             try {
                 final long accountId = getAccountIdLocked(db, accountToRename);
@@ -1433,54 +1434,51 @@ public class AccountManagerService
                     values.put(ACCOUNTS_PREVIOUS_NAME, accountToRename.name);
                     db.update(TABLE_ACCOUNTS, values, ACCOUNTS_ID + "=?", argsAccountId);
                     db.setTransactionSuccessful();
-                    isSuccessful = true;
                     logRecord(db, DebugDbHelper.ACTION_ACCOUNT_RENAME, TABLE_ACCOUNTS, accountId,
                             accounts);
                 }
             } finally {
                 db.endTransaction();
-                if (isSuccessful) {
-                    /*
-                     * Database transaction was successful. Clean up cached
-                     * data associated with the account in the user profile.
-                     */
-                    insertAccountIntoCacheLocked(accounts, renamedAccount);
-                    /*
-                     * Extract the data and token caches before removing the
-                     * old account to preserve the user data associated with
-                     * the account.
-                     */
-                    HashMap<String, String> tmpData = accounts.userDataCache.get(accountToRename);
-                    HashMap<String, String> tmpTokens = accounts.authTokenCache.get(accountToRename);
-                    removeAccountFromCacheLocked(accounts, accountToRename);
-                    /*
-                     * Update the cached data associated with the renamed
-                     * account.
-                     */
-                    accounts.userDataCache.put(renamedAccount, tmpData);
-                    accounts.authTokenCache.put(renamedAccount, tmpTokens);
-                    accounts.previousNameCache.put(
-                          renamedAccount,
-                          new AtomicReference<String>(accountToRename.name));
-                    resultAccount = renamedAccount;
+            }
+            /*
+             * Database transaction was successful. Clean up cached
+             * data associated with the account in the user profile.
+             */
+            insertAccountIntoCacheLocked(accounts, renamedAccount);
+            /*
+             * Extract the data and token caches before removing the
+             * old account to preserve the user data associated with
+             * the account.
+             */
+            HashMap<String, String> tmpData = accounts.userDataCache.get(accountToRename);
+            HashMap<String, String> tmpTokens = accounts.authTokenCache.get(accountToRename);
+            removeAccountFromCacheLocked(accounts, accountToRename);
+            /*
+             * Update the cached data associated with the renamed
+             * account.
+             */
+            accounts.userDataCache.put(renamedAccount, tmpData);
+            accounts.authTokenCache.put(renamedAccount, tmpTokens);
+            accounts.previousNameCache.put(
+                    renamedAccount,
+                    new AtomicReference<String>(accountToRename.name));
+            resultAccount = renamedAccount;
 
-                    int parentUserId = accounts.userId;
-                    if (canHaveProfile(parentUserId)) {
-                        /*
-                         * Owner or system user account was renamed, rename the account for
-                         * those users with which the account was shared.
-                         */
-                        List<UserInfo> users = getUserManager().getUsers(true);
-                        for (UserInfo user : users) {
-                            if (user.isRestricted()
-                                    && (user.restrictedProfileParentId == parentUserId)) {
-                                renameSharedAccountAsUser(accountToRename, newName, user.id);
-                            }
-                        }
+            int parentUserId = accounts.userId;
+            if (canHaveProfile(parentUserId)) {
+                /*
+                 * Owner or system user account was renamed, rename the account for
+                 * those users with which the account was shared.
+                 */
+                List<UserInfo> users = getUserManager().getUsers(true);
+                for (UserInfo user : users) {
+                    if (user.isRestricted()
+                            && (user.restrictedProfileParentId == parentUserId)) {
+                        renameSharedAccountAsUser(accountToRename, newName, user.id);
                     }
-                    sendAccountsChangedBroadcast(accounts.userId);
                 }
             }
+            sendAccountsChangedBroadcast(accounts.userId);
         }
         return resultAccount;
     }
@@ -1661,7 +1659,7 @@ public class AccountManagerService
     }
 
     private boolean removeAccountInternal(UserAccounts accounts, Account account, int callingUid) {
-        int deleted;
+        boolean isChanged = false;
         boolean userUnlocked = isLocalUnlockedUser(accounts.userId);
         if (!userUnlocked) {
             Slog.i(TAG, "Removing account " + account + " while user "+ accounts.userId
@@ -1671,25 +1669,38 @@ public class AccountManagerService
             final SQLiteDatabase db = userUnlocked
                     ? accounts.openHelper.getWritableDatabaseUserIsUnlocked()
                     : accounts.openHelper.getWritableDatabase();
-            final long accountId = getAccountIdLocked(db, account);
             db.beginTransaction();
+            // Set to a dummy value, this will only be used if the database
+            // transaction succeeds.
+            long accountId = -1;
             try {
-                deleted = db.delete(TABLE_ACCOUNTS, ACCOUNTS_NAME + "=? AND " + ACCOUNTS_TYPE
-                                + "=?", new String[]{account.name, account.type});
-                if (userUnlocked) {
-                    // Delete from CE table
-                    deleted = db.delete(CE_TABLE_ACCOUNTS, ACCOUNTS_NAME + "=? AND " + ACCOUNTS_TYPE
-                            + "=?", new String[]{account.name, account.type});
+                accountId = getAccountIdLocked(db, account);
+                if (accountId >= 0) {
+                    db.delete(
+                            TABLE_ACCOUNTS,
+                            ACCOUNTS_NAME + "=? AND " + ACCOUNTS_TYPE + "=?",
+                            new String[]{ account.name, account.type });
+                    if (userUnlocked) {
+                        // Delete from CE table
+                        db.delete(
+                                CE_TABLE_ACCOUNTS,
+                                ACCOUNTS_NAME + "=? AND " + ACCOUNTS_TYPE + "=?",
+                                new String[]{ account.name, account.type });
+                    }
+                    db.setTransactionSuccessful();
+                    isChanged = true;
                 }
-                db.setTransactionSuccessful();
             } finally {
                 db.endTransaction();
             }
-            removeAccountFromCacheLocked(accounts, account);
-            sendAccountsChangedBroadcast(accounts.userId);
-            String action = userUnlocked ? DebugDbHelper.ACTION_ACCOUNT_REMOVE
-                    : DebugDbHelper.ACTION_ACCOUNT_REMOVE_DE;
-            logRecord(db, action, TABLE_ACCOUNTS, accountId, accounts);
+            if (isChanged) {
+                removeAccountFromCacheLocked(accounts, account);
+                // Only broadcast LOGIN_ACCOUNTS_CHANGED if a change occured.
+                sendAccountsChangedBroadcast(accounts.userId);
+                String action = userUnlocked ? DebugDbHelper.ACTION_ACCOUNT_REMOVE
+                        : DebugDbHelper.ACTION_ACCOUNT_REMOVE_DE;
+                logRecord(db, action, TABLE_ACCOUNTS, accountId, accounts);
+            }
         }
         long id = Binder.clearCallingIdentity();
         try {
@@ -1706,7 +1717,7 @@ public class AccountManagerService
         } finally {
             Binder.restoreCallingIdentity(id);
         }
-        return (deleted > 0);
+        return isChanged;
     }
 
     @Override
@@ -1930,6 +1941,7 @@ public class AccountManagerService
         if (account == null) {
             return;
         }
+        boolean isChanged = false;
         synchronized (accounts.cacheLock) {
             final SQLiteDatabase db = accounts.openHelper.getWritableDatabaseUserIsUnlocked();
             db.beginTransaction();
@@ -1939,12 +1951,17 @@ public class AccountManagerService
                 final long accountId = getAccountIdLocked(db, account);
                 if (accountId >= 0) {
                     final String[] argsAccountId = {String.valueOf(accountId)};
-                    db.update(CE_TABLE_ACCOUNTS, values, ACCOUNTS_ID + "=?", argsAccountId);
-                    db.delete(CE_TABLE_AUTHTOKENS, AUTHTOKENS_ACCOUNTS_ID + "=?", argsAccountId);
+                    db.update(
+                            CE_TABLE_ACCOUNTS, values, ACCOUNTS_ID + "=?", argsAccountId);
+                    db.delete(
+                            CE_TABLE_AUTHTOKENS, AUTHTOKENS_ACCOUNTS_ID + "=?", argsAccountId);
                     accounts.authTokenCache.remove(account);
                     accounts.accountTokenCaches.remove(account);
                     db.setTransactionSuccessful();
-
+                    // If there is an account whose password will be updated and the database
+                    // transactions succeed, then we say that a change has occured. Even if the
+                    // new password is the same as the old and there were no authtokens to delete.
+                    isChanged = true;
                     String action = (password == null || password.length() == 0) ?
                             DebugDbHelper.ACTION_CLEAR_PASSWORD
                             : DebugDbHelper.ACTION_SET_PASSWORD;
@@ -1952,8 +1969,11 @@ public class AccountManagerService
                 }
             } finally {
                 db.endTransaction();
+                if (isChanged) {
+                    // Send LOGIN_ACCOUNTS_CHANGED only if the something changed.
+                    sendAccountsChangedBroadcast(accounts.userId);
+                }
             }
-            sendAccountsChangedBroadcast(accounts.userId);
         }
     }
 
