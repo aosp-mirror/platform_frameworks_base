@@ -47,9 +47,14 @@ public final class NightDisplayService extends SystemService
     private static final boolean DEBUG = false;
 
     /**
-     * Night mode ~= 3400 K.
+     * Night display ~= 3400 K.
      */
-    private static final String MATRIX_NIGHT = "1,0,0,0,0,.754,0,0,0,0,.516,0,0,0,0,1";
+    private static final float[] MATRIX_NIGHT = new float[] {
+        1,      0,      0, 0,
+        0, 0.754f,      0, 0,
+        0,      0, 0.516f, 0,
+        0,      0,      0, 1
+    };
 
     private int mCurrentUser = UserHandle.USER_NULL;
     private boolean mBootCompleted;
@@ -159,9 +164,9 @@ public final class NightDisplayService extends SystemService
             }
 
             // Update the current color matrix.
-            final ContentResolver cr = getContext().getContentResolver();
-            Secure.putStringForUser(cr, Secure.ACCESSIBILITY_DISPLAY_COLOR_MATRIX,
-                    activated ? MATRIX_NIGHT : null, mCurrentUser);
+            final DisplayTransformManager dtm = getLocalService(DisplayTransformManager.class);
+            dtm.setColorMatrix(DisplayTransformManager.LEVEL_COLOR_MATRIX_NIGHT_DISPLAY,
+                    activated ? MATRIX_NIGHT : null);
         }
     }
 
