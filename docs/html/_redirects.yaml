@@ -361,6 +361,8 @@ redirects:
   to: /about/dashboards/index.html
 - from: /resources/community-groups.html
   to: /support.html
+- from: /community/index.html
+  to: /support.html
 - from: /guide/tutorials/
   to: /resources/tutorials/
 - from: /resources/tutorials/views/hello-linearlayout.html
