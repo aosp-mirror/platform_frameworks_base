@@ -36,8 +36,4 @@ ifdef TARGET_32_BIT_SURFACEFLINGER
 LOCAL_32_BIT_ONLY := true
 endif
 
-# get asserts to work
-APP_OPTIM := debug
-LOCAL_CFLAGS += -UNDEBUG
-
 include $(BUILD_EXECUTABLE)

@@ -588,7 +588,7 @@ bool BootAnimation::preloadZip(Animation& animation)
         return false;
     }
 
-    bool hasAudio = false;
+    Animation::Part* partWithAudio = NULL;
     ZipEntryRO entry;
     char name[ANIM_ENTRY_NAME_MAX];
     while ((entry = zip->nextEntry(cookie)) != NULL) {
@@ -612,10 +612,10 @@ bool BootAnimation::preloadZip(Animation& animation)
                             if (map) {
                                 Animation::Part& part(animation.parts.editItemAt(j));
                                 if (leaf == "audio.wav") {
-                                    hasAudio = true;
                                     // a part may have at most one audio file
                                     part.audioData = (uint8_t *)map->getDataPtr();
                                     part.audioLength = map->getDataLength();
+                                    partWithAudio = &part;
                                 } else if (leaf == "trim.txt") {
                                     part.trimData.setTo((char const*)map->getDataPtr(),
                                                         map->getDataLength());
@@ -666,9 +666,11 @@ bool BootAnimation::preloadZip(Animation& animation)
     }
 
     // Create and initialize audioplay if there is a wav file in any of the animations.
-    if (hasAudio) {
+    if (partWithAudio != NULL) {
         ALOGD("found audio.wav, creating playback engine");
-        audioplay::create();
+        if (!audioplay::create(partWithAudio->audioData, partWithAudio->audioLength)) {
+            return false;
+        }
     }
 
     zip->endIteration(cookie);
@@ -904,7 +906,10 @@ BootAnimation::Animation* BootAnimation::loadAnimation(const String8& fn)
     mLoadedFiles.add(animation->fileName);
 
     parseAnimationDesc(*animation);
-    preloadZip(*animation);
+    if (!preloadZip(*animation)) {
+        return NULL;
+    }
+
 
     mLoadedFiles.remove(fn);
     return animation;
