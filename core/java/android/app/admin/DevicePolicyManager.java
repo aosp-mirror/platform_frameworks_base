@@ -1315,7 +1315,7 @@ public class DevicePolicyManager {
 
     /**
      * Retrieve the current minimum password quality for a particular admin or all admins that set
-     * retrictions on this user and its participating profiles. Restrictions on profiles that have
+     * restrictions on this user and its participating profiles. Restrictions on profiles that have
      * a separate challenge are not taken into account.
      *
      * <p>This method can be called on the {@link DevicePolicyManager} instance
@@ -1379,7 +1379,7 @@ public class DevicePolicyManager {
 
     /**
      * Retrieve the current minimum password length for a particular admin or all admins that set
-     * retrictions on this user and its participating profiles. Restrictions on profiles that have
+     * restrictions on this user and its participating profiles. Restrictions on profiles that have
      * a separate challenge are not taken into account.
      *
      * <p>This method can be called on the {@link DevicePolicyManager} instance
@@ -1442,7 +1442,7 @@ public class DevicePolicyManager {
 
     /**
      * Retrieve the current number of upper case letters required in the password
-     * for a particular admin or all admins that set retrictions on this user and
+     * for a particular admin or all admins that set restrictions on this user and
      * its participating profiles. Restrictions on profiles that have a separate challenge
      * are not taken into account.
      * This is the same value as set by
@@ -1511,7 +1511,7 @@ public class DevicePolicyManager {
 
     /**
      * Retrieve the current number of lower case letters required in the password
-     * for a particular admin or all admins that set retrictions on this user
+     * for a particular admin or all admins that set restrictions on this user
      * and its participating profiles. Restrictions on profiles that have
      * a separate challenge are not taken into account.
      * This is the same value as set by
@@ -1580,7 +1580,7 @@ public class DevicePolicyManager {
 
     /**
      * Retrieve the current number of letters required in the password
-     * for a particular admin or all admins that set retrictions on this user
+     * for a particular admin or all admins that set restrictions on this user
      * and its participating profiles. Restrictions on profiles that have
      * a separate challenge are not taken into account.
      * This is the same value as set by
@@ -1648,7 +1648,7 @@ public class DevicePolicyManager {
 
     /**
      * Retrieve the current number of numerical digits required in the password
-     * for a particular admin or all admins that set retrictions on this user
+     * for a particular admin or all admins that set restrictions on this user
      * and its participating profiles. Restrictions on profiles that have
      * a separate challenge are not taken into account.
      * This is the same value as set by
@@ -1716,7 +1716,7 @@ public class DevicePolicyManager {
 
     /**
      * Retrieve the current number of symbols required in the password
-     * for a particular admin or all admins that set retrictions on this user
+     * for a particular admin or all admins that set restrictions on this user
      * and its participating profiles. Restrictions on profiles that have
      * a separate challenge are not taken into account. This is the same value as
      * set by {@link #setPasswordMinimumSymbols(ComponentName, int)}
@@ -1783,7 +1783,7 @@ public class DevicePolicyManager {
 
     /**
      * Retrieve the current number of non-letter characters required in the password
-     * for a particular admin or all admins that set retrictions on this user
+     * for a particular admin or all admins that set restrictions on this user
      * and its participating profiles. Restrictions on profiles that have
      * a separate challenge are not taken into account.
      * This is the same value as set by
@@ -1915,7 +1915,7 @@ public class DevicePolicyManager {
 
     /**
      * Get the current password expiration time for a particular admin or all admins that set
-     * retrictions on this user and its participating profiles. Restrictions on profiles that have
+     * restrictions on this user and its participating profiles. Restrictions on profiles that have
      * a separate challenge are not taken into account. If admin is {@code null}, then a composite
      * of all expiration times is returned - which will be the minimum of all of them.
      *
@@ -1939,7 +1939,7 @@ public class DevicePolicyManager {
 
     /**
      * Retrieve the current password history length for a particular admin or all admins that
-     * set retrictions on this user and its participating profiles. Restrictions on profiles that
+     * set restrictions on this user and its participating profiles. Restrictions on profiles that
      * have a separate challenge are not taken into account.
      *
      * <p>This method can be called on the {@link DevicePolicyManager} instance
@@ -2121,7 +2121,7 @@ public class DevicePolicyManager {
 
     /**
      * Retrieve the current maximum number of login attempts that are allowed before the device
-     * or profile is wiped, for a particular admin or all admins that set retrictions on this user
+     * or profile is wiped, for a particular admin or all admins that set restrictions on this user
      * and its participating profiles. Restrictions on profiles that have a separate challenge are
      * not taken into account.
      *
@@ -2262,7 +2262,7 @@ public class DevicePolicyManager {
 
     /**
      * Retrieve the current maximum time to unlock for a particular admin or all admins that set
-     * retrictions on this user and its participating profiles. Restrictions on profiles that have
+     * restrictions on this user and its participating profiles. Restrictions on profiles that have
      * a separate challenge are not taken into account.
      *
      * <p>This method can be called on the {@link DevicePolicyManager} instance
@@ -3349,7 +3349,7 @@ public class DevicePolicyManager {
 
     /**
      * Determine whether or not features have been disabled in keyguard either by the calling
-     * admin, if specified, or all admins that set retrictions on this user and its participating
+     * admin, if specified, or all admins that set restrictions on this user and its participating
      * profiles. Restrictions on profiles that have a separate challenge are not taken into account.
      *
      * <p>This method can be called on the {@link DevicePolicyManager} instance
