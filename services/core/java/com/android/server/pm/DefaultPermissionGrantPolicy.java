@@ -31,6 +31,7 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.UserHandle;
+import android.os.storage.StorageManager;
 import android.print.PrintManager;
 import android.provider.CalendarContract;
 import android.provider.ContactsContract;
@@ -604,6 +605,15 @@ final class DefaultPermissionGrantPolicy {
                     && doesPackageSupportRuntimePermissions(nfcTagPkg)) {
                 grantRuntimePermissionsLPw(nfcTagPkg, CONTACTS_PERMISSIONS, false, userId);
                 grantRuntimePermissionsLPw(nfcTagPkg, PHONE_PERMISSIONS, false, userId);
+            }
+
+            // Storage Manager
+            Intent storageManagerIntent = new Intent(StorageManager.ACTION_MANAGE_STORAGE);
+            PackageParser.Package storageManagerPckg = getDefaultSystemHandlerActivityPackageLPr(
+                    storageManagerIntent, userId);
+            if (storageManagerPckg != null
+                    && doesPackageSupportRuntimePermissions(storageManagerPckg)) {
+                grantRuntimePermissionsLPw(storageManagerPckg, STORAGE_PERMISSIONS, true, userId);
             }
             mService.mSettings.onDefaultRuntimePermissionsGrantedLPr(userId);
         }
