@@ -1547,7 +1547,7 @@ public class PopupWindow {
         }
 
         // Let the window manager know to align the top to y.
-        outParams.gravity = Gravity.LEFT | Gravity.TOP;
+        outParams.gravity = computeGravity();
         outParams.width = width;
         outParams.height = height;
 
