@@ -6615,9 +6615,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /**
      * Called by the framework in response to a text auto-correction (such as fixing a typo using a
-     * a dictionnary) from the current input method, provided by it calling
-     * {@link InputConnection#commitCorrection} InputConnection.commitCorrection()}. The default
-     * implementation flashes the background of the corrected word to provide feedback to the user.
+     * a dictionary) from the current input method, provided by it calling
+     * {@link InputConnection#commitCorrection(CorrectionInfo) InputConnection.commitCorrection()}.
+     * The default implementation flashes the background of the corrected word to provide
+     * feedback to the user.
      *
      * @param info The auto correct info about the text that was corrected.
      */
