@@ -25,20 +25,9 @@
     android:background="@drawable/btn_borderless_rect"
     android:gravity="center">
 
-    <ImageView
-        android:id="@*android:id/up"
-        android:layout_width="@dimen/qs_detail_image_width"
-        android:layout_height="@dimen/qs_detail_image_height"
-        android:layout_marginEnd="@dimen/qs_detail_back_margin_end"
-        android:padding="@dimen/qs_detail_image_padding"
-        android:clickable="true"
-        android:background="?android:attr/selectableItemBackground"
-        android:contentDescription="@*android:string/action_bar_up_description"
-        android:src="?android:attr/homeAsUpIndicator" />
-
     <TextView
         android:id="@android:id/title"
-        android:paddingLeft="@dimen/qs_detail_header_text_padding"
+        android:paddingStart="@dimen/qs_detail_header_text_padding"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
