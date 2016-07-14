@@ -668,30 +668,74 @@ public class NotificationStackScrollLayout extends ViewGroup
     public void setStackHeight(float height) {
         mLastSetStackHeight = height;
         setIsExpanded(height > 0.0f);
-        int newStackHeight = (int) height;
-        int minStackHeight = getLayoutMinHeight();
         int stackHeight;
-        float paddingOffset;
-        boolean trackingHeadsUp = mTrackingHeadsUp || mHeadsUpManager.hasPinnedHeadsUp();
-        int normalUnfoldPositionStart = trackingHeadsUp
-                ? mHeadsUpManager.getTopHeadsUpPinnedHeight()
-                : minStackHeight;
-        if (newStackHeight - mTopPadding - mTopPaddingOverflow >= normalUnfoldPositionStart
-                || getNotGoneChildCount() == 0) {
-            paddingOffset = mTopPaddingOverflow;
-            stackHeight = newStackHeight;
+        float translationY;
+        float appearEndPosition = getAppearEndPosition();
+        float appearStartPosition = getAppearStartPosition();
+        if (height >= appearEndPosition) {
+            translationY = mTopPaddingOverflow;
+            stackHeight = (int) height;
         } else {
-            int translationY;
-            translationY = newStackHeight - normalUnfoldPositionStart;
-            paddingOffset = translationY - mTopPadding;
-            stackHeight = (int) (height - (translationY - mTopPadding));
+            float appearFraction = getAppearFraction(height);
+            if (appearFraction >= 0) {
+                translationY = NotificationUtils.interpolate(getExpandTranslationStart(), 0,
+                        appearFraction);
+            } else {
+                // This may happen when pushing up a heads up. We linearly push it up from the
+                // start
+                translationY = height - appearStartPosition + getExpandTranslationStart();
+            }
+            stackHeight = (int) (height - translationY);
         }
         if (stackHeight != mCurrentStackHeight) {
             mCurrentStackHeight = stackHeight;
             updateAlgorithmHeightAndPadding();
             requestChildrenUpdate();
         }
-        setStackTranslation(paddingOffset);
+        setStackTranslation(translationY);
+    }
+
+    /**
+     * @return The translation at the beginning when expanding.
+     *         Measured relative to the resting position.
+     */
+    private float getExpandTranslationStart() {
+        int startPosition = mTrackingHeadsUp || mHeadsUpManager.hasPinnedHeadsUp()
+                ? 0 : -getFirstChildMinHeight();
+        return startPosition - mTopPadding;
+    }
+
+    /**
+     * @return the position from where the appear transition starts when expanding.
+     *         Measured in absolute height.
+     */
+    private float getAppearStartPosition() {
+        return mTrackingHeadsUp
+                ? mHeadsUpManager.getTopHeadsUpPinnedHeight()
+                : 0;
+    }
+
+    /**
+     * @return the position from where the appear transition ends when expanding.
+     *         Measured in absolute height.
+     */
+    private float getAppearEndPosition() {
+        int firstItemHeight = mTrackingHeadsUp || mHeadsUpManager.hasPinnedHeadsUp()
+                ? mHeadsUpManager.getTopHeadsUpPinnedHeight() + mBottomStackPeekSize
+                        + mBottomStackSlowDownHeight
+                : getLayoutMinHeight();
+        return firstItemHeight + mTopPadding + mTopPaddingOverflow;
+    }
+
+    /**
+     * @param height the height of the panel
+     * @return the fraction of the appear animation that has been performed
+     */
+    public float getAppearFraction(float height) {
+        float appearEndPosition = getAppearEndPosition();
+        float appearStartPosition = getAppearStartPosition();
+        return (height - appearStartPosition)
+                / (appearEndPosition - appearStartPosition);
     }
 
     public float getStackTranslation() {
@@ -2096,6 +2140,12 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public int getLayoutMinHeight() {
+        int firstChildMinHeight = getFirstChildMinHeight();
+        return Math.min(firstChildMinHeight + mBottomStackPeekSize + mBottomStackSlowDownHeight,
+                mMaxLayoutHeight - mTopPadding);
+    }
+
+    private int getFirstChildMinHeight() {
         final ExpandableView firstChild = getFirstChildNotGone();
         int firstChildMinHeight = firstChild != null
                 ? firstChild.getIntrinsicHeight()
@@ -2105,8 +2155,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (mOwnScrollY > 0) {
             firstChildMinHeight = Math.max(firstChildMinHeight - mOwnScrollY, mCollapsedSize);
         }
-        return Math.min(firstChildMinHeight + mBottomStackPeekSize + mBottomStackSlowDownHeight,
-                mMaxLayoutHeight - mTopPadding);
+        return firstChildMinHeight;
     }
 
     public float getTopPaddingOverflow() {
