@@ -1453,19 +1453,27 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     }
 
     @Override
-    public void setWallpaperComponentChecked(ComponentName name, String callingPackage) {
+    public void setWallpaperComponentChecked(ComponentName name, String callingPackage,
+            int userId) {
+
         if (isWallpaperSupported(callingPackage) && isSetWallpaperAllowed(callingPackage)) {
-            setWallpaperComponent(name);
+            setWallpaperComponent(name, userId);
         }
     }
 
     // ToDo: Remove this version of the function
     @Override
     public void setWallpaperComponent(ComponentName name) {
+        setWallpaperComponent(name, UserHandle.getCallingUserId());
+    }
+
+    private void setWallpaperComponent(ComponentName name, int userId) {
+        userId = ActivityManager.handleIncomingUser(getCallingPid(), getCallingUid(), userId,
+                false /* all */, true /* full */, "changing live wallpaper", null /* pkg */);
         checkPermission(android.Manifest.permission.SET_WALLPAPER_COMPONENT);
+
         synchronized (mLock) {
             if (DEBUG) Slog.v(TAG, "setWallpaperComponent name=" + name);
-            int userId = UserHandle.getCallingUserId();
             WallpaperData wallpaper = mWallpaperMap.get(userId);
             if (wallpaper == null) {
                 throw new IllegalStateException("Wallpaper not yet initialized for user " + userId);
