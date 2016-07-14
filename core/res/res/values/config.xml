@@ -764,7 +764,7 @@
              1 - AUTO_MODE_CUSTOM
              2 - AUTO_MODE_TWILIGHT
     -->
-    <integer name="config_defaultNightDisplayAutoMode">1</integer>
+    <integer name="config_defaultNightDisplayAutoMode">0</integer>
 
     <!-- Default time when Night display is automatically activated.
          Represented as milliseconds from midnight (e.g. 79200000 == 10pm). -->
