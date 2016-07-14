@@ -429,6 +429,11 @@ def parse_ucd(ucd_path):
     _emoji_sequences[UN_seq] = 'Emoji_Flag_Sequence'
 
 
+    # add in UN flag
+    UN_seq = flag_sequence('UN')
+    _emoji_sequences[UN_seq] = 'Emoji_Flag_Sequence'
+
+
 def flag_sequence(territory_code):
     return tuple(0x1F1E6 + ord(ch) - ord('A') for ch in territory_code)
 
