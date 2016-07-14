@@ -530,14 +530,14 @@ void ClipArea::applyClip(const ClipBase* clip, const Matrix4& transform) {
 }
 
 void ClipArea::applyTransformToRegion(const Matrix4& transform, SkRegion* region) {
-    if (transform.isSimple() && !transform.isPureTranslate()) {
+    if (transform.rectToRect() && !transform.isPureTranslate()) {
         // handle matrices with scale manually by mapping each rect
         SkRegion other;
         SkRegion::Iterator it(*region);
         while (!it.done()) {
             Rect rect(it.rect());
             transform.mapRect(rect);
-            rect.roundOut();
+            rect.snapGeometryToPixelBoundaries(true);
             other.op(rect.left, rect.top, rect.right, rect.bottom, SkRegion::kUnion_Op);
             it.next();
         }
