@@ -235,7 +235,7 @@ public class VectorDrawable extends Drawable {
     private final Rect mTmpBounds = new Rect();
 
     public VectorDrawable() {
-        this(new VectorDrawableState(), null);
+        this(new VectorDrawableState(null), null);
     }
 
     /**
@@ -830,7 +830,8 @@ public class VectorDrawable extends Drawable {
 
         private static final int NATIVE_ALLOCATION_SIZE = 316;
 
-        // Deep copy for mutate() or implicitly mutate.
+        // If copy is not null, deep copy the given VectorDrawableState. Otherwise, create a
+        // native vector drawable tree with an empty root group.
         public VectorDrawableState(VectorDrawableState copy) {
             if (copy != null) {
                 mThemeAttrs = copy.mThemeAttrs;
@@ -851,8 +852,11 @@ public class VectorDrawable extends Drawable {
                 if (copy.mRootName != null) {
                     mVGTargetsMap.put(copy.mRootName, this);
                 }
-                onTreeConstructionFinished();
+            } else {
+                mRootGroup = new VGroup();
+                createNativeTree(mRootGroup);
             }
+            onTreeConstructionFinished();
         }
 
         private void createNativeTree(VGroup rootGroup) {
@@ -870,7 +874,8 @@ public class VectorDrawable extends Drawable {
             VMRuntime.getRuntime().registerNativeAllocation(NATIVE_ALLOCATION_SIZE);
         }
 
-
+        // This should be called every time after a new RootGroup and all its subtrees are created
+        // (i.e. in constructors of VectorDrawableState and in inflate).
         void onTreeConstructionFinished() {
             mRootGroup.setTree(mNativeTree);
             mAllocationOfAllNodes = mRootGroup.getNativeSize();
@@ -916,11 +921,6 @@ public class VectorDrawable extends Drawable {
                     || (mRootGroup != null && mRootGroup.canApplyTheme())
                     || (mTint != null && mTint.canApplyTheme())
                     || super.canApplyTheme();
-        }
-
-        public VectorDrawableState() {
-            mRootGroup = new VGroup();
-            createNativeTree(mRootGroup);
         }
 
         @Override
