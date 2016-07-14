@@ -1241,6 +1241,24 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private void setNetworkTemplateEnabled(NetworkTemplate template, boolean enabled) {
         // TODO: reach into ConnectivityManager to proactively disable bringing
         // up this network, since we know that traffic will be blocked.
+
+        if (template.getMatchRule() == MATCH_MOBILE_ALL) {
+            // If mobile data usage hits the limit or if the user resumes the data, we need to
+            // notify telephony.
+            final SubscriptionManager sm = SubscriptionManager.from(mContext);
+            final TelephonyManager tm = TelephonyManager.from(mContext);
+
+            final int[] subIds = sm.getActiveSubscriptionIdList();
+            for (int subId : subIds) {
+                final String subscriberId = tm.getSubscriberId(subId);
+                final NetworkIdentity probeIdent = new NetworkIdentity(TYPE_MOBILE,
+                        TelephonyManager.NETWORK_TYPE_UNKNOWN, subscriberId, null, false, true);
+                // Template is matched when subscriber id matches.
+                if (template.matches(probeIdent)) {
+                    tm.setPolicyDataEnabled(enabled, subId);
+                }
+            }
+        }
     }
 
     /**
