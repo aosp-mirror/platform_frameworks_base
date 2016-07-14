@@ -29,6 +29,7 @@ import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Slog;
+import android.util.TypedValue;
 import android.util.Xml;
 
 import com.android.internal.R;
@@ -260,7 +261,12 @@ public class ShortcutParser {
         final TypedArray sa = service.mContext.getResources().obtainAttributes(attrs,
                 R.styleable.ShortcutCategories);
         try {
-            return sa.getString(R.styleable.ShortcutCategories_name);
+            if (sa.getType(R.styleable.ShortcutCategories_name) == TypedValue.TYPE_STRING) {
+                return sa.getNonResourceString(R.styleable.ShortcutCategories_name);
+            } else {
+                Log.w(TAG, "android:name for shortcut category must be string literal.");
+                return null;
+            }
         } finally {
             sa.recycle();
         }
@@ -272,7 +278,11 @@ public class ShortcutParser {
         final TypedArray sa = service.mContext.getResources().obtainAttributes(attrs,
                 R.styleable.Shortcut);
         try {
-            final String id = sa.getString(R.styleable.Shortcut_shortcutId);
+            if (sa.getType(R.styleable.Shortcut_shortcutId) != TypedValue.TYPE_STRING) {
+                Log.w(TAG, "android:shortcutId must be string literal. activity=" + activity);
+                return null;
+            }
+            final String id = sa.getNonResourceString(R.styleable.Shortcut_shortcutId);
             final boolean enabled = sa.getBoolean(R.styleable.Shortcut_enabled, true);
             final int iconResId = sa.getResourceId(R.styleable.Shortcut_icon, 0);
             final int titleResId = sa.getResourceId(R.styleable.Shortcut_shortcutShortLabel, 0);
@@ -281,11 +291,11 @@ public class ShortcutParser {
                     R.styleable.Shortcut_shortcutDisabledMessage, 0);
 
             if (TextUtils.isEmpty(id)) {
-                Slog.w(TAG, "Shortcut ID must be provided. activity=" + activity);
+                Log.w(TAG, "android:shortcutId must be provided. activity=" + activity);
                 return null;
             }
             if (titleResId == 0) {
-                Slog.w(TAG, "Shortcut title must be provided. activity=" + activity);
+                Log.w(TAG, "android:shortcutShortLabel must be provided. activity=" + activity);
                 return null;
             }
 

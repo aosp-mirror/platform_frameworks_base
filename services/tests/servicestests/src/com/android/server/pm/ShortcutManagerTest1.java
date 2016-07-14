@@ -5856,9 +5856,11 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
         // Only the valid one is published.
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
-            assertShortcutIds(assertAllManifest(assertAllImmutable(assertAllEnabled(
-                    mManager.getManifestShortcuts()))),
-                    "x1");
+            assertWith(getCallerShortcuts())
+                    .areAllManifest()
+                    .areAllImmutable()
+                    .areAllEnabled()
+                    .haveIds("x1");
         });
 
         // Package 1 updated, which has one valid manifest shortcut and one invalid.
@@ -5871,9 +5873,11 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
         // Only the valid one is published.
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
-            assertShortcutIds(assertAllManifest(assertAllImmutable(assertAllEnabled(
-                    mManager.getManifestShortcuts()))),
-                    "x2");
+            assertWith(getCallerShortcuts())
+                    .areAllManifest()
+                    .areAllImmutable()
+                    .areAllEnabled()
+                    .haveIds("x2");
         });
 
         // Package 1 updated, which has one valid manifest shortcut and one invalid.
@@ -5886,9 +5890,14 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
         // Only the valid one is published.
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
-            assertShortcutIds(assertAllManifest(assertAllImmutable(assertAllEnabled(
-                    mManager.getManifestShortcuts()))),
-                    "x3");
+            assertWith(getCallerShortcuts())
+                    .areAllManifest()
+                    .areAllImmutable()
+                    .areAllEnabled()
+                    .haveIds("x3")
+                    .forShortcutWithId("x3", si -> {
+                        assertEquals(set("cat2"), si.getCategories());
+                     });
         });
     }
 
