@@ -1158,4 +1158,12 @@ interface ITelephony {
      * @hide
      */
     long getVtDataUsage();
+
+    /**
+     * Policy control of data connection. Usually used when data limit is passed.
+     * @param enabled True if enabling the data, otherwise disabling.
+     * @param subId Subscription index
+     * @hide
+     */
+    void setPolicyDataEnabled(boolean enabled, int subId);
 }
