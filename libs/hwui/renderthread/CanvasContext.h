@@ -99,7 +99,6 @@ public:
     static void trimMemory(RenderThread& thread, int level);
 
     static void invokeFunctor(RenderThread& thread, Functor* functor);
-    static bool isSkiaEnabled();
 
     Layer* createTextureLayer();
 

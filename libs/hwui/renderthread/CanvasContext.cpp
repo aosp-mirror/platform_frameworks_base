@@ -75,7 +75,7 @@ CanvasContext* CanvasContext::create(RenderThread& thread,
             //TODO: implement SKIA GL
             LOG_ALWAYS_FATAL("skiaGL canvas type not implemented.");
             break;
-        case RenderPipelineType::Vulkan:
+        case RenderPipelineType::SkiaVulkan:
             //TODO: implement Vulkan
             LOG_ALWAYS_FATAL("Vulkan canvas type not implemented.");
             break;
@@ -605,11 +605,6 @@ int64_t CanvasContext::getFrameNumber() {
         mFrameNumber = static_cast<int64_t>(mNativeSurface->getNextFrameNumber());
     }
     return mFrameNumber;
-}
-
-bool CanvasContext::isSkiaEnabled() {
-    auto renderType = Properties::getRenderPipelineType();
-    return RenderPipelineType::SkiaGL == renderType || RenderPipelineType::Vulkan == renderType;
 }
 
 SkRect CanvasContext::computeDirtyRect(const Frame& frame, SkRect* dirty) {

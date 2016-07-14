@@ -214,8 +214,8 @@ RenderPipelineType Properties::getRenderPipelineType() {
     property_get(PROPERTY_DEFAULT_RENDERER, prop, "opengl");
     if (!strcmp(prop, "skiagl") ) {
         sRenderPipelineType = RenderPipelineType::SkiaGL;
-    } else if (!strcmp(prop, "vulkan") ) {
-        sRenderPipelineType = RenderPipelineType::Vulkan;
+    } else if (!strcmp(prop, "skiavulkan") ) {
+        sRenderPipelineType = RenderPipelineType::SkiaVulkan;
     } else { //"opengl"
         sRenderPipelineType = RenderPipelineType::OpenGL;
     }
