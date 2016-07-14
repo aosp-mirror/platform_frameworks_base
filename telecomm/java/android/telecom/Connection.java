@@ -370,8 +370,14 @@ public abstract class Connection extends Conferenceable {
      */
     public static final int PROPERTY_HAS_CDMA_VOICE_PRIVACY = 1<<5;
 
+    /**
+     * Indicates that the connection represents a downgraded IMS conference.
+     * @hide
+     */
+    public static final int PROPERTY_IS_DOWNGRADED_CONFERENCE = 1<<6;
+
     //**********************************************************************************************
-    // Next PROPERTY value: 1<<6
+    // Next PROPERTY value: 1<<7
     //**********************************************************************************************
 
     /**
