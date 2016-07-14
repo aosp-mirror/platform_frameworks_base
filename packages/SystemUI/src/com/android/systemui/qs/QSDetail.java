@@ -63,7 +63,6 @@ public class QSDetail extends LinearLayout {
     private boolean mScanState;
     private boolean mClosingDetail;
     private boolean mFullyExpanded;
-    private View mQsDetailHeaderBack;
     private BaseStatusBarHeader mHeader;
     private boolean mTriggeredExpand;
     private int mOpenX;
@@ -92,7 +91,6 @@ public class QSDetail extends LinearLayout {
         mDetailDoneButton = (TextView) findViewById(android.R.id.button1);
 
         mQsDetailHeader = findViewById(R.id.qs_detail_header);
-        mQsDetailHeaderBack = mQsDetailHeader.findViewById(com.android.internal.R.id.up);
         mQsDetailHeaderTitle = (TextView) mQsDetailHeader.findViewById(android.R.id.title);
         mQsDetailHeaderSwitch = (Switch) mQsDetailHeader.findViewById(android.R.id.toggle);
         mQsDetailHeaderProgress = (ImageView) findViewById(R.id.qs_detail_header_progress);
@@ -109,7 +107,6 @@ public class QSDetail extends LinearLayout {
                 mQsPanel.closeDetail();
             }
         };
-        mQsDetailHeaderBack.setOnClickListener(doneListener);
         mDetailDoneButton.setOnClickListener(doneListener);
     }
 
