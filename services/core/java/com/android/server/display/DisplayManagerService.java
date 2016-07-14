@@ -244,6 +244,7 @@ public final class DisplayManagerService extends SystemService {
         publishBinderService(Context.DISPLAY_SERVICE, new BinderService(),
                 true /*allowIsolated*/);
         publishLocalService(DisplayManagerInternal.class, new LocalService());
+        publishLocalService(DisplayTransformManager.class, new DisplayTransformManager());
     }
 
     @Override

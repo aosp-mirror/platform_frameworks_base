@@ -5295,15 +5295,6 @@ public final class Settings {
                 "accessibility_display_daltonizer";
 
         /**
-         * Float list that specifies the color matrix to apply to
-         * the display. Valid values are defined in AccessibilityManager.
-         *
-         * @hide
-         */
-        public static final String ACCESSIBILITY_DISPLAY_COLOR_MATRIX =
-                "accessibility_display_color_matrix";
-
-        /**
          * Setting that specifies whether automatic click when the mouse pointer stops moving is
          * enabled.
          *
@@ -6334,7 +6325,6 @@ public final class Settings {
             USB_MASS_STORAGE_ENABLED,                           // moved to global
             ACCESSIBILITY_DISPLAY_INVERSION_ENABLED,
             ACCESSIBILITY_DISPLAY_DALTONIZER,
-            ACCESSIBILITY_DISPLAY_COLOR_MATRIX,
             ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED,
             ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED,
             ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE,
