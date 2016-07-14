@@ -21,7 +21,6 @@
 
 #define CHATTY ALOGD
 
-#include <assert.h>
 #include <string.h>
 
 #include <utils/Log.h>
@@ -80,8 +79,6 @@ struct ChunkFormat {
 void bqPlayerCallback(SLAndroidSimpleBufferQueueItf bq, void *context) {
     (void)bq;
     (void)context;
-    assert(bq == bqPlayerBufferQueue);
-    assert(NULL == context);
     audioplay::setPlaying(false);
 }
 
@@ -90,39 +87,56 @@ bool hasPlayer() {
 }
 
 // create the engine and output mix objects
-void createEngine() {
+bool createEngine() {
     SLresult result;
 
     // create engine
     result = slCreateEngine(&engineObject, 0, NULL, 0, NULL, NULL);
-    assert(SL_RESULT_SUCCESS == result);
+    if (result != SL_RESULT_SUCCESS) {
+        ALOGE("slCreateEngine failed with result %d", result);
+        return false;
+    }
     (void)result;
 
     // realize the engine
     result = (*engineObject)->Realize(engineObject, SL_BOOLEAN_FALSE);
-    assert(SL_RESULT_SUCCESS == result);
+    if (result != SL_RESULT_SUCCESS) {
+        ALOGE("sl engine Realize failed with result %d", result);
+        return false;
+    }
     (void)result;
 
     // get the engine interface, which is needed in order to create other objects
     result = (*engineObject)->GetInterface(engineObject, SL_IID_ENGINE, &engineEngine);
-    assert(SL_RESULT_SUCCESS == result);
+    if (result != SL_RESULT_SUCCESS) {
+        ALOGE("sl engine GetInterface failed with result %d", result);
+        return false;
+    }
     (void)result;
 
     // create output mix, with environmental reverb specified as a non-required interface
     const SLInterfaceID ids[1] = {SL_IID_ENVIRONMENTALREVERB};
     const SLboolean req[1] = {SL_BOOLEAN_FALSE};
     result = (*engineEngine)->CreateOutputMix(engineEngine, &outputMixObject, 1, ids, req);
-    assert(SL_RESULT_SUCCESS == result);
+    if (result != SL_RESULT_SUCCESS) {
+        ALOGE("sl engine CreateOutputMix failed with result %d", result);
+        return false;
+    }
     (void)result;
 
     // realize the output mix
     result = (*outputMixObject)->Realize(outputMixObject, SL_BOOLEAN_FALSE);
-    assert(SL_RESULT_SUCCESS == result);
+    if (result != SL_RESULT_SUCCESS) {
+        ALOGE("sl outputMix Realize failed with result %d", result);
+        return false;
+    }
     (void)result;
+
+    return true;
 }
 
 // create buffer queue audio player
-void createBufferQueueAudioPlayer(const ChunkFormat* chunkFormat) {
+bool createBufferQueueAudioPlayer(const ChunkFormat* chunkFormat) {
     SLresult result;
 
     // configure audio source
@@ -148,83 +162,89 @@ void createBufferQueueAudioPlayer(const ChunkFormat* chunkFormat) {
     const SLboolean req[2] = {SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE};
     result = (*engineEngine)->CreateAudioPlayer(engineEngine, &bqPlayerObject, &audioSrc, &audioSnk,
             2, ids, req);
-    assert(SL_RESULT_SUCCESS == result);
+    if (result != SL_RESULT_SUCCESS) {
+        ALOGE("sl CreateAudioPlayer failed with result %d", result);
+        return false;
+    }
     (void)result;
 
     // realize the player
     result = (*bqPlayerObject)->Realize(bqPlayerObject, SL_BOOLEAN_FALSE);
-    assert(SL_RESULT_SUCCESS == result);
+    if (result != SL_RESULT_SUCCESS) {
+        ALOGE("sl player Realize failed with result %d", result);
+        return false;
+    }
     (void)result;
 
     // get the play interface
     result = (*bqPlayerObject)->GetInterface(bqPlayerObject, SL_IID_PLAY, &bqPlayerPlay);
-    assert(SL_RESULT_SUCCESS == result);
+    if (result != SL_RESULT_SUCCESS) {
+        ALOGE("sl player GetInterface failed with result %d", result);
+        return false;
+    }
     (void)result;
 
     // get the buffer queue interface
     result = (*bqPlayerObject)->GetInterface(bqPlayerObject, SL_IID_BUFFERQUEUE,
             &bqPlayerBufferQueue);
-    assert(SL_RESULT_SUCCESS == result);
+    if (result != SL_RESULT_SUCCESS) {
+        ALOGE("sl playberBufferQueue GetInterface failed with result %d", result);
+        return false;
+    }
     (void)result;
 
     // register callback on the buffer queue
     result = (*bqPlayerBufferQueue)->RegisterCallback(bqPlayerBufferQueue, bqPlayerCallback, NULL);
-    assert(SL_RESULT_SUCCESS == result);
+    if (result != SL_RESULT_SUCCESS) {
+        ALOGE("sl bqPlayerBufferQueue RegisterCallback failed with result %d", result);
+        return false;
+    }
     (void)result;
-
-#if 0   // mute/solo is not supported for sources that are known to be mono, as this is
-    // get the mute/solo interface
-    result = (*bqPlayerObject)->GetInterface(bqPlayerObject, SL_IID_MUTESOLO, &bqPlayerMuteSolo);
-    assert(SL_RESULT_SUCCESS == result);
-    (void)result;
-#endif
 
     // get the volume interface
     result = (*bqPlayerObject)->GetInterface(bqPlayerObject, SL_IID_VOLUME, &bqPlayerVolume);
-    assert(SL_RESULT_SUCCESS == result);
+    if (result != SL_RESULT_SUCCESS) {
+        ALOGE("sl volume GetInterface failed with result %d", result);
+        return false;
+    }
     (void)result;
 
     // set the player's state to playing
     audioplay::setPlaying(true);
     CHATTY("Created buffer queue player: %p", bqPlayerBufferQueue);
+    return true;
 }
 
-} // namespace
-
-void create() {
-    createEngine();
-}
-
-bool playClip(const uint8_t* buf, int size) {
-    // Parse the WAV header
-    nextBuffer = buf;
-    nextSize = size;
-    const RiffWaveHeader* wavHeader = (const RiffWaveHeader*)buf;
-    if (nextSize < sizeof(*wavHeader) || (wavHeader->riff_id != ID_RIFF) ||
+bool parseClipBuf(const uint8_t* clipBuf, int clipBufSize, const ChunkFormat** oChunkFormat,
+                  const uint8_t** oSoundBuf, unsigned* oSoundBufSize) {
+    *oSoundBuf = clipBuf;
+    *oSoundBufSize = clipBufSize;
+    *oChunkFormat = NULL;
+    const RiffWaveHeader* wavHeader = (const RiffWaveHeader*)*oSoundBuf;
+    if (*oSoundBufSize < sizeof(*wavHeader) || (wavHeader->riff_id != ID_RIFF) ||
         (wavHeader->wave_id != ID_WAVE)) {
         ALOGE("Error: audio file is not a riff/wave file\n");
         return false;
     }
-    nextBuffer += sizeof(*wavHeader);
-    nextSize -= sizeof(*wavHeader);
+    *oSoundBuf += sizeof(*wavHeader);
+    *oSoundBufSize -= sizeof(*wavHeader);
 
-    const ChunkFormat* chunkFormat = nullptr;
     while (true) {
-        const ChunkHeader* chunkHeader = (const ChunkHeader*)nextBuffer;
-        if (nextSize < sizeof(*chunkHeader)) {
+        const ChunkHeader* chunkHeader = (const ChunkHeader*)*oSoundBuf;
+        if (*oSoundBufSize < sizeof(*chunkHeader)) {
             ALOGE("EOF reading chunk headers");
             return false;
         }
 
-        nextBuffer += sizeof(*chunkHeader);
-        nextSize -= sizeof(*chunkHeader);
+        *oSoundBuf += sizeof(*chunkHeader);
+        *oSoundBufSize -= sizeof(*chunkHeader);
 
         bool endLoop = false;
         switch (chunkHeader->id) {
             case ID_FMT:
-                chunkFormat = (const ChunkFormat*)nextBuffer;
-                nextBuffer += chunkHeader->sz;
-                nextSize -= chunkHeader->sz;
+                *oChunkFormat = (const ChunkFormat*)*oSoundBuf;
+                *oSoundBuf += chunkHeader->sz;
+                *oSoundBufSize -= chunkHeader->sz;
                 break;
             case ID_DATA:
                 /* Stop looking for chunks */
@@ -232,27 +252,49 @@ bool playClip(const uint8_t* buf, int size) {
                 break;
             default:
                 /* Unknown chunk, skip bytes */
-                nextBuffer += chunkHeader->sz;
-                nextSize -= chunkHeader->sz;
+                *oSoundBuf += chunkHeader->sz;
+                *oSoundBufSize -= chunkHeader->sz;
         }
         if (endLoop) {
             break;
         }
     }
 
-    if (!chunkFormat) {
+    if (*oChunkFormat == NULL) {
         ALOGE("format not found in WAV file");
         return false;
     }
+    return true;
+}
 
-    // If this is the first clip, create the buffer based on this WAV's header.
-    // We assume all future clips with be in the same format.
-    if (bqPlayerBufferQueue == nullptr) {
-        createBufferQueueAudioPlayer(chunkFormat);
+} // namespace
+
+bool create(const uint8_t* exampleClipBuf, int exampleClipBufSize) {
+    if (!createEngine()) {
+        return false;
     }
 
-    assert(bqPlayerBufferQueue != nullptr);
-    assert(buf != nullptr);
+    // Parse the example clip.
+    const ChunkFormat* chunkFormat;
+    const uint8_t* soundBuf;
+    unsigned soundBufSize;
+    if (!parseClipBuf(exampleClipBuf, exampleClipBufSize, &chunkFormat, &soundBuf, &soundBufSize)) {
+        return false;
+    }
+
+    // Initialize the BufferQueue based on this clip's format.
+    if (!createBufferQueueAudioPlayer(chunkFormat)) {
+        return false;
+    }
+    return true;
+}
+
+bool playClip(const uint8_t* buf, int size) {
+    // Parse the WAV header
+    const ChunkFormat* chunkFormat;
+    if (!parseClipBuf(buf, size, &chunkFormat, &nextBuffer, &nextSize)) {
+        return false;
+    }
 
     if (!hasPlayer()) {
         ALOGD("cannot play clip %p without a player", buf);
@@ -285,8 +327,6 @@ void setPlaying(bool isPlaying) {
         // set the player's state
         result = (*bqPlayerPlay)->SetPlayState(bqPlayerPlay,
             isPlaying ? SL_PLAYSTATE_PLAYING : SL_PLAYSTATE_STOPPED);
-        assert(SL_RESULT_SUCCESS == result);
-        (void)result;
     }
 
 }
