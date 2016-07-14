@@ -937,7 +937,7 @@
     <string name="selectAll" msgid="6876518925844129331">"انتخاب همه"</string>
     <string name="cut" msgid="3092569408438626261">"برش"</string>
     <string name="copy" msgid="2681946229533511987">"کپی"</string>
-    <string name="paste" msgid="5629880836805036433">"جای گذاری"</string>
+    <string name="paste" msgid="5629880836805036433">"جای‌گذاری"</string>
     <string name="paste_as_plain_text" msgid="5427792741908010675">"جای‌گذاری به عنوان متن ساده"</string>
     <string name="replace" msgid="5781686059063148930">"جایگزین شود..."</string>
     <string name="delete" msgid="6098684844021697789">"حذف"</string>
