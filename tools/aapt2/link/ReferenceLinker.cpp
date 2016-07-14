@@ -288,7 +288,7 @@ namespace {
 
 struct EmptyDeclStack : public xml::IPackageDeclStack {
     Maybe<xml::ExtractedPackage> transformPackageAlias(
-            const StringPiece16& alias, const StringPiece16& localPackage) const override {
+            const StringPiece& alias, const StringPiece& localPackage) const override {
         if (alias.empty()) {
             return xml::ExtractedPackage{ localPackage.toString(), true /* private */ };
         }

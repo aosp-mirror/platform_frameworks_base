@@ -19,7 +19,6 @@
 
 #include "NameMangler.h"
 #include "util/Util.h"
-
 #include "process/IResourceTableConsumer.h"
 #include "process/SymbolTable.h"
 #include "test/Common.h"
@@ -40,7 +39,7 @@ public:
         return &mDiagnostics;
     }
 
-    const std::u16string& getCompilationPackage() override {
+    const std::string& getCompilationPackage() override {
         assert(mCompilationPackage && "package name not set");
         return mCompilationPackage.value();
     }
@@ -65,7 +64,7 @@ public:
 private:
     friend class ContextBuilder;
 
-    Maybe<std::u16string> mCompilationPackage;
+    Maybe<std::string> mCompilationPackage;
     Maybe<uint8_t> mPackageId;
     StdErrDiagnostics mDiagnostics;
     SymbolTable mSymbols;
@@ -78,7 +77,7 @@ private:
     std::unique_ptr<Context> mContext = std::unique_ptr<Context>(new Context());
 
 public:
-    ContextBuilder& setCompilationPackage(const StringPiece16& package) {
+    ContextBuilder& setCompilationPackage(const StringPiece& package) {
         mContext->mCompilationPackage = package.toString();
         return *this;
     }
@@ -110,7 +109,7 @@ public:
 
 class StaticSymbolSourceBuilder {
 public:
-    StaticSymbolSourceBuilder& addPublicSymbol(const StringPiece16& name, ResourceId id,
+    StaticSymbolSourceBuilder& addPublicSymbol(const StringPiece& name, ResourceId id,
                                                std::unique_ptr<Attribute> attr = {}) {
         std::unique_ptr<SymbolTable::Symbol> symbol = util::make_unique<SymbolTable::Symbol>(
                 id, std::move(attr), true);
@@ -120,7 +119,7 @@ public:
         return *this;
     }
 
-    StaticSymbolSourceBuilder& addSymbol(const StringPiece16& name, ResourceId id,
+    StaticSymbolSourceBuilder& addSymbol(const StringPiece& name, ResourceId id,
                                          std::unique_ptr<Attribute> attr = {}) {
         std::unique_ptr<SymbolTable::Symbol> symbol = util::make_unique<SymbolTable::Symbol>(
                 id, std::move(attr), false);

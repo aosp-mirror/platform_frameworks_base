@@ -80,28 +80,28 @@ public:
     // These are available for all nodes.
     //
 
-    const std::u16string& getComment() const;
+    const std::string& getComment() const;
     size_t getLineNumber() const;
     size_t getDepth() const;
 
     /**
      * Returns the character data for a Text event.
      */
-    const std::u16string& getText() const;
+    const std::string& getText() const;
 
     //
     // Namespace prefix and URI are available for StartNamespace and EndNamespace.
     //
 
-    const std::u16string& getNamespacePrefix() const;
-    const std::u16string& getNamespaceUri() const;
+    const std::string& getNamespacePrefix() const;
+    const std::string& getNamespaceUri() const;
 
     //
     // These are available for StartElement and EndElement.
     //
 
-    const std::u16string& getElementNamespace() const;
-    const std::u16string& getElementName() const;
+    const std::string& getElementNamespace() const;
+    const std::string& getElementName() const;
 
     /*
      * Uses the current stack of namespaces to resolve the package. Eg:
@@ -115,7 +115,7 @@ public:
      * 'package' will be set to 'defaultPackage'.
      */
     Maybe<ExtractedPackage> transformPackageAlias(
-            const StringPiece16& alias, const StringPiece16& localPackage) const override;
+            const StringPiece& alias, const StringPiece& localPackage) const override;
 
     //
     // Remaining methods are for retrieving information about attributes
@@ -126,9 +126,9 @@ public:
     //
 
     struct Attribute {
-        std::u16string namespaceUri;
-        std::u16string name;
-        std::u16string value;
+        std::string namespaceUri;
+        std::string name;
+        std::string value;
 
         int compare(const Attribute& rhs) const;
         bool operator<(const Attribute& rhs) const;
@@ -141,7 +141,7 @@ public:
     const_iterator beginAttributes() const;
     const_iterator endAttributes() const;
     size_t getAttributeCount() const;
-    const_iterator findAttribute(StringPiece16 namespaceUri, StringPiece16 name) const;
+    const_iterator findAttribute(StringPiece namespaceUri, StringPiece name) const;
 
 private:
     static void XMLCALL startNamespaceHandler(void* userData, const char* prefix, const char* uri);
@@ -155,8 +155,8 @@ private:
         Event event;
         size_t lineNumber;
         size_t depth;
-        std::u16string data1;
-        std::u16string data2;
+        std::string data1;
+        std::string data2;
         std::vector<Attribute> attributes;
     };
 
@@ -165,12 +165,12 @@ private:
     char mBuffer[16384];
     std::queue<EventData> mEventQueue;
     std::string mLastError;
-    const std::u16string mEmpty;
+    const std::string mEmpty;
     size_t mDepth;
-    std::stack<std::u16string> mNamespaceUris;
+    std::stack<std::string> mNamespaceUris;
 
     struct PackageDecl {
-        std::u16string prefix;
+        std::string prefix;
         ExtractedPackage package;
     };
     std::vector<PackageDecl> mPackageAliases;
@@ -179,13 +179,13 @@ private:
 /**
  * Finds the attribute in the current element within the global namespace.
  */
-Maybe<StringPiece16> findAttribute(const XmlPullParser* parser, const StringPiece16& name);
+Maybe<StringPiece> findAttribute(const XmlPullParser* parser, const StringPiece& name);
 
 /**
  * Finds the attribute in the current element within the global namespace. The attribute's value
  * must not be the empty string.
  */
-Maybe<StringPiece16> findNonEmptyAttribute(const XmlPullParser* parser, const StringPiece16& name);
+Maybe<StringPiece> findNonEmptyAttribute(const XmlPullParser* parser, const StringPiece& name);
 
 //
 // Implementation
@@ -270,12 +270,12 @@ inline bool XmlPullParser::Attribute::operator!=(const Attribute& rhs) const {
     return compare(rhs) != 0;
 }
 
-inline XmlPullParser::const_iterator XmlPullParser::findAttribute(StringPiece16 namespaceUri,
-                                                                  StringPiece16 name) const {
+inline XmlPullParser::const_iterator XmlPullParser::findAttribute(StringPiece namespaceUri,
+                                                                  StringPiece name) const {
     const auto endIter = endAttributes();
     const auto iter = std::lower_bound(beginAttributes(), endIter,
-            std::pair<StringPiece16, StringPiece16>(namespaceUri, name),
-            [](const Attribute& attr, const std::pair<StringPiece16, StringPiece16>& rhs) -> bool {
+            std::pair<StringPiece, StringPiece>(namespaceUri, name),
+            [](const Attribute& attr, const std::pair<StringPiece, StringPiece>& rhs) -> bool {
                 int cmp = attr.namespaceUri.compare(0, attr.namespaceUri.size(),
                         rhs.first.data(), rhs.first.size());
                 if (cmp < 0) return true;

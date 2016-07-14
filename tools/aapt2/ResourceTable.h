@@ -48,7 +48,7 @@ enum class SymbolState {
 struct Symbol {
     SymbolState state = SymbolState::kUndefined;
     Source source;
-    std::u16string comment;
+    std::string comment;
 };
 
 class ResourceConfigValue {
@@ -86,7 +86,7 @@ public:
      * this determines the order of this resource
      * when doing lookups.
      */
-    const std::u16string name;
+    const std::string name;
 
     /**
      * The entry ID for this resource.
@@ -103,7 +103,7 @@ public:
      */
     std::vector<std::unique_ptr<ResourceConfigValue>> values;
 
-    ResourceEntry(const StringPiece16& name) : name(name.toString()) { }
+    ResourceEntry(const StringPiece& name) : name(name.toString()) { }
 
     ResourceConfigValue* findValue(const ConfigDescription& config);
     ResourceConfigValue* findValue(const ConfigDescription& config, const StringPiece& product);
@@ -147,8 +147,8 @@ public:
 
     explicit ResourceTableType(const ResourceType type) : type(type) { }
 
-    ResourceEntry* findEntry(const StringPiece16& name);
-    ResourceEntry* findOrCreateEntry(const StringPiece16& name);
+    ResourceEntry* findEntry(const StringPiece& name);
+    ResourceEntry* findOrCreateEntry(const StringPiece& name);
 
 private:
     DISALLOW_COPY_AND_ASSIGN(ResourceTableType);
@@ -165,7 +165,7 @@ class ResourceTablePackage {
 public:
     PackageType type = PackageType::App;
     Maybe<uint8_t> id;
-    std::u16string name;
+    std::string name;
 
     std::vector<std::unique_ptr<ResourceTableType>> types;
 
@@ -209,13 +209,13 @@ public:
     bool addFileReference(const ResourceNameRef& name,
                               const ConfigDescription& config,
                               const Source& source,
-                              const StringPiece16& path,
+                              const StringPiece& path,
                               IDiagnostics* diag);
 
     bool addFileReferenceAllowMangled(const ResourceNameRef& name,
                                       const ConfigDescription& config,
                                       const Source& source,
-                                      const StringPiece16& path,
+                                      const StringPiece& path,
                                       io::IFile* file,
                                       IDiagnostics* diag);
 
@@ -276,21 +276,21 @@ public:
      * exist. The empty string is a valid package and typically is used to represent the
      * 'current' package before it is known to the ResourceTable.
      */
-    ResourceTablePackage* findPackage(const StringPiece16& name);
+    ResourceTablePackage* findPackage(const StringPiece& name);
 
     ResourceTablePackage* findPackageById(uint8_t id);
 
-    ResourceTablePackage* createPackage(const StringPiece16& name, Maybe<uint8_t> id = {});
+    ResourceTablePackage* createPackage(const StringPiece& name, Maybe<uint8_t> id = {});
 
 private:
-    ResourceTablePackage* findOrCreatePackage(const StringPiece16& name);
+    ResourceTablePackage* findOrCreatePackage(const StringPiece& name);
 
     bool addFileReferenceImpl(const ResourceNameRef& name,
                               const ConfigDescription& config,
                               const Source& source,
-                              const StringPiece16& path,
+                              const StringPiece& path,
                               io::IFile* file,
-                              const char16_t* validChars,
+                              const char* validChars,
                               IDiagnostics* diag);
 
     bool addResourceImpl(const ResourceNameRef& name,
@@ -298,14 +298,14 @@ private:
                          const ConfigDescription& config,
                          const StringPiece& product,
                          std::unique_ptr<Value> value,
-                         const char16_t* validChars,
+                         const char* validChars,
                          std::function<int(Value*,Value*)> conflictResolver,
                          IDiagnostics* diag);
 
     bool setSymbolStateImpl(const ResourceNameRef& name,
                             ResourceId resId,
                             const Symbol& symbol,
-                            const char16_t* validChars,
+                            const char* validChars,
                             IDiagnostics* diag);
 
     DISALLOW_COPY_AND_ASSIGN(ResourceTable);

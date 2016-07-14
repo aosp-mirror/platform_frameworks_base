@@ -101,7 +101,7 @@ void Flags::usage(const StringPiece& command, std::ostream* out) {
         // Split the description by newlines and write out the argument (which is empty after
         // the first line) followed by the description line. This will make sure that multiline
         // descriptions are still right justified and aligned.
-        for (StringPiece line : util::tokenize<char>(flag.description, '\n')) {
+        for (StringPiece line : util::tokenize(flag.description, '\n')) {
             *out << " " << std::setw(kWidth) << std::left << argLine << line << "\n";
             argLine = " ";
         }

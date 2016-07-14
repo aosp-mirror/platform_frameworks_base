@@ -16,49 +16,45 @@
 
 #include "ResourceTable.h"
 #include "proto/ProtoSerialize.h"
-#include "test/Builders.h"
-#include "test/Common.h"
-#include "test/Context.h"
-
-#include <gtest/gtest.h>
+#include "test/Test.h"
 
 namespace aapt {
 
 TEST(TableProtoSerializer, SerializeSinglePackage) {
     std::unique_ptr<IAaptContext> context = test::ContextBuilder().build();
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
-            .setPackageId(u"com.app.a", 0x7f)
-            .addFileReference(u"@com.app.a:layout/main", ResourceId(0x7f020000),
-                              u"res/layout/main.xml")
-            .addReference(u"@com.app.a:layout/other", ResourceId(0x7f020001),
-                          u"@com.app.a:layout/main")
-            .addString(u"@com.app.a:string/text", {}, u"hi")
-            .addValue(u"@com.app.a:id/foo", {}, util::make_unique<Id>())
+            .setPackageId("com.app.a", 0x7f)
+            .addFileReference("@com.app.a:layout/main", ResourceId(0x7f020000),
+                              "res/layout/main.xml")
+            .addReference("@com.app.a:layout/other", ResourceId(0x7f020001),
+                          "@com.app.a:layout/main")
+            .addString("@com.app.a:string/text", {}, "hi")
+            .addValue("@com.app.a:id/foo", {}, util::make_unique<Id>())
             .build();
 
     Symbol publicSymbol;
     publicSymbol.state = SymbolState::kPublic;
-    ASSERT_TRUE(table->setSymbolState(test::parseNameOrDie(u"@com.app.a:layout/main"),
+    ASSERT_TRUE(table->setSymbolState(test::parseNameOrDie("@com.app.a:layout/main"),
                                       ResourceId(0x7f020000),
                                       publicSymbol, context->getDiagnostics()));
 
-    Id* id = test::getValue<Id>(table.get(), u"@com.app.a:id/foo");
+    Id* id = test::getValue<Id>(table.get(), "@com.app.a:id/foo");
     ASSERT_NE(nullptr, id);
 
     // Make a plural.
     std::unique_ptr<Plural> plural = util::make_unique<Plural>();
-    plural->values[Plural::One] = util::make_unique<String>(table->stringPool.makeRef(u"one"));
-    ASSERT_TRUE(table->addResource(test::parseNameOrDie(u"@com.app.a:plurals/hey"),
-                                   ConfigDescription{}, std::string(), std::move(plural),
+    plural->values[Plural::One] = util::make_unique<String>(table->stringPool.makeRef("one"));
+    ASSERT_TRUE(table->addResource(test::parseNameOrDie("@com.app.a:plurals/hey"),
+                                   ConfigDescription{}, {}, std::move(plural),
                                    context->getDiagnostics()));
 
     // Make a resource with different products.
-    ASSERT_TRUE(table->addResource(test::parseNameOrDie(u"@com.app.a:integer/one"),
-                                   test::parseConfigOrDie("land"), std::string(),
+    ASSERT_TRUE(table->addResource(test::parseNameOrDie("@com.app.a:integer/one"),
+                                   test::parseConfigOrDie("land"), {},
                                    test::buildPrimitive(android::Res_value::TYPE_INT_DEC, 123u),
                                    context->getDiagnostics()));
-    ASSERT_TRUE(table->addResource(test::parseNameOrDie(u"@com.app.a:integer/one"),
-                                       test::parseConfigOrDie("land"), std::string("tablet"),
+    ASSERT_TRUE(table->addResource(test::parseNameOrDie("@com.app.a:integer/one"),
+                                       test::parseConfigOrDie("land"), "tablet",
                                        test::buildPrimitive(android::Res_value::TYPE_INT_DEC, 321u),
                                        context->getDiagnostics()));
 
@@ -66,10 +62,10 @@ TEST(TableProtoSerializer, SerializeSinglePackage) {
     // The reference should point to a resource outside of this table to test that both
     // name and id get serialized.
     Reference expectedRef;
-    expectedRef.name = test::parseNameOrDie(u"@android:layout/main");
+    expectedRef.name = test::parseNameOrDie("@android:layout/main");
     expectedRef.id = ResourceId(0x01020000);
-    ASSERT_TRUE(table->addResource(test::parseNameOrDie(u"@com.app.a:layout/abc"),
-                                   ConfigDescription::defaultConfig(), std::string(),
+    ASSERT_TRUE(table->addResource(test::parseNameOrDie("@com.app.a:layout/abc"),
+                                   ConfigDescription::defaultConfig(), {},
                                    util::make_unique<Reference>(expectedRef),
                                    context->getDiagnostics()));
 
@@ -81,28 +77,28 @@ TEST(TableProtoSerializer, SerializeSinglePackage) {
                                                                      context->getDiagnostics());
     ASSERT_NE(nullptr, newTable);
 
-    Id* newId = test::getValue<Id>(newTable.get(), u"@com.app.a:id/foo");
+    Id* newId = test::getValue<Id>(newTable.get(), "@com.app.a:id/foo");
     ASSERT_NE(nullptr, newId);
     EXPECT_EQ(id->isWeak(), newId->isWeak());
 
     Maybe<ResourceTable::SearchResult> result = newTable->findResource(
-            test::parseNameOrDie(u"@com.app.a:layout/main"));
+            test::parseNameOrDie("@com.app.a:layout/main"));
     AAPT_ASSERT_TRUE(result);
     EXPECT_EQ(SymbolState::kPublic, result.value().type->symbolStatus.state);
     EXPECT_EQ(SymbolState::kPublic, result.value().entry->symbolStatus.state);
 
     // Find the product-dependent values
     BinaryPrimitive* prim = test::getValueForConfigAndProduct<BinaryPrimitive>(
-            newTable.get(), u"@com.app.a:integer/one", test::parseConfigOrDie("land"), "");
+            newTable.get(), "@com.app.a:integer/one", test::parseConfigOrDie("land"), "");
     ASSERT_NE(nullptr, prim);
     EXPECT_EQ(123u, prim->value.data);
 
     prim = test::getValueForConfigAndProduct<BinaryPrimitive>(
-            newTable.get(), u"@com.app.a:integer/one", test::parseConfigOrDie("land"), "tablet");
+            newTable.get(), "@com.app.a:integer/one", test::parseConfigOrDie("land"), "tablet");
     ASSERT_NE(nullptr, prim);
     EXPECT_EQ(321u, prim->value.data);
 
-    Reference* actualRef = test::getValue<Reference>(newTable.get(), u"@com.app.a:layout/abc");
+    Reference* actualRef = test::getValue<Reference>(newTable.get(), "@com.app.a:layout/abc");
     ASSERT_NE(nullptr, actualRef);
     AAPT_ASSERT_TRUE(actualRef->name);
     AAPT_ASSERT_TRUE(actualRef->id);
@@ -115,9 +111,9 @@ TEST(TableProtoSerializer, SerializeFileHeader) {
 
     ResourceFile f;
     f.config = test::parseConfigOrDie("hdpi-v9");
-    f.name = test::parseNameOrDie(u"@com.app.a:layout/main");
+    f.name = test::parseNameOrDie("@com.app.a:layout/main");
     f.source.path = "res/layout-hdpi-v9/main.xml";
-    f.exportedSymbols.push_back(SourcedResourceName{ test::parseNameOrDie(u"@+id/unchecked"), 23u });
+    f.exportedSymbols.push_back(SourcedResourceName{ test::parseNameOrDie("@+id/unchecked"), 23u });
 
     const std::string expectedData = "1234";
 
@@ -136,7 +132,7 @@ TEST(TableProtoSerializer, SerializeFileHeader) {
     const pb::CompiledFile* newPbFile = inFileStream.CompiledFile();
     ASSERT_NE(nullptr, newPbFile);
 
-    std::unique_ptr<ResourceFile> file = deserializeCompiledFileFromPb(*newPbFile, Source{ "test" },
+    std::unique_ptr<ResourceFile> file = deserializeCompiledFileFromPb(*newPbFile, Source("test"),
                                                                        context->getDiagnostics());
     ASSERT_NE(nullptr, file);
 
@@ -145,7 +141,7 @@ TEST(TableProtoSerializer, SerializeFileHeader) {
     EXPECT_EQ(0u, reinterpret_cast<uintptr_t>(inFileStream.data()) & 0x03);
 
     ASSERT_EQ(1u, file->exportedSymbols.size());
-    EXPECT_EQ(test::parseNameOrDie(u"@+id/unchecked"), file->exportedSymbols[0].name);
+    EXPECT_EQ(test::parseNameOrDie("@+id/unchecked"), file->exportedSymbols[0].name);
 }
 
 TEST(TableProtoSerializer, DeserializeCorruptHeaderSafely) {

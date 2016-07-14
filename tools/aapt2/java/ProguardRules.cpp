@@ -43,7 +43,7 @@ public:
                     node->namespaceUri);
             if (maybePackage) {
                 // This is a custom view, let's figure out the class name from this.
-                std::u16string package = maybePackage.value().package + u"." + node->name;
+                std::string package = maybePackage.value().package + "." + node->name;
                 if (util::isJavaClassName(package)) {
                     addClass(node->lineNumber, package);
                 }
@@ -58,11 +58,11 @@ public:
     }
 
 protected:
-    void addClass(size_t lineNumber, const std::u16string& className) {
+    void addClass(size_t lineNumber, const std::string& className) {
         mKeepSet->addClass(Source(mSource.path, lineNumber), className);
     }
 
-    void addMethod(size_t lineNumber, const std::u16string& methodName) {
+    void addMethod(size_t lineNumber, const std::string& methodName) {
         mKeepSet->addMethod(Source(mSource.path, lineNumber), methodName);
     }
 
@@ -79,19 +79,19 @@ struct LayoutVisitor : public BaseVisitor {
         bool checkClass = false;
         bool checkName = false;
         if (node->namespaceUri.empty()) {
-            checkClass = node->name == u"view" || node->name == u"fragment";
+            checkClass = node->name == "view" || node->name == "fragment";
         } else if (node->namespaceUri == xml::kSchemaAndroid) {
-            checkName = node->name == u"fragment";
+            checkName = node->name == "fragment";
         }
 
         for (const auto& attr : node->attributes) {
-            if (checkClass && attr.namespaceUri.empty() && attr.name == u"class" &&
+            if (checkClass && attr.namespaceUri.empty() && attr.name == "class" &&
                     util::isJavaClassName(attr.value)) {
                 addClass(node->lineNumber, attr.value);
             } else if (checkName && attr.namespaceUri == xml::kSchemaAndroid &&
-                    attr.name == u"name" && util::isJavaClassName(attr.value)) {
+                    attr.name == "name" && util::isJavaClassName(attr.value)) {
                 addClass(node->lineNumber, attr.value);
-            } else if (attr.namespaceUri == xml::kSchemaAndroid && attr.name == u"onClick") {
+            } else if (attr.namespaceUri == xml::kSchemaAndroid && attr.name == "onClick") {
                 addMethod(node->lineNumber, attr.value);
             }
         }
@@ -107,11 +107,11 @@ struct XmlResourceVisitor : public BaseVisitor {
     virtual void visit(xml::Element* node) override {
         bool checkFragment = false;
         if (node->namespaceUri.empty()) {
-            checkFragment = node->name == u"PreferenceScreen" || node->name == u"header";
+            checkFragment = node->name == "PreferenceScreen" || node->name == "header";
         }
 
         if (checkFragment) {
-            xml::Attribute* attr = node->findAttribute(xml::kSchemaAndroid, u"fragment");
+            xml::Attribute* attr = node->findAttribute(xml::kSchemaAndroid, "fragment");
             if (attr && util::isJavaClassName(attr->value)) {
                 addClass(node->lineNumber, attr->value);
             }
@@ -127,9 +127,9 @@ struct TransitionVisitor : public BaseVisitor {
 
     virtual void visit(xml::Element* node) override {
         bool checkClass = node->namespaceUri.empty() &&
-                (node->name == u"transition" || node->name == u"pathMotion");
+                (node->name == "transition" || node->name == "pathMotion");
         if (checkClass) {
-            xml::Attribute* attr = node->findAttribute({}, u"class");
+            xml::Attribute* attr = node->findAttribute({}, "class");
             if (attr && util::isJavaClassName(attr->value)) {
                 addClass(node->lineNumber, attr->value);
             }
@@ -147,50 +147,50 @@ struct ManifestVisitor : public BaseVisitor {
     virtual void visit(xml::Element* node) override {
         if (node->namespaceUri.empty()) {
             bool getName = false;
-            if (node->name == u"manifest") {
-                xml::Attribute* attr = node->findAttribute({}, u"package");
+            if (node->name == "manifest") {
+                xml::Attribute* attr = node->findAttribute({}, "package");
                 if (attr) {
                     mPackage = attr->value;
                 }
-            } else if (node->name == u"application") {
+            } else if (node->name == "application") {
                 getName = true;
-                xml::Attribute* attr = node->findAttribute(xml::kSchemaAndroid, u"backupAgent");
+                xml::Attribute* attr = node->findAttribute(xml::kSchemaAndroid, "backupAgent");
                 if (attr) {
-                    Maybe<std::u16string> result = util::getFullyQualifiedClassName(mPackage,
-                                                                                    attr->value);
+                    Maybe<std::string> result = util::getFullyQualifiedClassName(mPackage,
+                                                                                 attr->value);
                     if (result) {
                         addClass(node->lineNumber, result.value());
                     }
                 }
                 if (mMainDexOnly) {
                     xml::Attribute* defaultProcess = node->findAttribute(xml::kSchemaAndroid,
-                                                                         u"process");
+                                                                         "process");
                     if (defaultProcess) {
                         mDefaultProcess = defaultProcess->value;
                     }
                 }
-            } else if (node->name == u"activity" || node->name == u"service" ||
-                    node->name == u"receiver" || node->name == u"provider" ||
-                    node->name == u"instrumentation") {
+            } else if (node->name == "activity" || node->name == "service" ||
+                    node->name == "receiver" || node->name == "provider" ||
+                    node->name == "instrumentation") {
                 getName = true;
             }
 
             if (getName) {
-                xml::Attribute* attr = node->findAttribute(xml::kSchemaAndroid, u"name");
+                xml::Attribute* attr = node->findAttribute(xml::kSchemaAndroid, "name");
                 getName = attr != nullptr;
 
                 if (getName && mMainDexOnly) {
                     xml::Attribute* componentProcess = node->findAttribute(xml::kSchemaAndroid,
-                                                                           u"process");
+                                                                           "process");
 
-                    const std::u16string& process = componentProcess ? componentProcess->value
-                                                                     : mDefaultProcess;
-                    getName = !process.empty() && process[0] != u':';
+                    const std::string& process = componentProcess ? componentProcess->value
+                            : mDefaultProcess;
+                    getName = !process.empty() && process[0] != ':';
                 }
 
                 if (getName) {
-                    Maybe<std::u16string> result = util::getFullyQualifiedClassName(mPackage,
-                                                                                    attr->value);
+                    Maybe<std::string> result = util::getFullyQualifiedClassName(mPackage,
+                                                                                 attr->value);
                     if (result) {
                         addClass(node->lineNumber, result.value());
                     }
@@ -201,9 +201,9 @@ struct ManifestVisitor : public BaseVisitor {
     }
 
 private:
-    std::u16string mPackage;
+    std::string mPackage;
     const bool mMainDexOnly;
-    std::u16string mDefaultProcess;
+    std::string mDefaultProcess;
 };
 
 bool collectProguardRulesForManifest(const Source& source, xml::XmlResource* res,

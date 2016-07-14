@@ -31,12 +31,12 @@ struct AppInfo {
     /**
      * App's package name.
      */
-    std::u16string package;
+    std::string package;
 
     /**
      * The App's minimum SDK version.
      */
-    Maybe<std::u16string> minSdkVersion;
+    Maybe<std::string> minSdkVersion;
 };
 
 } // namespace aapt

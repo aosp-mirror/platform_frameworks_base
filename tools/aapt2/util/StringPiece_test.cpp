@@ -34,16 +34,16 @@ TEST(StringPieceTest, CompareNonNullTerminatedPiece) {
 }
 
 TEST(StringPieceTest, PiecesHaveCorrectSortOrder) {
-    std::u16string testing(u"testing");
-    std::u16string banana(u"banana");
-    std::u16string car(u"car");
+    std::string testing("testing");
+    std::string banana("banana");
+    std::string car("car");
 
-    EXPECT_TRUE(StringPiece16(testing) > banana);
-    EXPECT_TRUE(StringPiece16(testing) > car);
-    EXPECT_TRUE(StringPiece16(banana) < testing);
-    EXPECT_TRUE(StringPiece16(banana) < car);
-    EXPECT_TRUE(StringPiece16(car) < testing);
-    EXPECT_TRUE(StringPiece16(car) > banana);
+    EXPECT_TRUE(StringPiece(testing) > banana);
+    EXPECT_TRUE(StringPiece(testing) > car);
+    EXPECT_TRUE(StringPiece(banana) < testing);
+    EXPECT_TRUE(StringPiece(banana) < car);
+    EXPECT_TRUE(StringPiece(car) < testing);
+    EXPECT_TRUE(StringPiece(car) > banana);
 }
 
 TEST(StringPieceTest, PiecesHaveCorrectSortOrderUtf8) {

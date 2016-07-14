@@ -30,13 +30,13 @@
 namespace aapt {
 
 struct Span {
-    std::u16string name;
+    std::string name;
     uint32_t firstChar;
     uint32_t lastChar;
 };
 
 struct StyleString {
-    std::u16string str;
+    std::string str;
     std::vector<Span> spans;
 };
 
@@ -56,8 +56,8 @@ public:
         ~Ref();
 
         Ref& operator=(const Ref& rhs);
-        const std::u16string* operator->() const;
-        const std::u16string& operator*() const;
+        const std::string* operator->() const;
+        const std::string& operator*() const;
 
         size_t getIndex() const;
         const Context& getContext() const;
@@ -95,7 +95,7 @@ public:
 
     class Entry {
     public:
-        std::u16string value;
+        std::string value;
         Context context;
         size_t index;
 
@@ -136,14 +136,14 @@ public:
      * Adds a string to the pool, unless it already exists. Returns
      * a reference to the string in the pool.
      */
-    Ref makeRef(const StringPiece16& str);
+    Ref makeRef(const StringPiece& str);
 
     /**
      * Adds a string to the pool, unless it already exists, with a context
      * object that can be used when sorting the string pool. Returns
      * a reference to the string in the pool.
      */
-    Ref makeRef(const StringPiece16& str, const Context& context);
+    Ref makeRef(const StringPiece& str, const Context& context);
 
     /**
      * Adds a style to the string pool and returns a reference to it.
@@ -195,11 +195,11 @@ private:
 
     static bool flatten(BigBuffer* out, const StringPool& pool, bool utf8);
 
-    Ref makeRefImpl(const StringPiece16& str, const Context& context, bool unique);
+    Ref makeRefImpl(const StringPiece& str, const Context& context, bool unique);
 
     std::vector<std::unique_ptr<Entry>> mStrings;
     std::vector<std::unique_ptr<StyleEntry>> mStyles;
-    std::unordered_multimap<StringPiece16, Entry*> mIndexedStrings;
+    std::unordered_multimap<StringPiece, Entry*> mIndexedStrings;
 };
 
 //

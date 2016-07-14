@@ -37,30 +37,18 @@ std::vector<std::string> splitAndLowercase(const StringPiece& str, char sep);
 /**
  * Returns true if the string starts with prefix.
  */
-template <typename T>
-bool stringStartsWith(const BasicStringPiece<T>& str, const BasicStringPiece<T>& prefix) {
-    if (str.size() < prefix.size()) {
-        return false;
-    }
-    return str.substr(0, prefix.size()) == prefix;
-}
+bool stringStartsWith(const StringPiece& str, const StringPiece& prefix);
 
 /**
  * Returns true if the string ends with suffix.
  */
-template <typename T>
-bool stringEndsWith(const BasicStringPiece<T>& str, const BasicStringPiece<T>& suffix) {
-    if (str.size() < suffix.size()) {
-        return false;
-    }
-    return str.substr(str.size() - suffix.size(), suffix.size()) == suffix;
-}
+bool stringEndsWith(const StringPiece& str, const StringPiece& suffix);
 
 /**
  * Creates a new StringPiece16 that points to a substring
  * of the original string without leading or trailing whitespace.
  */
-StringPiece16 trimWhitespace(const StringPiece16& str);
+StringPiece trimWhitespace(const StringPiece& str);
 
 StringPiece trimWhitespace(const StringPiece& str);
 
@@ -76,18 +64,18 @@ inline bool isspace16(char16_t c) {
  * Returns an iterator to the first character that is not alpha-numeric and that
  * is not in the allowedChars set.
  */
-StringPiece16::const_iterator findNonAlphaNumericAndNotInSet(const StringPiece16& str,
-        const StringPiece16& allowedChars);
+StringPiece::const_iterator findNonAlphaNumericAndNotInSet(const StringPiece& str,
+                                                           const StringPiece& allowedChars);
 
 /**
  * Tests that the string is a valid Java class name.
  */
-bool isJavaClassName(const StringPiece16& str);
+bool isJavaClassName(const StringPiece& str);
 
 /**
  * Tests that the string is a valid Java package name.
  */
-bool isJavaPackageName(const StringPiece16& str);
+bool isJavaPackageName(const StringPiece& str);
 
 /**
  * Converts the class name to a fully qualified class name from the given `package`. Ex:
@@ -97,9 +85,8 @@ bool isJavaPackageName(const StringPiece16& str);
  * .a.b         --> package.a.b
  * asdf.adsf    --> asdf.adsf
  */
-Maybe<std::u16string> getFullyQualifiedClassName(const StringPiece16& package,
-                                                 const StringPiece16& className);
-
+Maybe<std::string> getFullyQualifiedClassName(const StringPiece& package,
+                                              const StringPiece& className);
 
 /**
  * Makes a std::unique_ptr<> with the template parameter inferred by the compiler.
@@ -147,25 +134,17 @@ inline ::std::function<::std::ostream&(::std::ostream&)> formatSize(size_t size)
 }
 
 /**
- * Helper method to extract a string from a StringPool.
+ * Helper method to extract a UTF-16 string from a StringPool. If the string is stored as UTF-8,
+ * the conversion to UTF-16 happens within ResStringPool.
  */
-inline StringPiece16 getString(const android::ResStringPool& pool, size_t idx) {
-    size_t len;
-    const char16_t* str = pool.stringAt(idx, &len);
-    if (str != nullptr) {
-        return StringPiece16(str, len);
-    }
-    return StringPiece16();
-}
+StringPiece16 getString16(const android::ResStringPool& pool, size_t idx);
 
-inline StringPiece getString8(const android::ResStringPool& pool, size_t idx) {
-    size_t len;
-    const char* str = pool.string8At(idx, &len);
-    if (str != nullptr) {
-        return StringPiece(str, len);
-    }
-    return StringPiece();
-}
+/**
+ * Helper method to extract a UTF-8 string from a StringPool. If the string is stored as UTF-16,
+ * the conversion from UTF-16 to UTF-8 does not happen in ResStringPool and is done by this method,
+ * which maintains no state or cache. This means we must return an std::string copy.
+ */
+std::string getString(const android::ResStringPool& pool, size_t idx);
 
 /**
  * Checks that the Java string format contains no non-positional arguments (arguments without
@@ -173,24 +152,24 @@ inline StringPiece getString8(const android::ResStringPool& pool, size_t idx) {
  * because translations may rearrange the order of the arguments in the string, which will
  * break the string interpolation.
  */
-bool verifyJavaStringFormat(const StringPiece16& str);
+bool verifyJavaStringFormat(const StringPiece& str);
 
 class StringBuilder {
 public:
-    StringBuilder& append(const StringPiece16& str);
-    const std::u16string& str() const;
+    StringBuilder& append(const StringPiece& str);
+    const std::string& str() const;
     const std::string& error() const;
     operator bool() const;
 
 private:
-    std::u16string mStr;
+    std::string mStr;
     bool mQuote = false;
     bool mTrailingSpace = false;
     bool mLastCharWasEscape = false;
     std::string mError;
 };
 
-inline const std::u16string& StringBuilder::str() const {
+inline const std::string& StringBuilder::str() const {
     return mStr;
 }
 
@@ -206,7 +185,7 @@ inline StringBuilder::operator bool() const {
  * Converts a UTF8 string to a UTF16 string.
  */
 std::u16string utf8ToUtf16(const StringPiece& utf8);
-std::string utf16ToUtf8(const StringPiece16& utf8);
+std::string utf16ToUtf8(const StringPiece16& utf16);
 
 /**
  * Writes the entire BigBuffer to the output stream.
@@ -222,7 +201,6 @@ std::unique_ptr<uint8_t[]> copy(const BigBuffer& buffer);
  * A Tokenizer implemented as an iterable collection. It does not allocate
  * any memory on the heap nor use standard containers.
  */
-template <typename Char>
 class Tokenizer {
 public:
     class iterator {
@@ -231,96 +209,41 @@ public:
         iterator& operator=(const iterator&) = default;
 
         iterator& operator++();
-        BasicStringPiece<Char> operator*();
+
+        StringPiece operator*() {
+            return mToken;
+        }
         bool operator==(const iterator& rhs) const;
         bool operator!=(const iterator& rhs) const;
 
     private:
-        friend class Tokenizer<Char>;
+        friend class Tokenizer;
 
-        iterator(BasicStringPiece<Char> s, Char sep, BasicStringPiece<Char> tok, bool end);
+        iterator(StringPiece s, char sep, StringPiece tok, bool end);
 
-        BasicStringPiece<Char> mStr;
-        Char mSeparator;
-        BasicStringPiece<Char> mToken;
+        StringPiece mStr;
+        char mSeparator;
+        StringPiece mToken;
         bool mEnd;
     };
 
-    Tokenizer(BasicStringPiece<Char> str, Char sep);
-    iterator begin();
-    iterator end();
+    Tokenizer(StringPiece str, char sep);
+
+    iterator begin() {
+        return mBegin;
+    }
+
+    iterator end() {
+        return mEnd;
+    }
 
 private:
     const iterator mBegin;
     const iterator mEnd;
 };
 
-template <typename Char>
-inline Tokenizer<Char> tokenize(BasicStringPiece<Char> str, Char sep) {
-    return Tokenizer<Char>(str, sep);
-}
-
-template <typename Char>
-typename Tokenizer<Char>::iterator& Tokenizer<Char>::iterator::operator++() {
-    const Char* start = mToken.end();
-    const Char* end = mStr.end();
-    if (start == end) {
-        mEnd = true;
-        mToken.assign(mToken.end(), 0);
-        return *this;
-    }
-
-    start += 1;
-    const Char* current = start;
-    while (current != end) {
-        if (*current == mSeparator) {
-            mToken.assign(start, current - start);
-            return *this;
-        }
-        ++current;
-    }
-    mToken.assign(start, end - start);
-    return *this;
-}
-
-template <typename Char>
-inline BasicStringPiece<Char> Tokenizer<Char>::iterator::operator*() {
-    return mToken;
-}
-
-template <typename Char>
-inline bool Tokenizer<Char>::iterator::operator==(const iterator& rhs) const {
-    // We check equality here a bit differently.
-    // We need to know that the addresses are the same.
-    return mToken.begin() == rhs.mToken.begin() && mToken.end() == rhs.mToken.end() &&
-            mEnd == rhs.mEnd;
-}
-
-template <typename Char>
-inline bool Tokenizer<Char>::iterator::operator!=(const iterator& rhs) const {
-    return !(*this == rhs);
-}
-
-template <typename Char>
-inline Tokenizer<Char>::iterator::iterator(BasicStringPiece<Char> s, Char sep,
-                                           BasicStringPiece<Char> tok, bool end) :
-        mStr(s), mSeparator(sep), mToken(tok), mEnd(end) {
-}
-
-template <typename Char>
-inline typename Tokenizer<Char>::iterator Tokenizer<Char>::begin() {
-    return mBegin;
-}
-
-template <typename Char>
-inline typename Tokenizer<Char>::iterator Tokenizer<Char>::end() {
-    return mEnd;
-}
-
-template <typename Char>
-inline Tokenizer<Char>::Tokenizer(BasicStringPiece<Char> str, Char sep) :
-        mBegin(++iterator(str, sep, BasicStringPiece<Char>(str.begin() - 1, 0), false)),
-        mEnd(str, sep, BasicStringPiece<Char>(str.end(), 0), true) {
+inline Tokenizer tokenize(StringPiece str, char sep) {
+    return Tokenizer(str, sep);
 }
 
 inline uint16_t hostToDevice16(uint16_t value) {
@@ -348,8 +271,8 @@ inline uint32_t deviceToHost32(uint32_t value) {
  *
  * Returns true if successful.
  */
-bool extractResFilePathParts(const StringPiece16& path, StringPiece16* outPrefix,
-                             StringPiece16* outEntry, StringPiece16* outSuffix);
+bool extractResFilePathParts(const StringPiece& path, StringPiece* outPrefix,
+                             StringPiece* outEntry, StringPiece* outSuffix);
 
 } // namespace util
 

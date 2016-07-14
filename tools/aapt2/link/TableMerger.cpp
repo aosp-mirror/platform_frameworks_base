@@ -67,7 +67,7 @@ bool TableMerger::mergeImpl(const Source& src, ResourceTable* table,
                 callback = [&](const ResourceNameRef& name, const ConfigDescription& config,
                                FileReference* newFile, FileReference* oldFile) -> bool {
                     // The old file's path points inside the APK, so we can use it as is.
-                    io::IFile* f = collection->findFile(util::utf16ToUtf8(*oldFile->path));
+                    io::IFile* f = collection->findFile(*oldFile->path);
                     if (!f) {
                         mContext->getDiagnostics()->error(DiagMessage(src) << "file '"
                                                           << *oldFile->path
@@ -95,7 +95,7 @@ bool TableMerger::mergeImpl(const Source& src, ResourceTable* table,
 /**
  * This will merge and mangle resources from a static library.
  */
-bool TableMerger::mergeAndMangle(const Source& src, const StringPiece16& packageName,
+bool TableMerger::mergeAndMangle(const Source& src, const StringPiece& packageName,
                                  ResourceTable* table, io::IFileCollection* collection) {
     bool error = false;
     for (auto& package : table->packages) {
@@ -112,7 +112,7 @@ bool TableMerger::mergeAndMangle(const Source& src, const StringPiece16& package
         auto callback = [&](const ResourceNameRef& name, const ConfigDescription& config,
                             FileReference* newFile, FileReference* oldFile) -> bool {
             // The old file's path points inside the APK, so we can use it as is.
-            io::IFile* f = collection->findFile(util::utf16ToUtf8(*oldFile->path));
+            io::IFile* f = collection->findFile(*oldFile->path);
             if (!f) {
                 mContext->getDiagnostics()->error(DiagMessage(src) << "file '" << *oldFile->path
                                                   << "' not found");
@@ -159,8 +159,8 @@ bool TableMerger::doMerge(const Source& src,
         for (auto& srcEntry : srcType->entries) {
             ResourceEntry* dstEntry;
             if (manglePackage) {
-                std::u16string mangledName = NameMangler::mangleEntry(srcPackage->name,
-                                                                      srcEntry->name);
+                std::string mangledName = NameMangler::mangleEntry(srcPackage->name,
+                                                                   srcEntry->name);
                 if (allowNewResources) {
                     dstEntry = dstType->findOrCreateEntry(mangledName);
                 } else {
@@ -275,13 +275,13 @@ bool TableMerger::doMerge(const Source& src,
     return !error;
 }
 
-std::unique_ptr<FileReference> TableMerger::cloneAndMangleFile(const std::u16string& package,
+std::unique_ptr<FileReference> TableMerger::cloneAndMangleFile(const std::string& package,
                                                                const FileReference& fileRef) {
 
-    StringPiece16 prefix, entry, suffix;
+    StringPiece prefix, entry, suffix;
     if (util::extractResFilePathParts(*fileRef.path, &prefix, &entry, &suffix)) {
-        std::u16string mangledEntry = NameMangler::mangleEntry(package, entry.toString());
-        std::u16string newPath = prefix.toString() + mangledEntry + suffix.toString();
+        std::string mangledEntry = NameMangler::mangleEntry(package, entry.toString());
+        std::string newPath = prefix.toString() + mangledEntry + suffix.toString();
         std::unique_ptr<FileReference> newFileRef = util::make_unique<FileReference>(
                 mMasterTable->stringPool.makeRef(newPath));
         newFileRef->setComment(fileRef.getComment());
@@ -293,8 +293,7 @@ std::unique_ptr<FileReference> TableMerger::cloneAndMangleFile(const std::u16str
 
 bool TableMerger::mergeFileImpl(const ResourceFile& fileDesc, io::IFile* file, bool overlay) {
     ResourceTable table;
-    std::u16string path = util::utf8ToUtf16(ResourceUtils::buildResourceFileName(fileDesc,
-                                                                                 nullptr));
+    std::string path = ResourceUtils::buildResourceFileName(fileDesc, nullptr);
     std::unique_ptr<FileReference> fileRef = util::make_unique<FileReference>(
             table.stringPool.makeRef(path));
     fileRef->setSource(fileDesc.source);

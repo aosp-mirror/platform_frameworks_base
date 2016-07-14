@@ -171,7 +171,7 @@ private:
     void serializeItemCommonToPb(const Item& item, T* pbItem) {
         serializeSourceToPb(item.getSource(), mSourcePool, pbItem->mutable_source());
         if (!item.getComment().empty()) {
-            pbItem->set_comment(util::utf16ToUtf8(item.getComment()));
+            pbItem->set_comment(item.getComment());
         }
     }
 
@@ -220,28 +220,28 @@ std::unique_ptr<pb::ResourceTable> serializeTableToPb(ResourceTable* table) {
         if (package->id) {
             pbPackage->set_package_id(package->id.value());
         }
-        pbPackage->set_package_name(util::utf16ToUtf8(package->name));
+        pbPackage->set_package_name(package->name);
 
         for (auto& type : package->types) {
             pb::Type* pbType = pbPackage->add_types();
             if (type->id) {
                 pbType->set_id(type->id.value());
             }
-            pbType->set_name(util::utf16ToUtf8(toString(type->type)));
+            pbType->set_name(toString(type->type).toString());
 
             for (auto& entry : type->entries) {
                 pb::Entry* pbEntry = pbType->add_entries();
                 if (entry->id) {
                     pbEntry->set_id(entry->id.value());
                 }
-                pbEntry->set_name(util::utf16ToUtf8(entry->name));
+                pbEntry->set_name(entry->name);
 
                 // Write the SymbolStatus struct.
                 pb::SymbolStatus* pbStatus = pbEntry->mutable_symbol_status();
                 pbStatus->set_visibility(serializeVisibilityToPb(entry->symbolStatus.state));
                 serializeSourceToPb(entry->symbolStatus.source, &sourcePool,
                                     pbStatus->mutable_source());
-                pbStatus->set_comment(util::utf16ToUtf8(entry->symbolStatus.comment));
+                pbStatus->set_comment(entry->symbolStatus.comment);
 
                 for (auto& configValue : entry->values) {
                     pb::ConfigValue* pbConfigValue = pbEntry->add_config_values();
@@ -254,7 +254,7 @@ std::unique_ptr<pb::ResourceTable> serializeTableToPb(ResourceTable* table) {
                     serializeSourceToPb(configValue->value->getSource(), &sourcePool,
                                         pbValue->mutable_source());
                     if (!configValue->value->getComment().empty()) {
-                        pbValue->set_comment(util::utf16ToUtf8(configValue->value->getComment()));
+                        pbValue->set_comment(configValue->value->getComment());
                     }
 
                     if (configValue->value->isWeak()) {
@@ -275,13 +275,13 @@ std::unique_ptr<pb::ResourceTable> serializeTableToPb(ResourceTable* table) {
 
 std::unique_ptr<pb::CompiledFile> serializeCompiledFileToPb(const ResourceFile& file) {
     std::unique_ptr<pb::CompiledFile> pbFile = util::make_unique<pb::CompiledFile>();
-    pbFile->set_resource_name(util::utf16ToUtf8(file.name.toString()));
+    pbFile->set_resource_name(file.name.toString());
     pbFile->set_source_path(file.source.path);
     serializeConfig(file.config, pbFile->mutable_config());
 
     for (const SourcedResourceName& exported : file.exportedSymbols) {
         pb::CompiledFile_Symbol* pbSymbol = pbFile->add_exported_symbols();
-        pbSymbol->set_resource_name(util::utf16ToUtf8(exported.name.toString()));
+        pbSymbol->set_resource_name(exported.name.toString());
         pbSymbol->set_line_no(exported.line);
     }
     return pbFile;

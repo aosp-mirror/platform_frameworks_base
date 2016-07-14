@@ -57,7 +57,6 @@ public:
      * Adds more comments. Since resources can have various values with different configurations,
      * we need to collect all the comments.
      */
-    void appendComment(const StringPiece16& comment);
     void appendComment(const StringPiece& comment);
 
     void appendNewLine();

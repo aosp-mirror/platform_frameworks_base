@@ -137,8 +137,8 @@ public:
         return nullptr;
     }
 
-    const std::u16string& getCompilationPackage() override {
-        static std::u16string empty;
+    const std::string& getCompilationPackage() override {
+        static std::string empty;
         return empty;
     }
 

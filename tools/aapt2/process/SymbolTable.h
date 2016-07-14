@@ -34,7 +34,7 @@
 namespace aapt {
 
 inline android::hash_t hash_type(const ResourceName& name) {
-    std::hash<std::u16string> strHash;
+    std::hash<std::string> strHash;
     android::hash_t hash = 0;
     hash = android::JenkinsHashMix(hash, (uint32_t) strHash(name.package));
     hash = android::JenkinsHashMix(hash, (uint32_t) name.type);

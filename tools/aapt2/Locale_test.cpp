@@ -23,7 +23,7 @@
 namespace aapt {
 
 static ::testing::AssertionResult TestLanguage(const char* input, const char* lang) {
-    std::vector<std::string> parts = util::splitAndLowercase(std::string(input), '-');
+    std::vector<std::string> parts = util::splitAndLowercase(input, '-');
     LocaleValue lv;
     ssize_t count = lv.initFromParts(std::begin(parts), std::end(parts));
     if (count < 0) {
@@ -45,7 +45,7 @@ static ::testing::AssertionResult TestLanguage(const char* input, const char* la
 
 static ::testing::AssertionResult TestLanguageRegion(const char* input, const char* lang,
                                                      const char* region) {
-    std::vector<std::string> parts = util::splitAndLowercase(std::string(input), '-');
+    std::vector<std::string> parts = util::splitAndLowercase(input, '-');
     LocaleValue lv;
     ssize_t count = lv.initFromParts(std::begin(parts), std::end(parts));
     if (count < 0) {

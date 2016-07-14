@@ -16,6 +16,7 @@
 
 #include "ConfigDescription.h"
 #include "Resource.h"
+#include "ResourceUtils.h"
 #include "ValueVisitor.h"
 #include "process/SymbolTable.h"
 #include "util/Util.h"
@@ -84,7 +85,7 @@ const SymbolTable::Symbol* SymbolTable::findById(ResourceId id) {
 const SymbolTable::Symbol* SymbolTable::findByReference(const Reference& ref) {
     // First try the ID. This is because when we lookup by ID, we only fill in the ID cache.
     // Looking up by name fills in the name and ID cache. So a cache miss will cause a failed
-    // ID lookup, then a successfull name lookup. Subsequent look ups will hit immediately
+    // ID lookup, then a successful name lookup. Subsequent look ups will hit immediately
     // because the ID is cached too.
     //
     // If we looked up by name first, a cache miss would mean we failed to lookup by name, then
@@ -184,18 +185,13 @@ static std::unique_ptr<SymbolTable::Symbol> lookupAttributeInTable(const android
                 return nullptr;
             }
 
-            const ResourceType* parsedType = parseResourceType(
-                    StringPiece16(entryName.type, entryName.typeLen));
-            if (!parsedType) {
-                table.unlockBag(entry);
+            Maybe<ResourceName> parsedName = ResourceUtils::toResourceName(entryName);
+            if (!parsedName) {
                 return nullptr;
             }
 
             Attribute::Symbol symbol;
-            symbol.symbol.name = ResourceName(
-                    StringPiece16(entryName.package, entryName.packageLen),
-                    *parsedType,
-                    StringPiece16(entryName.name, entryName.nameLen));
+            symbol.symbol.name = parsedName.value();
             symbol.symbol.id = ResourceId(mapEntry.name.ident);
             symbol.value = mapEntry.value.data;
             s->attribute->symbols.push_back(std::move(symbol));
@@ -208,11 +204,15 @@ static std::unique_ptr<SymbolTable::Symbol> lookupAttributeInTable(const android
 std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::findByName(
         const ResourceName& name) {
     const android::ResTable& table = mAssets.getResources(false);
-    StringPiece16 typeStr = toString(name.type);
+
+    const std::u16string package16 = util::utf8ToUtf16(name.package);
+    const std::u16string type16 = util::utf8ToUtf16(toString(name.type));
+    const std::u16string entry16 = util::utf8ToUtf16(name.entry);
+
     uint32_t typeSpecFlags = 0;
-    ResourceId resId = table.identifierForName(name.entry.data(), name.entry.size(),
-                                               typeStr.data(), typeStr.size(),
-                                               name.package.data(), name.package.size(),
+    ResourceId resId = table.identifierForName(entry16.data(), entry16.size(),
+                                               type16.data(), type16.size(),
+                                               package16.data(), package16.size(),
                                                &typeSpecFlags);
     if (!resId.isValid()) {
         return {};
@@ -238,37 +238,7 @@ static Maybe<ResourceName> getResourceName(const android::ResTable& table, Resou
     if (!table.getResourceName(id.id, true, &resName)) {
         return {};
     }
-
-    ResourceName name;
-    if (resName.package) {
-        name.package = StringPiece16(resName.package, resName.packageLen).toString();
-    }
-
-    const ResourceType* type;
-    if (resName.type) {
-        type = parseResourceType(StringPiece16(resName.type, resName.typeLen));
-
-    } else if (resName.type8) {
-        type = parseResourceType(util::utf8ToUtf16(StringPiece(resName.type8, resName.typeLen)));
-    } else {
-        return {};
-    }
-
-    if (!type) {
-        return {};
-    }
-
-    name.type = *type;
-
-    if (resName.name) {
-        name.entry = StringPiece16(resName.name, resName.nameLen).toString();
-    } else if (resName.name8) {
-        name.entry = util::utf8ToUtf16(StringPiece(resName.name8, resName.nameLen));
-    } else {
-        return {};
-    }
-
-    return name;
+    return ResourceUtils::toResourceName(resName);
 }
 
 std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::findById(ResourceId id) {

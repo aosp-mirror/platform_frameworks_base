@@ -47,23 +47,13 @@ void AnnotationProcessor::appendCommentLine(std::string& comment) {
     mComment << "\n * " << std::move(comment);
 }
 
-void AnnotationProcessor::appendComment(const StringPiece16& comment) {
-    // We need to process line by line to clean-up whitespace and append prefixes.
-    for (StringPiece16 line : util::tokenize(comment, u'\n')) {
-        line = util::trimWhitespace(line);
-        if (!line.empty()) {
-            std::string utf8Line = util::utf16ToUtf8(line);
-            appendCommentLine(utf8Line);
-        }
-    }
-}
-
 void AnnotationProcessor::appendComment(const StringPiece& comment) {
+    // We need to process line by line to clean-up whitespace and append prefixes.
     for (StringPiece line : util::tokenize(comment, '\n')) {
         line = util::trimWhitespace(line);
         if (!line.empty()) {
-            std::string utf8Line = line.toString();
-            appendCommentLine(utf8Line);
+            std::string lineCopy = line.toString();
+            appendCommentLine(lineCopy);
         }
     }
 }
@@ -75,7 +65,7 @@ void AnnotationProcessor::appendNewLine() {
 void AnnotationProcessor::writeToStream(std::ostream* out, const StringPiece& prefix) const {
     if (mHasComments) {
         std::string result = mComment.str();
-        for (StringPiece line : util::tokenize<char>(result, '\n')) {
+        for (StringPiece line : util::tokenize(result, '\n')) {
            *out << prefix << line << "\n";
         }
         *out << prefix << " */" << "\n";

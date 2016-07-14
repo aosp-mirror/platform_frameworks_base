@@ -57,8 +57,7 @@ bool XmlNodeAction::execute(XmlActionExecutorPolicy policy, SourcePathDiagnostic
 
     for (Element* childEl : el->getChildElements()) {
         if (childEl->namespaceUri.empty()) {
-            std::map<std::u16string, XmlNodeAction>::const_iterator iter =
-                    mMap.find(childEl->name);
+            std::map<std::string, XmlNodeAction>::const_iterator iter = mMap.find(childEl->name);
             if (iter != mMap.end()) {
                 error |= !iter->second.execute(policy, diag, childEl);
                 continue;
@@ -91,7 +90,7 @@ bool XmlActionExecutor::execute(XmlActionExecutorPolicy policy, IDiagnostics* di
     }
 
     if (el->namespaceUri.empty()) {
-        std::map<std::u16string, XmlNodeAction>::const_iterator iter = mMap.find(el->name);
+        std::map<std::string, XmlNodeAction>::const_iterator iter = mMap.find(el->name);
         if (iter != mMap.end()) {
             return iter->second.execute(policy, &sourceDiag, el);
         }

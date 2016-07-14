@@ -23,19 +23,25 @@
 namespace aapt {
 namespace xml {
 
-Maybe<ExtractedPackage> extractPackageFromNamespace(const std::u16string& namespaceUri) {
-    if (util::stringStartsWith<char16_t>(namespaceUri, kSchemaPublicPrefix)) {
-        StringPiece16 schemaPrefix = kSchemaPublicPrefix;
-        StringPiece16 package = namespaceUri;
+std::string buildPackageNamespace(const StringPiece& package) {
+    std::string result = kSchemaPublicPrefix;
+    result.append(package.data(), package.size());
+    return result;
+}
+
+Maybe<ExtractedPackage> extractPackageFromNamespace(const std::string& namespaceUri) {
+    if (util::stringStartsWith(namespaceUri, kSchemaPublicPrefix)) {
+        StringPiece schemaPrefix = kSchemaPublicPrefix;
+        StringPiece package = namespaceUri;
         package = package.substr(schemaPrefix.size(), package.size() - schemaPrefix.size());
         if (package.empty()) {
             return {};
         }
         return ExtractedPackage{ package.toString(), false /* isPrivate */ };
 
-    } else if (util::stringStartsWith<char16_t>(namespaceUri, kSchemaPrivatePrefix)) {
-        StringPiece16 schemaPrefix = kSchemaPrivatePrefix;
-        StringPiece16 package = namespaceUri;
+    } else if (util::stringStartsWith(namespaceUri, kSchemaPrivatePrefix)) {
+        StringPiece schemaPrefix = kSchemaPrivatePrefix;
+        StringPiece package = namespaceUri;
         package = package.substr(schemaPrefix.size(), package.size() - schemaPrefix.size());
         if (package.empty()) {
             return {};
@@ -43,13 +49,13 @@ Maybe<ExtractedPackage> extractPackageFromNamespace(const std::u16string& namesp
         return ExtractedPackage{ package.toString(), true /* isPrivate */ };
 
     } else if (namespaceUri == kSchemaAuto) {
-        return ExtractedPackage{ std::u16string(), true /* isPrivate */ };
+        return ExtractedPackage{ std::string(), true /* isPrivate */ };
     }
     return {};
 }
 
 void transformReferenceFromNamespace(IPackageDeclStack* declStack,
-                                     const StringPiece16& localPackage, Reference* inRef) {
+                                     const StringPiece& localPackage, Reference* inRef) {
     if (inRef->name) {
         if (Maybe<ExtractedPackage> transformedPackage =
                    declStack->transformPackageAlias(inRef->name.value().package, localPackage)) {

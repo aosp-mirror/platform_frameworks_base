@@ -33,13 +33,13 @@ constexpr char kXmlNamespaceSep = 1;
 struct Stack {
     std::unique_ptr<xml::Node> root;
     std::stack<xml::Node*> nodeStack;
-    std::u16string pendingComment;
+    std::string pendingComment;
 };
 
 /**
  * Extracts the namespace and name of an expanded element or attribute name.
  */
-static void splitName(const char* name, std::u16string* outNs, std::u16string* outName) {
+static void splitName(const char* name, std::string* outNs, std::string* outName) {
     const char* p = name;
     while (*p != 0 && *p != kXmlNamespaceSep) {
         p++;
@@ -47,10 +47,10 @@ static void splitName(const char* name, std::u16string* outNs, std::u16string* o
 
     if (*p == 0) {
         outNs->clear();
-        *outName = util::utf8ToUtf16(name);
+        *outName = StringPiece(name).toString();
     } else {
-        *outNs = util::utf8ToUtf16(StringPiece(name, (p - name)));
-        *outName = util::utf8ToUtf16(p + 1);
+        *outNs = StringPiece(name, (p - name)).toString();
+        *outName = StringPiece(p + 1).toString();
     }
 }
 
@@ -76,11 +76,11 @@ static void XMLCALL startNamespaceHandler(void* userData, const char* prefix, co
 
     std::unique_ptr<Namespace> ns = util::make_unique<Namespace>();
     if (prefix) {
-        ns->namespacePrefix = util::utf8ToUtf16(prefix);
+        ns->namespacePrefix = StringPiece(prefix).toString();
     }
 
     if (uri) {
-        ns->namespaceUri = util::utf8ToUtf16(uri);
+        ns->namespaceUri = StringPiece(uri).toString();
     }
 
     addToStack(stack, parser, std::move(ns));
@@ -109,7 +109,7 @@ static void XMLCALL startElementHandler(void* userData, const char* name, const 
     while (*attrs) {
         Attribute attribute;
         splitName(*attrs++, &attribute.namespaceUri, &attribute.name);
-        attribute.value = util::utf8ToUtf16(*attrs++);
+        attribute.value = StringPiece(*attrs++).toString();
 
         // Insert in sorted order.
         auto iter = std::lower_bound(el->attributes.begin(), el->attributes.end(), attribute,
@@ -144,14 +144,14 @@ static void XMLCALL characterDataHandler(void* userData, const char* s, int len)
         if (!currentParent->children.empty()) {
             Node* lastChild = currentParent->children.back().get();
             if (Text* text = nodeCast<Text>(lastChild)) {
-                text->text += util::utf8ToUtf16(StringPiece(s, len));
+                text->text += StringPiece(s, len).toString();
                 return;
             }
         }
     }
 
     std::unique_ptr<Text> text = util::make_unique<Text>();
-    text->text = util::utf8ToUtf16(StringPiece(s, len));
+    text->text = StringPiece(s, len).toString();
     addToStack(stack, parser, std::move(text));
 }
 
@@ -162,7 +162,7 @@ static void XMLCALL commentDataHandler(void* userData, const char* comment) {
     if (!stack->pendingComment.empty()) {
         stack->pendingComment += '\n';
     }
-    stack->pendingComment += util::utf8ToUtf16(comment);
+    stack->pendingComment += comment;
 }
 
 std::unique_ptr<XmlResource> inflate(std::istream* in, IDiagnostics* diag, const Source& source) {
@@ -209,17 +209,17 @@ static void copyAttributes(Element* el, android::ResXMLParser* parser) {
             size_t len;
             const char16_t* str16 = parser->getAttributeNamespace(i, &len);
             if (str16) {
-                attr.namespaceUri.assign(str16, len);
+                attr.namespaceUri = util::utf16ToUtf8(StringPiece16(str16, len));
             }
 
             str16 = parser->getAttributeName(i, &len);
             if (str16) {
-                attr.name.assign(str16, len);
+                attr.name = util::utf16ToUtf8(StringPiece16(str16, len));
             }
 
             str16 = parser->getAttributeStringValue(i, &len);
             if (str16) {
-                attr.value.assign(str16, len);
+                attr.value = util::utf16ToUtf8(StringPiece16(str16, len));
             }
             el->attributes.push_back(std::move(attr));
         }
@@ -250,12 +250,12 @@ std::unique_ptr<XmlResource> inflate(const void* data, size_t dataLen, IDiagnost
                 size_t len;
                 const char16_t* str16 = tree.getNamespacePrefix(&len);
                 if (str16) {
-                    node->namespacePrefix.assign(str16, len);
+                    node->namespacePrefix = util::utf16ToUtf8(StringPiece16(str16, len));
                 }
 
                 str16 = tree.getNamespaceUri(&len);
                 if (str16) {
-                    node->namespaceUri.assign(str16, len);
+                    node->namespaceUri = util::utf16ToUtf8(StringPiece16(str16, len));
                 }
                 newNode = std::move(node);
                 break;
@@ -266,12 +266,12 @@ std::unique_ptr<XmlResource> inflate(const void* data, size_t dataLen, IDiagnost
                 size_t len;
                 const char16_t* str16 = tree.getElementNamespace(&len);
                 if (str16) {
-                    node->namespaceUri.assign(str16, len);
+                    node->namespaceUri = util::utf16ToUtf8(StringPiece16(str16, len));
                 }
 
                 str16 = tree.getElementName(&len);
                 if (str16) {
-                    node->name.assign(str16, len);
+                    node->name = util::utf16ToUtf8(StringPiece16(str16, len));
                 }
 
                 copyAttributes(node.get(), &tree);
@@ -285,7 +285,7 @@ std::unique_ptr<XmlResource> inflate(const void* data, size_t dataLen, IDiagnost
                 size_t len;
                 const char16_t* str16 = tree.getText(&len);
                 if (str16) {
-                    node->text.assign(str16, len);
+                    node->text = util::utf16ToUtf8(StringPiece16(str16, len));
                 }
                 newNode = std::move(node);
                 break;
@@ -347,7 +347,7 @@ void Node::addChild(std::unique_ptr<Node> child) {
     children.push_back(std::move(child));
 }
 
-Attribute* Element::findAttribute(const StringPiece16& ns, const StringPiece16& name) {
+Attribute* Element::findAttribute(const StringPiece& ns, const StringPiece& name) {
     for (auto& attr : attributes) {
         if (ns == attr.namespaceUri && name == attr.name) {
             return &attr;
@@ -356,13 +356,13 @@ Attribute* Element::findAttribute(const StringPiece16& ns, const StringPiece16& 
     return nullptr;
 }
 
-Element* Element::findChild(const StringPiece16& ns, const StringPiece16& name) {
+Element* Element::findChild(const StringPiece& ns, const StringPiece& name) {
     return findChildWithAttribute(ns, name, {}, {}, {});
 }
 
-Element* Element::findChildWithAttribute(const StringPiece16& ns, const StringPiece16& name,
-                                         const StringPiece16& attrNs, const StringPiece16& attrName,
-                                         const StringPiece16& attrValue) {
+Element* Element::findChildWithAttribute(const StringPiece& ns, const StringPiece& name,
+                                         const StringPiece& attrNs, const StringPiece& attrName,
+                                         const StringPiece& attrValue) {
     for (auto& childNode : children) {
         Node* child = childNode.get();
         while (nodeCast<Namespace>(child)) {
@@ -422,7 +422,7 @@ void PackageAwareVisitor::visit(Namespace* ns) {
 }
 
 Maybe<ExtractedPackage> PackageAwareVisitor::transformPackageAlias(
-       const StringPiece16& alias, const StringPiece16& localPackage) const {
+       const StringPiece& alias, const StringPiece& localPackage) const {
    if (alias.empty()) {
        return ExtractedPackage{ localPackage.toString(), false /* private */ };
    }

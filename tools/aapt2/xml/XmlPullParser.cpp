@@ -98,7 +98,7 @@ const std::string& XmlPullParser::getLastError() const {
     return mLastError;
 }
 
-const std::u16string& XmlPullParser::getComment() const {
+const std::string& XmlPullParser::getComment() const {
     return mEventQueue.front().data1;
 }
 
@@ -110,14 +110,14 @@ size_t XmlPullParser::getDepth() const {
     return mEventQueue.front().depth;
 }
 
-const std::u16string& XmlPullParser::getText() const {
+const std::string& XmlPullParser::getText() const {
     if (getEvent() != Event::kText) {
         return mEmpty;
     }
     return mEventQueue.front().data1;
 }
 
-const std::u16string& XmlPullParser::getNamespacePrefix() const {
+const std::string& XmlPullParser::getNamespacePrefix() const {
     const Event currentEvent = getEvent();
     if (currentEvent != Event::kStartNamespace && currentEvent != Event::kEndNamespace) {
         return mEmpty;
@@ -125,7 +125,7 @@ const std::u16string& XmlPullParser::getNamespacePrefix() const {
     return mEventQueue.front().data1;
 }
 
-const std::u16string& XmlPullParser::getNamespaceUri() const {
+const std::string& XmlPullParser::getNamespaceUri() const {
     const Event currentEvent = getEvent();
     if (currentEvent != Event::kStartNamespace && currentEvent != Event::kEndNamespace) {
         return mEmpty;
@@ -134,7 +134,7 @@ const std::u16string& XmlPullParser::getNamespaceUri() const {
 }
 
 Maybe<ExtractedPackage> XmlPullParser::transformPackageAlias(
-        const StringPiece16& alias, const StringPiece16& localPackage) const {
+        const StringPiece& alias, const StringPiece& localPackage) const {
     if (alias.empty()) {
         return ExtractedPackage{ localPackage.toString(), false /* private */ };
     }
@@ -152,7 +152,7 @@ Maybe<ExtractedPackage> XmlPullParser::transformPackageAlias(
     return {};
 }
 
-const std::u16string& XmlPullParser::getElementNamespace() const {
+const std::string& XmlPullParser::getElementNamespace() const {
     const Event currentEvent = getEvent();
     if (currentEvent != Event::kStartElement && currentEvent != Event::kEndElement) {
         return mEmpty;
@@ -160,7 +160,7 @@ const std::u16string& XmlPullParser::getElementNamespace() const {
     return mEventQueue.front().data1;
 }
 
-const std::u16string& XmlPullParser::getElementName() const {
+const std::string& XmlPullParser::getElementName() const {
     const Event currentEvent = getEvent();
     if (currentEvent != Event::kStartElement && currentEvent != Event::kEndElement) {
         return mEmpty;
@@ -186,31 +186,31 @@ size_t XmlPullParser::getAttributeCount() const {
 /**
  * Extracts the namespace and name of an expanded element or attribute name.
  */
-static void splitName(const char* name, std::u16string& outNs, std::u16string& outName) {
+static void splitName(const char* name, std::string& outNs, std::string& outName) {
     const char* p = name;
     while (*p != 0 && *p != kXmlNamespaceSep) {
         p++;
     }
 
     if (*p == 0) {
-        outNs = std::u16string();
-        outName = util::utf8ToUtf16(name);
+        outNs = std::string();
+        outName = name;
     } else {
-        outNs = util::utf8ToUtf16(StringPiece(name, (p - name)));
-        outName = util::utf8ToUtf16(p + 1);
+        outNs = StringPiece(name, (p - name)).toString();
+        outName = p + 1;
     }
 }
 
 void XMLCALL XmlPullParser::startNamespaceHandler(void* userData, const char* prefix,
         const char* uri) {
     XmlPullParser* parser = reinterpret_cast<XmlPullParser*>(userData);
-    std::u16string namespaceUri = uri != nullptr ? util::utf8ToUtf16(uri) : std::u16string();
+    std::string namespaceUri = uri != nullptr ? uri : std::string();
     parser->mNamespaceUris.push(namespaceUri);
     parser->mEventQueue.push(EventData{
             Event::kStartNamespace,
             XML_GetCurrentLineNumber(parser->mParser),
             parser->mDepth++,
-            prefix != nullptr ? util::utf8ToUtf16(prefix) : std::u16string(),
+            prefix != nullptr ? prefix : std::string(),
             namespaceUri
     });
 }
@@ -227,7 +227,7 @@ void XMLCALL XmlPullParser::startElementHandler(void* userData, const char* name
     while (*attrs) {
         Attribute attribute;
         splitName(*attrs++, attribute.namespaceUri, attribute.name);
-        attribute.value = util::utf8ToUtf16(*attrs++);
+        attribute.value = *attrs++;
 
         // Insert in sorted order.
         auto iter = std::lower_bound(data.attributes.begin(), data.attributes.end(), attribute);
@@ -245,7 +245,7 @@ void XMLCALL XmlPullParser::characterDataHandler(void* userData, const char* s, 
             Event::kText,
             XML_GetCurrentLineNumber(parser->mParser),
             parser->mDepth,
-            util::utf8ToUtf16(StringPiece(s, len))
+            StringPiece(s, len).toString()
     });
 }
 
@@ -268,7 +268,7 @@ void XMLCALL XmlPullParser::endNamespaceHandler(void* userData, const char* pref
             Event::kEndNamespace,
             XML_GetCurrentLineNumber(parser->mParser),
             --(parser->mDepth),
-            prefix != nullptr ? util::utf8ToUtf16(prefix) : std::u16string(),
+            prefix != nullptr ? prefix : std::string(),
             parser->mNamespaceUris.top()
     });
     parser->mNamespaceUris.pop();
@@ -281,22 +281,22 @@ void XMLCALL XmlPullParser::commentDataHandler(void* userData, const char* comme
             Event::kComment,
             XML_GetCurrentLineNumber(parser->mParser),
             parser->mDepth,
-            util::utf8ToUtf16(comment)
+            comment
     });
 }
 
-Maybe<StringPiece16> findAttribute(const XmlPullParser* parser, const StringPiece16& name) {
-    auto iter = parser->findAttribute(u"", name);
+Maybe<StringPiece> findAttribute(const XmlPullParser* parser, const StringPiece& name) {
+    auto iter = parser->findAttribute("", name);
     if (iter != parser->endAttributes()) {
-        return StringPiece16(util::trimWhitespace(iter->value));
+        return StringPiece(util::trimWhitespace(iter->value));
     }
     return {};
 }
 
-Maybe<StringPiece16> findNonEmptyAttribute(const XmlPullParser* parser, const StringPiece16& name) {
-    auto iter = parser->findAttribute(u"", name);
+Maybe<StringPiece> findNonEmptyAttribute(const XmlPullParser* parser, const StringPiece& name) {
+    auto iter = parser->findAttribute("", name);
     if (iter != parser->endAttributes()) {
-        StringPiece16 trimmed = util::trimWhitespace(iter->value);
+        StringPiece trimmed = util::trimWhitespace(iter->value);
         if (!trimmed.empty()) {
             return trimmed;
         }

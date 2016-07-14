@@ -59,7 +59,7 @@ public:
      */
     TableMerger(IAaptContext* context, ResourceTable* outTable, const TableMergerOptions& options);
 
-    const std::set<std::u16string>& getMergedPackages() const {
+    const std::set<std::string>& getMergedPackages() const {
         return mMergedPackages;
     }
 
@@ -81,7 +81,7 @@ public:
      * Merges resources from the given package, mangling the name. This is for static libraries.
      * An io::IFileCollection is needed in order to find the referenced Files and process them.
      */
-    bool mergeAndMangle(const Source& src, const StringPiece16& package, ResourceTable* table,
+    bool mergeAndMangle(const Source& src, const StringPiece& package, ResourceTable* table,
                         io::IFileCollection* collection);
 
     /**
@@ -104,7 +104,7 @@ private:
     TableMergerOptions mOptions;
     ResourceTablePackage* mMasterPackage;
 
-    std::set<std::u16string> mMergedPackages;
+    std::set<std::string> mMergedPackages;
 
     bool mergeFileImpl(const ResourceFile& fileDesc, io::IFile* file, bool overlay);
 
@@ -117,7 +117,7 @@ private:
                  const bool allowNewResources,
                  FileMergeCallback callback);
 
-    std::unique_ptr<FileReference> cloneAndMangleFile(const std::u16string& package,
+    std::unique_ptr<FileReference> cloneAndMangleFile(const std::string& package,
                                                       const FileReference& value);
 };
 

@@ -16,13 +16,11 @@
 
 #include "flatten/XmlFlattener.h"
 #include "link/Linkers.h"
-#include "test/Builders.h"
-#include "test/Context.h"
+#include "test/Test.h"
 #include "util/BigBuffer.h"
 #include "util/Util.h"
 
 #include <androidfw/ResourceTypes.h>
-#include <gtest/gtest.h>
 
 namespace aapt {
 
@@ -30,15 +28,15 @@ class XmlFlattenerTest : public ::testing::Test {
 public:
     void SetUp() override {
         mContext = test::ContextBuilder()
-                .setCompilationPackage(u"com.app.test")
-                .setNameManglerPolicy(NameManglerPolicy{ u"com.app.test" })
+                .setCompilationPackage("com.app.test")
+                .setNameManglerPolicy(NameManglerPolicy{ "com.app.test" })
                 .addSymbolSource(test::StaticSymbolSourceBuilder()
-                        .addSymbol(u"@android:attr/id", ResourceId(0x010100d0),
+                        .addSymbol("@android:attr/id", ResourceId(0x010100d0),
                                    test::AttributeBuilder().build())
-                        .addSymbol(u"@com.app.test:id/id", ResourceId(0x7f020000))
-                        .addSymbol(u"@android:attr/paddingStart", ResourceId(0x010103b3),
+                        .addSymbol("@com.app.test:id/id", ResourceId(0x7f020000))
+                        .addSymbol("@android:attr/paddingStart", ResourceId(0x010103b3),
                                    test::AttributeBuilder().build())
-                        .addSymbol(u"@android:attr/colorAccent", ResourceId(0x01010435),
+                        .addSymbol("@android:attr/colorAccent", ResourceId(0x01010435),
                                    test::AttributeBuilder().build())
                         .build())
                 .build();

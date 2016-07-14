@@ -1234,7 +1234,7 @@ bool Png::process(const Source& source, std::istream* input, BigBuffer* outBuffe
         goto bail;
     }
 
-    if (util::stringEndsWith<char>(source.path, ".9.png")) {
+    if (util::stringEndsWith(source.path, ".9.png")) {
         std::string errorMsg;
         if (!do9Patch(&pngInfo, &errorMsg)) {
             mDiag->error(DiagMessage() << errorMsg);

@@ -57,7 +57,7 @@ struct XmlFlattenerVisitor : public xml::Visitor {
             mBuffer(buffer), mOptions(options) {
     }
 
-    void addString(const StringPiece16& str, uint32_t priority, android::ResStringPool_ref* dest,
+    void addString(const StringPiece& str, uint32_t priority, android::ResStringPool_ref* dest,
                    bool treatEmptyStringAsNull = false) {
         if (str.empty() && treatEmptyStringAsNull) {
             // Some parts of the runtime treat null differently than empty string.
@@ -205,9 +205,9 @@ struct XmlFlattenerVisitor : public xml::Visitor {
                     xmlAttr->compiledAttribute.value().id.value() == kIdAttr) {
                 flatElem->idIndex = util::hostToDevice16(attributeIndex);
             } else if (xmlAttr->namespaceUri.empty()) {
-                if (xmlAttr->name == u"class") {
+                if (xmlAttr->name == "class") {
                     flatElem->classIndex = util::hostToDevice16(attributeIndex);
-                } else if (xmlAttr->name == u"style") {
+                } else if (xmlAttr->name == "style") {
                     flatElem->styleIndex = util::hostToDevice16(attributeIndex);
                 }
             }

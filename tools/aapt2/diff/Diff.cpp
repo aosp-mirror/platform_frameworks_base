@@ -28,7 +28,7 @@ namespace aapt {
 
 class DiffContext : public IAaptContext {
 public:
-    const std::u16string& getCompilationPackage() override {
+    const std::string& getCompilationPackage() override {
         return mEmpty;
     }
 
@@ -57,7 +57,7 @@ public:
     }
 
 private:
-    std::u16string mEmpty;
+    std::string mEmpty;
     StdErrDiagnostics mDiagnostics;
     NameMangler mNameMangler = NameMangler(NameManglerPolicy{});
     SymbolTable mSymbolTable;

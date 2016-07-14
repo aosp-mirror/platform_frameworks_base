@@ -28,9 +28,8 @@ namespace aapt {
 static ::testing::AssertionResult simpleHelper(const char* input, const char* expected,
                                                Pseudolocalizer::Method method) {
     Pseudolocalizer pseudo(method);
-    std::string result = util::utf16ToUtf8(
-            pseudo.start() + pseudo.text(util::utf8ToUtf16(input)) + pseudo.end());
-    if (StringPiece(expected) != result) {
+    std::string result = pseudo.start() + pseudo.text(input) + pseudo.end();
+    if (result != expected) {
         return ::testing::AssertionFailure() << expected << " != " << result;
     }
     return ::testing::AssertionSuccess();
@@ -40,12 +39,9 @@ static ::testing::AssertionResult compoundHelper(const char* in1, const char* in
                                                  const char* expected,
                                                  Pseudolocalizer::Method method) {
     Pseudolocalizer pseudo(method);
-    std::string result = util::utf16ToUtf8(pseudo.start() +
-                                           pseudo.text(util::utf8ToUtf16(in1)) +
-                                           pseudo.text(util::utf8ToUtf16(in2)) +
-                                           pseudo.text(util::utf8ToUtf16(in3)) +
-                                           pseudo.end());
-    if (StringPiece(expected) != result) {
+    std::string result = pseudo.start() + pseudo.text(in1) + pseudo.text(in2) + pseudo.text(in3) +
+            pseudo.end();
+    if (result != expected) {
         return ::testing::AssertionFailure() << expected << " != " << result;
     }
     return ::testing::AssertionSuccess();
@@ -218,10 +214,10 @@ TEST(PseudolocalizerTest, NestedICU) {
 
 TEST(PseudolocalizerTest, RedefineMethod) {
     Pseudolocalizer pseudo(Pseudolocalizer::Method::kAccent);
-    std::u16string result = pseudo.text(u"Hello, ");
+    std::string result = pseudo.text("Hello, ");
     pseudo.setMethod(Pseudolocalizer::Method::kNone);
-    result += pseudo.text(u"world!");
-    ASSERT_EQ(StringPiece("Ĥéļļö, world!"), util::utf16ToUtf8(result));
+    result += pseudo.text("world!");
+    ASSERT_EQ(StringPiece("Ĥéļļö, world!"), result);
 }
 
 } // namespace aapt

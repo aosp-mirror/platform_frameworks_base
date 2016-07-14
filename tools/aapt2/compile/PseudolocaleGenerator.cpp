@@ -29,7 +29,7 @@ std::unique_ptr<StyledString> pseudolocalizeStyledString(StyledString* string,
                                                          StringPool* pool) {
     Pseudolocalizer localizer(method);
 
-    const StringPiece16 originalText = *string->value->str;
+    const StringPiece originalText = *string->value->str;
 
     StyleString localized;
 
@@ -147,7 +147,7 @@ struct Visitor : public RawValueVisitor {
     }
 
     void visit(String* string) override {
-        std::u16string result = mLocalizer.start() + mLocalizer.text(*string->value) +
+        std::string result = mLocalizer.start() + mLocalizer.text(*string->value) +
                 mLocalizer.end();
         std::unique_ptr<String> localized = util::make_unique<String>(mPool->makeRef(result));
         localized->setSource(string->getSource());

@@ -804,8 +804,14 @@ const char* ResStringPool::string8At(size_t idx, size_t* outLen) const
         if (off < (mStringPoolSize-1)) {
             const uint8_t* strings = (uint8_t*)mStrings;
             const uint8_t* str = strings+off;
-            *outLen = decodeLength(&str);
-            size_t encLen = decodeLength(&str);
+
+            // Decode the UTF-16 length. This is not used if we're not
+            // converting to UTF-16 from UTF-8.
+            decodeLength(&str);
+
+            const size_t encLen = decodeLength(&str);
+            *outLen = encLen;
+
             if ((uint32_t)(str+encLen-strings) < mStringPoolSize) {
                 return (const char*)str;
             } else {

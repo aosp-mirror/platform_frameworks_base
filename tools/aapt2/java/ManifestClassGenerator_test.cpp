@@ -15,10 +15,7 @@
  */
 
 #include "java/ManifestClassGenerator.h"
-#include "test/Builders.h"
-#include "test/Context.h"
-
-#include <gtest/gtest.h>
+#include "test/Test.h"
 
 namespace aapt {
 

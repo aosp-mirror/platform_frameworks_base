@@ -37,7 +37,7 @@ struct IAaptContext {
 
     virtual SymbolTable* getExternalSymbols() = 0;
     virtual IDiagnostics* getDiagnostics() = 0;
-    virtual const std::u16string& getCompilationPackage() = 0;
+    virtual const std::string& getCompilationPackage() = 0;
     virtual uint8_t getPackageId() = 0;
     virtual NameMangler* getNameMangler() = 0;
     virtual bool verbose() = 0;

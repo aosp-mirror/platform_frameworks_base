@@ -16,10 +16,9 @@
 
 #include "ConfigDescription.h"
 #include "SdkConstants.h"
-
+#include "test/Test.h"
 #include "util/StringPiece.h"
 
-#include <gtest/gtest.h>
 #include <string>
 
 namespace aapt {

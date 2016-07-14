@@ -33,7 +33,7 @@ void serializeStringPoolToPb(const StringPool& pool, pb::StringPool* outPbPool) 
 }
 
 void serializeSourceToPb(const Source& source, StringPool* srcPool, pb::Source* outPbSource) {
-    StringPool::Ref ref = srcPool->makeRef(util::utf8ToUtf16(source.path));
+    StringPool::Ref ref = srcPool->makeRef(source.path);
     outPbSource->set_path_idx(static_cast<uint32_t>(ref.getIndex()));
     if (source.line) {
         outPbSource->set_line_no(static_cast<uint32_t>(source.line.value()));
@@ -43,7 +43,7 @@ void serializeSourceToPb(const Source& source, StringPool* srcPool, pb::Source* 
 void deserializeSourceFromPb(const pb::Source& pbSource, const android::ResStringPool& srcPool,
                              Source* outSource) {
     if (pbSource.has_path_idx()) {
-        outSource->path = util::getString8(srcPool, pbSource.path_idx()).toString();
+        outSource->path = util::getString(srcPool, pbSource.path_idx());
     }
 
     if (pbSource.has_line_no()) {

@@ -25,12 +25,12 @@
 
 namespace aapt {
 
-static Maybe<StringPiece16> extractJavaIdentifier(IDiagnostics* diag, const Source& source,
-                                                  const StringPiece16& value) {
-    const StringPiece16 sep = u".";
+static Maybe<StringPiece> extractJavaIdentifier(IDiagnostics* diag, const Source& source,
+                                                const StringPiece& value) {
+    const StringPiece sep = ".";
     auto iter = std::find_end(value.begin(), value.end(), sep.begin(), sep.end());
 
-    StringPiece16 result;
+    StringPiece result;
     if (iter != value.end()) {
         result.assign(iter + sep.size(), value.end() - (iter + sep.size()));
     } else {
@@ -42,15 +42,15 @@ static Maybe<StringPiece16> extractJavaIdentifier(IDiagnostics* diag, const Sour
         return {};
     }
 
-    iter = util::findNonAlphaNumericAndNotInSet(result, u"_");
+    iter = util::findNonAlphaNumericAndNotInSet(result, "_");
     if (iter != result.end()) {
         diag->error(DiagMessage(source)
-                    << "invalid character '" << StringPiece16(iter, 1)
+                    << "invalid character '" << StringPiece(iter, 1)
                     << "' in '" << result << "'");
         return {};
     }
 
-    if (*result.begin() >= u'0' && *result.begin() <= u'9') {
+    if (*result.begin() >= '0' && *result.begin() <= '9') {
         diag->error(DiagMessage(source) << "symbol can not start with a digit");
         return {};
     }
@@ -60,20 +60,20 @@ static Maybe<StringPiece16> extractJavaIdentifier(IDiagnostics* diag, const Sour
 
 static bool writeSymbol(const Source& source, IDiagnostics* diag, xml::Element* el,
                         ClassDefinition* classDef) {
-    xml::Attribute* attr = el->findAttribute(xml::kSchemaAndroid, u"name");
+    xml::Attribute* attr = el->findAttribute(xml::kSchemaAndroid, "name");
     if (!attr) {
         diag->error(DiagMessage(source) << "<" << el->name << "> must define 'android:name'");
         return false;
     }
 
-    Maybe<StringPiece16> result = extractJavaIdentifier(diag, source.withLine(el->lineNumber),
-                                                        attr->value);
+    Maybe<StringPiece> result = extractJavaIdentifier(diag, source.withLine(el->lineNumber),
+                                                      attr->value);
     if (!result) {
         return false;
     }
 
     std::unique_ptr<StringMember> stringMember = util::make_unique<StringMember>(
-            util::utf16ToUtf8(result.value()), util::utf16ToUtf8(attr->value));
+            result.value(), attr->value);
     stringMember->getCommentBuilder()->appendComment(el->comment);
 
     classDef->addMember(std::move(stringMember));
@@ -87,7 +87,7 @@ std::unique_ptr<ClassDefinition> generateManifestClass(IDiagnostics* diag, xml::
         return {};
     }
 
-    if (el->name != u"manifest" && !el->namespaceUri.empty()) {
+    if (el->name != "manifest" && !el->namespaceUri.empty()) {
         diag->error(DiagMessage(res->file.source) << "no <manifest> root tag defined");
         return {};
     }
@@ -102,9 +102,9 @@ std::unique_ptr<ClassDefinition> generateManifestClass(IDiagnostics* diag, xml::
     std::vector<xml::Element*> children = el->getChildElements();
     for (xml::Element* childEl : children) {
         if (childEl->namespaceUri.empty()) {
-            if (childEl->name == u"permission") {
+            if (childEl->name == "permission") {
                 error |= !writeSymbol(res->file.source, diag, childEl, permissionClass.get());
-            } else if (childEl->name == u"permission-group") {
+            } else if (childEl->name == "permission-group") {
                 error |= !writeSymbol(res->file.source, diag, childEl, permissionGroupClass.get());
             }
         }

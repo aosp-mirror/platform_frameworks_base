@@ -35,11 +35,11 @@ static bool lessThanType(const std::unique_ptr<ResourceTableType>& lhs, Resource
 
 template <typename T>
 static bool lessThanStructWithName(const std::unique_ptr<T>& lhs,
-                                   const StringPiece16& rhs) {
+                                   const StringPiece& rhs) {
     return lhs->name.compare(0, lhs->name.size(), rhs.data(), rhs.size()) < 0;
 }
 
-ResourceTablePackage* ResourceTable::findPackage(const StringPiece16& name) {
+ResourceTablePackage* ResourceTable::findPackage(const StringPiece& name) {
     const auto last = packages.end();
     auto iter = std::lower_bound(packages.begin(), last, name,
                                  lessThanStructWithName<ResourceTablePackage>);
@@ -58,7 +58,7 @@ ResourceTablePackage* ResourceTable::findPackageById(uint8_t id) {
     return nullptr;
 }
 
-ResourceTablePackage* ResourceTable::createPackage(const StringPiece16& name, Maybe<uint8_t> id) {
+ResourceTablePackage* ResourceTable::createPackage(const StringPiece& name, Maybe<uint8_t> id) {
     ResourceTablePackage* package = findOrCreatePackage(name);
     if (id && !package->id) {
         package->id = id;
@@ -71,7 +71,7 @@ ResourceTablePackage* ResourceTable::createPackage(const StringPiece16& name, Ma
     return package;
 }
 
-ResourceTablePackage* ResourceTable::findOrCreatePackage(const StringPiece16& name) {
+ResourceTablePackage* ResourceTable::findOrCreatePackage(const StringPiece& name) {
     const auto last = packages.end();
     auto iter = std::lower_bound(packages.begin(), last, name,
                                  lessThanStructWithName<ResourceTablePackage>);
@@ -102,7 +102,7 @@ ResourceTableType* ResourceTablePackage::findOrCreateType(ResourceType type) {
     return types.emplace(iter, new ResourceTableType(type))->get();
 }
 
-ResourceEntry* ResourceTableType::findEntry(const StringPiece16& name) {
+ResourceEntry* ResourceTableType::findEntry(const StringPiece& name) {
     const auto last = entries.end();
     auto iter = std::lower_bound(entries.begin(), last, name,
                                  lessThanStructWithName<ResourceEntry>);
@@ -112,7 +112,7 @@ ResourceEntry* ResourceTableType::findEntry(const StringPiece16& name) {
     return nullptr;
 }
 
-ResourceEntry* ResourceTableType::findOrCreateEntry(const StringPiece16& name) {
+ResourceEntry* ResourceTableType::findOrCreateEntry(const StringPiece& name) {
     auto last = entries.end();
     auto iter = std::lower_bound(entries.begin(), last, name,
                                  lessThanStructWithName<ResourceEntry>);
@@ -261,8 +261,8 @@ int ResourceTable::resolveValueCollision(Value* existing, Value* incoming) {
     return 0;
 }
 
-static constexpr const char16_t* kValidNameChars = u"._-";
-static constexpr const char16_t* kValidNameMangledChars = u"._-$";
+static constexpr const char* kValidNameChars = "._-";
+static constexpr const char* kValidNameMangledChars = "._-$";
 
 bool ResourceTable::addResource(const ResourceNameRef& name,
                                 const ConfigDescription& config,
@@ -286,7 +286,7 @@ bool ResourceTable::addResource(const ResourceNameRef& name,
 bool ResourceTable::addFileReference(const ResourceNameRef& name,
                                      const ConfigDescription& config,
                                      const Source& source,
-                                     const StringPiece16& path,
+                                     const StringPiece& path,
                                      IDiagnostics* diag) {
     return addFileReferenceImpl(name, config, source, path, nullptr, kValidNameChars, diag);
 }
@@ -294,7 +294,7 @@ bool ResourceTable::addFileReference(const ResourceNameRef& name,
 bool ResourceTable::addFileReferenceAllowMangled(const ResourceNameRef& name,
                                                  const ConfigDescription& config,
                                                  const Source& source,
-                                                 const StringPiece16& path,
+                                                 const StringPiece& path,
                                                  io::IFile* file,
                                                  IDiagnostics* diag) {
     return addFileReferenceImpl(name, config, source, path, file, kValidNameMangledChars, diag);
@@ -303,9 +303,9 @@ bool ResourceTable::addFileReferenceAllowMangled(const ResourceNameRef& name,
 bool ResourceTable::addFileReferenceImpl(const ResourceNameRef& name,
                                          const ConfigDescription& config,
                                          const Source& source,
-                                         const StringPiece16& path,
+                                         const StringPiece& path,
                                          io::IFile* file,
-                                         const char16_t* validChars,
+                                         const char* validChars,
                                          IDiagnostics* diag) {
     std::unique_ptr<FileReference> fileRef = util::make_unique<FileReference>(
             stringPool.makeRef(path));
@@ -339,7 +339,7 @@ bool ResourceTable::addResourceImpl(const ResourceNameRef& name,
                                     const ConfigDescription& config,
                                     const StringPiece& product,
                                     std::unique_ptr<Value> value,
-                                    const char16_t* validChars,
+                                    const char* validChars,
                                     std::function<int(Value*,Value*)> conflictResolver,
                                     IDiagnostics* diag) {
     assert(value && "value can't be nullptr");
@@ -353,7 +353,7 @@ bool ResourceTable::addResourceImpl(const ResourceNameRef& name,
                     << "' has invalid entry name '"
                     << name.entry
                     << "'. Invalid character '"
-                    << StringPiece16(badCharIter, 1)
+                    << StringPiece(badCharIter, 1)
                     << "'");
         return false;
     }
@@ -438,7 +438,7 @@ bool ResourceTable::setSymbolStateAllowMangled(const ResourceNameRef& name,
 }
 
 bool ResourceTable::setSymbolStateImpl(const ResourceNameRef& name, const ResourceId resId,
-                                       const Symbol& symbol, const char16_t* validChars,
+                                       const Symbol& symbol, const char* validChars,
                                        IDiagnostics* diag) {
     assert(diag && "diagnostics can't be nullptr");
 
@@ -450,7 +450,7 @@ bool ResourceTable::setSymbolStateImpl(const ResourceNameRef& name, const Resour
                     << "' has invalid entry name '"
                     << name.entry
                     << "'. Invalid character '"
-                    << StringPiece16(badCharIter, 1)
+                    << StringPiece(badCharIter, 1)
                     << "'");
         return false;
     }
