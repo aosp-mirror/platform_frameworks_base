@@ -2188,6 +2188,12 @@ message MetricsEvent {
     // Settings launched from collapsed quick settings.
     ACTION_QS_COLLAPSED_SETTINGS_LAUNCH = 490;
 
+    // OPEN: QS Night mode tile shown
+    // ACTION: QS Night mode tile tapped
+    //   SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: QUICK_SETTINGS
+    QS_NIGHT_DISPLAY = 491;
+
     // ---- End N-MR1 Constants, all N-MR1 constants go above this line ----
 
     // ------- Begin N Keyboard Shortcuts Helper -----
