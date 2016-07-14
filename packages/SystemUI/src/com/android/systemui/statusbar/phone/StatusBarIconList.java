@@ -81,9 +81,9 @@ public class StatusBarIconList {
 
     public void dump(PrintWriter pw) {
         final int N = mSlots.size();
-        pw.println("Icon list:");
+        pw.println("  icon slots: " + N);
         for (int i=0; i<N; i++) {
-            pw.printf("  %2d: (%s) %s\n", i, mSlots.get(i), mIcons.get(i));
+            pw.printf("    %2d: (%s) %s\n", i, mSlots.get(i), mIcons.get(i));
         }
     }
 }
