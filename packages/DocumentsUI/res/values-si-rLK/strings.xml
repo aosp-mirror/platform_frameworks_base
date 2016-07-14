@@ -111,8 +111,7 @@
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"මෙම ස්ථානය තුළ තෝරාගත් ගොනු ඇලවිය නොහැක."</string>
     <string name="menu_rename" msgid="7678802479104285353">"යළි නම් කරන්න"</string>
     <string name="rename_error" msgid="4203041674883412606">"ලේඛනය යළි නම් කිරීම අසාර්ථක විය"</string>
-    <!-- no translation found for menu_eject_root (2768224615494227325) -->
-    <skip />
+    <string name="menu_eject_root" msgid="2768224615494227325">"පිටතට ගන්න"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"සමහර ගොනු පරිවර්තනය කරන ලදී"</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"<xliff:g id="APPNAME"><b>^1</b></xliff:g> හට <xliff:g id="STORAGE"><i>^3</i></xliff:g> මත <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> නාමාවලිය වෙත ප්‍රවේශය දෙන්නද?"</string>
     <string name="open_external_dialog_request_primary_volume" msgid="6635562535713428688">"<xliff:g id="APPNAME"><b>^1</b></xliff:g> ප්‍රවේශය <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> නාමාවලිය වෙත ලබා දෙන්නද?"</string>
