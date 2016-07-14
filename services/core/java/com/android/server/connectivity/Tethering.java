@@ -450,8 +450,6 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
 
     private int setWifiTethering(final boolean enable) {
         synchronized (mPublicSync) {
-            // Note that we're maintaining a predicate that mWifiTetherRequested always matches
-            // our last request to WifiManager re: its AP enabled status.
             mWifiTetherRequested = enable;
             final WifiManager wifiManager =
                     (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
@@ -794,10 +792,6 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                 }
             } else if (action.equals(WifiManager.WIFI_AP_STATE_CHANGED_ACTION)) {
                 synchronized (Tethering.this.mPublicSync) {
-                    if (!mWifiTetherRequested) {
-                        // We only care when we're trying to tether via our WiFi interface.
-                        return;
-                    }
                     int curState =  intent.getIntExtra(WifiManager.EXTRA_WIFI_AP_STATE,
                             WifiManager.WIFI_AP_STATE_DISABLED);
                     switch (curState) {
@@ -805,8 +799,10 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                             // We can see this state on the way to both enabled and failure states.
                             break;
                         case WifiManager.WIFI_AP_STATE_ENABLED:
-                            // Tell an appropriate interface state machine that it should tether.
-                            tetherMatchingInterfaces(true, ConnectivityManager.TETHERING_WIFI);
+                            // When the AP comes up and we've been requested to tether it, do so.
+                            if (mWifiTetherRequested) {
+                                tetherMatchingInterfaces(true, ConnectivityManager.TETHERING_WIFI);
+                            }
                             break;
                         case WifiManager.WIFI_AP_STATE_DISABLED:
                         case WifiManager.WIFI_AP_STATE_DISABLING:
@@ -816,10 +812,20 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                                 Log.d(TAG, "Canceling WiFi tethering request - AP_STATE=" +
                                     curState);
                             }
-                            // Tell an appropriate interface state machine that
-                            // it needs to tear itself down.
-                            tetherMatchingInterfaces(false, ConnectivityManager.TETHERING_WIFI);
-                            setWifiTethering(false);
+                            // Tell appropriate interface state machines that they should tear
+                            // themselves down.
+                            for (int i = 0; i < mTetherStates.size(); i++) {
+                                TetherInterfaceStateMachine tism =
+                                        mTetherStates.valueAt(i).mStateMachine;
+                                if (tism.interfaceType() == ConnectivityManager.TETHERING_WIFI) {
+                                    tism.sendMessage(
+                                            TetherInterfaceStateMachine.CMD_TETHER_UNREQUESTED);
+                                    break;  // There should be at most one of these.
+                                }
+                            }
+                            // Regardless of whether we requested this transition, the AP has gone
+                            // down.  Don't try to tether again unless we're requested to do so.
+                            mWifiTetherRequested = false;
                             break;
                     }
                 }
