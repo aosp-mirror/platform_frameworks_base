@@ -46,4 +46,6 @@
     <dimen name="drag_shadow_width">160dp</dimen>
     <dimen name="drag_shadow_height">48dp</dimen>
 
+    <dimen name="autoscroll_edge_height">32dp</dimen>
+
 </resources>

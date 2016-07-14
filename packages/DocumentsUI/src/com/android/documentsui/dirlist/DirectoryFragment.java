@@ -74,7 +74,6 @@ import android.widget.Toolbar;
 import com.android.documentsui.BaseActivity;
 import com.android.documentsui.DirectoryLoader;
 import com.android.documentsui.DirectoryResult;
-import com.android.documentsui.clipping.DocumentClipper;
 import com.android.documentsui.DocumentsActivity;
 import com.android.documentsui.DocumentsApplication;
 import com.android.documentsui.Events.InputEvent;
@@ -93,6 +92,7 @@ import com.android.documentsui.Shared;
 import com.android.documentsui.Snackbars;
 import com.android.documentsui.State;
 import com.android.documentsui.State.ViewMode;
+import com.android.documentsui.clipping.DocumentClipper;
 import com.android.documentsui.clipping.UrisSupplier;
 import com.android.documentsui.dirlist.MultiSelectManager.Selection;
 import com.android.documentsui.dirlist.UserInputHandler.DocumentDetails;
@@ -183,7 +183,7 @@ public class DirectoryFragment extends Fragment
     private @Nullable BandController mBandController;
     private @Nullable ActionMode mActionMode;
 
-    private DirectoryDragListener mOnDragListener;
+    private DragScrollListener mOnDragListener;
     private MenuManager mMenuManager;
 
     @Override
@@ -210,7 +210,8 @@ public class DirectoryFragment extends Fragment
 
         mRecView.setItemAnimator(new DirectoryItemAnimator(getActivity()));
 
-        mOnDragListener = new DirectoryDragListener(this);
+        mOnDragListener = DragScrollListener.create(
+                getActivity(), new DirectoryDragListener(this), mRecView);
 
         // Make the recycler and the empty views responsive to drop events.
         mRecView.setOnDragListener(mOnDragListener);

@@ -21,7 +21,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.net.Uri;
 import android.os.Looper;
 import android.provider.DocumentsContract;
 import android.text.TextUtils;
@@ -30,10 +29,6 @@ import android.text.format.Time;
 import android.util.Log;
 import android.view.WindowManager;
 
-import com.android.documentsui.model.DocumentInfo;
-import com.android.documentsui.model.RootInfo;
-
-import java.io.FileNotFoundException;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.List;

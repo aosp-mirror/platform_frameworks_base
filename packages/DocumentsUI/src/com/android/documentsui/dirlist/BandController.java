@@ -19,6 +19,7 @@ package com.android.documentsui.dirlist;
 import static com.android.documentsui.Shared.DEBUG;
 import static com.android.documentsui.dirlist.ModelBackedDocumentsAdapter.ITEM_TYPE_DIRECTORY;
 import static com.android.documentsui.dirlist.ModelBackedDocumentsAdapter.ITEM_TYPE_DOCUMENT;
+import static com.android.documentsui.dirlist.ViewAutoScroller.NOT_SET;
 
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -39,6 +40,8 @@ import com.android.documentsui.Events.InputEvent;
 import com.android.documentsui.Events.MotionInputEvent;
 import com.android.documentsui.R;
 import com.android.documentsui.dirlist.MultiSelectManager.Selection;
+import com.android.documentsui.dirlist.ViewAutoScroller.ScrollActionDelegate;
+import com.android.documentsui.dirlist.ViewAutoScroller.ScrollDistanceDelegate;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -54,15 +57,14 @@ import java.util.Set;
  */
 public class BandController extends RecyclerView.OnScrollListener {
 
-    private static final int NOT_SET = -1;
-
     private static final String TAG = "BandController";
+    private static final int AUTOSCROLL_EDGE_HEIGHT = 1;
 
     private final Runnable mModelBuilder;
     private final SelectionEnvironment mEnvironment;
     private final DocumentsAdapter mAdapter;
     private final MultiSelectManager mSelectionManager;
-    private final Runnable mViewScroller = new ViewScroller();
+    private final Runnable mViewScroller;
     private final GridModel.OnSelectionChangedListener mGridListener;
 
     @Nullable private Rect mBounds;
@@ -70,9 +72,6 @@ public class BandController extends RecyclerView.OnScrollListener {
     @Nullable private Point mOrigin;
     @Nullable private BandController.GridModel mModel;
 
-    // The time at which the current band selection-induced scroll began. If no scroll is in
-    // progress, the value is NOT_SET.
-    private long mScrollStartTime = NOT_SET;
     private Selection mSelection;
 
     public BandController(
@@ -114,6 +113,25 @@ public class BandController extends RecyclerView.OnScrollListener {
         mSelectionManager = selectionManager;
 
         mEnvironment.addOnScrollListener(this);
+        mViewScroller = new ViewAutoScroller(
+                AUTOSCROLL_EDGE_HEIGHT,
+                new ScrollDistanceDelegate() {
+                    @Override
+                    public Point getCurrentPosition() {
+                        return mCurrentPosition;
+                    }
+
+                    @Override
+                    public int getViewHeight() {
+                        return mEnvironment.getHeight();
+                    }
+
+                    @Override
+                    public boolean isActive() {
+                        return BandController.this.isActive();
+                    }
+                },
+                env);
 
         mAdapter.registerAdapterDataObserver(
                 new RecyclerView.AdapterDataObserver() {
@@ -173,6 +191,10 @@ public class BandController extends RecyclerView.OnScrollListener {
         };
     }
 
+    private boolean isActive() {
+        return mModel != null;
+    }
+
     void bindSelection(Selection selection) {
         mSelection = selection;
     }
@@ -210,10 +232,6 @@ public class BandController extends RecyclerView.OnScrollListener {
         }
 
         return isActive();
-    }
-
-    private boolean isActive() {
-        return mModel != null;
     }
 
     /**
@@ -335,112 +353,6 @@ public class BandController extends RecyclerView.OnScrollListener {
     private boolean onBeforeItemStateChange(String id, boolean nextState) {
         return mSelectionManager.notifyBeforeItemStateChange(id, nextState);
     }
-
-    private class ViewScroller implements Runnable {
-        /**
-         * The number of milliseconds of scrolling at which scroll speed continues to increase.
-         * At first, the scroll starts slowly; then, the rate of scrolling increases until it
-         * reaches its maximum value at after this many milliseconds.
-         */
-        private static final long SCROLL_ACCELERATION_LIMIT_TIME_MS = 2000;
-
-        @Override
-        public void run() {
-            // Compute the number of pixels the pointer's y-coordinate is past the view.
-            // Negative values mean the pointer is at or before the top of the view, and
-            // positive values mean that the pointer is at or after the bottom of the view. Note
-            // that one additional pixel is added here so that the view still scrolls when the
-            // pointer is exactly at the top or bottom.
-            int pixelsPastView = 0;
-            if (mCurrentPosition.y <= 0) {
-                pixelsPastView = mCurrentPosition.y - 1;
-            } else if (mCurrentPosition.y >= mEnvironment.getHeight() - 1) {
-                pixelsPastView = mCurrentPosition.y - mEnvironment.getHeight() + 1;
-            }
-
-            if (!isActive() || pixelsPastView == 0) {
-                // If band selection is inactive, or if it is active but not at the edge of the
-                // view, no scrolling is necessary.
-                mScrollStartTime = NOT_SET;
-                return;
-            }
-
-            if (mScrollStartTime == NOT_SET) {
-                // If the pointer was previously not at the edge of the view but now is, set the
-                // start time for the scroll.
-                mScrollStartTime = System.currentTimeMillis();
-            }
-
-            // Compute the number of pixels to scroll, and scroll that many pixels.
-            final int numPixels = computeScrollDistance(
-                    pixelsPastView, System.currentTimeMillis() - mScrollStartTime);
-            mEnvironment.scrollBy(numPixels);
-
-            mEnvironment.removeCallback(mViewScroller);
-            mEnvironment.runAtNextFrame(this);
-        }
-
-        /**
-         * Computes the number of pixels to scroll based on how far the pointer is past the end
-         * of the view and how long it has been there. Roughly based on ItemTouchHelper's
-         * algorithm for computing the number of pixels to scroll when an item is dragged to the
-         * end of a {@link RecyclerView}.
-         * @param pixelsPastView
-         * @param scrollDuration
-         * @return
-         */
-        private int computeScrollDistance(int pixelsPastView, long scrollDuration) {
-            final int maxScrollStep = mEnvironment.getHeight();
-            final int direction = (int) Math.signum(pixelsPastView);
-            final int absPastView = Math.abs(pixelsPastView);
-
-            // Calculate the ratio of how far out of the view the pointer currently resides to
-            // the entire height of the view.
-            final float outOfBoundsRatio = Math.min(
-                    1.0f, (float) absPastView / mEnvironment.getHeight());
-            // Interpolate this ratio and use it to compute the maximum scroll that should be
-            // possible for this step.
-            final float cappedScrollStep =
-                    direction * maxScrollStep * smoothOutOfBoundsRatio(outOfBoundsRatio);
-
-            // Likewise, calculate the ratio of the time spent in the scroll to the limit.
-            final float timeRatio = Math.min(
-                    1.0f, (float) scrollDuration / SCROLL_ACCELERATION_LIMIT_TIME_MS);
-            // Interpolate this ratio and use it to compute the final number of pixels to
-            // scroll.
-            final int numPixels = (int) (cappedScrollStep * smoothTimeRatio(timeRatio));
-
-            // If the final number of pixels to scroll ends up being 0, the view should still
-            // scroll at least one pixel.
-            return numPixels != 0 ? numPixels : direction;
-        }
-
-        /**
-         * Interpolates the given out of bounds ratio on a curve which starts at (0,0) and ends
-         * at (1,1) and quickly approaches 1 near the start of that interval. This ensures that
-         * drags that are at the edge or barely past the edge of the view still cause sufficient
-         * scrolling. The equation y=(x-1)^5+1 is used, but this could also be tweaked if
-         * needed.
-         * @param ratio A ratio which is in the range [0, 1].
-         * @return A "smoothed" value, also in the range [0, 1].
-         */
-        private float smoothOutOfBoundsRatio(float ratio) {
-            return (float) Math.pow(ratio - 1.0f, 5) + 1.0f;
-        }
-
-        /**
-         * Interpolates the given time ratio on a curve which starts at (0,0) and ends at (1,1)
-         * and stays close to 0 for most input values except those very close to 1. This ensures
-         * that scrolls start out very slowly but speed up drastically after the scroll has been
-         * in progress close to SCROLL_ACCELERATION_LIMIT_TIME_MS. The equation y=x^5 is used,
-         * but this could also be tweaked if needed.
-         * @param ratio A ratio which is in the range [0, 1].
-         * @return A "smoothed" value, also in the range [0, 1].
-         */
-        private float smoothTimeRatio(float ratio) {
-            return (float) Math.pow(ratio, 5);
-        }
-    };
 
     @Override
     public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
@@ -1110,16 +1022,13 @@ public class BandController extends RecyclerView.OnScrollListener {
      * Provides functionality for BandController. Exists primarily to tests that are
      * fully isolated from RecyclerView.
      */
-    interface SelectionEnvironment {
+    interface SelectionEnvironment extends ScrollActionDelegate {
         void showBand(Rect rect);
         void hideBand();
         void addOnScrollListener(RecyclerView.OnScrollListener listener);
         void removeOnScrollListener(RecyclerView.OnScrollListener listener);
-        void scrollBy(int dy);
         int getHeight();
         void invalidateView();
-        void runAtNextFrame(Runnable r);
-        void removeCallback(Runnable r);
         Point createAbsolutePoint(Point relativePoint);
         Rect getAbsoluteRectForChildViewAt(int index);
         int getAdapterPositionAt(int index);
