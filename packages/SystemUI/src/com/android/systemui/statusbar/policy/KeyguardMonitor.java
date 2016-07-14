@@ -112,6 +112,10 @@ public final class KeyguardMonitor extends KeyguardUpdateMonitorCallback {
         notifyKeyguardChanged();
     }
 
+    public boolean isDeviceInteractive() {
+        return mKeyguardUpdateMonitor.isDeviceInteractive();
+    }
+
     private void updateCanSkipBouncerState() {
         mCanSkipBouncer = mKeyguardUpdateMonitor.getUserCanSkipBouncer(mCurrentUser);
     }
