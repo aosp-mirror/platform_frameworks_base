@@ -17,6 +17,7 @@
 package android.net.wifi.nan;
 
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.net.wifi.RttManager;
 import android.util.Log;
 
@@ -167,7 +168,7 @@ public class WifiNanSession {
      *                 {@link android.net.wifi.RttManager.RttParams#bssid} member must be set to
      *                 a peer ID - not to a MAC address.
      * @param listener The listener to receive the results of the ranging session.
-     * @hide (RTT API isn't public yet so can't unhide here)
+     * @hide PROPOSED_NAN_SYSTEM_API [TODO: b/28847998 - track RTT API & visilibity]
      */
     public void startRanging(RttManager.RttParams[] params, RttManager.RttListener listener) {
         if (mTerminated) {
