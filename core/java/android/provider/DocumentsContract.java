@@ -235,7 +235,6 @@ public final class DocumentsContract {
          * @see #FLAG_DIR_PREFERS_GRID
          * @see #FLAG_DIR_PREFERS_LAST_MODIFIED
          * @see #FLAG_VIRTUAL_DOCUMENT
-         * @see #FLAG_ARCHIVE
          * @see #FLAG_SUPPORTS_COPY
          * @see #FLAG_SUPPORTS_MOVE
          * @see #FLAG_SUPPORTS_REMOVE
@@ -326,7 +325,7 @@ public final class DocumentsContract {
          * Flag indicating that a document can be renamed.
          *
          * @see #COLUMN_FLAGS
-         * @see DocumentsContract#renameDocument(ContentProviderClient, Uri,
+         * @see DocumentsContract#renameDocument(ContentResolver, Uri,
          *      String)
          * @see DocumentsProvider#renameDocument(String, String)
          */
@@ -337,7 +336,7 @@ public final class DocumentsContract {
          * within the same document provider.
          *
          * @see #COLUMN_FLAGS
-         * @see DocumentsContract#copyDocument(ContentProviderClient, Uri, Uri)
+         * @see DocumentsContract#copyDocument(ContentResolver, Uri, Uri)
          * @see DocumentsProvider#copyDocument(String, String)
          */
         public static final int FLAG_SUPPORTS_COPY = 1 << 7;
@@ -347,7 +346,7 @@ public final class DocumentsContract {
          * within the same document provider.
          *
          * @see #COLUMN_FLAGS
-         * @see DocumentsContract#moveDocument(ContentProviderClient, Uri, Uri, Uri)
+         * @see DocumentsContract#moveDocument(ContentResolver, Uri, Uri, Uri)
          * @see DocumentsProvider#moveDocument(String, String, String)
          */
         public static final int FLAG_SUPPORTS_MOVE = 1 << 8;
@@ -368,7 +367,7 @@ public final class DocumentsContract {
          * Flag indicating that a document can be removed from a parent.
          *
          * @see #COLUMN_FLAGS
-         * @see DocumentsContract#removeDocument(ContentProviderClient, Uri, Uri)
+         * @see DocumentsContract#removeDocument(ContentResolver, Uri, Uri)
          * @see DocumentsProvider#removeDocument(String, String)
          */
         public static final int FLAG_SUPPORTS_REMOVE = 1 << 10;
@@ -870,7 +869,7 @@ public final class DocumentsContract {
      * Test if the given URI represents a {@link Document} tree.
      *
      * @see #buildTreeDocumentUri(String, String)
-     * @see #getTreeDocumentId(Uri, String)
+     * @see #getTreeDocumentId(Uri)
      */
     public static boolean isTreeUri(Uri uri) {
         final List<String> paths = uri.getPathSegments();
