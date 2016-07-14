@@ -3074,7 +3074,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         final boolean nowVisible = allResumedActivitiesVisible();
         for (int activityNdx = mStoppingActivities.size() - 1; activityNdx >= 0; --activityNdx) {
             ActivityRecord s = mStoppingActivities.get(activityNdx);
-            final boolean waitingVisible = mWaitingVisibleActivities.contains(s);
+            boolean waitingVisible = mWaitingVisibleActivities.contains(s);
             if (DEBUG_STATES) Slog.v(TAG, "Stopping " + s + ": nowVisible=" + nowVisible
                     + " waitingVisible=" + waitingVisible + " finishing=" + s.finishing);
             if (waitingVisible && nowVisible) {
@@ -3087,6 +3087,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     // hidden by the activities in front of it.
                     if (DEBUG_STATES) Slog.v(TAG, "Before stopping, can hide: " + s);
                     mWindowManager.setAppVisibility(s.appToken, false);
+                    waitingVisible = false;
                 }
             }
             if ((!waitingVisible || mService.isSleepingOrShuttingDownLocked()) && remove) {
