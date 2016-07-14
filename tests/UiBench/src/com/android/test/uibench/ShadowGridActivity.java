@@ -23,19 +23,22 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 
 public class ShadowGridActivity extends AppCompatActivity {
+    public static class NoDividerListFragment extends ListFragment {
+        @Override
+        public void onViewCreated(View view, Bundle savedInstanceState) {
+            super.onViewCreated(view, savedInstanceState);
+            getListView().setDivider(null);
+        }
+    };
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         FragmentManager fm = getSupportFragmentManager();
         if (fm.findFragmentById(android.R.id.content) == null) {
-            ListFragment listFragment = new ListFragment() {
-                @Override
-                public void onViewCreated(View view, Bundle savedInstanceState) {
-                    super.onViewCreated(view, savedInstanceState);
-                    getListView().setDivider(null);
-                }
-            };
+            ListFragment listFragment = new NoDividerListFragment();
 
             listFragment.setListAdapter(new ArrayAdapter<>(this,
                     R.layout.card_row, R.id.card_text, TextUtils.buildSimpleStringList()));
