@@ -77,32 +77,10 @@ Android N Preview SDK in Android Studio as follows:</p>
 <h3 id="docs-dl">Get the N Preview reference documentation</h3>
 
 <p>Beginning with the Preview 4 release, the API reference for the
-N platform (API level 24) is now available online at <a href=
-  "{@docRoot}reference/">developer.android.com/reference/</a>.
-</p>
-
-<p>If you'd like an offline copy of the API reference, you can download it
-from the following table. The download also includes an incremental diff report
-for API changes between the Preview 3 and Preview 4 release, which is not
-available online.</p>
-
-<table>
-  <tr>
-    <th scope="col">Documentation</th>
-    <th scope="col">Checksums</th>
-  </tr>
-  <tr>
-    <td style="white-space: nowrap">
-    <a href="{@docRoot}shareables/preview/n-preview-4-docs.zip"
-      >n-preview-4-docs.zip</a></td>
-    <td width="100%">
-      MD5: f853e3ba0707083336dfa780b8fed9a7<br>
-      SHA-1: 36fcbc497cc2e63b1bc1d629c304b0ba43a88946
-    </td>
-  </tr>
-</table>
-
-
+  N platform (API level 24) is now available online at <a href=
+  "{@docRoot}reference/">developer.android.com/reference/</a>. There is also
+  an incremental diff report for <a href="{@docRoot}sdk/api_diff/24/changes.html"
+  >API changes between API levels 23 and 24</a>.</p>
 
 <h2 id="java8">Get the Java 8 JDK</h2>
 
