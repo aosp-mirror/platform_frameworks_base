@@ -34,7 +34,7 @@ import android.os.AsyncTask;
 abstract class CheckedTask<Input, Output>
         extends AsyncTask<Input, Void, Output> {
 
-    private Check mCheck ;
+    private Check mCheck;
 
     public CheckedTask(Check check) {
         mCheck = check;
