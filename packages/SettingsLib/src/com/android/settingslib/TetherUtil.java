@@ -16,17 +16,10 @@
 package com.android.settingslib;
 
 import android.content.Context;
-import android.net.wifi.WifiManager;
 import android.os.SystemProperties;
 import android.telephony.CarrierConfigManager;
 
 public class TetherUtil {
-
-    public static boolean setWifiTethering(boolean enable, Context context) {
-        final WifiManager wifiManager =
-                (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-        return wifiManager.setWifiApEnabled(null, enable);
-    }
 
     private static boolean isEntitlementCheckRequired(Context context) {
         final CarrierConfigManager configManager = (CarrierConfigManager) context
