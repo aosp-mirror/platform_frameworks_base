@@ -15,7 +15,8 @@
      limitations under the License.
 -->
 <!-- extends FrameLayout -->
-<com.android.systemui.qs.QSDetailItems xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.systemui.qs.QSDetailItems
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:sysui="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -28,26 +29,26 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        sysui:itemHeight="@dimen/qs_detail_item_height" />
+        sysui:itemHeight="@dimen/qs_detail_item_height"/>
 
     <LinearLayout
         android:id="@android:id/empty"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_gravity="center"
-        android:gravity="center_horizontal"
-        android:orientation="vertical" >
+        android:gravity="center"
+        android:orientation="vertical">
 
         <ImageView
             android:id="@android:id/icon"
             android:layout_width="56dp"
-            android:layout_height="56dp" />
+            android:layout_height="56dp"/>
 
         <TextView
             android:id="@android:id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            android:textAppearance="@style/TextAppearance.QS.DetailEmpty" />
+            android:textAppearance="@style/TextAppearance.QS.DetailEmpty"/>
     </LinearLayout>
 </com.android.systemui.qs.QSDetailItems>
