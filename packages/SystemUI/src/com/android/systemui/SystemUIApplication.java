@@ -55,7 +55,8 @@ public class SystemUIApplication extends Application {
             com.android.systemui.media.RingtonePlayer.class,
             com.android.systemui.keyboard.KeyboardUI.class,
             com.android.systemui.tv.pip.PipUI.class,
-            com.android.systemui.shortcut.ShortcutKeyDispatcher.class
+            com.android.systemui.shortcut.ShortcutKeyDispatcher.class,
+            com.android.systemui.VendorServices.class
     };
 
     /**

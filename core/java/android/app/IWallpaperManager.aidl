@@ -49,7 +49,7 @@ interface IWallpaperManager {
     /**
      * Set the live wallpaper. This only affects the system wallpaper.
      */
-    void setWallpaperComponentChecked(in ComponentName name, in String callingPackage);
+    void setWallpaperComponentChecked(in ComponentName name, in String callingPackage, int userId);
 
     /**
      * Set the live wallpaper. This only affects the system wallpaper.

@@ -1404,12 +1404,26 @@ public class WallpaperManager {
      */
     @SystemApi
     public boolean setWallpaperComponent(ComponentName name) {
+        return setWallpaperComponent(name, UserHandle.myUserId());
+    }
+
+    /**
+     * Set the live wallpaper.
+     *
+     * This can only be called by packages with android.permission.SET_WALLPAPER_COMPONENT
+     * permission. The caller must hold the INTERACT_ACROSS_USERS_FULL permission to change
+     * another user's wallpaper.
+     *
+     * @hide
+     */
+    public boolean setWallpaperComponent(ComponentName name, int userId) {
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
             throw new RuntimeException(new DeadSystemException());
         }
         try {
-            sGlobals.mService.setWallpaperComponentChecked(name, mContext.getOpPackageName());
+            sGlobals.mService.setWallpaperComponentChecked(name, mContext.getOpPackageName(),
+                    userId);
             return true;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
