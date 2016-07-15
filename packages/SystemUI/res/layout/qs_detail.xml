@@ -47,11 +47,12 @@
     <com.android.systemui.qs.NonInterceptingScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:fillViewport="true">
         <FrameLayout
             android:id="@android:id/content"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="match_parent"/>
     </com.android.systemui.qs.NonInterceptingScrollView>
 
     <include layout="@layout/qs_detail_buttons" />
