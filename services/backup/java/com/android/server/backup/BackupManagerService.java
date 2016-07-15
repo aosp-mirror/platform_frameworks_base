@@ -5707,16 +5707,21 @@ public class BackupManagerService {
         }
 
         void tearDownPipes() {
-            if (mPipes != null) {
-                try {
-                    mPipes[0].close();
-                    mPipes[0] = null;
-                    mPipes[1].close();
-                    mPipes[1] = null;
-                } catch (IOException e) {
-                    Slog.w(TAG, "Couldn't close agent pipes", e);
+            // Teardown might arise from the inline restore processing or from the asynchronous
+            // timeout mechanism, and these might race.  Make sure we don't try to close and
+            // null out the pipes twice.
+            synchronized (this) {
+                if (mPipes != null) {
+                    try {
+                        mPipes[0].close();
+                        mPipes[0] = null;
+                        mPipes[1].close();
+                        mPipes[1] = null;
+                    } catch (IOException e) {
+                        Slog.w(TAG, "Couldn't close agent pipes", e);
+                    }
+                    mPipes = null;
                 }
-                mPipes = null;
             }
         }
 
