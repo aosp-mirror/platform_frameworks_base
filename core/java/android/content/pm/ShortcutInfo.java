@@ -652,7 +652,7 @@ public final class ShortcutInfo implements Parcelable {
     /** @hide */
     public static IllegalArgumentException getInvalidIconException() {
         return new IllegalArgumentException("Unsupported icon type:"
-                +" only bitmap, resource and content URI are supported");
+                +" only the bitmap and resource types are supported");
     }
 
     /**
