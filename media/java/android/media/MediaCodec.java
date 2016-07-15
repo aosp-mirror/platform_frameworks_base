@@ -133,9 +133,10 @@ import java.util.Map;
  <p class=note>
  Note that on some devices the slice-height is advertised as 0. This could mean either that the
  slice-height is the same as the frame height, or that the slice-height is the frame height
- aligned to some value (usually a power of 2). Unfortunately, there is no way to tell the actual
- slice height in this case. Furthermore, the vertical stride of the {@code U} plane in planar
- formats is also not specified or defined, though usually it is half of the slice height.
+ aligned to some value (usually a power of 2). Unfortunately, there is no standard and simple way
+ to tell the actual slice height in this case. Furthermore, the vertical stride of the {@code U}
+ plane in planar formats is also not specified or defined, though usually it is half of the slice
+ height.
  <p>
  The {@link MediaFormat#KEY_WIDTH} and {@link MediaFormat#KEY_HEIGHT} keys specify the size of the
  video frames; however, for most encondings the video (picture) only occupies a portion of the
@@ -620,8 +621,9 @@ import java.util.Map;
  mode} will be automatically applied with one exception:
  <p class=note>
  Prior to the {@link android.os.Build.VERSION_CODES#M} release, software decoders may not
- have applied the rotation when being rendered onto a Surface. Unfortunately, there is no way to
- identify software decoders, or if they apply the rotation other than by trying it out.
+ have applied the rotation when being rendered onto a Surface. Unfortunately, there is no standard
+ and simple way to identify software decoders, or if they apply the rotation other than by trying
+ it out.
  <p>
  There are also some caveats.
  <p class=note>
