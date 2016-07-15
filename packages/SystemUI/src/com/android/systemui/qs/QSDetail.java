@@ -67,6 +67,8 @@ public class QSDetail extends LinearLayout {
     private boolean mTriggeredExpand;
     private int mOpenX;
     private int mOpenY;
+    private boolean mAnimating;
+    private boolean mSwitchState;
 
     public QSDetail(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -158,7 +160,7 @@ public class QSDetail extends LinearLayout {
                 mQsDetailHeader.setClickable(false);
             } else {
                 mQsDetailHeaderSwitch.setVisibility(VISIBLE);
-                mQsDetailHeaderSwitch.setChecked(toggleState);
+                handleToggleStateChanged(toggleState);
                 mQsDetailHeader.setClickable(true);
                 mQsDetailHeader.setOnClickListener(new OnClickListener() {
                     @Override
@@ -228,6 +230,7 @@ public class QSDetail extends LinearLayout {
         }
         sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
         if (visibleDiff) {
+            mAnimating = true;
             if (mFullyExpanded || mDetailAdapter != null) {
                 setAlpha(1);
                 mClipper.animateCircularClip(x, y, mDetailAdapter != null, listener);
@@ -241,6 +244,10 @@ public class QSDetail extends LinearLayout {
     }
 
     private void handleToggleStateChanged(boolean state) {
+        mSwitchState = state;
+        if (mAnimating) {
+            return;
+        }
         mQsDetailHeaderSwitch.setChecked(state);
     }
 
@@ -255,6 +262,10 @@ public class QSDetail extends LinearLayout {
             mQsDetailHeaderProgress.animate().alpha(0f);
             anim.stop();
         }
+    }
+
+    private void checkPendingAnimations() {
+        handleToggleStateChanged(mSwitchState);
     }
 
     private final QSPanel.Callback mQsPanelCallback = new QSPanel.Callback() {
@@ -294,6 +305,8 @@ public class QSDetail extends LinearLayout {
             // If we have been cancelled, remove the listener so that onAnimationEnd doesn't get
             // called, this will avoid accidentally turning off the grid when we don't want to.
             animation.removeListener(this);
+            mAnimating = false;
+            checkPendingAnimations();
         };
 
         @Override
@@ -303,6 +316,8 @@ public class QSDetail extends LinearLayout {
                 mQsPanel.setGridContentVisibility(false);
                 mHeader.setVisibility(View.INVISIBLE);
             }
+            mAnimating = false;
+            checkPendingAnimations();
         }
     };
 
