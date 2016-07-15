@@ -21,6 +21,8 @@ import android.util.Slog;
 
 import com.android.internal.util.Preconditions;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
@@ -31,6 +33,7 @@ import java.io.IOException;
  */
 abstract class ShortcutPackageItem {
     private static final String TAG = ShortcutService.TAG;
+    private static final String KEY_NAME = "name";
 
     private final int mPackageUserId;
     private final String mPackageName;
@@ -136,6 +139,12 @@ abstract class ShortcutPackageItem {
 
     public abstract void saveToXml(@NonNull XmlSerializer out, boolean forBackup)
             throws IOException, XmlPullParserException;
+
+    public JSONObject dumpCheckin(boolean clear) throws JSONException {
+        final JSONObject result = new JSONObject();
+        result.put(KEY_NAME, mPackageName);
+        return result;
+    }
 
     /**
      * Verify various internal states.

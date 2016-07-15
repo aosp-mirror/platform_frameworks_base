@@ -47,6 +47,10 @@ import android.test.suitebuilder.annotation.SmallTest;
 import com.android.frameworks.servicestests.R;
 import com.android.server.pm.ShortcutService.ConfigConstants;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Locale;
 
 /**
@@ -1851,5 +1855,47 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(R.drawable.black_16x64,
                 ShortcutInfo.lookUpResourceId(res, "drawable/black_16x64", null,
                         getTestContext().getPackageName()));
+    }
+
+    public void testDumpCheckin() throws IOException {
+        prepareCrossProfileDataSet();
+
+        // prepareCrossProfileDataSet() doesn't set any icons, so do set here.
+        final Icon res32x32 = Icon.createWithResource(getTestContext(), R.drawable.black_32x32);
+        final Icon res64x64 = Icon.createWithResource(getTestContext(), R.drawable.black_64x64);
+        final Icon bmp32x32 = Icon.createWithBitmap(BitmapFactory.decodeResource(
+                getTestContext().getResources(), R.drawable.black_32x32));
+        final Icon bmp64x64 = Icon.createWithBitmap(BitmapFactory.decodeResource(
+                getTestContext().getResources(), R.drawable.black_64x64));
+
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            assertTrue(mManager.setDynamicShortcuts(list(
+                    makeShortcutWithIcon("res32x32", res32x32),
+                    makeShortcutWithIcon("res64x64", res64x64),
+                    makeShortcutWithIcon("bmp32x32", bmp32x32),
+                    makeShortcutWithIcon("bmp64x64", bmp64x64))));
+        });
+        // We can't predict the compressed bitmap sizes, so get the real sizes here.
+        final long bitmapTotal =
+                new File(getPackageShortcut(CALLING_PACKAGE_2, "bmp32x32", USER_0)
+                        .getBitmapPath()).length() +
+                new File(getPackageShortcut(CALLING_PACKAGE_2, "bmp64x64", USER_0)
+                        .getBitmapPath()).length();
+
+        // Read the expected output and inject the bitmap size.
+        final String expected = readTestAsset("shortcut/dumpsys_expected.txt")
+                .replace("***BITMAP_SIZE***", String.valueOf(bitmapTotal));
+
+        assertEquals(expected, dumpCheckin());
+    }
+
+    public void testDumpsysNoPermission() {
+        assertExpectException(SecurityException.class, "android.permission.DUMP",
+                () -> mService.dump(null, new PrintWriter(new StringWriter()), null));
+
+        // System can call it without the permission.
+        runWithSystemUid(() -> {
+            mService.dump(null, new PrintWriter(new StringWriter()), null);
+        });
     }
 }

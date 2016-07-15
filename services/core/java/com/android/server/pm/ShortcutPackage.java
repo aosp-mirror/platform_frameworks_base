@@ -36,6 +36,8 @@ import com.android.internal.util.XmlUtils;
 import com.android.server.pm.ShortcutService.ShortcutOperation;
 import com.android.server.pm.ShortcutService.Stats;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -92,6 +94,12 @@ class ShortcutPackage extends ShortcutPackageItem {
 
     private static final String TAG_STRING_ARRAY_XMLUTILS = "string-array";
     private static final String ATTR_NAME_XMLUTILS = "name";
+
+    private static final String KEY_DYNAMIC = "dynamic";
+    private static final String KEY_MANIFEST = "manifest";
+    private static final String KEY_PINNED = "pinned";
+    private static final String KEY_BITMAPS = "bitmaps";
+    private static final String KEY_BITMAP_BYTES = "bitmapBytes";
 
     /**
      * All the shortcuts from the package, keyed on IDs.
@@ -1196,6 +1204,42 @@ class ShortcutPackage extends ShortcutPackageItem {
         pw.print(" (");
         pw.print(Formatter.formatFileSize(mShortcutUser.mService.mContext, totalBitmapSize));
         pw.println(")");
+    }
+
+    @Override
+    public JSONObject dumpCheckin(boolean clear) throws JSONException {
+        final JSONObject result = super.dumpCheckin(clear);
+
+        int numDynamic = 0;
+        int numPinned = 0;
+        int numManifest = 0;
+        int numBitmaps = 0;
+        long totalBitmapSize = 0;
+
+        final ArrayMap<String, ShortcutInfo> shortcuts = mShortcuts;
+        final int size = shortcuts.size();
+        for (int i = 0; i < size; i++) {
+            final ShortcutInfo si = shortcuts.valueAt(i);
+
+            if (si.isDynamic()) numDynamic++;
+            if (si.isDeclaredInManifest()) numManifest++;
+            if (si.isPinned()) numPinned++;
+
+            if (si.getBitmapPath() != null) {
+                numBitmaps++;
+                totalBitmapSize += new File(si.getBitmapPath()).length();
+            }
+        }
+
+        result.put(KEY_DYNAMIC, numDynamic);
+        result.put(KEY_MANIFEST, numManifest);
+        result.put(KEY_PINNED, numPinned);
+        result.put(KEY_BITMAPS, numBitmaps);
+        result.put(KEY_BITMAP_BYTES, totalBitmapSize);
+
+        // TODO Log update frequency too.
+
+        return result;
     }
 
     @Override
