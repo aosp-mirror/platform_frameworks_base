@@ -3474,6 +3474,8 @@ public class Notification implements Parcelable
                 mN.mSmallIcon = Icon.createWithResource(mContext, mN.icon);
             }
             contentView.setImageViewIcon(R.id.icon, mN.mSmallIcon);
+            contentView.setDrawableParameters(R.id.icon, false /* targetBackground */,
+                    -1 /* alpha */, -1 /* colorFilter */, null /* mode */, mN.iconLevel);
             processSmallIconColor(mN.mSmallIcon, contentView);
         }
 
