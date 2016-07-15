@@ -1197,3 +1197,5 @@ redirects:
   to: https://developer.android.com/studio/intro/update.html#sdk-manager
 - from: /r/studio-ui/newjclass.html
   to: /studio/write/index.html
+- from: /r/studio-ui/menu-help.html
+  to: /studio/intro/index.html
