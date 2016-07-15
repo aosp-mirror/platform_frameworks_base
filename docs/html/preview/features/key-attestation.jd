@@ -21,6 +21,19 @@ page.keywords="android N", "security", "TEE", "hardware-backed", "keystore", "ce
   interpret the schema of the attestation certificate's extension data.
 </p>
 
+<p class="note">
+  <strong>Note: </strong>Only a small number of devices running Android N
+  support hardware-level key attestation; all other devices running Android N
+  use software-level key attestation instead. Before you verify the properties
+  of a device's hardware-backed keys in a production-level environment, you
+  should make sure that the device supports hardware-level key attestation. To
+  do so, you should check that the attestation certificate chain contains a root
+  certificate that is signed by the Google attestation root key and that the
+  <code>attestationSecurityLevel</code> element within the <a
+  href="#certificate_schema_keydescription">key description</a> data structure
+  is set to the TrustedEnvironment security level.
+</p>
+
 <h2 id="verifying">
   Retrieving and Verifying a Hardware-backed Key Pair
 </h2>
@@ -227,8 +240,8 @@ VerifiedBootState ::= ENUMERATED {
       level</a> of the attestation.
     </p>
 
-    <p class="note">
-      <strong>Note:</strong> Although it is possible to attest keys that are
+    <p class="caution">
+      <strong>Warning:</strong> Although it is possible to attest keys that are
       stored in the Android system&mdash;that is, if the
       <code>attestationSecurity</code> value is set to Software&mdash;you
       cannot trust these attestations if the Android system becomes compromised.
