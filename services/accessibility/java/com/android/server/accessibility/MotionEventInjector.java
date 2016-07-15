@@ -40,7 +40,7 @@ import java.util.List;
  *
  * All methods except {@code injectEvents} must be called only from the main thread.
  */
-public class MotionEventInjector implements EventStreamTransformation {
+public class MotionEventInjector implements EventStreamTransformation, Handler.Callback {
     private static final String LOG_TAG = "MotionEventInjector";
     private static final int MESSAGE_SEND_MOTION_EVENT = 1;
     private static final int MESSAGE_INJECT_EVENTS = 2;
@@ -64,7 +64,14 @@ public class MotionEventInjector implements EventStreamTransformation {
      * @param looper A looper on the main thread to use for dispatching new events
      */
     public MotionEventInjector(Looper looper) {
-        mHandler = new Handler(looper, new Callback());
+        mHandler = new Handler(looper, this);
+    }
+
+    /**
+     * @param handler A handler to post messages. Exposes internal state for testing only.
+     */
+    public MotionEventInjector(Handler handler) {
+        mHandler = handler;
     }
 
     /**
@@ -125,6 +132,29 @@ public class MotionEventInjector implements EventStreamTransformation {
     public void onDestroy() {
         cancelAnyPendingInjectedEvents();
         mIsDestroyed = true;
+    }
+
+    @Override
+    public boolean handleMessage(Message message) {
+        if (message.what == MESSAGE_INJECT_EVENTS) {
+            SomeArgs args = (SomeArgs) message.obj;
+            injectEventsMainThread((List<MotionEvent>) args.arg1,
+                    (IAccessibilityServiceClient) args.arg2, args.argi1);
+            args.recycle();
+            return true;
+        }
+        if (message.what != MESSAGE_SEND_MOTION_EVENT) {
+            Slog.e(LOG_TAG, "Unknown message: " + message.what);
+            return false;
+        }
+        MotionEvent motionEvent = (MotionEvent) message.obj;
+        sendMotionEventToNext(motionEvent, motionEvent,
+                WindowManagerPolicy.FLAG_PASS_TO_USER);
+        // If the message queue is now empty, then this gesture is complete
+        if (!mHandler.hasMessages(MESSAGE_SEND_MOTION_EVENT)) {
+            notifyService(true);
+        }
+        return true;
     }
 
     private void injectEventsMainThread(List<MotionEvent> events,
@@ -201,6 +231,7 @@ public class MotionEventInjector implements EventStreamTransformation {
                     MotionEvent.obtain(now, now, MotionEvent.ACTION_CANCEL, 0.0f, 0.0f, 0);
             sendMotionEventToNext(cancelEvent, cancelEvent,
                     WindowManagerPolicy.FLAG_PASS_TO_USER);
+            mOpenGesturesInProgress.put(source, false);
         }
     }
 
@@ -210,7 +241,6 @@ public class MotionEventInjector implements EventStreamTransformation {
             mHandler.removeMessages(MESSAGE_SEND_MOTION_EVENT);
             notifyService(false);
         }
-
     }
 
     private void notifyService(boolean success) {
@@ -220,30 +250,6 @@ public class MotionEventInjector implements EventStreamTransformation {
         } catch (RemoteException re) {
             Slog.e(LOG_TAG, "Error sending motion event injection status to "
                     + mServiceInterfaceForCurrentGesture, re);
-        }
-    }
-
-    private class Callback implements Handler.Callback {
-        @Override
-        public boolean handleMessage(Message message) {
-            if (message.what == MESSAGE_INJECT_EVENTS) {
-                SomeArgs args = (SomeArgs) message.obj;
-                injectEventsMainThread((List<MotionEvent>) args.arg1,
-                        (IAccessibilityServiceClient) args.arg2, args.argi1);
-                args.recycle();
-                return true;
-            }
-            if (message.what != MESSAGE_SEND_MOTION_EVENT) {
-                throw new IllegalArgumentException("Unknown message: " + message.what);
-            }
-            MotionEvent motionEvent = (MotionEvent) message.obj;
-            sendMotionEventToNext(motionEvent, motionEvent,
-                    WindowManagerPolicy.FLAG_PASS_TO_USER);
-            // If the message queue is now empty, then this gesture is complete
-            if (!mHandler.hasMessages(MESSAGE_SEND_MOTION_EVENT)) {
-                notifyService(true);
-            }
-            return true;
         }
     }
 }
