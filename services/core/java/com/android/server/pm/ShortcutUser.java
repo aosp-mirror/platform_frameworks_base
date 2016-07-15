@@ -103,8 +103,15 @@ class ShortcutUser {
 
     private final ArrayMap<PackageWithUser, ShortcutLauncher> mLaunchers = new ArrayMap<>();
 
-    /** Default launcher that can access the launcher apps APIs. */
-    private ComponentName mDefaultLauncherComponent;
+    /**
+     * Last known launcher.  It's used when the default launcher isn't set in PM -- i.e.
+     * when getHomeActivitiesAsUser() return null.  We need it so that in this situation the
+     * previously default launcher can still access shortcuts.
+     */
+    private ComponentName mLastKnownLauncher;
+
+    /** In-memory-cached default launcher. */
+    private ComponentName mCachedLauncher;
 
     private String mKnownLocales;
 
@@ -304,8 +311,7 @@ class ShortcutUser {
         ShortcutService.writeAttr(out, ATTR_LAST_APP_SCAN_TIME,
                 mLastAppScanTime);
 
-        ShortcutService.writeTagValue(out, TAG_LAUNCHER,
-                mDefaultLauncherComponent);
+        ShortcutService.writeTagValue(out, TAG_LAUNCHER, mLastKnownLauncher);
 
         // Can't use forEachPackageItem due to the checked exceptions.
         {
@@ -364,7 +370,7 @@ class ShortcutUser {
             if (depth == outerDepth + 1) {
                 switch (tag) {
                     case TAG_LAUNCHER: {
-                        ret.mDefaultLauncherComponent = ShortcutService.parseComponentNameAttribute(
+                        ret.mLastKnownLauncher = ShortcutService.parseComponentNameAttribute(
                                 parser, ATTR_VALUE);
                         continue;
                     }
@@ -389,16 +395,42 @@ class ShortcutUser {
         return ret;
     }
 
-    public ComponentName getDefaultLauncherComponent() {
-        return mDefaultLauncherComponent;
+    public ComponentName getLastKnownLauncher() {
+        return mLastKnownLauncher;
     }
 
-    public void setDefaultLauncherComponent(ComponentName launcherComponent) {
-        if (Objects.equal(mDefaultLauncherComponent, launcherComponent)) {
+    public void setLauncher(ComponentName launcherComponent) {
+        setLauncher(launcherComponent, /* allowPurgeLastKnown */ false);
+    }
+
+    /** Clears the launcher information without clearing the last known one */
+    public void clearLauncher() {
+        setLauncher(null);
+    }
+
+    /**
+     * Clears the launcher information *with(* clearing the last known one; we do this witl
+     * "cmd shortcut clear-default-launcher".
+     */
+    public void forceClearLauncher() {
+        setLauncher(null, /* allowPurgeLastKnown */ true);
+    }
+
+    private void setLauncher(ComponentName launcherComponent, boolean allowPurgeLastKnown) {
+        mCachedLauncher = launcherComponent; // Always update the in-memory cache.
+
+        if (Objects.equal(mLastKnownLauncher, launcherComponent)) {
             return;
         }
-        mDefaultLauncherComponent = launcherComponent;
+        if (!allowPurgeLastKnown && launcherComponent == null) {
+            return;
+        }
+        mLastKnownLauncher = launcherComponent;
         mService.scheduleSaveUser(mUserId);
+    }
+
+    public ComponentName getCachedLauncher() {
+        return mCachedLauncher;
     }
 
     public void resetThrottling() {
@@ -422,8 +454,13 @@ class ShortcutUser {
         prefix += prefix + "  ";
 
         pw.print(prefix);
-        pw.print("Default launcher: ");
-        pw.print(mDefaultLauncherComponent);
+        pw.print("Cached launcher: ");
+        pw.print(mCachedLauncher);
+        pw.println();
+
+        pw.print(prefix);
+        pw.print("Last known launcher: ");
+        pw.print(mLastKnownLauncher);
         pw.println();
 
         for (int i = 0; i < mLaunchers.size(); i++) {
