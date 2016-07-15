@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 
+import static com.android.layoutlib.bridge.util.ReflectionUtils.getAccessibleMethod;
 import static com.android.layoutlib.bridge.util.ReflectionUtils.getClassInstance;
 import static com.android.layoutlib.bridge.util.ReflectionUtils.getMethod;
 import static com.android.layoutlib.bridge.util.ReflectionUtils.invoke;
@@ -93,9 +94,10 @@ public class SupportPreferencesUtil {
         Object preferenceInflater = instantiateClass(callback, PREFERENCE_INFLATER,
           new Class[]{Context.class, preferenceManager.getClass()},
           new Object[]{context, preferenceManager});
-        Object inflatedPreference = invoke(
-          getMethod(preferenceInflater.getClass(), "inflate", XmlPullParser.class,
-            preferenceGroupClass), preferenceInflater, parser, null);
+        Object inflatedPreference =
+                invoke(getAccessibleMethod(preferenceInflater.getClass(), "inflate",
+                        XmlPullParser.class, preferenceGroupClass), preferenceInflater, parser,
+                        null);
 
         if (inflatedPreference == null) {
             throw new ReflectionException("inflate method returned null");
