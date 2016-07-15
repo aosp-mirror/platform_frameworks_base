@@ -2913,9 +2913,23 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                     result |= RELAYOUT_RES_SURFACE_CHANGED;
                 }
+                final WindowSurfaceController surfaceController = winAnimator.mSurfaceController;
+                if (viewVisibility == View.VISIBLE && surfaceController != null) {
+                    // We already told the client to go invisible, but the message may not be
+                    // handled yet, or it might want to draw a last frame. If we already have a
+                    // surface, let the client use that, but don't create new surface at this point.
+                    surfaceController.getSurface(outSurface);
+                } else {
+                    if (DEBUG_VISIBILITY) Slog.i(TAG_WM, "Releasing surface in: " + win);
 
-                outSurface.release();
-                if (DEBUG_VISIBILITY) Slog.i(TAG_WM, "Releasing surface in: " + win);
+                    try {
+                        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "wmReleaseOutSurface_"
+                                + win.mAttrs.getTitle());
+                        outSurface.release();
+                    } finally {
+                        Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+                    }
+                }
             }
 
             if (focusMayChange) {
@@ -3050,6 +3064,7 @@ public class WindowManagerService extends IWindowManager.Stub
         } else {
             // For some reason there isn't a surface.  Clear the
             // caller's object so they see the same state.
+            Slog.w(TAG_WM, "Failed to create surface control for " + win);
             outSurface.release();
         }
         return result;
