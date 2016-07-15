@@ -400,7 +400,7 @@ public class QSTileHost implements QSTile.Host, Tunable {
                 ComponentName component = CustomTile.getComponentFromSpec(tileSpec);
                 Intent intent = new Intent().setComponent(component);
                 TileLifecycleManager lifecycleManager = new TileLifecycleManager(new Handler(),
-                        mContext, mServices, new Tile(component), intent,
+                        mContext, mServices, new Tile(), intent,
                         new UserHandle(ActivityManager.getCurrentUser()));
                 lifecycleManager.onStopListening();
                 lifecycleManager.onTileRemoved();
@@ -414,7 +414,7 @@ public class QSTileHost implements QSTile.Host, Tunable {
                 ComponentName component = CustomTile.getComponentFromSpec(tileSpec);
                 Intent intent = new Intent().setComponent(component);
                 TileLifecycleManager lifecycleManager = new TileLifecycleManager(new Handler(),
-                        mContext, mServices, new Tile(component), intent,
+                        mContext, mServices, new Tile(), intent,
                         new UserHandle(ActivityManager.getCurrentUser()));
                 lifecycleManager.onTileAdded();
                 lifecycleManager.flushMessagesAndUnbind();

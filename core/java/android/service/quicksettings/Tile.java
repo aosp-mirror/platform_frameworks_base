@@ -15,8 +15,8 @@
  */
 package android.service.quicksettings;
 
-import android.content.ComponentName;
 import android.graphics.drawable.Icon;
+import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
@@ -59,7 +59,7 @@ public final class Tile implements Parcelable {
      */
     public static final int STATE_ACTIVE = 2;
 
-    private ComponentName mComponentName;
+    private IBinder mToken;
     private Icon mIcon;
     private CharSequence mLabel;
     private CharSequence mContentDescription;
@@ -78,29 +78,15 @@ public final class Tile implements Parcelable {
     /**
      * @hide
      */
-    public Tile(ComponentName componentName) {
-        mComponentName = componentName;
+    public Tile() {
     }
 
     /**
      * @hide
      */
-    public void setService(IQSService service) {
+    public void setService(IQSService service, IBinder stub) {
         mService = service;
-    }
-
-    /**
-     * @hide
-     */
-    public ComponentName getComponentName() {
-        return mComponentName;
-    }
-
-    /**
-     * @hide
-     */
-    public IQSService getQsService() {
-        return mService;
+        mToken = stub;
     }
 
     /**
@@ -193,7 +179,7 @@ public final class Tile implements Parcelable {
      */
     public void updateTile() {
         try {
-            mService.updateQsTile(this);
+            mService.updateQsTile(this, mToken);
         } catch (RemoteException e) {
             Log.e(TAG, "Couldn't update tile");
         }
@@ -201,12 +187,6 @@ public final class Tile implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        if (mComponentName != null) {
-            dest.writeByte((byte) 1);
-            mComponentName.writeToParcel(dest, flags);
-        } else {
-            dest.writeByte((byte) 0);
-        }
         if (mIcon != null) {
             dest.writeByte((byte) 1);
             mIcon.writeToParcel(dest, flags);
@@ -219,11 +199,6 @@ public final class Tile implements Parcelable {
     }
 
     private void readFromParcel(Parcel source) {
-        if (source.readByte() != 0) {
-            mComponentName = ComponentName.CREATOR.createFromParcel(source);
-        } else {
-            mComponentName = null;
-        }
         if (source.readByte() != 0) {
             mIcon = Icon.CREATOR.createFromParcel(source);
         } else {
