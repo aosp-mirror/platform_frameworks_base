@@ -724,8 +724,6 @@ public class Activity extends ContextThemeWrapper
     private static final String REQUEST_PERMISSIONS_WHO_PREFIX = "@android:requestPermissions:";
 
     private static final String KEYBOARD_SHORTCUTS_RECEIVER_PKG_NAME = "com.android.systemui";
-    private static final String KEYBOARD_SHORTCUTS_RECEIVER_CLASS_NAME =
-            "com.android.systemui.statusbar.KeyboardShortcutsReceiver";
 
     private static class ManagedDialog {
         Dialog mDialog;
@@ -1694,9 +1692,8 @@ public class Activity extends ContextThemeWrapper
      */
     public final void requestShowKeyboardShortcuts() {
         Intent intent = new Intent(Intent.ACTION_SHOW_KEYBOARD_SHORTCUTS);
-        intent.setComponent(new ComponentName(KEYBOARD_SHORTCUTS_RECEIVER_PKG_NAME,
-                KEYBOARD_SHORTCUTS_RECEIVER_CLASS_NAME));
-        sendBroadcast(intent);
+        intent.setPackage(KEYBOARD_SHORTCUTS_RECEIVER_PKG_NAME);
+        sendBroadcastAsUser(intent, UserHandle.SYSTEM);
     }
 
     /**
@@ -1704,9 +1701,8 @@ public class Activity extends ContextThemeWrapper
      */
     public final void dismissKeyboardShortcutsHelper() {
         Intent intent = new Intent(Intent.ACTION_DISMISS_KEYBOARD_SHORTCUTS);
-        intent.setComponent(new ComponentName(KEYBOARD_SHORTCUTS_RECEIVER_PKG_NAME,
-                KEYBOARD_SHORTCUTS_RECEIVER_CLASS_NAME));
-        sendBroadcast(intent);
+        intent.setPackage(KEYBOARD_SHORTCUTS_RECEIVER_PKG_NAME);
+        sendBroadcastAsUser(intent, UserHandle.SYSTEM);
     }
 
     @Override
