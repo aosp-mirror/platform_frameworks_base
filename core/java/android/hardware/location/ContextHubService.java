@@ -166,9 +166,12 @@ public class ContextHubService extends IContextHubService.Stub {
         msgHeader[HEADER_FIELD_LOAD_APP_ID_LO] = (int)(appId & 0xFFFFFFFF);
         msgHeader[HEADER_FIELD_LOAD_APP_ID_HI] = (int)((appId >> 32) & 0xFFFFFFFF);
 
-        if (nativeSendMessage(msgHeader, app.getAppBinary()) != 0) {
+        int errVal = nativeSendMessage(msgHeader, app.getAppBinary());
+        if (errVal != 0) {
+            Log.e(TAG, "Send Message returns error" + contextHubHandle);
             return -1;
         }
+
         // Do not add an entry to mNanoAppInstance Hash yet. The HAL may reject the app
         return 0;
     }
