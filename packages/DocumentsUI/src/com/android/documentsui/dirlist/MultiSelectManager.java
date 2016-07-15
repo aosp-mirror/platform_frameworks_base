@@ -21,12 +21,9 @@ import static com.android.documentsui.Shared.DEBUG;
 import android.annotation.IntDef;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-
-import com.android.documentsui.Events.InputEvent;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -38,6 +35,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.annotation.Nullable;
 
 /**
  * MultiSelectManager provides support traditional multi-item selection support to RecyclerView.
@@ -62,7 +61,7 @@ public final class MultiSelectManager {
     private final DocumentsAdapter mAdapter;
     private final List<MultiSelectManager.Callback> mCallbacks = new ArrayList<>(1);
 
-    private Range mRanger;
+    private @Nullable Range mRanger;
     private boolean mSingleSelect;
 
     public MultiSelectManager(DocumentsAdapter adapter, @SelectionMode int mode) {
@@ -223,70 +222,13 @@ public final class MultiSelectManager {
         }
     }
 
-    @VisibleForTesting
-    void onLongPress(InputEvent input) {
-        if (DEBUG) Log.d(TAG, "Handling long press event.");
+    void snapSelection(int position) {
+        mRanger.snapSelection(position);
 
-        if (!input.isOverItem()) {
-            if (DEBUG) Log.i(TAG, "Cannot handle tap. No adapter position available.");
-        }
-
-        handleAdapterEvent(input);
-    }
-
-    boolean onSingleTapUp(InputEvent input) {
-        if (DEBUG) Log.d(TAG, "Processing tap event.");
-        if (!hasSelection()) {
-            // No selection active - do nothing.
-            return false;
-        }
-
-        if (!input.isOverItem()) {
-            if (DEBUG) Log.d(TAG, "Activity has no position. Canceling selection.");
-            clearSelection();
-            return false;
-        }
-
-        handleAdapterEvent(input);
-        return true;
-    }
-
-    /**
-     * Handles a change caused by a click on the item with the given position. If the Shift key is
-     * held down, this performs a range select; otherwise, it simply toggles the item's selection
-     * state.
-     */
-    private void handleAdapterEvent(InputEvent input) {
-        if (mRanger != null && input.isShiftKeyDown()) {
-            mRanger.snapSelection(input.getItemPosition());
-
-            // We're being lazy here notifying even when something might not have changed.
-            // To make this more correct, we'd need to update the Ranger class to return
-            // information about what has changed.
-            notifySelectionChanged();
-        } else {
-            int position = input.getItemPosition();
-            toggleSelection(position);
-            setSelectionRangeBegin(position);
-        }
-    }
-
-    /**
-     * A convenience method for toggling selection by adapter position.
-     *
-     * @param position Adapter position to toggle.
-     */
-    private void toggleSelection(int position) {
-        // Position may be special "no position" during certain
-        // transitional phases. If so, skip handling of the event.
-        if (position == RecyclerView.NO_POSITION) {
-            if (DEBUG) Log.d(TAG, "Ignoring toggle for element with no position.");
-            return;
-        }
-        String id = mAdapter.getModelId(position);
-        if (id != null) {
-            toggleSelection(id);
-        }
+        // We're being lazy here notifying even when something might not have changed.
+        // To make this more correct, we'd need to update the Ranger class to return
+        // information about what has changed.
+        notifySelectionChanged();
     }
 
     /**
@@ -329,7 +271,9 @@ public final class MultiSelectManager {
      * @param pos The new end position for the selection range.
      */
     void snapRangeSelection(int pos) {
-        assert(mRanger != null);
+        if (!isRangeSelectionActive()) {
+            throw new IllegalStateException("Range start point not set.");
+        }
 
         mRanger.snapSelection(pos);
         notifySelectionChanged();

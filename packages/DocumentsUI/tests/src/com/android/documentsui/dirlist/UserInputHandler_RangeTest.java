@@ -18,7 +18,6 @@ package com.android.documentsui.dirlist;
 
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-import android.support.v7.widget.RecyclerView;
 import android.view.MotionEvent;
 
 import com.android.documentsui.Events.InputEvent;
@@ -34,9 +33,13 @@ import org.junit.runner.RunWith;
 
 import java.util.List;
 
+/**
+ * UserInputHandler / MultiSelectManager integration test covering the shared
+ * responsibility of range selection.
+ */
 @RunWith(AndroidJUnit4.class)
 @SmallTest
-public final class UserInputHandler_MouseTest {
+public final class UserInputHandler_RangeTest {
 
     private static final List<String> ITEMS = TestData.create(100);
 
@@ -48,7 +51,6 @@ public final class UserInputHandler_MouseTest {
     private TestPredicate<InputEvent> mRightClickHandler;
     private TestPredicate<DocumentDetails> mActivateHandler;
     private TestPredicate<DocumentDetails> mDeleteHandler;
-
     private Builder mEvent;
 
     @Before
@@ -82,29 +84,64 @@ public final class UserInputHandler_MouseTest {
     }
 
     @Test
-    public void testConfirmedClick_StartsSelection() {
-        mInputHandler.onSingleTapConfirmed(mEvent.at(11).build());
-        mSelection.assertSelection(11);
-    }
-
-    @Test
-    public void testUnconfirmedClick_AddsToExistingSelection() {
+    public void testExtendRange() {
         mInputHandler.onSingleTapConfirmed(mEvent.at(7).build());
-
-        mInputHandler.onSingleTapUp(mEvent.at(11).build());
-        mSelection.assertSelection(7, 11);
+        mInputHandler.onSingleTapUp(mEvent.at(11).shift().build());
+        mSelection.assertRangeSelection(7, 11);
     }
 
     @Test
-    public void testDoubleClick_Activates() {
-        mInputHandler.onDoubleTap(mEvent.at(11).build());
-        mActivateHandler.assertLastArgument(mEvent.build());
+    public void testExtendRangeContinues() {
+        mInputHandler.onSingleTapConfirmed(mEvent.at(7).build());
+        mInputHandler.onSingleTapUp(mEvent.at(11).shift().build());
+        mInputHandler.onSingleTapUp(mEvent.at(21).shift().build());
+        mSelection.assertRangeSelection(7, 21);
     }
 
     @Test
-    public void testClickOff_ClearsSelection() {
-        mInputHandler.onSingleTapConfirmed(mEvent.at(11).build());
-        mInputHandler.onSingleTapUp(mEvent.at(RecyclerView.NO_POSITION).build());
-        mSelection.assertNoSelection();
+    public void testMultipleContiguousRanges() {
+        mInputHandler.onSingleTapConfirmed(mEvent.at(7).build());
+        mInputHandler.onSingleTapUp(mEvent.at(11).shift().build());
+
+        // click without shift sets a new range start point.
+        mInputHandler.onSingleTapUp(mEvent.at(20).unshift().build());
+        mInputHandler.onSingleTapUp(mEvent.at(25).shift().build());
+
+        mSelection.assertRangeSelected(7, 11);
+        mSelection.assertRangeSelected(20, 25);
+
+        mSelection.assertRangeNotSelected(12, 19);
+        mSelection.assertSelectionSize(11);
+    }
+
+    @Test
+    public void testReducesSelectionRange() {
+        mInputHandler.onSingleTapConfirmed(mEvent.at(7).build());
+        mInputHandler.onSingleTapUp(mEvent.at(17).shift().build());
+        mInputHandler.onSingleTapUp(mEvent.at(10).shift().build());
+        mSelection.assertRangeSelection(7, 10);
+    }
+
+    @Test
+    public void testReducesSelectionRange_Reverse() {
+        mInputHandler.onSingleTapConfirmed(mEvent.at(17).build());
+        mInputHandler.onSingleTapUp(mEvent.at(7).shift().build());
+        mInputHandler.onSingleTapUp(mEvent.at(14).shift().build());
+        mSelection.assertRangeSelection(14, 17);
+    }
+
+    @Test
+    public void testExtendsRange_Reverse() {
+        mInputHandler.onSingleTapConfirmed(mEvent.at(12).build());
+        mInputHandler.onSingleTapUp(mEvent.at(5).shift().build());
+        mSelection.assertRangeSelection(5, 12);
+    }
+
+    @Test
+    public void testExtendsRange_ReversesAfterForwardClick() {
+        mInputHandler.onSingleTapConfirmed(mEvent.at(7).build());
+        mInputHandler.onSingleTapUp(mEvent.at(11).shift().build());
+        mInputHandler.onSingleTapUp(mEvent.at(0).shift().build());
+        mSelection.assertRangeSelection(0, 7);
     }
 }
