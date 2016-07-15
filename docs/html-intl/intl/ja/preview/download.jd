@@ -300,65 +300,73 @@ page.image=images/cards/card-n-downloads_2x.png
 
   <tr id="bullhead">
     <td>Nexus 5X <br>"bullhead"</td>
-    <td><a href="#top" onclick="onDownload(this)">bullhead-npd35k-factory-5ba40535.tgz</a><br>
-      MD5: b6c5d79a21815ee21db41822dcf61e9f<br>
-      SHA-1:5ba4053577007d15c96472206e3a79bc80ab194c
+    <td><a href="#top" onclick="onDownload(this)"
+      >bullhead-npd90g-factory-7a0ca1bc.tgz</a><br>
+      MD5: e7a9a3061335c1e0c8be2588f13290af<br>
+      SHA-1: 7a0ca1bcfa51bbefde34243603bc79c7dec214a1
     </td>
   </tr>
 
   <tr id="shamu">
     <td>Nexus 6 <br>"shamu"</td>
-    <td><a href="#top" onclick="onDownload(this)">shamu-npd35k-factory-a33bf20c.tgz</a><br>
-      MD5: e1cf9c57cfb11bebe7f1f5bfbf05d7ab<br>
-      SHA-1: a33bf20c719206bcf08d1edd8da6c0ff9d50f69c
+    <td><a href="#top" onclick="onDownload(this)"
+      >shamu-npd90g-factory-f7a4e3a9.tgz</a><br>
+      MD5: 2fb572ddcfca67bb1d741be97492a9ed<br>
+      SHA-1: f7a4e3a96c797827492998e855c8f9efbfc8559a
     </td>
   </tr>
 
   <tr id="angler">
     <td>Nexus 6P <br>"angler"</td>
-    <td><a href="#top" onclick="onDownload(this)">angler-npd35k-factory-81c341d5.tgz</a><br>
-      MD5: e93de7949433339856124c3729c15ebb<br>
-      SHA-1:81c341d57ef2cd139569b055d5d59e9e592a7abd
+    <td><a href="#top" onclick="onDownload(this)"
+      >angler-npd90g-factory-cd9ac81e.tgz</a><br>
+      MD5: 2370c30f3ef1d0684c1de5216a5d90fe<br>
+      SHA-1: cd9ac81ec7f4a646ac6054eecbf2ea4c4b89b054
     </td>
   </tr>
 
   <tr id="volantis">
     <td>Nexus 9 <br>"volantis"</td>
-    <td><a href="#top" onclick="onDownload(this)">volantis-npd35k-factory-2b50e19d.tgz</a><br>
-      MD5:565be87ebb2d5937e2abe1a42645864b<br>
-      SHA-1:2b50e19dae2667b27f911e3c61ed64860caf43e1
+    <td><a href="#top" onclick="onDownload(this)"
+      >volantis-npd90g-factory-41b55406.tgz</a><br>
+      MD5: cefa78950141da2a7c75e887717e3c8f<br>
+      SHA-1: 41b554060263a7ef16e4be8422cbd6caca26e00f
     </td>
   </tr>
 
   <tr id="volantisg">
     <td>Nexus 9G <br>"volantisg"</td>
-    <td><a href="#top" onclick="onDownload(this)">volantisg-npd35k-factory-2e89ebe6.tgz</a><br>
-      MD5: a8464e15c6683fe2afa378a63e205fda<br>
-      SHA-1:2e89ebe67a46b2f3beb050746c13341cd11fa678
+    <td><a href="#top" onclick="onDownload(this)"
+      >volantisg-npd90g-factory-610492be.tgz</a><br>
+      MD5: 2f36dc0d0fab02ab78be500677ec239f<br>
+      SHA-1: 610492bedfc4127023040ecb2c89239a78a900ad
     </td>
   </tr>
 
   <tr id="fugu">
     <td>Nexus Player <br>"fugu"</td>
-    <td><a href="#top" onclick="onDownload(this)">fugu-npd35k-factory-1de74874.tgz</a><br>
-      MD5: c0dbb7db671f61b2785da5001cedefcb<br>
-      SHA-1:1de74874f8d83e14d642f13b5a2130fc2aa55873
+    <td><a href="#top" onclick="onDownload(this)"
+      >fugu-npd90g-factory-0fe95694.tgz</a><br>
+      MD5: f4cb48f919e4c29c631de21416c612e2<br>
+      SHA-1: 0fe95694e7bc41e4c3ac0e4438cd77102a0aa8b4
     </td>
   </tr>
 
   <tr id="ryu">
     <td>Pixel C <br>"ryu"</td>
-    <td><a href="#top" onclick="onDownload(this)">ryu-npd35k-factory-b4eed85d.tgz</a><br>
-      MD5: bdcb6f770e753668b5fadff2a6678e0d<br>
-      SHA-1: b4eed85de0d42c200348a8629084f78e24f72ac2
+    <td><a href="#top" onclick="onDownload(this)"
+      >ryu-npd90g-factory-f4da981c.tgz</a><br>
+      MD5: d9f0e40b6c20d274831e8a7d285fd887<br>
+      SHA-1: f4da981c70576133321e2858e52fe2c990e68a75
     </td>
   </tr>
 
   <tr id="seed">
-    <td>General Mobile 4G（Android One） <br>"seed"</td>
-    <td><a href="#top" onclick="onDownload(this)">seed_l8150-npd35k-factory-5ab1212b.tgz</a><br>
-      MD5:7d34a9774fdd6e025d485ce6cfc23c4c<br>
-      SHA-1:5ab1212bc9417269d391aacf1e672fff24b4ecc5
+    <td>General Mobile 4G (Android One) <br>"seed"</td>
+    <td><a href="#top" onclick="onDownload(this)"
+      >seed_l8150-npd90g-factory-48f59c99.tgz</a><br>
+      MD5: 0ed565c509594072822d71c65b48ec8e<br>
+      SHA-1: 48f59c99ac43d1cd2f5656a283bb9868581663a8
     </td>
   </tr>
 
