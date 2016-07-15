@@ -371,5 +371,5 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
             }
             mItems.setItems(items);
         }
-    };
+    }
 }
