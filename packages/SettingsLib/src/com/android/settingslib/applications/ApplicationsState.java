@@ -582,10 +582,10 @@ public class ApplicationsState {
         public ArrayList<AppEntry> rebuild(AppFilter filter, Comparator<AppEntry> comparator,
                 boolean foreground) {
             synchronized (mRebuildSync) {
-                synchronized (mEntriesMap) {
+                synchronized (mRebuildingSessions) {
                     mRebuildingSessions.add(this);
                     mRebuildRequested = true;
-                    mRebuildAsync = false;
+                    mRebuildAsync = true;
                     mRebuildFilter = filter;
                     mRebuildComparator = comparator;
                     mRebuildForeground = foreground;
@@ -597,23 +597,7 @@ public class ApplicationsState {
                     }
                 }
 
-                // We will wait for .25s for the list to be built.
-                long waitend = SystemClock.uptimeMillis()+250;
-
-                while (mRebuildResult == null) {
-                    long now = SystemClock.uptimeMillis();
-                    if (now >= waitend) {
-                        break;
-                    }
-                    try {
-                        mRebuildSync.wait(waitend - now);
-                    } catch (InterruptedException e) {
-                    }
-                }
-
-                mRebuildAsync = true;
-
-                return mRebuildResult;
+                return null;
             }
         }
 
@@ -776,7 +760,7 @@ public class ApplicationsState {
         public void handleMessage(Message msg) {
             // Always try rebuilding list first thing, if needed.
             ArrayList<Session> rebuildingSessions = null;
-            synchronized (mEntriesMap) {
+            synchronized (mRebuildingSessions) {
                 if (mRebuildingSessions.size() > 0) {
                     rebuildingSessions = new ArrayList<Session>(mRebuildingSessions);
                     mRebuildingSessions.clear();
