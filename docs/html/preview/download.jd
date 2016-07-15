@@ -219,14 +219,26 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
 </p>
 
 <ul>
-  <li><strong>Enroll the device in automatic OTA system updates</strong> through the
-  <a href="https://g.co/androidbeta">Android Beta Program</a>. Once enrolled, your device will receive regular
-  over-the-air (OTA) updates of all milestone builds in the N Developer Preview. This
-  approach is recommended because it lets you seamlessly transition from your current
-  environment through the various releases of the N Developer Preview.</li>
-  <li><strong>Download a Developer Preview system image and flash the device</strong>.
-  OTA updates are not provided automatically for devices that you flash manually, but
-  you can enroll those devices in Android Beta Program to get OTA updates. </li>
+  <li>
+    <strong>Enroll the device in automatic OTA system updates</strong> through
+    the <a href="https://g.co/androidbeta">Android Beta Program</a>. Once
+    enrolled, your device will receive regular over-the-air (OTA) updates of
+    all milestone builds in the N Developer Preview. When the next version of
+    Android is released, your device will automatically update to the final
+    version. This approach is recommended because it lets you seamlessly
+    transition from your current environment, through the various releases of
+    the N Developer Preview, to the release version.
+  </li>
+
+  <li>
+    <strong>Download a Developer Preview system image and flash the
+    device</strong>. OTA updates are not provided automatically for devices
+    that you flash manually, but you can enroll those devices in Android Beta
+    Program to get OTA updates. When the next version of Android is released,
+    you can download the final device image from the <a href=
+    "https://developers.google.com/android/nexus/images" type=
+    "external-link">factory images</a> page.
+  </li>
 </ul>
 
 <h3 id="ota">Enroll the device in automatic OTA updates</h3>
@@ -234,9 +246,11 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
 <p>
   If you have access to a supported device (see the list in the Downloads
   table), you can receive over-the-air updates to preview versions of Android
-  by enrolling that device in the <a href="https://g.co/androidbeta">Android Beta Program</a>. These updates are
-  automatically downloaded and will update your device just like official
-  system updates.
+  by enrolling that device in the <a href="https://g.co/androidbeta">Android
+  Beta Program</a>. These updates are automatically downloaded and will update
+  your device just like official system updates. When the next version of
+  Android is released, the device will automatically update to the production
+  version.
 </p>
 
 <p>
@@ -282,7 +296,8 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
 <p>
   Manually flashed system images <strong>do not
   automatically receive OTA updates</strong> to later Developer Preview
-  milestone builds. Make sure to keep your environment up-to-date and flash a
+  milestone builds or the final, production version. Make sure to keep your
+  environment up-to-date and flash a
   new system image at each Developer Preview milestone.
 </p>
 
