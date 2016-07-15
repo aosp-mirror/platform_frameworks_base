@@ -643,30 +643,41 @@ public final class ActivityManagerService extends ActivityManagerNative
         return mShowDialogs && !mSleeping && !mShuttingDown;
     }
 
-    // it's a semaphore; boost when 0->1, reset when 1->0
-    static ThreadLocal<Integer> sIsBoosted = new ThreadLocal<Integer>() {
-        @Override protected Integer initialValue() {
-            return 0;
+    private static final class PriorityState {
+        // Acts as counter for number of synchronized region that needs to acquire 'this' as a lock
+        // the current thread is currently in. When it drops down to zero, we will no longer boost
+        // the thread's priority.
+        private int regionCounter = 0;
+
+        // The thread's previous priority before boosting.
+        private int prevPriority = Integer.MIN_VALUE;
+    }
+
+    static ThreadLocal<PriorityState> sThreadPriorityState = new ThreadLocal<PriorityState>() {
+        @Override protected PriorityState initialValue() {
+            return new PriorityState();
         }
     };
 
     static void boostPriorityForLockedSection() {
-        if (sIsBoosted.get() == 0) {
-            // boost to prio 118 while holding a global lock
-            Process.setThreadPriority(Process.myTid(), -2);
-            //Log.e(TAG, "PRIORITY BOOST:  set priority on TID " + Process.myTid());
+        int tid = Process.myTid();
+        int prevPriority = Process.getThreadPriority(tid);
+        PriorityState state = sThreadPriorityState.get();
+        if (state.regionCounter == 0 && prevPriority > -2) {
+            state.prevPriority = prevPriority;
+            Process.setThreadPriority(tid, -2);
         }
-        int cur = sIsBoosted.get();
-        sIsBoosted.set(cur + 1);
+        state.regionCounter++;
     }
 
     static void resetPriorityAfterLockedSection() {
-        sIsBoosted.set(sIsBoosted.get() - 1);
-        if (sIsBoosted.get() == 0) {
-            //Log.e(TAG, "PRIORITY BOOST:  reset priority on TID " + Process.myTid());
-            Process.setThreadPriority(Process.myTid(), 0);
+        PriorityState state = sThreadPriorityState.get();
+        state.regionCounter--;
+        if (state.regionCounter == 0 && state.prevPriority > -2) {
+            Process.setThreadPriority(Process.myTid(), state.prevPriority);
         }
     }
+
     public class PendingAssistExtras extends Binder implements Runnable {
         public final ActivityRecord activity;
         public final Bundle extras;
