@@ -53,8 +53,12 @@ import java.util.Map;
  * <tr><td>{@link #KEY_INTRA_REFRESH_PERIOD}</td><td>Integer</td><td><b>encoder-only</b>, optional</td></tr>
  * <tr><td>{@link #KEY_MAX_WIDTH}</td><td>Integer</td><td><b>decoder-only</b>, optional, max-resolution width</td></tr>
  * <tr><td>{@link #KEY_MAX_HEIGHT}</td><td>Integer</td><td><b>decoder-only</b>, optional, max-resolution height</td></tr>
- * <tr><td>{@link #KEY_REPEAT_PREVIOUS_FRAME_AFTER}</td><td>Long</td><td><b>video encoder in surface-mode only</b></td></tr>
- * <tr><td>{@link #KEY_PUSH_BLANK_BUFFERS_ON_STOP}</td><td>Integer(1)</td><td><b>video decoder rendering to a surface only</b></td></tr>
+ * <tr><td>{@link #KEY_REPEAT_PREVIOUS_FRAME_AFTER}</td><td>Long</td><td><b>encoder in surface-mode
+ *         only</b>, optional</td></tr>
+ * <tr><td>{@link #KEY_PUSH_BLANK_BUFFERS_ON_STOP}</td><td>Integer(1)</td><td><b>decoder rendering
+ *         to a surface only</b>, optional</td></tr>
+ * <tr><td>{@link #KEY_TEMPORAL_LAYERING}</td><td>String</td><td><b>encoder only</b>, optional,
+ *         temporal-layering schema</td></tr>
  * </table>
  * Specify both {@link #KEY_MAX_WIDTH} and {@link #KEY_MAX_HEIGHT} to enable
  * adaptive playback (seamless resolution change) for a video decoder that
@@ -280,12 +284,18 @@ public final class MediaFormat {
 
    /**
      * A key describing the temporal layering schema.  This is an optional parameter
-     * that applies only to video encoders.  Use {@link MediaCodec#getInputFormat}
+     * that applies only to video encoders.  Use {@link MediaCodec#getOutputFormat}
      * after {@link MediaCodec#configure configure} to query if the encoder supports
-     * the desired schema. Supported values are {@code webrtc.vp8.1-layer},
-     * {@code webrtc.vp8.2-layer}, {@code webrtc.vp8.3-layer}, and {@code none}.
-     * If the encoder does not support temporal layering, the input format will
-     * not have an entry with this key.
+     * the desired schema. Supported values are {@code webrtc.vp8.N-layer},
+     * {@code android.generic.N}, {@code android.generic.N+M} and {@code none}, where
+     * {@code N} denotes the total number of non-bidirectional layers (which must be at least 1)
+     * and {@code M} denotes the total number of bidirectional layers (which must be non-negative).
+     * <p class=note>{@code android.generic.*} schemas have been added in {@link
+     * android.os.Build.VERSION_CODES#N_MR1}.
+     * <p>
+     * The encoder may support fewer temporal layers, in which case the output format
+     * will contain the configured schema. If the encoder does not support temporal
+     * layering, the output format will not have an entry with this key.
      * The associated value is a string.
      */
     public static final String KEY_TEMPORAL_LAYERING = "ts-schema";
