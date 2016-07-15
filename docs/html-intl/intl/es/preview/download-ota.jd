@@ -178,7 +178,7 @@ Uso de las API de Google
 <ol>
   <li>Descargar una imagen de dispositivo inalámbrico de la tabla que verás a continuación.</li>
   <li>Reinicia el dispositivo en modo Recuperación. Para leer más información sobre cómo
-    aplicar este modo en dispositivos Nexus, visita la sección 
+    aplicar este modo en dispositivos Nexus, visita la sección
 <a href="https://support.google.com/nexus/answer/4596836">Reset your Nexus
       device to factory settings</a>.
   </li>
@@ -202,65 +202,73 @@ Uso de las API de Google
 
   <tr id="bullhead">
     <td>Nexus 5X <br>"bullhead"</td>
-    <td><a href="#top" onclick="onDownload(this)">bullhead-ota-npd35k-b8cfbd80.zip</a><br>
-      MD5: 15fe2eba9b01737374196bdf0a792fe9<br>
-      SHA-1: 5014b2bba77f9e1a680ac3f90729621c85a14283
+    <td><a href="#top" onclick="onDownload(this)"
+      >bullhead-ota-npd90g-0a874807.zip</a><br>
+      MD5: 4b83b803fac1a6eec13f66d0afc6f46e<br>
+      SHA-1: a9920bcc8d475ce322cada097d085448512635e2
     </td>
   </tr>
 
   <tr id="shamu">
     <td>Nexus 6 <br>"shamu"</td>
-    <td><a href="#top" onclick="onDownload(this)">shamu-ota-npd35k-078e6fa5.zip</a><br>
-      MD5: e8b12f7721c53af9a450f7058928a5fc<br>
-      SHA-1: b7a9b756f84a1d2e482ff9c16749d65f6e51425a
+    <td><a href="#top" onclick="onDownload(this)"
+      >shamu-ota-npd90g-06f5d23d.zip</a><br>
+      MD5: 513570bb3a91878c2d1a5807d2340420<br>
+      SHA-1: 2d2f40636c95c132907e6ba0d10b395301e969ed
     </td>
   </tr>
 
   <tr id="angler">
     <td>Nexus 6P <br>"angler"</td>
-    <td><a href="#top" onclick="onDownload(this)">angler-ota-npd35k-88457699.zip</a><br>
-      MD5: 3fac09fef759dde26e57cb80b20b6477<br>
-      SHA-1: 27d6caa786577d8a38b2da5bf94b33b4524a1a1c
+    <td><a href="#top" onclick="onDownload(this)"
+      >angler-ota-npd90g-5baa69c2.zip</a><br>
+      MD5: 096fe26c5d50606a424d2f3326c0477b<br>
+      SHA-1: 468d2e7aea444505513ddc183c85690c00fab0c1
     </td>
   </tr>
 
   <tr id="volantis">
     <td>Nexus 9 <br>"volantis"</td>
-    <td><a href="#top" onclick="onDownload(this)">volantis-ota-npd35k-51dbae76.zip</a><br>
-      MD5: 58312c4a5971818ef5c77a3f446003da<br>
-      SHA-1: aad9005be33d3e2bab480509a6ab74c3c3b9d921
+    <td><a href="#top" onclick="onDownload(this)"
+      >volantis-ota-npd90g-c04785e1.zip</a><br>
+      MD5: 6aecd3b0b3a839c5ce1ce4d12187b03e<br>
+      SHA-1: 31633180635b831e59271a7d904439f278586f49
     </td>
   </tr>
 
   <tr id="volantisg">
     <td>Nexus 9G <br>"volantisg"</td>
-    <td><a href="#top" onclick="onDownload(this)">volantisg-ota-npd35k-834f047f.zip</a><br>
-      MD5: 92b7d1fa252f7394e70f957c72d4aac8<br>
-      SHA-1: b6c057c84d90893630e303cbb60530e20ddb8361
+    <td><a href="#top" onclick="onDownload(this)"
+      >volantisg-ota-npd90g-c56aa1b0.zip</a><br>
+      MD5: 0493fa79763d67bcdde8007299e1888d<br>
+      SHA-1: f709daf81968a1b27ed41fe40d42e0d106f3c494
     </td>
   </tr>
 
   <tr id="fugu">
     <td>Nexus Player <br>"fugu"</td>
-    <td><a href="#top" onclick="onDownload(this)">fugu-ota-npd35k-6ac91298.zip</a><br>
-      MD5: 1461622ad53ea842b2722fa7b49b8172<br>
-      SHA-1: 409c061668ab270774877d7f3eae44fa48d2b931
+    <td><a href="#top" onclick="onDownload(this)"
+      >fugu-ota-npd90g-3a0643ae.zip</a><br>
+      MD5: 9c38b6647fe5a4f2965196b7c409f0f7<br>
+      SHA-1: 77c6fb05191f0c2ae0956bae18f1c80b2f922f05
     </td>
   </tr>
 
   <tr id="ryu">
     <td>Pixel C <br>"ryu"</td>
-    <td><a href="#top" onclick="onDownload(this)">ryu-ota-npd35k-a0b2347f.zip</a><br>
-      MD5: c60117f3640cc6db12386fd632289c7d<br>
-      SHA-1: 87349c767c69efb4172c90ce1d88cf578c3d28b3
+    <td><a href="#top" onclick="onDownload(this)"
+      >ryu-ota-npd90g-ec931914.zip</a><br>
+      MD5: 4c6135498ca156a9cdaf443ddfdcb2ba<br>
+      SHA-1: 297cc9a204685ef5507ec087fc7edf5b34551ce6
     </td>
   </tr>
 
   <tr id="seed">
     <td>General Mobile 4G (Android One) <br>"seed"</td>
-    <td><a href="#top" onclick="onDownload(this)">seed_l8150-ota-npd35k-09897a1d.zip</a><br>
-      MD5: a55cf94f7cce0393ec6c0b35041766b7<br>
-      SHA-1: 6f33742290eb46f2561891f38ca2e754b4e50c6a
+    <td><a href="#top" onclick="onDownload(this)"
+      >seed_l8150-ota-npd90g-dcb0662d.zip</a><br>
+      MD5: f40ea6314a13ea6dd30d0e68098532a2<br>
+      SHA-1: 11af10b621f4480ac63f4e99189d61e1686c0865
     </td>
   </tr>
 
