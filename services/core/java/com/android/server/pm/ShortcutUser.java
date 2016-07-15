@@ -19,6 +19,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.ComponentName;
+import android.content.pm.ShortcutManager;
+import android.text.TextUtils;
 import android.text.format.Formatter;
 import android.util.ArrayMap;
 import android.util.Slog;
@@ -51,7 +53,7 @@ class ShortcutUser {
     private static final String TAG_LAUNCHER = "launcher";
 
     private static final String ATTR_VALUE = "value";
-    private static final String ATTR_KNOWN_LOCALE_CHANGE_SEQUENCE_NUMBER = "locale-seq-no";
+    private static final String ATTR_KNOWN_LOCALES = "locales";
     private static final String ATTR_LAST_APP_SCAN_TIME = "last-app-scan-time";
 
     static final class PackageWithUser {
@@ -104,7 +106,7 @@ class ShortcutUser {
     /** Default launcher that can access the launcher apps APIs. */
     private ComponentName mDefaultLauncherComponent;
 
-    private long mKnownLocaleChangeSequenceNumber;
+    private String mKnownLocales;
 
     private long mLastAppScanTime;
 
@@ -225,29 +227,62 @@ class ShortcutUser {
     }
 
     /**
-     * Reset all throttling counters for all packages, if there has been a system locale change.
+     * Must be called at any entry points on {@link ShortcutManager} APIs to make sure the
+     * information on the package is up-to-date.
+     *
+     * We use broadcasts to handle locale changes and package changes, but because broadcasts
+     * are asynchronous, there's a chance a publisher calls getXxxShortcuts() after a certain event
+     * (e.g. system locale change) but shortcut manager hasn't finished processing the broadcast.
+     *
+     * So we call this method at all entry points from publishers to make sure we update all
+     * relevant information.
+     *
+     * Similar inconsistencies can happen when the launcher fetches shortcut information, but
+     * that's a less of an issue because for the launcher we report shortcut changes with
+     * callbacks.
      */
-    public void resetThrottlingIfNeeded() {
-        final long currentNo = mService.getLocaleChangeSequenceNumber();
-        if (mKnownLocaleChangeSequenceNumber < currentNo) {
-            if (ShortcutService.DEBUG) {
-                Slog.d(TAG, "LocaleChange detected for user " + mUserId);
-            }
-
-            mKnownLocaleChangeSequenceNumber = currentNo;
-
-            forAllPackages(p -> p.resetRateLimiting());
-
-            mService.scheduleSaveUser(mUserId);
-        }
+    public void onCalledByPublisher(@NonNull String packageName) {
+        detectLocaleChange();
+        rescanPackageIfNeeded(packageName, /*forceRescan=*/ false);
     }
 
-    public void handlePackageAddedOrUpdated(@NonNull String packageName, boolean forceRescan) {
+    private String getKnownLocales() {
+        if (TextUtils.isEmpty(mKnownLocales)) {
+            mKnownLocales = mService.injectGetLocaleTagsForUser(mUserId);
+            mService.scheduleSaveUser(mUserId);
+        }
+        return mKnownLocales;
+    }
+
+    /**
+     * Check to see if the system locale has changed, and if so, reset throttling
+     * and update resource strings.
+     */
+    public void detectLocaleChange() {
+        final String currentLocales = mService.injectGetLocaleTagsForUser(mUserId);
+        if (getKnownLocales().equals(currentLocales)) {
+            return;
+        }
+        if (ShortcutService.DEBUG) {
+            Slog.d(TAG, "Locale changed from " + currentLocales + " to " + mKnownLocales
+                    + " for user " + mUserId);
+        }
+        mKnownLocales = currentLocales;
+
+        forAllPackages(pkg -> {
+            pkg.resetRateLimiting();
+            pkg.resolveResourceStrings();
+        });
+
+        mService.scheduleSaveUser(mUserId);
+    }
+
+    public void rescanPackageIfNeeded(@NonNull String packageName, boolean forceRescan) {
         final boolean isNewApp = !mPackages.containsKey(packageName);
 
         final ShortcutPackage shortcutPackage = getPackageShortcuts(packageName);
 
-        if (!shortcutPackage.handlePackageAddedOrUpdated(isNewApp, forceRescan)) {
+        if (!shortcutPackage.rescanPackageIfNeeded(isNewApp, forceRescan)) {
             if (isNewApp) {
                 mPackages.remove(packageName);
             }
@@ -265,8 +300,7 @@ class ShortcutUser {
             throws IOException, XmlPullParserException {
         out.startTag(null, TAG_ROOT);
 
-        ShortcutService.writeAttr(out, ATTR_KNOWN_LOCALE_CHANGE_SEQUENCE_NUMBER,
-                mKnownLocaleChangeSequenceNumber);
+        ShortcutService.writeAttr(out, ATTR_KNOWN_LOCALES, mKnownLocales);
         ShortcutService.writeAttr(out, ATTR_LAST_APP_SCAN_TIME,
                 mLastAppScanTime);
 
@@ -307,8 +341,8 @@ class ShortcutUser {
             boolean fromBackup) throws IOException, XmlPullParserException {
         final ShortcutUser ret = new ShortcutUser(s, userId);
 
-        ret.mKnownLocaleChangeSequenceNumber = ShortcutService.parseLongAttribute(parser,
-                ATTR_KNOWN_LOCALE_CHANGE_SEQUENCE_NUMBER);
+        ret.mKnownLocales = ShortcutService.parseStringAttribute(parser,
+                ATTR_KNOWN_LOCALES);
 
         // If lastAppScanTime is in the future, that means the clock went backwards.
         // Just scan all apps again.
@@ -377,8 +411,8 @@ class ShortcutUser {
         pw.print(prefix);
         pw.print("User: ");
         pw.print(mUserId);
-        pw.print("  Known locale seq#: ");
-        pw.print(mKnownLocaleChangeSequenceNumber);
+        pw.print("  Known locales: ");
+        pw.print(mKnownLocales);
         pw.print("  Last app scan: [");
         pw.print(mLastAppScanTime);
         pw.print("] ");

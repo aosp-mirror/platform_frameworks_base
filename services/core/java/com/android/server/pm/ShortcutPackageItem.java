@@ -48,6 +48,10 @@ abstract class ShortcutPackageItem {
         mPackageInfo = Preconditions.checkNotNull(packageInfo);
     }
 
+    public ShortcutUser getUser() {
+        return mShortcutUser;
+    }
+
     /**
      * ID of the user who actually has this package running on.  For {@link ShortcutPackage},
      * this is the same thing as {@link #getOwnerUserId}, but if it's a {@link ShortcutLauncher} and

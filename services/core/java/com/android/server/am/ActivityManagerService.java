@@ -140,7 +140,6 @@ import android.content.pm.PermissionInfo;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.UserInfo;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
@@ -18865,15 +18864,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                         null, AppOpsManager.OP_NONE, null, false, false,
                         MY_PID, Process.SYSTEM_UID, UserHandle.USER_ALL);
                 if ((changes&ActivityInfo.CONFIG_LOCALE) != 0) {
-                    // Tell the shortcut manager that the system locale changed.  It needs to know
-                    // it before any other apps receive ACTION_LOCALE_CHANGED, which is why
-                    // we "push" from here, rather than having the service listen to the broadcast.
-                    final ShortcutServiceInternal shortcutService =
-                            LocalServices.getService(ShortcutServiceInternal.class);
-                    if (shortcutService != null) {
-                        shortcutService.onSystemLocaleChangedNoLock();
-                    }
-
                     intent = new Intent(Intent.ACTION_LOCALE_CHANGED);
                     intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
                     if (!mProcessesReady) {

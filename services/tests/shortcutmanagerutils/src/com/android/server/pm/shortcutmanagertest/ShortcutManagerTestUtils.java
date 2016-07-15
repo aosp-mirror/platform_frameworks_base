@@ -973,6 +973,8 @@ public class ShortcutManagerTestUtils {
 
         waitOnMainThread();
 
+        launcherApps.unregisterCallback(asserter.getMockCallback());
+
         return asserter;
     }
 }
