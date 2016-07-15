@@ -26,6 +26,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ServiceInfo;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -37,6 +38,7 @@ import android.service.quicksettings.TileService;
 import android.support.annotation.VisibleForTesting;
 import android.util.ArraySet;
 import android.util.Log;
+
 import libcore.util.Objects;
 
 import java.util.Set;
@@ -67,6 +69,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     private final Handler mHandler;
     private final Intent mIntent;
     private final UserHandle mUser;
+    private final IBinder mToken = new Binder();
 
     private Set<Integer> mQueuedMessages = new ArraySet<>();
     private QSTileServiceWrapper mWrapper;
@@ -88,7 +91,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         mHandler = handler;
         mIntent = intent;
         mIntent.putExtra(TileService.EXTRA_SERVICE, service.asBinder());
-        mIntent.putExtra(TileService.EXTRA_COMPONENT, intent.getComponent());
+        mIntent.putExtra(TileService.EXTRA_TOKEN, mToken);
         mUser = user;
         if (DEBUG) Log.d(TAG, "Creating " + mIntent + " " + mUser);
     }
@@ -394,6 +397,10 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     public void binderDied() {
         if (DEBUG) Log.d(TAG, "binderDeath");
         handleDeath();
+    }
+
+    public IBinder getToken() {
+        return mToken;
     }
 
     public interface TileChangeListener {

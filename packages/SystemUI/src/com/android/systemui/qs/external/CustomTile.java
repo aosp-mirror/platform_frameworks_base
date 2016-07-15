@@ -71,7 +71,7 @@ public class CustomTile extends QSTile<QSTile.State> implements TileChangeListen
         super(host);
         mWindowManager = WindowManagerGlobal.getWindowManagerService();
         mComponent = ComponentName.unflattenFromString(action);
-        mTile = new Tile(mComponent);
+        mTile = new Tile();
         setTileIcon();
         mServiceManager = host.getTileServices().getTileWrapper(this);
         mService = mServiceManager.getTileService();
