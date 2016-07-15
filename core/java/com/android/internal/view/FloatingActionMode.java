@@ -26,6 +26,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+import android.util.DisplayMetrics;
 
 import com.android.internal.R;
 import com.android.internal.util.Preconditions;
@@ -209,11 +210,9 @@ public class FloatingActionMode extends ActionMode {
     }
 
     private boolean isContentRectWithinBounds() {
-        mScreenRect.set(
-            0,
-            0,
-            mContext.getResources().getDisplayMetrics().widthPixels,
-            mContext.getResources().getDisplayMetrics().heightPixels);
+        DisplayMetrics metrics = mContext.getApplicationContext()
+                .getResources().getDisplayMetrics();
+        mScreenRect.set(0, 0, metrics.widthPixels, metrics.heightPixels);
 
         return intersectsClosed(mContentRectOnScreen, mScreenRect)
             && intersectsClosed(mContentRectOnScreen, mViewRectOnScreen);
