@@ -180,6 +180,7 @@ public class ApfFilter {
     private static final int IPV4_FRAGMENT_OFFSET_MASK = 0x1fff;
     private static final int IPV4_PROTOCOL_OFFSET = ETH_HEADER_LEN + 9;
     private static final int IPV4_DEST_ADDR_OFFSET = ETH_HEADER_LEN + 16;
+    private static final int IPV4_ANY_HOST_ADDRESS = 0;
 
     private static final int IPV6_NEXT_HEADER_OFFSET = ETH_HEADER_LEN + 6;
     private static final int IPV6_SRC_ADDR_OFFSET = ETH_HEADER_LEN + 8;
@@ -201,12 +202,14 @@ public class ApfFilter {
     private static final int DHCP_CLIENT_MAC_OFFSET = ETH_HEADER_LEN + UDP_HEADER_LEN + 28;
 
     private static final int ARP_HEADER_OFFSET = ETH_HEADER_LEN;
-    private static final byte[] ARP_IPV4_REQUEST_HEADER = new byte[]{
+    private static final int ARP_OPCODE_OFFSET = ARP_HEADER_OFFSET + 6;
+    private static final short ARP_OPCODE_REQUEST = 1;
+    private static final short ARP_OPCODE_REPLY = 2;
+    private static final byte[] ARP_IPV4_HEADER = new byte[]{
             0, 1, // Hardware type: Ethernet (1)
             8, 0, // Protocol type: IP (0x0800)
             6,    // Hardware size: 6
             4,    // Protocol size: 4
-            0, 1  // Opcode: request (1)
     };
     private static final int ARP_TARGET_IP_ADDRESS_OFFSET = ETH_HEADER_LEN + 24;
 
@@ -667,23 +670,48 @@ public class ApfFilter {
     private void generateArpFilterLocked(ApfGenerator gen) throws IllegalInstructionException {
         // Here's a basic summary of what the ARP filter program does:
         //
-        // if interface has IPv4 address:
-        //   if it's not an ARP IPv4 request:
-        //     pass
-        //   if it's not a request for our IPv4 address:
-        //     drop
+        // if not ARP IPv4
+        //   pass
+        // if not ARP IPv4 reply or request
+        //   pass
+        // if unicast ARP reply
+        //   pass
+        // if interface has no IPv4 address
+        //   if target ip is 0.0.0.0
+        //      drop
+        // else
+        //   if target ip is not the interface ip
+        //      drop
         // pass
 
-        if (mIPv4Address != null) {
-            // if it's not an ARP IPv4 request, pass
-            gen.addLoadImmediate(Register.R0, ARP_HEADER_OFFSET);
-            gen.addJumpIfBytesNotEqual(Register.R0, ARP_IPV4_REQUEST_HEADER, gen.PASS_LABEL);
-            // if it's not a request for our IPv4 address, drop
+        final String checkTargetIPv4 = "checkTargetIPv4";
+
+        // Pass if not ARP IPv4.
+        gen.addLoadImmediate(Register.R0, ARP_HEADER_OFFSET);
+        gen.addJumpIfBytesNotEqual(Register.R0, ARP_IPV4_HEADER, gen.PASS_LABEL);
+
+        // Pass if unknown ARP opcode.
+        gen.addLoad16(Register.R0, ARP_OPCODE_OFFSET);
+        gen.addJumpIfR0Equals(ARP_OPCODE_REQUEST, checkTargetIPv4); // Skip to unicast check
+        gen.addJumpIfR0NotEquals(ARP_OPCODE_REPLY, gen.PASS_LABEL);
+
+        // Pass if unicast reply.
+        gen.addLoadImmediate(Register.R0, ETH_DEST_ADDR_OFFSET);
+        gen.addJumpIfBytesNotEqual(Register.R0, ETH_BROADCAST_MAC_ADDRESS, gen.PASS_LABEL);
+
+        // Either a unicast request, a unicast reply, or a broadcast reply.
+        gen.defineLabel(checkTargetIPv4);
+        if (mIPv4Address == null) {
+            // When there is no IPv4 address, drop GARP replies (b/29404209).
+            gen.addLoad32(Register.R0, ARP_TARGET_IP_ADDRESS_OFFSET);
+            gen.addJumpIfR0Equals(IPV4_ANY_HOST_ADDRESS, gen.DROP_LABEL);
+        } else {
+            // When there is an IPv4 address, drop unicast/broadcast requests
+            // and broadcast replies with a different target IPv4 address.
             gen.addLoadImmediate(Register.R0, ARP_TARGET_IP_ADDRESS_OFFSET);
             gen.addJumpIfBytesNotEqual(Register.R0, mIPv4Address, gen.DROP_LABEL);
         }
 
-        // Otherwise, pass
         gen.addJump(gen.PASS_LABEL);
     }
 
