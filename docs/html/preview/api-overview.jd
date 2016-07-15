@@ -755,6 +755,20 @@ For more information, see <a href="{@docRoot}preview/features/direct-boot.html">
   on the device.
 </p>
 
+<p class="note">
+  <strong>Note: </strong>Only a small number of devices running Android N
+  support hardware-level key attestation; all other devices running Android N
+  use software-level key attestation instead. Before you verify the properties
+  of a device's hardware-backed keys in a production-level environment, you
+  should make sure that the device supports hardware-level key attestation. To
+  do so, you should check that the attestation certificate chain contains a root
+  certificate that is signed by the Google attestation root key and that the
+  <code>attestationSecurityLevel</code> element within the <a
+  href="{@docRoot}preview/features/key-attestation.html#certificate_schema_keydescription">key
+  description</a> data structure is set to the TrustedEnvironment security
+  level.
+</p>
+
 <p>
   For more information, see the
   <a href="{@docRoot}preview/features/key-attestation.html">Key Attestation</a>
