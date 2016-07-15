@@ -153,7 +153,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         Log.i(TAG, "#### setup() on " + getName());
         Instrumentation instrumentation = getInstrumentation();
         mContext = instrumentation.getTargetContext();
-        mUiBot = new UiBot(UiDevice.getInstance(instrumentation), TIMEOUT);
+        mUiBot = new UiBot(instrumentation, TIMEOUT);
         mListener = ActionSendMultipleConsumerActivity.getListener(mContext);
 
         cancelExistingNotifications();
@@ -233,10 +233,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
 
         assertProgressNotification(NAME, 00.00f);
 
-        openProgressNotification(ID);
-        UiObject cancelButton = mUiBot.getVisibleObject(mContext.getString(
-                com.android.internal.R.string.cancel).toUpperCase());
-        mUiBot.click(cancelButton, "cancel_button");
+        cancelFromNotification();
 
         waitForService(false);
     }
@@ -320,6 +317,21 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT, ID, PID, TITLE,
                 NEW_NAME, TITLE, mDescription, 0, RENAMED_SCREENSHOTS);
 
+        assertServiceNotRunning();
+    }
+
+    public void testProgress_cancelBugClosesDetailsDialog() throws Exception {
+        resetProperties();
+        sendBugreportStarted(1000);
+        waitForScreenshotButtonEnabled(true);
+
+        DetailsUi detailsUi = new DetailsUi(mUiBot, ID);
+        detailsUi.assertName(NAME);  // Sanity check
+
+        cancelFromNotification();
+        mUiBot.closeNotifications();
+
+        assertDetailsUiClosed();
         assertServiceNotRunning();
     }
 
@@ -577,6 +589,13 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
             Log.i(TAG, "Canceling existing notification (id=" + id + ")");
             nm.cancel(id);
         }
+    }
+
+    private void cancelFromNotification() {
+        openProgressNotification(ID);
+        UiObject cancelButton = mUiBot.getVisibleObject(mContext.getString(
+                com.android.internal.R.string.cancel).toUpperCase());
+        mUiBot.click(cancelButton, "cancel_button");
     }
 
     private void assertProgressNotification(String name, float percent) {
@@ -927,6 +946,11 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         UiObject screenshotButton = getScreenshotButton();
         assertEquals("wrong state for screenshot button ", expectedEnabled,
                 screenshotButton.isEnabled());
+    }
+
+    private void assertDetailsUiClosed() {
+        // TODO: unhardcode resource ids
+        mUiBot.assertNotVisibleById("android:id/alertTitle");
     }
 
     /**
