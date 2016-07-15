@@ -423,7 +423,7 @@ static int startLoadAppTxn(uint64_t appId, int hubHandle) {
     txnInfo->appInfo.num_mem_ranges = 0;
     txnInfo->appInfo.version = -1; // Awaited
 
-    if (!addTxn(CONTEXT_HUB_LOAD_APP, txnInfo)) {
+    if (addTxn(CONTEXT_HUB_LOAD_APP, txnInfo) != 0) {
         return_id(instanceId);
         free(txnInfo);
         return -1;
@@ -726,6 +726,7 @@ static int handle_os_message(uint32_t msgType, uint32_t hubHandle,
           if (isValidOsStatus(msg, msgLen, &rsp)) {
               rsp.result = 0;
               ALOGW("Context Hub handle %d restarted", hubHandle);
+              closeTxn();
               passOnOsResponse(hubHandle, msgType, &rsp, nullptr, 0);
               invalidateNanoApps(hubHandle);
               query_hub_for_apps(ALL_APPS, hubHandle);
@@ -1012,10 +1013,12 @@ static jint nativeSendMessage(JNIEnv *env, jobject instance, jintArray header_,
 
         if (msgType == CONTEXT_HUB_LOAD_APP) {
             if (startLoadAppTxn(appId, hubHandle) != 0) {
+                ALOGW("Cannot Start Load Transaction");
                 return -1;
             }
         } else if (msgType == CONTEXT_HUB_UNLOAD_APP) {
             if (startUnloadAppTxn(appInstanceHandle) != 0) {
+                ALOGW("Cannot Start UnLoad Transaction");
                 return -1;
             }
         }
