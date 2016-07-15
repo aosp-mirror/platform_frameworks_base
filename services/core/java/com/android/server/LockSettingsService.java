@@ -584,6 +584,18 @@ public class LockSettingsService extends ILockSettings.Stub {
                         Slog.e(TAG, "Invalid tied profile lock type: " + quality);
                     }
                 }
+                try {
+                    final String alias = LockPatternUtils.PROFILE_KEY_NAME_ENCRYPT + userInfo.id;
+                    java.security.KeyStore keyStore =
+                            java.security.KeyStore.getInstance("AndroidKeyStore");
+                    keyStore.load(null);
+                    if (keyStore.containsAlias(alias)) {
+                        keyStore.deleteEntry(alias);
+                    }
+                } catch (KeyStoreException | NoSuchAlgorithmException |
+                        CertificateException | IOException e) {
+                    Slog.e(TAG, "Unable to remove tied profile key", e);
+                }
             }
         } catch (RemoteException re) {
             Slog.e(TAG, "Unable to migrate old data", re);
@@ -1027,37 +1039,38 @@ public class LockSettingsService extends ILockSettings.Stub {
             KeyGenerator keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES);
             keyGenerator.init(new SecureRandom());
             SecretKey secretKey = keyGenerator.generateKey();
-
             java.security.KeyStore keyStore = java.security.KeyStore.getInstance("AndroidKeyStore");
             keyStore.load(null);
-            keyStore.setEntry(
-                    LockPatternUtils.PROFILE_KEY_NAME_ENCRYPT + userId,
-                    new java.security.KeyStore.SecretKeyEntry(secretKey),
-                    new KeyProtection.Builder(KeyProperties.PURPOSE_ENCRYPT)
-                            .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-                            .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-                            .build());
-            keyStore.setEntry(
-                    LockPatternUtils.PROFILE_KEY_NAME_DECRYPT + userId,
-                    new java.security.KeyStore.SecretKeyEntry(secretKey),
-                    new KeyProtection.Builder(KeyProperties.PURPOSE_DECRYPT)
-                            .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-                            .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-                            .setUserAuthenticationRequired(true)
-                            .setUserAuthenticationValidityDurationSeconds(30)
-                            .build());
-
-            // Key imported, obtain a reference to it.
-            SecretKey keyStoreEncryptionKey = (SecretKey) keyStore.getKey(
-                    LockPatternUtils.PROFILE_KEY_NAME_ENCRYPT + userId, null);
-            // The original key can now be discarded.
-
-            Cipher cipher = Cipher.getInstance(
-                    KeyProperties.KEY_ALGORITHM_AES + "/" + KeyProperties.BLOCK_MODE_GCM + "/"
-                            + KeyProperties.ENCRYPTION_PADDING_NONE);
-            cipher.init(Cipher.ENCRYPT_MODE, keyStoreEncryptionKey);
-            encryptionResult = cipher.doFinal(randomLockSeed);
-            iv = cipher.getIV();
+            try {
+                keyStore.setEntry(
+                        LockPatternUtils.PROFILE_KEY_NAME_ENCRYPT + userId,
+                        new java.security.KeyStore.SecretKeyEntry(secretKey),
+                        new KeyProtection.Builder(KeyProperties.PURPOSE_ENCRYPT)
+                                .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+                                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                                .build());
+                keyStore.setEntry(
+                        LockPatternUtils.PROFILE_KEY_NAME_DECRYPT + userId,
+                        new java.security.KeyStore.SecretKeyEntry(secretKey),
+                        new KeyProtection.Builder(KeyProperties.PURPOSE_DECRYPT)
+                                .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+                                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                                .setUserAuthenticationRequired(true)
+                                .setUserAuthenticationValidityDurationSeconds(30)
+                                .build());
+                // Key imported, obtain a reference to it.
+                SecretKey keyStoreEncryptionKey = (SecretKey) keyStore.getKey(
+                        LockPatternUtils.PROFILE_KEY_NAME_ENCRYPT + userId, null);
+                Cipher cipher = Cipher.getInstance(
+                        KeyProperties.KEY_ALGORITHM_AES + "/" + KeyProperties.BLOCK_MODE_GCM + "/"
+                                + KeyProperties.ENCRYPTION_PADDING_NONE);
+                cipher.init(Cipher.ENCRYPT_MODE, keyStoreEncryptionKey);
+                encryptionResult = cipher.doFinal(randomLockSeed);
+                iv = cipher.getIV();
+            } finally {
+                // The original key can now be discarded.
+                keyStore.deleteEntry(LockPatternUtils.PROFILE_KEY_NAME_ENCRYPT + userId);
+            }
         } catch (CertificateException | UnrecoverableKeyException
                 | IOException | BadPaddingException | IllegalBlockSizeException | KeyStoreException
                 | NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException e) {
