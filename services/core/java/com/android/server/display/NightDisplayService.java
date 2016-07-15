@@ -22,6 +22,8 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.ContentObserver;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
@@ -56,7 +58,10 @@ public final class NightDisplayService extends SystemService
         0,      0,      0, 1
     };
 
+    private final Handler mHandler;
+
     private int mCurrentUser = UserHandle.USER_NULL;
+    private ContentObserver mUserSetupObserver;
     private boolean mBootCompleted;
 
     private NightDisplayController mController;
@@ -65,6 +70,7 @@ public final class NightDisplayService extends SystemService
 
     public NightDisplayService(Context context) {
         super(context);
+        mHandler = new Handler(Looper.getMainLooper());
     }
 
     @Override
@@ -73,15 +79,23 @@ public final class NightDisplayService extends SystemService
     }
 
     @Override
+    public void onBootPhase(int phase) {
+        if (phase == PHASE_BOOT_COMPLETED) {
+            mBootCompleted = true;
+
+            // Register listeners now that boot is complete.
+            if (mCurrentUser != UserHandle.USER_NULL && mUserSetupObserver == null) {
+                setUp();
+            }
+        }
+    }
+
+    @Override
     public void onStartUser(int userHandle) {
         super.onStartUser(userHandle);
 
-        // Register listeners for the new user.
         if (mCurrentUser == UserHandle.USER_NULL) {
-            mCurrentUser = userHandle;
-            if (mBootCompleted) {
-                setUpNightMode();
-            }
+            onUserChanged(userHandle);
         }
     }
 
@@ -89,44 +103,60 @@ public final class NightDisplayService extends SystemService
     public void onSwitchUser(int userHandle) {
         super.onSwitchUser(userHandle);
 
-        // Unregister listeners for the old user.
-        if (mBootCompleted && mCurrentUser != UserHandle.USER_NULL) {
-            tearDownNightMode();
-        }
-
-        // Register listeners for the new user.
-        mCurrentUser = userHandle;
-        if (mBootCompleted) {
-            setUpNightMode();
-        }
+        onUserChanged(userHandle);
     }
 
     @Override
     public void onStopUser(int userHandle) {
         super.onStopUser(userHandle);
 
-        // Unregister listeners for the old user.
         if (mCurrentUser == userHandle) {
-            if (mBootCompleted) {
-                tearDownNightMode();
-            }
-            mCurrentUser = UserHandle.USER_NULL;
+            onUserChanged(UserHandle.USER_NULL);
         }
     }
 
-    @Override
-    public void onBootPhase(int phase) {
-        if (phase == PHASE_BOOT_COMPLETED) {
-            mBootCompleted = true;
+    private void onUserChanged(int userHandle) {
+        final ContentResolver cr = getContext().getContentResolver();
 
-            // Register listeners now that boot is complete.
-            if (mCurrentUser != UserHandle.USER_NULL) {
-                setUpNightMode();
+        if (mCurrentUser != UserHandle.USER_NULL) {
+            if (mUserSetupObserver != null) {
+                cr.unregisterContentObserver(mUserSetupObserver);
+                mUserSetupObserver = null;
+            } else if (mBootCompleted) {
+                tearDown();
+            }
+        }
+
+        mCurrentUser = userHandle;
+
+        if (mCurrentUser != UserHandle.USER_NULL) {
+            if (!isUserSetupCompleted(cr, mCurrentUser)) {
+                mUserSetupObserver = new ContentObserver(mHandler) {
+                    @Override
+                    public void onChange(boolean selfChange, Uri uri) {
+                        if (isUserSetupCompleted(cr, mCurrentUser)) {
+                            cr.unregisterContentObserver(this);
+                            mUserSetupObserver = null;
+
+                            if (mBootCompleted) {
+                                setUp();
+                            }
+                        }
+                    }
+                };
+                cr.registerContentObserver(Secure.getUriFor(Secure.USER_SETUP_COMPLETE),
+                        false /* notifyForDescendents */, mUserSetupObserver, mCurrentUser);
+            } else if (mBootCompleted) {
+                setUp();
             }
         }
     }
 
-    private void setUpNightMode() {
+    private static boolean isUserSetupCompleted(ContentResolver cr, int userHandle) {
+        return Secure.getIntForUser(cr, Secure.USER_SETUP_COMPLETE, 0, userHandle) == 1;
+    }
+
+    private void setUp() {
         // Create a new controller for the current user and start listening for changes.
         mController = new NightDisplayController(getContext(), mCurrentUser);
         mController.setListener(this);
@@ -140,8 +170,11 @@ public final class NightDisplayService extends SystemService
         }
     }
 
-    private void tearDownNightMode() {
-        mController.setListener(null);
+    private void tearDown() {
+        if (mController != null) {
+            mController.setListener(null);
+            mController = null;
+        }
 
         if (mAutoMode != null) {
             mAutoMode.onStop();
@@ -149,7 +182,6 @@ public final class NightDisplayService extends SystemService
         }
 
         mIsActivated = null;
-        mController = null;
     }
 
     @Override
@@ -324,13 +356,11 @@ public final class NightDisplayService extends SystemService
     private class TwilightAutoMode extends AutoMode implements TwilightListener {
 
         private final TwilightManager mTwilightManager;
-        private final Handler mHandler;
 
         private boolean mIsNight;
 
         public TwilightAutoMode() {
             mTwilightManager = getLocalService(TwilightManager.class);
-            mHandler = new Handler(Looper.getMainLooper());
         }
 
         private void updateActivated() {
