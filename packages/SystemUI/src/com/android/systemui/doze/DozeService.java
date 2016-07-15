@@ -214,6 +214,10 @@ public class DozeService extends DreamService {
     }
 
     private void requestPulse(final int reason) {
+        requestPulse(reason, false /* performedProxCheck */);
+    }
+
+    private void requestPulse(final int reason, boolean performedProxCheck) {
         if (mHost != null && mDreaming && !mPulsing) {
             // Let the host know we want to pulse.  Wait for it to be ready, then
             // turn the screen on.  When finished, turn the screen off again.
@@ -226,10 +230,9 @@ public class DozeService extends DreamService {
                 return;
             }
             final long start = SystemClock.uptimeMillis();
-            final boolean nonBlocking = reason == DozeLog.PULSE_REASON_SENSOR_PICKUP
-                    && mDozeParameters.getPickupPerformsProxCheck();
-            if (nonBlocking) {
-                // proximity check is only done to capture statistics, continue pulsing
+            if (performedProxCheck) {
+                // the caller already performed a successful proximity check; we'll only do one to
+                // capture statistics, continue pulsing immediately.
                 continuePulsing(reason);
             }
             // perform a proximity check
@@ -239,7 +242,7 @@ public class DozeService extends DreamService {
                     final boolean isNear = result == RESULT_NEAR;
                     final long end = SystemClock.uptimeMillis();
                     DozeLog.traceProximityResult(mContext, isNear, end - start, reason);
-                    if (nonBlocking) {
+                    if (performedProxCheck) {
                         // we already continued
                         return;
                     }
@@ -540,9 +543,12 @@ public class DozeService extends DreamService {
             mWakeLock.acquire();
             try {
                 if (DEBUG) Log.d(mTag, "onTrigger: " + triggerEventToString(event));
+                boolean sensorPerformsProxCheck = false;
                 if (mSensor.getType() == Sensor.TYPE_PICK_UP_GESTURE) {
                     int subType = (int) event.values[0];
                     MetricsLogger.action(mContext, MetricsEvent.ACTION_AMBIENT_GESTURE, subType);
+                    sensorPerformsProxCheck = mDozeParameters.getPickupSubtypePerformsProxCheck(
+                            subType);
                 }
                 if (mDebugVibrate) {
                     final Vibrator v = (Vibrator) mContext.getSystemService(
@@ -555,7 +561,7 @@ public class DozeService extends DreamService {
                 }
 
                 mRegistered = false;
-                requestPulse(mPulseReason);
+                requestPulse(mPulseReason, sensorPerformsProxCheck);
                 updateListener();  // reregister, this sensor only fires once
 
                 // reset the notification pulse schedule, but only if we think we were not triggered
