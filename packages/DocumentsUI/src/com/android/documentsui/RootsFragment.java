@@ -298,8 +298,15 @@ public class RootsFragment extends Fragment implements ItemDragListener.DragHost
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         AdapterContextMenuInfo adapterMenuInfo = (AdapterContextMenuInfo) item.getMenuInfo();
+        // There is a possibility that this is called from DirectoryFragment since
+        // all fragments' onContextItemSelected gets called when any menu item is selected
+        // This is to guard against it since DirectoryFragment's RecylerView does not have a
+        // menuInfo
+        if (adapterMenuInfo == null) {
+            return false;
+        }
         final RootItem rootItem = (RootItem) mAdapter.getItem(adapterMenuInfo.position);
-        switch(item.getItemId()) {
+        switch (item.getItemId()) {
             case R.id.menu_eject_root:
                 final View ejectIcon = adapterMenuInfo.targetView.findViewById(R.id.eject_icon);
                 ejectClicked(ejectIcon, rootItem.root);
