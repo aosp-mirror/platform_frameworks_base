@@ -6380,7 +6380,11 @@ public final class Settings {
             PREFERRED_TTY_MODE,
             ENHANCED_VOICE_PRIVACY_ENABLED,
             TTY_MODE_ENABLED,
-            INCALL_POWER_BUTTON_BEHAVIOR
+            INCALL_POWER_BUTTON_BEHAVIOR,
+            NIGHT_DISPLAY_CUSTOM_START_TIME,
+            NIGHT_DISPLAY_CUSTOM_END_TIME,
+            NIGHT_DISPLAY_AUTO_MODE,
+            NIGHT_DISPLAY_ACTIVATED
         };
 
         /**
