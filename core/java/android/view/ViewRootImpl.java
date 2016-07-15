@@ -5502,6 +5502,15 @@ public final class ViewRootImpl implements ViewParent,
         if (mView != null && mAdded) {
             final int what = event.mAction;
 
+            // Cache the drag description when the operation starts, then fill it in
+            // on subsequent calls as a convenience
+            if (what == DragEvent.ACTION_DRAG_STARTED) {
+                mCurrentDragView = null;    // Start the current-recipient tracking
+                mDragDescription = event.mClipDescription;
+            } else {
+                event.mClipDescription = mDragDescription;
+            }
+
             if (what == DragEvent.ACTION_DRAG_EXITED) {
                 // A direct EXITED event means that the window manager knows we've just crossed
                 // a window boundary, so the current drag target within this one must have
@@ -5509,15 +5518,6 @@ public final class ViewRootImpl implements ViewParent,
                 // for now.
                 mView.dispatchDragEvent(event);
             } else {
-                // Cache the drag description when the operation starts, then fill it in
-                // on subsequent calls as a convenience
-                if (what == DragEvent.ACTION_DRAG_STARTED) {
-                    mCurrentDragView = null;    // Start the current-recipient tracking
-                    mDragDescription = event.mClipDescription;
-                } else {
-                    event.mClipDescription = mDragDescription;
-                }
-
                 // For events with a [screen] location, translate into window coordinates
                 if ((what == DragEvent.ACTION_DRAG_LOCATION) || (what == DragEvent.ACTION_DROP)) {
                     mDragPoint.set(event.mX, event.mY);
