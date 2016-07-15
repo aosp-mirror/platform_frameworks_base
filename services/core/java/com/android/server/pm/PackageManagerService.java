@@ -11704,12 +11704,18 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (pkgSetting == null) {
                     return false;
                 }
+                // Do not allow "android" is being disabled
+                if ("android".equals(packageName)) {
+                    Slog.w(TAG, "Cannot hide package: android");
+                    return false;
+                }
                 // Only allow protected packages to hide themselves.
                 if (hidden && !UserHandle.isSameApp(uid, pkgSetting.appId)
                         && mProtectedPackages.isPackageStateProtected(userId, packageName)) {
                     Slog.w(TAG, "Not hiding protected package: " + packageName);
                     return false;
                 }
+
                 if (pkgSetting.getHidden(userId) != hidden) {
                     pkgSetting.setHidden(hidden, userId);
                     mSettings.writePackageRestrictionsLPr(userId);
