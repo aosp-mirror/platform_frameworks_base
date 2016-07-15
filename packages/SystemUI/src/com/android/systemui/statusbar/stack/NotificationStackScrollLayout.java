@@ -2656,6 +2656,10 @@ public class NotificationStackScrollLayout extends ViewGroup
                 type = row.wasJustClicked()
                         ? AnimationEvent.ANIMATION_TYPE_HEADS_UP_DISAPPEAR_CLICK
                         : AnimationEvent.ANIMATION_TYPE_HEADS_UP_DISAPPEAR;
+                if (row.isChildInGroup()) {
+                    // We can otherwise get stuck in there if it was just isolated
+                    row.setHeadsupDisappearRunning(false);
+                }
             } else {
                 StackViewState viewState = mCurrentStackScrollState.getViewStateForView(row);
                 if (viewState == null) {
@@ -3156,7 +3160,13 @@ public class NotificationStackScrollLayout extends ViewGroup
         for (int i = 0; i < getChildCount(); i++) {
             View view = getChildAt(i);
             if (view instanceof ExpandableNotificationRow) {
-                ((ExpandableNotificationRow) view).setHeadsupDisappearRunning(false);
+                ExpandableNotificationRow row = (ExpandableNotificationRow) view;
+                row.setHeadsupDisappearRunning(false);
+                if (row.isSummaryWithChildren()) {
+                    for (ExpandableNotificationRow child : row.getNotificationChildren()) {
+                        child.setHeadsupDisappearRunning(false);
+                    }
+                }
             }
         }
     }
