@@ -186,7 +186,7 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
         try {
             final PackageInfo info =
                     pm.getPackageInfo(sbn.getPackageName(), PackageManager.GET_SIGNATURES);
-            systemApp = Utils.isSystemPackage(pm, info);
+            systemApp = Utils.isSystemPackage(getResources(), pm, info);
         } catch (PackageManager.NameNotFoundException e) {
             // unlikely.
         }
