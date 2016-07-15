@@ -16688,7 +16688,26 @@ public class PackageManagerService extends IPackageManager.Stub {
             filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
             pir.addFilter(new PreferredActivity(filter, match, set, activity, always));
             scheduleWritePackageRestrictionsLocked(userId);
+            postPreferredActivityChangedBroadcast(userId);
         }
+    }
+
+    private void postPreferredActivityChangedBroadcast(int userId) {
+        mHandler.post(() -> {
+            final IActivityManager am = ActivityManagerNative.getDefault();
+            if (am == null) {
+                return;
+            }
+
+            final Intent intent = new Intent(Intent.ACTION_PREFERRED_ACTIVITY_CHANGED);
+            intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
+            try {
+                am.broadcastIntent(null, intent, null, null,
+                        0, null, null, null, android.app.AppOpsManager.OP_NONE,
+                        null, false, false, userId);
+            } catch (RemoteException e) {
+            }
+        });
     }
 
     @Override
@@ -16842,6 +16861,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 changed = true;
             }
         }
+        if (changed) {
+            postPreferredActivityChangedBroadcast(userId);
+        }
         return changed;
     }
 
@@ -16955,6 +16977,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             mSettings.editPersistentPreferredActivitiesLPw(userId).addFilter(
                     new PersistentPreferredActivity(filter, activity));
             scheduleWritePackageRestrictionsLocked(userId);
+            postPreferredActivityChangedBroadcast(userId);
         }
     }
 
@@ -16997,6 +17020,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             if (changed) {
                 scheduleWritePackageRestrictionsLocked(userId);
+                postPreferredActivityChangedBroadcast(userId);
             }
         }
     }

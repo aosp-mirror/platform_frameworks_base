@@ -303,11 +303,6 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
 
         @Override
-        PackageManagerInternal injectPackageManagerInternal() {
-            return mMockPackageManagerInternal;
-        }
-
-        @Override
         boolean hasShortcutHostPermission(@NonNull String callingPackage, int userId) {
             return mDefaultLauncherChecker.test(callingPackage, userId);
         }
