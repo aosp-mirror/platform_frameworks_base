@@ -24,9 +24,11 @@ import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
 import android.app.IUidObserver;
 import android.app.usage.UsageStatsManagerInternal;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
@@ -49,10 +51,12 @@ import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Canvas;
 import android.graphics.RectF;
 import android.graphics.drawable.Icon;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
+import android.os.LocaleList;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
@@ -116,15 +120,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
  * TODO:
- * - Deal with the async nature of PACKAGE_ADD.  Basically when a publisher does anything after
- *   it's upgraded, the manager should make sure the upgrade process has been executed.
- *
  * - getIconMaxWidth()/getIconMaxHeight() should use xdpi and ydpi.
  *   -> But TypedValue.applyDimension() doesn't differentiate x and y..?
  *
@@ -179,7 +179,6 @@ public class ShortcutService extends IShortcutService.Stub {
 
     private static final String TAG_ROOT = "root";
     private static final String TAG_LAST_RESET_TIME = "last_reset_time";
-    private static final String TAG_LOCALE_CHANGE_SEQUENCE_NUMBER = "locale_seq_no";
 
     private static final String ATTR_VALUE = "value";
 
@@ -292,16 +291,6 @@ public class ShortcutService extends IShortcutService.Stub {
     @GuardedBy("mLock")
     private List<Integer> mDirtyUserIds = new ArrayList<>();
 
-    /**
-     * A counter that increments every time the system locale changes.  We keep track of it to
-     * reset
-     * throttling counters on the first call from each package after the last locale change.
-     *
-     * We need this mechanism because we can't do much in the locale change callback, which is
-     * {@link ShortcutServiceInternal#onSystemLocaleChangedNoLock()}.
-     */
-    private final AtomicLong mLocaleChangeSequenceNumber = new AtomicLong();
-
     private final AtomicBoolean mBootCompleted = new AtomicBoolean();
 
     private static final int PACKAGE_MATCH_FLAGS =
@@ -326,8 +315,9 @@ public class ShortcutService extends IShortcutService.Stub {
         int GET_LAUNCHER_ACTIVITY = 11;
         int CHECK_LAUNCHER_ACTIVITY = 12;
         int IS_ACTIVITY_ENABLED = 13;
+        int PACKAGE_UPDATE_CHECK = 14;
 
-        int COUNT = IS_ACTIVITY_ENABLED + 1;
+        int COUNT = PACKAGE_UPDATE_CHECK + 1;
     }
 
     final Object mStatLock = new Object();
@@ -381,7 +371,25 @@ public class ShortcutService extends IShortcutService.Stub {
             return; // Don't do anything further.  For unit tests only.
         }
 
-        mPackageMonitor.register(context, looper, UserHandle.ALL, /* externalStorage= */ false);
+        // Register receivers.
+
+        // We need to set a priority, so let's just not use PackageMonitor for now.
+        // TODO Refactor PackageMonitor to support priorities.
+        final IntentFilter packageFilter = new IntentFilter();
+        packageFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
+        packageFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        packageFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
+        packageFilter.addAction(Intent.ACTION_PACKAGE_DATA_CLEARED);
+        packageFilter.addDataScheme("package");
+        packageFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+        mContext.registerReceiverAsUser(mPackageMonitor, UserHandle.ALL,
+                packageFilter, null, mHandler);
+
+        final IntentFilter localeFilter = new IntentFilter();
+        localeFilter.addAction(Intent.ACTION_LOCALE_CHANGED);
+        localeFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+        mContext.registerReceiverAsUser(mReceiver, UserHandle.ALL,
+                localeFilter, null, mHandler);
 
         injectRegisterUidObserver(mUidObserver, ActivityManager.UID_OBSERVER_PROCSTATE
                 | ActivityManager.UID_OBSERVER_GONE);
@@ -394,8 +402,9 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
-    public long getLocaleChangeSequenceNumber() {
-        return mLocaleChangeSequenceNumber.get();
+    public String injectGetLocaleTagsForUser(@UserIdInt int userId) {
+        // TODO This should get the per-user locale.  b/30123329 b/30119489
+        return LocaleList.getDefault().toLanguageTags();
     }
 
     final private IUidObserver mUidObserver = new IUidObserver.Stub() {
@@ -504,8 +513,11 @@ public class ShortcutService extends IShortcutService.Stub {
             Slog.d(TAG, "handleUnlockUser: user=" + userId);
         }
         synchronized (mLock) {
-            // Preload
-            getUserShortcutsLocked(userId);
+            // Preload the user's shortcuts.
+            // Also see if the locale has changed.
+            // Note as of nyc, the locale is per-user, so the locale shouldn't change
+            // when the user is locked.  However due to b/30119489 it still happens.
+            getUserShortcutsLocked(userId).detectLocaleChange();
 
             checkPackageChanges(userId);
         }
@@ -751,8 +763,6 @@ public class ShortcutService extends IShortcutService.Stub {
 
             // Body.
             writeTagValue(out, TAG_LAST_RESET_TIME, mRawLastResetTime);
-            writeTagValue(out, TAG_LOCALE_CHANGE_SEQUENCE_NUMBER,
-                    mLocaleChangeSequenceNumber.get());
 
             // Epilogue.
             out.endTag(null, TAG_ROOT);
@@ -796,9 +806,6 @@ public class ShortcutService extends IShortcutService.Stub {
                 switch (tag) {
                     case TAG_LAST_RESET_TIME:
                         mRawLastResetTime = parseLongAttribute(parser, ATTR_VALUE);
-                        break;
-                    case TAG_LOCALE_CHANGE_SEQUENCE_NUMBER:
-                        mLocaleChangeSequenceNumber.set(parseLongAttribute(parser, ATTR_VALUE));
                         break;
                     default:
                         Slog.e(TAG, "Invalid tag: " + tag);
@@ -1501,6 +1508,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
         synchronized (mLock) {
             final ShortcutPackage ps = getPackageShortcutsLocked(packageName, userId);
+            ps.getUser().onCalledByPublisher(packageName);
 
             ps.ensureImmutableShortcutsNotIncluded(newShortcuts);
 
@@ -1550,6 +1558,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
         synchronized (mLock) {
             final ShortcutPackage ps = getPackageShortcutsLocked(packageName, userId);
+            ps.getUser().onCalledByPublisher(packageName);
 
             ps.ensureImmutableShortcutsNotIncluded(newShortcuts);
 
@@ -1628,6 +1637,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
         synchronized (mLock) {
             final ShortcutPackage ps = getPackageShortcutsLocked(packageName, userId);
+            ps.getUser().onCalledByPublisher(packageName);
 
             ps.ensureImmutableShortcutsNotIncluded(newShortcuts);
 
@@ -1675,6 +1685,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
         synchronized (mLock) {
             final ShortcutPackage ps = getPackageShortcutsLocked(packageName, userId);
+            ps.getUser().onCalledByPublisher(packageName);
 
             ps.ensureImmutableShortcutsNotIncludedWithIds((List<String>) shortcutIds);
 
@@ -1702,6 +1713,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
         synchronized (mLock) {
             final ShortcutPackage ps = getPackageShortcutsLocked(packageName, userId);
+            ps.getUser().onCalledByPublisher(packageName);
 
             ps.ensureImmutableShortcutsNotIncludedWithIds((List<String>) shortcutIds);
 
@@ -1722,6 +1734,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
         synchronized (mLock) {
             final ShortcutPackage ps = getPackageShortcutsLocked(packageName, userId);
+            ps.getUser().onCalledByPublisher(packageName);
 
             ps.ensureImmutableShortcutsNotIncludedWithIds((List<String>) shortcutIds);
 
@@ -1743,7 +1756,9 @@ public class ShortcutService extends IShortcutService.Stub {
         verifyCaller(packageName, userId);
 
         synchronized (mLock) {
-            getPackageShortcutsLocked(packageName, userId).deleteAllDynamicShortcuts();
+            final ShortcutPackage ps = getPackageShortcutsLocked(packageName, userId);
+            ps.getUser().onCalledByPublisher(packageName);
+            ps.deleteAllDynamicShortcuts();
         }
         packageShortcutsChanged(packageName, userId);
 
@@ -1788,7 +1803,9 @@ public class ShortcutService extends IShortcutService.Stub {
 
         final ArrayList<ShortcutInfo> ret = new ArrayList<>();
 
-        getPackageShortcutsLocked(packageName, userId).findAll(ret, query, cloneFlags);
+        final ShortcutPackage ps = getPackageShortcutsLocked(packageName, userId);
+        ps.getUser().onCalledByPublisher(packageName);
+        ps.findAll(ret, query, cloneFlags);
 
         return new ParceledListSlice<>(ret);
     }
@@ -1806,8 +1823,9 @@ public class ShortcutService extends IShortcutService.Stub {
         verifyCaller(packageName, userId);
 
         synchronized (mLock) {
-            return mMaxUpdatesPerInterval
-                    - getPackageShortcutsLocked(packageName, userId).getApiCallCount();
+            final ShortcutPackage ps = getPackageShortcutsLocked(packageName, userId);
+            ps.getUser().onCalledByPublisher(packageName);
+            return mMaxUpdatesPerInterval - ps.getApiCallCount();
         }
     }
 
@@ -1842,6 +1860,8 @@ public class ShortcutService extends IShortcutService.Stub {
 
         synchronized (mLock) {
             final ShortcutPackage ps = getPackageShortcutsLocked(packageName, userId);
+            ps.getUser().onCalledByPublisher(packageName);
+
             if (ps.findShortcutById(shortcutId) == null) {
                 Log.w(TAG, String.format("reportShortcutUsed: package %s doesn't have shortcut %s",
                         packageName, shortcutId));
@@ -2039,7 +2059,7 @@ public class ShortcutService extends IShortcutService.Stub {
         if (appStillExists && (packageUserId == owningUserId)) {
             // This will do the notification and save when needed, so do it after the above
             // notifyListeners.
-            user.handlePackageAddedOrUpdated(packageName, /* forceRescan=*/ true);
+            user.rescanPackageIfNeeded(packageName, /* forceRescan=*/ true);
         }
 
         if (!wasUserLoaded) {
@@ -2282,36 +2302,19 @@ public class ShortcutService extends IShortcutService.Stub {
                 @NonNull String callingPackage) {
             return ShortcutService.this.hasShortcutHostPermission(callingPackage, launcherUserId);
         }
+    }
 
-        /**
-         * Called by AM when the system locale changes *within the AM lock.  ABSOLUTELY do not take
-         * any locks in this method.
-         */
+    final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
-        public void onSystemLocaleChangedNoLock() {
-            // DO NOT HOLD ANY LOCKS HERE.
-
-            // We want to reset throttling for all packages for all users.  But we can't just do so
-            // here because:
-            // - We can't load/save users that are locked.
-            // - Even for loaded users, resetting the counters would require us to hold mLock.
-            //
-            // So we use a "pull" model instead.  In here, we just increment the "locale change
-            // sequence number".  Each ShortcutUser has the "last known locale change sequence".
-            //
-            // This allows ShortcutUser's to detect the system locale change, so they can reset
-            // counters.
-
-            // Ignore all callback during system boot.
-            if (mBootCompleted.get()) {
-                mLocaleChangeSequenceNumber.incrementAndGet();
-                if (DEBUG) {
-                    Slog.d(TAG, "onSystemLocaleChangedNoLock: " + mLocaleChangeSequenceNumber.get());
-                }
-                injectPostToHandler(() -> handleLocaleChanged());
+        public void onReceive(Context context, Intent intent) {
+            if (!mBootCompleted.get()) {
+                return; // Boot not completed, ignore the broadcast.
+            }
+            if (Intent.ACTION_LOCALE_CHANGED.equals(intent.getAction())) {
+                handleLocaleChanged();
             }
         }
-    }
+    };
 
     void handleLocaleChanged() {
         if (DEBUG) {
@@ -2321,7 +2324,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
         final long token = injectClearCallingIdentity();
         try {
-            forEachLoadedUserLocked(u -> u.forAllPackages(p -> p.resolveResourceStrings()));
+            forEachLoadedUserLocked(user -> user.detectLocaleChange());
         } finally {
             injectRestoreCallingIdentity(token);
         }
@@ -2331,52 +2334,64 @@ public class ShortcutService extends IShortcutService.Stub {
      * Package event callbacks.
      */
     @VisibleForTesting
-    final PackageMonitor mPackageMonitor = new PackageMonitor() {
-
-        private boolean isUserUnlocked() {
-            return mUserManager.isUserUnlocked(getChangingUserId());
-        }
-
+    final BroadcastReceiver mPackageMonitor = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            // clearCallingIdentity is not needed normally, but need to do it for the unit test.
+            final int userId  = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
+            if (userId == UserHandle.USER_NULL) {
+                Slog.w(TAG, "Intent broadcast does not contain user handle: " + intent);
+                return;
+            }
+
+            final String action = intent.getAction();
+
+            // This is normally called on Handler, so clearCallingIdentity() isn't needed,
+            // but we still check it in unit tests.
             final long token = injectClearCallingIdentity();
             try {
-                super.onReceive(context, intent);
+
+                if (!mUserManager.isUserUnlocked(userId)) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Ignoring package broadcast " + action
+                                + " for locked/stopped user " + userId);
+                    }
+                    return;
+                }
+
+                final Uri intentUri = intent.getData();
+                final String packageName = (intentUri != null) ? intentUri.getSchemeSpecificPart()
+                        : null;
+                if (packageName == null) {
+                    Slog.w(TAG, "Intent broadcast does not contain package name: " + intent);
+                    return;
+                }
+
+                final boolean replacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
+
+                switch (action) {
+                    case Intent.ACTION_PACKAGE_ADDED:
+                        if (replacing) {
+                            handlePackageUpdateFinished(packageName, userId);
+                        } else {
+                            handlePackageAdded(packageName, userId);
+                        }
+                        break;
+                    case Intent.ACTION_PACKAGE_REMOVED:
+                        if (!replacing) {
+                            handlePackageRemoved(packageName, userId);
+                        }
+                        break;
+                    case Intent.ACTION_PACKAGE_CHANGED:
+                        handlePackageChanged(packageName, userId);
+
+                        break;
+                    case Intent.ACTION_PACKAGE_DATA_CLEARED:
+                        handlePackageDataCleared(packageName, userId);
+                        break;
+                }
             } finally {
                 injectRestoreCallingIdentity(token);
             }
-        }
-
-        @Override
-        public void onPackageAdded(String packageName, int uid) {
-            if (!isUserUnlocked()) return;
-            handlePackageAdded(packageName, getChangingUserId());
-        }
-
-        @Override
-        public void onPackageUpdateFinished(String packageName, int uid) {
-            if (!isUserUnlocked()) return;
-            handlePackageUpdateFinished(packageName, getChangingUserId());
-        }
-
-        @Override
-        public void onPackageRemoved(String packageName, int uid) {
-            if (!isUserUnlocked()) return;
-            handlePackageRemoved(packageName, getChangingUserId());
-        }
-
-        @Override
-        public void onPackageDataCleared(String packageName, int uid) {
-            if (!isUserUnlocked()) return;
-            handlePackageDataCleared(packageName, getChangingUserId());
-        }
-
-        @Override
-        public boolean onPackageChanged(String packageName, int uid, String[] components) {
-            if (!isUserUnlocked()) return false;
-            handlePackageChanged(packageName, getChangingUserId());
-            return false; // We don't need to receive onSomePackagesChanged(), so just false.
         }
     };
 
@@ -2427,7 +2442,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
                 // Then for each installed app, publish manifest shortcuts when needed.
                 forUpdatedPackages(ownerUserId, user.getLastAppScanTime(), ai -> {
-                    user.handlePackageAddedOrUpdated(ai.packageName, /* forceRescan=*/ false);
+                    user.rescanPackageIfNeeded(ai.packageName, /* forceRescan=*/ false);
                 });
 
                 // Write the time just before the scan, because there may be apps that have just
@@ -2448,7 +2463,7 @@ public class ShortcutService extends IShortcutService.Stub {
         synchronized (mLock) {
             final ShortcutUser user = getUserShortcutsLocked(userId);
             user.attemptToRestoreIfNeededAndSave(this, packageName, userId);
-            user.handlePackageAddedOrUpdated(packageName, /* forceRescan=*/ false);
+            user.rescanPackageIfNeeded(packageName, /* forceRescan=*/ false);
         }
         verifyStates();
     }
@@ -2463,7 +2478,7 @@ public class ShortcutService extends IShortcutService.Stub {
             user.attemptToRestoreIfNeededAndSave(this, packageName, userId);
 
             if (isPackageInstalled(packageName, userId)) {
-                user.handlePackageAddedOrUpdated(packageName, /* forceRescan=*/ false);
+                user.rescanPackageIfNeeded(packageName, /* forceRescan=*/ false);
             }
         }
         verifyStates();
@@ -2499,7 +2514,7 @@ public class ShortcutService extends IShortcutService.Stub {
         synchronized (mLock) {
             final ShortcutUser user = getUserShortcutsLocked(packageUserId);
 
-            user.handlePackageAddedOrUpdated(packageName, /* forceRescan=*/ true);
+            user.rescanPackageIfNeeded(packageName, /* forceRescan=*/ true);
         }
 
         verifyStates();
@@ -2975,10 +2990,6 @@ public class ShortcutService extends IShortcutService.Stub {
             pw.print("] ");
             pw.print(formatTime(next));
 
-            pw.print("  Locale change seq#: ");
-            pw.print(mLocaleChangeSequenceNumber.get());
-            pw.println();
-
             pw.print("  Config:");
             pw.print("    Max icon dim: ");
             pw.println(mMaxIconDimension);
@@ -3014,6 +3025,7 @@ public class ShortcutService extends IShortcutService.Stub {
                 dumpStatLS(pw, p, Stats.GET_LAUNCHER_ACTIVITY, "getLauncherActivity");
                 dumpStatLS(pw, p, Stats.CHECK_LAUNCHER_ACTIVITY, "checkLauncherActivity");
                 dumpStatLS(pw, p, Stats.IS_ACTIVITY_ENABLED, "isActivityEnabled");
+                dumpStatLS(pw, p, Stats.PACKAGE_UPDATE_CHECK, "packageUpdateCheck");
             }
 
             pw.println();
