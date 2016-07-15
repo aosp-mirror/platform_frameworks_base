@@ -3131,7 +3131,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             assertEquals(2, mManager.getRemainingCallCount());
         });
 
-        mService.getShortcutsForTest().get(UserHandle.USER_SYSTEM).setDefaultLauncherComponent(
+        mService.getShortcutsForTest().get(UserHandle.USER_SYSTEM).setLauncher(
                 new ComponentName("pkg1", "class"));
 
         // Restore.
@@ -3165,7 +3165,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         });
 
         assertEquals("pkg1", mService.getShortcutsForTest().get(UserHandle.USER_SYSTEM)
-                .getDefaultLauncherComponent().getPackageName());
+                .getLastKnownLauncher().getPackageName());
 
         // Start another user
         mService.handleUnlockUser(USER_10);
@@ -3181,7 +3181,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             assertEquals("title10-1-1", getCallerShortcut("s1").getTitle());
             assertEquals("title10-1-2", getCallerShortcut("s2").getTitle());
         });
-        assertNull(mService.getShortcutsForTest().get(USER_10).getDefaultLauncherComponent());
+        assertNull(mService.getShortcutsForTest().get(USER_10).getLastKnownLauncher());
 
         // Try stopping the user
         mService.handleCleanupUser(USER_10);

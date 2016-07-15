@@ -385,6 +385,12 @@ public class ShortcutService extends IShortcutService.Stub {
         mContext.registerReceiverAsUser(mPackageMonitor, UserHandle.ALL,
                 packageFilter, null, mHandler);
 
+        final IntentFilter preferedActivityFilter = new IntentFilter();
+        preferedActivityFilter.addAction(Intent.ACTION_PREFERRED_ACTIVITY_CHANGED);
+        preferedActivityFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+        mContext.registerReceiverAsUser(mPackageMonitor, UserHandle.ALL,
+                preferedActivityFilter, null, mHandler);
+
         final IntentFilter localeFilter = new IntentFilter();
         localeFilter.addAction(Intent.ACTION_LOCALE_CHANGED);
         localeFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
@@ -1923,7 +1929,12 @@ public class ShortcutService extends IShortcutService.Stub {
 
     // We override this method in unit tests to do a simpler check.
     boolean hasShortcutHostPermission(@NonNull String callingPackage, int userId) {
-        return hasShortcutHostPermissionInner(callingPackage, userId);
+        final long start = injectElapsedRealtime();
+        try {
+            return hasShortcutHostPermissionInner(callingPackage, userId);
+        } finally {
+            logDurationStat(Stats.LAUNCHER_PERMISSION_CHECK, start);
+        }
     }
 
     // This method is extracted so we can directly call this method from unit tests,
@@ -1931,15 +1942,22 @@ public class ShortcutService extends IShortcutService.Stub {
     @VisibleForTesting
     boolean hasShortcutHostPermissionInner(@NonNull String callingPackage, int userId) {
         synchronized (mLock) {
-            final long start = injectElapsedRealtime();
-
             final ShortcutUser user = getUserShortcutsLocked(userId);
+
+            // Always trust the in-memory cache.
+            final ComponentName cached = user.getCachedLauncher();
+            if (cached != null) {
+                if (cached.getPackageName().equals(callingPackage)) {
+                    return true;
+                }
+            }
+            // If the cached one doesn't match, then go ahead
 
             final List<ResolveInfo> allHomeCandidates = new ArrayList<>();
 
             // Default launcher from package manager.
             final long startGetHomeActivitiesAsUser = injectElapsedRealtime();
-            final ComponentName defaultLauncher = injectPackageManagerInternal()
+            final ComponentName defaultLauncher = mPackageManagerInternal
                     .getHomeActivitiesAsUser(allHomeCandidates, userId);
             logDurationStat(Stats.GET_DEFAULT_HOME, startGetHomeActivitiesAsUser);
 
@@ -1950,7 +1968,7 @@ public class ShortcutService extends IShortcutService.Stub {
                     Slog.v(TAG, "Default launcher from PM: " + detected);
                 }
             } else {
-                detected = user.getDefaultLauncherComponent();
+                detected = user.getLastKnownLauncher();
 
                 if (detected != null) {
                     if (injectIsActivityEnabledAndExported(detected, userId)) {
@@ -1960,7 +1978,7 @@ public class ShortcutService extends IShortcutService.Stub {
                     } else {
                         Slog.w(TAG, "Cached launcher " + detected + " no longer exists");
                         detected = null;
-                        user.setDefaultLauncherComponent(null);
+                        user.clearLauncher();
                     }
                 }
             }
@@ -1991,13 +2009,13 @@ public class ShortcutService extends IShortcutService.Stub {
                     lastPriority = ri.priority;
                 }
             }
-            logDurationStat(Stats.LAUNCHER_PERMISSION_CHECK, start);
 
+            // Update the cache.
+            user.setLauncher(detected);
             if (detected != null) {
                 if (DEBUG) {
                     Slog.v(TAG, "Detected launcher: " + detected);
                 }
-                user.setDefaultLauncherComponent(detected);
                 return detected.getPackageName().equals(callingPackage);
             } else {
                 // Default launcher not found.
@@ -2355,6 +2373,17 @@ public class ShortcutService extends IShortcutService.Stub {
                         Slog.d(TAG, "Ignoring package broadcast " + action
                                 + " for locked/stopped user " + userId);
                     }
+                    return;
+                }
+
+                // Whenever we get one of those package broadcasts, or get
+                // ACTION_PREFERRED_ACTIVITY_CHANGED, we purge the default launcher cache.
+                synchronized (mLock) {
+                    final ShortcutUser user = getUserShortcutsLocked(userId);
+                    user.clearLauncher();
+                }
+                if (Intent.ACTION_PREFERRED_ACTIVITY_CHANGED.equals(action)) {
+                    // Nothing farther to do.
                     return;
                 }
 
@@ -3260,7 +3289,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
         private void clearLauncher() {
             synchronized (mLock) {
-                getUserShortcutsLocked(mUserId).setDefaultLauncherComponent(null);
+                getUserShortcutsLocked(mUserId).forceClearLauncher();
             }
         }
 
@@ -3270,7 +3299,7 @@ public class ShortcutService extends IShortcutService.Stub {
                 hasShortcutHostPermissionInner("-", mUserId);
 
                 getOutPrintWriter().println("Launcher: "
-                        + getUserShortcutsLocked(mUserId).getDefaultLauncherComponent());
+                        + getUserShortcutsLocked(mUserId).getLastKnownLauncher());
             }
         }
 
@@ -3394,11 +3423,6 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
-    @VisibleForTesting
-    PackageManagerInternal injectPackageManagerInternal() {
-        return mPackageManagerInternal;
-    }
-
     File getUserBitmapFilePath(@UserIdInt int userId) {
         return new File(injectUserDataPath(userId), DIRECTORY_BITMAPS);
     }
@@ -3482,7 +3506,7 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     private void verifyStatesInner() {
-        synchronized (this) {
+        synchronized (mLock) {
             forEachLoadedUserLocked(u -> u.forAllPackageItems(ShortcutPackageItem::verifyStates));
         }
     }
