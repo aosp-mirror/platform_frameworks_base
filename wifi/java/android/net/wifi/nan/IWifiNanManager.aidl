@@ -49,8 +49,8 @@ interface IWifiNanManager
     // session API
     void updatePublish(int clientId, int sessionId, in PublishConfig publishConfig);
     void updateSubscribe(int clientId, int sessionId, in SubscribeConfig subscribeConfig);
-    void sendMessage(int clientId, int sessionId, int peerId, in byte[] message, int messageLength,
-            int messageId, int retryCount);
+    void sendMessage(int clientId, int sessionId, int peerId, in byte[] message, int messageId,
+        int retryCount);
     void terminateSession(int clientId, int sessionId);
     int startRanging(int clientId, int sessionId, in RttManager.ParcelableRttParams parms);
 }

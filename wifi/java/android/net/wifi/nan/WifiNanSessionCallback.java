@@ -156,14 +156,10 @@ public class WifiNanSessionCallback {
      * @param serviceSpecificInfo The service specific information (arbitrary
      *            byte array) provided by the peer as part of its discovery
      *            packet.
-     * @param serviceSpecificInfoLength The length of the service specific
-     *            information array.
      * @param matchFilter The filter (Tx on advertiser and Rx on listener) which
      *            resulted in this match.
-     * @param matchFilterLength The length of the match filter array.
      */
-    public void onMatch(int peerId, byte[] serviceSpecificInfo,
-            int serviceSpecificInfoLength, byte[] matchFilter, int matchFilterLength) {
+    public void onMatch(int peerId, byte[] serviceSpecificInfo, byte[] matchFilter) {
         /* empty */
     }
 
@@ -204,10 +200,8 @@ public class WifiNanSessionCallback {
      *
      * @param peerId The ID of the peer sending the message.
      * @param message A byte array containing the message.
-     * @param messageLength The length of the byte array containing the relevant
-     *            message bytes.
      */
-    public void onMessageReceived(int peerId, byte[] message, int messageLength) {
+    public void onMessageReceived(int peerId, byte[] message) {
         /* empty */
     }
 }

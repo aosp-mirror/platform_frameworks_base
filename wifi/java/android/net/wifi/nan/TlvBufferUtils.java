@@ -16,10 +16,13 @@
 
 package android.net.wifi.nan;
 
+import android.annotation.Nullable;
+
 import libcore.io.Memory;
 
 import java.nio.BufferOverflowException;
 import java.nio.ByteOrder;
+import java.util.Arrays;
 import java.util.Iterator;
 
 /**
@@ -50,8 +53,7 @@ public class TlvBufferUtils {
      * Values are added to the structure using the {@code TlvConstructor.put*()}
      * methods.
      * <p>
-     * The final byte array is obtained using {@link TlvConstructor#getArray()}
-     * and {@link TlvConstructor#getActualLength()} methods.
+     * The final byte array is obtained using {@link TlvConstructor#getArray()}.
      */
     public static class TlvConstructor {
         private int mTypeSize;
@@ -88,9 +90,9 @@ public class TlvBufferUtils {
          * @return The constructor to facilitate chaining
          *         {@code ctr.putXXX(..).putXXX(..)}.
          */
-        public TlvConstructor wrap(byte[] array) {
+        public TlvConstructor wrap(@Nullable byte[] array) {
             mArray = array;
-            mArrayLength = array.length;
+            mArrayLength = (array == null) ? 0 : array.length;
             return this;
         }
 
@@ -137,10 +139,13 @@ public class TlvBufferUtils {
          * @return The constructor to facilitate chaining
          *         {@code ctr.putXXX(..).putXXX(..)}.
          */
-        public TlvConstructor putByteArray(int type, byte[] array, int offset, int length) {
+        public TlvConstructor putByteArray(int type, @Nullable byte[] array, int offset,
+                int length) {
             checkLength(length);
             addHeader(type, length);
-            System.arraycopy(array, offset, mArray, mPosition, length);
+            if (length != 0) {
+                System.arraycopy(array, offset, mArray, mPosition, length);
+            }
             mPosition += length;
             return this;
         }
@@ -155,8 +160,8 @@ public class TlvBufferUtils {
          * @return The constructor to facilitate chaining
          *         {@code ctr.putXXX(..).putXXX(..)}.
          */
-        public TlvConstructor putByteArray(int type, byte[] array) {
-            return putByteArray(type, array, 0, array.length);
+        public TlvConstructor putByteArray(int type, @Nullable byte[] array) {
+            return putByteArray(type, array, 0, (array == null) ? 0 : array.length);
         }
 
         /**
@@ -223,24 +228,25 @@ public class TlvBufferUtils {
          * @return The constructor to facilitate chaining
          *         {@code ctr.putXXX(..).putXXX(..)}.
          */
-        public TlvConstructor putString(int type, String data) {
-            byte[] bytes = data.getBytes();
-            return putByteArray(type, bytes, 0, bytes.length);
+        public TlvConstructor putString(int type, @Nullable String data) {
+            byte[] bytes = null;
+            int length = 0;
+            if (data != null) {
+                bytes = data.getBytes();
+                length = bytes.length;
+            }
+            return putByteArray(type, bytes, 0, length);
         }
 
         /**
-         * Returns the constructed TLV formatted byte-array. Note that the
-         * returned array is the fully wrapped (
-         * {@link TlvConstructor#wrap(byte[])}) or allocated (
-         * {@link TlvConstructor#allocate(int)}) array - which isn't necessarily
-         * the actual size of the formatted data. Use
-         * {@link TlvConstructor#getActualLength()} to obtain the size of the
-         * formatted data.
+         * Returns the constructed TLV formatted byte-array. This array is a copy of the wrapped
+         * or allocated array - truncated to just the significant bytes - i.e. those written into
+         * the (T)LV.
          *
          * @return The byte array containing the TLV formatted structure.
          */
         public byte[] getArray() {
-            return mArray;
+            return Arrays.copyOf(mArray, getActualLength());
         }
 
         /**
@@ -250,7 +256,7 @@ public class TlvBufferUtils {
          *
          * @return The size of the TLV formatted portion of the byte array.
          */
-        public int getActualLength() {
+        private int getActualLength() {
             return mPosition;
         }
 
@@ -307,7 +313,7 @@ public class TlvBufferUtils {
          */
         public int mOffset;
 
-        private TlvElement(int type, int length, byte[] refArray, int offset) {
+        private TlvElement(int type, int length, @Nullable byte[] refArray, int offset) {
             mType = type;
             mLength = length;
             mRefArray = refArray;
@@ -389,10 +395,8 @@ public class TlvBufferUtils {
          * @param lengthSize Number of bytes sued for the Length (L) field.
          *            Values values are 1 or 2 bytes.
          * @param array The TLV formatted byte-array to parse.
-         * @param length The number of bytes of the array to be used in the
-         *            parsing.
          */
-        public TlvIterable(int typeSize, int lengthSize, byte[] array, int length) {
+        public TlvIterable(int typeSize, int lengthSize, @Nullable byte[] array) {
             if (typeSize < 0 || typeSize > 2 || lengthSize <= 0 || lengthSize > 2) {
                 throw new IllegalArgumentException(
                         "Invalid sizes - typeSize=" + typeSize + ", lengthSize=" + lengthSize);
@@ -400,7 +404,7 @@ public class TlvBufferUtils {
             mTypeSize = typeSize;
             mLengthSize = lengthSize;
             mArray = array;
-            mArrayLength = length;
+            mArrayLength = (array == null) ? 0 : array.length;
         }
 
         /**
@@ -494,12 +498,11 @@ public class TlvBufferUtils {
      * fields correctly fill the specified length (and do not overshoot).
      *
      * @param array The (T)LV array to verify.
-     * @param length The number of bytes in the array to consider (starting at offset 0).
      * @param typeSize The size (in bytes) of the type field. Valid values are 0, 1, or 2.
      * @param lengthSize The size (in bytes) of the length field. Valid values are 1 or 2.
      * @return A boolean indicating whether the array is valid (true) or invalid (false).
      */
-    public static boolean isValid(byte[] array, int length, int typeSize, int lengthSize) {
+    public static boolean isValid(@Nullable byte[] array, int typeSize, int lengthSize) {
         if (typeSize < 0 || typeSize > 2) {
             throw new IllegalArgumentException(
                     "Invalid arguments - typeSize must be 0, 1, or 2: typeSize=" + typeSize);
@@ -508,14 +511,12 @@ public class TlvBufferUtils {
             throw new IllegalArgumentException(
                     "Invalid arguments - lengthSize must be 1 or 2: lengthSize=" + lengthSize);
         }
-        if (length < 0 || length > array.length) {
-            throw new IllegalArgumentException(
-                    "Invalid arguments - length must be non-negative and <= array.length: length="
-                            + length + ", array.length=" + array.length);
+        if (array == null) {
+            return true;
         }
 
         int nextTlvIndex = 0;
-        while (nextTlvIndex + typeSize + lengthSize <= length) {
+        while (nextTlvIndex + typeSize + lengthSize <= array.length) {
             nextTlvIndex += typeSize;
             if (lengthSize == 1) {
                 nextTlvIndex += lengthSize + array[nextTlvIndex];
@@ -525,6 +526,6 @@ public class TlvBufferUtils {
             }
         }
 
-        return nextTlvIndex == length;
+        return nextTlvIndex == array.length;
     }
 }
