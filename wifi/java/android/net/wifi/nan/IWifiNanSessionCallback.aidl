@@ -28,10 +28,9 @@ oneway interface IWifiNanSessionCallback
     void onSessionConfigFail(int reason);
     void onSessionTerminated(int reason);
 
-    void onMatch(int peerId, in byte[] serviceSpecificInfo,
-            int serviceSpecificInfoLength, in byte[] matchFilter, int matchFilterLength);
+    void onMatch(int peerId, in byte[] serviceSpecificInfo, in byte[] matchFilter);
 
     void onMessageSendSuccess(int messageId);
     void onMessageSendFail(int messageId, int reason);
-    void onMessageReceived(int peerId, in byte[] message, int messageLength);
+    void onMessageReceived(int peerId, in byte[] message);
 }

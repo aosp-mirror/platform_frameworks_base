@@ -22,6 +22,8 @@ import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
+import android.net.ConnectivityManager;
+import android.net.NetworkRequest;
 import android.net.wifi.RttManager;
 import android.os.Binder;
 import android.os.Bundle;
@@ -205,15 +207,15 @@ public class WifiNanManager {
 
     /**
      * Data-path creation role is that of INITIATOR. Used in
-     * {@link #createNetworkSpecifier(int, byte[], byte[], int)} and
-     * {@link WifiNanSession#createNetworkSpecifier(int, int, byte[], int)}.
+     * {@link #createNetworkSpecifier(int, byte[], byte[])} and
+     * {@link WifiNanSession#createNetworkSpecifier(int, int, byte[])}.
      */
     public static final int WIFI_NAN_DATA_PATH_ROLE_INITIATOR = 0;
 
     /**
      * Data-path creation role is that of RESPONDER. Used in
-     * {@link #createNetworkSpecifier(int, byte[], byte[], int)} and
-     * {@link WifiNanSession#createNetworkSpecifier(int, int, byte[], int)}.
+     * {@link #createNetworkSpecifier(int, byte[], byte[])} and
+     * {@link WifiNanSession#createNetworkSpecifier(int, int, byte[])}.
      */
 
     public static final int WIFI_NAN_DATA_PATH_ROLE_RESPONDER = 1;
@@ -524,12 +526,11 @@ public class WifiNanManager {
     /**
      * {@hide}
      */
-    public void sendMessage(int sessionId, int peerId, byte[] message, int messageLength,
-            int messageId, int retryCount) {
+    public void sendMessage(int sessionId, int peerId, byte[] message, int messageId,
+            int retryCount) {
         if (VDBG) {
             Log.v(TAG, "sendMessage(): sessionId=" + sessionId + ", peerId=" + peerId
-                    + ", messageLength=" + messageLength + ", messageId=" + messageId
-                    + ", retryCount=" + retryCount);
+                    + ", messageId=" + messageId + ", retryCount=" + retryCount);
         }
 
         int clientId;
@@ -543,8 +544,7 @@ public class WifiNanManager {
         }
 
         try {
-            mService.sendMessage(clientId, sessionId, peerId, message, messageLength, messageId,
-                    retryCount);
+            mService.sendMessage(clientId, sessionId, peerId, message, messageId, retryCount);
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
         }
@@ -587,10 +587,10 @@ public class WifiNanManager {
      * {@hide}
      */
     public String createNetworkSpecifier(@DataPathRole int role, int sessionId, int peerId,
-            byte[] token, int tokenLength) {
+            byte[] token) {
         if (VDBG) {
             Log.v(TAG, "createNetworkSpecifier: role=" + role + ", sessionId=" + sessionId
-                    + ", peerId=" + peerId + ", token=" + token + ", tokenLength=" + tokenLength);
+                    + ", peerId=" + peerId + ", token=" + token);
         }
 
         int type;
@@ -621,10 +621,6 @@ public class WifiNanManager {
                                 + "INITIATOR");
             }
         }
-        if (tokenLength != 0 && (token == null || token.length < tokenLength)) {
-            throw new IllegalArgumentException(
-                    "Non-matching combination of token and tokenLength");
-        }
 
         int clientId;
         synchronized (mLock) {
@@ -650,7 +646,7 @@ public class WifiNanManager {
             }
             if (token != null) {
                 json.put(NETWORK_SPECIFIER_KEY_TOKEN,
-                        Base64.encodeToString(token, 0, tokenLength, Base64.DEFAULT));
+                        Base64.encodeToString(token, 0, token.length, Base64.DEFAULT));
             }
         } catch (JSONException e) {
             return "";
@@ -674,19 +670,15 @@ public class WifiNanManager {
      *              data-path setup process. On the RESPONDER a null token is permitted and
      *              matches any peer token - an empty token requires the peer token to be empty
      *              as well.
-     * @param tokenLength The number of significant (usable) bytes from the {@code token} parameter.
      * @return A string to be used to construct
      * {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(String)} to pass to {@link
-     * android.net.ConnectivityManager#requestNetwork(NetworkRequest,
-     * ConnectivityManager.NetworkCallback)}
-     * [or other varierties of that API].
+     * android.net.ConnectivityManager#requestNetwork(NetworkRequest, ConnectivityManager.NetworkCallback)}
+     * [or other varieties of that API].
      */
     public String createNetworkSpecifier(@DataPathRole int role, @Nullable byte[] peer,
-            @Nullable byte[] token, int tokenLength) {
+            @Nullable byte[] token) {
         if (VDBG) {
-            Log.v(TAG,
-                    "createNetworkSpecifier: role=" + role + ", token=" + token + ", tokenLength="
-                            + tokenLength);
+            Log.v(TAG, "createNetworkSpecifier: role=" + role + ", token=" + token);
         }
 
         int type;
@@ -721,10 +713,6 @@ public class WifiNanManager {
                         "createNetworkSpecifier: Invalid peer MAC address");
             }
         }
-        if (tokenLength != 0 && (token == null || token.length < tokenLength)) {
-            throw new IllegalArgumentException(
-                    "Non-matching combination of token and tokenLength");
-        }
 
         int clientId;
         synchronized (mLock) {
@@ -749,7 +737,7 @@ public class WifiNanManager {
             }
             if (token != null) {
                 json.put(NETWORK_SPECIFIER_KEY_TOKEN,
-                        Base64.encodeToString(token, 0, tokenLength, Base64.DEFAULT));
+                        Base64.encodeToString(token, 0, token.length, Base64.DEFAULT));
             }
         } catch (JSONException e) {
             return "";
@@ -932,7 +920,6 @@ public class WifiNanManager {
         private static final int CALLBACK_MESSAGE_SEND_FAIL = 6;
         private static final int CALLBACK_MESSAGE_RECEIVED = 7;
 
-        private static final String MESSAGE_BUNDLE_KEY_PEER_ID = "peer_id";
         private static final String MESSAGE_BUNDLE_KEY_MESSAGE = "message";
         private static final String MESSAGE_BUNDLE_KEY_MESSAGE2 = "message2";
 
@@ -983,11 +970,9 @@ public class WifiNanManager {
                             break;
                         case CALLBACK_MATCH:
                             mOriginalCallback.onMatch(
-                                    msg.getData().getInt(MESSAGE_BUNDLE_KEY_PEER_ID),
-                                    msg.getData().getByteArray(MESSAGE_BUNDLE_KEY_MESSAGE),
                                     msg.arg1,
-                                    msg.getData().getByteArray(MESSAGE_BUNDLE_KEY_MESSAGE2),
-                                    msg.arg2);
+                                    msg.getData().getByteArray(MESSAGE_BUNDLE_KEY_MESSAGE),
+                                    msg.getData().getByteArray(MESSAGE_BUNDLE_KEY_MESSAGE2));
                             break;
                         case CALLBACK_MESSAGE_SEND_SUCCESS:
                             mOriginalCallback.onMessageSendSuccess(msg.arg1);
@@ -996,9 +981,7 @@ public class WifiNanManager {
                             mOriginalCallback.onMessageSendFail(msg.arg1, msg.arg2);
                             break;
                         case CALLBACK_MESSAGE_RECEIVED:
-                            mOriginalCallback.onMessageReceived(msg.arg2,
-                                    msg.getData().getByteArray(MESSAGE_BUNDLE_KEY_MESSAGE),
-                                    msg.arg1);
+                            mOriginalCallback.onMessageReceived(msg.arg1, (byte[]) msg.obj);
                             break;
                     }
                 }
@@ -1041,18 +1024,15 @@ public class WifiNanManager {
         }
 
         @Override
-        public void onMatch(int peerId, byte[] serviceSpecificInfo,
-                int serviceSpecificInfoLength, byte[] matchFilter, int matchFilterLength) {
+        public void onMatch(int peerId, byte[] serviceSpecificInfo, byte[] matchFilter) {
             if (VDBG) Log.v(TAG, "onMatch: peerId=" + peerId);
 
             Bundle data = new Bundle();
-            data.putInt(MESSAGE_BUNDLE_KEY_PEER_ID, peerId);
             data.putByteArray(MESSAGE_BUNDLE_KEY_MESSAGE, serviceSpecificInfo);
             data.putByteArray(MESSAGE_BUNDLE_KEY_MESSAGE2, matchFilter);
 
             Message msg = mHandler.obtainMessage(CALLBACK_MATCH);
-            msg.arg1 = serviceSpecificInfoLength;
-            msg.arg2 = matchFilterLength;
+            msg.arg1 = peerId;
             msg.setData(data);
             mHandler.sendMessage(msg);
         }
@@ -1077,19 +1057,14 @@ public class WifiNanManager {
         }
 
         @Override
-        public void onMessageReceived(int peerId, byte[] message, int messageLength) {
+        public void onMessageReceived(int peerId, byte[] message) {
             if (VDBG) {
-                Log.v(TAG, "onMessageReceived: peerId='" + peerId + "', messageLength="
-                        + messageLength);
+                Log.v(TAG, "onMessageReceived: peerId='" + peerId);
             }
 
-            Bundle data = new Bundle();
-            data.putByteArray(MESSAGE_BUNDLE_KEY_MESSAGE, message);
-
             Message msg = mHandler.obtainMessage(CALLBACK_MESSAGE_RECEIVED);
-            msg.arg1 = messageLength;
-            msg.arg2 = peerId;
-            msg.setData(data);
+            msg.arg1 = peerId;
+            msg.obj = message;
             mHandler.sendMessage(msg);
         }
 

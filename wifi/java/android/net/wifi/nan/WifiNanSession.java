@@ -108,12 +108,11 @@ public class WifiNanSession {
     /**
      * Sends a message to the specified destination. Message transmission is part of the current
      * discovery session - i.e. executed subsequent to a publish/subscribe
-     * {@link WifiNanSessionCallback#onMatch(int, byte[], int, byte[], int)} event.
+     * {@link WifiNanSessionCallback#onMatch(int, byte[], byte[])} event.
      *
      * @param peerId The peer's ID for the message. Must be a result of an
-     *            {@link WifiNanSessionCallback#onMatch(int, byte[], int, byte[], int)} event.
+     *            {@link WifiNanSessionCallback#onMatch(int, byte[], byte[])} event.
      * @param message The message to be transmitted.
-     * @param messageLength The number of bytes from the {@code message} to be transmitted.
      * @param messageId An arbitrary integer used by the caller to identify the message. The same
      *            integer ID will be returned in the callbacks indicated message send success or
      *            failure.
@@ -122,8 +121,7 @@ public class WifiNanSession {
      *            (note: no retransmissions are attempted in other failure cases). A value of 0
      *            indicates no retries. Max possible value is {@link #MAX_SEND_RETRY_COUNT}.
      */
-    public void sendMessage(int peerId, byte[] message, int messageLength, int messageId,
-            int retryCount) {
+    public void sendMessage(int peerId, @Nullable byte[] message, int messageId, int retryCount) {
         if (mTerminated) {
             Log.w(TAG, "sendMessage: called on terminated session");
             return;
@@ -134,33 +132,32 @@ public class WifiNanSession {
                 return;
             }
 
-            mgr.sendMessage(mSessionId, peerId, message, messageLength, messageId, retryCount);
+            mgr.sendMessage(mSessionId, peerId, message, messageId, retryCount);
         }
     }
 
     /**
      * Sends a message to the specified destination. Message transmission is part of the current
      * discovery session - i.e. executed subsequent to a publish/subscribe
-     * {@link WifiNanSessionCallback#onMatch(int, byte[], int, byte[], int)} event. This is
-     * equivalent to {@link #sendMessage(int, byte[], int, int, int)} with a {@code retryCount} of
+     * {@link WifiNanSessionCallback#onMatch(int, byte[], byte[])} event. This is
+     * equivalent to {@link #sendMessage(int, byte[], int, int)} with a {@code retryCount} of
      * 0.
      *
      * @param peerId The peer's ID for the message. Must be a result of an
-     *            {@link WifiNanSessionCallback#onMatch(int, byte[], int, byte[], int)} event.
+     *            {@link WifiNanSessionCallback#onMatch(int, byte[], byte[])} event.
      * @param message The message to be transmitted.
-     * @param messageLength The number of bytes from the {@code message} to be transmitted.
      * @param messageId An arbitrary integer used by the caller to identify the message. The same
      *            integer ID will be returned in the callbacks indicated message send success or
      *            failure.
      */
-    public void sendMessage(int peerId, byte[] message, int messageLength, int messageId) {
-        sendMessage(peerId, message, messageLength, messageId, 0);
+    public void sendMessage(int peerId, @Nullable byte[] message, int messageId) {
+        sendMessage(peerId, message, messageId, 0);
     }
 
     /**
      * Start a ranging operation with the specified peers. The peer IDs are obtained from an
-     * {@link WifiNanSessionCallback#onMatch(int, byte[], int, byte[], int)} or
-     * {@link WifiNanSessionCallback#onMessageReceived(int, byte[], int)} operation - i.e. can only
+     * {@link WifiNanSessionCallback#onMatch(int, byte[], byte[])} or
+     * {@link WifiNanSessionCallback#onMessageReceived(int, byte[])} operation - i.e. can only
      * range devices which are part of an ongoing discovery session.
      *
      * @param params   RTT parameters - each corresponding to a specific peer ID (the array sizes
@@ -194,22 +191,20 @@ public class WifiNanSession {
      * {@link WifiNanManager#WIFI_NAN_DATA_PATH_ROLE_INITIATOR} or
      * {@link WifiNanManager#WIFI_NAN_DATA_PATH_ROLE_RESPONDER}
      * @param peerId The peer ID obtained through
-     * {@link WifiNanSessionCallback#onMatch(int, byte[], int, byte[], int)} or
-     * {@link WifiNanSessionCallback#onMessageReceived(int, byte[], int)}. On the RESPONDER a
+     * {@link WifiNanSessionCallback#onMatch(int, byte[], byte[])} or
+     * {@link WifiNanSessionCallback#onMessageReceived(int, byte[])}. On the RESPONDER a
      *               value of 0 is permitted which matches any peer.
      * @param token An arbitrary token (message) to be passed to the peer as part of the
      *              data-path setup process. On the RESPONDER a null token is permitted and
      *              matches any peer token - an empty token requires the peer token to be empty
      *              as well.
-     * @param tokenLength The number of significant (usable) bytes from the {@code token} parameter.
      * @return A string to be used to construct
      * {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(String)} to pass to {@link
      * android.net.ConnectivityManager#requestNetwork(NetworkRequest,
-     * ConnectivityManager.NetworkCallback)}
-     * [or other varierties of that API].
+     * ConnectivityManager.NetworkCallback)} [or other varieties of that API].
      */
     public String createNetworkSpecifier(@WifiNanManager.DataPathRole int role, int peerId,
-            @Nullable byte[] token, int tokenLength) {
+            @Nullable byte[] token) {
         if (mTerminated) {
             Log.w(TAG, "createNetworkSpecifier: called on terminated session");
             return null;
@@ -220,7 +215,7 @@ public class WifiNanSession {
                 return null;
             }
 
-            return mgr.createNetworkSpecifier(role, mSessionId, peerId, token, tokenLength);
+            return mgr.createNetworkSpecifier(role, mSessionId, peerId, token);
         }
     }
 }
