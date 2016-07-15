@@ -110,13 +110,14 @@ import java.util.function.Function;
 public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected static final String TAG = "ShortcutManagerTest";
 
+    protected static final boolean DUMP_IN_TEARDOWN = false; // DO NOT SUBMIT WITH true
+
     /**
      * Whether to enable dump or not.  Should be only true when debugging to avoid bugs where
      * dump affecting the behavior.
      */
-    protected static final boolean ENABLE_DUMP = false; // DO NOT SUBMIT WITH true
-
-    protected static final boolean DUMP_IN_TEARDOWN = false; // DO NOT SUBMIT WITH true
+    protected static final boolean ENABLE_DUMP = false // DO NOT SUBMIT WITH true
+            || DUMP_IN_TEARDOWN || ShortcutService.DEBUG;
 
     protected static final String[] EMPTY_STRINGS = new String[0]; // Just for readability.
 
@@ -153,6 +154,11 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                 IntentFilter filter, String broadcastPermission, Handler scheduler) {
             // ignore.
             return null;
+        }
+
+        @Override
+        public void unregisterReceiver(BroadcastReceiver receiver) {
+            // ignore.
         }
     }
 
@@ -209,6 +215,11 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         public ShortcutServiceTestable(ServiceContext context, Looper looper) {
             super(context, looper, /* onyForPackageManagerApis */ false);
             mContext = context;
+        }
+
+        @Override
+        public String injectGetLocaleTagsForUser(@UserIdInt int userId) {
+            return mInjectedLocale.toLanguageTag();
         }
 
         @Override
@@ -715,11 +726,6 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         // Start the service.
         initService();
         setCaller(CALLING_PACKAGE_1);
-
-        // In order to complicate the situation, we set mLocaleChangeSequenceNumber to 1 by
-        // calling this.  Running test with mLocaleChangeSequenceNumber == 0 might make us miss
-        // some edge cases.
-        mInternal.onSystemLocaleChangedNoLock();
     }
 
     /**
@@ -836,12 +842,6 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
         // Send boot sequence events.
         mService.onBootPhase(SystemService.PHASE_LOCK_SETTINGS_READY);
-
-        // Make sure a call to onSystemLocaleChangedNoLock() before PHASE_BOOT_COMPLETED will be
-        // ignored.
-        final long origSequenceNumber = mService.getLocaleChangeSequenceNumber();
-        mInternal.onSystemLocaleChangedNoLock();
-        assertEquals(origSequenceNumber, mService.getLocaleChangeSequenceNumber());
 
         mService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
     }

@@ -34,6 +34,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.server.pm.ShortcutService.ShortcutOperation;
+import com.android.server.pm.ShortcutService.Stats;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -437,8 +438,6 @@ class ShortcutPackage extends ShortcutPackageItem {
      * locale changes.
      */
     public int getApiCallCount() {
-        mShortcutUser.resetThrottlingIfNeeded();
-
         final ShortcutService s = mShortcutUser.mService;
 
         // Reset the counter if:
@@ -598,7 +597,37 @@ class ShortcutPackage extends ShortcutPackageItem {
     }
 
     /**
-     * Called when the package is updated or added.
+     * @return false if any of the target activities are no longer enabled.
+     */
+    private boolean areAllActivitiesStillEnabled() {
+        if (mShortcuts.size() == 0) {
+            return true;
+        }
+        final ShortcutService s = mShortcutUser.mService;
+
+        // Normally the number of target activities is 1 or so, so no need to use a complex
+        // structure like a set.
+        final ArrayList<ComponentName> checked = new ArrayList<>(4);
+
+        for (int i = mShortcuts.size() - 1; i >= 0; i--) {
+            final ShortcutInfo si = mShortcuts.valueAt(i);
+            final ComponentName activity = si.getActivity();
+
+            if (checked.contains(activity)) {
+                continue; // Already checked.
+            }
+            checked.add(activity);
+
+            if (!s.injectIsActivityEnabledAndExported(activity, getOwnerUserId())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Called when the package may be added or updated, or its activities may be disabled, and
+     * if so, rescan the package and do the necessary stuff.
      *
      * Add case:
      * - Publish manifest shortcuts.
@@ -606,23 +635,35 @@ class ShortcutPackage extends ShortcutPackageItem {
      * Update case:
      * - Re-publish manifest shortcuts.
      * - If there are shortcuts with resources (icons or strings), update their timestamps.
+     * - Disable shortcuts whose target activities are disabled.
      *
      * @return TRUE if any shortcuts have been changed.
      */
-    public boolean handlePackageAddedOrUpdated(boolean isNewApp, boolean forceRescan) {
-        final PackageInfo pi = mShortcutUser.mService.getPackageInfo(
-                getPackageName(), getPackageUserId());
-        if (pi == null) {
-            return false; // Shouldn't happen.
-        }
+    public boolean rescanPackageIfNeeded(boolean isNewApp, boolean forceRescan) {
+        final ShortcutService s = mShortcutUser.mService;
+        final long start = s.injectElapsedRealtime();
 
-        if (!isNewApp && !forceRescan) {
-            // Make sure the version code or last update time has changed.
-            // Otherwise, nothing to do.
-            if (getPackageInfo().getVersionCode() >= pi.versionCode
-                    && getPackageInfo().getLastUpdateTime() >= pi.lastUpdateTime) {
-                return false;
+        final PackageInfo pi;
+        try {
+            pi = mShortcutUser.mService.getPackageInfo(
+                    getPackageName(), getPackageUserId());
+            if (pi == null) {
+                return false; // Shouldn't happen.
             }
+
+            if (!isNewApp && !forceRescan) {
+                // Return if the package hasn't changed, ie:
+                // - version code hasn't change
+                // - lastUpdateTime hasn't change
+                // - all target activities are still enabled.
+                if ((getPackageInfo().getVersionCode() >= pi.versionCode)
+                        && (getPackageInfo().getLastUpdateTime() >= pi.lastUpdateTime)
+                        && areAllActivitiesStillEnabled()) {
+                    return false;
+                }
+            }
+        } finally {
+            s.logDurationStat(Stats.PACKAGE_UPDATE_CHECK, start);
         }
 
         // Now prepare to publish manifest shortcuts.
@@ -653,8 +694,6 @@ class ShortcutPackage extends ShortcutPackageItem {
         }
 
         getPackageInfo().updateVersionInfo(pi);
-
-        final ShortcutService s = mShortcutUser.mService;
 
         boolean changed = false;
 
@@ -1001,7 +1040,7 @@ class ShortcutPackage extends ShortcutPackageItem {
             }
         }
         if (changed) {
-            s.scheduleSaveUser(getPackageUserId());
+            s.packageShortcutsChanged(getPackageName(), getPackageUserId());
         }
     }
 

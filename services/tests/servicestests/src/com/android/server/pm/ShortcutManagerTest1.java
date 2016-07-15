@@ -5730,21 +5730,24 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         mRunningUsers.put(USER_10, false);
         mUnlockedUsers.put(USER_10, false);
 
-                mService.mPackageMonitor.onReceive(getTestContext(),
+        mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageAddIntent(CALLING_PACKAGE_2, USER_10));
         runWithCaller(CALLING_PACKAGE_2, USER_10, () -> {
-            assertEmpty(mManager.getManifestShortcuts());
-            assertEmpty(mManager.getPinnedShortcuts());
+            // Don't use the mManager APIs to get shortcuts, because they'll trigger the package
+            // update check.
+            // So look the internal data directly using getCallerShortcuts().
+            assertEmpty(getCallerShortcuts());
         });
 
         // Try again, but the user is locked, so still ignored.
         mRunningUsers.put(USER_10, true);
-
                 mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageAddIntent(CALLING_PACKAGE_2, USER_10));
         runWithCaller(CALLING_PACKAGE_2, USER_10, () -> {
-            assertEmpty(mManager.getManifestShortcuts());
-            assertEmpty(mManager.getPinnedShortcuts());
+            // Don't use the mManager APIs to get shortcuts, because they'll trigger the package
+            // update check.
+            // So look the internal data directly using getCallerShortcuts().
+            assertEmpty(getCallerShortcuts());
         });
 
         // Unlock the user, now it should work.
@@ -6108,7 +6111,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         });
     }
 
-    public void testManifestShortcuts_localeChange() {
+    public void testManifestShortcuts_localeChange() throws InterruptedException {
         mService.handleUnlockUser(USER_0);
 
         // Package 1 updated, which has one valid manifest shortcut and one invalid.
@@ -6164,8 +6167,15 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
         mInjectedCurrentTimeMillis++;
 
+        // Change the locale and send the broadcast, make sure the launcher gets a callback too.
         mInjectedLocale = Locale.JAPANESE;
-        mInternal.onSystemLocaleChangedNoLock();
+
+        setCaller(LAUNCHER_1, USER_0);
+
+        assertForLauncherCallback(mLauncherApps, () -> {
+            mService.mReceiver.onReceive(mServiceContext, new Intent(Intent.ACTION_LOCALE_CHANGED));
+        }).assertCallbackCalledForPackageAndUser(CALLING_PACKAGE_1, HANDLE_USER_0)
+                .haveIds("ms1", "ms2", "s1");
 
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
             // check first shortcut.
