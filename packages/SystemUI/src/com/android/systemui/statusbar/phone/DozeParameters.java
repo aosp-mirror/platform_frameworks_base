@@ -21,6 +21,7 @@ import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.MathUtils;
+import android.util.SparseBooleanArray;
 
 import com.android.systemui.R;
 
@@ -38,6 +39,8 @@ public class DozeParameters {
     private final Context mContext;
 
     private static PulseSchedule sPulseSchedule;
+
+    private static IntInOutMatcher sPickupSubtypePerformsProxMatcher;
 
     public DozeParameters(Context context) {
         mContext = context;
@@ -61,7 +64,20 @@ public class DozeParameters {
         pw.print("    getPulseSchedule(): "); pw.println(getPulseSchedule());
         pw.print("    getPulseScheduleResets(): "); pw.println(getPulseScheduleResets());
         pw.print("    getPickupVibrationThreshold(): "); pw.println(getPickupVibrationThreshold());
-        pw.print("    getPickupPerformsProxCheck(): "); pw.println(getPickupPerformsProxCheck());
+        pw.print("    getPickupSubtypePerformsProxCheck(): ");pw.println(
+                dumpPickupSubtypePerformsProxCheck());
+    }
+
+    private String dumpPickupSubtypePerformsProxCheck() {
+        // Refresh sPickupSubtypePerformsProxMatcher
+        getPickupSubtypePerformsProxCheck(0);
+
+        if (sPickupSubtypePerformsProxMatcher == null) {
+            return "fallback: " + mContext.getResources().getBoolean(
+                    R.bool.doze_pickup_performs_proximity_check);
+        } else {
+            return "spec: " + sPickupSubtypePerformsProxMatcher.mSpec;
+        }
     }
 
     public boolean getDisplayStateSupported() {
@@ -106,10 +122,6 @@ public class DozeParameters {
         return getBoolean("doze.pulse.proxcheck", R.bool.doze_proximity_check_before_pulse);
     }
 
-    public boolean getPickupPerformsProxCheck() {
-        return getBoolean("doze.pickup.proxcheck", R.bool.doze_pickup_performs_proximity_check);
-    }
-
     public boolean getPulseOnNotifications() {
         return getBoolean("doze.pulse.notifications", R.bool.doze_pulse_on_notifications);
     }
@@ -141,6 +153,101 @@ public class DozeParameters {
 
     private String getString(String propName, int resId) {
         return SystemProperties.get(propName, mContext.getString(resId));
+    }
+
+    public boolean getPickupSubtypePerformsProxCheck(int subType) {
+        String spec = getString("doze.pickup.proxcheck",
+                R.string.doze_pickup_subtype_performs_proximity_check);
+
+        if (TextUtils.isEmpty(spec)) {
+            // Fall back to non-subtype based property.
+            return mContext.getResources().getBoolean(R.bool.doze_pickup_performs_proximity_check);
+        }
+
+        if (sPickupSubtypePerformsProxMatcher == null
+                || !TextUtils.equals(spec, sPickupSubtypePerformsProxMatcher.mSpec)) {
+            sPickupSubtypePerformsProxMatcher = new IntInOutMatcher(spec);
+        }
+
+        return sPickupSubtypePerformsProxMatcher.isIn(subType);
+    }
+
+
+    /**
+     * Parses a spec of the form `1,2,3,!5,*`. The resulting object will match numbers that are
+     * listed, will not match numbers that are listed with a ! prefix, and will match / not match
+     * unlisted numbers depending on whether * or !* is present.
+     *
+     * *  -> match any numbers that are not explicitly listed
+     * !* -> don't match any numbers that are not explicitly listed
+     * 2  -> match 2
+     * !3 -> don't match 3
+     *
+     * It is illegal to specify:
+     * - an empty spec
+     * - a spec containing that are empty, or a lone !
+     * - a spec for anything other than numbers or *
+     * - multiple terms for the same number / multiple *s
+     */
+    public static class IntInOutMatcher {
+        private static final String WILDCARD = "*";
+        private static final char OUT_PREFIX = '!';
+
+        private final SparseBooleanArray mIsIn;
+        private final boolean mDefaultIsIn;
+        final String mSpec;
+
+        public IntInOutMatcher(String spec) {
+            if (TextUtils.isEmpty(spec)) {
+                throw new IllegalArgumentException("Spec must not be empty");
+            }
+
+            boolean defaultIsIn = false;
+            boolean foundWildcard = false;
+
+            mSpec = spec;
+            mIsIn = new SparseBooleanArray();
+
+            for (String itemPrefixed : spec.split(",", -1)) {
+                if (itemPrefixed.length() == 0) {
+                    throw new IllegalArgumentException(
+                            "Illegal spec, must not have zero-length items: `" + spec + "`");
+                }
+                boolean isIn = itemPrefixed.charAt(0) != OUT_PREFIX;
+                String item = isIn ? itemPrefixed : itemPrefixed.substring(1);
+
+                if (itemPrefixed.length() == 0) {
+                    throw new IllegalArgumentException(
+                            "Illegal spec, must not have zero-length items: `" + spec + "`");
+                }
+
+                if (WILDCARD.equals(item)) {
+                    if (foundWildcard) {
+                        throw new IllegalArgumentException("Illegal spec, `" + WILDCARD +
+                                "` must not appear multiple times in `" + spec + "`");
+                    }
+                    defaultIsIn = isIn;
+                    foundWildcard = true;
+                } else {
+                    int key = Integer.parseInt(item);
+                    if (mIsIn.indexOfKey(key) >= 0) {
+                        throw new IllegalArgumentException("Illegal spec, `" + key +
+                                "` must not appear multiple times in `" + spec + "`");
+                    }
+                    mIsIn.put(key, isIn);
+                }
+            }
+
+            if (!foundWildcard) {
+                throw new IllegalArgumentException("Illegal spec, must specify either * or !*");
+            }
+
+            mDefaultIsIn = defaultIsIn;
+        }
+
+        public boolean isIn(int value) {
+            return (mIsIn.get(value, mDefaultIsIn));
+        }
     }
 
     public static class PulseSchedule {
