@@ -2219,6 +2219,22 @@ public class Intent implements Parcelable, Cloneable {
         "android.intent.action.EXTERNAL_APPLICATIONS_UNAVAILABLE";
 
     /**
+     * Broadcast Action: preferred activities have changed *explicitly*.
+     *
+     * <p>Note there are cases where a preferred activity is invalidated *implicitly*, e.g.
+     * when an app is installed or uninstalled, but in such cases this broadcast will *not*
+     * be sent.
+     *
+     * {@link #EXTRA_USER_HANDLE} contains the user ID in question.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_PREFERRED_ACTIVITY_CHANGED =
+            "android.intent.action.ACTION_PREFERRED_ACTIVITY_CHANGED";
+
+
+    /**
      * Broadcast Action:  The current system wallpaper has changed.  See
      * {@link android.app.WallpaperManager} for retrieving the new wallpaper.
      * This should <em>only</em> be used to determine when the wallpaper
