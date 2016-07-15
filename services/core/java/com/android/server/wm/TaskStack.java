@@ -182,21 +182,9 @@ public class TaskStack implements DimLayer.DimLayerUser,
             Configuration config = configs.get(task.mTaskId);
             if (config != null) {
                 Rect bounds = taskBounds.get(task.mTaskId);
-                if (task.isTwoFingerScrollMode()) {
-                    // This is a non-resizeable task that's docked (or side-by-side to the docked
-                    // stack). It might have been scrolled previously, and after the stack resizing,
-                    // it might no longer fully cover the stack area.
-                    // Save the old bounds and re-apply the scroll. This adjusts the bounds to
-                    // fit the new stack bounds.
-                    task.resizeLocked(bounds, config, false /* forced */);
-                    task.getBounds(mTmpRect);
-                    task.scrollLocked(mTmpRect);
-                } else {
-                    task.resizeLocked(bounds, config, false /* forced */);
-                    task.setTempInsetBounds(
-                            taskTempInsetBounds != null ? taskTempInsetBounds.get(task.mTaskId)
-                                    : null);
-                }
+                task.resizeLocked(bounds, config, false /* forced */);
+                task.setTempInsetBounds(taskTempInsetBounds != null ?
+                        taskTempInsetBounds.get(task.mTaskId) : null);
             } else {
                 Slog.wtf(TAG_WM, "No config for task: " + task + ", is there a mismatch with AM?");
             }
@@ -250,19 +238,13 @@ public class TaskStack implements DimLayer.DimLayerUser,
         if (mFullscreen) {
             return;
         }
+
+        final boolean alignBottom = mAdjustedForIme && getDockSide() == DOCKED_TOP;
+
         // Update bounds of containing tasks.
         for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
             final Task task = mTasks.get(taskNdx);
-            if (task.isTwoFingerScrollMode()) {
-                // If we're scrolling we don't care about your bounds or configs,
-                // they should be null as if we were in fullscreen.
-                task.resizeLocked(null, null, false /* forced */);
-                task.getBounds(mTmpRect2);
-                task.scrollLocked(mTmpRect2);
-            } else {
-                final boolean alignBottom = mAdjustedForIme && getDockSide() == DOCKED_TOP;
-                task.alignToAdjustedBounds(adjustedBounds, tempInsetBounds, alignBottom);
-            }
+            task.alignToAdjustedBounds(adjustedBounds, tempInsetBounds, alignBottom);
         }
     }
 
@@ -542,11 +524,6 @@ public class TaskStack implements DimLayer.DimLayerUser,
         if (DEBUG_TASK_MOVEMENT) Slog.d(TAG_WM,
                 "positionTask: task=" + task + " position=" + position);
         mTasks.add(position, task);
-
-        // If we are moving the task across stacks, the scroll is no longer valid.
-        if (task.mStack != this) {
-            task.resetScrollLocked();
-        }
         task.mStack = this;
         task.updateDisplayInfo(mDisplayContent);
         boolean toTop = position == mTasks.size() - 1;

@@ -345,20 +345,12 @@ class TaskPositioner implements DimLayer.DimLayerUser {
         mStartDragX = startX;
         mStartDragY = startY;
 
-        if (mTask.isDockedInEffect()) {
-            // If this is a docked task or if task size is affected by docked stack changing size,
-            // we can only be here if the task is not resizeable and we're handling a two-finger
-            // scrolling. Use the original task bounds to position the task, the dim bounds
-            // is cropped and doesn't move.
-            mTask.getBounds(mTmpRect);
-        } else {
-            // Use the dim bounds, not the original task bounds. The cursor
-            // movement should be calculated relative to the visible bounds.
-            // Also, use the dim bounds of the task which accounts for
-            // multiple app windows. Don't use any bounds from win itself as it
-            // may not be the same size as the task.
-            mTask.getDimBounds(mTmpRect);
-        }
+        // Use the dim bounds, not the original task bounds. The cursor
+        // movement should be calculated relative to the visible bounds.
+        // Also, use the dim bounds of the task which accounts for
+        // multiple app windows. Don't use any bounds from win itself as it
+        // may not be the same size as the task.
+        mTask.getDimBounds(mTmpRect);
 
         if (resize) {
             if (startX < mTmpRect.left) {
@@ -422,52 +414,37 @@ class TaskPositioner implements DimLayer.DimLayerUser {
         // This is a moving or scrolling operation.
         mTask.mStack.getDimBounds(mTmpRect);
 
-        boolean dragEnded = false;
         int nX = (int) x;
         int nY = (int) y;
         if (!mTmpRect.contains(nX, nY)) {
-            if (mTask.isDockedInEffect()) {
-                // We end the scrolling operation if position is outside the stack bounds.
-                dragEnded = true;
-            } else {
-                // For a moving operation we allow the pointer to go out of the stack bounds, but
-                // use the clamped pointer position for the drag bounds computation.
-                nX = Math.min(Math.max(nX, mTmpRect.left), mTmpRect.right);
-                nY = Math.min(Math.max(nY, mTmpRect.top), mTmpRect.bottom);
-            }
+            // For a moving operation we allow the pointer to go out of the stack bounds, but
+            // use the clamped pointer position for the drag bounds computation.
+            nX = Math.min(Math.max(nX, mTmpRect.left), mTmpRect.right);
+            nY = Math.min(Math.max(nY, mTmpRect.top), mTmpRect.bottom);
         }
 
         updateWindowDragBounds(nX, nY, mTmpRect);
         updateDimLayerVisibility(nX);
-        return dragEnded;
+        return false;
     }
 
     private void updateWindowDragBounds(int x, int y, Rect stackBounds) {
         final int offsetX = Math.round(x - mStartDragX);
         final int offsetY = Math.round(y - mStartDragY);
         mWindowDragBounds.set(mWindowOriginalBounds);
-        if (mTask.isDockedInEffect()) {
-            // Offset the bounds without clamp, the bounds will be shifted later
-            // by window manager before applying the scrolling.
-            if (mService.mCurConfiguration.orientation == ORIENTATION_LANDSCAPE) {
-                mWindowDragBounds.offset(offsetX, 0);
-            } else {
-                mWindowDragBounds.offset(0, offsetY);
-            }
-        } else {
-            // Horizontally, at least mMinVisibleWidth pixels of the window should remain visible.
-            final int maxLeft = stackBounds.right - mMinVisibleWidth;
-            final int minLeft = stackBounds.left + mMinVisibleWidth - mWindowOriginalBounds.width();
+        // Horizontally, at least mMinVisibleWidth pixels of the window should remain visible.
+        final int maxLeft = stackBounds.right - mMinVisibleWidth;
+        final int minLeft = stackBounds.left + mMinVisibleWidth - mWindowOriginalBounds.width();
 
-            // Vertically, the top mMinVisibleHeight of the window should remain visible.
-            // (This assumes that the window caption bar is at the top of the window).
-            final int minTop = stackBounds.top;
-            final int maxTop = stackBounds.bottom - mMinVisibleHeight;
+        // Vertically, the top mMinVisibleHeight of the window should remain visible.
+        // (This assumes that the window caption bar is at the top of the window).
+        final int minTop = stackBounds.top;
+        final int maxTop = stackBounds.bottom - mMinVisibleHeight;
 
-            mWindowDragBounds.offsetTo(
-                    Math.min(Math.max(mWindowOriginalBounds.left + offsetX, minLeft), maxLeft),
-                    Math.min(Math.max(mWindowOriginalBounds.top + offsetY, minTop), maxTop));
-        }
+        mWindowDragBounds.offsetTo(
+                Math.min(Math.max(mWindowOriginalBounds.left + offsetX, minLeft), maxLeft),
+                Math.min(Math.max(mWindowOriginalBounds.top + offsetY, minTop), maxTop));
+
         if (DEBUG_TASK_POSITIONING) Slog.d(TAG,
                 "updateWindowDragBounds: " + mWindowDragBounds);
     }

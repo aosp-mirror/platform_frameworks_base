@@ -65,9 +65,6 @@ class Task implements DimLayer.DimLayerUser {
     final Rect mPreparedFrozenBounds = new Rect();
     final Configuration mPreparedFrozenMergedConfig = new Configuration();
 
-    private Rect mPreScrollBounds = new Rect();
-    private boolean mScrollValid;
-
     // Bounds used to calculate the insets.
     private final Rect mTempInsetBounds = new Rect();
 
@@ -234,22 +231,19 @@ class Task implements DimLayer.DimLayerUser {
             // Can't set to fullscreen if we don't have a display to get bounds from...
             return BOUNDS_CHANGE_NONE;
         }
-        if (mPreScrollBounds.equals(bounds) && oldFullscreen == mFullscreen && mRotation == rotation) {
+        if (mBounds.equals(bounds) && oldFullscreen == mFullscreen && mRotation == rotation) {
             return BOUNDS_CHANGE_NONE;
         }
 
         int boundsChange = BOUNDS_CHANGE_NONE;
-        if (mPreScrollBounds.left != bounds.left || mPreScrollBounds.top != bounds.top) {
+        if (mBounds.left != bounds.left || mBounds.top != bounds.top) {
             boundsChange |= BOUNDS_CHANGE_POSITION;
         }
-        if (mPreScrollBounds.width() != bounds.width() || mPreScrollBounds.height() != bounds.height()) {
+        if (mBounds.width() != bounds.width() || mBounds.height() != bounds.height()) {
             boundsChange |= BOUNDS_CHANGE_SIZE;
         }
 
-
-        mPreScrollBounds.set(bounds);
-
-        resetScrollLocked();
+        mBounds.set(bounds);
 
         mRotation = rotation;
         if (displayContent != null) {
@@ -350,67 +344,6 @@ class Task implements DimLayer.DimLayerUser {
         }
         setTempInsetBounds(tempInsetBounds);
         resizeLocked(mTmpRect2, mOverrideConfig, false /* forced */);
-    }
-
-    void resetScrollLocked() {
-        if (mScrollValid) {
-            mScrollValid = false;
-            applyScrollToAllWindows(0, 0);
-        }
-        mBounds.set(mPreScrollBounds);
-    }
-
-    void applyScrollToAllWindows(final int xOffset, final int yOffset) {
-        for (int activityNdx = mAppTokens.size() - 1; activityNdx >= 0; --activityNdx) {
-            final ArrayList<WindowState> windows = mAppTokens.get(activityNdx).allAppWindows;
-            for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
-                final WindowState win = windows.get(winNdx);
-                win.mXOffset = xOffset;
-                win.mYOffset = yOffset;
-            }
-        }
-    }
-
-    void applyScrollToWindowIfNeeded(final WindowState win) {
-        if (mScrollValid) {
-            win.mXOffset = mBounds.left;
-            win.mYOffset = mBounds.top;
-        }
-    }
-
-    boolean scrollLocked(Rect bounds) {
-        // shift the task bound if it doesn't fully cover the stack area
-        mStack.getDimBounds(mTmpRect);
-        if (mService.mCurConfiguration.orientation == ORIENTATION_LANDSCAPE) {
-            if (bounds.left > mTmpRect.left) {
-                bounds.left = mTmpRect.left;
-                bounds.right = mTmpRect.left + mBounds.width();
-            } else if (bounds.right < mTmpRect.right) {
-                bounds.left = mTmpRect.right - mBounds.width();
-                bounds.right = mTmpRect.right;
-            }
-        } else {
-            if (bounds.top > mTmpRect.top) {
-                bounds.top = mTmpRect.top;
-                bounds.bottom = mTmpRect.top + mBounds.height();
-            } else if (bounds.bottom < mTmpRect.bottom) {
-                bounds.top = mTmpRect.bottom - mBounds.height();
-                bounds.bottom = mTmpRect.bottom;
-            }
-        }
-
-        // We can stop here if we're already scrolling and the scrolled bounds not changed.
-        if (mScrollValid && bounds.equals(mBounds)) {
-            return false;
-        }
-
-        // Normal setBounds() does not allow non-null bounds for fullscreen apps.
-        // We only change bounds for the scrolling case without change it size,
-        // on resizing path we should still want the validation.
-        mBounds.set(bounds);
-        mScrollValid = true;
-        applyScrollToAllWindows(bounds.left, bounds.top);
-        return true;
     }
 
     /** Return true if the current bound can get outputted to the rest of the system as-is. */
@@ -583,11 +516,11 @@ class Task implements DimLayer.DimLayerUser {
         }
 
         // Device rotation changed.
-        // - Reset the bounds to the pre-scroll bounds as whatever scrolling was done is no longer
-        // valid.
+        // - We don't want the task to move around on the screen when this happens, so update the
+        //   task bounds so it stays in the same place.
         // - Rotate the bounds and notify activity manager if the task can be resized independently
-        // from its stack. The stack will take care of task rotation for the other case.
-        mTmpRect2.set(mPreScrollBounds);
+        //   from its stack. The stack will take care of task rotation for the other case.
+        mTmpRect2.set(mBounds);
 
         if (!StackId.isTaskResizeAllowed(mStack.mStackId)) {
             setBounds(mTmpRect2, mOverrideConfig);
@@ -600,7 +533,7 @@ class Task implements DimLayer.DimLayerUser {
             // call. We do this to prevent a deadlock between window manager lock and activity
             // manager lock been held.
             mService.mH.obtainMessage(RESIZE_TASK, mTaskId,
-                    RESIZE_MODE_SYSTEM_SCREEN_ROTATION, mPreScrollBounds).sendToTarget();
+                    RESIZE_MODE_SYSTEM_SCREEN_ROTATION, mBounds).sendToTarget();
         }
     }
 
@@ -708,34 +641,12 @@ class Task implements DimLayer.DimLayerUser {
         return mStack != null && mStack.mStackId == FREEFORM_WORKSPACE_STACK_ID;
     }
 
-    boolean inDockedWorkspace() {
-        return mStack != null && mStack.mStackId == DOCKED_STACK_ID;
-    }
-
     boolean inPinnedWorkspace() {
         return mStack != null && mStack.mStackId == PINNED_STACK_ID;
     }
 
-    boolean isResizeableByDockedStack() {
-        final DisplayContent displayContent = getDisplayContent();
-        return displayContent != null && displayContent.getDockedStackLocked() != null
-                && mStack != null && StackId.isTaskResizeableByDockedStack(mStack.mStackId);
-    }
-
     boolean isFloating() {
         return StackId.tasksAreFloating(mStack.mStackId);
-    }
-
-    /**
-     * Whether the task should be treated as if it's docked. Returns true if the task
-     * is currently in docked workspace, or it's side-by-side to a docked task.
-     */
-    boolean isDockedInEffect() {
-        return inDockedWorkspace() || isResizeableByDockedStack();
-    }
-
-    boolean isTwoFingerScrollMode() {
-        return inCropWindowsResizeMode() && isDockedInEffect();
     }
 
     WindowState getTopVisibleAppMainWindow() {

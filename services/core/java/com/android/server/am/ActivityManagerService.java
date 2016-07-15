@@ -9386,16 +9386,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                     Slog.w(TAG, "resizeTask: taskId=" + taskId + " not found");
                     return;
                 }
-                int stackId = task.stack.mStackId;
-                // We allow the task to scroll instead of resizing if this is a non-resizeable task
-                // in crop windows resize mode or if the task size is affected by the docked stack
-                // changing size. No need to update configuration.
-                if (bounds != null && task.inCropWindowsResizeMode()
-                        && mStackSupervisor.isStackDockedInEffect(stackId)) {
-                    mWindowManager.scrollTask(task.taskId, bounds);
-                    return;
-                }
-
                 // Place the task in the right stack if it isn't there already based on
                 // the requested bounds.
                 // The stack transition logic is:
@@ -9403,6 +9393,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // - a non-null bounds on a non-freeform (fullscreen OR docked) task moves
                 //   that task to freeform
                 // - otherwise the task is not moved
+                int stackId = task.stack.mStackId;
                 if (!StackId.isTaskResizeAllowed(stackId)) {
                     throw new IllegalArgumentException("resizeTask not allowed on task=" + task);
                 }
