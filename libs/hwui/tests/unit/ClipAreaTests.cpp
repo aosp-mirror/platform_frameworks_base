@@ -334,5 +334,14 @@ TEST(ClipArea, applyTransformToRegion_translateScale) {
     EXPECT_EQ(SkIRect::MakeLTRB(12, 26, 16, 32), region.getBounds());
 }
 
+TEST(ClipArea, applyTransformToRegion_rotate90) {
+    SkRegion region(SkIRect::MakeLTRB(1, 2, 3, 4));
+    Matrix4 transform;
+    transform.loadRotate(90);
+    ClipArea::applyTransformToRegion(transform, &region);
+    EXPECT_TRUE(region.isRect());
+    EXPECT_EQ(SkIRect::MakeLTRB(-4, 1, -2, 3), region.getBounds());
+}
+
 } // namespace uirenderer
 } // namespace android
