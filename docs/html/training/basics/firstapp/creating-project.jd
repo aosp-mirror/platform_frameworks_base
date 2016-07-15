@@ -14,36 +14,19 @@ next.link=running-app.html
 <div id="tb-wrapper">
 <div id="tb">
 
-<h2>This lesson teaches you to</h2>
-
-<ol>
-  <li><a href="#Studio">Create a Project with Android Studio</a></li>
-</ol>
-
 <h2>You should also read</h2>
 
 <ul>
-  <li><a href="{@docRoot}tools/projects/index.html">Managing Projects</a></li>
+  <li><a href="{@docRoot}studio/projects/index.html">Projects Overview</a></li>
 </ul>
 
 
 </div>
 </div>
 
-<p>An Android project contains all the files that comprise the source code for your Android
-app.</p>
-
-<p>This lesson
-shows how to create a new project either using Android Studio or using the
-SDK tools from a command line.</p>
-
-<p class="note"><strong>Note:</strong> You should already have Android Studio or the Android SDK
-command-line tools installed. If not, <a
-href="{@docRoot}studio/index.html">download them</a> before you start this
-lesson.</p>
-
-
-<h2 id="Studio">Create a Project with Android Studio</h2>
+<p>This lesson shows you how to create a new Android project with
+  <a href="{@docRoot}studio/index.html">Android Studio</a> and describes some
+  of the files in the project.</p>
 
 <ol>
   <li>In Android Studio, create a new project:
@@ -54,11 +37,12 @@ lesson.</p>
         Project</strong>. The <em>Create New Project</em> screen appears.</li>
     </ul>
   </li>
-  <li>Fill out the fields on the screen, and click <strong>Next</strong>.
-    <p>It is easier to follow these lessons if you use the same values as shown.</p>
+  <li>Fill out the fields on the screen. For <strong>Application Name</strong>
+    use "My First App". For <strong>Company Domain</strong>, use "example.com".
+    For the other fields, use the default values and click <strong>Next</strong>
+    <p>Here's a brief explanation of each field:</p>
     <ul>
-      <li><strong>Application Name</strong> is the app name that appears to users.
-          For this project, use "My First App."</li>
+      <li><strong>Application Name</strong> is the app name that appears to users.</li>
       <li><strong>Company domain</strong> provides a qualifier that will be appended to the package
         name; Android Studio will remember this qualifier for each new project you create.</li>
       <li><strong>Package name</strong> is the fully qualified name for the project (following the
@@ -70,9 +54,8 @@ lesson.</p>
         files.</li>
     </ul>
   </li>
-  <li>Under <strong>Select the form factors your app will run on</strong>, check the box for <strong>
-    Phone and Tablet</strong>.</li>
-  <li>For <strong>Minimum SDK</strong>, select <strong>API 8: Android 2.2 (Froyo)</strong>.
+  <li>Under <strong>Target Android Devices</strong>, accept the default values
+    and click <strong>Next</strong>.
     <p>The Minimum Required SDK is the earliest version of Android that your app supports,
       indicated using the <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">
       API level</a>. To support as many devices as possible, you should set this to the lowest
@@ -80,8 +63,13 @@ lesson.</p>
       app is possible only on newer versions of Android and it's not critical to the app's core
       feature set, you can enable the feature only when running on the versions that support it (as
       discussed in <a href="{@docRoot}training/basics/supporting-devices/platforms.html">
-      Supporting Different Platform Versions</a>).</p></li>
-  <li>Leave all of the other options (TV, Wear, and Glass) unchecked and click <strong>Next.</strong></li>
+      Supporting Different Platform Versions</a>).</p>
+    </li>
+
+  <li>Under <strong>Add an Activity to Mobile</strong>, select <strong>Empty
+    Activity</strong> and click <strong>Next</strong>.
+  </li>
+
   <div class="sidebox-wrapper">
     <div class="sidebox">
       <h3>Activities</h3>
@@ -93,43 +81,25 @@ lesson.</p>
         Activities</a> for more information.</p>
     </div>
   </div>
-  <li>Under <strong>Add an activity to &lt;<em>template</em>&gt;</strong>,
-  select <strong>Basic Activity</strong> and click <strong>Next</strong>.
-  </li>
 
-  <li>Under <strong>Customize the Activity</strong>, change the
-  <strong>Activity Name</strong> to <em>MyActivity</em>. The <strong>Layout
-  Name</strong> changes to <em>activity_my</em>, and the <strong>Title</strong>
-  to <em>MyActivity</em>. The <strong>Menu Resource Name</strong> is
-  <em>menu_my</em>.
-  </li>
-
-  <li>Click the <strong>Finish</strong> button to create the project.
-  </li>
+  <li>Under <strong>Customize the Activity</strong>, accept the default values
+    and click <strong>Finish</strong>.
 </ol>
 
 <p>Your Android project is now a basic "Hello World" app that contains some default files. Take a
 moment to review the most important of these:</p>
 
 <dl>
-  <dt><code>app/src/main/res/layout/activity_my.xml</code></dt>
-  <dd>This XML layout file is for the activity you added when you created the project
-  with Android Studio. Following the New Project workflow, Android Studio presents this file
-  with both a text
-    view and a preview of the screen UI. The file contains some default interface elements
-    from the material design library, including the
-    <a href="{@docRoot}training/appbar/index.html">app bar</a> and a floating action button.
-    It also includes a separate layout file with the main content.</dd>
+  <dt><code>app/src/main/java/com.example.myfirstapp/MainActivity.java</code></dt>
+  <dd>This file appears in Android Studio after the New Project wizard finishes.
+    It contains the class definition for the activity you created earlier. When you build
+    and run the app, the {@link android.app.Activity} starts and loads the
+    layout file that says "Hello World!"</dd>
 
-  <dt><code>app/src/main/res/layout/content_my.xml</code></dt>
-  <dd>This XML layout file resides in {@code activity_my.xml}, and contains some settings and
-  a {@code TextView} element that displays the message, "Hello world!".</dd>
+  <dt><code>app/src/main/res/layout/activity_main.xml</code></dt>
+  <dd>This XML file defines the layout of the activity. It contains a {@code TextView}
+    element with the text "Hello world!".</dd>
 
-  <dt><code>app/src/main/java/com.mycompany.myfirstapp/MyActivity.java</code></dt>
-  <dd>A tab for this file appears in Android Studio when the New Project workflow finishes. When you
-    select the file you see the class definition for the activity you created. When you build and
-    run the app, the {@link android.app.Activity} class starts the activity and loads the layout file
-    that says "Hello World!"</dd>
   <dt><code>app/src/main/AndroidManifest.xml</code></dt>
   <dd>The <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">manifest file</a> describes
     the fundamental characteristics of the app and defines each of its components. You'll revisit
@@ -143,15 +113,15 @@ moment to review the most important of these:</p>
     <ul>
       <li><code>compiledSdkVersion</code> is the platform version against which you will compile
         your app. By default, this is set to the latest version of Android available in your SDK.
-        (It should be Android 4.1 or greater; if you don't have such a version available, you must
-        install one using the <a href="{@docRoot}studio/intro/update.html">SDK Manager</a>.)
+        By default, this is set to the latest version of Android SDK installed on your
+        development machine.
         You can still build your app to support older versions, but setting this to the latest
         version allows you to enable new features and optimize your app for a great user experience
         on the latest devices.</li>
       <li><code>applicationId</code> is the fully qualified package name for your application that
-        you specified during the New Project workflow.</li>
+        you specified in the New Project wizard.</li>
       <li><code>minSdkVersion</code> is the Minimum SDK version you specified during the New Project
-        workflow. This is the earliest version of the Android SDK that your app supports.</li>
+        wizard. This is the earliest version of the Android SDK that your app supports.</li>
       <li><code>targetSdkVersion</code> indicates the highest version of Android with which you have
         tested your application. As new versions of Android become available, you should
         test your app on the new version and update this value to match the latest API level and
@@ -172,8 +142,8 @@ moment to review the most important of these:</p>
     for various <a href="{@docRoot}training/multiscreen/screendensities.html">densities</a>.
 </dd>
   <dt><code>layout/</code></dt>
-    <dd>Directory for files that define your app's user interface like {@code activity_my.xml},
-      discussed above, which describes a basic layout for the {@code MyActivity}
+    <dd>Directory for files that define your app's user interface like {@code activity_main.xml},
+      discussed above, which describes a basic layout for the {@code MainActivity}
       class.</dd>
   <dt><code>menu/</code></dt>
     <dd>Directory for files that define your app's menu items.</dd>
