@@ -76,8 +76,6 @@ import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.pm.PackageParser.PARSE_IS_PRIVILEGED;
 import static android.content.pm.PackageParser.isApkFile;
-import static android.os.Process.PACKAGE_INFO_GID;
-import static android.os.Process.SYSTEM_UID;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDWR;
@@ -208,7 +206,6 @@ import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.AtomicFile;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.ExceptionUtils;
@@ -267,7 +264,6 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -280,7 +276,6 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.security.DigestInputStream;
@@ -307,7 +302,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Keep track of all those APKs everywhere.
@@ -1131,204 +1125,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     final @NonNull String mSharedSystemSharedLibraryPackageName;
 
     private final PackageUsage mPackageUsage = new PackageUsage();
-
-    private class PackageUsage {
-        private static final int WRITE_INTERVAL
-            = (DEBUG_DEXOPT) ? 0 : 30*60*1000; // 30m in ms
-
-        private final Object mFileLock = new Object();
-        private final AtomicLong mLastWritten = new AtomicLong(0);
-        private final AtomicBoolean mBackgroundWriteRunning = new AtomicBoolean(false);
-
-        private boolean mIsHistoricalPackageUsageAvailable = true;
-
-        boolean isHistoricalPackageUsageAvailable() {
-            return mIsHistoricalPackageUsageAvailable;
-        }
-
-        void write(boolean force) {
-            if (force) {
-                writeInternal();
-                return;
-            }
-            if (SystemClock.elapsedRealtime() - mLastWritten.get() < WRITE_INTERVAL
-                && !DEBUG_DEXOPT) {
-                return;
-            }
-            if (mBackgroundWriteRunning.compareAndSet(false, true)) {
-                new Thread("PackageUsage_DiskWriter") {
-                    @Override
-                    public void run() {
-                        try {
-                            writeInternal();
-                        } finally {
-                            mBackgroundWriteRunning.set(false);
-                        }
-                    }
-                }.start();
-            }
-        }
-
-        private void writeInternal() {
-            synchronized (mPackages) {
-                synchronized (mFileLock) {
-                    AtomicFile file = getFile();
-                    FileOutputStream f = null;
-                    try {
-                        f = file.startWrite();
-                        BufferedOutputStream out = new BufferedOutputStream(f);
-                        FileUtils.setPermissions(file.getBaseFile().getPath(),
-                                0640, SYSTEM_UID, PACKAGE_INFO_GID);
-                        StringBuilder sb = new StringBuilder();
-
-                        sb.append(USAGE_FILE_MAGIC_VERSION_1);
-                        sb.append('\n');
-                        out.write(sb.toString().getBytes(StandardCharsets.US_ASCII));
-
-                        for (PackageParser.Package pkg : mPackages.values()) {
-                            if (pkg.getLatestPackageUseTimeInMills() == 0L) {
-                                continue;
-                            }
-                            sb.setLength(0);
-                            sb.append(pkg.packageName);
-                            for (long usageTimeInMillis : pkg.mLastPackageUsageTimeInMills) {
-                                sb.append(' ');
-                                sb.append(usageTimeInMillis);
-                            }
-                            sb.append('\n');
-                            out.write(sb.toString().getBytes(StandardCharsets.US_ASCII));
-                        }
-                        out.flush();
-                        file.finishWrite(f);
-                    } catch (IOException e) {
-                        if (f != null) {
-                            file.failWrite(f);
-                        }
-                        Log.e(TAG, "Failed to write package usage times", e);
-                    }
-                }
-            }
-            mLastWritten.set(SystemClock.elapsedRealtime());
-        }
-
-        void readLP() {
-            synchronized (mFileLock) {
-                AtomicFile file = getFile();
-                BufferedInputStream in = null;
-                try {
-                    in = new BufferedInputStream(file.openRead());
-                    StringBuffer sb = new StringBuffer();
-
-                    String firstLine = readLine(in, sb);
-                    if (firstLine == null) {
-                        // Empty file. Do nothing.
-                    } else if (USAGE_FILE_MAGIC_VERSION_1.equals(firstLine)) {
-                        readVersion1LP(in, sb);
-                    } else {
-                        readVersion0LP(in, sb, firstLine);
-                    }
-                } catch (FileNotFoundException expected) {
-                    mIsHistoricalPackageUsageAvailable = false;
-                } catch (IOException e) {
-                    Log.w(TAG, "Failed to read package usage times", e);
-                } finally {
-                    IoUtils.closeQuietly(in);
-                }
-            }
-            mLastWritten.set(SystemClock.elapsedRealtime());
-        }
-
-        private void readVersion0LP(InputStream in, StringBuffer sb, String firstLine)
-                throws IOException {
-            // Initial version of the file had no version number and stored one
-            // package-timestamp pair per line.
-            // Note that the first line has already been read from the InputStream.
-            for (String line = firstLine; line != null; line = readLine(in, sb)) {
-                String[] tokens = line.split(" ");
-                if (tokens.length != 2) {
-                    throw new IOException("Failed to parse " + line +
-                            " as package-timestamp pair.");
-                }
-
-                String packageName = tokens[0];
-                PackageParser.Package pkg = mPackages.get(packageName);
-                if (pkg == null) {
-                    continue;
-                }
-
-                long timestamp = parseAsLong(tokens[1]);
-                for (int reason = 0;
-                        reason < PackageManager.NOTIFY_PACKAGE_USE_REASONS_COUNT;
-                        reason++) {
-                    pkg.mLastPackageUsageTimeInMills[reason] = timestamp;
-                }
-            }
-        }
-
-        private void readVersion1LP(InputStream in, StringBuffer sb) throws IOException {
-            // Version 1 of the file started with the corresponding version
-            // number and then stored a package name and eight timestamps per line.
-            String line;
-            while ((line = readLine(in, sb)) != null) {
-                String[] tokens = line.split(" ");
-                if (tokens.length != PackageManager.NOTIFY_PACKAGE_USE_REASONS_COUNT + 1) {
-                    throw new IOException("Failed to parse " + line + " as a timestamp array.");
-                }
-
-                String packageName = tokens[0];
-                PackageParser.Package pkg = mPackages.get(packageName);
-                if (pkg == null) {
-                    continue;
-                }
-
-                for (int reason = 0;
-                        reason < PackageManager.NOTIFY_PACKAGE_USE_REASONS_COUNT;
-                        reason++) {
-                    pkg.mLastPackageUsageTimeInMills[reason] = parseAsLong(tokens[reason + 1]);
-                }
-            }
-        }
-
-        private long parseAsLong(String token) throws IOException {
-            try {
-                return Long.parseLong(token);
-            } catch (NumberFormatException e) {
-                throw new IOException("Failed to parse " + token + " as a long.", e);
-            }
-        }
-
-        private String readLine(InputStream in, StringBuffer sb) throws IOException {
-            return readToken(in, sb, '\n');
-        }
-
-        private String readToken(InputStream in, StringBuffer sb, char endOfToken)
-                throws IOException {
-            sb.setLength(0);
-            while (true) {
-                int ch = in.read();
-                if (ch == -1) {
-                    if (sb.length() == 0) {
-                        return null;
-                    }
-                    throw new IOException("Unexpected EOF");
-                }
-                if (ch == endOfToken) {
-                    return sb.toString();
-                }
-                sb.append((char)ch);
-            }
-        }
-
-        private AtomicFile getFile() {
-            File dataDir = Environment.getDataDirectory();
-            File systemDir = new File(dataDir, "system");
-            File fname = new File(systemDir, "package-usage.list");
-            return new AtomicFile(fname);
-        }
-
-        private static final String USAGE_FILE_MAGIC = "PACKAGE_USAGE__VERSION_";
-        private static final String USAGE_FILE_MAGIC_VERSION_1 = USAGE_FILE_MAGIC + "1";
-    }
+    private final CompilerStats mCompilerStats = new CompilerStats();
 
     class PackageHandler extends Handler {
         private boolean mBound = false;
@@ -2709,7 +2506,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             // Now that we know all the packages we are keeping,
             // read and update their last usage times.
-            mPackageUsage.readLP();
+            mPackageUsage.read(mPackages);
+            mCompilerStats.read();
 
             EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_SCAN_END,
                     SystemClock.uptimeMillis());
@@ -7477,7 +7275,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // Package could not be found. Report failure.
                 return PackageDexOptimizer.DEX_OPT_FAILED;
             }
-            mPackageUsage.write(false);
+            mPackageUsage.maybeWriteAsync(mPackages);
+            mCompilerStats.maybeWriteAsync();
         }
         long callingId = Binder.clearCallingIdentity();
         try {
@@ -7522,11 +7321,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // Currently this will do a full compilation of the library by default.
                 pdo.performDexOpt(depPackage, null /* sharedLibraries */, instructionSets,
                         false /* checkProfiles */,
-                        getCompilerFilterForReason(REASON_NON_SYSTEM_LIBRARY));
+                        getCompilerFilterForReason(REASON_NON_SYSTEM_LIBRARY),
+                        getOrCreateCompilerPackageStats(depPackage));
             }
         }
         return pdo.performDexOpt(p, p.usesLibraryFiles, instructionSets, checkProfiles,
-                targetCompilerFilter);
+                targetCompilerFilter, getOrCreateCompilerPackageStats(p));
     }
 
     Collection<PackageParser.Package> findSharedNonSystemLibraries(PackageParser.Package p) {
@@ -7580,7 +7380,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     public void shutdown() {
-        mPackageUsage.write(true);
+        mPackageUsage.writeNow(mPackages);
+        mCompilerStats.writeNow();
     }
 
     @Override
@@ -15226,7 +15027,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             // Also, don't fail application installs if the dexopt step fails.
             mPackageDexOptimizer.performDexOpt(pkg, pkg.usesLibraryFiles,
                     null /* instructionSets */, false /* checkProfiles */,
-                    getCompilerFilterForReason(REASON_INSTALL));
+                    getCompilerFilterForReason(REASON_INSTALL),
+                    getOrCreateCompilerPackageStats(pkg));
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 
             // Notify BackgroundDexOptService that the package has been changed.
@@ -18187,6 +17989,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         public static final int DUMP_DOMAIN_PREFERRED = 1 << 18;
         public static final int DUMP_FROZEN = 1 << 19;
         public static final int DUMP_DEXOPT = 1 << 20;
+        public static final int DUMP_COMPILER_STATS = 1 << 21;
 
         public static final int OPTION_SHOW_FILTERS = 1 << 0;
 
@@ -18304,6 +18107,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 pw.println("    installs: details about install sessions");
                 pw.println("    check-permission <permission> <package> [<user>]: does pkg hold perm?");
                 pw.println("    dexopt: dump dexopt state");
+                pw.println("    compiler-stats: dump compiler statistics");
                 pw.println("    <package.name>: info about given package");
                 return;
             } else if ("--checkin".equals(opt)) {
@@ -18425,6 +18229,8 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 dumpState.setDump(DumpState.DUMP_FROZEN);
             } else if ("dexopt".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_DEXOPT);
+            } else if ("compiler-stats".equals(cmd)) {
+                dumpState.setDump(DumpState.DUMP_COMPILER_STATS);
             } else if ("write".equals(cmd)) {
                 synchronized (mPackages) {
                     mSettings.writeLPr();
@@ -18787,6 +18593,11 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 dumpDexoptStateLPr(pw, packageName);
             }
 
+            if (!checkin && dumpState.isDumping(DumpState.DUMP_COMPILER_STATS)) {
+                if (dumpState.onTitlePrinted()) pw.println();
+                dumpCompilerStatsLPr(pw, packageName);
+            }
+
             if (!checkin && dumpState.isDumping(DumpState.DUMP_MESSAGES) && packageName == null) {
                 if (dumpState.onTitlePrinted()) pw.println();
                 mSettings.dumpReadMessagesLPr(pw, dumpState);
@@ -18847,6 +18658,38 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             ipw.println("[" + pkg.packageName + "]");
             ipw.increaseIndent();
             mPackageDexOptimizer.dumpDexoptState(ipw, pkg);
+            ipw.decreaseIndent();
+        }
+    }
+
+    private void dumpCompilerStatsLPr(PrintWriter pw, String packageName) {
+        final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ", 120);
+        ipw.println();
+        ipw.println("Compiler stats:");
+        ipw.increaseIndent();
+        Collection<PackageParser.Package> packages = null;
+        if (packageName != null) {
+            PackageParser.Package targetPackage = mPackages.get(packageName);
+            if (targetPackage != null) {
+                packages = Collections.singletonList(targetPackage);
+            } else {
+                ipw.println("Unable to find package: " + packageName);
+                return;
+            }
+        } else {
+            packages = mPackages.values();
+        }
+
+        for (PackageParser.Package pkg : packages) {
+            ipw.println("[" + pkg.packageName + "]");
+            ipw.increaseIndent();
+
+            CompilerStats.PackageStats stats = getCompilerPackageStats(pkg.packageName);
+            if (stats == null) {
+                ipw.println("(No recorded stats)");
+            } else {
+                stats.dump(ipw);
+            }
             ipw.decreaseIndent();
         }
     }
@@ -21011,5 +20854,21 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 ProcessLoggingHandler.LOG_APP_PROCESS_START_MSG);
         msg.setData(data);
         mProcessLoggingHandler.sendMessage(msg);
+    }
+
+    public CompilerStats.PackageStats getCompilerPackageStats(String pkgName) {
+        return mCompilerStats.getPackageStats(pkgName);
+    }
+
+    public CompilerStats.PackageStats getOrCreateCompilerPackageStats(PackageParser.Package pkg) {
+        return getOrCreateCompilerPackageStats(pkg.packageName);
+    }
+
+    public CompilerStats.PackageStats getOrCreateCompilerPackageStats(String pkgName) {
+        return mCompilerStats.getOrCreatePackageStats(pkgName);
+    }
+
+    public void deleteCompilerPackageStats(String pkgName) {
+        mCompilerStats.deletePackageStats(pkgName);
     }
 }
