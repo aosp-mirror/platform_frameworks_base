@@ -838,6 +838,10 @@ public class UsageStatsService extends SystemService implements
                     && mAppWidgetManager.isBoundWidgetPackage(packageName, userId)) {
                 return false;
             }
+
+            if (isDeviceProvisioningPackage(packageName)) {
+                return false;
+            }
         }
 
         if (!isAppIdleUnfiltered(packageName, userId, elapsedRealtime)) {
@@ -928,6 +932,16 @@ public class UsageStatsService extends SystemService implements
         DevicePolicyManager dpm = getContext().getSystemService(DevicePolicyManager.class);
         if (dpm == null) return false;
         return dpm.packageHasActiveAdmins(packageName, userId);
+    }
+
+    /**
+     * Returns {@code true} if the supplied package is the device provisioning app. Otherwise,
+     * returns {@code false}.
+     */
+    private boolean isDeviceProvisioningPackage(String packageName) {
+        String deviceProvisioningPackage = getContext().getResources().getString(
+                com.android.internal.R.string.config_deviceProvisioningPackage);
+        return deviceProvisioningPackage != null && deviceProvisioningPackage.equals(packageName);
     }
 
     private boolean isCarrierApp(String packageName) {
