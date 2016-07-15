@@ -14,6 +14,7 @@ page.image=images/cards/card-nyc_2x.jpg
     <li><a href="#notification">Getting Notified of User Unlock</a></li>
     <li><a href="#migrating">Migrating Existing Data</a></li>
     <li><a href="#testing">Testing Your Encryption Aware App</a></li>
+    <li><a href="#dpm">Checking Device Policy Encryption Status</a></li>
   </ol>
 </div>
 </div>
@@ -186,3 +187,34 @@ $ adb shell sm set-emulate-fbe false
 </pre>
 
 <p>Using these commands causes the device to reboot.</p>
+
+<h2 id="dpm">Checking Device Policy Encryption Status</h2>
+
+<p>Device administration apps can use
+{@link android.app.admin.DevicePolicyManager#getStorageEncryptionStatus
+DevicePolicyManager.getStorageEncryptionStatus()} to check the current
+encryption status of the device. If your app is targeting an API level
+lower than Android N,
+{@link android.app.admin.DevicePolicyManager#getStorageEncryptionStatus
+getStorageEncryptionStatus()} will return
+{@link android.app.admin.DevicePolicyManager#ENCRYPTION_STATUS_ACTIVE
+ENCRYPTION_STATUS_ACTIVE} if the device is either using full-disk encryption,
+or file-based encryption with Direct Boot. In both of these cases, data is
+always stored encrypted at rest. If your app is targeting an API level of
+Android N or higher,
+{@link android.app.admin.DevicePolicyManager#getStorageEncryptionStatus
+getStorageEncryptionStatus()} will return
+{@link android.app.admin.DevicePolicyManager#ENCRYPTION_STATUS_ACTIVE
+ENCRYPTION_STATUS_ACTIVE} if the device is using full-disk encryption. It will
+return
+{@link android.app.admin.DevicePolicyManager#ENCRYPTION_STATUS_ACTIVE_PER_USER
+ENCRYPTION_STATUS_ACTIVE_PER_USER} if the device is using file-based encryption
+with Direct Boot.</p>
+
+<p>If you build a device administration app
+that targets Android N, make sure to check for both
+{@link android.app.admin.DevicePolicyManager#ENCRYPTION_STATUS_ACTIVE
+ENCRYPTION_STATUS_ACTIVE} and
+{@link android.app.admin.DevicePolicyManager#ENCRYPTION_STATUS_ACTIVE_PER_USER
+ENCRYPTION_STATUS_ACTIVE_PER_USER} to determine if the device is
+encrypted.</p>
