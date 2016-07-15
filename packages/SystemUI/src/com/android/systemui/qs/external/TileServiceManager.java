@@ -25,6 +25,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.UserHandle;
 import android.service.quicksettings.IQSTileService;
 import android.service.quicksettings.Tile;
@@ -32,6 +33,7 @@ import android.service.quicksettings.TileService;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 
+import com.android.systemui.qs.customize.TileQueryHelper.TileStateListener;
 import com.android.systemui.qs.external.TileLifecycleManager.TileChangeListener;
 
 import java.util.List;
@@ -104,6 +106,10 @@ public class TileServiceManager {
 
     public IQSTileService getTileService() {
         return mStateManager;
+    }
+
+    public IBinder getToken() {
+        return mStateManager.getToken();
     }
 
     public void setBindRequested(boolean bindRequested) {
