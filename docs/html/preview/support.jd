@@ -12,14 +12,14 @@ page.image=images/cards/card-n-support_2x.png
 <h2>In this document</h2>
 
 <ul>
-  <li><a href="#dp4">Developer Preview 4</a>
+  <li><a href="#dp5">Developer Preview 5</a>
     <ul>
       <li><a href="#general">General advisories</a></li>
-      <li><a href="#new">New in DP4</a></li>
+      <li><a href="#new">New in DP5</a></li>
       <li><a href="#ki">Known issues</a></li>
-      <li><a href="#upgrade-notes">Notes on publishing apps that target API 24</a></li>
     </ul>
   </li>
+  <li><a href="#dp4">Developer Preview 4</a></li>
   <li><a href="#dp3">Developer Preview 3</a></li>
   <li><a href="#dp2">Developer Preview 2</a></li>
   <li><a href="#dp1">Developer Preview 1</a></li>
@@ -49,6 +49,123 @@ page.image=images/cards/card-n-support_2x.png
   the <a href="{@docRoot}preview/dev-community">Developer Preview Google+
   community</a>.
 </p>
+
+<h2 id="dp5">Developer Preview 5</h2>
+
+<div class="wrap">
+  <div class="cols">
+    <div class="col-6of12">
+      <p>
+        <em>Date: July 2016<br>
+        Build: NPD90G<br>
+        Emulator support: x86 &amp; ARM (32/64-bit)<br>
+        Google Play services: 8.4</em>
+      </p>
+    </div>
+  </div>
+</div>
+
+<h3 id="general">General advisories</h3>
+
+<p>
+  This Developer Preview release is for <strong>app developers and other early
+  adopters</strong> and is available for daily use, development, or
+  compatibility testing. Please be aware of these general notes about the
+  release:
+</p>
+
+<ul>
+  <li>This release may have various <strong>stability issues</strong> on
+  supported devices.
+  </li>
+
+  <li>Some apps <strong>may not function as expected</strong> on the new
+  platform version. This includes Google’s apps as well as other apps.
+  </li>
+
+  <li>Developer Preview 5 is <strong>Compatibility Test Suite (CTS)
+  approved</strong> on these devices: Nexus 5X, Nexus 6, Nexus 6P, and
+  Pixel C. Apps that depend on CTS approved builds should work normally
+  on these devices (Android Pay for example).
+  </li>
+
+  <li>Developer Preview 4 is <strong>available on all supported
+  devices:</strong> Nexus 5X, Nexus 6, Nexus 6P, Nexus 9, Nexus Player,
+  Pixel C, General Mobile 4G (Android One), as well as Sony Xperia Z3
+  (D6603 and D6653 models).
+  </li>
+</ul>
+
+
+<h3 id="new">New in DP5</h3>
+
+<h4>Updated system images for supported devices and emulator</h4>
+
+<p>
+  Developer Preview 5 includes <a href=
+  "{@docRoot}preview/download.html"><strong>near-final system
+  images</strong></a> for supported devices and the Android emulator. The
+  images include the final APIs (API level 24) for the upcoming Android N
+  platform. When you are done testing, you can publish app using API level 24
+  to Google Play, in alpha, beta, and production release channels.
+</p>
+
+
+<!--
+
+<h4 id="api-changes">Feature and API changes</h4>
+
+<ul>
+  <li>TODO</li>
+</ul>
+
+-->
+
+<h3 id="ki">Known Issues</h3>
+
+<h4>Stability</h4>
+
+<ul>
+  <li>Users may encounter system instability (such as kernel panics and
+  crashes).
+  </li>
+</ul>
+
+<!-- TBA, if any
+<h4>Device-specific issues</h4>
+
+<dl>
+  <dt>
+    <strong>Device Name</strong>
+  </dt>
+
+  <dd>
+    Issue 1
+  </dd>
+
+  <dd>
+    Issue 2
+  </dd>
+</dl>
+
+-->
+<!-- TBA, if any
+
+<h4 id="dp5-fixes">Fixes for issues reported by developers</h4>
+
+<p>
+  A number of issues reported by developers have been fixed, including:
+</p>
+
+<ul>
+  <li>TODO</li>
+</ul>
+
+-->
+
+
+
+<!-- DP4 Release Notes Archive -->
 
 <h2 id="dp4">Developer Preview 4</h2>
 
@@ -280,7 +397,7 @@ page.image=images/cards/card-n-support_2x.png
   </li>
 </ul>
 
-<h4 id="">Android Auto</h4>
+<h4>Android Auto</h4>
 
 <p>
   The version of Google Maps included in Developer Preview 4 (9.30) crashes
