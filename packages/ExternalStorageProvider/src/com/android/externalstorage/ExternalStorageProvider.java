@@ -491,6 +491,8 @@ public class ExternalStorageProvider extends DocumentsProvider {
     @Override
     public void deleteDocument(String docId) throws FileNotFoundException {
         final File file = getFileForDocId(docId);
+        final File visibleFile = getFileForDocId(docId, true);
+
         final boolean isDirectory = file.isDirectory();
         if (isDirectory) {
             FileUtils.deleteContents(file);
@@ -499,7 +501,6 @@ public class ExternalStorageProvider extends DocumentsProvider {
             throw new IllegalStateException("Failed to delete " + file);
         }
 
-        final File visibleFile = getFileForDocId(docId, true);
         if (visibleFile != null) {
             final ContentResolver resolver = getContext().getContentResolver();
             final Uri externalUri = MediaStore.Files.getContentUri("external");
