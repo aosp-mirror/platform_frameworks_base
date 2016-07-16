@@ -629,7 +629,7 @@ class WindowStateAnimator {
         boolean result = false;
         final AppWindowToken atoken = mWin.mAppToken;
         if (atoken == null || atoken.allDrawn || mWin.mAttrs.type == TYPE_APPLICATION_STARTING) {
-            result = performShowLocked();
+            result = mWin.performShowLocked();
         }
         return result;
     }
@@ -852,15 +852,12 @@ class WindowStateAnimator {
             return;
         }
 
-        int i = mWin.mChildWindows.size();
         // When destroying a surface we want to make sure child windows are hidden. If we are
         // preserving the surface until redraw though we intend to swap it out with another surface
         // for resizing. In this case the window always remains visible to the user and the child
         // windows should likewise remain visible.
-        while (!mDestroyPreservedSurfaceUponRedraw && i > 0) {
-            i--;
-            WindowState c = mWin.mChildWindows.get(i);
-            c.mAttachedHidden = true;
+        if (!mDestroyPreservedSurfaceUponRedraw) {
+            mWin.mHidden = true;
         }
 
         try {
@@ -1546,7 +1543,7 @@ class WindowStateAnimator {
         if (mIsWallpaper && !mWin.mWallpaperVisible) {
             // Wallpaper is no longer visible and there is no wp target => hide it.
             hide("prepareSurfaceLocked");
-        } else if (w.mAttachedHidden || !w.isOnScreen()) {
+        } else if (w.isParentWindowHidden() || !w.isOnScreen()) {
             hide("prepareSurfaceLocked");
             mWallpaperControllerLocked.hideWallpapers(w);
 
@@ -1701,90 +1698,6 @@ class WindowStateAnimator {
             return;
         }
         mSurfaceController.setSecure(isSecure);
-    }
-
-    // This must be called while inside a transaction.
-    boolean performShowLocked() {
-        if (mWin.isHiddenFromUserLocked()) {
-            if (DEBUG_VISIBILITY) Slog.w(TAG, "hiding " + mWin + ", belonging to " + mWin.mOwnerUid);
-            mWin.hideLw(false);
-            return false;
-        }
-        if (DEBUG_VISIBILITY || (DEBUG_STARTING_WINDOW &&
-                mWin.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING)) {
-            Slog.v(TAG, "performShow on " + this
-                    + ": mDrawState=" + drawStateToString() + " readyForDisplay="
-                    + mWin.isReadyForDisplayIgnoringKeyguard()
-                    + " starting=" + (mWin.mAttrs.type == TYPE_APPLICATION_STARTING)
-                    + " during animation: policyVis=" + mWin.mPolicyVisibility
-                    + " attHidden=" + mWin.mAttachedHidden
-                    + " tok.hiddenRequested="
-                    + (mWin.mAppToken != null ? mWin.mAppToken.hiddenRequested : false)
-                    + " tok.hidden="
-                    + (mWin.mAppToken != null ? mWin.mAppToken.hidden : false)
-                    + " animating=" + mAnimating
-                    + " tok animating="
-                    + (mAppAnimator != null ? mAppAnimator.animating : false) + " Callers="
-                    + Debug.getCallers(3));
-        }
-        if (mDrawState == READY_TO_SHOW && mWin.isReadyForDisplayIgnoringKeyguard()) {
-            if (DEBUG_VISIBILITY || (DEBUG_STARTING_WINDOW &&
-                    mWin.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING)) {
-                Slog.v(TAG, "Showing " + this
-                        + " during animation: policyVis=" + mWin.mPolicyVisibility
-                        + " attHidden=" + mWin.mAttachedHidden
-                        + " tok.hiddenRequested="
-                        + (mWin.mAppToken != null ? mWin.mAppToken.hiddenRequested : false)
-                        + " tok.hidden="
-                        + (mWin.mAppToken != null ? mWin.mAppToken.hidden : false)
-                        + " animating=" + mAnimating
-                        + " tok animating="
-                        + (mAppAnimator != null ? mAppAnimator.animating : false));
-            }
-
-            mService.enableScreenIfNeededLocked();
-
-            applyEnterAnimationLocked();
-
-            // Force the show in the next prepareSurfaceLocked() call.
-            mLastAlpha = -1;
-            if (DEBUG_SURFACE_TRACE || DEBUG_ANIM)
-                Slog.v(TAG, "performShowLocked: mDrawState=HAS_DRAWN in " + mWin);
-            mDrawState = HAS_DRAWN;
-            mService.scheduleAnimationLocked();
-
-            int i = mWin.mChildWindows.size();
-            while (i > 0) {
-                i--;
-                WindowState c = mWin.mChildWindows.get(i);
-                if (c.mAttachedHidden) {
-                    c.mAttachedHidden = false;
-                    if (c.mWinAnimator.mSurfaceController != null) {
-                        c.mWinAnimator.performShowLocked();
-                        // It hadn't been shown, which means layout not
-                        // performed on it, so now we want to make sure to
-                        // do a layout.  If called from within the transaction
-                        // loop, this will cause it to restart with a new
-                        // layout.
-                        final DisplayContent displayContent = c.getDisplayContent();
-                        if (displayContent != null) {
-                            displayContent.layoutNeeded = true;
-                        }
-                    }
-                }
-            }
-
-            if (mWin.mAttrs.type != TYPE_APPLICATION_STARTING && mWin.mAppToken != null) {
-                mWin.mAppToken.onFirstWindowDrawn(mWin, this);
-            }
-
-            if (mWin.mAttrs.type == TYPE_INPUT_METHOD) {
-                mWin.mDisplayContent.mDividerControllerLocked.resetImeHideRequested();
-            }
-
-            return true;
-        }
-        return false;
     }
 
     /**

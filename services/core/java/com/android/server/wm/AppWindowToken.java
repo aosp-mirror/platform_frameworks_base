@@ -26,7 +26,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.server.wm.WindowManagerService.WINDOW_REPLACEMENT_TIMEOUT_DURATION;
 import static com.android.server.wm.WindowManagerService.H.NOTIFY_ACTIVITY_DRAWN;
 
 import com.android.server.input.InputApplicationHandle;
@@ -225,7 +224,7 @@ class AppWindowToken extends WindowToken {
                             win.mWinAnimator.mSurfaceController
                             + " pv=" + win.mPolicyVisibility
                             + " mDrawState=" + win.mWinAnimator.mDrawState
-                            + " ah=" + win.mAttachedHidden
+                            + " ph=" + win.isParentWindowHidden()
                             + " th="
                             + (win.mAppToken != null
                                     ? win.mAppToken.hiddenRequested : false)

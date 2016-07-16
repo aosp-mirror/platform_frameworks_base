@@ -1464,7 +1464,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             + " viewVis=" + w.mViewVisibility
                             + " policyVis=" + w.mPolicyVisibility
                             + " policyVisAfterAnim=" + w.mPolicyVisibilityAfterAnim
-                            + " attachHid=" + w.mAttachedHidden
+                            + " parentHidden=" + w.isParentWindowHidden()
                             + " exiting=" + w.mAnimatingExit + " destroying=" + w.mDestroying);
                     if (w.mAppToken != null) {
                         Slog.i(TAG_WM, "  mAppToken.hiddenRequested=" + w.mAppToken.hiddenRequested);

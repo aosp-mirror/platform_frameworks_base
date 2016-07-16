@@ -18,7 +18,6 @@ package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
@@ -353,7 +352,7 @@ public class WindowAnimator {
                             + " hasSurface=" + win.mHasSurface
                             + " policyVis=" + win.mPolicyVisibility
                             + " destroying=" + win.mDestroying
-                            + " attHidden=" + win.mAttachedHidden
+                            + " parentHidden=" + win.isParentWindowHidden()
                             + " vis=" + win.mViewVisibility
                             + " hidden=" + win.mRootToken.hidden
                             + " anim=" + win.mWinAnimator.mAnimation);
@@ -450,7 +449,7 @@ public class WindowAnimator {
             final AppWindowToken atoken = win.mAppToken;
             if (winAnimator.mDrawState == READY_TO_SHOW) {
                 if (atoken == null || atoken.allDrawn) {
-                    if (winAnimator.performShowLocked()) {
+                    if (win.performShowLocked()) {
                         setPendingLayoutChanges(displayId,
                                 WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM);
                         if (DEBUG_LAYOUT_REPEATS) {

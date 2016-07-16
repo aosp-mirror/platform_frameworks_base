@@ -47,6 +47,22 @@ public class WindowStateTests extends AndroidTestCase {
         mWindowToken = new WindowToken(mWm, null, 0, false);
     }
 
+    public void testIsParentWindowHidden() throws Exception {
+        final WindowState parentWindow = createWindow(null);
+        final WindowState child1 = createWindow(parentWindow);
+        final WindowState child2 = createWindow(parentWindow);
+
+        assertFalse(parentWindow.mHidden);
+        assertFalse(parentWindow.isParentWindowHidden());
+        assertFalse(child1.isParentWindowHidden());
+        assertFalse(child2.isParentWindowHidden());
+
+        parentWindow.mHidden = true;
+        assertFalse(parentWindow.isParentWindowHidden());
+        assertTrue(child1.isParentWindowHidden());
+        assertTrue(child2.isParentWindowHidden());
+    }
+
     private WindowState createWindow(WindowState parent) {
         final int type = (parent == null) ? TYPE_APPLICATION : FIRST_SUB_WINDOW;
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(type);
