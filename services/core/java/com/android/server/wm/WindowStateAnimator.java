@@ -24,7 +24,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static com.android.server.wm.AppWindowAnimator.sDummyAnimation;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_FREEFORM;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYERS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEATS;
@@ -53,7 +52,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
 import android.os.Debug;
-import android.os.RemoteException;
 import android.os.Trace;
 import android.util.Slog;
 import android.view.DisplayInfo;
@@ -102,7 +100,7 @@ class WindowStateAnimator {
     // Unchanging local convenience fields.
     final WindowManagerService mService;
     final WindowState mWin;
-    final WindowStateAnimator mAttachedWinAnimator;
+    private final WindowStateAnimator mParentWinAnimator;
     final WindowAnimator mAnimator;
     AppWindowAnimator mAppAnimator;
     final Session mSession;
@@ -260,8 +258,7 @@ class WindowStateAnimator {
         }
 
         mWin = win;
-        mAttachedWinAnimator = !win.isChildWindow()
-                ? null : win.mParentWindow.mWinAnimator;
+        mParentWinAnimator = !win.isChildWindow() ? null : win.mParentWindow.mWinAnimator;
         mAppAnimator = win.mAppToken == null ? null : win.mAppToken.mAppAnimator;
         mSession = win.mSession;
         mAttrType = win.mAttrs.type;
@@ -309,7 +306,7 @@ class WindowStateAnimator {
      */
     boolean isAnimationSet() {
         return mAnimation != null
-                || (mAttachedWinAnimator != null && mAttachedWinAnimator.mAnimation != null)
+                || (mParentWinAnimator != null && mParentWinAnimator.mAnimation != null)
                 || (mAppAnimator != null && mAppAnimator.isAnimating());
     }
 
@@ -490,7 +487,7 @@ class WindowStateAnimator {
             }
         }
 
-        finishExit();
+        mWin.onExitAnimationDone();
         final int displayId = mWin.getDisplayId();
         mAnimator.setPendingLayoutChanges(displayId, WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM);
         if (DEBUG_LAYOUT_REPEATS)
@@ -502,80 +499,6 @@ class WindowStateAnimator {
         }
 
         return false;
-    }
-
-    void finishExit() {
-        if (DEBUG_ANIM) Slog.v(
-                TAG, "finishExit in " + this
-                + ": exiting=" + mWin.mAnimatingExit
-                + " remove=" + mWin.mRemoveOnExit
-                + " windowAnimating=" + isWindowAnimationSet());
-
-        if (!mWin.mChildWindows.isEmpty()) {
-            // Copying to a different list as multiple children can be removed.
-            final WindowList childWindows = new WindowList(mWin.mChildWindows);
-            for (int i = childWindows.size() - 1; i >= 0; i--) {
-                childWindows.get(i).mWinAnimator.finishExit();
-            }
-        }
-
-        if (mEnteringAnimation) {
-            mEnteringAnimation = false;
-            mService.requestTraversal();
-            // System windows don't have an activity and an app token as a result, but need a way
-            // to be informed about their entrance animation end.
-            if (mWin.mAppToken == null) {
-                try {
-                    mWin.mClient.dispatchWindowShown();
-                } catch (RemoteException e) {
-                }
-            }
-        }
-
-        if (!isWindowAnimationSet()) {
-            //TODO (multidisplay): Accessibility is supported only for the default display.
-            if (mService.mAccessibilityController != null
-                    && mWin.getDisplayId() == DEFAULT_DISPLAY) {
-                mService.mAccessibilityController.onSomeWindowResizedOrMovedLocked();
-            }
-        }
-
-        if (!mWin.mAnimatingExit) {
-            return;
-        }
-
-        if (isWindowAnimationSet()) {
-            return;
-        }
-
-        if (WindowManagerService.localLOGV || DEBUG_ADD_REMOVE) Slog.v(TAG,
-                "Exit animation finished in " + this + ": remove=" + mWin.mRemoveOnExit);
-
-
-        mWin.mDestroying = true;
-
-        final boolean hasSurface = hasSurface();
-        if (hasSurface) {
-            hide("finishExit");
-        }
-
-        // If we have an app token, we ask it to destroy the surface for us,
-        // so that it can take care to ensure the activity has actually stopped
-        // and the surface is not still in use. Otherwise we add the service to
-        // mDestroySurface and allow it to be processed in our next transaction.
-        if (mWin.mAppToken != null) {
-            mWin.mAppToken.destroySurfaces();
-        } else {
-            if (hasSurface) {
-                mService.mDestroySurface.add(mWin);
-            }
-            if (mWin.mRemoveOnExit) {
-                mService.mPendingRemove.add(mWin);
-                mWin.mRemoveOnExit = false;
-            }
-        }
-        mWin.mAnimatingExit = false;
-        mWallpaperControllerLocked.hideWallpapers(mWin);
     }
 
     void hide(String reason) {
@@ -925,8 +848,8 @@ class WindowStateAnimator {
     void computeShownFrameLocked() {
         final boolean selfTransformation = mHasLocalTransformation;
         Transformation attachedTransformation =
-                (mAttachedWinAnimator != null && mAttachedWinAnimator.mHasLocalTransformation)
-                ? mAttachedWinAnimator.mTransformation : null;
+                (mParentWinAnimator != null && mParentWinAnimator.mHasLocalTransformation)
+                ? mParentWinAnimator.mTransformation : null;
         Transformation appTransformation = (mAppAnimator != null && mAppAnimator.hasTransformation)
                 ? mAppAnimator.transformation : null;
 

@@ -49,6 +49,7 @@ import android.view.InputEvent;
 import android.view.InputEventReceiver;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.WindowInfo;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicy;
 
@@ -61,6 +62,7 @@ import static android.app.ActivityManager.StackId;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_CONTENT;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
@@ -100,6 +102,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYERS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_POWER;
@@ -107,6 +110,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_RESIZE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WINDOW;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SURFACE_TRACE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowStateAnimator.COMMIT_DRAW_PENDING;
@@ -157,7 +161,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     final WindowManager.LayoutParams mAttrs = new WindowManager.LayoutParams();
     final DeathRecipient mDeathRecipient;
     final WindowState mParentWindow;
-    final WindowList mChildWindows = new WindowList();
+    private final WindowList mChildWindows = new WindowList();
     final int mBaseLayer;
     final int mSubLayer;
     final boolean mLayoutAttached;
@@ -1454,6 +1458,31 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     void removeLocked() {
+        if (mRemoved) {
+            // Nothing to do.
+            if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "WS.removeLocked: " + this + " Already removed...");
+            return;
+        }
+
+        for (int i = mChildWindows.size() - 1; i >= 0; i--) {
+            final WindowState child = mChildWindows.get(i);
+            Slog.w(TAG_WM, "Force-removing child win " + child + " from container " + this);
+            child.removeLocked();
+        }
+
+        mRemoved = true;
+
+        if (mService.mInputMethodTarget == this) {
+            mService.moveInputMethodWindowsIfNeededLocked(false);
+        }
+
+        final int type = mAttrs.type;
+        if (WindowManagerService.excludeWindowTypeFromTapOutTask(type)) {
+            final DisplayContent displaycontent = getDisplayContent();
+            displaycontent.mTapExcludedWindows.remove(this);
+        }
+        mPolicy.removeWindowLw(this);
+
         disposeInputChannel();
 
         if (isChildWindow()) {
@@ -1469,6 +1498,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             // Ignore if it has already been removed (usually because
             // we are doing this as part of processing a death note.)
         }
+
+        mService.postWindowRemoveCleanupLocked(this);
     }
 
     void setHasSurface(boolean hasSurface) {
@@ -1630,7 +1661,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 win.mReplacingWindow = null;
                 mSkipEnterAnimationForSeamlessReplacement = false;
                 if (win.mAnimatingExit || !animateReplacingWindow) {
-                    mService.removeWindowInnerLocked(win);
+                    win.removeLocked();
                 }
             }
         }
@@ -2830,6 +2861,24 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return mParentWindow != null;
     }
 
+    boolean hasChild(WindowState child) {
+        for (int i = mChildWindows.size() - 1; i >= 0; --i) {
+            if (mChildWindows.get(i) == child) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns the bottom child window in regards to z-order of this window or null if no children.
+     */
+    WindowState getBottomChild() {
+        // Child windows are z-ordered based on sub-layer using {@link #sWindowSubLayerComparator}
+        // and the child with the lowest z-order will be at the head of the list.
+        return mChildWindows.isEmpty() ? null : mChildWindows.get(0);
+    }
+
     boolean layoutInParentFrame() {
         return isChildWindow() && (mAttrs.privateFlags & PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME) != 0;
     }
@@ -2982,5 +3031,171 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     + (mWinAnimator.mAppAnimator != null ? mWinAnimator.mAppAnimator.animating : false)
                     + " Callers=" + Debug.getCallers(4));
         }
+    }
+
+    WindowInfo getWindowInfo() {
+        WindowInfo windowInfo = WindowInfo.obtain();
+        windowInfo.type = mAttrs.type;
+        windowInfo.layer = mLayer;
+        windowInfo.token = mClient.asBinder();
+        windowInfo.title = mAttrs.accessibilityTitle;
+        windowInfo.accessibilityIdOfAnchor = mAttrs.accessibilityIdOfAnchor;
+        windowInfo.focused = isFocused();
+
+        if (isChildWindow()) {
+            windowInfo.parentToken = mParentWindow.mClient.asBinder();
+        }
+
+        final int childCount = mChildWindows.size();
+        if (childCount > 0) {
+            if (windowInfo.childTokens == null) {
+                windowInfo.childTokens = new ArrayList<>();
+            }
+            for (int j = 0; j < childCount; j++) {
+                final WindowState child = mChildWindows.get(j);
+                windowInfo.childTokens.add(child.mClient.asBinder());
+            }
+        }
+
+        return windowInfo;
+    }
+
+    void adjustAnimLayer(int adj) {
+        mWinAnimator.mAnimLayer = mLayer + adj;
+        if (DEBUG_LAYERS) Slog.v(TAG_WM, "win=" + this + " anim layer: " + mWinAnimator.mAnimLayer);
+        for (int i = mChildWindows.size() - 1; i >= 0; i--) {
+            final WindowState child = mChildWindows.get(i);
+            child.adjustAnimLayer(adj);
+        }
+    }
+
+    // TODO: come-up with a better name for this method that represents what it does.
+    // Or, it is probably not going to matter anyways if we are successful in getting rid of
+    // the WindowList concept.
+    int reAddWindowLocked(int index) {
+        final WindowList windows = getWindowList();
+        // Adding child windows relies on child windows being ordered by mSubLayer using
+        // {@link #sWindowSubLayerComparator}.
+        final int childCount = mChildWindows.size();
+        boolean winAdded = false;
+        for (int j = 0; j < childCount; j++) {
+            WindowState child = mChildWindows.get(j);
+            if (!winAdded && child.mSubLayer >= 0) {
+                if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG_WM,
+                        "Re-adding child window at " + index + ": " + child);
+                mRebuilding = false;
+                windows.add(index, this);
+                index++;
+                winAdded = true;
+            }
+            if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG_WM, "Re-adding window at " + index + ": " + child);
+            child.mRebuilding = false;
+            windows.add(index, child);
+            index++;
+        }
+        if (!winAdded) {
+            if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG_WM, "Re-adding window at " + index + ": " + this);
+            mRebuilding = false;
+            windows.add(index, this);
+            index++;
+        }
+        mService.mWindowsChanged = true;
+        return index;
+    }
+
+    int removeFromWindowList(int interestingPos) {
+        final WindowList windows = getWindowList();
+        int wpos = windows.indexOf(this);
+        if (wpos < 0) {
+            return interestingPos;
+        }
+
+        if (wpos < interestingPos) interestingPos--;
+        if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG_WM, "Temp removing at " + wpos + ": " + this);
+        windows.remove(wpos);
+        mService.mWindowsChanged = true;
+        int childCount = mChildWindows.size();
+        while (childCount > 0) {
+            childCount--;
+            final WindowState cw = mChildWindows.get(childCount);
+            int cpos = windows.indexOf(cw);
+            if (cpos >= 0) {
+                if (cpos < interestingPos) interestingPos--;
+                if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG_WM,
+                        "Temp removing child at " + cpos + ": " + cw);
+                windows.remove(cpos);
+            }
+        }
+        return interestingPos;
+    }
+
+    void onExitAnimationDone() {
+        if (DEBUG_ANIM) Slog.v(TAG, "onExitAnimationDone in " + this
+                + ": exiting=" + mAnimatingExit + " remove=" + mRemoveOnExit
+                + " windowAnimating=" + mWinAnimator.isWindowAnimationSet());
+
+        if (!mChildWindows.isEmpty()) {
+            // Copying to a different list as multiple children can be removed.
+            final WindowList childWindows = new WindowList(mChildWindows);
+            for (int i = childWindows.size() - 1; i >= 0; i--) {
+                childWindows.get(i).onExitAnimationDone();
+            }
+        }
+
+        if (mWinAnimator.mEnteringAnimation) {
+            mWinAnimator.mEnteringAnimation = false;
+            mService.requestTraversal();
+            // System windows don't have an activity and an app token as a result, but need a way
+            // to be informed about their entrance animation end.
+            if (mAppToken == null) {
+                try {
+                    mClient.dispatchWindowShown();
+                } catch (RemoteException e) {
+                }
+            }
+        }
+
+        if (!mWinAnimator.isWindowAnimationSet()) {
+            //TODO (multidisplay): Accessibility is supported only for the default display.
+            if (mService.mAccessibilityController != null && getDisplayId() == DEFAULT_DISPLAY) {
+                mService.mAccessibilityController.onSomeWindowResizedOrMovedLocked();
+            }
+        }
+
+        if (!mAnimatingExit) {
+            return;
+        }
+
+        if (mWinAnimator.isWindowAnimationSet()) {
+            return;
+        }
+
+        if (WindowManagerService.localLOGV || DEBUG_ADD_REMOVE) Slog.v(TAG,
+                "Exit animation finished in " + this + ": remove=" + mRemoveOnExit);
+
+        mDestroying = true;
+
+        final boolean hasSurface = mWinAnimator.hasSurface();
+        if (hasSurface) {
+            mWinAnimator.hide("onExitAnimationDone");
+        }
+
+        // If we have an app token, we ask it to destroy the surface for us, so that it can take
+        // care to ensure the activity has actually stopped and the surface is not still in use.
+        // Otherwise we add the service to mDestroySurface and allow it to be processed in our next
+        // transaction.
+        if (mAppToken != null) {
+            mAppToken.destroySurfaces();
+        } else {
+            if (hasSurface) {
+                mService.mDestroySurface.add(this);
+            }
+            if (mRemoveOnExit) {
+                mService.mPendingRemove.add(this);
+                mRemoveOnExit = false;
+            }
+        }
+        mAnimatingExit = false;
+        mService.mWallpaperControllerLocked.hideWallpapers(this);
     }
 }

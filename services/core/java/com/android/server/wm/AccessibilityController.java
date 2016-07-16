@@ -1206,33 +1206,10 @@ final class AccessibilityController {
                     (int) windowFrame.right, (int) windowFrame.bottom);
         }
 
-        private static WindowInfo obtainPopulatedWindowInfo(WindowState windowState,
-                Rect boundsInScreen) {
-            WindowInfo window = WindowInfo.obtain();
-            window.type = windowState.mAttrs.type;
-            window.layer = windowState.mLayer;
-            window.token = windowState.mClient.asBinder();
-            window.title = windowState.mAttrs.accessibilityTitle;
-            window.accessibilityIdOfAnchor = windowState.mAttrs.accessibilityIdOfAnchor;
-
-            if (windowState.isChildWindow()) {
-                window.parentToken = windowState.mParentWindow.mClient.asBinder();
-            }
-
-            window.focused = windowState.isFocused();
+        private static WindowInfo obtainPopulatedWindowInfo(
+                WindowState windowState, Rect boundsInScreen) {
+            final WindowInfo window = windowState.getWindowInfo();
             window.boundsInScreen.set(boundsInScreen);
-
-            final int childCount = windowState.mChildWindows.size();
-            if (childCount > 0) {
-                if (window.childTokens == null) {
-                    window.childTokens = new ArrayList<IBinder>();
-                }
-                for (int j = 0; j < childCount; j++) {
-                    WindowState child = windowState.mChildWindows.get(j);
-                    window.childTokens.add(child.mClient.asBinder());
-                }
-            }
-
             return window;
         }
 

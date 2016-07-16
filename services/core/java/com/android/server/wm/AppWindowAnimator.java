@@ -424,7 +424,7 @@ public class AppWindowAnimator {
 
         final int numAllAppWinAnimators = mAllAppWinAnimators.size();
         for (int i = 0; i < numAllAppWinAnimators; i++) {
-            mAllAppWinAnimators.get(i).finishExit();
+            mAllAppWinAnimators.get(i).mWin.onExitAnimationDone();
         }
         mService.mAppTransition.notifyAppTransitionFinishedLocked(mAppToken.token);
         return false;
