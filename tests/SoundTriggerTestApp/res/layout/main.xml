@@ -87,6 +87,7 @@
             android:text="@string/capture"
             android:id="@+id/caputre_check_box"
             android:layout_gravity="center_horizontal"
+            android:onClick="onCaptureAudioCheckboxClicked"
             android:padding="20dp" />
 
         <Button
@@ -94,6 +95,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/play_capture"
+            android:onClick="onPlayCapturedAudioButtonClicked"
             android:padding="20dp"
             android:enabled="false" />
     </LinearLayout>
