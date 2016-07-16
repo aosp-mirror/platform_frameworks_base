@@ -59,6 +59,8 @@ public class NekoLand extends Activity implements PrefsListener {
     public static boolean DEBUG = false;
     public static boolean DEBUG_NOTIFICATIONS = false;
 
+    private static final int EXPORT_BITMAP_SIZE = 600;
+
     private static final int STORAGE_PERM_REQUEST = 123;
 
     private static boolean CAT_GEN = false;
@@ -181,6 +183,31 @@ public class NekoLand extends Activity implements PrefsListener {
                     .inflate(R.layout.cat_view, parent, false));
         }
 
+        private void setContextGroupVisible(final CatHolder holder, boolean vis) {
+            final View group = holder.contextGroup;
+            if (vis && group.getVisibility() != View.VISIBLE) {
+                group.setAlpha(0);
+                group.setVisibility(View.VISIBLE);
+                group.animate().alpha(1.0f).setDuration(333);
+                Runnable hideAction = new Runnable() {
+                    @Override
+                    public void run() {
+                        setContextGroupVisible(holder, false);
+                    }
+                };
+                group.setTag(hideAction);
+                group.postDelayed(hideAction, 5000);
+            } else if (!vis && group.getVisibility() == View.VISIBLE) {
+                group.removeCallbacks((Runnable) group.getTag());
+                group.animate().alpha(0f).setDuration(250).withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        group.setVisibility(View.INVISIBLE);
+                    }
+                });
+            }
+        }
+
         @Override
         public void onBindViewHolder(final CatHolder holder, int position) {
             Context context = holder.itemView.getContext();
@@ -195,30 +222,30 @@ public class NekoLand extends Activity implements PrefsListener {
             holder.itemView.setOnLongClickListener(new OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
-                    holder.contextGroup.removeCallbacks((Runnable) holder.contextGroup.getTag());
-                    holder.contextGroup.setVisibility(View.VISIBLE);
-                    Runnable hideAction = new Runnable() {
-                        @Override
-                        public void run() {
-                            holder.contextGroup.setVisibility(View.INVISIBLE);
-                        }
-                    };
-                    holder.contextGroup.setTag(hideAction);
-                    holder.contextGroup.postDelayed(hideAction, 5000);
+                    setContextGroupVisible(holder, true);
                     return true;
                 }
             });
             holder.delete.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    holder.contextGroup.setVisibility(View.INVISIBLE);
-                    holder.contextGroup.removeCallbacks((Runnable) holder.contextGroup.getTag());
-                    onCatRemove(mCats[holder.getAdapterPosition()]);
+                    setContextGroupVisible(holder, false);
+                    new AlertDialog.Builder(NekoLand.this)
+                        .setTitle(getString(R.string.confirm_delete, mCats[position].getName()))
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                onCatRemove(mCats[holder.getAdapterPosition()]);
+                            }
+                        })
+                        .show();
                 }
             });
             holder.share.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    setContextGroupVisible(holder, false);
                     Cat cat = mCats[holder.getAdapterPosition()];
                     if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                             != PackageManager.PERMISSION_GRANTED) {
@@ -248,7 +275,7 @@ public class NekoLand extends Activity implements PrefsListener {
             return;
         }
         final File png = new File(dir, cat.getName().replaceAll("[/ #:]+", "_") + ".png");
-        Bitmap bitmap = cat.createBitmap(512, 512);
+        Bitmap bitmap = cat.createBitmap(EXPORT_BITMAP_SIZE, EXPORT_BITMAP_SIZE);
         if (bitmap != null) {
             try {
                 OutputStream os = new FileOutputStream(png);
