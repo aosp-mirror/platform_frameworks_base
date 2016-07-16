@@ -952,7 +952,7 @@ public class MediaRecorder
     /* Do not change these values without updating their counterparts
      * in include/media/mediarecorder.h!
      */
-    /** Unspecified media recorder error.
+    /** Unspecified media recorder info.
      * @see android.media.MediaRecorder.OnInfoListener
      */
     public static final int MEDIA_RECORDER_INFO_UNKNOWN              = 1;
@@ -1035,22 +1035,22 @@ public class MediaRecorder
 
 
     /**
-     * Interface definition for a callback to be invoked when an error
-     * occurs while recording.
+     * Interface definition of a callback to be invoked to communicate some
+     * info and/or warning about the recording.
      */
     public interface OnInfoListener
     {
         /**
-         * Called when an error occurs while recording.
+         * Called to indicate an info or a warning during recording.
          *
-         * @param mr the MediaRecorder that encountered the error
-         * @param what    the type of error that has occurred:
+         * @param mr   the MediaRecorder the info pertains to
+         * @param what the type of info or warning that has occurred
          * <ul>
          * <li>{@link #MEDIA_RECORDER_INFO_UNKNOWN}
          * <li>{@link #MEDIA_RECORDER_INFO_MAX_DURATION_REACHED}
          * <li>{@link #MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED}
          * </ul>
-         * @param extra   an extra code, specific to the error type
+         * @param extra   an extra code, specific to the info type
          */
         void onInfo(MediaRecorder mr, int what, int extra);
     }
