@@ -65,6 +65,8 @@ struct ConfigDescription : public android::ResTable_config {
     bool operator!=(const ConfigDescription& o) const;
     bool operator>=(const ConfigDescription& o) const;
     bool operator>(const ConfigDescription& o) const;
+
+    ConfigDescription copyWithoutSdkVersion() const;
 };
 
 inline ConfigDescription::ConfigDescription() {

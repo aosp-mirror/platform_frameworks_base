@@ -783,4 +783,10 @@ void ConfigDescription::applyVersionForCompatibility(ConfigDescription* config) 
     }
 }
 
+ConfigDescription ConfigDescription::copyWithoutSdkVersion() const {
+    ConfigDescription copy = *this;
+    copy.sdkVersion = 0;
+    return copy;
+}
+
 } // namespace aapt
