@@ -27,6 +27,7 @@ page.image=images/cards/card-n-apis_2x.png
         <li><a href="#multi-locale_languages">Locales and Languages</a></li>
         <li><a href="#emoji">New Emojis</a></li>
         <li><a href="#icu4">ICU4J APIs in Android</a></li>
+        <li><a href="#webview">WebView</a></li>
         <li><a href="#gles_32">OpenGL ES 3.2 API</a></li>
         <li><a href="#android_tv_recording">Android TV Recording</a></li>
         <li><a href="#android_for_work">Android for Work</a></li>
@@ -573,7 +574,85 @@ should follow, see <a href="{@docRoot}preview/features/multilingual-support.html
   "{@docRoot}preview/features/icu4j-framework.html">ICU4J Support</a>.
 </p>
 
+<h2 id="webview">WebView</h2>
 
+<h3>Chrome + WebView, Together</h3>
+
+<p>
+  Starting with Chrome version 51 on Android N and above, the Chrome APK on your device
+  is used to provide and render Android System WebViews. This approach improves memory
+  usage on the device itself and also reduces the bandwidth required to keep
+  WebView up to date (as the standalone WebView APK will no longer be updated
+  as long as Chrome remains enabled).
+</p>
+
+<p>
+  You can choose your WebView provider by enabling Developer Options and
+  selecting <strong>WebView implementation</strong>. You can use any compatible
+  Chrome version (Dev, Beta or Stable) that is installed on your device or the
+  standalone Webview APK to act as the WebView implementation.
+</p>
+
+<h3>Multiprocess</h3>
+
+<p>
+  Starting with Chrome version 51 in Android N, WebView will run web content in a
+  separate sandboxed process when the developer option "Multiprocess WebView"
+  is enabled.
+</p>
+
+<p>
+  We're looking for feedback on compatibility and runtime performance in N
+  before enabling multiprocess WebView in a future version of Android. In this
+  version, regressions in startup time, total memory usage and software
+  rendering performance are expected.
+</p>
+
+<p>
+  If you find unexpected issues in multiprocess mode we’d like to hear about
+  them. Please get in touch with the WebView team on the <a href=
+  "https://bugs.chromium.org/p/chromium/issues/entry?template=Webview%20Bugs"
+  >Chromium bug tracker</a>.
+</p>
+
+<h3>Javascript run before page load</h3>
+<p>
+  Starting with apps targeting Android N, the Javascript context will be reset
+  when a new page is loaded. Currently, the context is carried over for the
+  first page loaded in a new WebView instance.
+</p>
+
+<p>
+  Developers looking to inject Javascript into the WebView should execute the
+  script after the page has started to load.
+</p>
+
+<h3>Geolocation on insecure origins</h3>
+
+<p>
+  Starting with apps targeting Android N, the geolocation API will only be
+  allowed on secure origins (over HTTPS.) This policy is designed to protect
+  users’ private information when they’re using an insecure connection.
+</p>
+
+<h3>Testing with WebView Beta</h3>
+
+<p>
+  WebView is updated regularly, so we recommend that you test compatibility
+  with your app frequently using WebView’s beta channel. To get started testing
+  pre-release versions of WebView on Android N, download and install either
+  Chrome Dev or Chrome Beta, and select it as the WebView implementation under
+  developer options as described above. Please report issues via the <a href=
+  "https://bugs.chromium.org/p/chromium/issues/entry?template=Webview%20Bugs">Chromium
+  bug tracker</a> so that we can fix them before a new version of WebView is
+  released.
+</p>
+
+<p>
+  If you have any other questions or issues, feel free to reach out to the
+  WebView team via our <a href=
+  "https://plus.google.com/communities/105434725573080290360">G+ community</a>.
+</p>
 
 <h2 id="gles_32">OpenGL&trade; ES 3.2 API</h2>
 
@@ -667,8 +746,9 @@ action <code>android.net.VpnService</code>. </p>
 
 <p>
   Users can also manually set Always on VPN clients that implement
-  <code>VPNService</code> methods in the primary user using
-  <strong>Settings&gt;More&gt;Vpn</strong>.
+  <code>VPNService</code> methods using
+  <strong>Settings&gt;More&gt;Vpn</strong>. The option to enable Always on VPN
+  from Settings is available only if VPN client targets API level 24.
 </p>
 
 <h3 id="custom_provisioning">Customized provisioning</h3>
