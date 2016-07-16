@@ -748,6 +748,23 @@ JavaVM::AttachCurrentThread from &lt;jni.h&gt;.
   to the trusted credentials storage via Settings UI separately, with a
   DER-encoded format under a .crt or .cer file extension.
   </li>
+
+  <li>Starting in Android N, fingerprint enrollment and storage are managed per user.
+  If a profile owner’s Device Policy Client (DPC) targets pre-N on an N device,
+  the user is still able to set fingerprint on the device, but work
+  applications cannot access device fingerprint. When the DPC targets N and
+  above, the user can set fingerprint specifically for work profile by going to
+  <strong>Settings &gt; Security &gt; Work profile security</strong>.
+  </li>
+
+  <li>A new encryption status <code>ENCRYPTION_STATUS_ACTIVE_PER_USER</code> is
+  returned by <code>DevicePolicyManager.getStorageEncryptionStatus()</code>, to
+  indicate that encryption is active and the encryption key is tied to the
+  user. The new status is only returned if DPC targets API Level 24 and above.
+  For apps targeting earlier API levels, <code>ENCRYPTION_STATUS_ACTIVE</code>
+  is returned, even if the encryption key is specific to the user or profile.
+  </li>
+
 </ul>
 
 <p>
