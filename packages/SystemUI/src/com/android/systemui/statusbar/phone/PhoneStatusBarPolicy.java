@@ -21,6 +21,8 @@ import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
 import android.app.AlarmManager.AlarmClockInfo;
 import android.app.SynchronousUserSwitchObserver;
+import android.bluetooth.BluetoothAssignedNumbers;
+import android.bluetooth.BluetoothHeadset;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -89,6 +91,7 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
     private boolean mZenVisible;
     private boolean mVolumeVisible;
     private boolean mCurrentUserSetup;
+    private Float mBluetoothBatteryLevel = null;
 
     private int mZen;
 
@@ -102,6 +105,7 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
             CastController cast, HotspotController hotspot, UserInfoController userInfoController,
             BluetoothController bluetooth, RotationLockController rotationLockController,
             DataSaverController dataSaver) {
+
         mContext = context;
         mIconController = iconController;
         mCast = cast;
@@ -140,6 +144,11 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_REMOVED);
+
+        filter.addAction(BluetoothHeadset.ACTION_VENDOR_SPECIFIC_HEADSET_EVENT);
+        filter.addCategory(BluetoothHeadset.VENDOR_SPECIFIC_HEADSET_EVENT_COMPANY_ID_CATEGORY
+            + "." + Integer.toString(BluetoothAssignedNumbers.APPLE));
+
         mContext.registerReceiver(mIntentReceiver, filter, null, mHandler);
 
         // listen for user / profile change.
@@ -311,6 +320,27 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
         updateBluetooth();
     }
 
+    private void updateBluetoothBattery(Intent intent) {
+        if (intent.hasExtra(BluetoothHeadset.EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_CMD)) {
+            String command = intent.getStringExtra(BluetoothHeadset.EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_CMD);
+            if ("+IPHONEACCEV".equals(command)) {
+                Object[] args = (Object[]) intent.getSerializableExtra(BluetoothHeadset.EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_ARGS);
+                if (args.length >= 3 && args[0] instanceof Integer && ((Integer)args[0])*2+1<=args.length) {
+                    for (int i=0;i<((Integer)args[0]);i++) {
+                        if (!(args[i*2+1] instanceof Integer) || !(args[i*2+2] instanceof Integer)) {
+                            continue;
+                        }
+                        if (args[i*2+1].equals(1)) {
+                            mBluetoothBatteryLevel = (((Integer)args[i*2+2])+1)/10.0f;
+                            updateBluetooth();
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
     private final void updateBluetooth() {
         int iconId = R.drawable.stat_sys_data_bluetooth;
         String contentDescription =
@@ -319,8 +349,24 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
         if (mBluetooth != null) {
             bluetoothEnabled = mBluetooth.isBluetoothEnabled();
             if (mBluetooth.isBluetoothConnected()) {
-                iconId = R.drawable.stat_sys_data_bluetooth_connected;
+                if (mBluetoothBatteryLevel == null) {
+                    iconId = R.drawable.stat_sys_data_bluetooth_connected;
+                } else {
+                    if (mBluetoothBatteryLevel<=0.15f) {
+                        iconId = R.drawable.stat_sys_data_bluetooth_connected_battery_1;
+                    } else if (mBluetoothBatteryLevel<=0.375f) {
+                        iconId = R.drawable.stat_sys_data_bluetooth_connected_battery_2;
+                    } else if (mBluetoothBatteryLevel<=0.625f) {
+                        iconId = R.drawable.stat_sys_data_bluetooth_connected_battery_3;
+                    } else if (mBluetoothBatteryLevel<=0.85f) {
+                        iconId = R.drawable.stat_sys_data_bluetooth_connected_battery_4;
+                    } else {
+                        iconId = R.drawable.stat_sys_data_bluetooth_connected_battery_5;
+                    }
+                }
                 contentDescription = mContext.getString(R.string.accessibility_bluetooth_connected);
+            } else {
+                mBluetoothBatteryLevel = null;
             }
         }
 
@@ -545,6 +591,8 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
                 updateManagedProfile();
             } else if (action.equals(AudioManager.ACTION_HEADSET_PLUG)) {
                 updateHeadsetPlug(intent);
+            } else if (action.equals(BluetoothHeadset.ACTION_VENDOR_SPECIFIC_HEADSET_EVENT)) {
+                updateBluetoothBattery(intent);
             }
         }
     };
