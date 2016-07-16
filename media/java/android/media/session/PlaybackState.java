@@ -45,7 +45,8 @@ public final class PlaybackState implements Parcelable {
             ACTION_SKIP_TO_PREVIOUS, ACTION_SKIP_TO_NEXT, ACTION_FAST_FORWARD, ACTION_SET_RATING,
             ACTION_SEEK_TO, ACTION_PLAY_PAUSE, ACTION_PLAY_FROM_MEDIA_ID, ACTION_PLAY_FROM_SEARCH,
             ACTION_SKIP_TO_QUEUE_ITEM, ACTION_PLAY_FROM_URI, ACTION_PREPARE,
-            ACTION_PREPARE_FROM_MEDIA_ID, ACTION_PREPARE_FROM_SEARCH, ACTION_PREPARE_FROM_URI})
+            ACTION_PREPARE_FROM_MEDIA_ID, ACTION_PREPARE_FROM_SEARCH, ACTION_PREPARE_FROM_URI,
+            ACTION_SET_REPEAT_MODE, ACTION_SET_SHUFFLE_MODE})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Actions {}
 
@@ -176,6 +177,20 @@ public final class PlaybackState implements Parcelable {
     public static final long ACTION_PREPARE_FROM_URI = 1 << 17;
 
     /**
+     * Indicates this session supports the set repeat mode command.
+     *
+     * @see Builder#setActions(long)
+     */
+    public static final long ACTION_SET_REPEAT_MODE = 1 << 18;
+
+    /**
+     * Indicates this session supports the set shuffle mode command.
+     *
+     * @see Builder#setActions(long)
+     */
+    public static final long ACTION_SET_SHUFFLE_MODE = 1 << 19;
+
+    /**
      * @hide
      */
     @IntDef({STATE_NONE, STATE_STOPPED, STATE_PAUSED, STATE_PLAYING, STATE_FAST_FORWARDING,
@@ -280,6 +295,30 @@ public final class PlaybackState implements Parcelable {
      * Use this value for the position to indicate the position is not known.
      */
     public final static long PLAYBACK_POSITION_UNKNOWN = -1;
+
+    /**
+     * @hide
+     */
+    @IntDef({REPEAT_MODE_NONE, REPEAT_MODE_ONE, REPEAT_MODE_ALL})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RepeatMode {}
+    /**
+     * Use this value with {@link MediaController.TransportControls#setRepeatMode}
+     * to indicate that the playback will be stopped at the end of the playing media list.
+     */
+    public final static int REPEAT_MODE_NONE = 0;
+
+    /**
+     * Use this value with {@link MediaController.TransportControls#setRepeatMode}
+     * to indicate that the playback of the current playing media item will be repeated.
+     */
+    public final static int REPEAT_MODE_ONE = 1;
+
+    /**
+     * Use this value with {@link MediaController.TransportControls#setRepeatMode}
+     * to indicate that the playback of the playing media list will be repeated.
+     */
+    public final static int REPEAT_MODE_ALL = 2;
 
     private final int mState;
     private final long mPosition;
@@ -427,6 +466,8 @@ public final class PlaybackState implements Parcelable {
      * <li> {@link PlaybackState#ACTION_PREPARE_FROM_MEDIA_ID}</li>
      * <li> {@link PlaybackState#ACTION_PREPARE_FROM_SEARCH}</li>
      * <li> {@link PlaybackState#ACTION_PREPARE_FROM_URI}</li>
+     * <li> {@link PlaybackState#ACTION_SET_REPEAT_MODE}</li>
+     * <li> {@link PlaybackState#ACTION_SET_SHUFFLE_MODE}</li>
      * </ul>
      */
     @Actions
@@ -961,6 +1002,8 @@ public final class PlaybackState implements Parcelable {
          * <li> {@link PlaybackState#ACTION_PREPARE_FROM_MEDIA_ID}</li>
          * <li> {@link PlaybackState#ACTION_PREPARE_FROM_SEARCH}</li>
          * <li> {@link PlaybackState#ACTION_PREPARE_FROM_URI}</li>
+         * <li> {@link PlaybackState#ACTION_SET_REPEAT_MODE}</li>
+         * <li> {@link PlaybackState#ACTION_SET_SHUFFLE_MODE}</li>
          * </ul>
          *
          * @param actions The set of actions allowed.

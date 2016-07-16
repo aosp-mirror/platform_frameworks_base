@@ -48,6 +48,14 @@ interface ISessionController {
     ParcelableVolumeInfo getVolumeAttributes();
     void adjustVolume(int direction, int flags, String packageName);
     void setVolumeTo(int value, int flags, String packageName);
+    MediaMetadata getMetadata();
+    PlaybackState getPlaybackState();
+    ParceledListSlice getQueue();
+    CharSequence getQueueTitle();
+    Bundle getExtras();
+    int getRatingType();
+    int getRepeatMode();
+    boolean getShuffleMode();
 
     // These commands are for the TransportControls
     void prepare();
@@ -67,11 +75,7 @@ interface ISessionController {
     void rewind();
     void seekTo(long pos);
     void rate(in Rating rating);
+    void repeatMode(int repeatMode);
+    void shuffleMode(boolean shuffleMode);
     void sendCustomAction(String action, in Bundle args);
-    MediaMetadata getMetadata();
-    PlaybackState getPlaybackState();
-    ParceledListSlice getQueue();
-    CharSequence getQueueTitle();
-    Bundle getExtras();
-    int getRatingType();
 }
