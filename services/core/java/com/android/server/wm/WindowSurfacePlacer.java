@@ -663,8 +663,8 @@ class WindowSurfacePlacer {
                     for (int i = windows.size() - 1; i >= 0; i--) {
                         WindowState w = windows.get(i);
                         if (w.mHasSurface) {
-                            mService.mPolicy.applyPostLayoutPolicyLw(w, w.mAttrs,
-                                    w.mParentWindow);
+                            mService.mPolicy.applyPostLayoutPolicyLw(
+                                    w, w.mAttrs, w.getParentWindow());
                         }
                     }
                     displayContent.pendingLayoutChanges |=
@@ -1040,7 +1040,7 @@ class WindowSurfacePlacer {
                     }
                     win.mLayoutNeeded = false;
                     win.prelayout();
-                    mService.mPolicy.layoutWindowLw(win, win.mParentWindow);
+                    mService.mPolicy.layoutWindowLw(win, win.getParentWindow());
                     win.mLayoutSeq = seq;
                     if (DEBUG_LAYOUT) Slog.v(TAG,
                             "  LAYOUT: mFrame=" + win.mFrame + " mContainingFrame="

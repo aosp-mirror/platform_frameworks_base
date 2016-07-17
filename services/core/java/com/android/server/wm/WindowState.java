@@ -160,7 +160,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     // modified they will need to be locked.
     final WindowManager.LayoutParams mAttrs = new WindowManager.LayoutParams();
     final DeathRecipient mDeathRecipient;
-    final WindowState mParentWindow;
+    private final WindowState mParentWindow;
     private final WindowList mChildWindows = new WindowList();
     final int mBaseLayer;
     final int mSubLayer;
@@ -340,8 +340,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      *{@link android.app.IActivityManager#resizeDockedStack}.
      */
     final Rect mInsetFrame = new Rect();
-
-    private static final Rect sTmpRect = new Rect();
 
     boolean mContentChanged;
 
@@ -619,10 +617,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mIsFloatingLayer = mIsImWindow || mIsWallpaper;
         }
 
-        WindowState appWin = this;
-        while (appWin.isChildWindow()) {
-            appWin = appWin.mParentWindow;
-        }
+        final WindowState appWin = getTopParentWindow();
         WindowToken appToken = appWin.mToken;
         while (appToken.appWindowToken == null) {
             WindowToken parent = mService.mTokenMap.get(appToken.token);
@@ -1048,11 +1043,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     @Override
     public int getBaseType() {
-        WindowState win = this;
-        while (win.isChildWindow()) {
-            win = win.mParentWindow;
-        }
-        return win.mAttrs.type;
+        return getTopParentWindow().mAttrs.type;
     }
 
     @Override
@@ -2187,11 +2178,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     boolean isHiddenFromUserLocked() {
-        // Attached windows are evaluated based on the window that they are attached to.
-        WindowState win = this;
-        while (win.isChildWindow()) {
-            win = win.mParentWindow;
-        }
+        // Child windows are evaluated based on their parent window.
+        final WindowState win = getTopParentWindow();
         if (win.mAttrs.type < WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW
                 && win.mAppToken != null && win.mAppToken.showForAllUsers) {
 
@@ -2881,6 +2869,20 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     boolean layoutInParentFrame() {
         return isChildWindow() && (mAttrs.privateFlags & PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME) != 0;
+    }
+
+    /** Returns the parent window if this is a child of another window, else null. */
+    WindowState getParentWindow() {
+        return mParentWindow;
+    }
+
+    /** Returns the topmost parent window if this is a child of another window, else this. */
+    WindowState getTopParentWindow() {
+        WindowState w = this;
+        while (w.isChildWindow()) {
+            w = w.getParentWindow();
+        }
+        return w;
     }
 
     boolean isParentWindowHidden() {

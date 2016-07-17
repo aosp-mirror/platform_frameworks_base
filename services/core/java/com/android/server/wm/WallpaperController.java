@@ -659,12 +659,13 @@ class WallpaperController {
             // AND any starting window associated with it, AND below the
             // maximum layer the policy allows for wallpapers.
             while (wallpaperTargetIndex > 0) {
-                WindowState wb = windows.get(wallpaperTargetIndex - 1);
-                if (wb.mBaseLayer < maxLayer &&
-                        wb.mParentWindow != wallpaperTarget &&
-                        (wallpaperTarget.mParentWindow == null ||
-                                wb.mParentWindow != wallpaperTarget.mParentWindow) &&
-                        (wb.mAttrs.type != TYPE_APPLICATION_STARTING
+                final WindowState wb = windows.get(wallpaperTargetIndex - 1);
+                final WindowState wbParentWindow = wb.getParentWindow();
+                final WindowState wallpaperParentWindow = wallpaperTarget.getParentWindow();
+                if (wb.mBaseLayer < maxLayer
+                        && wbParentWindow != wallpaperTarget
+                        && (wallpaperParentWindow == null || wbParentWindow != wallpaperParentWindow)
+                        && (wb.mAttrs.type != TYPE_APPLICATION_STARTING
                                 || wallpaperTarget.mToken == null
                                 || wb.mToken != wallpaperTarget.mToken)) {
                     // This window is not related to the previous one in any

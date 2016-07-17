@@ -1354,18 +1354,17 @@ public class WindowManagerService extends IWindowManager.Stub
         mWindowsChanged = true;
     }
 
-    private void addAttachedWindowToListLocked(final WindowState win, boolean addToToken) {
+    private void addChildWindowToListLocked(final WindowState win, boolean addToToken) {
         final WindowToken token = win.mToken;
         final DisplayContent displayContent = win.getDisplayContent();
         if (displayContent == null) {
             return;
         }
-        final WindowState attached = win.mParentWindow;
+        final WindowState parentWindow = win.getParentWindow();
 
         WindowList tokenWindowList = getTokenWindowsOnDisplay(token, displayContent);
 
-        // Figure out this window's ordering relative to the window
-        // it is attached to.
+        // Figure out this window's ordering relative to the parent window.
         final int NA = tokenWindowList.size();
         final int sublayer = win.mSubLayer;
         int largestSublayer = Integer.MIN_VALUE;
@@ -1379,19 +1378,17 @@ public class WindowManagerService extends IWindowManager.Stub
                 windowWithLargestSublayer = w;
             }
             if (sublayer < 0) {
-                // For negative sublayers, we go below all windows
-                // in the same sublayer.
+                // For negative sublayers, we go below all windows in the same sublayer.
                 if (wSublayer >= sublayer) {
                     if (addToToken) {
                         if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "Adding " + win + " to " + token);
                         token.windows.add(i, win);
                     }
-                    placeWindowBefore(wSublayer >= 0 ? attached : w, win);
+                    placeWindowBefore(wSublayer >= 0 ? parentWindow : w, win);
                     break;
                 }
             } else {
-                // For positive sublayers, we go above all windows
-                // in the same sublayer.
+                // For positive sublayers, we go above all windows in the same sublayer.
                 if (wSublayer > sublayer) {
                     if (addToToken) {
                         if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "Adding " + win + " to " + token);
@@ -1408,12 +1405,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 token.windows.add(win);
             }
             if (sublayer < 0) {
-                placeWindowBefore(attached, win);
+                placeWindowBefore(parentWindow, win);
             } else {
-                placeWindowAfter(largestSublayer >= 0
-                                 ? windowWithLargestSublayer
-                                 : attached,
-                                 win);
+                placeWindowAfter(
+                        largestSublayer >= 0 ? windowWithLargestSublayer : parentWindow, win);
             }
         }
     }
@@ -1434,7 +1429,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 token.windows.add(tokenWindowsPos, win);
             }
         } else {
-            addAttachedWindowToListLocked(win, addToToken);
+            addChildWindowToListLocked(win, addToToken);
         }
 
         final AppWindowToken appToken = win.mAppToken;
@@ -1685,7 +1680,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mInputMethodWindow != null) {
                 while (pos < windows.size()) {
                     WindowState wp = windows.get(pos);
-                    if (wp == mInputMethodWindow || wp.mParentWindow == mInputMethodWindow) {
+                    if (wp == mInputMethodWindow || wp.getParentWindow() == mInputMethodWindow) {
                         pos++;
                         continue;
                     }
