@@ -157,8 +157,17 @@ class IPv6TetheringInterfaceServices {
             }
         } else {
             if (mLastLocalRoutes != null && !mLastLocalRoutes.isEmpty()) {
-                // TODO: Remove only locally added network routes.
-                // mNMSwervice.removeInterfaceFromLocalNetwork(mIfName);
+                try {
+                    final int removalFailures =
+                            mNMService.removeRoutesFromLocalNetwork(mLastLocalRoutes);
+                    if (removalFailures > 0) {
+                        Log.e(TAG,
+                                String.format("Failed to remove %d IPv6 routes from local table.",
+                                removalFailures));
+                    }
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Failed to remove IPv6 routes from local table: ", e);
+                }
             }
         }
 
