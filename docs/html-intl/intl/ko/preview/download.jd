@@ -370,13 +370,6 @@ Developer Preview 마일스톤 빌드에 대한 <strong>OTA 업데이트를 자�
     </td>
   </tr>
 
-  <tr id="xperia">
-    <td>Sony Xperia Z3 <br> (D6603 및 D6653)</td>
-    <td>다운로드: <a class="external-link" href="http://support.sonymobile.com/xperiaz3/tools/xperia-companion/">Xperia Companion</a><br>
-      자세한 내용은 <a class="external-link" href="https://developer.sony.com/develop/smartphones-and-tablets/android-n-developer-preview/">Xperia Z3용 Android N Developer Preview 체험</a>을 참조하세요.
-    </td>
-  </tr>
-
 </table>
 
 <h3 id="revertDevice">기기에서 Preview 제거</h3>
