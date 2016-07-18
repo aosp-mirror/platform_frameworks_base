@@ -815,7 +815,7 @@ penyimpanan eksternal ke aplikasi Anda. Bila Anda menggunakan API baru, sistem a
 sederhana yang memperinci dengan jelas direktori apa yang aksesnya diminta
 oleh aplikasi.</p>
 
-<p>Untuk informasi selengkapnya, lihat dokumentasi pengembang 
+<p>Untuk informasi selengkapnya, lihat dokumentasi pengembang
 <a href="{@docRoot}preview/features/scoped-folder-access.html">Scoped
 Directory Access</a>.</p>
 

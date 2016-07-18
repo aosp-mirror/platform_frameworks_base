@@ -381,7 +381,7 @@ your hierarchy by switching over to an entirely different layout type.
 <p>
 For example, you may find that a {@link android.widget.TableLayout}
 provides the same functionality as a more complex layout with many
-positional dependencies. In the N release of Android, the 
+positional dependencies. In the N release of Android, the
 <a
 href="http://tools.android.com/tech-docs/layout-editor">{@code ConstraintLayout}</a> class provides similar functionality to
 {@link android.widget.RelativeLayout}, but at a significantly lower cost.

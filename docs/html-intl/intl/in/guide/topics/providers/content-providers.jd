@@ -69,7 +69,7 @@ menempelkan data atau file yang kompleks dari aplikasi Anda ke aplikasi lain.
 <p>
     Android sendiri berisi penyedia konten yang mengelola data seperti informasi audio, video, gambar, dan
  kontak pribadi. Anda bisa melihat sebagian informasi ini tercantum dalam dokumentasi
- acuan untuk paket 
+ acuan untuk paket
  <code><a href="{@docRoot}reference/android/provider/package-summary.html">android.provider</a>
     </code>. Dengan beberapa batasan, semua penyedia ini bisa diakses oleh aplikasi Android
  apa saja.

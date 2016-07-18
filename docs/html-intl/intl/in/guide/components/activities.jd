@@ -53,7 +53,7 @@ jendela lain.</p>
 <p> Sebuah aplikasi biasanya terdiri atas beberapa aktivitas yang terikat secara longgar
 satu sama lain. Biasanya, satu aktivitas dalam aplikasi ditetapkan sebagai aktivitas "utama", yang
 ditampilkan kepada pengguna saat membuka aplikasi untuk pertama kali. Tiap
-aktivitas kemudian bisa memulai aktivitas lain untuk melakukan berbagai tindakan. Tiap kali 
+aktivitas kemudian bisa memulai aktivitas lain untuk melakukan berbagai tindakan. Tiap kali
 aktivitas baru dimulai, aktivitas sebelumnya akan dihentikan, namun sistem mempertahankan aktivitas
 dalam sebuah tumpukan ("back-stack"). Bila sebuah aktivitas baru dimulai, aktivitas itu akan didorong ke atas back-stack dan
 mengambil fokus pengguna. Back-stack mematuhi mekanisme dasar tumpukan "masuk terakhir, keluar pertama",
@@ -67,7 +67,7 @@ melalui metode callback daur hidupnya.
 Ada beberapa metode callback yang mungkin diterima aktivitas, karena sebuah perubahan dalam
 statusnya&mdash;apakah sistem sedang membuatnya, menghentikannya, melanjutkannya, atau menghapuskannya&mdash;dan
 masing-masing callback memberi Anda kesempatan melakukan pekerjaan tertentu yang
-sesuai untuk perubahan status itu. Misalnya, bila dihentikan, aktivitas Anda harus melepas 
+sesuai untuk perubahan status itu. Misalnya, bila dihentikan, aktivitas Anda harus melepas
 objek besar, seperti koneksi jaringan atau database. Bila aktivitas dilanjutkan, Anda bisa
 memperoleh kembali sumber daya yang diperlukan dan melanjutkan tindakan yang terputus. Transisi status ini
 semuanya bagian dari daur hidup aktivitas.</p>
@@ -89,7 +89,7 @@ terpenting adalah:</p>
 <dl>
   <dt>{@link android.app.Activity#onCreate onCreate()}</dt>
   <dd>Anda harus mengimplementasikan metode ini. Sistem memanggilnya saat membuat
-    aktivitas Anda. Dalam implementasi, Anda harus menginisialisasi komponen-komponen esensial 
+    aktivitas Anda. Dalam implementasi, Anda harus menginisialisasi komponen-komponen esensial
 aktivitas.
     Yang terpenting, inilah tempat Anda harus memanggil {@link android.app.Activity#setContentView
     setContentView()} untuk mendefinisikan layout untuk antarmuka pengguna aktivitas.</dd>
@@ -115,7 +115,7 @@ dalam jendela aktivitas dan bisa merespons interaksi pengguna. Misalnya, sebuah 
 tombol yang mengawali suatu tindakan bila pengguna menyentuhnya.</p>
 
 <p>Android menyediakan sejumlah tampilan siap-dibuat yang bisa Anda gunakan untuk mendesain dan mengatur
-layout. "Widget" adalah tampilan yang menyediakan elemen-elemen visual (dan interaktif) untuk layar, 
+layout. "Widget" adalah tampilan yang menyediakan elemen-elemen visual (dan interaktif) untuk layar,
 misalnya tombol, bidang teks, kotak cek, atau sekadar sebuah gambar. "Layout" adalah tampilan yang diturunkan dari {@link
 android.view.ViewGroup} yang memberikan sebuah model layout unik untuk tampilan anaknya, misalnya
 layout linier, layout grid, atau layout relatif. Anda juga bisa mensubkelaskan kelas-kelas {@link android.view.View} dan
@@ -124,7 +124,7 @@ layout Anda sendiri dan menerapkannya ke layout aktivitas Anda.</p>
 
 <p>Cara paling umum untuk mendefinisikan layout dengan menggunakan tampilan adalah dengan file layout XML yang disimpan dalam
 sumber daya aplikasi Anda. Dengan cara ini, Anda bisa memelihara desain antarmuka pengguna Anda secara terpisah dari
-kode yang mendefinisikan perilaku aktivitas. Anda bisa mengatur layout sebagai UI 
+kode yang mendefinisikan perilaku aktivitas. Anda bisa mengatur layout sebagai UI
 aktivitas Anda dengan {@link android.app.Activity#setContentView(int) setContentView()}, dengan meneruskan
 ID sumber daya untuk layout itu. Akan tetapi, Anda juga bisa membuat {@link android.view.View} baru dalam
 kode aktivitas dan membuat hierarki tampilan dengan menyisipkan {@link
@@ -169,7 +169,7 @@ untuk informasi selengkapnya tentang cara mendeklarasikan aktivitas Anda dalam m
 
 <p>Elemen <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code
 &lt;activity&gt;}</a> juga bisa menetapkan berbagai filter intent&mdash;dengan menggunakan elemen <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
-&lt;intent-filter&gt;}</a> &mdash;untuk mendeklarasikan cara komponen aplikasi lain 
+&lt;intent-filter&gt;}</a> &mdash;untuk mendeklarasikan cara komponen aplikasi lain
 mengaktifkannya.</p>
 
 <p>Bila Anda membuat aplikasi baru dengan Android SDK Tools, aktivitas stub
@@ -251,7 +251,7 @@ startActivity(intent);
 
 <p>Ekstra {@link android.content.Intent#EXTRA_EMAIL} yang ditambahkan ke intent adalah sebuah larik string
   alamat email yang menjadi tujuan pengiriman email. Bila aplikasi email merespons intent ini,
- aplikasi itu akan membaca larik string yang disediakan dalam ekstra dan meletakkannya dalam bidang "to" 
+ aplikasi itu akan membaca larik string yang disediakan dalam ekstra dan meletakkannya dalam bidang "to"
   pada formulir penulisan email. Dalam situasi ini, aktivitas aplikasi email dimulai dan bila
   pengguna selesai, aktivitas Anda akan dilanjutkan.</p>
 
@@ -297,7 +297,7 @@ protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 </pre>
 
 <p>Contoh ini menunjukkan logika dasar yang harus Anda gunakan dalam metode {@link
-android.app.Activity#onActivityResult onActivityResult()} Anda untuk menangani 
+android.app.Activity#onActivityResult onActivityResult()} Anda untuk menangani
 hasil aktivitas. Syarat pertama memeriksa apakah permintaan berhasil&mdash;jika ya, maka
  {@code resultCode} akan berupa {@link android.app.Activity#RESULT_OK}&mdash;dan apakah permintaan
 yang direspons hasil ini dikenal&mdash;dalam hal ini, {@code requestCode} cocok dengan
@@ -602,19 +602,19 @@ tidak berubah. Sebagai gantinya, sistem harus membuat ulang objek {@link android
 menyusuri kembali ke aktivitas tersebut. Namun, pengguna tidak menyadari
 bahwa sistem memusnahkan aktivitas dan membuatnya kembali dan, karena itu, mungkin
 mengharapkan aktivitas untuk sama persis dengan sebelumnya. Dalam situasi ini, Anda bisa memastikan bahwa
-informasi penting tentang status aktivitas tetap terjaga dengan mengimplementasikan 
+informasi penting tentang status aktivitas tetap terjaga dengan mengimplementasikan
 metode callback tambahan yang memungkinkan Anda menyimpan informasi tentang status aktivitas: {@link
 android.app.Activity#onSaveInstanceState onSaveInstanceState()}.</p>
 
 <p>Sistem memanggil {@link android.app.Activity#onSaveInstanceState onSaveInstanceState()}
 sebelum membuat aktivitas rawan terhadap pemusnahan. Sistem meneruskan ke metode ini
-sebuah {@link android.os.Bundle} tempat Anda bisa menyimpan 
+sebuah {@link android.os.Bundle} tempat Anda bisa menyimpan
 informasi status tentang aktivitas sebagai pasangan nama-nilai, dengan menggunakan metode-metode misalnya {@link
 android.os.Bundle#putString putString()} dan {@link
 android.os.Bundle#putInt putInt()}. Kemudian, jika sistem mematikan proses aplikasi Anda
 dan pengguna menyusuri kembali ke aktivitas tersebut, sistem akan membuat kembali aktivitas dan meneruskan
 {@link android.os.Bundle} ke {@link android.app.Activity#onCreate onCreate()} maupun {@link
-android.app.Activity#onRestoreInstanceState onRestoreInstanceState()}. Dengan menggunakan salah satu 
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()}. Dengan menggunakan salah satu
 metode ini, Anda bisa mengekstrak status tersimpan dari {@link android.os.Bundle} dan memulihkan
 status aktivitas. Jika tidak ada informasi status untuk dipulihkan, maka {@link
 android.os.Bundle} yang diteruskan kepada adalah Anda null (yang akan terjadi bila aktivitas dibuat untuk
@@ -639,7 +639,7 @@ onPause()}.</p>
 <p>Akan tetapi, sekalipun Anda tidak melakukan apa-apa dan tidak mengimplementasikan {@link
 android.app.Activity#onSaveInstanceState onSaveInstanceState()}, beberapa status aktivitas
 akan dipulihkan oleh implementasi default {@link
-android.app.Activity#onSaveInstanceState onSaveInstanceState()} dalam kelas {@link android.app.Activity}. Khususnya, 
+android.app.Activity#onSaveInstanceState onSaveInstanceState()} dalam kelas {@link android.app.Activity}. Khususnya,
 implementasi default akan memanggil metode {@link
 android.view.View#onSaveInstanceState onSaveInstanceState()} yang sesuai untuk setiap {@link
 android.view.View} dalam layout, yang memungkinkan setiap tampilan untuk memberi informasi tentang dirinya
@@ -696,7 +696,7 @@ menggunakan aplikasi.</p>
 , dan bahasa). Bila terjadi perubahan demikian, Android akan membuat kembali aktivitas yang berjalan
 (sistem akan memanggil {@link android.app.Activity#onDestroy}, kemudian segera memanggil {@link
 android.app.Activity#onCreate onCreate()}). Perilaku ini
-didesain untuk membantu aplikasi Anda menyesuaikan diri dengan konfigurasi baru dengan cara memuat ulang 
+didesain untuk membantu aplikasi Anda menyesuaikan diri dengan konfigurasi baru dengan cara memuat ulang
 aplikasi Anda secara otomatis dengan sumber daya alternatif yang telah Anda sediakan (misalnya layout yang berbeda untuk
 layar orientasi dan ukuran yang berbeda).</p>
 
@@ -722,7 +722,7 @@ Perubahan Runtime</a>.</p>
 akan berhenti sementara dan berhenti sama sekali (walau tidak akan berhenti jika masih terlihat di latar belakang), saat
 aktivitas lain dibuat. Jika aktivitas-aktivitas ini berbagi data yang disimpan ke disk atau di tempat lain, Anda perlu
 memahami bahwa aktivitas pertama tidak dihentikan sepenuhnya sebelum aktivitas kedua dibuat.
-Sebagai gantinya, proses akan memulai aktivitas kedua secara tumpang tindih dengan proses penghentian 
+Sebagai gantinya, proses akan memulai aktivitas kedua secara tumpang tindih dengan proses penghentian
 aktivitas pertama.</p>
 
 <p>Urutan callback daur hidup didefinisikan dengan baik, khususnya bila kedua aktivitas berada dalam

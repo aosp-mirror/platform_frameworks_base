@@ -80,7 +80,7 @@ public class ListViewLoader extends ListActivity
             ContactsContract.Data.DISPLAY_NAME};
 
     // This is the select criteria
-    static final String SELECTION = "((" + 
+    static final String SELECTION = "((" +
             ContactsContract.Data.DISPLAY_NAME + " NOTNULL) AND (" +
             ContactsContract.Data.DISPLAY_NAME + " != '' ))";
 
@@ -105,7 +105,7 @@ public class ListViewLoader extends ListActivity
 
         // Create an empty adapter we will use to display the loaded data.
         // We pass null for the cursor, then update it in onLoadFinished()
-        mAdapter = new SimpleCursorAdapter(this, 
+        mAdapter = new SimpleCursorAdapter(this,
                 android.R.layout.simple_list_item_1, null,
                 fromColumns, toViews, 0);
         setListAdapter(mAdapter);
@@ -138,7 +138,7 @@ public class ListViewLoader extends ListActivity
         mAdapter.swapCursor(null);
     }
 
-    &#64;Override 
+    &#64;Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         // Do something when a list item is clicked
     }

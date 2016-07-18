@@ -99,7 +99,7 @@ device.</p>
 <h4>User Profile</h4>
 
 <p>Android now includes a personal profile that represents the device owner, as defined by the
-{@link android.provider.ContactsContract.Profile} table.  Social apps that maintain a user identity 
+{@link android.provider.ContactsContract.Profile} table.  Social apps that maintain a user identity
 can contribute to the user's profile data by creating a new {@link
 android.provider.ContactsContract.RawContacts} entry within the {@link
 android.provider.ContactsContract.Profile}. That is, raw contacts that represent the device user do
@@ -210,7 +210,7 @@ used by the sync adapter. The provider takes no action with items in this table 
 them when their related events are deleted.</li>
 </ul>
 
-<p>To access a user’s calendar data with the Calendar Provider, your application must request 
+<p>To access a user’s calendar data with the Calendar Provider, your application must request
 the {@link android.Manifest.permission#READ_CALENDAR} permission (for read access) and
 {@link android.Manifest.permission#WRITE_CALENDAR} (for write access).</p>
 
@@ -850,7 +850,7 @@ android.view.accessibility.AccessibilityRecord} (there may be several records at
 event).</li>
 
 <li>From either {@link android.view.accessibility.AccessibilityEvent} or an individual {@link
-android.view.accessibility.AccessibilityRecord}, you can call {@link 
+android.view.accessibility.AccessibilityRecord}, you can call {@link
 android.view.accessibility.AccessibilityRecord#getSource() getSource()} to retrieve a {@link
 android.view.accessibility.AccessibilityNodeInfo} object.
   <p>An {@link android.view.accessibility.AccessibilityNodeInfo} represents a single node

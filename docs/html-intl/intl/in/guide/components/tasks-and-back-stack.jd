@@ -29,7 +29,7 @@ parent.link=activities.html
 <ol>
   <li><a href="{@docRoot}design/patterns/navigation.html">Desain Android:
 Navigasi</a></li>
-  <li><a href="{@docRoot}guide/topics/manifest/activity-element.html">Elemen manifes 
+  <li><a href="{@docRoot}guide/topics/manifest/activity-element.html">Elemen manifes
 {@code &lt;activity&gt;}</a></li>
   <li><a href="{@docRoot}guide/components/recents.html">Layar Ikhtisar</a></li>
 </ol>
@@ -52,7 +52,7 @@ dikirim, aktivitas Anda akan dilanjutkan dan seolah-olah aktivitas email adalah 
 aktivitas mungkin dari aplikasi yang berbeda, Android akan tetap mempertahankan pengalaman pengguna yang mulus
 dengan menjalankan kedua aktivitas dalam <em>tugas</em> yang sama.</p>
 
-<p>Tugas adalah kumpulan aktivitas yang berinteraksi dengan pengguna 
+<p>Tugas adalah kumpulan aktivitas yang berinteraksi dengan pengguna
 saat melakukan pekerjaan tertentu. Aktivitas tersebut diatur dalam tumpukan (<em>back-stack</em>), dalam
 urutan membuka setiap aktivitas.</p>
 
@@ -93,7 +93,7 @@ tidak pernah disusun ulang, hanya didorong dan dikeluarkan dari back-stack&mdash
 aktivitas saat ini dan dikeluarkan bila pengguna meninggalkannya menggunakan tombol <em>Back</em>. Dengan demikian,
 back-stack
 beroperasi sebagai struktur objek "masuk terakhir, keluar pertama". Gambar 1 melukiskan perilaku
-ini dengan jangka waktu yang menunjukkan kemajuan antar aktivitas beserta 
+ini dengan jangka waktu yang menunjukkan kemajuan antar aktivitas beserta
 back-stack pada setiap waktu.</p>
 
 <img src="{@docRoot}images/fundamentals/diagram_backstack.png" alt="" />
@@ -148,7 +148,7 @@ pengguna untuk memulai aktivitas tertentu dari lebih dari satu aktivitas, instan
 aktivitas tersebut akan dibuat dan didorong ke back-stack (bukannya memunculkan instance sebelumnya dari
 aktivitas ke atas). Dengan demikian, satu aktivitas pada aplikasi Anda mungkin dibuat beberapa
 kali (bahkan dari beberapa tugas), seperti yang ditampilkan dalam gambar 3. Dengan demikian, jika pengguna mengarahkan mundur
-menggunakan tombol <em>Back</em>, setiap instance aktivitas ini akan ditampilkan dalam urutan saat 
+menggunakan tombol <em>Back</em>, setiap instance aktivitas ini akan ditampilkan dalam urutan saat
 dibuka (masing-masing
 dengan status UI sendiri). Akan tetapi, Anda bisa memodifikasi perilaku ini jika tidak ingin aktivitas
 dibuat instance-nya lebih dari sekali. Caranya dibahas di bagian selanjutnya tentang <a href="#ManagingTasks">Mengelola Tugas</a>.</p>
@@ -347,7 +347,7 @@ aktivitas apa pun yang dimulai dengan ini akan dibuka di tugas yang terpisah.</d
 selalu dibuka dalam tugasnya sendiri&mdash;dengan menetapkan mode pembuka {@code singleTask} dalam elemen<a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>.
 Ini berarti bahwa jika aplikasi Anda mengeluarkan
 intent untuk membuka Browser Android, aktivitasnya <em>tidak</em> akan ditempatkan dalam tugas
-yang sama seperti aplikasi Anda. Sebagai gantinya, tugas baru akan dimulai untuk Browser atau, jika Browser 
+yang sama seperti aplikasi Anda. Sebagai gantinya, tugas baru akan dimulai untuk Browser atau, jika Browser
 sudah memiliki tugas yang berjalan di latar belakang, tugas tersebut akan dimajukan untuk menangani intent
 baru.</p>
 
@@ -387,13 +387,13 @@ adalah:</p>
     <dd>Memulai aktivitas dalam tugas baru. Jika tugas sudah dijalankan untuk aktivitas yang sekarang
 Anda mulai, tugas tersebut akan dibawa ke latar depan dengan status terakhir yang dipulihkan dan aktivitas
 akan menerima intent baru dalam {@link android.app.Activity#onNewIntent onNewIntent()}.
-    <p>Ini menghasilkan perilaku yang sama dengan nilai {@code "singleTask"} <a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">{@code launchMode}</a> 
+    <p>Ini menghasilkan perilaku yang sama dengan nilai {@code "singleTask"} <a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">{@code launchMode}</a>
 yang dibahas di bagian sebelumnya.</p></dd>
   <dt>{@link android.content.Intent#FLAG_ACTIVITY_SINGLE_TOP}</dt>
     <dd>Jika aktivitas yang dimulai adalah aktivitas saat ini (di bagian teratas back-stack), maka
 instance yang ada akan menerima panggilan ke {@link android.app.Activity#onNewIntent onNewIntent()}
 sebagai ganti membuat instance baru aktivitas.
-    <p>Ini menghasilkan perilaku yang sama dengan nilai {@code "singleTop"} <a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">{@code launchMode}</a> 
+    <p>Ini menghasilkan perilaku yang sama dengan nilai {@code "singleTop"} <a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">{@code launchMode}</a>
 yang dibahas di bagian sebelumnya.</p></dd>
   <dt>{@link android.content.Intent#FLAG_ACTIVITY_CLEAR_TOP}</dt>
     <dd>Jika aktivitas yang dimulai sudah berjalan dalam tugas saat ini, maka sebagai
@@ -427,8 +427,8 @@ afinitas default untuk suatu aktivitas. Aktivitas yang didefinisikan dalam
 aplikasi yang berbeda bisa berbagi afinitas, atau aktivitas yang didefinisikan dalam aplikasi yang sama bisa
 diberi afinitas tugas yang berbeda.</p>
 
-<p>Anda bisa memodifikasi afinitas untuk setiap yang diberikan 
-dengan atribut <a href="{@docRoot}guide/topics/manifest/activity-element.html#aff">{@code taskAffinity}</a> 
+<p>Anda bisa memodifikasi afinitas untuk setiap yang diberikan
+dengan atribut <a href="{@docRoot}guide/topics/manifest/activity-element.html#aff">{@code taskAffinity}</a>
 elemen <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>.</p>
 
 <p>Atribut <a href="{@docRoot}guide/topics/manifest/activity-element.html#aff">{@code taskAffinity}</a>
@@ -444,7 +444,7 @@ tugas default untuk aplikasi.</p>
   {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK}
 .
 
-<p>Aktivitas baru, secara default, diluncurkan ke dalam tugas aktivitas 
+<p>Aktivitas baru, secara default, diluncurkan ke dalam tugas aktivitas
 yang disebut {@link android.app.Activity#startActivity startActivity()}. Ini didorong ke back-stack
 yang sama seperti caller.  Akan tetapi, jika intent yang diteruskan ke
 {@link android.app.Activity#startActivity startActivity()}
@@ -473,7 +473,7 @@ dimilikinya, bila tugas tersebut di bawa ke latar depan.</p>
 yang didefinisikan sebagai bagian dari aplikasi perjalanan.  Aktivitas memiliki afinitas yang sama dengan aktivitas lain dalam aplikasi
 yang sama (afinitas aplikasi default) dan aktivitas ini memungkinkan re-parenting dengan atribut ini.
 Bila salah satu aktivitas Anda memulai aktivitas laporan cuaca, awalnya aktivitas ini dimiliki oleh tugas
-yang sama dengan aktivitas Anda. Akan tetapi, bila tugas aplikasi perjalanan di bawa ke latar depan, 
+yang sama dengan aktivitas Anda. Akan tetapi, bila tugas aplikasi perjalanan di bawa ke latar depan,
 aktivitas laporan cuaca akan ditetapkan kembali ke tugas itu dan ditampilkan di dalamnya.</p>
 </li>
 </ul>
@@ -497,7 +497,7 @@ apa yang mereka kerjakan sebelum dan kembali ke tugas itu untuk memulai sesuatu 
 <dt><code><a
 href="{@docRoot}guide/topics/manifest/activity-element.html#always">alwaysRetainTaskState</a></code>
 </dt>
-<dd>Jika atribut ini ditetapkan ke {@code "true"} dalam aktivitas akar tugas, 
+<dd>Jika atribut ini ditetapkan ke {@code "true"} dalam aktivitas akar tugas,
 perilaku default yang baru dijelaskan tidak akan terjadi.
  Tugas akan mempertahankan semua aktivitas dalam back-stack bahkan setelah sekian lama.</dd>
 
@@ -516,7 +516,7 @@ href="{@docRoot}guide/topics/manifest/activity-element.html#finish">finishOnTask
 <dd>Atribut ini seperti <a href="{@docRoot}guide/topics/manifest/activity-element.html#clear">{@code clearTaskOnLaunch}</a>,
 namun beroperasi pada
 satu aktivitas, bukan pada seluruh tugas.  Hal ini juga bisa menyebabkan aktivitas
-hilang, termasuk aktivitas akar.  Bila ini diatur ke {@code "true"}, 
+hilang, termasuk aktivitas akar.  Bila ini diatur ke {@code "true"},
 aktivitas akan tetap menjadi bagian dari tugas hanya untuk sesi saat ini.  Jika pengguna
 keluar dan kemudian kembali ke tugas tersebut, tugas tidak akan ada lagi.</dd>
 </dl>
@@ -552,14 +552,14 @@ pembuka</a> yang menandai aktivitas selalu memulai tugas, {@code "singleTask"} d
 {@code "singleInstance"}, hanya boleh digunakan bila aktivitas memiliki filter
 {@link android.content.Intent#ACTION_MAIN}
 dan {@link android.content.Intent#CATEGORY_LAUNCHER}. Bayangkan, misalnya, apa yang akan
-terjadi jika filter tidak ada: Intent meluncurkan aktivitas{@code "singleTask"}, memulai 
-tugas yang baru, dan pengguna menghabiskan lebih banyak waktu mengerjakan tugas tersebut. Pengguna kemudian menekan tombol 
+terjadi jika filter tidak ada: Intent meluncurkan aktivitas{@code "singleTask"}, memulai
+tugas yang baru, dan pengguna menghabiskan lebih banyak waktu mengerjakan tugas tersebut. Pengguna kemudian menekan tombol
 <em>Home</em>. Tugas kini dikirim ke latar belakang dan tidak terlihat. Sekarang pengguna tidak memiliki cara untuk kembali
 ke tugas tersebut, karena tidak dinyatakan dalam launcher aplikasi.</p>
 
-<p>Untuk kasus-kasus di mana Anda tidak ingin pengguna bisa kembali ke aktivitas, atur dalam 
+<p>Untuk kasus-kasus di mana Anda tidak ingin pengguna bisa kembali ke aktivitas, atur dalam
 <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
- pada 
+ pada
 <a href="{@docRoot}guide/topics/manifest/activity-element.html#finish">{@code finishOnTaskLaunch}</a>
 elemen ke {@code "true"} (lihat <a href="#Clearing">Menghapus back-stack</a>).</p>
 

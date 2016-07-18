@@ -55,7 +55,7 @@ download the platform into your Android 1.6 or later SDK.</p>
 <h2 id="features">Platform Highlights</h2>
 
 <p>For a list of new user features and platform highlights, see the <a
-href="http://developer.android.com/about/versions/android-{@sdkPlatformVersion}-highlights.html">Android 
+href="http://developer.android.com/about/versions/android-{@sdkPlatformVersion}-highlights.html">Android
 {@sdkPlatformVersion} Platform Highlights</a> document.</p>
 
 <h2 id="relnotes">Revisions</h2>
@@ -119,10 +119,10 @@ function toggleDiv(link) {
 
 <dt>Tools:</dt>
 <dd>
-<ul> 
+<ul>
 <li>Adds support for library projects in the Ant build system.</li>
 <li>Fixes test project build in the Ant build system.</li>
-</ul> 
+</ul>
 </dd>
 
 </dl>
@@ -256,8 +256,8 @@ android.speech.RecognizerIntent RecognizerIntent}.</li>
 
 <h3 id="api-diff">API differences report</h3>
 
-<p>For a detailed view of API changes in Android {@sdkPlatformVersion} (API Level {@sdkPlatformApiLevel}), as compared to 
-the previous version, see the <a href="{@docRoot}sdk/api_diff/{@sdkPlatformApiLevel}/changes.html">API 
+<p>For a detailed view of API changes in Android {@sdkPlatformVersion} (API Level {@sdkPlatformApiLevel}), as compared to
+the previous version, see the <a href="{@docRoot}sdk/api_diff/{@sdkPlatformApiLevel}/changes.html">API
 Differences Report</a>.</p>
 
 
@@ -300,8 +300,8 @@ built-in applications:</p>
 <p>The system image included in the downloadable platform provides a variety of
 built-in locales. In some cases, region-specific strings are available for the
 locales. In other cases, a default version of the language is used. The
-languages that are available in the Android {@sdkPlatformVersion} system 
-image are listed below (with <em>language</em>_<em>country/region</em> 
+languages that are available in the Android {@sdkPlatformVersion} system
+image are listed below (with <em>language</em>_<em>country/region</em>
 locale descriptor).</p>
 
 <table style="border:0;padding-bottom:0;margin-bottom:0;">
@@ -341,7 +341,7 @@ locale descriptor).</p>
 </tr>
 </table>
 
-<p>Localized UI strings match the locales that are accessible 
+<p>Localized UI strings match the locales that are accessible
 through Settings.</p>
 
 <h2 id="skins">Emulator Skins</h2>

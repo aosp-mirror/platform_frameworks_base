@@ -2146,19 +2146,19 @@ startActivity(insertIntent);
         viewStreamItemPhotoActivity="<em>viewphotostream_activity_name</em>"&gt;
 </pre>
 <p>
-    <strong>含まれているファイル:</strong> 
+    <strong>含まれているファイル:</strong>
 </p>
 <p>
     <code>res/xml/contacts.xml</code>
 </p>
 <p>
-    <strong>含めることのできる要素:</strong> 
+    <strong>含めることのできる要素:</strong>
 </p>
 <p>
     <strong><code>&lt;ContactsDataKind&gt;</code></strong>
 </p>
 <p>
-    <strong>説明:</strong> 
+    <strong>説明:</strong>
 </p>
 <p>
     ユーザーが連絡先の 1 人をソーシャル ネットワーキングに招待できるようにしたり、ソーシャル ネットワーキング ストリームのどれかがアップデートされたらユーザーに通知したりするための、Android コンポーネントや UI ラベルを宣言します。
@@ -2170,7 +2170,7 @@ startActivity(insertIntent);
 
 </p>
 <p>
-    <strong>属性:</strong> 
+    <strong>属性:</strong>
 </p>
 <dl>
     <dt>{@code inviteContactActivity}</dt>
@@ -2248,11 +2248,11 @@ Google+ サークルのどれかをクリックすると、そのサークルに
         android:detailColumn="<em>column_name</em>"&gt;
 </pre>
 <p>
-    <strong>含まれているファイル:</strong> 
+    <strong>含まれているファイル:</strong>
 </p>
 <code>&lt;ContactsAccountType&gt;</code>
 <p>
-    <strong>説明:</strong> 
+    <strong>説明:</strong>
 </p>
 <p>
     この要素は、カスタムデータ行のコンテンツを未加工連絡先の詳細の一部として連絡先アプリケーションに表示させるために使用します。
@@ -2263,7 +2263,7 @@ Google+ サークルのどれかをクリックすると、そのサークルに
 
 </p>
 <p>
-    <strong>属性:</strong> 
+    <strong>属性:</strong>
 </p>
 <dl>
     <dt>{@code android:mimeType}</dt>

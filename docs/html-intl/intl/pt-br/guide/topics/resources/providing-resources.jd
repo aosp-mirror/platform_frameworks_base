@@ -71,7 +71,7 @@ MyProject/
 </pre>
 
 <p>Como pode ver neste exemplo, o diretório {@code res/} contém todos os recursos (em subdiretórios):
-um recurso de imagem, dois recursos de layout, diretórios {@code mipmap/} para ícones de 
+um recurso de imagem, dois recursos de layout, diretórios {@code mipmap/} para ícones de
 inicialização e um arquivo de recurso de string. Os nomes dos diretórios
 de recursos são importantes e são descritos na tabela 1.</p>
 
@@ -161,7 +161,7 @@ então é possível lê-los usando apenas o {@link android.content.res.AssetMana
 com base no nome do arquivo XML, os arquivos no diretório {@code values/} descrevem vários recursos.
 Para cada arquivo neste diretório, cada filho do elemento {@code &lt;resources&gt;} define um único
 recurso. Por exemplo, um elemento {@code &lt;string&gt;} cria
-um recurso {@code R.string} e um elemento {@code &lt;color&gt;} cria um recurso 
+um recurso {@code R.string} e um elemento {@code &lt;color&gt;} cria um recurso
 {@code R.color}.</p>
       <p>Como cada recurso é definido com seu próprio elemento XML, é possível nomear o arquivo
 da forma que quiser e colocar tipos de recurso variados em um arquivo. No entanto, para esclarecer, você pode
@@ -510,7 +510,7 @@ quaisquer recursos que representarem a <a href="#BestMatch">melhor correspondên
 e o aplicativo apresentará um erro em tempo de execução (por exemplo, se todos os recursos de layout receberem tag com o qualificador {@code
 xlarge}, mas o dispositivo tiver uma tela de tamanho normal).</p>
         <p><em>Adicionado à API de nível 4.</em></p>
-        
+
         <p>Consulte <a href="{@docRoot}guide/practices/screens_support.html">Compatibilidade com
 várias telas</a> para obter mais informações.</p>
         <p>Consulte também o campo de configuração {@link android.content.res.Configuration#screenLayout},
@@ -627,8 +627,8 @@ sobre como isto pode afetar o aplicativo em tempo de execução.</p>
 nível 8</em></li>
           <li>{@code xxhdpi}: Telas de densidade extra-extra-alta, aproximadamente 480 dpi. <em>Adicionado à API de
 nível 16</em></li>
-          <li>{@code xxxhdpi}: Usos de densidade extra-extra-extra-alta (somente ícone do inicializador, consulte a 
-            <a href="{@docRoot}guide/practices/screens_support.html#xxxhdpi-note">observação</a> 
+          <li>{@code xxxhdpi}: Usos de densidade extra-extra-extra-alta (somente ícone do inicializador, consulte a
+            <a href="{@docRoot}guide/practices/screens_support.html#xxxhdpi-note">observação</a>
             em <em>Compatibilidade com várias telas</em>), aproximadamente 640 dpi. <em>Adicionado à API de
 nível 18</em></li>
           <li>{@code nodpi}: Isto pode ser usado para recursos de bitmap que você não deseja dimensionar
@@ -823,7 +823,7 @@ exemplo:
     para letras minúsculas antes de processar para evitar problemas nos sistemas de arquivo
     que não diferenciam maiúsculas e minúsculas. Qualquer letra maiúscula nos nomes é apenas para o benefício da leitura.</li>
     <li>Somente um valor para cada tipo de qualificador é suportado. Por exemplo, se quiser usar
-os mesmos arquivos desenháveis para Espanha e França, <em>não</em> é possível ter um diretório chamado 
+os mesmos arquivos desenháveis para Espanha e França, <em>não</em> é possível ter um diretório chamado
 <code>drawable-rES-rFR/</code>. Em vez disso, você precisa de dois diretórios de recursos, como
 <code>drawable-rES/</code> e <code>drawable-rFR/</code>, que contenham arquivos adequados.
 No entanto, não é necessário duplicar os mesmos arquivos em ambos os locais. Em vez disso,
@@ -1088,7 +1088,7 @@ mas o dispositivo tiver uma tela de tamanho normal).</p>
 do que o número de qualificadores que correspondem exatamente ao dispositivo. Por exemplo, na etapa 4 acima, a última
 escolha na lista inclui três qualificadores que correspondem exatamente ao dispositivo (orientação, tipo de
 tela sensível ao toque e método de entrada), enquanto que <code>drawable-en</code> possui apenas um parâmetro que corresponde
-(idioma). No entanto, o idioma tem uma precedência maior que esses outros qualificadores, então 
+(idioma). No entanto, o idioma tem uma precedência maior que esses outros qualificadores, então
 <code>drawable-port-notouch-12key</code> está fora.</p>
 
 <p>Para obter mais informações sobre como usar os recursos no aplicativo, acesse <a href="accessing-resources.html">Acesso aos recursos</a>.</p>

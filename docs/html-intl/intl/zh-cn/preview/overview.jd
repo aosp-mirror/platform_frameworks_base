@@ -117,7 +117,7 @@ page.tags="preview", "developer", "android"
 
       <p>
         使用 <a href="{@docRoot}preview/bug">Issue Tracker</a> 向我们报告问题并提供反馈。
-与 
+与
 <a href="{@docRoot}preview/dev-community">N&nbsp;开发者社区</a>中的其他开发者建立联系。
 
       </p>
@@ -381,7 +381,7 @@ page.tags="preview", "developer", "android"
 </p>
 
 <p>
-  Android N Developer Preview 提供<strong>预览版 API</strong> 功能 
+  Android N Developer Preview 提供<strong>预览版 API</strong> 功能
 &mdash; 在最终的 SDK 发布之前，这些 API 都不是正式的 API。目前，最终的 SDK 计划于 2016 年第三季度发布。
 这意味着一段时期内，特别是该计划的最初几周内，
 <strong>API 可能会出现细微变化</strong>。

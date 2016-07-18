@@ -239,7 +239,7 @@ page.title=建立內容供應程式
         表格資料一律需包含「主索引鍵」欄，方便供應程式保存每個資料列的數值。
 您可以使用這些值將資料列連結至其他表格中的相關資料列 (也就是將這些值當作「外部索引鍵」使用)。
 事實上，您也可以使用此資料欄的任何名稱進行連結，但使用 {@link android.provider.BaseColumns#_ID BaseColumns._ID} 是最佳做法，這是因為將供應程式的查詢結果連結至
-{@link android.widget.ListView} 時需要將某個擷取出的資料列命名為 
+{@link android.widget.ListView} 時需要將某個擷取出的資料列命名為
 <code>_ID</code>。
 
 
@@ -288,14 +288,14 @@ MIME 類型欄中的值會決定 BLOB 欄的資料定義，
 此外，也請針對 Android 套件名稱採取此建議做法；您可以將供應程式授權定義為內含供應程式的套件名稱的副檔名。
 
 例如，假設您 Android 套件的名稱為
- <code>com.example.&lt;appname&gt;</code>，則請將供應程式的授權定義為 
+ <code>com.example.&lt;appname&gt;</code>，則請將供應程式的授權定義為
 <code>com.example.&lt;appname&gt;.provider</code>。
 </p>
 <h3>設計路徑結構</h3>
 <p>
     開發人員通常只要附加指向個別表格的路徑，即可從授權建立內容 URI。
-例如，假設您有「table1」<em></em>和「table2」<em></em>這兩個表格，則您可以結合上述範例中的授權來產生內容 URI 
-<code>com.example.&lt;appname&gt;.provider/table1</code> 和 
+例如，假設您有「table1」<em></em>和「table2」<em></em>這兩個表格，則您可以結合上述範例中的授權來產生內容 URI
+<code>com.example.&lt;appname&gt;.provider/table1</code> 和
 <code>com.example.&lt;appname&gt;.provider/table2</code>。
 
 路徑並不侷限於單一區隔，而您也不必為每個路徑層級產生表格。
@@ -350,11 +350,11 @@ MIME 類型欄中的值會決定 BLOB 欄的資料定義，
         <code>content://com.example.app.provider/table1</code>：名稱為 <code>table1</code> 的表格。
     </li>
     <li>
-        <code>content://com.example.app.provider/table2/dataset1</code>：名稱為 
+        <code>content://com.example.app.provider/table2/dataset1</code>：名稱為
 <code>dataset1</code> 的表格。
     </li>
     <li>
-        <code>content://com.example.app.provider/table2/dataset2</code>：名稱為 
+        <code>content://com.example.app.provider/table2/dataset2</code>：名稱為
 <code>dataset2</code> 的表格。
     </li>
     <li>
@@ -380,7 +380,7 @@ MIME 類型欄中的值會決定 BLOB 欄的資料定義，
         <code>content://com.example.app.provider/table2/*</code>：
     </dt>
     <dd>
-        與 <code>dataset1</code> 和 <code>dataset2</code> 表格的內容 URI 相符，但與 <code>table1</code> 或 
+        與 <code>dataset1</code> 和 <code>dataset2</code> 表格的內容 URI 相符，但與 <code>table1</code> 或
 <code>table3</code> 的內容 URI 不符。
 
     </dd>
@@ -393,8 +393,8 @@ MIME 類型欄中的值會決定 BLOB 欄的資料定義，
 </dl>
 <p>
     以下程式碼片段說明各種方法在 {@link android.content.UriMatcher} 中的運作方式。
-    這個程式碼會以不同方式處理整個表格的 URI 以及單一資料列的 URI；針對表格使用內容 URI 模式 
-<code>content://&lt;authority&gt;/&lt;path&gt;</code>，針對單一資料列則使用 
+    這個程式碼會以不同方式處理整個表格的 URI 以及單一資料列的 URI；針對表格使用內容 URI 模式
+<code>content://&lt;authority&gt;/&lt;path&gt;</code>，針對單一資料列則使用
 <code>content://&lt;authority&gt;/&lt;path&gt;/&lt;id&gt;</code>。
 
 </p>
@@ -469,8 +469,8 @@ public class ExampleProvider extends ContentProvider {
 </pre>
 <p>
     另一個 {@link android.content.ContentUris} 類別可提供使用內容 URI 的 <code>id</code> 部分的簡便方法。
-{@link android.net.Uri} 和 
-{@link android.net.Uri.Builder} 類別則可提供剖析現有 
+{@link android.net.Uri} 和
+{@link android.net.Uri.Builder} 類別則可提供剖析現有
 {@link android.net.Uri} 物件及建置新物件的簡便方法。
 </p>
 
@@ -485,7 +485,7 @@ public class ExampleProvider extends ContentProvider {
 <h3 id="RequiredAccess">必要方法</h3>
 <p>
     抽象類別 {@link android.content.ContentProvider} 會定義 6 種方法，而您必須將這些方法實作成您所擁有子類別的一部分。
-嘗試存取您內容供應程式的用戶端應用程式會呼叫以下所有方法 
+嘗試存取您內容供應程式的用戶端應用程式會呼叫以下所有方法
 ({@link android.content.ContentProvider#onCreate() onCreate()} 除外)：
 
 </p>
@@ -539,7 +539,7 @@ public class ExampleProvider extends ContentProvider {
     </dd>
 </dl>
 <p>
-    請注意，上述方法採用的簽名與同名的 
+    請注意，上述方法採用的簽名與同名的
 {@link android.content.ContentResolver} 方法相同。
 </p>
 <p>
@@ -641,7 +641,7 @@ Android 可以針對下列例外狀況執行這項動作，藉此協助解決查
 
 </p>
 <p>
-    例如，如果您採用 SQLite 資料庫，您可以透過 
+    例如，如果您採用 SQLite 資料庫，您可以透過
 {@link android.content.ContentProvider#onCreate() ContentProvider.onCreate()} 建立新的 {@link android.database.sqlite.SQLiteOpenHelper} 物件，然後在初次開啟資料庫時建立 SQL 表格。
 
 為了加快這個程序，當您初次呼叫 {@link android.database.sqlite.SQLiteOpenHelper#getWritableDatabase
@@ -651,10 +651,10 @@ SQLiteOpenHelper.onCreate()} 方法。
 
 </p>
 <p>
-    以下兩個程式碼片段展示了 
+    以下兩個程式碼片段展示了
 {@link android.content.ContentProvider#onCreate() ContentProvider.onCreate()} 與 {@link android.database.sqlite.SQLiteOpenHelper#onCreate(SQLiteDatabase)
     SQLiteOpenHelper.onCreate()} 之間的互動過程。
-而第一個程式碼片段是用於實作 
+而第一個程式碼片段是用於實作
 {@link android.content.ContentProvider#onCreate() ContentProvider.onCreate()}：
 </p>
 <pre class="prettyprint">
@@ -808,7 +808,7 @@ protected static final class MainDatabaseHelper extends SQLiteOpenHelper {
             <code>&lt;name&gt;</code> 必須是全域唯一值，而 <code>&lt;type&gt;</code> 必須為相對應 URI 模式的專屬值。
 
 建議您使用貴公司的名稱或您應用程式的部分 Android 套件名稱做為 <code>&lt;name&gt;</code>。
-針對 
+針對
 <code>&lt;type&gt;</code>，則建議您使用可識別與 URI 相關的表格的字串。
 
         </p>
@@ -816,8 +816,8 @@ protected static final class MainDatabaseHelper extends SQLiteOpenHelper {
     </li>
 </ul>
 <p>
-    例如，假設供應程式的授權為 
-<code>com.example.app.provider</code>，而該授權可提供 
+    例如，假設供應程式的授權為
+<code>com.example.app.provider</code>，而該授權可提供
 <code>table1</code> 這個表格，則 <code>table1</code> 中多個資料列的 MIME 類型會如下所示：
 </p>
 <pre>
@@ -940,7 +940,7 @@ ContentProvider.getStreamTypes()} 會傳回如下所示的陣列：
 為了將權限設為僅適用於您的供應程式，請針對
  <code><a href="{@docRoot}guide/topics/manifest/permission-element.html#nm">
     android:name</a></code> 屬性使用 Java 式範圍。
-例如，請將讀取權限命名為 
+例如，請將讀取權限命名為
 <code>com.example.app.provider.permission.READ_PROVIDER</code>。
 
 </p>
@@ -955,7 +955,7 @@ ContentProvider.getStreamTypes()} 會傳回如下所示的陣列：
     </dt>
     <dd>
         這項權限是由 <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
-        &lt;provider&gt;</a></code> 元素的 
+        &lt;provider&gt;</a></code> 元素的
 <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#prmsn">
         android:permission</a></code> 屬性所指定，可控制整個供應程式的讀取及寫入存取權。
 
@@ -967,10 +967,10 @@ ContentProvider.getStreamTypes()} 會傳回如下所示的陣列：
         整個供應程式的讀取權限及寫入權限。您可以使用 <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
         &lt;provider&gt;</a></code> 元素的
  <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#rprmsn">
-        android:readPermission</a></code> 和 
+        android:readPermission</a></code> 和
 <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#wprmsn">
         android:writePermission</a></code> 屬性指定這兩項權限。
-這些權限的優先等級比 
+這些權限的優先等級比
 <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#prmsn">
         android:permission</a></code> 所需的權限來得高。
     </dd>
@@ -1037,9 +1037,9 @@ Context.revokeUriPermission()}。
 
         </p>
         <p>
-            如要將臨時存取權委派給某款應用程式，您就必須在意圖中加入 
-{@link android.content.Intent#FLAG_GRANT_READ_URI_PERMISSION} 或 
-{@link android.content.Intent#FLAG_GRANT_WRITE_URI_PERMISSION} 旗標，或是同時加入以上兩者。請使用 
+            如要將臨時存取權委派給某款應用程式，您就必須在意圖中加入
+{@link android.content.Intent#FLAG_GRANT_READ_URI_PERMISSION} 或
+{@link android.content.Intent#FLAG_GRANT_WRITE_URI_PERMISSION} 旗標，或是同時加入以上兩者。請使用
 {@link android.content.Intent#setFlags(int) setFlags()} 方法設定這些旗標。
         </p>
         <p>
@@ -1187,7 +1187,7 @@ Context.revokeUriPermission()}。
 <h2 id="Intents">意圖和資料存取權</h2>
 <p>
     應用程式可透過 {@link android.content.Intent} 以間接方式存取內容供應程式。
-    利用這種存取方式的應用程式不會呼叫 {@link android.content.ContentResolver} 或 
+    利用這種存取方式的應用程式不會呼叫 {@link android.content.ContentResolver} 或
 {@link android.content.ContentProvider} 的任何方法，而是會傳送可啟動 Activity (此 Activity 通常屬於供應程式本身的應用程式) 的意圖。
 目標 Activity 會負責擷取資料並在本身的 UI 中顯示該資料。視意圖中的動作而定，目標 Activity 也可能會提示使用者修改供應程式的資料。
 

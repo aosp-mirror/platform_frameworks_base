@@ -132,7 +132,7 @@ page.metaDescription=Distribuye tus aplicaciones, juegos y contenido para Androi
 <ul>
   <li>Cumple las pautas de Calidad de la aplicación principal
     <ul>
-      <li>Sigue las <a href="{@docRoot}design/index.html">pautas de 
+      <li>Sigue las <a href="{@docRoot}design/index.html">pautas de
  Diseño Android</a>. Presta especial atención al uso de <a href="http://www.google.com/design/spec/material-design/introduction.html">Material
  Design</a> en tu aplicación.
       </li>
@@ -261,7 +261,7 @@ page.metaDescription=Distribuye tus aplicaciones, juegos y contenido para Androi
  los criterios, recibirás una <strong>notificación por correo electrónico enviada a tu cuenta
  de desarrollador</strong> con un resumen de las áreas que debes abordar. Una vez que realices
  los ajustes necesarios, puedes cargar una nueva versión de tu aplicación a la Consola para
- desarrolladores. 
+ desarrolladores.
 </p>
 
 <p>
@@ -282,7 +282,7 @@ page.metaDescription=Distribuye tus aplicaciones, juegos y contenido para Androi
 
   <li>
     <em>Aprobada</em>: se revisó tu aplicación y se aprobó. La aplicación
- estará disponible de forma directa para los usuarios de Android TV. 
+ estará disponible de forma directa para los usuarios de Android TV.
   </li>
 
   <li>

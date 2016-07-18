@@ -120,7 +120,7 @@ bắt buộc để đảm bảo giao diện người dùng có phản hồi.</p>
 
       <ul>
         <li>Nó lưu trữ một {@link android.app.Activity} mà không nằm trong tiền cảnh, nhưng vẫn
-hiển thị với người dùng (phương pháp {@link android.app.Activity#onPause onPause()} của nó đã được gọi). 
+hiển thị với người dùng (phương pháp {@link android.app.Activity#onPause onPause()} của nó đã được gọi).
 Điều này có thể xảy ra, ví dụ, nếu hoạt động tiền cảnh đã bắt đầu một hộp thoại, nó cho phép
 hoạt động trước được nhìn thấy phía sau nó.</li>
 
@@ -202,7 +202,7 @@ gọi lại của hệ thống (chẳng hạn như {@link android.view.View#onKe
 hoặc một phương pháp gọi lại vòng đời) sẽ luôn chạy trong luồng UI của tiến trình.</p>
 
 <p>Ví dụ, khi người dùng chạm vào một nút trên màn hình, luồng UI của ứng dụng của bạn sẽ phân phối
-sự kiện chạm tới widget, đến lượt mình, widget sẽ đặt trạng thái được nhấn và đăng một yêu cầu vô hiệu hóa tới 
+sự kiện chạm tới widget, đến lượt mình, widget sẽ đặt trạng thái được nhấn và đăng một yêu cầu vô hiệu hóa tới
 hàng đợi sự kiện. Luồng UI loại yêu cầu khỏi hàng đợi và thông báo với widget rằng nó nên tự vẽ lại
 .</p>
 
@@ -319,7 +319,7 @@ private class DownloadImageTask extends AsyncTask&lt;String, Void, Bitmap&gt; {
     protected Bitmap doInBackground(String... urls) {
         return loadImageFromNetwork(urls[0]);
     }
-    
+
     /** The system calls this to perform work in the UI thread and delivers
       * the result from doInBackground() */
     protected void onPostExecute(Bitmap result) {

@@ -41,12 +41,12 @@ class="button">Download the sample</a>
 </div>
 </div>
 
-<p>In Android, scrolling is typically achieved by using the 
+<p>In Android, scrolling is typically achieved by using the
 {@link android.widget.ScrollView}
-class. Any standard layout that might extend beyond the bounds of its container should be 
-nested in a {@link android.widget.ScrollView} to provide a scrollable view that's 
-managed by the framework. Implementing a custom scroller should only be 
-necessary for special scenarios. This lesson describes such a scenario: displaying 
+class. Any standard layout that might extend beyond the bounds of its container should be
+nested in a {@link android.widget.ScrollView} to provide a scrollable view that's
+managed by the framework. Implementing a custom scroller should only be
+necessary for special scenarios. This lesson describes such a scenario: displaying
 a scrolling effect in response to touch gestures using <em>scrollers</em>.
 
 
@@ -54,8 +54,8 @@ a scrolling effect in response to touch gestures using <em>scrollers</em>.
 android.widget.OverScroller}) to collect the data you need to produce a
 scrolling animation in response to a touch event. They are similar, but
 {@link android.widget.OverScroller}
-includes methods for indicating to users that they've reached the content edges 
-after a pan or fling gesture. The {@code InteractiveChart} sample 
+includes methods for indicating to users that they've reached the content edges
+after a pan or fling gesture. The {@code InteractiveChart} sample
 uses the {@link android.widget.EdgeEffect} class
 (actually the {@link android.support.v4.widget.EdgeEffectCompat} class)
 to display a "glow" effect when users reach the content edges.</p>
@@ -68,7 +68,7 @@ compatibility with older devices.
 <br />
 Also note that you generally only need to use scrollers
 when implementing scrolling yourself. {@link android.widget.ScrollView} and
-{@link android.widget.HorizontalScrollView} do all of this for you if you nest your 
+{@link android.widget.HorizontalScrollView} do all of this for you if you nest your
 layout within them.
 </p>
 
@@ -86,71 +86,71 @@ scrolling animation look smooth.</p>
 
 <p>"Scrolling" is a word that can take on different meanings in Android, depending on the context.</p>
 
-<p><strong>Scrolling</strong> is the general process of moving the viewport (that is, the 'window' 
-of content you're looking at). When scrolling is in both the x and y axes, it's called 
-<em>panning</em>. The sample application provided with this class, {@code InteractiveChart}, illustrates 
+<p><strong>Scrolling</strong> is the general process of moving the viewport (that is, the 'window'
+of content you're looking at). When scrolling is in both the x and y axes, it's called
+<em>panning</em>. The sample application provided with this class, {@code InteractiveChart}, illustrates
 two different types of scrolling, dragging and flinging:</p>
 <ul>
-    <li><strong>Dragging</strong> is the type of scrolling that occurs when a user drags her 
-finger across the touch screen. Simple dragging is often implemented by overriding 
-{@link android.view.GestureDetector.OnGestureListener#onScroll onScroll()} in 
-{@link android.view.GestureDetector.OnGestureListener}. For more discussion of dragging, see 
+    <li><strong>Dragging</strong> is the type of scrolling that occurs when a user drags her
+finger across the touch screen. Simple dragging is often implemented by overriding
+{@link android.view.GestureDetector.OnGestureListener#onScroll onScroll()} in
+{@link android.view.GestureDetector.OnGestureListener}. For more discussion of dragging, see
 <a href="scale.html">Dragging and Scaling</a>.</li>
 
-    <li><strong>Flinging</strong> is the type of scrolling that occurs when a user 
-drags and lifts her finger quickly. After the user lifts her finger, you generally 
-want to keep scrolling (moving the viewport), but decelerate until the viewport stops moving. 
-Flinging can be implemented by overriding 
-{@link android.view.GestureDetector.OnGestureListener#onFling onFling()} 
-in {@link android.view.GestureDetector.OnGestureListener}, and by using 
-a scroller object. This is the use 
+    <li><strong>Flinging</strong> is the type of scrolling that occurs when a user
+drags and lifts her finger quickly. After the user lifts her finger, you generally
+want to keep scrolling (moving the viewport), but decelerate until the viewport stops moving.
+Flinging can be implemented by overriding
+{@link android.view.GestureDetector.OnGestureListener#onFling onFling()}
+in {@link android.view.GestureDetector.OnGestureListener}, and by using
+a scroller object. This is the use
 case that is the topic of this lesson.</li>
 </ul>
 
-<p>It's common to use scroller objects 
+<p>It's common to use scroller objects
 in conjunction with a fling gesture, but they
 can be used in pretty much any context where you want the UI to display
-scrolling in response to a touch event. For example, you could override  
-{@link android.view.View#onTouchEvent onTouchEvent()} to process touch 
-events directly, and produce a scrolling effect or a "snapping to page" animation 
+scrolling in response to a touch event. For example, you could override
+{@link android.view.View#onTouchEvent onTouchEvent()} to process touch
+events directly, and produce a scrolling effect or a "snapping to page" animation
 in response to those touch events.</p>
 
 
-<h2 id="#scroll">Implement Touch-Based Scrolling</h2> 
+<h2 id="#scroll">Implement Touch-Based Scrolling</h2>
 
 <p>This section describes how to use a scroller.
-The snippet shown below comes from the {@code InteractiveChart} sample 
+The snippet shown below comes from the {@code InteractiveChart} sample
 provided with this class.
-It uses a 
-{@link android.view.GestureDetector}, and overrides the  
-{@link android.view.GestureDetector.SimpleOnGestureListener} method 
+It uses a
+{@link android.view.GestureDetector}, and overrides the
+{@link android.view.GestureDetector.SimpleOnGestureListener} method
 {@link android.view.GestureDetector.OnGestureListener#onFling onFling()}.
 It uses {@link android.widget.OverScroller} to track the fling gesture.
-If the user reaches the content edges 
+If the user reaches the content edges
 after the fling gesture, the app displays a "glow" effect.
 </p>
 
-<p class="note"><strong>Note:</strong> The {@code InteractiveChart} sample app displays a 
-chart that you can zoom, pan, scroll, and so on. In the following snippet, 
-{@code mContentRect} represents the rectangle coordinates within the view that the chart 
-will be drawn into. At any given time, a subset of the total chart domain and range are drawn 
-into this rectangular area. 
-{@code mCurrentViewport} represents the portion of the chart that is currently 
-visible in the screen. Because pixel offsets are generally treated as integers, 
-{@code mContentRect} is of the type {@link android.graphics.Rect}. Because the 
-graph domain and range are decimal/float values, {@code mCurrentViewport} is of 
+<p class="note"><strong>Note:</strong> The {@code InteractiveChart} sample app displays a
+chart that you can zoom, pan, scroll, and so on. In the following snippet,
+{@code mContentRect} represents the rectangle coordinates within the view that the chart
+will be drawn into. At any given time, a subset of the total chart domain and range are drawn
+into this rectangular area.
+{@code mCurrentViewport} represents the portion of the chart that is currently
+visible in the screen. Because pixel offsets are generally treated as integers,
+{@code mContentRect} is of the type {@link android.graphics.Rect}. Because the
+graph domain and range are decimal/float values, {@code mCurrentViewport} is of
 the type {@link android.graphics.RectF}.</p>
 
-<p>The first part of the snippet shows the implementation of 
+<p>The first part of the snippet shows the implementation of
 {@link android.view.GestureDetector.OnGestureListener#onFling onFling()}:</p>
 
-<pre>// The current viewport. This rectangle represents the currently visible 
+<pre>// The current viewport. This rectangle represents the currently visible
 // chart domain and range. The viewport is the part of the app that the
 // user manipulates via touch gestures.
-private RectF mCurrentViewport = 
+private RectF mCurrentViewport =
         new RectF(AXIS_X_MIN, AXIS_Y_MIN, AXIS_X_MAX, AXIS_Y_MAX);
 
-// The current destination rectangle (in pixel coordinates) into which the 
+// The current destination rectangle (in pixel coordinates) into which the
 // chart data should be drawn.
 private Rect mContentRect;
 
@@ -171,7 +171,7 @@ private final GestureDetector.SimpleOnGestureListener mGestureListener
     }
     ...
     &#64;Override
-    public boolean onFling(MotionEvent e1, MotionEvent e2, 
+    public boolean onFling(MotionEvent e1, MotionEvent e2,
             float velocityX, float velocityY) {
         fling((int) -velocityX, (int) -velocityY);
         return true;
@@ -184,10 +184,10 @@ private void fling(int velocityX, int velocityY) {
     // Flings use math in pixels (as opposed to math based on the viewport).
     Point surfaceSize = computeScrollSurfaceSize();
     mScrollerStartViewport.set(mCurrentViewport);
-    int startX = (int) (surfaceSize.x * (mScrollerStartViewport.left - 
+    int startX = (int) (surfaceSize.x * (mScrollerStartViewport.left -
             AXIS_X_MIN) / (
             AXIS_X_MAX - AXIS_X_MIN));
-    int startY = (int) (surfaceSize.y * (AXIS_Y_MAX - 
+    int startY = (int) (surfaceSize.y * (AXIS_Y_MAX -
             mScrollerStartViewport.bottom) / (
             AXIS_Y_MAX - AXIS_Y_MIN));
     // Before flinging, aborts the current animation.
@@ -200,10 +200,10 @@ private void fling(int velocityX, int velocityY) {
             velocityX,
             velocityY,
             /*
-             * Minimum and maximum scroll positions. The minimum scroll 
-             * position is generally zero and the maximum scroll position 
-             * is generally the content size less the screen size. So if the 
-             * content width is 1000 pixels and the screen width is 200  
+             * Minimum and maximum scroll positions. The minimum scroll
+             * position is generally zero and the maximum scroll position
+             * is generally the content size less the screen size. So if the
+             * content width is 1000 pixels and the screen width is 200
              * pixels, the maximum scroll offset should be 800 pixels.
              */
             0, surfaceSize.x - mContentRect.width(),
@@ -216,21 +216,21 @@ private void fling(int velocityX, int velocityY) {
     ViewCompat.postInvalidateOnAnimation(this);
 }</pre>
 
-<p>When {@link android.view.GestureDetector.OnGestureListener#onFling onFling()} calls 
-{@link android.support.v4.view.ViewCompat#postInvalidateOnAnimation postInvalidateOnAnimation()}, 
-it triggers 
-{@link android.view.View#computeScroll computeScroll()} to update the values for x and y. 
+<p>When {@link android.view.GestureDetector.OnGestureListener#onFling onFling()} calls
+{@link android.support.v4.view.ViewCompat#postInvalidateOnAnimation postInvalidateOnAnimation()},
+it triggers
+{@link android.view.View#computeScroll computeScroll()} to update the values for x and y.
 This is typically be done when a view child is animating a scroll using a scroller object, as in this example. </p>
 
-<p>Most views pass the scroller object's x and y position directly to 
-{@link android.view.View#scrollTo scrollTo()}. 
-The following implementation of {@link android.view.View#computeScroll computeScroll()} 
-takes a different approach&mdash;it calls 
-{@link android.widget.OverScroller#computeScrollOffset computeScrollOffset()} to get the current 
-location of x and y. When the criteria for displaying an overscroll "glow" edge effect are met 
-(the display is zoomed in, x or y is out of bounds, and the app isn't already showing an overscroll), 
-the code sets up the overscroll glow effect and calls 
-{@link android.support.v4.view.ViewCompat#postInvalidateOnAnimation postInvalidateOnAnimation()} 
+<p>Most views pass the scroller object's x and y position directly to
+{@link android.view.View#scrollTo scrollTo()}.
+The following implementation of {@link android.view.View#computeScroll computeScroll()}
+takes a different approach&mdash;it calls
+{@link android.widget.OverScroller#computeScrollOffset computeScrollOffset()} to get the current
+location of x and y. When the criteria for displaying an overscroll "glow" edge effect are met
+(the display is zoomed in, x or y is out of bounds, and the app isn't already showing an overscroll),
+the code sets up the overscroll glow effect and calls
+{@link android.support.v4.view.ViewCompat#postInvalidateOnAnimation postInvalidateOnAnimation()}
 to trigger an invalidate on the view:</p>
 
 <pre>// Edge effect / overscroll tracking objects.
@@ -250,7 +250,7 @@ public void computeScroll() {
 
     boolean needsInvalidate = false;
 
-    // The scroller isn't finished, meaning a fling or programmatic pan 
+    // The scroller isn't finished, meaning a fling or programmatic pan
     // operation is currently active.
     if (mScroller.computeScrollOffset()) {
         Point surfaceSize = computeScrollSurfaceSize();
@@ -262,7 +262,7 @@ public void computeScroll() {
         boolean canScrollY = (mCurrentViewport.top > AXIS_Y_MIN
                 || mCurrentViewport.bottom < AXIS_Y_MAX);
 
-        /*          
+        /*
          * If you are zoomed in and currX or currY is
          * outside of bounds and you're not already
          * showing overscroll, then render the overscroll
@@ -272,7 +272,7 @@ public void computeScroll() {
                 && currX < 0
                 && mEdgeEffectLeft.isFinished()
                 && !mEdgeEffectLeftActive) {
-            mEdgeEffectLeft.onAbsorb((int) 
+            mEdgeEffectLeft.onAbsorb((int)
                     OverScrollerCompat.getCurrVelocity(mScroller));
             mEdgeEffectLeftActive = true;
             needsInvalidate = true;
@@ -280,7 +280,7 @@ public void computeScroll() {
                 && currX > (surfaceSize.x - mContentRect.width())
                 && mEdgeEffectRight.isFinished()
                 && !mEdgeEffectRightActive) {
-            mEdgeEffectRight.onAbsorb((int) 
+            mEdgeEffectRight.onAbsorb((int)
                     OverScrollerCompat.getCurrVelocity(mScroller));
             mEdgeEffectRightActive = true;
             needsInvalidate = true;
@@ -290,7 +290,7 @@ public void computeScroll() {
                 && currY < 0
                 && mEdgeEffectTop.isFinished()
                 && !mEdgeEffectTopActive) {
-            mEdgeEffectTop.onAbsorb((int) 
+            mEdgeEffectTop.onAbsorb((int)
                     OverScrollerCompat.getCurrVelocity(mScroller));
             mEdgeEffectTopActive = true;
             needsInvalidate = true;
@@ -298,7 +298,7 @@ public void computeScroll() {
                 && currY > (surfaceSize.y - mContentRect.height())
                 && mEdgeEffectBottom.isFinished()
                 && !mEdgeEffectBottomActive) {
-            mEdgeEffectBottom.onAbsorb((int) 
+            mEdgeEffectBottom.onAbsorb((int)
                     OverScrollerCompat.getCurrVelocity(mScroller));
             mEdgeEffectBottomActive = true;
             needsInvalidate = true;
@@ -316,14 +316,14 @@ private PointF mZoomFocalPoint = new PointF();
 // If a zoom is in progress (either programmatically or via double
 // touch), performs the zoom.
 if (mZoomer.computeZoom()) {
-    float newWidth = (1f - mZoomer.getCurrZoom()) * 
+    float newWidth = (1f - mZoomer.getCurrZoom()) *
             mScrollerStartViewport.width();
-    float newHeight = (1f - mZoomer.getCurrZoom()) * 
+    float newHeight = (1f - mZoomer.getCurrZoom()) *
             mScrollerStartViewport.height();
-    float pointWithinViewportX = (mZoomFocalPoint.x - 
+    float pointWithinViewportX = (mZoomFocalPoint.x -
             mScrollerStartViewport.left)
             / mScrollerStartViewport.width();
-    float pointWithinViewportY = (mZoomFocalPoint.y - 
+    float pointWithinViewportY = (mZoomFocalPoint.y -
             mScrollerStartViewport.top)
             / mScrollerStartViewport.height();
     mCurrentViewport.set(
@@ -339,9 +339,9 @@ if (needsInvalidate) {
 }
 </pre>
 
-<p>This is the {@code computeScrollSurfaceSize()} method that's called in the above snippet. It 
-computes the current scrollable surface size, in pixels. For example, if the entire chart area is visible, 
-this is simply the current size of {@code mContentRect}. If the chart is zoomed in 200% in both directions, 
+<p>This is the {@code computeScrollSurfaceSize()} method that's called in the above snippet. It
+computes the current scrollable surface size, in pixels. For example, if the entire chart area is visible,
+this is simply the current size of {@code mContentRect}. If the chart is zoomed in 200% in both directions,
 the returned size will be twice as large horizontally and vertically.</p>
 
 <pre>private Point computeScrollSurfaceSize() {
@@ -352,8 +352,8 @@ the returned size will be twice as large horizontally and vertically.</p>
                     / mCurrentViewport.height()));
 }</pre>
 
-<p>For another example of scroller usage, see the 
-<a href="http://github.com/android/platform_frameworks_support/blob/master/v4/java/android/support/v4/view/ViewPager.java">source code</a> for the 
-{@link android.support.v4.view.ViewPager} class. It scrolls in response to flings, 
+<p>For another example of scroller usage, see the
+<a href="http://github.com/android/platform_frameworks_support/blob/master/v4/java/android/support/v4/view/ViewPager.java">source code</a> for the
+{@link android.support.v4.view.ViewPager} class. It scrolls in response to flings,
 and uses scrolling to implement the "snapping to page" animation.</p>
 

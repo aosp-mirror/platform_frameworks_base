@@ -154,7 +154,7 @@ android.content.Intent} utilizada para iniciá-la.</p>
 
 <p>Quando sua atividade iniciar, chame {@link android.app.Activity#getIntent()} para retomar a
 {@link android.content.Intent} que iniciou a atividade. Pode-se fazer isso a qualquer momento durante
-o ciclo de vida da atividade, mas recomenda-se fazê-lo no início do retorno de chamada como 
+o ciclo de vida da atividade, mas recomenda-se fazê-lo no início do retorno de chamada como
 {@link android.app.Activity#onCreate onCreate()} ou {@link android.app.Activity#onStart()}.</p>
 
 <p>Por exemplo:</p>

@@ -457,7 +457,7 @@ Tracker</a>.</p>
   versi aplikasi multi-APK yang didesain untuk mendukung Vulkan yang lebih rendah pada
   perangkat dengan dukungan versi yang lebih tinggi. Saat ini, Google Play Store tidak
   menerima unggahan aplikasi yang menggunakan penargetan versi Vulkan. Dukungan ini
-  akan ditambahkan pada Google Play Store di masa mendatang dan diperbaiki dalam 
+  akan ditambahkan pada Google Play Store di masa mendatang dan diperbaiki dalam
   Google Play Services versi berikutnya (akan disertakan dalam rilis Developer Preview
   mendatang). Perangkat N yang menggunakan Google Play Services 9.0.83 akan
   tetap menerima versi Aplikasi yang menargetkan dukungan Vulkan dasar.

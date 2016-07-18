@@ -88,7 +88,7 @@ Android TV 的 Google Play 体验仅<strong>展示可在电视上使用的应用
 <p>
   在考虑您的电视应用时，请查看<a href="{@docRoot}training/tv/start/index.html">开发者文档</a>和可用性准则，并且尽可能支持这些准则。
 
-确保为用户设计一种出色 Leanback 观看体验，并使用 SDK 中随附的 
+确保为用户设计一种出色 Leanback 观看体验，并使用 SDK 中随附的
 Leanback 库来打造这种体验。您想针对电视用例优化应用的其他部分，最好在开发过程的早期确定这些部分。
 
 
@@ -261,7 +261,7 @@ Google Play 将展示优质应用，以便用户能够在 Google Play 中轻松�
 
 当您进行必要的调整后，就可以将应用的新版本上传到开发者控制台。
 
- 
+
 </p>
 
 <p>
@@ -282,7 +282,7 @@ Google Play 将展示优质应用，以便用户能够在 Google Play 中轻松�
 
   <li>
     <em>已批准</em> — 您的应用已被审查并获得批准。该应用将直接提供给 Android TV 用户。
- 
+
   </li>
 
   <li>

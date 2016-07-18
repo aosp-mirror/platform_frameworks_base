@@ -60,7 +60,7 @@ melihat ke sana untuk menemukan ID sumber daya. ID sumber daya selalu terdiri da
 string}, {@code drawable}, dan {@code layout}. Untuk mengetahui selengkapnya tentang berbagai tipe, lihat <a href="available-resources.html">Tipe Sumber Daya</a>.
   </li>
   <li><em>Nama sumber daya</em>, bisa berupa: nama file,
-tidak termasuk ekstensi; atau nilai dalam atribut {@code android:name} XML, jika 
+tidak termasuk ekstensi; atau nilai dalam atribut {@code android:name} XML, jika
 sumber daya itu sebuah nilai sederhana (misalnya sebuah string).</li>
 </ul>
 
@@ -259,8 +259,8 @@ mengacu sumber daya sistem, Anda perlu memasukkan nama paketnya. Misalnya:</p>
     android:text=&quot;&#64;string/hello&quot; /&gt;
 </pre>
 
-<p class="note"><strong>Catatan:</strong> Anda harus menggunakan sumber daya string sepanjang 
-waktu, sehingga aplikasi Anda bisa dilokalkan untuk bahasa lain. 
+<p class="note"><strong>Catatan:</strong> Anda harus menggunakan sumber daya string sepanjang
+waktu, sehingga aplikasi Anda bisa dilokalkan untuk bahasa lain.
 Untuk informasi tentang cara menciptakan
 sumber daya alternatif (seperti string lokal), lihat <a href="providing-resources.html#AlternativeResources">Menyediakan Sumber Daya Alternatif
 </a>. Untuk panduan lengkap melokalkan aplikasi Anda ke bahasa lain,
@@ -332,6 +332,6 @@ android.widget.ArrayAdapter}&lt;String&gt;(this, <strong>android.R.layout.simple
 
 <p>Dalam contoh ini, {@link android.R.layout#simple_list_item_1} adalah sumber daya layout yang didefinisikan oleh
 platform untuk item di {@link android.widget.ListView}. Anda bisa menggunakannya sebagai ganti menciptakan
-layout sendiri untuk item daftar. Untuk informasi selengkapnya, lihat panduan pengembang 
+layout sendiri untuk item daftar. Untuk informasi selengkapnya, lihat panduan pengembang
 <a href="{@docRoot}guide/topics/ui/layout/listview.html">List View</a>.</p>
 

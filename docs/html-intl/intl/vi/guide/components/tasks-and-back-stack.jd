@@ -190,7 +190,7 @@ trạng thái của các hoạt động của mình bằng cách sử dụng cá
 
 <p>Khi hệ thống dừng một trong các hoạt động của bạn (chẳng hạn như khi một hoạt động mới bắt đầu hoặc tác vụ
 di chuyển về nền), hệ thống có thể hoàn toàn hủy hoạt động đó nếu nó cần khôi phục
-bộ nhớ hệ thống. Khi điều này xảy ra, thông tin về trạng thái của hoạt động sẽ bị mất. Nếu điều này xảy ra, 
+bộ nhớ hệ thống. Khi điều này xảy ra, thông tin về trạng thái của hoạt động sẽ bị mất. Nếu điều này xảy ra,
 hệ thống vẫn
 biết rằng hoạt động có một vị trí trong ngăn xếp, nhưng khi hoạt động được đưa tới vị trí trên cùng
 của chồng, hệ thống phải tạo lại nó (thay vì tiếp tục). Để tránh
@@ -314,7 +314,7 @@ hoạt động nằm trên cùng của ngăn xếp <em>không</em> phải là m�
   <p>Ví dụ, giả sử ngăn xếp của một tác vụ bao gồm hoạt động gốc A với các hoạt động B, C,
 và D ở trên cùng (chồng là A-B-C-D; D ở trên cùng). Một ý định đến cho loại hoạt động D.
 Nếu D có chế độ khởi chạy {@code "standard"} mặc định, một thực thể mới của lớp sẽ được khởi chạy và
-chồng trở thành A-B-C-D-D. Tuy nhiên, nếu chế độ khởi chạy của D là {@code "singleTop"}, thực thể hiện tại 
+chồng trở thành A-B-C-D-D. Tuy nhiên, nếu chế độ khởi chạy của D là {@code "singleTop"}, thực thể hiện tại
 của D sẽ nhận ý định thông qua {@link
 android.app.Activity#onNewIntent onNewIntent()}, bởi nó nằm ở vị trí trên cùng của chồng&mdash;chồng
 vẫn là A-B-C-D. Tuy nhiên, nếu một ý định đến cho hoạt động loại B, khi đó một thực thể
@@ -557,9 +557,9 @@ tác vụ mới và người dùng dành một khoảng thời gian làm việc 
 . Lúc này, tác vụ được gửi tới nền và không hiển thị. Bây giờ, người dùng không có cách nào để quay lại
 tác vụ bởi nó không được biểu diễn trong trình khởi chạy ứng dụng.</p>
 
-<p>Đối với những trường hợp mà bạn không muốn người dùng có thể quay lại một hoạt động, hãy đặt giá trị của phần tử 
+<p>Đối với những trường hợp mà bạn không muốn người dùng có thể quay lại một hoạt động, hãy đặt giá trị của phần tử
 <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
-, 
+,
 <a href="{@docRoot}guide/topics/manifest/activity-element.html#finish">{@code finishOnTaskLaunch}</a>
 thành {@code "true"} (xem <a href="#Clearing">Xóa chồng</a>).</p>
 

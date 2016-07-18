@@ -121,7 +121,7 @@ android.view.View#setOutlineProvider View.setOutlineProvider()} 메서드를 사
 <p>뷰를 클리핑하면 뷰의 모양을 손쉽게 바꿀 수 있습니다. 다른 디자인 요소와의 일관성을 위해, 또는 사용자 입력에 응답하여 뷰의 모양을 바꾸기 위해 뷰를 클리핑할 수 있습니다. {@link android.view.View#setClipToOutline
 View.setClipToOutline()} 메서드나 <code>android:clipToOutline</code> 특성을 사용하여 뷰를 해당 윤곽선 영역까지 클리핑할 수 있습니다.
 
- 
+
 {@link android.graphics.Outline#canClip Outline.canClip()} 메서드에서 결정된 대로 사각형, 원형 및 둥근 사각형의 윤곽선만 클리핑을 지원합니다.
 </p>
 

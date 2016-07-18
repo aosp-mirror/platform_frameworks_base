@@ -236,7 +236,7 @@ page.title=Nội dung Cơ bản về Trình cung cấp Nội dung
     Ví dụ, để có một danh sách các từ và nội dung bản địa của chúng từ Trình cung cấp Từ điển Người dùng,
     bạn hãy gọi {@link android.content.ContentResolver#query ContentResolver.query()}.
     Phương pháp {@link android.content.ContentResolver#query query()} sẽ gọi phương pháp
-    {@link android.content.ContentProvider#query ContentProvider.query()} được định nghĩa bởi 
+    {@link android.content.ContentProvider#query ContentProvider.query()} được định nghĩa bởi
     Trình cung cấp Từ điển Người dùng. Các dòng mã sau thể hiện một lệnh gọi
     {@link android.content.ContentResolver#query ContentResolver.query()}:
 <p>
@@ -251,7 +251,7 @@ mCursor = getContentResolver().query(
 </pre>
 <p>
     Bảng 2 cho biết các tham đối tới
-    {@link android.content.ContentResolver#query 
+    {@link android.content.ContentResolver#query
     query(Uri,projection,selection,selectionArgs,sortOrder)} khớp với một câu lệnh SQL SELECT như thế nào:
 </p>
 <p class="table-caption">
@@ -292,7 +292,7 @@ mCursor = getContentResolver().query(
         <td align="center"><code>sortOrder</code></td>
         <td align="center"><code>ORDER BY <em>col,col,...</em></code></td>
         <td>
-            <code>sortOrder</code> quy định thứ tự các hàng xuất hiện trong 
+            <code>sortOrder</code> quy định thứ tự các hàng xuất hiện trong
             {@link android.database.Cursor} được trả về.
         </td>
     </tr>
@@ -344,7 +344,7 @@ Uri singleUri = ContentUris.withAppendedId(UserDictionary.Words.CONTENT_URI,4);
 </p>
 <p class="note">
     <strong>Lưu ý:</strong> Các lớp {@link android.net.Uri} và {@link android.net.Uri.Builder}
-    chứa các phương pháp thuận tiện để xây dựng đối tượng URI định dạng tốt từ các xâu. 
+    chứa các phương pháp thuận tiện để xây dựng đối tượng URI định dạng tốt từ các xâu.
     {@link android.content.ContentUris} chứa các phương pháp thuận tiện để nối các giá trị id với
     một URI. Đoạn mã HTML trước sử dụng {@link android.content.ContentUris#withAppendedId
 withAppendedId()} để nối một id với URI nội dung Từ điển Người dùng.
@@ -359,8 +359,8 @@ withAppendedId()} để nối một id với URI nội dung Từ điển Ngườ
 </p>
 <p class="note">
     Để giải thích rõ, đoạn mã HTML trong phần này gọi
-    {@link android.content.ContentResolver#query ContentResolver.query()} trên "luồng UI"". Tuy nhiên, trong 
-    mã thực sự, bạn nên thực hiện các truy vấn không đồng bộ trên một luồng riêng. Một cách để làm 
+    {@link android.content.ContentResolver#query ContentResolver.query()} trên "luồng UI"". Tuy nhiên, trong
+    mã thực sự, bạn nên thực hiện các truy vấn không đồng bộ trên một luồng riêng. Một cách để làm
     điều này đó là sử dụng lớp {@link android.content.CursorLoader}, nó được mô tả chi tiết hơn
     trong hướng dẫn <a href="{@docRoot}guide/components/loaders.html">
     Trình tải</a>. Bênh cạnh đó, các dòng mã chỉ là đoạn mã HTML; chúng không thể hiện một ứng dụng
@@ -428,7 +428,7 @@ String[] mSelectionArgs = {""};
 <p>
     Đoạn mã HTML tiếp theo cho biết cách sử dụng
     {@link android.content.ContentResolver#query ContentResolver.query()}, bằng cách sử dụng Trình cung cấp Từ điển
-    Người dùng như một ví dụ. Truy vấn máy khách trình cung cấp tương tự như một truy vấn SQL, và nó chứa một 
+    Người dùng như một ví dụ. Truy vấn máy khách trình cung cấp tương tự như một truy vấn SQL, và nó chứa một
     tập hợp các cột để trả về, một tập hợp các tiêu chí lựa chọn, và một thứ tự sắp xếp.
 </p>
 <p>
@@ -438,8 +438,8 @@ String[] mSelectionArgs = {""};
 <p>
     Biểu thức để chỉ định các hàng cần truy xuất sẽ được chia thành một mệnh đề lựa chọn và
     tham đối lựa chọn. Mệnh đề lựa chọn là sự kết hợp giữa các biểu thức lô-gic và biểu thức Boolean,
-    tên cột, và giá trị (biến <code>mSelectionClause</code>). Nếu bạn chỉ định 
-    tham số thay thế được <code>?</code> thay vì một giá trị, phương pháp truy vấn sẽ truy xuất giá trị 
+    tên cột, và giá trị (biến <code>mSelectionClause</code>). Nếu bạn chỉ định
+    tham số thay thế được <code>?</code> thay vì một giá trị, phương pháp truy vấn sẽ truy xuất giá trị
     từ mảng tham đối lựa chọn (biến <code>mSelectionArgs</code>).
 </p>
 <p>
@@ -565,14 +565,14 @@ selectionArgs[0] = mUserInput;
 <!-- Displaying the results -->
 <h3 id="DisplayResults">Hiển thị các kết quả truy vấn</h3>
 <p>
-    Phương pháp máy khách {@link android.content.ContentResolver#query ContentResolver.query()} luôn trả về 
-    một {@link android.database.Cursor} chứa các cột được chỉ định bởi dự thảo của 
-    truy vấn cho các hàng khớp với các tiêu chí lựa chọn của truy vấn. Một đối tượng 
-    {@link android.database.Cursor} cung cấp truy cập đọc ngẫu nhiên vào các hàng và cột mà nó 
-    chứa. Bằng cách sử dụng phương pháp {@link android.database.Cursor}, bạn có thể lặp lại các hàng trong 
+    Phương pháp máy khách {@link android.content.ContentResolver#query ContentResolver.query()} luôn trả về
+    một {@link android.database.Cursor} chứa các cột được chỉ định bởi dự thảo của
+    truy vấn cho các hàng khớp với các tiêu chí lựa chọn của truy vấn. Một đối tượng
+    {@link android.database.Cursor} cung cấp truy cập đọc ngẫu nhiên vào các hàng và cột mà nó
+    chứa. Bằng cách sử dụng phương pháp {@link android.database.Cursor}, bạn có thể lặp lại các hàng trong
     kết quả, xác định kiểu dữ liệu của từng cột, lấy dữ liệu ra khỏi cột, và kiểm tra các tính chất khác
-    của kết quả. Một số triển khai {@link android.database.Cursor} sẽ tự động 
-    cập nhật đối tượng khi dữ liệu của trình cung cấp thay đổi, hoặc kích khởi các phương pháp trong một đối tượng quan sát 
+    của kết quả. Một số triển khai {@link android.database.Cursor} sẽ tự động
+    cập nhật đối tượng khi dữ liệu của trình cung cấp thay đổi, hoặc kích khởi các phương pháp trong một đối tượng quan sát
     khi {@link android.database.Cursor} thay đổi, hoặc cả hai.
 </p>
 <p class="note">
@@ -703,14 +703,14 @@ if (mCursor != null) {
 <p>
     Để nhận các quyền cần để truy cập một trình cung cấp, ứng dụng yêu cầu chúng bằng một phần tử
 <code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>
-    trong tệp bản kê khai của nó. Khi Trình quản lý Gói Android cài đặt các ứng dụng, người dùng 
+    trong tệp bản kê khai của nó. Khi Trình quản lý Gói Android cài đặt các ứng dụng, người dùng
     phải phê chuẩn tất cả quyền mà ứng dụng yêu cầu. Nếu người dùng phê chuẩn tất cả quyền, khi đó
     Trình quản lý Gói sẽ tiếp tục cài đặt; nếu người dùng không phê chuẩn chúng, Trình quản lý Gói sẽ
     hủy bỏ việc cài đặt.
 </p>
 <p>
     Phần tử
-<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code> 
+<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>
     sau yêu cầu quyền truy cập đọc vào Trình cung cấp Từ điển Người dùng:
 </p>
 <pre>
@@ -793,8 +793,8 @@ content://user_dictionary/words/&lt;id_value&gt;
     Để cập nhật một hàng, bạn sử dụng một đối tượng {@link android.content.ContentValues} với các giá trị
     được cập nhật giống như cách bạn làm với việc chèn, và các tiêu chí lựa chọn giống như cách bạn làm với truy vấn.
     Phương pháp máy khách mà bạn sử dụng là
-    {@link android.content.ContentResolver#update ContentResolver.update()}. Bạn chỉ cần thêm 
-    các giá trị vào đối tượng {@link android.content.ContentValues} cho các cột mà bạn đang cập nhật. Nếu bạn 
+    {@link android.content.ContentResolver#update ContentResolver.update()}. Bạn chỉ cần thêm
+    các giá trị vào đối tượng {@link android.content.ContentValues} cho các cột mà bạn đang cập nhật. Nếu bạn
     muốn xóa các nội dung của một cột, hãy đặt giá trị thành <code>null</code>.
 </p>
 <p>
@@ -828,7 +828,7 @@ mRowsUpdated = getContentResolver().update(
 </pre>
 <p>
     Bạn cũng nên thanh lọc thông tin đầu vào của người dùng khi gọi
-    {@link android.content.ContentResolver#update ContentResolver.update()}. Để tìm hiểu thêm về 
+    {@link android.content.ContentResolver#update ContentResolver.update()}. Để tìm hiểu thêm về
     điều này, hãy đọc phần <a href="#Injection">Bảo vệ trước mục nhập độc hại</a>.
 </p>
 <h3 id="Deleting">Xóa dữ liệu</h3>
@@ -858,7 +858,7 @@ mRowsDeleted = getContentResolver().delete(
 </pre>
 <p>
     Bạn cũng nên thanh lọc thông tin đầu vào của người dùng khi gọi
-    {@link android.content.ContentResolver#delete ContentResolver.delete()}. Để tìm hiểu thêm về 
+    {@link android.content.ContentResolver#delete ContentResolver.delete()}. Để tìm hiểu thêm về
     điều này, hãy đọc phần <a href="#Injection">Bảo vệ trước mục nhập độc hại</a>.
 </p>
 <!-- Provider Data Types -->
@@ -929,7 +929,7 @@ mRowsDeleted = getContentResolver().delete(
     </li>
     <li>
         <a href="#Intents">Truy cập dữ liệu thông qua ý định</a>: Mặc dù không thể gửi một ý định
-        trực tiếp tới một trình cung cấp, bạn có thể gửi một ý định tới ứng dụng của trình cung cấp đó, 
+        trực tiếp tới một trình cung cấp, bạn có thể gửi một ý định tới ứng dụng của trình cung cấp đó,
         đây thường là cách tốt nhất để sửa đổi dữ liệu của trình cung cấp.
     </li>
 </ul>
@@ -947,14 +947,14 @@ mRowsDeleted = getContentResolver().delete(
     bạn tạo một mảng đối tượng {@link android.content.ContentProviderOperation} rồi
     phân phối chúng tới một trình cung cấp nội dung bằng
     {@link android.content.ContentResolver#applyBatch ContentResolver.applyBatch()}. Bạn chuyển
-    <em>quyền</em> của trình cung cấp nội dung cho phương pháp này thay vì một URI nội dung cụ thể. 
+    <em>quyền</em> của trình cung cấp nội dung cho phương pháp này thay vì một URI nội dung cụ thể.
 Điều này cho phép đối tượng {@link android.content.ContentProviderOperation} trong mảng có tác dụng
     đối với một bảng khác. Một lệnh gọi tới {@link android.content.ContentResolver#applyBatch
     ContentResolver.applyBatch()} trả về một mảng kết quả.
 </p>
 <p>
     Mô tả lớp hợp đồng {@link android.provider.ContactsContract.RawContacts}
-    bao gồm một đoạn mã HTML thể hiện việc chèn hàng loạt. Ứng dụng mẫu 
+    bao gồm một đoạn mã HTML thể hiện việc chèn hàng loạt. Ứng dụng mẫu
     <a href="{@docRoot}resources/samples/ContactManager/index.html">Trình quản lý Danh bạ</a>
     có một ví dụ về truy cập hàng loạt trong tệp nguồn <code>ContactAdder.java</code>
     của nó.
@@ -1053,7 +1053,7 @@ mRowsDeleted = getContentResolver().delete(
         trả kiểm soát về ứng dụng của bạn.
     </li>
     <li>
-        Hoạt động của bạn trả về tiền cảnh, và hệ thống sẽ gọi phương pháp 
+        Hoạt động của bạn trả về tiền cảnh, và hệ thống sẽ gọi phương pháp
         {@link android.app.Activity#onActivityResult onActivityResult()}
         của hoạt động của bạn. Phương pháp này nhận được ý định kết quả do hoạt động lựa chọn tạo trong
         ứng dụng Danh bạ.

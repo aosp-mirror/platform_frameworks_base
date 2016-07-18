@@ -25,7 +25,7 @@ acesso direcionado a diretórios para esses tipos de aplicativos. Por exemplo:</
 ou {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} em seu manifesto
 permite o acesso a todos os diretórios públicos no armazenamento externo, o que pode ser mais do
 que o aplicativo precisa.</li>
-<li>Usar a 
+<li>Usar a
 <a href="{@docRoot}guide/topics/providers/document-provider.html">Estrutura de
 acesso ao armazenamento</a> geralmente faz com que o usuário selecione diretórios
 por meio de uma IU de sistema, o que é desnecessário se seu aplicativo sempre acessa o mesmo
@@ -54,7 +54,7 @@ o diretório de armazenamento externo para o arquivo.</p>
 Em volumes secundários, como cartões SD externos, passe nulo ao chamar
 <code>StorageVolume.createAccessIntent()</code> para solicitar acesso ao
 volume todo em vez de um diretório específico.
-<code>StorageVolume.createAccessIntent()</code> retornará nulo se você passar 
+<code>StorageVolume.createAccessIntent()</code> retornará nulo se você passar
 nulo no volume principal ou se passar um nome de diretório inválido.
 </p>
 
@@ -80,7 +80,7 @@ acesso ao diretório Pictures.</p>
 <code>onActivityResult()</code> com um código de resultado de
 <code>Activity.RESULT_OK</code> e os dados de intenção que contêm o URI. Use
 o URI fornecido para acessar as informações do diretório, o que é semelhante a usar URIs
-retornados pela 
+retornados pela
 <a href="{@docRoot}guide/topics/providers/document-provider.html">Estrutura de
 acesso ao armazenamento</a>.</p>
 

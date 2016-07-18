@@ -95,7 +95,7 @@ but rather they are meant to emphasize the common approaches that your icons can
 share with others on the device. Figure 1, at right, provides examples.  </p>
 
 <div class="figure">
-  <img src="{@docRoot}images/icon_design/IconGraphic_Icons_i.png" 
+  <img src="{@docRoot}images/icon_design/IconGraphic_Icons_i.png"
     width="340">
   <p class="img-caption">
     <strong>Figure 1.</strong> Example launcher icons for Android 2.0 and

@@ -66,7 +66,7 @@ sediakan listener sebagai gantinya.</p>
 <p>Anda bisa mengambil warna mencolok dari gambar dengan metode getter di kelas
 <code>Palette</code>, misalnya <code>Palette.getVibrantColor</code>.</p>
 
-<p>Untuk menggunakan kelas {@link android.support.v7.graphics.Palette} dalam proyek Anda, tambahkan 
+<p>Untuk menggunakan kelas {@link android.support.v7.graphics.Palette} dalam proyek Anda, tambahkan
 <a href="{@docRoot}sdk/installing/studio-build.html#dependencies">dependensi Gradle</a> berikut ke
 modul aplikasi Anda:</p>
 

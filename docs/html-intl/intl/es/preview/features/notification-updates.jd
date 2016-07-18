@@ -194,7 +194,7 @@ notificationManager.notify(notificationId, repliedNotification);
 </ol>
 
 <p>
-  En el caso de las aplicaciones interactivas, como los chats, podría ser útil incluir 
+  En el caso de las aplicaciones interactivas, como los chats, podría ser útil incluir
  contexto adicional cuando se administra texto recuperado. Por ejemplo, en estas aplicaciones, se podrían mostrar
  múltiples líneas de historial de chat. Cuando el usuario responde a través de {@link
   android.support.v4.app.RemoteInput}, puedes actualizar el historial de respuestas

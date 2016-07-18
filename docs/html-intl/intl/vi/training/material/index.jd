@@ -17,7 +17,7 @@ page.metaDescription=Tìm hiểu cách áp dụng material design cho ứng dụ
 
 <p>Material design là một hướng dẫn toàn diện về thiết kế trực quan, chuyển động
 và tương tác giữa nhiều nền tảng và thiết bị. Để sử dụng material design trong ứng dụng Androi của mình, hãy làm theo hướng dẫn
-mô tả trong 
+mô tả trong
 <a href="http://www.google.com/design/spec/material-design/introduction.html">đặc tả
 material design</a> và sử dụng những thành phần và tính năng mới sẵn có trong Android 5.0
 (API mức 21).</p>

@@ -91,7 +91,7 @@ public class RSSPullService extends IntentService {
 </p>
 <h2 id="ReceiveStatus">Receive Status Broadcasts from an IntentService</h2>
 <p>
-    
+
     To receive broadcast {@link android.content.Intent} objects, use a subclass of
     {@link android.content.BroadcastReceiver}. In the subclass, implement the
     {@link android.content.BroadcastReceiver#onReceive BroadcastReceiver.onReceive()} callback
@@ -137,7 +137,7 @@ public class DisplayActivity extends FragmentActivity {
         // The filter's action is BROADCAST_ACTION
         IntentFilter mStatusIntentFilter = new IntentFilter(
                 Constants.BROADCAST_ACTION);
-    
+
         // Adds a data filter for the HTTP scheme
         mStatusIntentFilter.addDataScheme("http");
         ...
@@ -194,6 +194,6 @@ public class DisplayActivity extends FragmentActivity {
     {@link android.content.Intent}.
 </p>
 <p>
-    
+
 </p>
 

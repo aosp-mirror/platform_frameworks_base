@@ -1,6 +1,6 @@
 page.title=User Interface
 page.landing=true
-page.landing.intro=Your app's user interface is everything that the user can see and interact with. Android provides a variety of pre-built UI components such as structured layout objects and UI controls that allow you to build the graphical user interface for your app. Android also provides other UI modules for special interfaces such as dialogs, notifications, and menus.  
+page.landing.intro=Your app's user interface is everything that the user can see and interact with. Android provides a variety of pre-built UI components such as structured layout objects and UI controls that allow you to build the graphical user interface for your app. Android also provides other UI modules for special interfaces such as dialogs, notifications, and menus.
 page.landing.image=images/ui/ui_index.png
 page.landing.next=overview.html
 

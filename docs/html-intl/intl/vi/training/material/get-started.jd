@@ -94,7 +94,7 @@ bố trí của bạn, hãy đặc biệt chú ý tới điều sau đây:</p>
 
 <h2 id="Depth">Quy định Độ cao trong Dạng xem của Bạn</h2>
 
-<p>Dạng xem có thể đổ bóng và giá trị độ cao của một dạng xem 
+<p>Dạng xem có thể đổ bóng và giá trị độ cao của một dạng xem
 xác định kích cỡ bóng và thứ tự vẽ của nó. Để đặt độ cao của một dạng xem, hãy sử dụng thuộc tính
 <code>android:elevation</code> trong bố trí của bạn:</p>
 
@@ -122,7 +122,7 @@ chạm</a>.</p>
 <p>{@link android.support.v7.widget.RecyclerView} là một phiên bản dễ ghép nối hơn của {@link
 android.widget.ListView} có hỗ trợ các kiểu bố trí khác nhau và cung cấp những cải tiến về hiệu năng.
 {@link android.support.v7.widget.CardView} cho phép bạn hiện các mẩu thông tin bên trong thẻ với
-một diện mạo nhất quán giữa các ứng dụng. Ví dụ về mã sau đây minh họa cách thêm 
+một diện mạo nhất quán giữa các ứng dụng. Ví dụ về mã sau đây minh họa cách thêm
 {@link android.support.v7.widget.CardView} vào bố trí của bạn:</p>
 
 <pre>
