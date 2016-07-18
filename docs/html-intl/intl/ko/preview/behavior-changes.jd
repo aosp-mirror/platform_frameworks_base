@@ -167,7 +167,7 @@ CPU 및 네트워크 제한의 하위 세트를 적용하여 잠자기 모드를
  Android N 기기를 올바로 대상으로 삼을 수 있도록 이들 인텐트에 대한 종속성을 최대한 빨리 제거해야 합니다.
   Android 프레임워크는 이러한 암시적 브로드캐스트의
  필요성을 줄이기 위한 여러 가지 해결책을 제공합니다. 예를 들어, {@link
- android.app.job.JobScheduler} API는 지정된 조건(예: 
+ android.app.job.JobScheduler} API는 지정된 조건(예:
 고정 요금제 네트워크에 연결)이 충족될 경우 네트워크 운영을 예약할 수 있는
 강력한 메커니즘을 제공합니다. 심지어 {@link
  android.app.job.JobScheduler}를 사용하여 콘텐츠 공급자의 변경 사항에 대응할 수도 있습니다.
@@ -224,7 +224,7 @@ API 또는 {@link java.io.File File} API를 사용하여 개인 디렉터리에 
 대상으로 하는 앱은 {@link android.app.DownloadManager#COLUMN_LOCAL_FILENAME}에 액세스할 때 {@link java.lang.SecurityException}을
 트리거합니다.
 
-    
+
 {@link
  android.app.DownloadManager.Request#setDestinationInExternalFilesDir
  DownloadManager.Request.setDestinationInExternalFilesDir()} 또는
@@ -562,7 +562,7 @@ TCP 소켓에 대한 쓰기를 엄격 모드 위반으로서 플래그하지 못
 </li>
 
 <li>
-{@code Debug.startMethodTracing()} 계열에 속하는 메서드는, 
+{@code Debug.startMethodTracing()} 계열에 속하는 메서드는,
 SD 카드의 최상위 레벨에 저장하는 것이 아니라, 이제 공유 저장소의
 패키지별 디렉터리에 출력을 기본적으로
 저장합니다.  즉, 앱은 이들 API를 사용하기 위해 {@code WRITE_EXTERNAL_STORAGE} 권한을 요청할 필요가 더 이상 없습니다.

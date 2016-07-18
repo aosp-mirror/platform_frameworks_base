@@ -21,14 +21,14 @@ parent.link=activities.html
         </ol>
     </li>
   </ol>
-    
+
   <h2>关键类</h2>
     <ol>
       <li>{@link android.app.LoaderManager}</li>
       <li>{@link android.content.Loader}</li>
 
-    </ol>   
-    
+    </ol>
+
     <h2>相关示例</h2>
    <ol>
      <li> <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderCursor.html">
@@ -51,7 +51,7 @@ android.app.Fragment}。</li>
 因此，它们无需重新查询其数据。
 </li>
   </ul>
- 
+
 <h2 id="summary">Loader API 摘要</h2>
 
 <p>在应用中使用加载器时，可能会涉及到多个类和接口。
@@ -129,7 +129,7 @@ android.content.ContentProvider} 支持的数据。您也可以实现自己的
 或 {@link android.content.AsyncTaskLoader} 子类，从其他源中加载数据。</li>
   <li>一个
 {@link android.app.LoaderManager.LoaderCallbacks}
-实现。您可以使用它来创建新加载器，并管理对现有加载器的引用。</li> 
+实现。您可以使用它来创建新加载器，并管理对现有加载器的引用。</li>
 <li>一种显示加载器数据的方法，如 {@link
 android.widget.SimpleCursorAdapter}。</li>
   <li>使用
@@ -140,11 +140,11 @@ android.widget.SimpleCursorAdapter}。</li>
 <p>{@link android.app.LoaderManager} 可在 {@link android.app.Activity} 或
 {@link android.app.Fragment} 内管理一个或多个 {@link
 android.content.Loader} 实例。每个 Activity 或片段只有一个 {@link
-android.app.LoaderManager}。</p> 
+android.app.LoaderManager}。</p>
 
 <p>通常，您会使用 Activity 的 {@link
 android.app.Activity#onCreate onCreate()} 方法或片段的
-{@link android.app.Fragment#onActivityCreated onActivityCreated()} 
+{@link android.app.Fragment#onActivityCreated onActivityCreated()}
 方法初始化 {@link android.content.Loader}。您执行操作如下：
 </p>
 
@@ -157,13 +157,13 @@ getLoaderManager().initLoader(0, null, this);</pre>
 <ul>
   <li>用于标识加载器的唯一 ID。在此示例中，ID 为 0。</li>
 <li>在构建时提供给加载器的可选参数（在此示例中为 <code>null</code>
-）。</li> 
+）。</li>
 
 <li>{@link android.app.LoaderManager.LoaderCallbacks} 实现，
 {@link android.app.LoaderManager} 将调用此实现来报告加载器事件。在此示例中，本地类实现
 {@link
 android.app.LoaderManager.LoaderCallbacks}
-接口，因此它会将引用 {@code this} 传递给自己。</li> 
+接口，因此它会将引用 {@code this} 传递给自己。</li>
 </ul>
 <p>{@link android.app.LoaderManager#initLoader initLoader()}
 调用确保加载器已初始化且处于Activity状态。这可能会出现两种结果：</p>
@@ -362,11 +362,11 @@ public void onLoaderReset(Loader&lt;Cursor&gt; loader) {
 
 <h2 id="example">示例</h2>
 
-<p>以下是一个 
+<p>以下是一个
 {@link
 android.app.Fragment} 完整实现示例。它展示了一个 {@link android.widget.ListView}，其中包含针对联系人内容提供程序的查询结果。它使用 {@link
 android.content.CursorLoader} 管理提供程序的查询。</p>
- 
+
 <p>应用如需访问用户联系人（正如此示例中所示），其清单文件必须包括权限
 {@link android.Manifest.permission#READ_CONTACTS READ_CONTACTS}。
 </p>

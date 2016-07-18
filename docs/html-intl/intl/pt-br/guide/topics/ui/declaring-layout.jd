@@ -43,7 +43,7 @@ simples</a></li> </div>
 <ul>
 <li><strong>Declarar elementos da IU em XML</strong>. O Android fornece um vocabulário XML
 direto que corresponde às classes e subclasses de View, como as de widgets e layouts.</li>
-<li><strong>Instanciar elementos do layout em tempo de execução</strong>. 
+<li><strong>Instanciar elementos do layout em tempo de execução</strong>.
 O aplicativo pode criar objetos de View e ViewGroup (e manipular suas propriedades) programaticamente. </li>
 </ul>
 
@@ -123,7 +123,7 @@ public void onCreate(Bundle savedInstanceState) {
 </pre>
 
 <p>O método de retorno de chamada <code>onCreate()</code> na Atividade é chamado pela estrutura do Android quando
-ela é inicializada (veja a discussão sobre ciclos de vida no documento 
+ela é inicializada (veja a discussão sobre ciclos de vida no documento
 <a href="{@docRoot}guide/components/activities.html#Lifecycle">Atividades</a>
 ).</p>
 
@@ -201,7 +201,7 @@ de layout associados a cada uma delas.</p>
 valores. Cada elemento filho deve definir LayoutParams apropriados para seu pai,
 embora possa também definir diferentes LayoutParams para os próprios filhos. </p>
 
-<p>Todos os grupos de vistas contêm largura e altura (<code>layout_width</code> e 
+<p>Todos os grupos de vistas contêm largura e altura (<code>layout_width</code> e
 <code>layout_height</code>) e cada vista é obrigatória para defini-las. Muitos
 LayoutParams também contêm margens e bordas opcionais. <p>
 
@@ -229,7 +229,7 @@ Recursos disponíveis</a>.</p>
 <h2 id="Position">Posição do layout</h2>
    <p>
    A geometria de uma vista de um retângulo. As vistas têm uma localização,
-   expressa como um par de coordenadas <em>esquerda</em> e <em>topo</em> 
+   expressa como um par de coordenadas <em>esquerda</em> e <em>topo</em>
    e duas dimensões, expressas como largura e altura. A unidade de localização
    e de dimensões é o pixel.
    </p>
@@ -262,7 +262,7 @@ desnecessárias, chamados {@link android.view.View#getRight()} e {@link android.
    <p>
    O primeiro par é conhecido como <em>largura medida</em>
    e <em>altura medida</em>. Essas dimensões definem o tamanho que a vista terá
-   dentro da vista pai. 
+   dentro da vista pai.
    Para obter as dimensões medidas, chamam-se {@link android.view.View#getMeasuredWidth()}
    e {@link android.view.View#getMeasuredHeight()}.
    </p>
@@ -368,7 +368,7 @@ partially or totally obscuring them (unless the newer object is transparent).
 <h2 id="AdapterViews" style="clear:left">Criação de layouts com um adaptador</h2>
 
 <p>Quando o conteúdo do layout é dinâmico ou não predeterminado, é possível usar um layout que
-torne {@link android.widget.AdapterView} uma subclasse para preencher o layout com vistas em tempo de execução. 
+torne {@link android.widget.AdapterView} uma subclasse para preencher o layout com vistas em tempo de execução.
 Uma subclasse da classe {@link android.widget.AdapterView} usa um {@link android.widget.Adapter}
 para agrupar dados ao seu layout. O {@link android.widget.Adapter} se comporta como um intermediário entre a fonte
 dos dados e o layout do {@link android.widget.AdapterView} &mdash; o {@link android.widget.Adapter}
@@ -399,7 +399,7 @@ a um {@link android.widget.Adapter}, o que recupera dados de uma fonte externa e
 android.view.View} que representa cada entrada de dados.</p>
 
 <p>O Android oferece diversas subclasses de {@link android.widget.Adapter} que são úteis para
-recuperar diferentes tipos de dados e criar vistas de um {@link android.widget.AdapterView}. 
+recuperar diferentes tipos de dados e criar vistas de um {@link android.widget.AdapterView}.
 Os dois adaptadores mais comuns são:</p>
 
 <dl>
@@ -438,7 +438,7 @@ getView()} para retornar o tipo de vista que deseja para cada item.</p>
 </dd>
 
   <dt>{@link android.widget.SimpleCursorAdapter}</dt>
-    <dd>Use este adaptador quando os dados vierem de um {@link android.database.Cursor}. 
+    <dd>Use este adaptador quando os dados vierem de um {@link android.database.Cursor}.
 Ao usar {@link android.widget.SimpleCursorAdapter}, é necessário especificar um layout a usar para cada
 linha no {@link android.database.Cursor} e que colunas no {@link android.database.Cursor}
 devem ser inseridas em determinadas vistas do layout. Por exemplo: se você deseja criar uma lista
@@ -466,7 +466,7 @@ fromColumns} na vista {@code toViews} correspondente.</p>.</dd>
 </dl>
 
 
-<p>Se durante o curso de vida do aplicativo, você mudar os dados subjacentes lidos 
+<p>Se durante o curso de vida do aplicativo, você mudar os dados subjacentes lidos
 pelo adaptador, chame {@link android.widget.ArrayAdapter#notifyDataSetChanged()}. Isso
 notificará à vista anexada que os dados foram alterados e que ela deve se atualizar.</p>
 

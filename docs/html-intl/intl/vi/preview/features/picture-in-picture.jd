@@ -128,7 +128,7 @@ các hành động ở chế độ PIP trên thanh điều khiển và sử dụ
 video. Hãy xóa các phần tử UI trước khi hoạt động của bạn vào chế độ PIP,
 và khôi phục các phần tử này khi hoạt động quay lại chế độ toàn màn hình.
 Ghi đè phương thức <code>Activity.onPictureInPictureChanged()</code> hoặc
-<code>Fragment.onPictureInPictureChanged()</code> và bật hoặc 
+<code>Fragment.onPictureInPictureChanged()</code> và bật hoặc
 tắt các phần tử UI khi cần thiết, ví dụ:</p>
 
 <pre>
@@ -150,7 +150,7 @@ public void onPictureInPictureChanged(boolean inPictureInPicture) {
 <p>Khi hoạt động của bạn chuyển sang chế độ PIP thì hệ thống sẽ coi hoạt động đó đang ở trong
 trạng thái tạm dừng và sẽ gọi phương thức <code>onPause()</code> của hoạt động. Việc phát lại
 video không nên được tạm dừng và cần được tiếp tục phát nếu hoạt động
-bị tạm dừng do chế độ PIP. Hãy kiểm tra chế độ PIP trong phương thức 
+bị tạm dừng do chế độ PIP. Hãy kiểm tra chế độ PIP trong phương thức
 <code>onPause()</code> của hoạt động và xử lý việc phát lại cho phù hợp, ví
 dụ:</p>
 

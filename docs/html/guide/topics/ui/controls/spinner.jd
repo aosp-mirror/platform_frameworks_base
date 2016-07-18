@@ -4,7 +4,7 @@ page.tags=adapterview,spinneradapter
 
 <div id="qv-wrapper">
 <div id="qv">
-  
+
 <h2>In this document</h2>
 <ol>
   <li><a href="#Populate">Populate the Spinner with User Choices</a></li>
@@ -113,8 +113,8 @@ For example, here's an implementation of the interface in an {@link android.app.
 <pre>
 public class SpinnerActivity extends Activity implements OnItemSelectedListener {
     ...
-    
-    public void onItemSelected(AdapterView&lt;?> parent, View view, 
+
+    public void onItemSelected(AdapterView&lt;?> parent, View view,
             int pos, long id) {
         // An item was selected. You can retrieve the selected item using
         // parent.getItemAtPosition(pos)

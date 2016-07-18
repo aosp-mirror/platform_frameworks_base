@@ -32,7 +32,7 @@ page.metaDescription=Android Auto에 앱 및 콘텐츠를 배포합니다.
 
 <p>
   시작하려면 이 문서를 참조하여 Google Play를 통해 사용자에게 Auto 앱을 배포하는 방법을 배우십시오.
- 앱이 충족해야 하는 유용성, 품질 및 안전 관련 가이드라인에 대한 내용은 
+ 앱이 충족해야 하는 유용성, 품질 및 안전 관련 가이드라인에 대한 내용은
 <a href="{@docRoot}distribute/essentials/quality/auto.html">Auto 앱 품질</a>
 을 참조하십시오.
  앱이 준비되면 개발자 콘솔의 약관에 동의하고 검토용 APK를 업로드할 수 있습니다.
@@ -98,7 +98,7 @@ page.metaDescription=Android Auto에 앱 및 콘텐츠를 배포합니다.
   Auto 앱은 잘 작동하고 차 안에서 멋있게 보이고 최고의 사용자 경험을 제공하도록 디자인해야 합니다.
    Google Play는 사용자가 Google Play에서 쉽게 검색할 수 있도록 선정된 고품질 Auto 앱을 소개합니다.
  다음과 같은 방법으로 참여하여 사용자에게 멋진 Android Auto 앱을 제공할 수 있습니다.
-  
+
 </p>
 
 <ul>
@@ -127,7 +127,7 @@ page.metaDescription=Android Auto에 앱 및 콘텐츠를 배포합니다.
 
 <p>
   약관에 동의한 후에만 Auto 앱을 업로드할 수 있습니다. 다음은 Auto 앱을 지정하는 기준에 대한 설명입니다.
-  
+
 </p>
 
 <ul>
@@ -159,10 +159,10 @@ page.metaDescription=Android Auto에 앱 및 콘텐츠를 배포합니다.
 
 <p>
   검토는 휴대폰이나 태블릿 등 Google Play 스토어의 다른 장치에서 앱의 사용 가능성을 결정합니다.
-  
+
   휴대폰/태블릿 구성요소 업데이트를 포함한 기존 앱이 있는 경우, Android Auto 구성요소가 검토를 통과해야 Google Play 스토어에서 업데이트된 앱을 사용할 수 있습니다.
 
-  
+
 </p>
 
 <p>
@@ -209,7 +209,7 @@ page.metaDescription=Android Auto에 앱 및 콘텐츠를 배포합니다.
 <p>앱이 승인되지 않으면 개발자는 해결해야 할 문제에 대한 요약이 포함된 <strong>알림 이메일을 개발자 계정 주소</strong>로 받게 됩니다.
    필요한 조정을 거친 후에 새로운 앱 버전을 개발자 콘솔에 업로드할 수 있습니다.
 
-  
+
 </p>
 
 <p>

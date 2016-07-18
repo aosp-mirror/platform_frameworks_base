@@ -146,7 +146,7 @@ TV 端末で、アプリがピクチャ イン ピクチャ モードで動画�
   ユーザーがウィンドウのサイズを変更して、高さや幅を拡大した場合、ユーザー操作に一致するようにアクティビティのサイズが変更され、必要に応じて、<a href="{@docRoot}guide/topics/resources/runtime-changes.html">実行時の変更</a>が発行されます。
 
 アプリで新しく表示された領域を描画するまでに時間がかかる場合、{@link
-  android.R.attr#windowBackground windowBackground} 属性またはデフォルトの 
+  android.R.attr#windowBackground windowBackground} 属性またはデフォルトの
 <code>windowBackgroundFallback</code> システム属性によって指定された色でこれらの領域が一時的に塗りつぶされます。
 
 </p>
@@ -158,7 +158,7 @@ TV 端末で、アプリがピクチャ イン ピクチャ モードで動画�
 サイズとレイアウトを制御するための属性をマニフェストに設定できます。
 
   ルート アクティビティ属性の設定は、タスクスタック内のすべてのアクティビティに適用されます。
-たとえば、ルート アクティビティにより 
+たとえば、ルート アクティビティにより
 <code>android:resizeableActivity</code> が true に設定されると、タスク スタック内のすべてのアクティビティのサイズを変更できるようになります。
 
 </p>
@@ -175,7 +175,7 @@ TV 端末で、アプリがピクチャ イン ピクチャ モードで動画�
 
 <h4 id="resizeableActivity">android:resizeableActivity</h4>
 <p>
-  マルチ ウィンドウ ディスプレイを有効または無効にするには、この属性をマニフェストの <code>&lt;activity&gt;</code> ノードまたは 
+  マルチ ウィンドウ ディスプレイを有効または無効にするには、この属性をマニフェストの <code>&lt;activity&gt;</code> ノードまたは
 <code>&lt;application&gt;</code> ノードに設定します。
 
 </p>
@@ -361,7 +361,7 @@ android:supportsPictureInPicture=["true" | "false"]
 <h3 id="entering-pip">ピクチャ イン ピクチャ モードにする</h3>
 
 <p>
-  アクティビティをピクチャ イン ピクチャ モードにするには、新しいメソッド 
+  アクティビティをピクチャ イン ピクチャ モードにするには、新しいメソッド
 <code>Activity.enterPictureInPictureMode()</code> を呼び出します。端末がピクチャ イン ピクチャ モードをサポートしない場合、このメソッドの効果はありません。
 詳細については、<a href="picture-in-picture.html">ピクチャ イン ピクチャ</a>に関するドキュメントをご覧ください。
 
@@ -371,7 +371,7 @@ android:supportsPictureInPicture=["true" | "false"]
 
 <p>
   新しいアクティビティを起動するときに、可能であれば、新しいアクティビティを現在のアクティビティの隣に表示する必用があるかどうかをシステムに示すことができます。
-そうするには、フラグ 
+そうするには、フラグ
 <code>Intent.FLAG_ACTIVITY_LAUNCH_TO_ADJACENT</code> を使用します。
 このフラグを渡すと、次の動作がリクエストされます。
 
@@ -434,10 +434,10 @@ android:supportsPictureInPicture=["true" | "false"]
   </dt>
 
   <dd>
-    {@link android.view.View#startDrag View.startDrag()} の新しいエイリアスです。異なるアクティビティ間のドラッグ＆ドロップを有効にするには、新しいフラグ 
+    {@link android.view.View#startDrag View.startDrag()} の新しいエイリアスです。異なるアクティビティ間のドラッグ＆ドロップを有効にするには、新しいフラグ
 <code>View.DRAG_FLAG_GLOBAL</code> を渡します。
-URI パーミッションを受け取る側のアクティビティに付与する必要がある場合、必要に応じて、新しいフラグ 
-<code>View.DRAG_FLAG_GLOBAL_URI_READ</code> または 
+URI パーミッションを受け取る側のアクティビティに付与する必要がある場合、必要に応じて、新しいフラグ
+<code>View.DRAG_FLAG_GLOBAL_URI_READ</code> または
 <code>View.DRAG_FLAG_GLOBAL_URI_WRITE</code> を渡します。
 
   </dd>
@@ -581,7 +581,7 @@ URI パーミッションを受け取る側のアクティビティに付与す�
 <h3 id="test-disabled-mw">マルチ ウィンドウのサポートを無効にしている場合</h3>
 
 <p>
-  
+
 <code>android:resizableActivity="false"</code> を設定して、マルチ ウィンドウのサポートを無効にした場合は、Android N を実行している端末でアプリを起動し、アプリをフリーフォーム モードおよび分割画面モードにすることを試みる必要があります。
 
 アプリをマルチ ウィンドウ モードにすることを試みたとき、アプリが全画面モードのままであることを確認してください。

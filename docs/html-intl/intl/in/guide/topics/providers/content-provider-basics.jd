@@ -236,7 +236,7 @@ page.title=Dasar-Dasar Penyedia Konten
     Misalnya, untuk mendapatkan daftar kata dan lokalnya dari Penyedia Kamus Pengguna,
     Anda memanggil {@link android.content.ContentResolver#query ContentResolver.query()}.
     Metode {@link android.content.ContentResolver#query query()} memanggil
-    metode {@link android.content.ContentProvider#query ContentProvider.query()} yang didefinisikan oleh 
+    metode {@link android.content.ContentProvider#query ContentProvider.query()} yang didefinisikan oleh
     Penyedia Kamus Pengguna. Baris-baris kode berikut menunjukkan sebuah
     panggilan {@link android.content.ContentResolver#query ContentResolver.query()}:
 <p>
@@ -251,7 +251,7 @@ mCursor = getContentResolver().query(
 </pre>
 <p>
     Tabel 2 menampilkan cara argumen untuk
-    {@link android.content.ContentResolver#query 
+    {@link android.content.ContentResolver#query
     query(Uri,projection,selection,selectionArgs,sortOrder)} cocok dengan sebuah pernyataan SELECT di SQL:
 </p>
 <p class="table-caption">
@@ -310,7 +310,7 @@ mCursor = getContentResolver().query(
     {@link android.provider.UserDictionary.Words#CONTENT_URI} mengandung URI konten dari
     tabel "words" kamus pengguna. Objek {@link android.content.ContentResolver}
     akan mengurai otoritas URI, dan menggunakannya untuk "mengetahui" penyedia dengan
-    membandingkan otoritas tersebut dengan sebuah tabel sistem berisi penyedia yang dikenal. 
+    membandingkan otoritas tersebut dengan sebuah tabel sistem berisi penyedia yang dikenal.
 {@link android.content.ContentResolver}    kemudian bisa mengirim argumen query ke penyedia
     yang benar.
 </p>
@@ -343,8 +343,8 @@ Uri singleUri = ContentUris.withAppendedId(UserDictionary.Words.CONTENT_URI,4);
     salah satunya.
 </p>
 <p class="note">
-    <strong>Catatan:</strong> Kelas-kelas {@link android.net.Uri} dan {@link android.net.Uri.Builder} 
-    berisi metode praktis untuk membangun objek dari string URI yang tersusun dengan baik. 
+    <strong>Catatan:</strong> Kelas-kelas {@link android.net.Uri} dan {@link android.net.Uri.Builder}
+    berisi metode praktis untuk membangun objek dari string URI yang tersusun dengan baik.
 {@link android.content.ContentUris}    berisi metode praktis untuk menambahkan nilai ID ke
     URI. Cuplikan kode sebelumnya menggunakan {@link android.content.ContentUris#withAppendedId
     withAppendedId()} untuk menambahkan id ke URI konten User Dictionary.
@@ -359,8 +359,8 @@ Uri singleUri = ContentUris.withAppendedId(UserDictionary.Words.CONTENT_URI,4);
 </p>
 <p class="note">
     Demi kejelasan, cuplikan kode di bagian ini memanggil
-    {@link android.content.ContentResolver#query ContentResolver.query()} pada "UI thread"". Akan tetapi, dalam 
-    kode sesungguhnya, Anda harus melakukan query secara asinkron pada sebuah thread terpisah. Satu cara melakukannya 
+    {@link android.content.ContentResolver#query ContentResolver.query()} pada "UI thread"". Akan tetapi, dalam
+    kode sesungguhnya, Anda harus melakukan query secara asinkron pada sebuah thread terpisah. Satu cara melakukannya
     adalah menggunakan kelas {@link android.content.CursorLoader}, yang dijelaskan
     lebih detail dalam panduan <a href="{@docRoot}guide/components/loaders.html">
     Loader</a>. Juga, baris-baris kode tersebut hanyalah cuplikan; tidak menunjukkan sebuah aplikasi
@@ -428,7 +428,7 @@ String[] mSelectionArgs = {""};
 <p>
     Cuplikan berikutnya menampilkan cara menggunakan
     {@link android.content.ContentResolver#query ContentResolver.query()}, dengan menggunakan Penyedia Kamus Pengguna
-    sebagai contoh. Query klien penyedia serupa dengan query SQL, dan berisi satu 
+    sebagai contoh. Query klien penyedia serupa dengan query SQL, dan berisi satu
     set kolom yang akan dihasilkan, satu set kriteria pemilihan, dan urutan sortir.
 </p>
 <p>
@@ -438,8 +438,8 @@ String[] mSelectionArgs = {""};
 <p>
     Ekspresi yang menetapkan baris yang harus diambil dipecah menjadi klausa pemilihan dan
     argumen pemilihan. Klausa pemilihan adalah kombinasi ekspresi logis dan boolean,
-    nama kolom, dan nilai (variabel <code>mSelectionClause</code>). Jika Anda menetapkan 
-    parameter <code>?</code> yang bisa diganti, sebagai ganti nilai, metode query akan mengambil nilai 
+    nama kolom, dan nilai (variabel <code>mSelectionClause</code>). Jika Anda menetapkan
+    parameter <code>?</code> yang bisa diganti, sebagai ganti nilai, metode query akan mengambil nilai
     dari larik argumen pemilihan (variabel <code>mSelectionArgs</code>).
 </p>
 <p>
@@ -558,21 +558,21 @@ String[] selectionArgs = {""};
 selectionArgs[0] = mUserInput;
 </pre>
 <p>
-    Sebuah klausa pemilihan yang menggunakan <code>?</code> sebagai parameter yang bisa diganti dan sebuah larik 
+    Sebuah klausa pemilihan yang menggunakan <code>?</code> sebagai parameter yang bisa diganti dan sebuah larik
     argumen pemilihan adalah cara yang lebih disukai untuk menyebutkan pemilihan, sekalipun penyedia tidak
     dibuat berdasarkan database SQL.
 </p>
 <!-- Displaying the results -->
 <h3 id="DisplayResults">Menampilkan hasil query</h3>
 <p>
-    Metode klien {@link android.content.ContentResolver#query ContentResolver.query()} selalu 
-    menghasilkan {@link android.database.Cursor} berisi kolom-kolom yang ditetapkan oleh 
+    Metode klien {@link android.content.ContentResolver#query ContentResolver.query()} selalu
+    menghasilkan {@link android.database.Cursor} berisi kolom-kolom yang ditetapkan oleh
     proyeksi query untuk baris yang cocok dengan kriteria pemilihan query. Objek
-    {@link android.database.Cursor} menyediakan akses baca acak ke baris dan kolom yang 
-    dimuatnya. Dengan metode {@link android.database.Cursor}, Anda bisa mengulang baris-baris dalam 
+    {@link android.database.Cursor} menyediakan akses baca acak ke baris dan kolom yang
+    dimuatnya. Dengan metode {@link android.database.Cursor}, Anda bisa mengulang baris-baris dalam
     hasil, menentukan tipe data tiap kolom, mengambil data dari kolom, dan memeriksa
-    properti lain dari hasil. Beberapa implementasi {@link android.database.Cursor} 
-    akan memperbarui objek secara otomatis bila data penyedia berubah, atau memicu metode dalam objek pengamat 
+    properti lain dari hasil. Beberapa implementasi {@link android.database.Cursor}
+    akan memperbarui objek secara otomatis bila data penyedia berubah, atau memicu metode dalam objek pengamat
     bila {@link android.database.Cursor} berubah, atau keduanya.
 </p>
 <p class="note">
@@ -703,14 +703,14 @@ if (mCursor != null) {
 <p>
     Untuk mendapatkan izin yang diperlukan untuk mengakses penyedia, aplikasi memintanya dengan elemen
 <code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>
-    dalam file manifesnya. Bila Android Package Manager memasang aplikasi, pengguna 
-    harus menyetujui semua izin yang diminta aplikasi. Jika pengguna menyetujui semuanya, 
+    dalam file manifesnya. Bila Android Package Manager memasang aplikasi, pengguna
+    harus menyetujui semua izin yang diminta aplikasi. Jika pengguna menyetujui semuanya,
     Package Manager akan melanjutkan instalasi; jika pengguna tidak menyetujui, Package Manager
     akan membatalkan instalasi.
 </p>
 <p>
     Elemen
-<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code> 
+<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>
     berikut meminta akses baca ke Penyedia Kamus Pengguna:
 </p>
 <pre>
@@ -793,8 +793,8 @@ content://user_dictionary/words/&lt;id_value&gt;
     Untuk memperbarui sebuah baris, gunakan objek {@link android.content.ContentValues} dengan
     nilai-nilai yang diperbarui, persis seperti yang Anda lakukan pada penyisipan, dan kriteria pemilihan persis seperti yang Anda lakukan pada query.
     Metode klien yang Anda gunakan adalah
-    {@link android.content.ContentResolver#update ContentResolver.update()}. Anda hanya perlu menambahkan 
-    nilai-nilai ke objek {@link android.content.ContentValues} untuk kolom yang sedang Anda perbarui. Jika Anda 
+    {@link android.content.ContentResolver#update ContentResolver.update()}. Anda hanya perlu menambahkan
+    nilai-nilai ke objek {@link android.content.ContentValues} untuk kolom yang sedang Anda perbarui. Jika Anda
     ingin membersihkan konten kolom, aturlah nilai ke <code>null</code>.
 </p>
 <p>
@@ -828,7 +828,7 @@ mRowsUpdated = getContentResolver().update(
 </pre>
 <p>
     Anda juga harus membersihkan input pengguna bila memanggil
-    {@link android.content.ContentResolver#update ContentResolver.update()}. Untuk mengetahui selengkapnya tentang 
+    {@link android.content.ContentResolver#update ContentResolver.update()}. Untuk mengetahui selengkapnya tentang
     hal ini, bacalah bagian <a href="#Injection">Melindungi dari input merusak</a>.
 </p>
 <h3 id="Deleting">Menghapus data</h3>
@@ -858,7 +858,7 @@ mRowsDeleted = getContentResolver().delete(
 </pre>
 <p>
     Anda juga harus membersihkan input pengguna bila memanggil
-    {@link android.content.ContentResolver#delete ContentResolver.delete()}. Untuk mengetahui selengkapnya tentang 
+    {@link android.content.ContentResolver#delete ContentResolver.delete()}. Untuk mengetahui selengkapnya tentang
     hal ini, bacalah bagian <a href="#Injection">Melindungi dari input merusak</a>.
 </p>
 <!-- Provider Data Types -->
@@ -883,7 +883,7 @@ mRowsDeleted = getContentResolver().delete(
     </ul>
 <p>
     Tipe data lain yang sering digunakan penyedia adalah Binary Large OBject (BLOB) yang diimplementasikan sebagai
-    larik byte 64 KB. Anda bisa melihat tipe data yang tersedia dengan memperhatikan metode "get" 
+    larik byte 64 KB. Anda bisa melihat tipe data yang tersedia dengan memperhatikan metode "get"
     kelas {@link android.database.Cursor}.
 </p>
 <p>
@@ -905,7 +905,7 @@ mRowsDeleted = getContentResolver().delete(
     {@link android.content.ContentResolver#getType ContentResolver.getType()}.
 </p>
 <p>
-    Bagian <a href="#MIMETypeReference">Acuan Tipe MIME</a> menerangkan 
+    Bagian <a href="#MIMETypeReference">Acuan Tipe MIME</a> menerangkan
     sintaks tipe MIME baik yang standar maupun custom.
 </p>
 
@@ -946,9 +946,9 @@ mRowsDeleted = getContentResolver().delete(
     Untuk mengakses penyedia dalam "mode batch",
     buat satu larik objek {@link android.content.ContentProviderOperation}, kemudian
     kirim larik itu ke penyedia konten dengan
-    {@link android.content.ContentResolver#applyBatch ContentResolver.applyBatch()}. Anda meneruskan 
-    <em>otoritas</em> penyedia konten ke metode ini, daripada URI konten tertentu. 
-    Ini memungkinkan tiap objek {@link android.content.ContentProviderOperation} dalam larik untuk bekerja 
+    {@link android.content.ContentResolver#applyBatch ContentResolver.applyBatch()}. Anda meneruskan
+    <em>otoritas</em> penyedia konten ke metode ini, daripada URI konten tertentu.
+    Ini memungkinkan tiap objek {@link android.content.ContentProviderOperation} dalam larik untuk bekerja
     terhadap tabel yang berbeda. Panggilan ke {@link android.content.ContentResolver#applyBatch
     ContentResolver.applyBatch()} menghasilkan satu larik hasil.
 </p>
@@ -1011,7 +1011,7 @@ mRowsDeleted = getContentResolver().delete(
 <p>
     Penyedia mendefinisikan izin URI untuk URI konten dalam manifesnya, dengan menggunakan atribut
 <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#gprmsn">android:grantUriPermission</a></code>
-    dari elemen 
+    dari elemen
 <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code>
 ,   serta elemen anak
 <code><a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">&lt;grant-uri-permission&gt;</a></code>
@@ -1184,7 +1184,7 @@ content://com.example.trains/Line2/5
 vnd.android.cursor.<strong>item</strong>/vnd.example.line2
 </pre>
 <p>
-    Kebanyakan penyedia konten mendefinisikan konstanta kelas kontrak untuk tipe MIME yang digunakannya. Kelas kontrak 
+    Kebanyakan penyedia konten mendefinisikan konstanta kelas kontrak untuk tipe MIME yang digunakannya. Kelas kontrak
     {@link android.provider.ContactsContract.RawContacts} pada Penyedia Kontak
     misalnya, mendefinisikan konstanta
     {@link android.provider.ContactsContract.RawContacts#CONTENT_ITEM_TYPE} untuk tipe MIME

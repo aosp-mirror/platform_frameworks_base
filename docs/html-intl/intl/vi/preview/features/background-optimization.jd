@@ -60,7 +60,7 @@ page.image=images/cards/card-nyc_2x.jpg
 
 <ul>
   <li>Các ứng dụng nhắm đến Preview không nhận được truyền phát {@link
-  android.net.ConnectivityManager#CONNECTIVITY_ACTION} nếu chúng 
+  android.net.ConnectivityManager#CONNECTIVITY_ACTION} nếu chúng
   đăng ký nhận truyền phát trong bản kê khai của chúng. Các ứng dụng đang chạy ở tiền cảnh
   vẫn có thể theo dõi {@code CONNECTIVITY_CHANGE} trên luồng chính của chúng bằng cách
   đăng ký{@link android.content.BroadcastReceiver} với {@link
@@ -119,7 +119,7 @@ page.image=images/cards/card-nyc_2x.jpg
 </h3>
 
 <p>
-  Khi sử dụng lớp{@link android.app.job.JobInfo.Builder JobInfo.Builder} 
+  Khi sử dụng lớp{@link android.app.job.JobInfo.Builder JobInfo.Builder}
   để xây dựng đối tượng {@link android.app.job.JobInfo} của bạn, hãy áp dụng phương thức {@link
   android.app.job.JobInfo.Builder#setRequiredNetworkType
   setRequiredNetworkType()} và chuyển {@link android.app.job.JobInfo
@@ -145,7 +145,7 @@ public static void scheduleJob(Context context) {
 </pre>
 
 <p>
-  Khi các điều kiện cho tác vụ của bạn đã được đáp ứng, ứng dụng của bạn sẽ nhận được lệnh gọi lại để chạy 
+  Khi các điều kiện cho tác vụ của bạn đã được đáp ứng, ứng dụng của bạn sẽ nhận được lệnh gọi lại để chạy
   phương thức{@link android.app.job.JobService#onStartJob onStartJob()}trong
   {@code JobService.class} được chỉ định. Để xem thêm các ví dụ về triển khai {@link
   android.app.job.JobScheduler} , hãy xem <a href="{@docRoot}samples/JobScheduler/index.html">ứng dụng mẫu JobScheduler</a>.
@@ -243,7 +243,7 @@ public static void scheduleJob(Context context) {
 </dl>
 
 <p class="note">
-  <strong>Lưu ý:</strong> {@code TriggerContentUri()} không thể được sử dụng 
+  <strong>Lưu ý:</strong> {@code TriggerContentUri()} không thể được sử dụng
   kết hợp với {@link android.app.job.JobInfo.Builder#setPeriodic
   setPeriodic()} hoặc {@link android.app.job.JobInfo.Builder#setPersisted
   setPersisted()}. Để tiếp tục theo dõi các thay đổi nội dung, hãy lên lịch một
@@ -313,7 +313,7 @@ public static void scheduleJob(Context context) {
 
 <p>
   Mã mẫu sau sẽ ghi đè lên phương thức {@link
-  android.app.job.JobService#onStartJob JobService.onStartJob()} và 
+  android.app.job.JobService#onStartJob JobService.onStartJob()} và
   và ghi lại các thẩm quyền nội dung và URI đã kích hoạt tác vụ.
 </p>
 
@@ -357,7 +357,7 @@ public boolean onStartJob(JobParameters params) {
   bộ nhớ ít có thể cải thiện hiệu suất và trải nghiệm của người dùng. Loại bỏ
   các thành phần phụ thuộc trên các dịch vụ chạy ngầm và bộ thu truyền phát không biểu thị đã đăng ký tĩnh
   có thể giúp ứng dụng của bạn chạy tốt hơn trên các thiết bị như vậy. Mặc dù
-  N Developer Preview thực hiện các bước để giảm bớt một vài trong số các vấn đề này, nhưng chúng tôi 
+  N Developer Preview thực hiện các bước để giảm bớt một vài trong số các vấn đề này, nhưng chúng tôi
   khuyến nghị bạn nên tối ưu ứng dụng của bạn để chạy hoàn toàn không cần sử dụng
   các tiến trình chạy ngầm này.
 </p>

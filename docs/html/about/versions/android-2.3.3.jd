@@ -81,7 +81,7 @@ tag technologies, based on two new intent actions &mdash;
 <code>android.nfc.action.NDEF_DISCOVERED</code> and
 <code>android.nfc.action.TECH_DISCOVERED</code>.</p>
 
-<p>The NFC API is available in the {@link android.nfc} and 
+<p>The NFC API is available in the {@link android.nfc} and
 {@link android.nfc.tech} packages. The key classes are: </p>
 
 <ul>
@@ -89,7 +89,7 @@ tag technologies, based on two new intent actions &mdash;
 <li>{@link android.nfc.NdefMessage}, which represents an NDEF data message,
 the standard format in which "records" carrying data are transmitted between
 devices and tags. An NDEF message certain many NDEF records of different types.
-Applications can receive these messages from 
+Applications can receive these messages from
 {@link android.nfc.NfcAdapter#ACTION_NDEF_DISCOVERED NDEF_DISCOVERED},
 {@link android.nfc.NfcAdapter#ACTION_TECH_DISCOVERED TECH_DISCOVERED}, or
 {@link android.nfc.NfcAdapter#ACTION_TAG_DISCOVERED TAG_DISCOVERED} Intents.</li>
@@ -124,15 +124,15 @@ NFC. To request filtering, add
 <code>&lt;uses-feature android:name="android.hardware.nfc"
 android:required="true"&gt;</code> to the application's manifest.</p>
 
-<p class="note">For more information, read the 
+<p class="note">For more information, read the
   <a href="{@docRoot}guide/topics/connectivity/nfc/index.html">NFC</a> developer guide.</p>
 
 <h3 id="bluetooth">Bluetooth</h3>
 
 <p>Android 2.3.3 adds platform and API support for Bluetooth nonsecure socket
 connections. This lets applications communicate with simple devices that may not
-offer a UI for authentication. See 
-{@link android.bluetooth.BluetoothDevice#createInsecureRfcommSocketToServiceRecord(java.util.UUID)} and 
+offer a UI for authentication. See
+{@link android.bluetooth.BluetoothDevice#createInsecureRfcommSocketToServiceRecord(java.util.UUID)} and
 {@link android.bluetooth.BluetoothAdapter#listenUsingInsecureRfcommWithServiceRecord(java.lang.String, java.util.UUID)}
 for more information. </p>
 
@@ -183,7 +183,7 @@ the system, prior to installing the application. </p>
 
 <p>To use APIs introduced in Android {@sdkPlatformVersion} in your application,
 you need compile the application against the Android library that is provided in
-the Android {@sdkPlatformVersion} SDK platform. Depending on your needs, you might 
+the Android {@sdkPlatformVersion} SDK platform. Depending on your needs, you might
 also need to add an <code>android:minSdkVersion="{@sdkPlatformApiLevel}"</code>
 attribute to the <code>&lt;uses-sdk&gt;</code> element in the application's
 manifest. If your application is designed to run only on Android 2.3 and higher,

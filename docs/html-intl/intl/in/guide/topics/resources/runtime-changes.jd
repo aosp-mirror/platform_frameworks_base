@@ -82,12 +82,12 @@ aktivitas untuk mempertahankan objek stateful.</p>
 <p>Untuk mempertahankan objek stateful dalam fragmen selama perubahan konfigurasi runtime:</p>
 
 <ol>
-  <li>Perluas kelas {@link android.app.Fragment} dan deklarasikan referensi ke objek stateful 
+  <li>Perluas kelas {@link android.app.Fragment} dan deklarasikan referensi ke objek stateful
 Anda.</li>
   <li>Panggil {@link android.app.Fragment#setRetainInstance(boolean)} saat fragmen dibuat.
       </li>
   <li>Tambahkan fragmen ke aktivitas.</li>
-  <li>Gunakan {@link android.app.FragmentManager} untuk mengambil fragmen saat aktivitas 
+  <li>Gunakan {@link android.app.FragmentManager} untuk mengambil fragmen saat aktivitas
 di-restart.</li>
 </ol>
 
@@ -125,8 +125,8 @@ membocorkan semua tampilan dan sumber daya instance aktivitas semula. (Sumber da
 berarti bahwa aplikasi Anda tetap menyimpannya dan tidak bisa dijadikan kumpulan sampah, sehingga bisa banyak
 memori yang hilang.)</p>
 
-<p>Selanjutnya gunakan {@link android.app.FragmentManager} untuk menambahkan fragmen ke aktivitas. 
-Anda bisa memperoleh objek data dari fragmen saat aktivitas memulai kembali selama perubahan 
+<p>Selanjutnya gunakan {@link android.app.FragmentManager} untuk menambahkan fragmen ke aktivitas.
+Anda bisa memperoleh objek data dari fragmen saat aktivitas memulai kembali selama perubahan
 konfigurasi runtime. Misalnya, definisikan aktivitas Anda sebagai berikut:</p>
 
 <pre>

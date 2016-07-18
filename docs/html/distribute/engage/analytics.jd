@@ -42,7 +42,7 @@ page.image=/images/gp-analytics.jpg
   </h2>
 </div>
 
-<div class="resource-widget resource-flow-layout col-13" 
+<div class="resource-widget resource-flow-layout col-13"
   data-query="collection:distribute/engage/analytics"
   data-sortorder="-timestamp"
   data-cardsizes="9x3"

@@ -170,7 +170,7 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
 
 <h4 id="resizeableActivity">android:resizeableActivity</h4>
 <p>
-  在宣示說明的 <code>&lt;activity&gt;</code> 或 
+  在宣示說明的 <code>&lt;activity&gt;</code> 或
   <code>&lt;application&gt;</code> 節點中，設定此屬性以啟用或停用多視窗顯示：
 
 </p>

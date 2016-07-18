@@ -81,7 +81,7 @@ page.image=images/cards/card-nyc_2x.jpg
 전송하는 역할을 담당합니다.</p>
 
 <p>시스템이 <code>RecordingSession.onTune()</code>을 호출하면
-채널 URI에 전달되고, URI가 지정하는 채널에 맞춰 조정됩니다. 
+채널 URI에 전달되고, URI가 지정하는 채널에 맞춰 조정됩니다.
 <code>notifyTuned()</code>를 호출해서 앱이 원하는 채널에 맞춰졌음을 시스템에 알리거나
 앱이 적절한 채널에 맞출 수 없으면
 <code>notifyError()</code>를 호출합니다.</p>

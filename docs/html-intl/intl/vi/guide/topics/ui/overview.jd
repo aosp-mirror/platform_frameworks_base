@@ -39,7 +39,7 @@ và một phần tử <code>&lt;LinearLayout&gt;</code> tạo ra một nhóm d�
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?>
 &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="fill_parent" 
+              android:layout_width="fill_parent"
               android:layout_height="fill_parent"
               android:orientation="vertical" >
     &lt;TextView android:id="@+id/text"
@@ -60,7 +60,7 @@ bố trí.</p>
 <p>Để xem hướng dẫn đầy đủ về tạo bố trí UI, hãy xem phần <a href="declaring-layout.html">Bố trí
 XML</a>.
 
-  
+
 <h2 id="UIComponents">Thành phần Giao diện Người dùng</h2>
 
 <p>Bạn không phải xây dựng tất cả UI của mình bằng cách sử dụng các đối tượng {@link android.view.View} và {@link

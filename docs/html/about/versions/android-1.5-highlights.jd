@@ -7,7 +7,7 @@ excludeFromSuggestions=true
 </p>
 
 
-<p>The Android 1.5 platform introduces many new features for users and developers. 
+<p>The Android 1.5 platform introduces many new features for users and developers.
 The list below provides an overview of the changes. </p>
 
 <ul>
@@ -65,7 +65,7 @@ The list below provides an overview of the changes. </p>
   <ul>
      <li>Widgets
      <ul>
-       <li>Bundled home screen widgets include: analog clock, calendar, 
+       <li>Bundled home screen widgets include: analog clock, calendar,
            music player, picture frame, and search</li>
      </ul></li>
      <li>Live folders</li>
@@ -121,7 +121,7 @@ The list below provides an overview of the changes. </p>
 <li>Google applications (not available in the Android 1.5 System Image that is
 included in the Android SDK)
   <ul>
-    <li>View Google Talk friends' status in Contacts, SMS, MMS, GMail, and 
+    <li>View Google Talk friends' status in Contacts, SMS, MMS, GMail, and
         Email applications</li>
     <li>Batch actions such as archive, delete, and label on Gmail messages</li>
     <li>Upload videos to Youtube</li>
@@ -165,7 +165,7 @@ framework</a> on the Android Developer's Blog.</li>
   </ul>
 </li>
 
-<li>Input Method framework 
+<li>Input Method framework
    <ul>
     <li>{@link android.inputmethodservice.InputMethodService Input Method
         Service} framework</li>

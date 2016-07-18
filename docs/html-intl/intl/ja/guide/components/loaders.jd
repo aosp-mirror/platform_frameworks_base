@@ -21,14 +21,14 @@ parent.link=activities.html
         </ol>
     </li>
   </ol>
-    
+
   <h2>キークラス</h2>
     <ol>
       <li>{@link android.app.LoaderManager}</li>
       <li>{@link android.content.Loader}</li>
 
-    </ol>   
-    
+    </ol>
+
     <h2>関連サンプル</h2>
    <ol>
      <li> <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderCursor.html">
@@ -51,7 +51,7 @@ android.app.Fragment} で使用できる。</li>
 再度データを問い合わせる必要がない。
 </li>
   </ul>
- 
+
 <h2 id="summary">Loader API の概要</h2>
 
 <p>アプリケーションでローダを使用するのに必要になりそうなクラスやインターフェースは複数あります。
@@ -129,7 +129,7 @@ android.content.ContentProvider} でサポートされているデータをロ�
 </li>
   <li>{@link android.app.LoaderManager.LoaderCallbacks} の実装。ここで、新しいローダを作成して既存のローダへの参照を管理します。
 
-</li> 
+</li>
 <li>{@link
 android.widget.SimpleCursorAdapter} などのローダのデータを表示する方法。</li>
   <li>{@link android.content.CursorLoader} を使用するときの、{@link android.content.ContentProvider} などのデータ ソース。
@@ -140,7 +140,7 @@ android.widget.SimpleCursorAdapter} などのローダのデータを表示す�
 <p>{@link android.app.LoaderManager} は 1 つ以上の {@link
 android.content.Loader} インスタンスを {@link android.app.Activity} や {@link android.app.Fragment} 内で管理します。
 1 つのアクティビティやフラグメントごとに、{@link
-android.app.LoaderManager} は 1 つだけ存在します。</p> 
+android.app.LoaderManager} は 1 つだけ存在します。</p>
 
 <p>通常は、アクティビティの {@link
 android.app.Activity#onCreate onCreate()} メソッドか、フラグメントの {@link android.app.Fragment#onActivityCreated onActivityCreated()} メソッド内で {@link android.content.Loader} を初期化します。
@@ -157,13 +157,13 @@ getLoaderManager().initLoader(0, null, this);</pre>
 <ul>
   <li>ローダを識別する一意の ID。この例では、ID は 0 です。</li>
 <li>ローダの構築時に提供する任意の引数（この例では <code>null</code>）。
-</li> 
+</li>
 
 <li>{@link android.app.LoaderManager} がローダのイベントを報告する際に呼び出す {@link android.app.LoaderManager.LoaderCallbacks} の実装。
 この例では、ローカルクラスが {@link
 android.app.LoaderManager.LoaderCallbacks} インターフェースを実装するため、自身の {@code this} に参照を渡します。
 
-</li> 
+</li>
 </ul>
 <p>{@link android.app.LoaderManager#initLoader initLoader()} の呼び出しによって、ローダが初期化され、アクティブになります。
 結果には次の 2 つの可能性があります。</p>
@@ -366,7 +366,7 @@ public void onLoaderReset(Loader&lt;Cursor&gt; loader) {
 android.app.Fragment} の完全な実装の例です。
 {@link
 android.content.CursorLoader} を使用してプロバイダへのクエリを管理しています。</p>
- 
+
 <p>この例にあるように、アプリケーションがユーザーの連絡先にアクセスするには、マニフェストに {@link android.Manifest.permission#READ_CONTACTS READ_CONTACTS} の許可を含める必要があります。
 
 </p>

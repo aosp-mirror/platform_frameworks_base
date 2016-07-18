@@ -264,8 +264,8 @@ reference a system resource, you would need to include the package name. For exa
     android:text=&quot;&#64;string/hello&quot; /&gt;
 </pre>
 
-<p class="note"><strong>Note:</strong> You should use string resources at 
-all times, so that your application can be localized for other languages. 
+<p class="note"><strong>Note:</strong> You should use string resources at
+all times, so that your application can be localized for other languages.
 For information about creating alternative
 resources (such as localized strings), see <a
 href="providing-resources.html#AlternativeResources">Providing Alternative

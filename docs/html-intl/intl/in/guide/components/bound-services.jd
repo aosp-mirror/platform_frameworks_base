@@ -137,7 +137,7 @@ mendefinisikan {@link android.os.Handler} yang akan merespons aneka tipe objek {
 android.os.Message}. {@link android.os.Handler}
 ini adalah dasar bagi {@link android.os.Messenger} yang nanti bisa berbagi {@link android.os.IBinder}
 dengan klien, sehingga memungkinkan klien mengirim perintah ke layanan dengan menggunakan objek {@link
-android.os.Message}. Selain itu, klien bisa mendefinisikan sendiri {@link android.os.Messenger} 
+android.os.Message}. Selain itu, klien bisa mendefinisikan sendiri {@link android.os.Messenger}
 sehingga layanan bisa mengirim balik pesan.
   <p>Inilah cara termudah melakukan komunikasi antarproses (IPC), karena {@link
 android.os.Messenger} akan mengantre semua permintaan ke dalam satu thread sehingga Anda tidak perlu mendesain
@@ -539,7 +539,7 @@ selengkapnya di bawah ini.)</p>
 </ol>
 
 <p>Misalnya, cuplikan berikut menghubungkan klien ke layanan yang dibuat di atas dengan
-<a href="#Binder">memperluas kelas Binder</a>, sehingga tinggal mengkonversi 
+<a href="#Binder">memperluas kelas Binder</a>, sehingga tinggal mengkonversi
 {@link android.os.IBinder} yang dihasilkan ke kelas {@code LocalService} dan meminta instance {@code
 LocalService}:</p>
 
@@ -573,7 +573,7 @@ bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
 </pre>
 
 <ul>
-  <li>Parameter pertama {@link android.content.Context#bindService bindService()} adalah sebuah 
+  <li>Parameter pertama {@link android.content.Context#bindService bindService()} adalah sebuah
 {@link android.content.Intent} yang secara eksplisit menyebutkan layanan yang akan diikat (walaupun intent
 boleh implisit).</li>
 <li>Parameter kedua adalah objek {@link android.content.ServiceConnection}.</li>

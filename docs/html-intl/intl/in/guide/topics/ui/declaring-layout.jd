@@ -74,7 +74,7 @@ tertarik dalam membuat instance objek View saat runtime, lihat referensi kelas {
 <code>EditText.setText()</code>. </p>
 
 <p class="note"><strong>Tip:</strong> Ketahui selengkapnya berbagai tipe layout dalam <a href="{@docRoot}guide/topics/ui/layout-objects.html">Objek
-Layout Umum</a>. Ada juga sekumpulan tutorial tentang cara membangun berbagai layout dalam panduan tutorial 
+Layout Umum</a>. Ada juga sekumpulan tutorial tentang cara membangun berbagai layout dalam panduan tutorial
 <a href="{@docRoot}resources/tutorials/views/index.html">Hello Views</a>.</p>
 
 <h2 id="write">Tulis XML</h2>
@@ -107,7 +107,7 @@ dalam direktori <code>res/layout/</code> proyek Android, sehingga nanti bisa dik
 
 <h2 id="load">Muat Sumber Daya XML</h2>
 
-<p>Saat mengompilasi aplikasi, masing-masing file layout XML akan dikompilasi dalam sebuah sumber daya 
+<p>Saat mengompilasi aplikasi, masing-masing file layout XML akan dikompilasi dalam sebuah sumber daya
 {@link android.view.View}. Anda harus memuat sumber daya layout dari kode aplikasi, dalam implementasi
 callback {@link android.app.Activity#onCreate(android.os.Bundle) Activity.onCreate()}.
 Lakukan dengan memanggil <code>{@link android.app.Activity#setContentView(int) setContentView()}</code>,
@@ -367,8 +367,8 @@ kiri anak B) atau terhadap induk (disejajarkan dengan atas induknya).</p>
 
 <h2 id="AdapterViews" style="clear:left">Membangun Layout dengan Adaptor</h2>
 
-<p>Bila isi layout bersifat dinamis atau tidak dipastikan sebelumnya, Anda bisa menggunakan layout yang menjadi 
-subkelas {@link android.widget.AdapterView} untuk mengisi layout dengan tampilan saat runtime. 
+<p>Bila isi layout bersifat dinamis atau tidak dipastikan sebelumnya, Anda bisa menggunakan layout yang menjadi
+subkelas {@link android.widget.AdapterView} untuk mengisi layout dengan tampilan saat runtime.
 Subkelas dari kelas {@link android.widget.AdapterView} menggunakan {@link android.widget.Adapter} untuk
 mengikat data ke layoutnya. {@link android.widget.Adapter} berfungsi sebagai penghubung antara sumber data
 dan layout{@link android.widget.AdapterView}&mdash;{@link android.widget.Adapter}
@@ -445,7 +445,7 @@ harus memasukkan tampilan layout. Misalnya, jika Anda ingin untuk membuat daftar
 nama orang dan nomor telepon, Anda bisa melakukan query yang menghasilkan {@link
 android.database.Cursor} yang berisi satu baris untuk tiap orang dan kolom-kolom untuk nama dan
 nomor. Selanjutnya Anda membuat larik string yang menentukan kolom dari {@link
-android.database.Cursor} yang Anda inginkan dalam layout untuk setiap hasil dan larik integer yang menentukan 
+android.database.Cursor} yang Anda inginkan dalam layout untuk setiap hasil dan larik integer yang menentukan
 tampilan yang sesuai untuk menempatkan masing-masing kolom:</p>
 <pre>
 String[] fromColumns = {ContactsContract.Data.DISPLAY_NAME,

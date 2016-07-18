@@ -67,7 +67,7 @@ page.image=images/cards/card-n-changes_2x.png
 <p>
   Được đưa vào Android 6.0 (Mức API 23), Chế độ Ngủ sâu cải thiện thời lượng pin bằng cách
   trì hoãn các hoạt động của CPU và mạng khi người dùng không cắm sạc,
-   không di chuyển và tắt màn hình thiết bị. Android N 
+   không di chuyển và tắt màn hình thiết bị. Android N
   thêm các cải tiến cho Chế độ Ngủ sâu bằng cách sử dụng một tập con các hạn chế của CPU và mạng
   khi thiết bị không được cắm sạc với màn hình bị tắt, nhưng không nhất thiết
   phải để một chỗ, ví dụ như một thiết bị cầm tay di chuyển trong túi của người dùng.
@@ -250,7 +250,7 @@ page.image=images/cards/card-n-changes_2x.png
 <ul>
   <li>Nếu một ứng dụng nhắm mục tiêu mức API 23 hoặc thấp hơn thì hệ thống sẽ tự động tắt
   tất cả các tiến trình chạy ngầm của ứng dụng đó. Điều này có nghĩa là nếu một người dùng rời khỏi
-  ứng dụng đó để mở màn hình <em>Settings</em> và thay đổi 
+  ứng dụng đó để mở màn hình <em>Settings</em> và thay đổi
   <strong>Display size</strong> thì hệ thống sẽ tắt ứng dụng giống
  như trong trường hợp thiết bị thiếu bộ nhớ. Nếu ứng dụng đó có bất kỳ tiến trình nào
   chạy ở tiền cảnh thì hệ thống sẽ thông báo cho các tiến trình đó về thay đổi cấu hình như
@@ -418,7 +418,7 @@ JavaVM::AttachCurrentThread from &lt;jni.h&gt;.
 
   <li>Giờ đây các hạn chế đặt lại mật khẩu cho người quản lý thiết bị sẽ áp dụng với người sở hữu
    cấu hình. Người quản lý thiết bị không thể sử dụng
-  <code>DevicePolicyManager.resetPassword()</code> được nữa để xóa mật khẩu hoặc thay đổi 
+  <code>DevicePolicyManager.resetPassword()</code> được nữa để xóa mật khẩu hoặc thay đổi
   các mật khẩu đã đặt. Người quản lý thiết bị vẫn có thể đặt một mật khẩu nhưng chỉ
   khi thiết bị không có mật khẩu, mã PIN hoặc mẫu hình.
   </li>

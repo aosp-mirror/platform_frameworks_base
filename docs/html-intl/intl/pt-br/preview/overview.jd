@@ -116,7 +116,7 @@ page.tags="preview", "developer", "android"
       </h5>
 
       <p>
-        Informe problemas e dê-nos feedback usando o 
+        Informe problemas e dê-nos feedback usando o
 <a href="{@docRoot}preview/bug">issue tracker</a>. Conecte-se a outros
  desenvolvedores na
  <a href="{@docRoot}preview/dev-community">Comunidade N&nbsp;Developer</a>.
@@ -262,7 +262,7 @@ page.tags="preview", "developer", "android"
 </p>
 
 <p>
-  Para se inscrever no programa, acesse o site do <a href="https://g.co/androidbeta">programa beta 
+  Para se inscrever no programa, acesse o site do <a href="https://g.co/androidbeta">programa beta
  do Android</a>. Você
  verá uma lista de todos os dispositivos registrados em sua conta que estejam qualificados para inscrição no
  programa beta do Android.
@@ -314,13 +314,13 @@ page.tags="preview", "developer", "android"
 </p>
 
 <ul>
-  <li> <a href="{@docRoot}preview/setup-sdk.html">Preparação para desenvolver para o 
+  <li> <a href="{@docRoot}preview/setup-sdk.html">Preparação para desenvolver para o
 Android N</a> tem
  instruções passo a passo para você iniciar o trabalho.</li>
   <li> <a href="{@docRoot}preview/behavior-changes.html">Mudanças
  de comportamento</a> indicam as principais áreas a serem testadas.</li>
-  <li> Documentação de novas APIs, incluindo uma <a href="{@docRoot}preview/api-overview.html">visão geral das APIs</a>, a 
-<a href="{@docRoot}preview/setup-sdk.html#docs-dl">referência da 
+  <li> Documentação de novas APIs, incluindo uma <a href="{@docRoot}preview/api-overview.html">visão geral das APIs</a>, a
+<a href="{@docRoot}preview/setup-sdk.html#docs-dl">referência da
 API</a> disponível para download e guias de desenvolvedor detalhados sobre os recursos principais, como
 suporte para várias janelas, notificações agrupadas, suporte para vários idiomas e outros.
   <li> <a href="{@docRoot}preview/samples.html">Exemplo de código</a> que
@@ -333,7 +333,7 @@ suporte para várias janelas, notificações agrupadas, suporte para vários idi
 <h4 id="reference">Referência da API para download</h4>
 
 <p>
-  Durante as primeiras atualizações do Preview, você pode fazer o download da 
+  Durante as primeiras atualizações do Preview, você pode fazer o download da
  <a href="{@docRoot}preview/setup-sdk.html#docs-dl">referência da API
  mais recente para a plataforma Android N</a> como um arquivo zip separado. Esse download
  também inclui um relatório de diferenças que ajuda você a identificar as mudanças da API em relação à
@@ -357,7 +357,7 @@ suporte para várias janelas, notificações agrupadas, suporte para vários idi
 <ul>
   <li> O <a href="https://code.google.com/p/android-developer-preview/">Issue
  Tracker do N Developer Preview</a> é o <strong>canal principal de feedback.</strong> É possível informar erros,
- problemas de desempenho e feedback geral pelo issue tracker. Também é possível verificar os 
+ problemas de desempenho e feedback geral pelo issue tracker. Também é possível verificar os
 <a href="{@docRoot}preview/bugs">erros conhecidos</a> e
  encontrar etapas de resolução. Manteremos você atualizado sobre seu problema conforme ele seja avaliado e
  enviado para a equipe de engenharia do Android para análise. </li>
@@ -374,7 +374,7 @@ suporte para várias janelas, notificações agrupadas, suporte para vários idi
   O N Developer Preview fornece um sistema apenas para desenvolvimento e uma biblioteca Android
  que <strong>não tem um nível da API padrão</strong>. Caso opte
  pelos comportamentos de compatibilidade para testar o aplicativo (o que é muito
- recomendado), é possível destinar a versão de prévia do Android N 
+ recomendado), é possível destinar a versão de prévia do Android N
 configurando o <code><a href=
   "{@docRoot}preview/setup-sdk.html#create-update">targetSdkVersion</a></code> do aplicativo
  para <code>“N”</code>.

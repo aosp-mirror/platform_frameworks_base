@@ -55,7 +55,7 @@ android.app.Activity} 实例接收的重要生命周期回调方法以及您如�
 </p>
 
 <h2>课程</h2>
- 
+
 <dl>
   <dt><b><a href="starting.html">开始Activity</a></b></dt>
   <dd>学习有关Activity生命周期、用户如何启动您的应用以及如何执行基本Activity创建操作的基础知识。
@@ -68,5 +68,5 @@ android.app.Activity} 实例接收的重要生命周期回调方法以及您如�
   <dt><b><a href="recreating.html">重新创建Activity</a></b></dt>
   <dd>学习您的Activity被销毁时的情况以及您如何能够根据需要重新构建Activity。
 </dd>
-</dl> 
+</dl>
 

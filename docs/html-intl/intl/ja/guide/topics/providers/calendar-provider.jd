@@ -42,7 +42,7 @@ page.title=カレンダー プロバイダ
       <li><a href="#intent-view">インテントを使用したカレンダー データの参照</a></li>
     </ol>
   </li>
-  
+
   <li><a href="#sync-adapter">同期アダプタ</a></li>
 </ol>
 
@@ -113,14 +113,14 @@ URI の形式は <code><em>&lt;class&gt;</em>.CONTENT_URI</code> です。
   </tr>
   <tr>
     <td><p>{@link android.provider.CalendarContract.Calendars}</p></td>
-    
+
     <td>このテーブルは、該当するカレンダー固有の情報を保持します。
 各行には、名前、色、同期情報など、1 つのカレンダーに関する詳細が格納されます。
 </td>
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.Events}</td>
-    
+
     <td>このテーブルは、該当するイベント固有の情報を保持します。
 各行には、1 つのイベントに関する情報が格納されます&mdash;イベントのタイトル、場所、開始時刻、終了時刻などが該当します。
 
@@ -132,7 +132,7 @@ URI の形式は <code><em>&lt;class&gt;</em>.CONTENT_URI</code> です。
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.Instances}</td>
-    
+
     <td>このテーブルは、あるイベントの発生ごとの開始時刻と終了時刻を保持します。
 各行は、イベントの発生 1 回を表します。
 単発イベントには、イベントのインスタンスが 1 対 1 で対応します。
@@ -141,7 +141,7 @@ URI の形式は <code><em>&lt;class&gt;</em>.CONTENT_URI</code> です。
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.Attendees}</td>
-    
+
     <td>このテーブルは、イベントの参加者（ゲスト）の情報を保持します。
 各行は、1 回のイベントの 1 人のゲストを表します。
 ゲストのタイプと、ゲストのイベントへの出欠の回答を指定します。
@@ -149,7 +149,7 @@ URI の形式は <code><em>&lt;class&gt;</em>.CONTENT_URI</code> です。
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.Reminders}</td>
-    
+
     <td>このテーブルは、アラートや通知のデータを保持します。
 各行は、1 回のイベントの 1 つのアラートを表します。1 つのイベントが複数のリマインダーを持つことができます。
 1 イベントあたりの最大リマインダー数は {@link android.provider.CalendarContract.CalendarColumns#MAX_REMINDERS} で指定され、指定されたカレンダーを所有する同期アダプタによって設定されます。
@@ -159,7 +159,7 @@ URI の形式は <code><em>&lt;class&gt;</em>.CONTENT_URI</code> です。
 リマインダーは、イベント開始前の分単位で指定され、ユーザーに注意喚起する手段を示す情報を保持します。
 </td>
   </tr>
-  
+
 </table>
 
 <p>カレンダー プロバイダ API は、柔軟で効果的な設計になっています。ですが同時に、エンドユーザーにとって使いやすくすることや、カレンダーとそのデータの整合性を保護することが重要です。
@@ -229,7 +229,7 @@ URI の形式は <code><em>&lt;class&gt;</em>.CONTENT_URI</code> です。
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.Calendars#VISIBLE}</td>
-    
+
     <td>カレンダーが表示対象として選択されているかどうかを示すブール値。値 0 は、このカレンダーに関連付けられているイベントを表示しないことを示します。
 
 値 1 は、このカレンダーに関連付けられているイベントを表示することを示します。
@@ -240,7 +240,7 @@ URI の形式は <code><em>&lt;class&gt;</em>.CONTENT_URI</code> です。
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.CalendarColumns#SYNC_EVENTS}</td>
-    
+
     <td>カレンダーを同期してそのイベントを端末に格納するかどうかを示すブール値。
 値 0 は、このカレンダーを同期せず、イベントを端末に格納しないことを指定します。
 値 1 は、このカレンダーのイベントを同期し、イベントを端末に格納することを指定します。
@@ -268,13 +268,13 @@ public static final String[] EVENT_PROJECTION = new String[] {
     Calendars.CALENDAR_DISPLAY_NAME,         // 2
     Calendars.OWNER_ACCOUNT                  // 3
 };
-  
+
 // The indices for the projection array above.
 private static final int PROJECTION_ID_INDEX = 0;
 private static final int PROJECTION_ACCOUNT_NAME_INDEX = 1;
 private static final int PROJECTION_DISPLAY_NAME_INDEX = 2;
 private static final int PROJECTION_OWNER_ACCOUNT_INDEX = 3;</pre>
-  
+
 
 <div class="sidebox-wrapper"> <div class="sidebox"> <h3>ACCOUNT_TYPE を含める必要がある理由
 </h3> <p>{@link android.provider.CalendarContract.Calendars#ACCOUNT_NAME Calendars.ACCOUNT_NAME} にクエリする場合は、このセクションに {@link android.provider.CalendarContract.Calendars#ACCOUNT_TYPE Calendars.ACCOUNT_TYPE} も含める必要があります。
@@ -289,7 +289,7 @@ private static final int PROJECTION_OWNER_ACCOUNT_INDEX = 3;</pre>
 
 
 
-</p> </div> </div> 
+</p> </div> </div>
 
 
 <p> この例の次の部分では、クエリを作成します。クエリの条件は selection に指定しています。
@@ -308,38 +308,38 @@ private static final int PROJECTION_OWNER_ACCOUNT_INDEX = 3;</pre>
 <pre>// Run query
 Cursor cur = null;
 ContentResolver cr = getContentResolver();
-Uri uri = Calendars.CONTENT_URI;   
-String selection = "((" + Calendars.ACCOUNT_NAME + " = ?) AND (" 
+Uri uri = Calendars.CONTENT_URI;
+String selection = "((" + Calendars.ACCOUNT_NAME + " = ?) AND ("
                         + Calendars.ACCOUNT_TYPE + " = ?) AND ("
                         + Calendars.OWNER_ACCOUNT + " = ?))";
 String[] selectionArgs = new String[] {"sampleuser@gmail.com", "com.google",
-        "sampleuser@gmail.com"}; 
-// Submit the query and get a Cursor object back. 
+        "sampleuser@gmail.com"};
+// Submit the query and get a Cursor object back.
 cur = cr.query(uri, EVENT_PROJECTION, selection, selectionArgs, null);</pre>
 
 <p>次のセクションでは、カーソルを使用して結果セットをステップ単位で移動します。例の冒頭で設定した定数を使用して各フィールドの値を返します。
 
 </p>
-    
+
 <pre>// Use the cursor to step through the returned records
 while (cur.moveToNext()) {
     long calID = 0;
     String displayName = null;
     String accountName = null;
     String ownerName = null;
-      
+
     // Get the field values
     calID = cur.getLong(PROJECTION_ID_INDEX);
     displayName = cur.getString(PROJECTION_DISPLAY_NAME_INDEX);
     accountName = cur.getString(PROJECTION_ACCOUNT_NAME_INDEX);
     ownerName = cur.getString(PROJECTION_OWNER_ACCOUNT_INDEX);
-              
+
     // Do something with the values...
 
    ...
 }
 </pre>
-  
+
 <h3 id="modify-calendar">カレンダーの変更</h3>
 
 <p>カレンダーのアップデートを実行する場合、カレンダーの {@link android.provider.BaseColumns#_ID} を、URI（{@link android.content.ContentUris#withAppendedId(android.net.Uri,long) withAppendedId()}）の末尾に追加された ID として、または最初の selection 項目として指定できます。
@@ -434,7 +434,7 @@ Log.i(DEBUG_TAG, &quot;Rows updated: &quot; + rows);</pre>
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.EventsColumns#DURATION}</td>
-    
+
     <td><a href="http://tools.ietf.org/html/rfc5545#section-3.8.2.5">RFC5545</a> 形式でのイベントの期間。たとえば、<code>&quot;PT1H&quot;</code> という値はイベントが 1 時間であること、<code>&quot;P2W&quot;</code> という値は期間が 2 週間であることを示します。
 
 
@@ -444,24 +444,24 @@ Log.i(DEBUG_TAG, &quot;Rows updated: &quot; + rows);</pre>
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.EventsColumns#ALL_DAY}</td>
-    
+
     <td>値 1 は、そのイベントがローカルのタイムゾーンで定義された終日を占めることを示します。
 値 0 は、1 日のどこかで始まって終わる定例のイベントであることを示します。
 </td>
 
-    
+
   </tr>
-  
-  
+
+
   <tr>
     <td>{@link android.provider.CalendarContract.EventsColumns#RRULE}</td>
-    
+
     <td>イベント形式の繰り返し発生ルール。たとえば、<code>&quot;FREQ=WEEKLY;COUNT=10;WKST=SU&quot;</code> のようになります。
 その他の例については、<a href="http://tools.ietf.org/html/rfc5545#section-3.8.5.3">こちら</a>をご覧ください。
 </td>
-    
+
   </tr>
-  
+
   <tr>
     <td>{@link android.provider.CalendarContract.EventsColumns#RDATE}</td>
     <td>イベントの繰り返し発生日。通常、{@link android.provider.CalendarContract.EventsColumns#RDATE} は {@link android.provider.CalendarContract.EventsColumns#RRULE} と組み合わせて、繰り返し発生全体を定義するのに使用します。
@@ -470,13 +470,13 @@ Log.i(DEBUG_TAG, &quot;Rows updated: &quot; + rows);</pre>
 
 詳細については、<a href="http://tools.ietf.org/html/rfc5545#section-3.8.5.2">RFC5545 の仕様</a>をご覧ください。</td>
 </tr>
- 
+
   <tr>
     <td>{@link android.provider.CalendarContract.EventsColumns#AVAILABILITY}</td>
-    
+
     <td>このイベントを埋まっている時間に数えるか、それともスケジュールのやり直しが利く空き時間とみなすか。
  </td>
-    
+
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.EventsColumns#GUESTS_CAN_MODIFY}</td>
@@ -514,11 +514,11 @@ Log.i(DEBUG_TAG, &quot;Rows updated: &quot; + rows);</pre>
 
 
 </li>
-  
+
   <li>繰り返されないイベントには、{@link android.provider.CalendarContract.EventsColumns#DTEND} を含める必要があります。
  </li>
-  
-  
+
+
   <li>繰り返されるイベントには、{@link android.provider.CalendarContract.EventsColumns#RRULE} と {@link android.provider.CalendarContract.EventsColumns#RDATE} に加えて {@link android.provider.CalendarContract.EventsColumns#DURATION} を含める必要があります。
 
 
@@ -528,7 +528,7 @@ Log.i(DEBUG_TAG, &quot;Rows updated: &quot; + rows);</pre>
 
 
 </li>
-  
+
 </ul>
 
 <p>イベントの挿入の例を次に示します。簡潔にするため、この例は UI スレッドで実行されています。
@@ -539,8 +539,8 @@ Log.i(DEBUG_TAG, &quot;Rows updated: &quot; + rows);</pre>
 
 <pre>
 long calID = 3;
-long startMillis = 0; 
-long endMillis = 0;     
+long startMillis = 0;
+long endMillis = 0;
 Calendar beginTime = Calendar.getInstance();
 beginTime.set(2012, 9, 14, 7, 30);
 startMillis = beginTime.getTimeInMillis();
@@ -561,7 +561,7 @@ Uri uri = cr.insert(Events.CONTENT_URI, values);
 
 // get the event ID that is the last element in the Uri
 long eventID = Long.parseLong(uri.getLastPathSegment());
-// 
+//
 // ... do something with event ID
 //
 //</pre>
@@ -598,7 +598,7 @@ ContentResolver cr = getContentResolver();
 ContentValues values = new ContentValues();
 Uri updateUri = null;
 // The new title for the event
-values.put(Events.TITLE, &quot;Kickboxing&quot;); 
+values.put(Events.TITLE, &quot;Kickboxing&quot;);
 updateUri = ContentUris.withAppendedId(Events.CONTENT_URI, eventID);
 int rows = getContentResolver().update(updateUri, values, null, null);
 Log.i(DEBUG_TAG, &quot;Rows updated: &quot; + rows);  </pre>
@@ -625,7 +625,7 @@ ContentValues values = new ContentValues();
 Uri deleteUri = null;
 deleteUri = ContentUris.withAppendedId(Events.CONTENT_URI, eventID);
 int rows = getContentResolver().delete(deleteUri, null, null);
-Log.i(DEBUG_TAG, &quot;Rows deleted: &quot; + rows);  
+Log.i(DEBUG_TAG, &quot;Rows deleted: &quot; + rows);
 </pre>
 
 <h2 id="attendees">Attendees テーブル</h2>
@@ -637,7 +637,7 @@ Log.i(DEBUG_TAG, &quot;Rows deleted: &quot; + rows);
 この {@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID} は特定のイベントの {@link android.provider.BaseColumns#_ID} と一致している必要があります。
 
 
-</p> 
+</p>
 
 <p>次の表に、書き込み可能なフィールドを示します。
 新しい参加者を挿入する際には、<code>ATTENDEE_NAME</code> を除くすべてを含める必要があります。
@@ -801,18 +801,18 @@ Instances テーブルは書き込みできません。イベントの発生を�
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.Instances#END_DAY}</td>
-    
+
     <td>インスタンスの、カレンダーのタイムゾーンにおけるユリウス暦での終了日。
- 
-    
+
+
 </td>
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.Instances#END_MINUTE}</td>
-    
+
     <td>カレンダーのタイムゾーンにおける午前零時を基準にしたインスタンスの終了分。
 </td>
-    
+
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.Instances#EVENT_ID}</td>
@@ -820,16 +820,16 @@ Instances テーブルは書き込みできません。イベントの発生を�
   </tr>
     <tr>
     <td>{@link android.provider.CalendarContract.Instances#START_DAY}</td>
-    <td>インスタンスの、カレンダーのタイムゾーンにおけるユリウス暦での開始日。 
+    <td>インスタンスの、カレンダーのタイムゾーンにおけるユリウス暦での開始日。
  </td>
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.Instances#START_MINUTE}</td>
-    
+
     <td>カレンダーのタイムゾーンにおける午前零時を基準にしたインスタンスの開始分。
- 
+
 </td>
-    
+
   </tr>
 
 </table>
@@ -853,7 +853,7 @@ public static final String[] INSTANCE_PROJECTION = new String[] {
     Instances.BEGIN,         // 1
     Instances.TITLE          // 2
   };
-  
+
 // The indices for the projection array above.
 private static final int PROJECTION_ID_INDEX = 0;
 private static final int PROJECTION_BEGIN_INDEX = 1;
@@ -868,7 +868,7 @@ long startMillis = beginTime.getTimeInMillis();
 Calendar endTime = Calendar.getInstance();
 endTime.set(2011, 10, 24, 8, 0);
 long endMillis = endTime.getTimeInMillis();
-  
+
 Cursor cur = null;
 ContentResolver cr = getContentResolver();
 
@@ -883,28 +883,28 @@ ContentUris.appendId(builder, startMillis);
 ContentUris.appendId(builder, endMillis);
 
 // Submit the query
-cur =  cr.query(builder.build(), 
-    INSTANCE_PROJECTION, 
-    selection, 
-    selectionArgs, 
+cur =  cr.query(builder.build(),
+    INSTANCE_PROJECTION,
+    selection,
+    selectionArgs,
     null);
-   
+
 while (cur.moveToNext()) {
     String title = null;
     long eventID = 0;
-    long beginVal = 0;    
-    
+    long beginVal = 0;
+
     // Get the field values
     eventID = cur.getLong(PROJECTION_ID_INDEX);
     beginVal = cur.getLong(PROJECTION_BEGIN_INDEX);
     title = cur.getString(PROJECTION_TITLE_INDEX);
-              
-    // Do something with the values. 
-    Log.i(DEBUG_TAG, "Event:  " + title); 
+
+    // Do something with the values.
+    Log.i(DEBUG_TAG, "Event:  " + title);
     Calendar calendar = Calendar.getInstance();
-    calendar.setTimeInMillis(beginVal);  
+    calendar.setTimeInMillis(beginVal);
     DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
-    Log.i(DEBUG_TAG, "Date: " + formatter.format(calendar.getTime()));    
+    Log.i(DEBUG_TAG, "Date: " + formatter.format(calendar.getTime()));
     }
  }</pre>
 
@@ -924,7 +924,7 @@ while (cur.moveToNext()) {
     <td><p><code>content://com.android.calendar/time/&lt;ms_since_epoch&gt;</code></p>
     URI は、{@link android.provider.CalendarContract#CONTENT_URI CalendarContract.CONTENT_URI} を使用しても参照できます。
 このインテントの使用例については、<a href="{@docRoot}guide/topics/providers/calendar-provider.html#intent-view">インテントを使用したカレンダー データの参照</a>をご覧ください。
- 
+
 
     </td>
     <td><code>&lt;ms_since_epoch&gt;</code> に指定された時刻でカレンダーを開きます。</td>
@@ -935,11 +935,11 @@ while (cur.moveToNext()) {
 
      </td>
     <td><p><code>content://com.android.calendar/events/&lt;event_id&gt;</code></p>
-    
+
     URI は、{@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI} を使用しても参照できます。
 このインテントの使用例については、<a href="{@docRoot}guide/topics/providers/calendar-provider.html#intent-view">インテントを使用したカレンダー データの参照</a>をご覧ください。
 
-    
+
     </td>
     <td><code>&lt;event_id&gt;</code> で指定されたイベントを参照します。</td>
 
@@ -952,12 +952,12 @@ while (cur.moveToNext()) {
   <tr>
     <td>{@link android.content.Intent#ACTION_EDIT EDIT} </td>
     <td><p><code>content://com.android.calendar/events/&lt;event_id&gt;</code></p>
-    
+
   URI は、{@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI} を使用しても参照できます。
 このインテントの使用例については、<a href="{@docRoot}guide/topics/providers/calendar-provider.html#intent-edit">インテントを使用したカレンダー データの編集</a>をご覧ください。
 
-    
-    
+
+
     </td>
     <td><code>&lt;event_id&gt;</code> で指定されたイベントを編集します。</td>
 
@@ -972,11 +972,11 @@ while (cur.moveToNext()) {
     <br>
     {@link android.content.Intent#ACTION_INSERT INSERT} </td>
     <td><p><code>content://com.android.calendar/events</code></p>
-    
+
    URI は、{@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI} を使用しても参照できます。
 このインテントの使用例については、<a href="{@docRoot}guide/topics/providers/calendar-provider.html#intent-insert">インテントを使用したカレンダー データの挿入</a>をご覧ください。
 
-    
+
     </td>
 
     <td>イベントを作成します。</td>
@@ -996,7 +996,7 @@ while (cur.moveToNext()) {
     <td>イベントの名前。</td>
   </tr>
   <tr>
-  
+
     <td>{@link android.provider.CalendarContract#EXTRA_EVENT_BEGIN_TIME CalendarContract.EXTRA_EVENT_BEGIN_TIME}
 </td>
     <td>イベントの開始時刻（エポックからのミリ秒単位）。</td>
@@ -1004,25 +1004,25 @@ while (cur.moveToNext()) {
   <tr>
     <td>{@link android.provider.CalendarContract#EXTRA_EVENT_END_TIME CalendarContract.EXTRA_EVENT_END_TIME}
 </td>
-    
+
     <td>イベントの終了時刻（エポックからのミリ秒単位）。</td>
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract#EXTRA_EVENT_ALL_DAY CalendarContract.EXTRA_EVENT_ALL_DAY}
 </td>
-    
+
     <td>イベントが終日かどうかを示すブール値。使用できる値は <code>true</code> または <code>false</code> です。
 </td> </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.EventsColumns#EVENT_LOCATION Events.EVENT_LOCATION}
 </td>
-    
+
     <td>イベントの場所。</td>
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.EventsColumns#DESCRIPTION Events.DESCRIPTION}
 </td>
-    
+
     <td>イベントの説明。</td>
   </tr>
   <tr>
@@ -1039,16 +1039,16 @@ while (cur.moveToNext()) {
     <td>
     {@link android.provider.CalendarContract.EventsColumns#ACCESS_LEVEL Events.ACCESS_LEVEL}
 </td>
-    
+
     <td>イベントが公開か非公開か。</td>
   </tr>
   <tr>
     <td>{@link android.provider.CalendarContract.EventsColumns#AVAILABILITY Events.AVAILABILITY}
 </td>
-    
+
     <td>このイベントを埋まっている時間に数えるか、それともスケジュールのやり直しが利く空き時間とみなすか。</td>
-    
-</table> 
+
+</table>
 <p>次のセクションでは、これらのインテント使用方法を説明します。</p>
 
 
@@ -1059,14 +1059,14 @@ while (cur.moveToNext()) {
 
 </p>
 
-  
+
 <p>このアプローチのアプリケーションをユーザーが実行すると、アプリケーションによってユーザーがカレンダーに誘導されイベントを追加できるようになります。
 {@link android.content.Intent#ACTION_INSERT INSERT} インテントは、追加フィールドを使用して、カレンダーに格納されている詳細情報をフォームに自動入力します。
 
 それに対して、ユーザーはイベントのキャンセル、必要に応じたイベントの編集、イベントのカレンダーへの保存ができます。
 
 </p>
-  
+
 
 
 <p>次に示すのは、2012 年 1 月 19 日の午前 7:30 から 午前 8:30 までのイベントをスケジュールするコード スニペットです。
@@ -1075,7 +1075,7 @@ while (cur.moveToNext()) {
 <ul>
   <li>URI として {@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI} を指定しています。
 </li>
-  
+
   <li>{@link android.provider.CalendarContract#EXTRA_EVENT_BEGIN_TIME CalendarContract.EXTRA_EVENT_BEGIN_TIME} と {@link android.provider.CalendarContract#EXTRA_EVENT_END_TIME CalendarContract.EXTRA_EVENT_END_TIME} の各エクストラ フィールドを使用して、イベントの時間をフォームに自動入力しています。
 
 
@@ -1083,10 +1083,10 @@ while (cur.moveToNext()) {
 
 これらの値は、エポックからの UTC ミリ秒単位であることが必要です。
 </li>
-  
+
   <li>{@link android.content.Intent#EXTRA_EMAIL Intent.EXTRA_EMAIL} エクストラ フィールドを使用して、参加者をメールアドレスで示したコンマ区切りリストを指定しています。
 </li>
-  
+
 </ul>
 <pre>
 Calendar beginTime = Calendar.getInstance();
@@ -1158,12 +1158,12 @@ startActivity(intent);
 
 <ul>
   <li>同期アダプタは、{@link android.provider.CalendarContract#CALLER_IS_SYNCADAPTER} を <code>true</code> に設定して、それが同期アダプタであることを示す必要があります。</li>
-  
-  
+
+
   <li>同期アダプタは、{@link android.provider.CalendarContract.SyncColumns#ACCOUNT_NAME} と {@link android.provider.CalendarContract.SyncColumns#ACCOUNT_TYPE} をクエリ パラメータとして URI に指定する必要があります。
 
  </li>
-  
+
   <li>同期アダプタは、アプリケーションやウィジェットより多くの列に書き込みアクセスできます。
   たとえば、アプリケーションで変更できるのは、名前、表示名、可視性の設定、カレンダーが同期対象かどうかなど、カレンダーの特性の一部のみです。
 

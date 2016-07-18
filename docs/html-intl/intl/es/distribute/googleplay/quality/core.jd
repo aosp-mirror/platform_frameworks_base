@@ -12,7 +12,7 @@ page.image=/distribute/images/core-quality-guidelines.jpg
         <li><a href="#listing">Google Play</a></li>
 
   </ol>
-  
+
   <h2>Prueba</h2>
   <ol>
     <li><a href="#test-environment">Configuración de un entorno de prueba</a></li>
@@ -24,7 +24,7 @@ page.image=/distribute/images/core-quality-guidelines.jpg
     <li><a href="{@docRoot}distribute/essentials/quality/tablets.html">Calidad de las aplicaciones para tablets</a></li>
         <li><a href="{@docRoot}distribute/essentials/optimizing-your-app.html">Optimiza tu aplicación</a></li>
   </ol>
-  
+
 
 </div>
 </div>
@@ -84,7 +84,7 @@ page.image=/distribute/images/core-quality-guidelines.jpg
     <th style="width:54px;">
       ID
     </th>
-    
+
 
     <th>
       Descripción
