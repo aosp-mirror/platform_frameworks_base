@@ -21,11 +21,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.UserInfo;
+import android.app.ActivityManager;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
+import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.internal.util.ArrayUtils;
 
@@ -34,24 +38,39 @@ import java.util.Arrays;
 import java.util.List;
 
 /** Test {@link UserManager} functionality. */
-@MediumTest
 public class UserManagerTest extends AndroidTestCase {
-    private static final int REMOVE_CHECK_INTERVAL = 500;
-    private static final int REMOVE_TIMEOUT = 60 * 1000;
+    private static final int REMOVE_CHECK_INTERVAL_MILLIS = 500; // 0.5 seconds
+    private static final int REMOVE_TIMEOUT_MILLIS = 60 * 1000; // 60 seconds
+    private static final int SWITCH_CHECK_INTERVAL_MILLIS = 2 * 1000; // 2 seconds
+    private static final int SWITCH_USER_TIMEOUT_MILLIS = 40 * 1000; // 40 seconds
+
+    private final Object mUserRemoveLock = new Object();
+    private final Object mUserSwitchLock = new Object();
+
     private UserManager mUserManager = null;
-    private final Object mUserLock = new Object();
     private List<Integer> usersToRemove;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
         mUserManager = UserManager.get(getContext());
+
         IntentFilter filter = new IntentFilter(Intent.ACTION_USER_REMOVED);
+        filter.addAction(Intent.ACTION_USER_SWITCHED);
         getContext().registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                synchronized (mUserLock) {
-                    mUserLock.notifyAll();
+                switch (intent.getAction()) {
+                    case Intent.ACTION_USER_REMOVED:
+                        synchronized (mUserRemoveLock) {
+                            mUserRemoveLock.notifyAll();
+                        }
+                        break;
+                    case Intent.ACTION_USER_SWITCHED:
+                        synchronized (mUserSwitchLock) {
+                            mUserSwitchLock.notifyAll();
+                        }
+                        break;
                 }
             }
         }, filter);
@@ -81,10 +100,12 @@ public class UserManagerTest extends AndroidTestCase {
         }
     }
 
+    @SmallTest
     public void testHasSystemUser() throws Exception {
         assertTrue(findUser(UserHandle.USER_SYSTEM));
     }
 
+    @MediumTest
     public void testAddUser() throws Exception {
         UserInfo userInfo = createUser("Guest 1", UserInfo.FLAG_GUEST);
         assertTrue(userInfo != null);
@@ -105,6 +126,7 @@ public class UserManagerTest extends AndroidTestCase {
         assertTrue(found);
     }
 
+    @MediumTest
     public void testAdd2Users() throws Exception {
         UserInfo user1 = createUser("Guest 1", UserInfo.FLAG_GUEST);
         UserInfo user2 = createUser("User 2", UserInfo.FLAG_ADMIN);
@@ -117,6 +139,7 @@ public class UserManagerTest extends AndroidTestCase {
         assertTrue(findUser(user2.id));
     }
 
+    @MediumTest
     public void testRemoveUser() throws Exception {
         UserInfo userInfo = createUser("Guest 1", UserInfo.FLAG_GUEST);
         removeUser(userInfo.id);
@@ -124,6 +147,7 @@ public class UserManagerTest extends AndroidTestCase {
         assertFalse(findUser(userInfo.id));
     }
 
+    @MediumTest
     public void testAddGuest() throws Exception {
         UserInfo userInfo1 = createUser("Guest 1", UserInfo.FLAG_GUEST);
         UserInfo userInfo2 = createUser("Guest 2", UserInfo.FLAG_GUEST);
@@ -131,19 +155,54 @@ public class UserManagerTest extends AndroidTestCase {
         assertNull(userInfo2);
     }
 
+    @MediumTest
+    public void testGetProfileParent() throws Exception {
+        final int primaryUserId = mUserManager.getPrimaryUser().id;
+
+        UserInfo userInfo = createProfileForUser("Profile",
+                UserInfo.FLAG_MANAGED_PROFILE, primaryUserId);
+        assertNotNull(userInfo);
+
+        UserInfo parentProfileInfo = mUserManager.getProfileParent(userInfo.id);
+        assertNotNull(parentProfileInfo);
+        assertEquals(parentProfileInfo.id, primaryUserId);
+    }
+
     // Make sure only one managed profile can be created
+    @MediumTest
     public void testAddManagedProfile() throws Exception {
         final int primaryUserId = mUserManager.getPrimaryUser().id;
         UserInfo userInfo1 = createProfileForUser("Managed 1",
                 UserInfo.FLAG_MANAGED_PROFILE, primaryUserId);
         UserInfo userInfo2 = createProfileForUser("Managed 2",
                 UserInfo.FLAG_MANAGED_PROFILE, primaryUserId);
+
         assertNotNull(userInfo1);
         assertNull(userInfo2);
         // Verify that current user is not a managed profile
         assertFalse(mUserManager.isManagedProfile());
     }
 
+    @MediumTest
+    public void testAddRestrictedProfile() throws Exception {
+        UserInfo userInfo = createRestrictedProfile("Profile");
+        assertNotNull(userInfo);
+
+        Bundle restrictions = mUserManager.getUserRestrictions(UserHandle.of(userInfo.id));
+        assertTrue("Restricted profile should have DISALLOW_MODIFY_ACCOUNTS restriction by default",
+                restrictions.getBoolean(UserManager.DISALLOW_MODIFY_ACCOUNTS));
+        assertTrue("Restricted profile should have DISALLOW_SHARE_LOCATION restriction by default",
+                restrictions.getBoolean(UserManager.DISALLOW_SHARE_LOCATION));
+
+        int locationMode = Settings.Secure.getIntForUser(getContext().getContentResolver(),
+                Settings.Secure.LOCATION_MODE,
+                Settings.Secure.LOCATION_MODE_HIGH_ACCURACY,
+                userInfo.id);
+        assertEquals("Restricted profile should have setting LOCATION_MODE set to "
+                + "LOCATION_MODE_OFF by default", locationMode, Settings.Secure.LOCATION_MODE_OFF);
+    }
+
+    @MediumTest
     public void testGetUserCreationTime() throws Exception {
         final int primaryUserId = mUserManager.getPrimaryUser().id;
         UserInfo profile = createProfileForUser("Managed 1",
@@ -177,7 +236,6 @@ public class UserManagerTest extends AndroidTestCase {
         }
     }
 
-
     private boolean findUser(int id) {
         List<UserInfo> list = mUserManager.getUsers();
 
@@ -189,6 +247,7 @@ public class UserManagerTest extends AndroidTestCase {
         return false;
     }
 
+    @MediumTest
     public void testSerialNumber() {
         UserInfo user1 = createUser("User 1", 0);
         int serialNumber1 = user1.serialNumber;
@@ -201,6 +260,7 @@ public class UserManagerTest extends AndroidTestCase {
         assertEquals(user2.id, mUserManager.getUserHandle(serialNumber2));
     }
 
+    @MediumTest
     public void testGetSerialNumbersOfUsers() {
         UserInfo user1 = createUser("User 1", 0);
         UserInfo user2 = createUser("User 2", 0);
@@ -212,6 +272,7 @@ public class UserManagerTest extends AndroidTestCase {
                 ArrayUtils.contains(serialNumbersOfUsers, user2.serialNumber));
     }
 
+    @MediumTest
     public void testMaxUsers() {
         int N = UserManager.getMaxSupportedUsers();
         int count = mUserManager.getUsers().size();
@@ -226,6 +287,17 @@ public class UserManagerTest extends AndroidTestCase {
         assertNull(extra);
     }
 
+    @MediumTest
+    public void testGetUserCount() {
+        int count = mUserManager.getUsers().size();
+        UserInfo user1 = createUser("User 1", 0);
+        assertNotNull(user1);
+        UserInfo user2 = createUser("User 2", 0);
+        assertNotNull(user2);
+        assertEquals(count + 2, mUserManager.getUserCount());
+    }
+
+    @MediumTest
     public void testRestrictions() {
         UserInfo testUser = createUser("User 1", 0);
 
@@ -241,18 +313,66 @@ public class UserManagerTest extends AndroidTestCase {
         assertEquals(stored.getBoolean(UserManager.DISALLOW_INSTALL_APPS), true);
     }
 
-    private void removeUser(int userId) {
-        synchronized (mUserLock) {
-            mUserManager.removeUser(userId);
+    @MediumTest
+    public void testSetDefaultGuestRestrictions() {
+        final Bundle origGuestRestrictions = mUserManager.getDefaultGuestRestrictions();
+        Bundle restrictions = new Bundle();
+        restrictions.putBoolean(UserManager.DISALLOW_FUN, true);
+        mUserManager.setDefaultGuestRestrictions(restrictions);
+
+        try {
+            UserInfo guest = createUser("Guest", UserInfo.FLAG_GUEST);
+            assertNotNull(guest);
+            assertTrue(mUserManager.hasUserRestriction(UserManager.DISALLOW_FUN,
+                    guest.getUserHandle()));
+        } finally {
+            mUserManager.setDefaultGuestRestrictions(origGuestRestrictions);
+        }
+    }
+
+    @LargeTest
+    public void testSwitchUser() {
+        ActivityManager am = getContext().getSystemService(ActivityManager.class);
+        final int startUser = am.getCurrentUser();
+        UserInfo user = createUser("User", 0);
+        assertNotNull(user);
+        // Switch to the user just created.
+        switchUser(user.id);
+        // Switch back to the starting user.
+        switchUser(startUser);
+    }
+
+    private void switchUser(int userId) {
+        synchronized (mUserSwitchLock) {
+            ActivityManager am = getContext().getSystemService(ActivityManager.class);
+            am.switchUser(userId);
             long time = System.currentTimeMillis();
-            while (mUserManager.getUserInfo(userId) != null) {
+            while (am.getCurrentUser() != userId) {
                 try {
-                    mUserLock.wait(REMOVE_CHECK_INTERVAL);
+                    mUserSwitchLock.wait(SWITCH_CHECK_INTERVAL_MILLIS);
                 } catch (InterruptedException ie) {
                     Thread.currentThread().interrupt();
                     return;
                 }
-                if (System.currentTimeMillis() - time > REMOVE_TIMEOUT) {
+                if (System.currentTimeMillis() - time > SWITCH_USER_TIMEOUT_MILLIS) {
+                    fail("Timeout waiting for the user switch to u" + userId);
+                }
+            }
+        }
+    }
+
+    private void removeUser(int userId) {
+        synchronized (mUserRemoveLock) {
+            mUserManager.removeUser(userId);
+            long time = System.currentTimeMillis();
+            while (mUserManager.getUserInfo(userId) != null) {
+                try {
+                    mUserRemoveLock.wait(REMOVE_CHECK_INTERVAL_MILLIS);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    return;
+                }
+                if (System.currentTimeMillis() - time > REMOVE_TIMEOUT_MILLIS) {
                     fail("Timeout waiting for removeUser. userId = " + userId);
                 }
             }
@@ -275,4 +395,11 @@ public class UserManagerTest extends AndroidTestCase {
         return profile;
     }
 
+    private UserInfo createRestrictedProfile(String name) {
+        UserInfo profile = mUserManager.createRestrictedProfile(name);
+        if (profile != null) {
+            usersToRemove.add(profile.id);
+        }
+        return profile;
+    }
 }
