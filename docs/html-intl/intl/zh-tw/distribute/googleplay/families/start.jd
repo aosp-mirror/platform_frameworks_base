@@ -51,7 +51,7 @@ page.metaDescription=只需幾個簡易步驟即可加入 Designed for Families�
 </p>
 
 <p class="note">
-  <strong>注意：</strong>Designed for Families 計劃中已發行的應用程式也可供 Google Play 上的所有使用者使用。 
+  <strong>注意：</strong>Designed for Families 計劃中已發行的應用程式也可供 Google Play 上的所有使用者使用。
 </p>
 
 <p>
@@ -67,4 +67,4 @@ page.metaDescription=只需幾個簡易步驟即可加入 Designed for Families�
 
 <div class="paging-links" style="padding-top:.75em;">
   <a href="{@docRoot}distribute/googleplay/families/faq.html" class="next-class-link">後續內容：常見問題</a>
-</div> 
+</div>

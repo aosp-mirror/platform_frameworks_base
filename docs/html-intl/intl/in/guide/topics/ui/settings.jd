@@ -82,7 +82,7 @@ cara membangun pengaturan aplikasi Anda menggunakan API {@link android.preferenc
 
 <img src="{@docRoot}images/ui/settings/settings.png" alt="" width="435" />
 <p class="img-caption"><strong>Gambar 1.</strong> Cuplikan layar dari pengaturan
-aplikasi Messaging Android. Memilih item yang didefinisikan oleh {@link android.preference.Preference} 
+aplikasi Messaging Android. Memilih item yang didefinisikan oleh {@link android.preference.Preference}
 akan membuka antarmuka untuk mengubah pengaturan.</p>
 
 
@@ -163,7 +163,7 @@ tersimpan bisa berupa tipe nilai apa pun yang didukung (tercantum di atas).</dd>
 java.lang.String}.</dd>
 </dl>
 
-<p>Lihat kelas {@link android.preference.Preference} untuk mengetahui daftar subkelas lain dan 
+<p>Lihat kelas {@link android.preference.Preference} untuk mengetahui daftar subkelas lain dan
 propertinya.</p>
 
 <p>Tentu saja, kelas bawaan tidak mengakomodasi setiap kebutuhan dan aplikasi Anda mungkin memerlukan
@@ -226,7 +226,7 @@ android.preference.ListPreference}. Kedua item tersebut menyertakan tiga atribut
   <dt>{@code android:key}</dt>
   <dd>Atribut ini diperlukan untuk preferensi yang mempertahankan nilai data. Ini menetapkan kunci
 unik (string) yang digunakan sistem saat menyimpan nilai pengaturan ini dalam {@link
-android.content.SharedPreferences}. 
+android.content.SharedPreferences}.
   <p>Instance satu-satunya di mana atribut ini <em>tidak diperlukan</em> adalah bila preferensi berupa
 {@link android.preference.PreferenceCategory} atau {@link android.preference.PreferenceScreen}, atau
 preferensi menetapkan {@link android.content.Intent} untuk dipanggil (dengan elemen <a href="#Intents">{@code &lt;intent&gt;}</a>) atau {@link android.app.Fragment} untuk ditampilkan (dengan atribut <a href="{@docRoot}reference/android/preference/Preference.html#attr_android:fragment">{@code
@@ -285,7 +285,7 @@ android.preference.PreferenceCategory}.</p>
 
 <pre>
 &lt;PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    &lt;PreferenceCategory 
+    &lt;PreferenceCategory
         android:title="&#64;string/pref_sms_storage_title"
         android:key="pref_key_storage_settings">
         &lt;CheckBoxPreference
@@ -293,12 +293,12 @@ android.preference.PreferenceCategory}.</p>
             android:summary="&#64;string/pref_summary_auto_delete"
             android:title="&#64;string/pref_title_auto_delete"
             android:defaultValue="false"... />
-        &lt;Preference 
+        &lt;Preference
             android:key="pref_key_sms_delete_limit"
             android:dependency="pref_key_auto_delete"
             android:summary="&#64;string/pref_summary_delete_limit"
             android:title="&#64;string/pref_title_sms_delete"... />
-        &lt;Preference 
+        &lt;Preference
             android:key="pref_key_mms_delete_limit"
             android:dependency="pref_key_auto_delete"
             android:summary="&#64;string/pref_summary_delete_limit"
@@ -370,12 +370,12 @@ sebagai anak dari elemen {@code &lt;Preference&gt;} yang bersangkutan.</p>
 
 <dl>
   <dt>{@code android:action}</dt>
-    <dd>Tindakan yang akan ditetapkan, sesuai metode 
+    <dd>Tindakan yang akan ditetapkan, sesuai metode
 {@link android.content.Intent#setAction setAction()}.</dd>
   <dt>{@code android:data}</dt>
     <dd>Data yang akan ditetapkan, sesuai metode {@link android.content.Intent#setData setData()}.</dd>
   <dt>{@code android:mimeType}</dt>
-    <dd>Tipe MIME yang akan ditetapkan, sesuai metode 
+    <dd>Tipe MIME yang akan ditetapkan, sesuai metode
 {@link android.content.Intent#setType setType()}.</dd>
   <dt>{@code android:targetClass}</dt>
     <dd>Bagian kelas dari nama komponen, sesuai metode {@link android.content.Intent#setComponent
@@ -588,11 +588,11 @@ tunggal dalam elemen {@code &lt;preference-headers&gt;} akar. Misalnya:</p>
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?>
 &lt;preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
-    &lt;header 
+    &lt;header
         android:fragment="com.example.prefs.SettingsActivity$SettingsFragmentOne"
         android:title="@string/prefs_category_one"
         android:summary="@string/prefs_summ_category_one" />
-    &lt;header 
+    &lt;header
         android:fragment="com.example.prefs.SettingsActivity$SettingsFragmentTwo"
         android:title="@string/prefs_category_two"
         android:summary="@string/prefs_summ_category_two" >
@@ -672,15 +672,15 @@ android.preference.Preference &lt;Preference&gt;} mengirimkan {@link android.con
 akan dimuat.</p>
 
 <p>Misalnya, ini adalah file XML untuk header preferensi yang menggunakan Android 3.0
-dan yang lebih tinggi ({@code res/xml/preference_headers.xml}):</p> 
+dan yang lebih tinggi ({@code res/xml/preference_headers.xml}):</p>
 
 <pre>
 &lt;preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
-    &lt;header 
+    &lt;header
         android:fragment="com.example.prefs.SettingsFragmentOne"
         android:title="@string/prefs_category_one"
         android:summary="@string/prefs_summ_category_one" />
-    &lt;header 
+    &lt;header
         android:fragment="com.example.prefs.SettingsFragmentTwo"
         android:title="@string/prefs_category_two"
         android:summary="@string/prefs_summ_category_two" />
@@ -692,18 +692,18 @@ Android 3.0 ({@code res/xml/preference_headers_legacy.xml}):</p>
 
 <pre>
 &lt;PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    &lt;Preference 
+    &lt;Preference
         android:title="@string/prefs_category_one"
         android:summary="@string/prefs_summ_category_one"  >
-        &lt;intent 
+        &lt;intent
             android:targetPackage="com.example.prefs"
             android:targetClass="com.example.prefs.SettingsActivity"
             android:action="com.example.prefs.PREFS_ONE" />
     &lt;/Preference>
-    &lt;Preference 
+    &lt;Preference
         android:title="@string/prefs_category_two"
         android:summary="@string/prefs_summ_category_two" >
-        &lt;intent 
+        &lt;intent
             android:targetPackage="com.example.prefs"
             android:targetClass="com.example.prefs.SettingsActivity"
             android:action="com.example.prefs.PREFS_TWO" />
@@ -879,7 +879,7 @@ prefs.registerOnSharedPreferenceChangeListener(
 });
 </pre>
 
-<p>Sebagai gantinya, simpan referensi ke listener dalam bidang data instance 
+<p>Sebagai gantinya, simpan referensi ke listener dalam bidang data instance
 objek yang akan ada selama listener dibutuhkan:</p>
 
 <pre>
@@ -975,11 +975,11 @@ negatif dan positif default:</p>
 public class NumberPickerPreference extends DialogPreference {
     public NumberPickerPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
-        
+
         setDialogLayoutResource(R.layout.numberpicker_dialog);
         setPositiveButtonText(android.R.string.ok);
         setNegativeButtonText(android.R.string.cancel);
-        
+
         setDialogIcon(null);
     }
     ...
@@ -1194,7 +1194,7 @@ protected void onRestoreInstanceState(Parcelable state) {
     // Cast state to custom BaseSavedState and pass to superclass
     SavedState myState = (SavedState) state;
     super.onRestoreInstanceState(myState.getSuperState());
-    
+
     // Set this Preference's widget to reflect the restored state
     mNumberPicker.setValue(myState.value);
 }

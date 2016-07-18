@@ -50,7 +50,7 @@ download the platform into your SDK.</p>
 <h2 id="features">Platform Highlights</h2>
 
 <p>For a list of new user features and platform highlights, see the <a
-href="http://developer.android.com/about/versions/android-{@sdkPlatformVersion}-highlights.html">Android 
+href="http://developer.android.com/about/versions/android-{@sdkPlatformVersion}-highlights.html">Android
 {@sdkPlatformVersion} Platform Highlights</a> document.</p>
 
 <h2 id="relnotes">Revisions</h2>
@@ -151,8 +151,8 @@ built-in applications:</p>
 <p>The system image included in the downloadable platform provides a variety of
 built-in locales. In some cases, region-specific strings are available for the
 locales. In other cases, a default version of the language is used. The
-languages that are available in the Android {@sdkPlatformVersion} system 
-image are listed below (with <em>language</em>_<em>country/region</em> locale 
+languages that are available in the Android {@sdkPlatformVersion} system
+image are listed below (with <em>language</em>_<em>country/region</em> locale
 descriptor).</p>
 
 <table style="border:0;padding-bottom:0;margin-bottom:0;">
@@ -192,7 +192,7 @@ descriptor).</p>
 </tr>
 </table>
 
-<p>Localized UI strings match the locales that are accessible 
+<p>Localized UI strings match the locales that are accessible
 through Settings.</p>
 
 <h2 id="skins">Emulator Skins</h2>
@@ -242,14 +242,14 @@ through Settings.</p>
 <h3 id="api-level">API level</h3>
 
 <p>The Android {@sdkPlatformVersion} platform delivers an updated version of the framework
-API. As with previous versions, the Android {@sdkPlatformVersion} API 
+API. As with previous versions, the Android {@sdkPlatformVersion} API
 is assigned an integer identifier &mdash; <strong>{@sdkPlatformApiLevel}</strong> &mdash; that is
 stored in the system itself. This identifier, called the "API Level", allows the
 system to correctly determine whether an application is compatible with
 the system, prior to installing the application. </p>
 
-<p>To use APIs introduced in Android {@sdkPlatformVersion} in your application, you need to 
-set the proper value, "{@sdkPlatformApiLevel}", in the attributes of the <code>&lt;uses-sdk&gt;</code> 
+<p>To use APIs introduced in Android {@sdkPlatformVersion} in your application, you need to
+set the proper value, "{@sdkPlatformApiLevel}", in the attributes of the <code>&lt;uses-sdk&gt;</code>
 element in your application's manifest. </p>
 
 <p>For more information about how to use API Level, see the <a
@@ -319,8 +319,8 @@ href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API Level
 <p>Android 2.0 is designed to run on devices that use virtual keys for HOME,
 MENU, BACK, and SEARCH, rather than physical keys. To support the best user
 experience on those devices, the Android platform now executes these buttons at
-key-up, for a key-down/key-up pair, rather than key-down. This helps prevent 
-accidental button events and lets the user press the button area and then drag 
+key-up, for a key-down/key-up pair, rather than key-down. This helps prevent
+accidental button events and lets the user press the button area and then drag
 out of it without generating an event. </p>
 
 <p>This change in behavior should only affect your application if it is
@@ -332,7 +332,7 @@ make sure that your application is handling the key events properly. </p>
 however, if your application is doing so and it invokes some action on
 key-down, rather than key-up, you should modify your code. </p>
 
-<p>If your application will use APIs introduced in Android 2.0 (API Level 5), 
+<p>If your application will use APIs introduced in Android 2.0 (API Level 5),
 you can take advantage of new APIs for managing key-event pairs:</p>
 
 <ul>
@@ -363,16 +363,16 @@ method), then invoke the action at key up. Here's a pattern you can use:</li>
 </ul>
 
 <p>If you want to update a legacy application so that its handling of the BACK
-key works properly for both Android 2.0 and older platform versions, you 
+key works properly for both Android 2.0 and older platform versions, you
 can use an approach similar to that shown above. Your code can catch the
-target button event on key-down, set a flag to track the key event, and 
-then also catch the event on key-up, executing the desired action if the tracking 
-flag is set. You'll also want to watch for focus changes and clear the tracking 
+target button event on key-down, set a flag to track the key event, and
+then also catch the event on key-up, executing the desired action if the tracking
+flag is set. You'll also want to watch for focus changes and clear the tracking
 flag when gaining/losing focus.</p>
 
 <h3 id="api-diff">API differences report</h3>
 
-<p>For a detailed view of API changes in Android {@sdkPlatformVersion} (API Level {@sdkPlatformApiLevel}), as compared to 
+<p>For a detailed view of API changes in Android {@sdkPlatformVersion} (API Level {@sdkPlatformApiLevel}), as compared to
 the previous version, see the <a
 href="{@docRoot}sdk/api_diff/{@sdkPlatformApiLevel}/changes.html">API Differences Report</a>.</p>
 

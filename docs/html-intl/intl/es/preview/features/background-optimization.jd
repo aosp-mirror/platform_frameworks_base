@@ -274,7 +274,7 @@ public static void scheduleJob(Context context) {
 </pre>
 <p>
   Cuando el sistema informa un cambio en el(los) URI de contenido especificado(s), tu aplicación
-  recibe un callback y se pasa un objeto {@link android.app.job.JobParameters} 
+  recibe un callback y se pasa un objeto {@link android.app.job.JobParameters}
   al método {@link android.app.job.JobService#onStartJob onStartJob()}
   en {@code MediaContentJob.class}.
 </p>

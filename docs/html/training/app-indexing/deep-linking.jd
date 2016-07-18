@@ -69,7 +69,7 @@ in your manifest for deep linking. The URIs {@code “example://gizmos”} and
         &lt;!-- Accepts URIs that begin with "example://gizmos” --&gt;
         &lt;data android:scheme="example"
               android:host="gizmos" /&gt;
-        
+
     &lt;/intent-filter&gt;
 &lt;/activity&gt;
 </pre>

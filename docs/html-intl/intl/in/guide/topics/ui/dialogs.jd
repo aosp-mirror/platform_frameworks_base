@@ -32,7 +32,7 @@ page.tags=alertdialog,dialogfragment
       <li>{@link android.app.DialogFragment}</li>
       <li>{@link android.app.AlertDialog}</li>
     </ol>
-    
+
     <h2>Lihat juga</h2>
     <ol>
       <li><a href="{@docRoot}design/building-blocks/dialogs.html">Panduan desain dialog</a></li>
@@ -89,7 +89,7 @@ pada layar besar dan kecil).</p>
 
 <p>Bagian-bagian berikutnya dalam panduan ini akan menjelaskan cara menggunakan {@link
 android.support.v4.app.DialogFragment} yang dikombinasikan dengan objek {@link android.app.AlertDialog}
-. Jika Anda ingin membuat picker tanggal atau waktu, Anda harus membaca panduan 
+. Jika Anda ingin membuat picker tanggal atau waktu, Anda harus membaca panduan
 <a href="{@docRoot}guide/topics/ui/controls/pickers.html">Picker</a>.</p>
 
 <p class="note"><strong>Catatan:</strong>
@@ -235,8 +235,8 @@ AlertDialog dialog = builder.create();
 </pre>
 
 <p>Metode <code>set...Button()</code> mengharuskan adanya judul bagi tombol (disediakan
-oleh suatu <a href="{@docRoot}guide/topics/resources/string-resource.html">sumber daya string</a>) dan 
-{@link android.content.DialogInterface.OnClickListener} yang mendefinisikan tindakan yang diambil 
+oleh suatu <a href="{@docRoot}guide/topics/resources/string-resource.html">sumber daya string</a>) dan
+{@link android.content.DialogInterface.OnClickListener} yang mendefinisikan tindakan yang diambil
 bila pengguna menekan tombol.</p>
 
 <p>Ada tiga macam tombol tindakan yang Anda bisa tambahkan:</p>
@@ -247,8 +247,8 @@ bila pengguna menekan tombol.</p>
   <dd>Anda harus menggunakan tipe ini untuk membatalkan tindakan.</dd>
   <dt>Netral</dt>
   <dd>Anda harus menggunakan tipe ini bila pengguna mungkin tidak ingin melanjutkan tindakan,
-  namun tidak ingin membatalkan. Tipe ini muncul antara tombol positif dan 
-tombol negatif. Misalnya, tindakan bisa berupa "Ingatkan saya nanti".</dd> 
+  namun tidak ingin membatalkan. Tipe ini muncul antara tombol positif dan
+tombol negatif. Misalnya, tindakan bisa berupa "Ingatkan saya nanti".</dd>
 </dl>
 
 <p>Anda hanya bisa menambahkan salah satu tipe tombol ke {@link
@@ -271,7 +271,7 @@ Dialog dengan satu judul dan daftar.</p>
 <li>Daftar pilihan ganda persisten (kotak cek)</li>
 </ul>
 
-<p>Untuk membuat daftar pilihan tunggal seperti dalam gambar 3, 
+<p>Untuk membuat daftar pilihan tunggal seperti dalam gambar 3,
 gunakan metode {@link android.app.AlertDialog.Builder#setItems setItems()}:</p>
 
 <pre style="clear:right">
@@ -291,7 +291,7 @@ public Dialog onCreateDialog(Bundle savedInstanceState) {
 
 <p>Karena daftar muncul dalam area konten dialog,
 dialog tidak bisa menampilkan pesan dan daftar sekaligus dan Anda harus menetapkan judul untuk
-dialog dengan {@link android.app.AlertDialog.Builder#setTitle setTitle()}. 
+dialog dengan {@link android.app.AlertDialog.Builder#setTitle setTitle()}.
 Untuk menentukan item daftar, panggil {@link
 android.app.AlertDialog.Builder#setItems setItems()}, dengan meneruskan larik.
 Atau, Anda bisa menetapkan daftar menggunakan {@link
@@ -300,7 +300,7 @@ dengan data dinamis (seperti dari database) dengan menggunakan {@link android.wi
 
 <p>Jika Anda memilih untuk mendukung daftar dengan {@link android.widget.ListAdapter},
 selalu gunakan sebuah {@link android.support.v4.content.Loader} agar konten dimuat
-secara asinkron. Hal ini dijelaskan lebih jauh dalam panduan 
+secara asinkron. Hal ini dijelaskan lebih jauh dalam panduan
 <a href="{@docRoot}guide/topics/ui/declaring-layout.html#AdapterViews">Membuat Layout
 dengan Adaptor</a> dan <a href="{@docRoot}guide/components/loaders.html">Loader</a>
 .</p>
@@ -317,11 +317,11 @@ Daftar item pilihan ganda.</p>
 
 <h4 id="Checkboxes">Menambahkan daftar pilihan ganda atau pilihan tunggal persisten</h4>
 
-<p>Untuk menambahkan daftar item pilihan ganda (kotak cek) atau 
-item pilihan tunggal (tombol radio), gunakan masing-masing metode 
+<p>Untuk menambahkan daftar item pilihan ganda (kotak cek) atau
+item pilihan tunggal (tombol radio), gunakan masing-masing metode
 {@link android.app.AlertDialog.Builder#setMultiChoiceItems(Cursor,String,String,
-DialogInterface.OnMultiChoiceClickListener) setMultiChoiceItems()}, atau 
-{@link android.app.AlertDialog.Builder#setSingleChoiceItems(int,int,DialogInterface.OnClickListener) 
+DialogInterface.OnMultiChoiceClickListener) setMultiChoiceItems()}, atau
+{@link android.app.AlertDialog.Builder#setSingleChoiceItems(int,int,DialogInterface.OnClickListener)
 setSingleChoiceItems()}.</p>
 
 <p>Misalnya, berikut ini cara membuat daftar pilihan ganda seperti
@@ -346,7 +346,7 @@ public Dialog onCreateDialog(Bundle savedInstanceState) {
                        // If the user checked the item, add it to the selected items
                        mSelectedItems.add(which);
                    } else if (mSelectedItems.contains(which)) {
-                       // Else, if the item is already in the array, remove it 
+                       // Else, if the item is already in the array, remove it
                        mSelectedItems.remove(Integer.valueOf(which));
                    }
                }
@@ -373,7 +373,7 @@ public Dialog onCreateDialog(Bundle savedInstanceState) {
 
 <p>Walaupun daftar tradisional maupun daftar dengan tombol radio
 menyediakan tindakan "pilihan tunggal", Anda harus menggunakan {@link
-android.app.AlertDialog.Builder#setSingleChoiceItems(int,int,DialogInterface.OnClickListener) 
+android.app.AlertDialog.Builder#setSingleChoiceItems(int,int,DialogInterface.OnClickListener)
 setSingleChoiceItems()} jika ingin mempertahankan pilihan pengguna.
 Yakni, jika nanti membuka dialog lagi untuk menunjukkan pilihan pengguna,
 maka Anda perlu membuat daftar dengan tombol radio.</p>
@@ -442,7 +442,7 @@ Anda harus mengubah keluarga font ke {@code "sans-serif"} sehingga kedua bidang 
 gaya font yang cocok.</p>
 
 <p>Untuk memekarkan layout dalam {@link android.support.v4.app.DialogFragment} Anda,
-ambillah {@link android.view.LayoutInflater} dengan 
+ambillah {@link android.view.LayoutInflater} dengan
 {@link android.app.Activity#getLayoutInflater()} dan panggil
 {@link android.view.LayoutInflater#inflate inflate()}, dengan parameter pertama
 adalah ID sumber daya layout dan parameter kedua adalah tampilan induk untuk layout.
@@ -470,7 +470,7 @@ public Dialog onCreateDialog(Bundle savedInstanceState) {
                public void onClick(DialogInterface dialog, int id) {
                    LoginDialogFragment.this.getDialog().cancel();
                }
-           });      
+           });
     return builder.create();
 }
 </pre>
@@ -505,7 +505,7 @@ antarmuka yang akan digunakan untuk mengirim kembali suatu kejadian ke aktivitas
 
 <pre>
 public class NoticeDialogFragment extends DialogFragment {
-    
+
     /* The activity that creates an instance of this dialog fragment must
      * implement this interface in order to receive event callbacks.
      * Each method passes the DialogFragment in case the host needs to query it. */
@@ -513,10 +513,10 @@ public class NoticeDialogFragment extends DialogFragment {
         public void onDialogPositiveClick(DialogFragment dialog);
         public void onDialogNegativeClick(DialogFragment dialog);
     }
-    
+
     // Use this instance of the interface to deliver action events
     NoticeDialogListener mListener;
-    
+
     // Override the Fragment.onAttach() method to instantiate the NoticeDialogListener
     &#64;Override
     public void onAttach(Activity activity) {
@@ -543,7 +543,7 @@ melalui implementasi antarmuka {@code NoticeDialogListener}:</p>
 public class MainActivity extends FragmentActivity
                           implements NoticeDialogFragment.NoticeDialogListener{
     ...
-    
+
     public void showNoticeDialog() {
         // Create an instance of the dialog fragment and show it
         DialogFragment dialog = new NoticeDialogFragment();
@@ -638,12 +638,12 @@ android.support.v4.app.Fragment} yang bisa ditanamkan.</p>
 
 <p>Akan tetapi, dalam hal ini Anda tidak bisa menggunakan {@link android.app.AlertDialog.Builder AlertDialog.Builder}
 atau objek {@link android.app.Dialog} lain untuk membangun dialog. Jika
-Anda ingin {@link android.support.v4.app.DialogFragment} 
+Anda ingin {@link android.support.v4.app.DialogFragment}
 bisa ditanamkan, Anda harus mendefinisikan dialog UI dalam layout, lalu memuat layout itu dalam metode callback
 {@link android.support.v4.app.DialogFragment#onCreateView
 onCreateView()}.</p>
 
-<p>Berikut ini adalah contoh {@link android.support.v4.app.DialogFragment} yang bisa muncul sebagai 
+<p>Berikut ini adalah contoh {@link android.support.v4.app.DialogFragment} yang bisa muncul sebagai
 dialog maupun fragmen yang bisa ditanamkan (menggunakan layout bernama <code>purchase_items.xml</code>):</p>
 
 <pre>
@@ -656,7 +656,7 @@ public class CustomDialogFragment extends DialogFragment {
         // Inflate the layout to use as dialog or embedded fragment
         return inflater.inflate(R.layout.purchase_items, container, false);
     }
-  
+
     /** The system calls this only when creating the layout in a dialog. */
     &#64;Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -678,7 +678,7 @@ atau UI layar penuh, berdasarkan ukuran layar:</p>
 public void showDialog() {
     FragmentManager fragmentManager = getSupportFragmentManager();
     CustomDialogFragment newFragment = new CustomDialogFragment();
-    
+
     if (mIsLargeLayout) {
         // The device is using a large layout, so show the fragment as a dialog
         newFragment.show(fragmentManager, "dialog");
@@ -776,7 +776,7 @@ android.support.v4.app.DialogFragment#onDismiss onDismiss()} dalam {@link
 android.support.v4.app.DialogFragment} Anda.</p>
 
 <p>Anda juga bisa <em>membatalkan</em> dialog. Ini merupakan kejadian khusus yang menunjukkan bahwa pengguna
-secara eksplisit meninggalkan dialog tanpa menyelesaikan tugas. Hal ini terjadi jika pengguna menekan tombol 
+secara eksplisit meninggalkan dialog tanpa menyelesaikan tugas. Hal ini terjadi jika pengguna menekan tombol
 <em>Back</em>, menyentuh layar di luar area dialog,
 atau jika Anda secara eksplisit memanggil {@link android.app.Dialog#cancel()} pada {@link
 android.app.Dialog} (seperti saat merespons tombol "Cancel" dalam dialog).</p>

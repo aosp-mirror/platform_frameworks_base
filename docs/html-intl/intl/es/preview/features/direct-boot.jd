@@ -58,7 +58,7 @@ el almacenamiento encriptado por credencial.</p>
 <p>Debes registrar los componentes de las aplicaciones con el sistema antes de que estas puedan
 ejecutarse durante el modo de inicio directo o acceder al almacenamiento encriptado por
 dispositivo. Para registrar una aplicación en el sistema, debes marcar los componentes como
-<i>"con reconocimiento de encriptación"</i>. Para marcar tu dispositivo como "con reconocimiento de encriptación", configura el atributo 
+<i>"con reconocimiento de encriptación"</i>. Para marcar tu dispositivo como "con reconocimiento de encriptación", configura el atributo
 <code>android:directBootAware</code> como verdadero en el manifiesto.<p>
 
 <p>Los componentes con reconocimiento de encriptación pueden registrarse para recibir un mensaje de transmisión

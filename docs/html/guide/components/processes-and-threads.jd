@@ -121,7 +121,7 @@ required to keep the user interface responsive.</p></li>
 
       <ul>
         <li>It hosts an {@link android.app.Activity} that is not in the foreground, but is still
-visible to the user (its {@link android.app.Activity#onPause onPause()} method has been called). 
+visible to the user (its {@link android.app.Activity#onPause onPause()} method has been called).
 This might occur, for example, if the foreground activity started a dialog, which allows the
 previous activity to be seen behind it.</li>
 

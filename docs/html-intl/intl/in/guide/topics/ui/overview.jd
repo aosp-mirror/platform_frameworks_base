@@ -39,7 +39,7 @@ dan elemen <code>&lt;LinearLayout&gt;</code> membuat kelompok tampilan {@link an
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?>
 &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="fill_parent" 
+              android:layout_width="fill_parent"
               android:layout_height="fill_parent"
               android:orientation="vertical" >
     &lt;TextView android:id="@+id/text"
@@ -60,7 +60,7 @@ layout.</p>
 <p>Untuk mendapatkan panduan lengkap mengenai pembuatan layout UI, lihat <a href="declaring-layout.html">Layout
 XML</a>.
 
-  
+
 <h2 id="UIComponents">Komponen Antarmuka Pengguna</h2>
 
 <p>Anda tidak harus membuat semua UI menggunakan objek {@link android.view.View} dan {link

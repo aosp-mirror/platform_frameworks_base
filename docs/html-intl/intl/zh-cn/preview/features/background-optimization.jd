@@ -61,7 +61,7 @@ page.image=images/cards/card-nyc_2x.jpg
 <ul>
   <li>面向 Preview 的应用不会收到 {@link
 android.net.ConnectivityManager#CONNECTIVITY_ACTION} 广播，即使它们在清单中注册接收这些广播。
-运行的应用如果使用 {@link android.content.Context#registerReceiver Context.registerReceiver()} 注册 
+运行的应用如果使用 {@link android.content.Context#registerReceiver Context.registerReceiver()} 注册
 {@link android.content.BroadcastReceiver}，则仍可在主线程上侦听 {@code CONNECTIVITY_CHANGE}。
 
 

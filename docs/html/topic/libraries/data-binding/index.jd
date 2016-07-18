@@ -515,8 +515,8 @@ If you need to use an expression with a predicate (e.g. ternary), you can use
 
 <h5>Avoid Complex Listeners</h5>
 Listener expressions are very powerful and can make your code very easy to read.
-On the other hand, listeners containing complex expressions make your layouts hard to read and unmaintainable. 
-These expressions should be as simple as passing available data from your UI to your callback method. You should implement 
+On the other hand, listeners containing complex expressions make your layouts hard to read and unmaintainable.
+These expressions should be as simple as passing available data from your UI to your callback method. You should implement
 any business logic inside the callback method that you invoked from the listener expression.
 
 <p>

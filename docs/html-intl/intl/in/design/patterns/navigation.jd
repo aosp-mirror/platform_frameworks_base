@@ -121,7 +121,7 @@ pemberitahuan tunggal yang mengarahkan pengguna ke layar antara. Layar ini meran
 kejadian tersebut, dan menyediakan path bagi pengguna untuk menjelajah ke dalam aplikasi. Pemberitahuan dengan gaya seperti ini
 disebut <em>pemberitahuan tidak langsung</em>.</p>
 
-<p>Berbeda dengan pemberitahuan standar (langsung), menekan tombol Back dari 
+<p>Berbeda dengan pemberitahuan standar (langsung), menekan tombol Back dari
 layar antara pada pemberitahuan tidak langsung akan mengembalikan pengguna ke titik pemicu pemberitahuan tersebut&mdash;tidak ada
 layar tambahan yang disisipkan ke dalam back-stack. Setelah pengguna melanjutkan ke dalam aplikasi dari
 layar antara, tombol Up dan Back akan berperilaku seperti pada pemberitahuan standar, sebagaimana dijelaskan di atas:
@@ -168,7 +168,7 @@ yang akan dibahas di bawah ini.</p>
 informasi dan semua tindakan terkait yang dapat dilakukan pengguna. Aplikasi Anda adalah kumpulan
 aktivitas, yang terdiri dari aktivitas yang Anda buat dan aktivitas yang Anda gunakan ulang dari aplikasi lain.</p>
 
-<p><strong>Tugas</strong> adalah urutan aktivitas yang diikuti pengguna untuk mencapai tujuan. 
+<p><strong>Tugas</strong> adalah urutan aktivitas yang diikuti pengguna untuk mencapai tujuan.
 Tugas tunggal dapat memanfaatkan aktivitas dari satu aplikasi saja, atau dapat memanfaatkan aktivitas dari sejumlah
 aplikasi berbeda.</p>
 

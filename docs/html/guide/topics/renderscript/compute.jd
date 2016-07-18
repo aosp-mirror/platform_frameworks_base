@@ -167,7 +167,7 @@ precision (such as SIMD CPU instructions).</p>
 </ul>
 
 <p>We strongly recommend using the Support Library APIs for accessing RenderScript because they
-  provide a wider range of device compatibility. Developers targeting specific versions of 
+  provide a wider range of device compatibility. Developers targeting specific versions of
   Android can use {@link android.renderscript} if necessary.</p>
 
 

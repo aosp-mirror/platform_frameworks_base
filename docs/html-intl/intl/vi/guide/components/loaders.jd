@@ -21,14 +21,14 @@ parent.link=activities.html
         </ol>
     </li>
   </ol>
-    
+
   <h2>Lớp khóa</h2>
     <ol>
       <li>{@link android.app.LoaderManager}</li>
       <li>{@link android.content.Loader}</li>
 
-    </ol>   
-    
+    </ol>
+
     <h2>Các mẫu liên quan</h2>
    <ol>
      <li> <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderCursor.html">
@@ -51,7 +51,7 @@ thay đổi.</li>
 tạo lại sau khi cấu hình thay đổi. Vì thế, chúng không cần truy vấn lại dữ liệu
 của mình.</li>
   </ul>
- 
+
 <h2 id="summary">Tổng quan về API Trình tải</h2>
 
 <p>Có nhiều lớp và giao diện có thể có liên quan trong khi sử dụng
@@ -129,10 +129,10 @@ của {@link android.content.Loader} hoặc {@link android.content.AsyncTaskLoad
 dữ liệu từ một số nguồn khác.</li>
   <li>Một triển khai cho {@link android.app.LoaderManager.LoaderCallbacks}.
 Đây là nơi bạn tạo trình tải mới và quản lý các tham chiếu của mình tới các
-trình tải hiện có.</li> 
+trình tải hiện có.</li>
 <li>Một cách để hiển thị dữ liệu của trình tải, chẳng hạn như {@link
 android.widget.SimpleCursorAdapter}.</li>
-  <li>Một nguồn dữ liệu, chẳng hạn như một {@link android.content.ContentProvider}, khi sử dụng một 
+  <li>Một nguồn dữ liệu, chẳng hạn như một {@link android.content.ContentProvider}, khi sử dụng một
 {@link android.content.CursorLoader}.</li>
 </ul>
 <h3 id="starting">Khởi động một Trình tải</h3>
@@ -140,7 +140,7 @@ android.widget.SimpleCursorAdapter}.</li>
 <p>{@link android.app.LoaderManager} quản lý một hoặc nhiều thực thể {@link
 android.content.Loader} trong một {@link android.app.Activity} hoặc
 {@link android.app.Fragment}. Chỉ có một {@link
-android.app.LoaderManager} trên mỗi hoạt động hoặc phân đoạn.</p> 
+android.app.LoaderManager} trên mỗi hoạt động hoặc phân đoạn.</p>
 
 <p>Thông thường, bạn
 sẽ khởi tạo một {@link android.content.Loader} bên trong phương pháp {@link
@@ -157,13 +157,13 @@ tham số sau:</p>
 <ul>
   <li>Một ID duy nhất xác định trình tải. Trong ví dụ này, ID là 0.</li>
 <li>Các tham đối tùy chọn để cung cấp cho trình tải khi
-xây dựng (<code>null</code> trong ví dụ này).</li> 
+xây dựng (<code>null</code> trong ví dụ này).</li>
 
-<li>Triển khai {@link android.app.LoaderManager.LoaderCallbacks}, phương pháp mà 
+<li>Triển khai {@link android.app.LoaderManager.LoaderCallbacks}, phương pháp mà
 {@link android.app.LoaderManager} gọi để báo cáo các sự kiện trình tải. Trong ví dụ này
 , lớp cục bộ triển khai giao diện {@link
 android.app.LoaderManager.LoaderCallbacks}, vì thế nó chuyển một tham chiếu
-tới chính nó, {@code this}.</li> 
+tới chính nó, {@code this}.</li>
 </ul>
 <p>Lệnh gọi {@link android.app.LoaderManager#initLoader initLoader()} đảm bảo rằng một trình tải
 được khởi tạo và hiện hoạt. Nó có hai kết quả có thể xảy ra:</p>
@@ -193,7 +193,7 @@ vòng đời của trình tải. {@link android.app.LoaderManager}
 khởi động và dừng tải khi cần và duy trì trạng thái của trình tải
 và nội dung đi kèm của nó. Như hàm ý, bạn hiếm khi tương tác trực tiếp với các trình tải
 (thông qua một ví dụ về việc sử dụng các phương pháp trình tải để tinh chỉnh hành vi
-của một trình tải, hãy xem ví dụ <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderThrottle.html"> LoaderThrottle</a>). 
+của một trình tải, hãy xem ví dụ <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderThrottle.html"> LoaderThrottle</a>).
 Bạn thường sử dụng nhất là các phương pháp {@link
 android.app.LoaderManager.LoaderCallbacks} để can thiệp vào tiến trình tải
 khi diễn ra một sự kiện đặc biệt. Để thảo luận thêm về chủ đề này, hãy xem phần <a href="#callback">Sử dụng Phương pháp Gọi lại LoaderManager</a>.</p>
@@ -245,7 +245,7 @@ Khởi tạo và trả về một {@link android.content.Loader} mới cho ID đ
 — Được gọi khi một trình tải được tạo trước đó đã hoàn tất việc tải.
 </li></ul>
 <ul>
-  <li>{@link android.app.LoaderManager.LoaderCallbacks#onLoaderReset onLoaderReset()}  
+  <li>{@link android.app.LoaderManager.LoaderCallbacks#onLoaderReset onLoaderReset()}
     — Được gọi khi một trình tải được tạo trước đó đang được đặt lại, vì thế mà khiến dữ liệu
 của nó không sẵn có.
 </li>
@@ -315,7 +315,7 @@ public Loader&lt;Cursor&gt; onCreateLoader(int id, Bundle args) {
 <p>Phương pháp này được gọi khi một trình tải được tạo trước đó đã hoàn thành việc tải của mình.
 Phương pháp này được bảo đảm sẽ được gọi trước khi giải phóng dữ liệu cuối cùng
 được cung cấp cho trình tải này.  Tại điểm này, bạn nên loại bỏ mọi trường hợp sử dụng
-dữ liệu cũ (do nó sẽ được giải phóng sớm), nhưng không nên 
+dữ liệu cũ (do nó sẽ được giải phóng sớm), nhưng không nên
 tự mình giải phóng dữ liệu do trình tải sở hữu dữ liệu và sẽ đảm nhận việc này.</p>
 
 
@@ -340,11 +340,11 @@ public void onLoadFinished(Loader&lt;Cursor&gt; loader, Cursor data) {
 
 <h4 id="onLoaderReset">onLoaderReset</h4>
 
-<p>Phương pháp này được gọi khi một trình tải được tạo trước đó đang được đặt lại, vì thế mà khiến 
+<p>Phương pháp này được gọi khi một trình tải được tạo trước đó đang được đặt lại, vì thế mà khiến
 dữ liệu của nó không sẵn có. Lệnh gọi lại này cho phép bạn tìm hiểu xem khi nào thì dữ liệu
 sẽ được giải phóng để bạn có thể loại bỏ tham chiếu của mình tới nó.  </p>
-<p>Sự triển khai này gọi ra 
-{@link android.widget.SimpleCursorAdapter#swapCursor swapCursor()}  
+<p>Sự triển khai này gọi ra
+{@link android.widget.SimpleCursorAdapter#swapCursor swapCursor()}
 với một giá trị <code>null</code>:</p>
 
 <pre>
@@ -366,7 +366,7 @@ public void onLoaderReset(Loader&lt;Cursor&gt; loader) {
 android.app.Fragment} có chức năng hiển thị một {@link android.widget.ListView} chứa
 kết quả của một truy vấn đối với trình cung cấp nội dung danh bạ. Nó sử dụng một {@link
 android.content.CursorLoader} để quản lý truy vấn trên trình cung cấp.</p>
- 
+
 <p>Để một ứng dụng truy cập danh bạ của một người dùng, như minh họa trong ví dụ này, bản kê khai
 của nó phải bao gồm quyền
 {@link android.Manifest.permission#READ_CONTACTS READ_CONTACTS}.</p>

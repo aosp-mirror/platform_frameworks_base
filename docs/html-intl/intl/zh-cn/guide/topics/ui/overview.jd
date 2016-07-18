@@ -39,7 +39,7 @@ UI
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?>
 &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="fill_parent" 
+              android:layout_width="fill_parent"
               android:layout_height="fill_parent"
               android:orientation="vertical" >
     &lt;TextView android:id="@+id/text"
@@ -60,7 +60,7 @@ UI
 <p>有关创建 UI 布局的完整指南，请参阅 <a href="declaring-layout.html">XML
 布局</a>。
 
-  
+
 <h2 id="UIComponents">用户界面组件</h2>
 
 <p>您无需使用 {@link android.view.View} 和 {@link

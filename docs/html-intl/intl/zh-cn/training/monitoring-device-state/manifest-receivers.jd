@@ -9,7 +9,7 @@ previous.link=connectivity-monitoring.html
 
 @jd:body
 
-<div id="tb-wrapper"> 
+<div id="tb-wrapper">
 <div id="tb">
 
 <h2>本教程将指导您</h2>
@@ -23,7 +23,7 @@ previous.link=connectivity-monitoring.html
   <li><a href="{@docRoot}guide/components/intents-filters.html">intent 和 intent 过滤器</a>
 </ul>
 
-</div> 
+</div>
 </div>
 
 <p>监控设备状态变化的最简单方法就是，为您监控的每种状态创建 {@link android.content.BroadcastReceiver} 并在应用清单中逐一进行注册。然后，您只需根据当前设备状态在每个接收器中重新安排重复提醒即可。</p>
@@ -31,10 +31,10 @@ previous.link=connectivity-monitoring.html
 <p>此方法的负面影响在于，只要系统触发了这些接收器中的任何一个，相关应用就会唤醒设备，其频率可能会远远超过所需的水平。</p>
 
 <p>更好的方法是在运行时停用或启用广播接收器。这样的话，您就可以将自己在清单中声明的接收器用作被动提醒，只有在需要时才会由系统事件触发。</p>
- 
 
-<h2 id="ToggleReceivers">切换和层叠状态变化接收器以提高效率 </h2> 
- 
+
+<h2 id="ToggleReceivers">切换和层叠状态变化接收器以提高效率 </h2>
+
 <p>您可以使用 {@link android.content.pm.PackageManager} 切换清单中定义的任意组件的启用状态（包括您要启用或停用的任意广播接收器），具体如以下片段所示：</p>
 
 <pre>ComponentName receiver = new ComponentName(context, myReceiver.class);

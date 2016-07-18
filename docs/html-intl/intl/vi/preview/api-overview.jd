@@ -336,7 +336,7 @@ của chúng &mdash; người dùng chỉ cần kéo và thả để thêm hoặ
 <h2 id="number-blocking">Chặn số</h2>
 
 <p>Android N đã hỗ trợ chặn số điện thoại trong nền tảng này và cung cấp một
- API khuôn khổ cho phép các nhà cung cấp dịch vụ duy trì một danh sách số bị chặn. 
+ API khuôn khổ cho phép các nhà cung cấp dịch vụ duy trì một danh sách số bị chặn.
 Ứng dụng SMS mặc định, ứng dụng gọi điện mặc định và các ứng dụng của nhà cung cấp có thể đọc và
 ghi vào danh sách số bị chặn. Các ứng dụng khác không thể truy cập vào danh sách này.</p>
 

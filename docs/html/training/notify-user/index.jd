@@ -43,9 +43,9 @@ class="button">Download the sample</a>
 </div>
 
 <p>
-   A notification is a user interface element that you display outside your app's normal UI to indicate 
-   that an event has occurred. Users can choose to view the notification while using other apps and respond 
-   to it when it's convenient for them. 
+   A notification is a user interface element that you display outside your app's normal UI to indicate
+   that an event has occurred. Users can choose to view the notification while using other apps and respond
+   to it when it's convenient for them.
 
 </p>
 
@@ -86,10 +86,10 @@ class="button">Download the sample</a>
         </strong>
     </dt>
     <dd>
-        Learn how to create a big view within an expanded notification, while still maintaining 
+        Learn how to create a big view within an expanded notification, while still maintaining
         backward compatibility.
     </dd>
-   
+
     <dt>
         <strong>
         <a href="display-progress.html">Displaying Progress in a Notification</a>

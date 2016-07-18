@@ -77,9 +77,9 @@ activity. It's where you should place actions that have a global impact on the a
 "Search," "Compose email," and "Settings."
   <p>See the section about <a href="#options-menu">Creating an Options Menu</a>.</p>
     </dd>
-    
+
   <dt><strong>Context menu and contextual action mode</strong></dt>
-  
+
    <dd>A context menu is a <a href="#FloatingContextMenu">floating menu</a> that appears when the
 user performs a long-click on an element. It provides actions that affect the selected content or
 context frame.
@@ -88,7 +88,7 @@ action items that affect the selected content in a bar at the top of the screen 
 to select multiple items.</p>
   <p>See the section about <a href="#context-menu">Creating Contextual Menus</a>.</p>
 </dd>
-    
+
   <dt><strong>Popup menu</strong></dt>
     <dd>A popup menu displays a list of items in a vertical list that's anchored to the view that
 invoked the menu. It's good for providing an overflow of actions that relate to specific content or
@@ -130,7 +130,7 @@ directory and build the menu with the following elements:</p>
   <dt><code>&lt;item></code></dt>
     <dd>Creates a {@link android.view.MenuItem}, which represents a single item in a menu. This
 element may contain a nested <code>&lt;menu></code> element in order to create a submenu.</dd>
-    
+
   <dt><code>&lt;group></code></dt>
     <dd>An optional, invisible container for {@code &lt;item&gt;} elements. It allows you to
 categorize menu items so they share properties such as active state and visibility. For more
@@ -224,7 +224,7 @@ the sixth item and the rest into the overflow menu, which the user can open by s
 <em>More</em>.</li>
 
   <li>If you've developed your application for <strong>Android 3.0 (API level 11) and
-higher</strong>, items from the options menu are available in the 
+higher</strong>, items from the options menu are available in the
 app bar. By default, the system
 places all items in the action overflow, which the user can reveal with the action overflow icon on
 the right side of the app bar (or by pressing the device <em>Menu</em> button, if available). To
@@ -343,7 +343,7 @@ again unless the menu is invalidated for some reason. However, you should use {@
 android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()} only to create the initial
 menu state and not to make changes during the activity lifecycle.</p>
 
-<p>If you want to modify the options menu based on 
+<p>If you want to modify the options menu based on
 events that occur during the activity lifecycle, you can do so in
 the {@link android.app.Activity#onPrepareOptionsMenu(Menu) onPrepareOptionsMenu()} method. This
 method passes you the {@link android.view.Menu} object as it currently exists so you can modify it,
@@ -360,7 +360,7 @@ presented in the app bar. When an event occurs and you want to perform a menu up
 call {@link android.app.Activity#invalidateOptionsMenu invalidateOptionsMenu()} to request that the
 system call {@link android.app.Activity#onPrepareOptionsMenu(Menu) onPrepareOptionsMenu()}.</p>
 
-<p class="note"><strong>Note:</strong> 
+<p class="note"><strong>Note:</strong>
 You should never change items in the options menu based on the {@link android.view.View} currently
 in focus. When in touch mode (when the user is not using a trackball or d-pad), views
 cannot take focus, so you should never use focus as the basis for modifying
@@ -738,8 +738,8 @@ that shows a popup menu:</p>
 
 <pre>
 &lt;ImageButton
-    android:layout_width="wrap_content" 
-    android:layout_height="wrap_content" 
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:src="@drawable/ic_overflow_holo_dark"
     android:contentDescription="@string/descr_overflow_button"
     android:onClick="showPopup" />
@@ -1023,6 +1023,6 @@ category. For example:</p>
 <p>Read more about writing intent filters in the
 <a href="/guide/components/intents-filters.html">Intents and Intent Filters</a> document.</p>
 
-<p>For a sample application using this technique, see the 
+<p>For a sample application using this technique, see the
 <a href="{@docRoot}resources/samples/NotePad/src/com/example/android/notepad/NoteEditor.html">Note
 Pad</a> sample code.</p>

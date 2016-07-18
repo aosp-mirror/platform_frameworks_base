@@ -9,7 +9,7 @@ excludeFromSuggestions=true
 <p>For the purposes of licensing, the content of this web site is divided
 into two categories:</p>
 <ul>
-  <li>Documentation content, including both static documentation and content extracted from source 
+  <li>Documentation content, including both static documentation and content extracted from source
   code modules, as well as sample code, and </li>
 <li>All other site content</li>
 </ul>
@@ -66,7 +66,7 @@ it as an audiobook for the visually impaired, or even translate it. </p>
 license, note that proprietary trademarks and brand features are not
 included in that license.</li>
 
-<li>Google's trademarks and other brand features (including the 	
+<li>Google's trademarks and other brand features (including the
 <img src="images/android-logo.png" alt="Android"
 style="margin:0;padding:0 2px;vertical-align:baseline" /> stylized typeface logo) are not included
 in the license.
@@ -74,7 +74,7 @@ Please see <a
 href="{@docRoot}distribute/tools/promote/brand.html">Brand Guidelines</a> for
 information about this usage. </li>
 
-<li>In some cases, a page may include content, such as an image, that is not 
+<li>In some cases, a page may include content, such as an image, that is not
 covered by the license. In that case, we will label the content that is not licensed. </li>
 
 <li>In addition, content linked from a page on this site is not covered
@@ -92,22 +92,22 @@ Proper attribution is required when you reuse or create modified
 versions of content that appears on a page made available under the
 terms of the Creative Commons Attribution license. On this site, the
 requirement for attribution applies only to the non-documentation
-content, as described earlier in this document. The complete 
-requirements for attribution can be found in section 4b of the 
+content, as described earlier in this document. The complete
+requirements for attribution can be found in section 4b of the
 <a href="http://creativecommons.org/licenses/by/2.5/legalcode">
 Creative Commons legal code</a>.
 </p>
 <p>
  In practice we ask that you provide attribution to the Android Open
- Source project to the best of the ability of the medium in which you 
- are producing the work. There are several typical ways in which this 
+ Source project to the best of the ability of the medium in which you
+ are producing the work. There are several typical ways in which this
  might apply:
 </p>
 <h3>Exact Reproductions</h3>
 <p>
  If your online work <em>exactly reproduces</em> text or images from this
  site, in whole or in part, please include a paragraph at the bottom
- of your page that reads: 
+ of your page that reads:
 </p>
 <p style="margin-left:20px;font-style:italic">
  Portions of this page are reproduced from work created and <a

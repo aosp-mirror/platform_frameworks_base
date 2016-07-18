@@ -37,16 +37,16 @@ page.tags=androidn
 
 <h2 id="accessing">外部ストレージのディレクトリへのアクセス</h2>
 
-<p><code>StorageManager</code> クラスを使用して、適切な 
-<code>StorageVolume</code> インスタンスを取得します。次に、そのインスタンスの 
+<p><code>StorageManager</code> クラスを使用して、適切な
+<code>StorageVolume</code> インスタンスを取得します。次に、そのインスタンスの
 <code>StorageVolume.createAccessIntent()</code> メソッドを呼び出して、インテントを作成します。このインテントを使用して、外部ストレージのディレクトリにアクセスします。
 リムーバブル メディア ボリュームなど、使用できるすべてのボリュームのリストを取得するには、<code>StorageManager.getVolumesList()</code> を使用します。
 
 </p>
 
 <p>特定のファイルに関する情報がある場合は、
-<code>StorageManager.getStorageVolume(File)</code> を使用して、そのファイルを含む 
-<code>StorageVolume</code> を取得します。この <code>StorageVolume</code> で 
+<code>StorageManager.getStorageVolume(File)</code> を使用して、そのファイルを含む
+<code>StorageVolume</code> を取得します。この <code>StorageVolume</code> で
 <code>createAccessIntent()</code> を呼び出し、このファイルの外部ストレージ ディレクトリにアクセスします。
 </p>
 
@@ -58,7 +58,7 @@ page.tags=androidn
 
 </p>
 
-<p>次のコード スニペットは、プライマリ共有ストレージの 
+<p>次のコード スニペットは、プライマリ共有ストレージの
 <code>Pictures</code> ディレクトリを開く方法の例を示しています。</p>
 
 <pre>
@@ -109,7 +109,7 @@ startActivityForResult(intent, request_code);
 &lt;/receiver&gt;
 </pre>
 
-<p>ユーザーが SD カードなどのリムーバブル メディアをマウントすると、システムは 
+<p>ユーザーが SD カードなどのリムーバブル メディアをマウントすると、システムは
 {@link android.os.Environment#MEDIA_MOUNTED} 通知を送信します。この通知は、インテント データ内の <code>StorageVolume</code> オブジェクトを提供します。このオブジェクトを使用して、リムーバブル メディア上のディレクトリにアクセスできます。
 
 次の例では、リムーバブル メディア上の <code>Pictures</code> ディレクトリにアクセスします。
@@ -127,7 +127,7 @@ startActivityForResult(intent, request_code);
 <h2 id="best">ベスト プラクティス</h2>
 
 <p>外部ディレクトリのアクセス URI はできる限り保持してください。そうすれば、ユーザーに何度もアクセス要求をする必要がなくなります。
-ユーザーがアクセスを付与したら、ディレクトリのアクセス URI を指定して 
+ユーザーがアクセスを付与したら、ディレクトリのアクセス URI を指定して
 <code>getContentResolver().takePersistableUriPermssion()</code> を呼び出します。
 システムが URI を保持し、以降のアクセス要求では <code>RESULT_OK</code> を返して、ユーザーに確認の UI を表示しません。
 

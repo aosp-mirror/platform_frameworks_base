@@ -4,6 +4,6 @@ page.trainingcourse=true
 @jd:body
 
 
-<p>These lessons teach you how to include contact information and authenticate users with the same 
-credentials they use for Google. These features allow your app to connect users with people they 
+<p>These lessons teach you how to include contact information and authenticate users with the same
+credentials they use for Google. These features allow your app to connect users with people they
 care about and provide a personalized experience without creating new user accounts.</p>
