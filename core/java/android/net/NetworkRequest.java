@@ -284,6 +284,15 @@ public class NetworkRequest implements Parcelable {
         };
 
     /**
+     * Returns true iff. the contained NetworkRequest is of type LISTEN.
+     *
+     * @hide
+     */
+    public boolean isListen() {
+        return type == Type.LISTEN;
+    }
+
+    /**
      * Returns true iff. the contained NetworkRequest is one that:
      *
      *     - should be associated with at most one satisfying network
