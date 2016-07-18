@@ -105,15 +105,6 @@ import java.util.Locale;
  -r -g ${ANDROID_PRODUCT_OUT}/data/app/FrameworksServicesTests/FrameworksServicesTests.apk &&
  adb shell am instrument -e class com.android.server.pm.ShortcutManagerTest1 \
  -w com.android.frameworks.servicestests/android.support.test.runner.AndroidJUnitRunner
-
-
- * TODO More tests for pinning + manifest shortcuts
- * TODO Manifest shortcuts + app upgrade -> launcher callback.
- *      Also locale change should trigger launcehr callbacks too, when they use strign resoucres.
- *      (not implemented yet.)
- * TODO: Add checks with assertAllNotHaveIcon()
- * TODO: Detailed test for hasShortcutPermissionInner().
- * TODO: Add tests for the command line functions too.
  */
 @SmallTest
 public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
@@ -4069,7 +4060,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         });
 
         // Clear data
-                mService.mPackageMonitor.onReceive(getTestContext(),
+        mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageDataClear(CALLING_PACKAGE_1, USER_10));
 
         // Only manifest shortcuts will remain, and are no longer pinned.

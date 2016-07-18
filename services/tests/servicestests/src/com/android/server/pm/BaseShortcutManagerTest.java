@@ -621,6 +621,14 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected final Map<Integer, Boolean> mRunningUsers = new HashMap<>();
     protected final Map<Integer, Boolean> mUnlockedUsers = new HashMap<>();
 
+    protected static final String PACKAGE_SYSTEM_LAUNCHER = "com.android.systemlauncher";
+    protected static final String PACKAGE_SYSTEM_LAUNCHER_NAME = "systemlauncher_name";
+    protected static final int PACKAGE_SYSTEM_LAUNCHER_PRIORITY = 0;
+
+    protected static final String PACKAGE_FALLBACK_LAUNCHER = "com.android.settings";
+    protected static final String PACKAGE_FALLBACK_LAUNCHER_NAME = "fallback";
+    protected static final int PACKAGE_FALLBACK_LAUNCHER_PRIORITY = -999;
+
     static {
         QUERY_ALL.setQueryFlags(
                 ShortcutQuery.FLAG_GET_ALL_KINDS);
@@ -1823,5 +1831,41 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
             }
         }
         return sb.toString();
+    }
+
+    protected void prepareGetHomeActivitiesAsUser(ComponentName preferred,
+            List<ResolveInfo> candidates, int userId) {
+        doAnswer(inv -> {
+            ((List) inv.getArguments()[0]).addAll(candidates);
+            return preferred;
+        }).when(mMockPackageManagerInternal).getHomeActivitiesAsUser(any(List.class), eq(userId));
+    }
+
+    protected static ComponentName cn(String packageName, String name) {
+        return new ComponentName(packageName, name);
+    }
+
+    protected static ResolveInfo ri(String packageName, String name, boolean isSystem, int priority) {
+        final ResolveInfo ri = new ResolveInfo();
+        ri.activityInfo = new ActivityInfo();
+        ri.activityInfo.applicationInfo = new ApplicationInfo();
+
+        ri.activityInfo.packageName = packageName;
+        ri.activityInfo.name = name;
+        if (isSystem) {
+            ri.activityInfo.applicationInfo.flags |= ApplicationInfo.FLAG_SYSTEM;
+        }
+        ri.priority = priority;
+        return ri;
+    }
+
+    protected static ResolveInfo getSystemLauncher() {
+        return ri(PACKAGE_SYSTEM_LAUNCHER, PACKAGE_SYSTEM_LAUNCHER_NAME, true,
+                PACKAGE_SYSTEM_LAUNCHER_PRIORITY);
+    }
+
+    protected static ResolveInfo getFallbackLauncher() {
+        return ri(PACKAGE_FALLBACK_LAUNCHER, PACKAGE_FALLBACK_LAUNCHER_NAME, true,
+                PACKAGE_FALLBACK_LAUNCHER_PRIORITY);
     }
 }

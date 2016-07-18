@@ -131,12 +131,8 @@ import java.util.function.Predicate;
  * - getIconMaxWidth()/getIconMaxHeight() should use xdpi and ydpi.
  *   -> But TypedValue.applyDimension() doesn't differentiate x and y..?
  *
- * - Default launcher check does take a few ms.  Worth caching.
- *
  * - Detect when already registered instances are passed to APIs again, which might break
  * internal bitmap handling.
- *
- * - Add more call stats.
  */
 public class ShortcutService extends IShortcutService.Stub {
     static final String TAG = "ShortcutService";
@@ -1343,16 +1339,21 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     private void enforceSystemOrShell() {
-        Preconditions.checkState(isCallerSystem() || isCallerShell(),
-                "Caller must be system or shell");
+        if (!(isCallerSystem() || isCallerShell())) {
+            throw new SecurityException("Caller must be system or shell");
+        }
     }
 
     private void enforceShell() {
-        Preconditions.checkState(isCallerShell(), "Caller must be shell");
+        if (!isCallerShell()) {
+            throw new SecurityException("Caller must be shell");
+        }
     }
 
     private void enforceSystem() {
-        Preconditions.checkState(isCallerSystem(), "Caller must be system");
+        if (!isCallerSystem()) {
+            throw new SecurityException("Caller must be system");
+        }
     }
 
     private void enforceResetThrottlingPermission() {
@@ -3166,9 +3167,13 @@ public class ShortcutService extends IShortcutService.Stub {
 
         enforceShell();
 
-        final int status = (new MyShellCommand()).exec(this, in, out, err, args, resultReceiver);
-
-        resultReceiver.send(status, null);
+        final long token = injectClearCallingIdentity();
+        try {
+            final int status = (new MyShellCommand()).exec(this, in, out, err, args, resultReceiver);
+            resultReceiver.send(status, null);
+        } finally {
+            injectRestoreCallingIdentity(token);
+        }
     }
 
     static class CommandException extends Exception {
@@ -3213,9 +3218,6 @@ public class ShortcutService extends IShortcutService.Stub {
             final PrintWriter pw = getOutPrintWriter();
             try {
                 switch (cmd) {
-                    case "reset-package-throttling":
-                        handleResetPackageThrottling();
-                        break;
                     case "reset-throttling":
                         handleResetThrottling();
                         break;
@@ -3233,9 +3235,6 @@ public class ShortcutService extends IShortcutService.Stub {
                         break;
                     case "get-default-launcher":
                         handleGetDefaultLauncher();
-                        break;
-                    case "refresh-default-launcher":
-                        handleRefreshDefaultLauncher();
                         break;
                     case "unload-user":
                         handleUnloadUser();
@@ -3262,9 +3261,6 @@ public class ShortcutService extends IShortcutService.Stub {
             final PrintWriter pw = getOutPrintWriter();
             pw.println("Usage: cmd shortcut COMMAND [options ...]");
             pw.println();
-            pw.println("cmd shortcut reset-package-throttling [--user USER_ID] PACKAGE");
-            pw.println("    Reset throttling for a package");
-            pw.println();
             pw.println("cmd shortcut reset-throttling [--user USER_ID]");
             pw.println("    Reset throttling for all packages and users");
             pw.println();
@@ -3281,10 +3277,7 @@ public class ShortcutService extends IShortcutService.Stub {
             pw.println("    Clear the cached default launcher");
             pw.println();
             pw.println("cmd shortcut get-default-launcher [--user USER_ID]");
-            pw.println("    Show the cached default launcher");
-            pw.println();
-            pw.println("cmd shortcut refresh-default-launcher [--user USER_ID]");
-            pw.println("    Refresh the cached default launcher");
+            pw.println("    Show the default launcher");
             pw.println();
             pw.println("cmd shortcut unload-user [--user USER_ID]");
             pw.println("    Unload a user from the memory");
@@ -3298,7 +3291,7 @@ public class ShortcutService extends IShortcutService.Stub {
         private void handleResetThrottling() throws CommandException {
             parseOptions(/* takeUser =*/ true);
 
-            Slog.i(TAG, "cmd: handleResetThrottling");
+            Slog.i(TAG, "cmd: handleResetThrottling: user=" + mUserId);
 
             resetThrottlingInner(mUserId);
         }
@@ -3307,16 +3300,6 @@ public class ShortcutService extends IShortcutService.Stub {
             Slog.i(TAG, "cmd: handleResetAllThrottling");
 
             resetAllThrottlingInner();
-        }
-
-        private void handleResetPackageThrottling() throws CommandException {
-            parseOptions(/* takeUser =*/ true);
-
-            final String packageName = getNextArgRequired();
-
-            Slog.i(TAG, "cmd: handleResetPackageThrottling: " + packageName);
-
-            resetPackageThrottling(packageName, mUserId);
         }
 
         private void handleOverrideConfig() throws CommandException {
@@ -3364,12 +3347,6 @@ public class ShortcutService extends IShortcutService.Stub {
         private void handleGetDefaultLauncher() throws CommandException {
             parseOptions(/* takeUser =*/ true);
 
-            showLauncher();
-        }
-
-        private void handleRefreshDefaultLauncher() throws CommandException {
-            parseOptions(/* takeUser =*/ true);
-
             clearLauncher();
             showLauncher();
         }
@@ -3377,7 +3354,7 @@ public class ShortcutService extends IShortcutService.Stub {
         private void handleUnloadUser() throws CommandException {
             parseOptions(/* takeUser =*/ true);
 
-            Slog.i(TAG, "cmd: handleUnloadUser: " + mUserId);
+            Slog.i(TAG, "cmd: handleUnloadUser: user=" + mUserId);
 
             ShortcutService.this.handleCleanupUser(mUserId);
         }
@@ -3386,7 +3363,7 @@ public class ShortcutService extends IShortcutService.Stub {
             parseOptions(/* takeUser =*/ true);
             final String packageName = getNextArgRequired();
 
-            Slog.i(TAG, "cmd: handleClearShortcuts: " + mUserId + ", " + packageName);
+            Slog.i(TAG, "cmd: handleClearShortcuts: user" + mUserId + ", " + packageName);
 
             ShortcutService.this.cleanUpPackageForAllLoadedUsers(packageName, mUserId,
                     /* appStillExists = */ true);
