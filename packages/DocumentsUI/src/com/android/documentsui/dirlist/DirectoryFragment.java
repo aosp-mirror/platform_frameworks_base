@@ -46,6 +46,7 @@ import android.os.Parcelable;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.support.v13.view.DragStartHelper;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.GridLayoutManager.SpanSizeLookup;
 import android.support.v7.widget.RecyclerView;
@@ -118,7 +119,7 @@ import javax.annotation.Nullable;
  */
 public class DirectoryFragment extends Fragment
         implements DocumentsAdapter.Environment, LoaderCallbacks<DirectoryResult>,
-        ItemDragListener.DragHost {
+        ItemDragListener.DragHost, SwipeRefreshLayout.OnRefreshListener {
 
     @IntDef(flag = true, value = {
             TYPE_NORMAL,
@@ -148,6 +149,7 @@ public class DirectoryFragment extends Fragment
 
     private IconHelper mIconHelper;
 
+    private SwipeRefreshLayout mRefreshLayout;
     private View mEmptyView;
     private RecyclerView mRecView;
     private ListeningGestureDetector mGestureDetector;
@@ -192,6 +194,10 @@ public class DirectoryFragment extends Fragment
 
         mMessageBar = MessageBar.create(getChildFragmentManager());
         mProgressBar = view.findViewById(R.id.progressbar);
+
+        mRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.refresh_layout);
+        mRefreshLayout.setOnRefreshListener(this);
+
         mEmptyView = view.findViewById(android.R.id.empty);
         mRecView = (RecyclerView) view.findViewById(R.id.dir_list);
         mRecView.setRecyclerListener(
@@ -1602,6 +1608,11 @@ public class DirectoryFragment extends Fragment
     }
 
     @Override
+    public void onRefresh() {
+        getLoaderManager().restartLoader(LOADER_ID, null, this);
+    }
+
+    @Override
     public Loader<DirectoryResult> onCreateLoader(int id, Bundle args) {
         Context context = getActivity();
         State state = getDisplayState();
@@ -1667,10 +1678,13 @@ public class DirectoryFragment extends Fragment
 
         mTuner.onModelLoaded(mModel, mType, mSearchMode);
 
+        mRefreshLayout.setRefreshing(false);
     }
 
     @Override
     public void onLoaderReset(Loader<DirectoryResult> loader) {
         mModel.update(null);
+
+        mRefreshLayout.setRefreshing(false);
     }
   }
