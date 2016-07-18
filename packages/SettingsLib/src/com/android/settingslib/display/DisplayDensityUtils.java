@@ -20,6 +20,7 @@ import com.android.settingslib.R;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.hardware.display.DisplayManager;
 import android.os.AsyncTask;
 import android.os.RemoteException;
 import android.util.DisplayMetrics;
@@ -95,7 +96,9 @@ public class DisplayDensityUtils {
         }
 
         final Resources res = context.getResources();
-        final DisplayMetrics metrics = res.getDisplayMetrics();
+        final DisplayMetrics metrics = new DisplayMetrics();
+        context.getDisplay().getRealMetrics(metrics);
+
         final int currentDensity = metrics.densityDpi;
         int currentDensityIndex = -1;
 
