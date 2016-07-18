@@ -17,6 +17,8 @@ page.image=images/cards/card-n-support_2x.png
       <li><a href="#general">General advisories</a></li>
       <li><a href="#new">New in DP5</a></li>
       <li><a href="#ki">Known issues</a></li>
+      <li><a href="#upgrade-notes">Notes on publishing apps
+      that target API 24</a></li>
     </ul>
   </li>
   <li><a href="#dp4">Developer Preview 4</a></li>
@@ -52,16 +54,14 @@ page.image=images/cards/card-n-support_2x.png
 
 <h2 id="dp5">Developer Preview 5</h2>
 
-<div class="wrap">
-  <div class="cols">
-    <div class="col-6of12">
-      <p>
-        <em>Date: July 2016<br>
-        Build: NPD90G<br>
-        Emulator support: x86 &amp; ARM (32/64-bit)<br>
-        Google Play services: 8.4</em>
-      </p>
-    </div>
+<div class="cols">
+  <div class="col-6of12">
+    <p>
+      <em>Date: July 2016<br>
+      Build: NPD90G<br>
+      Emulator support: x86 &amp; ARM (32/64-bit)<br>
+      Google Play services: 8.4</em>
+    </p>
   </div>
 </div>
 
@@ -84,15 +84,13 @@ page.image=images/cards/card-n-support_2x.png
   </li>
 
   <li>Developer Preview 5 is <strong>Compatibility Test Suite (CTS)
-  approved</strong> on these devices: Nexus 5X, Nexus 6, Nexus 6P, and
-  Pixel C. Apps that depend on CTS approved builds should work normally
+  approved</strong> on these devices: Nexus 5X, Nexus 6, Nexus 6P, Nexus 9,
+  and Pixel C. Apps that depend on CTS approved builds should work normally
   on these devices (Android Pay for example).
   </li>
 
-  <li>Developer Preview 4 is <strong>available on all supported
-  devices:</strong> Nexus 5X, Nexus 6, Nexus 6P, Nexus 9, Nexus Player,
-  Pixel C, General Mobile 4G (Android One), as well as Sony Xperia Z3
-  (D6603 and D6653 models).
+  <li>Developer Preview 5 is <strong>available</strong> on Nexus 5X, Nexus 6, Nexus 6P,
+  Nexus 9, Nexus Player, Pixel C, and General Mobile 4G (Android One).
   </li>
 </ul>
 
@@ -106,8 +104,8 @@ page.image=images/cards/card-n-support_2x.png
   "{@docRoot}preview/download.html"><strong>near-final system
   images</strong></a> for supported devices and the Android emulator. The
   images include the final APIs (API level 24) for the upcoming Android N
-  platform. When you are done testing, you can publish app using API level 24
-  to Google Play, in alpha, beta, and production release channels.
+  platform. When you are done testing, you can publish apps using API
+  level 24 to Google Play, in alpha, beta, and production release channels.
 </p>
 
 
@@ -130,6 +128,64 @@ page.image=images/cards/card-n-support_2x.png
   crashes).
   </li>
 </ul>
+
+<h4>Multi-window</h4>
+<ul>
+  <li>MapView may be blank when resized in multi-window mode and not focused.
+  </li>
+</ul>
+
+<h4>Camera</h4>
+<ul>
+  <li>Apps may encounter Intermittent issues recording and playing back
+  video at 240fps.
+  </li>
+</ul>
+
+<h4>Do Not Disturb</h4>
+<ul>
+  <li>Do Not Disturb mode may be set at device reboot. To work around
+  the issue, delete the existing rule for VR as follows: go to
+  <strong>Settings > Sound > Do not disturb > Automatic Rules</strong>
+  and tap the trash icon next to the VR rule.
+  </li>
+</ul>
+
+<h4>Screen zoom and multiple APKs in Google Play</h4>
+<ul>
+  <li>On devices running Developer Preview 5, Google Play services 9.0.83
+  incorrectly reports the current screen density rather than the stable screen
+  density. When screen zoom is enabled on these devices, this can cause Google
+  Play to select a version of a multi-APK app that’s designed for smaller
+  screens. This issue is fixed in the next version of Google Play service
+  and will be included in a later Developer Preview release.
+  </li>
+</ul>
+
+<h4>Vulkan support and multiple APKs in Google Play</h4>
+<ul>
+  <li>On devices running Developer Preview 5, Google Play services 9.0.83
+  currently reports Vulkan support but not Vulkan version. This can cause
+  Google Play to select a version of a multi-APK app that’s designed for lower
+  Vulkan support on devices with higher version support. Currently, the Google
+  Play Store does not accept uploads of Apps which use Vulkan version
+  targeting. This support will be added to the Google Play Store in the
+  future and fixed in the next version of Google Play services (to be included
+  in a later Developer Preview release) any Android N devices using the
+  version of Google Play services 9.0.83 will continue to receive versions
+  of Apps targeting basic Vulkan support.
+  </li>
+</ul>
+
+<h4>Android Auto</h4>
+<ul>
+  <li>The version of Google Maps included in Developer Preview 5 (9.30)
+  crashes when used with Android Auto. This issue will be fixed in the
+  next update to Google Maps (9.31), expected in the coming weeks.
+  </li>
+</ul>
+
+
 
 <!-- TBA, if any
 <h4>Device-specific issues</h4>
@@ -163,6 +219,28 @@ page.image=images/cards/card-n-support_2x.png
 
 -->
 
+<h3 id="upgrade-notes">Notes on publishing apps that target API 24</h3>
+
+<p>
+  Before publishing apps that target API 24 in Google Play, keep these points
+  in mind:
+</p>
+
+<ul>
+  <li>If your app’s current <code>targetSdkVersion</code> is 22 or lower and
+  you want to target API 24, you’ll need to support <a href=
+  "{@docRoot}about/versions/marshmallow/android-6.0-changes.html">behaviors
+  introduced with Android 6.0 (Marshmallow)</a>, such as <a href=
+  "{@docRoot}training/permissions/requesting.html">runtime permissions</a>, in
+  addition to Android N behaviors.
+  </li>
+
+  <li>Once you publish an app with <code>targetSdkVersion</code> set to 23 or
+  higher, you can't later publish a version of the app with a higher
+  <code>versionCode</code> that targets 22 or lower. This restriction applies
+  in alpha and beta channels as well as production channel.
+  </li>
+</ul>
 
 
 <!-- DP4 Release Notes Archive -->
@@ -182,7 +260,7 @@ page.image=images/cards/card-n-support_2x.png
   </div>
 </div>
 
-<h3 id="general">General advisories</h3>
+<h3 id="dp4-general">General advisories</h3>
 
 <p>
   This Developer Preview release is for <strong>app developers and other early
@@ -214,7 +292,7 @@ page.image=images/cards/card-n-support_2x.png
 </ul>
 
 
-<h3 id="new">New in DP4</h3>
+<h3 id="dp4-new">New in DP4</h3>
 
 <h4>Android N final APIs</h4>
 
@@ -246,7 +324,7 @@ page.image=images/cards/card-n-support_2x.png
   your app ready for an update in the Play store.
 </p>
 
-<h4 id="api-changes">Feature and API changes</h4>
+<h4 id="dp4-api-changes">Feature and API changes</h4>
 
 <ul>
   <li>In previous versions of Android, an app activates with all of its locale
@@ -273,7 +351,7 @@ page.image=images/cards/card-n-support_2x.png
   </li>
 </ul>
 
-<h3 id="ki">Known Issues</h3>
+<h3 id="dp4-ki">Known Issues</h3>
 
 <h4>Stability</h4>
 
@@ -461,7 +539,7 @@ page.image=images/cards/card-n-support_2x.png
 <p>For the full list of fixed issues, see <a href="https://goo.gl/6uCKtf">the
 issue tracker</a>.</p>
 
-<h3 id="upgrade-notes">Notes on publishing apps that target API 24</h3>
+<h3 id="dp4-upgrade-notes">Notes on publishing apps that target API 24</h3>
 
 <p>
   Before publishing apps that target API 24 in Google Play, keep these points
