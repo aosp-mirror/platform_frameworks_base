@@ -94,9 +94,6 @@ class DisplayContent {
     /** Detect user tapping outside of current focused stack bounds .*/
     Region mTouchExcludeRegion = new Region();
 
-    /** Detect user tapping in a non-resizeable task in docked or fullscreen stack .*/
-    Region mNonResizeableRegion = new Region();
-
     /** Save allocating when calculating rects */
     private final Rect mTmpRect = new Rect();
     private final Rect mTmpRect2 = new Rect();
@@ -358,7 +355,6 @@ class DisplayContent {
         mTouchExcludeRegion.set(mBaseDisplayRect);
         final int delta = mService.dipToPixel(RESIZE_HANDLE_WIDTH_IN_DP, mDisplayMetrics);
         boolean addBackFocusedTask = false;
-        mNonResizeableRegion.setEmpty();
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             TaskStack stack = mStacks.get(stackNdx);
             final ArrayList<Task> tasks = stack.getTasks();
@@ -400,11 +396,6 @@ class DisplayContent {
                     }
                     mTouchExcludeRegion.op(mTmpRect, Region.Op.DIFFERENCE);
                 }
-                if (task.isTwoFingerScrollMode()) {
-                    stack.getBounds(mTmpRect);
-                    mNonResizeableRegion.op(mTmpRect, Region.Op.UNION);
-                    break;
-                }
             }
         }
         // If we removed the focused task above, add it back and only leave its
@@ -432,7 +423,7 @@ class DisplayContent {
             mTouchExcludeRegion.op(mTmpRegion, Op.UNION);
         }
         if (mTapDetector != null) {
-            mTapDetector.setTouchExcludeRegion(mTouchExcludeRegion, mNonResizeableRegion);
+            mTapDetector.setTouchExcludeRegion(mTouchExcludeRegion);
         }
     }
 

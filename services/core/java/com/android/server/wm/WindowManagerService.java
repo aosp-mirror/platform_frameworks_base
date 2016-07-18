@@ -2120,10 +2120,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
-            // If the window is being added to a task that's docked but non-resizeable,
-            // we need to update this new window's scroll position when it's added.
-            win.applyScrollIfNeeded();
-
             // If the window is being added to a stack that's currently adjusted for IME,
             // make sure to apply the same adjust to this new window.
             win.applyAdjustForImeIfNeeded();
@@ -5293,21 +5289,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void scrollTask(int taskId, Rect bounds) {
-        synchronized (mWindowMap) {
-            Task task = mTaskIdToTask.get(taskId);
-            if (task == null) {
-                throw new IllegalArgumentException("scrollTask: taskId " + taskId
-                        + " not found.");
-            }
-
-            if (task.scrollLocked(bounds)) {
-                task.getDisplayContent().layoutNeeded = true;
-                mInputMonitor.setUpdateInputWindowsNeededLw();
-                mWindowPlacerLocked.performSurfacePlacement();
-            }
-        }
-    }
     /**
      * Starts deferring layout passes. Useful when doing multiple changes but to optimize
      * performance, only one layout pass should be done. This can be called multiple times, and
@@ -7637,26 +7618,6 @@ public class WindowManagerService extends IWindowManager.Stub
         return true;
     }
 
-    private void startScrollingTask(DisplayContent displayContent, int startX, int startY) {
-        if (DEBUG_TASK_POSITIONING) Slog.d(TAG_WM,
-                "startScrollingTask: " + "{" + startX + ", " + startY + "}");
-
-        Task task = null;
-        synchronized (mWindowMap) {
-            int taskId = displayContent.taskIdFromPoint(startX, startY);
-            if (taskId >= 0) {
-                task = mTaskIdToTask.get(taskId);
-            }
-            if (task == null || !task.isDockedInEffect() || !startPositioningLocked(
-                    task.getTopVisibleAppMainWindow(), false /*resize*/, startX, startY)) {
-                return;
-            }
-        }
-        try {
-            mActivityManager.setFocusedTask(task.mTaskId);
-        } catch(RemoteException e) {}
-    }
-
     private void handleTapOutsideTask(DisplayContent displayContent, int x, int y) {
         int taskId = -1;
         synchronized (mWindowMap) {
@@ -8045,9 +8006,6 @@ public class WindowManagerService extends IWindowManager.Stub
             if (displayContent != null) {
                 mAnimator.addDisplayLocked(displayId);
                 displayContent.initializeDisplayBaseInfo();
-                if (displayContent.mTapDetector != null) {
-                    displayContent.mTapDetector.init();
-                }
             }
         }
     }
@@ -8111,8 +8069,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
         public static final int RESIZE_STACK = 42;
         public static final int RESIZE_TASK = 43;
-
-        public static final int TWO_FINGER_SCROLL_START = 44;
 
         public static final int WINDOW_REPLACEMENT_TIMEOUT = 46;
 
@@ -8610,11 +8566,6 @@ public class WindowManagerService extends IWindowManager.Stub
                         handleDisplayChangedLocked(msg.arg1);
                     }
                     break;
-
-                case TWO_FINGER_SCROLL_START: {
-                    startScrollingTask((DisplayContent)msg.obj, msg.arg1, msg.arg2);
-                }
-                break;
 
                 case TAP_OUTSIDE_TASK: {
                     handleTapOutsideTask((DisplayContent)msg.obj, msg.arg1, msg.arg2);

@@ -1636,27 +1636,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
     }
 
-    boolean inDockedWorkspace() {
-        final Task task = getTask();
-        return task != null && task.inDockedWorkspace();
-    }
-
     // TODO: Strange usage of word workspace here and above.
     boolean inPinnedWorkspace() {
         final Task task = getTask();
         return task != null && task.inPinnedWorkspace();
-    }
-
-    boolean isDockedInEffect() {
-        final Task task = getTask();
-        return task != null && task.isDockedInEffect();
-    }
-
-    void applyScrollIfNeeded() {
-        final Task task = getTask();
-        if (task != null) {
-            task.applyScrollToWindowIfNeeded(this);
-        }
     }
 
     void applyAdjustForImeIfNeeded() {
