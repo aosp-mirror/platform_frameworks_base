@@ -157,8 +157,7 @@ page.image=images/cards/card-n-support_2x.png
   incorrectly reports the current screen density rather than the stable screen
   density. When screen zoom is enabled on these devices, this can cause Google
   Play to select a version of a multi-APK app that’s designed for smaller
-  screens. This issue is fixed in the next version of Google Play service
-  and will be included in a later Developer Preview release.
+  screens. This issue is fixed in the next version of Google Play services.
   </li>
 </ul>
 
@@ -170,10 +169,8 @@ page.image=images/cards/card-n-support_2x.png
   Vulkan support on devices with higher version support. Currently, the Google
   Play Store does not accept uploads of Apps which use Vulkan version
   targeting. This support will be added to the Google Play Store in the
-  future and fixed in the next version of Google Play services (to be included
-  in a later Developer Preview release) any Android N devices using the
-  version of Google Play services 9.0.83 will continue to receive versions
-  of Apps targeting basic Vulkan support.
+  future any Android N devices using the Google Play services 9.0.83 will
+  continue to receive versions of Apps targeting basic Vulkan support.
   </li>
 </ul>
 
