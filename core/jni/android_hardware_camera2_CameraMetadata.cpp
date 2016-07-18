@@ -43,8 +43,6 @@
 #include <sys/types.h> // for socketpair
 #include <sys/socket.h> // for socketpair
 
-static const bool kIsDebug = false;
-
 // fully-qualified class name
 #define CAMERA_METADATA_CLASS_NAME "android/hardware/camera2/impl/CameraMetadataNative"
 #define CHARACTERISTICS_KEY_CLASS_NAME "android/hardware/camera2/CameraCharacteristics$Key"
