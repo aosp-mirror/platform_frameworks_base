@@ -30,6 +30,7 @@ import android.app.ActivityManager.StackId;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.Region.Op;
+import android.hardware.display.DisplayManagerInternal;
 import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.view.Display;
@@ -200,12 +201,15 @@ class DisplayContent {
     }
 
     void initializeDisplayBaseInfo() {
-        // Bootstrap the default logical display from the display manager.
-        final DisplayInfo newDisplayInfo =
-                mService.mDisplayManagerInternal.getDisplayInfo(mDisplayId);
-        if (newDisplayInfo != null) {
-            mDisplayInfo.copyFrom(newDisplayInfo);
+        final DisplayManagerInternal displayManagerInternal = mService.mDisplayManagerInternal;
+        if (displayManagerInternal != null) {
+            // Bootstrap the default logical display from the display manager.
+            final DisplayInfo newDisplayInfo = displayManagerInternal.getDisplayInfo(mDisplayId);
+            if (newDisplayInfo != null) {
+                mDisplayInfo.copyFrom(newDisplayInfo);
+            }
         }
+
         mBaseDisplayWidth = mInitialDisplayWidth = mDisplayInfo.logicalWidth;
         mBaseDisplayHeight = mInitialDisplayHeight = mDisplayInfo.logicalHeight;
         mBaseDisplayDensity = mInitialDisplayDensity = mDisplayInfo.logicalDensityDpi;

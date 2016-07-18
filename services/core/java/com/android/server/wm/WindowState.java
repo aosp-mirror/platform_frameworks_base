@@ -505,13 +505,13 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     WindowState(WindowManagerService service, Session s, IWindow c, WindowToken token,
            WindowState parentWindow, int appOp, int seq, WindowManager.LayoutParams a,
-           int viewVisibility, final DisplayContent displayContent) {
+           int viewVisibility, final DisplayContent displayContent, int ownerId) {
         mService = service;
         mSession = s;
         mClient = c;
         mAppOp = appOp;
         mToken = token;
-        mOwnerUid = s.mUid;
+        mOwnerUid = ownerId;
         mWindowId = new IWindowId.Stub() {
             @Override
             public void registerFocusObserver(IWindowFocusObserver observer) {
