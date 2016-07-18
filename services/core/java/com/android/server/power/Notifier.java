@@ -194,6 +194,48 @@ final class Notifier {
         }
     }
 
+    public void onLongPartialWakeLockStart(String tag, int ownerUid, WorkSource workSource,
+            String historyTag) {
+        if (DEBUG) {
+            Slog.d(TAG, "onLongPartialWakeLockStart: ownerUid=" + ownerUid
+                    + ", workSource=" + workSource);
+        }
+
+        try {
+            if (workSource != null) {
+                final int N = workSource.size();
+                for (int i=0; i<N; i++) {
+                    mBatteryStats.noteLongPartialWakelockStart(tag, historyTag, workSource.get(i));
+                }
+            } else {
+                mBatteryStats.noteLongPartialWakelockStart(tag, historyTag, ownerUid);
+            }
+        } catch (RemoteException ex) {
+            // Ignore
+        }
+    }
+
+    public void onLongPartialWakeLockFinish(String tag, int ownerUid, WorkSource workSource,
+            String historyTag) {
+        if (DEBUG) {
+            Slog.d(TAG, "onLongPartialWakeLockFinish: ownerUid=" + ownerUid
+                    + ", workSource=" + workSource);
+        }
+
+        try {
+            if (workSource != null) {
+                final int N = workSource.size();
+                for (int i=0; i<N; i++) {
+                    mBatteryStats.noteLongPartialWakelockFinish(tag, historyTag, workSource.get(i));
+                }
+            } else {
+                mBatteryStats.noteLongPartialWakelockFinish(tag, historyTag, ownerUid);
+            }
+        } catch (RemoteException ex) {
+            // Ignore
+        }
+    }
+
     /**
      * Called when a wake lock is changing.
      */
