@@ -1243,6 +1243,10 @@ public class LockSettingsService extends ILockSettings.Stub {
     private VerifyCredentialResponse doVerifyPattern(String pattern, CredentialHash storedHash,
             boolean hasChallenge, long challenge, int userId,
             ICheckCredentialProgressCallback progressCallback) throws RemoteException {
+
+       if (TextUtils.isEmpty(pattern)) {
+           throw new IllegalArgumentException("Pattern can't be null or empty");
+       }
        boolean shouldReEnrollBaseZero = storedHash != null && storedHash.isBaseZeroPattern;
 
        String patternToVerify;
@@ -1340,6 +1344,9 @@ public class LockSettingsService extends ILockSettings.Stub {
     private VerifyCredentialResponse doVerifyPassword(String password, CredentialHash storedHash,
             boolean hasChallenge, long challenge, int userId,
             ICheckCredentialProgressCallback progressCallback) throws RemoteException {
+       if (TextUtils.isEmpty(password)) {
+           throw new IllegalArgumentException("Password can't be null or empty");
+       }
        return verifyCredential(userId, storedHash, password, hasChallenge, challenge,
                new CredentialUtil() {
                    @Override
