@@ -6,9 +6,129 @@ page.metaDescription=This page provides details about the Support Library packag
 <p>This page provides details about the Support Library package releases.</p>
 
 <div class="toggle-content opened">
-  <p id="rev24-0-0">
+  <p id="rev24-1-0">
     <a href="#" onclick="return toggleContent(this)"><img src=
     "{@docRoot}assets/images/styles/disclosure_up.png" class=
+    "toggle-content-img" alt="">Android Support Library, revision 24.1.0</a>
+    <em>(July 2016)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>
+        Changes for <a href=
+        "{@docRoot}tools/support-library/features.html#v4">v4 Support
+        Library</a>:
+      </dt>
+
+      <dd>
+          <ul>
+            <li>{@link android.support.v4.app.NotificationCompat.Action.WearableExtender}
+            has new <code>getHintDisplayActionInline()</code> and
+            <code>setHintDisplayActionInline()</code> methods for compatibility with
+            <a href="{@docRoot}wear/preview/index.html">Android Wear 2.0 Preview</a>.
+            These methods allow an application to specify that an action should be
+            displayed inline with the notification.
+            </li>
+
+            <li>Calling {@link android.support.v4.app.Fragment#setUserVisibleHint
+            Fragment.setUserVisbileHint()} will no longer cause a fragment to become
+            <strong>started</strong> if the hint has been added to a {@link
+            android.support.v4.app.FragmentTransaction} that is not yet committed. This
+            affects users of {@link android.support.v4.app.FragmentPagerAdapter} that
+            override {@link android.support.v4.app.Fragment#setUserVisibleHint
+            setUserVisbileHint()} and assume a specific lifecycle state of the fragment
+            after calling <code>super.setUserVisibleHint()</code>. For more information,
+            see the reference page for docs for {@link
+            android.support.v4.app.Fragment#setUserVisibleHint
+            Fragment.setUserVisbileHint()}.
+            </li>
+          </ul>
+
+    </dl>
+    <p>Fixed issues:</p>
+
+    <ul>
+      <li>TabLayout.setCustomView(null) results in NullPointerException
+        (<a href="https://code.google.com/p/android/issues/detail?id=214753">AOSP
+        issue</a>)
+      </li>
+
+      <li>TabLayout incorrectly highlights custom tabs (<a href=
+      "https://code.google.com/p/android/issues/detail?id=214316">AOSP issue 214316</a>)
+      </li>
+
+      <li>AppCompatTextHelper uses incorrectly sorted attribute array (<a href=
+      "https://code.google.com/p/android/issues/detail?id=214366">AOSP issue 214366</a>)
+      </li>
+
+      <li>Unable to reference VectorDrawable from drawable container XML when using
+      custom ContextWrapper (<a href=
+      "https://code.google.com/p/android/issues/detail?id=214055">AOSP issue 214055</a>)
+      </li>
+
+      <li>ViewDragHelper.saveLastMotion() throws ArrayIndexOutOfBoundsException
+      (<a href="https://code.google.com/p/android/issues/detail?id=212945">AOSP
+      issue 212945</a>)
+      </li>
+
+      <li>BottomSheetBehavior expands to old content height when using
+      setState(STATE_EXPANDED) (<a href=
+      "https://code.google.com/p/android/issues/detail?id=213660">AOSP issue
+      213660</a>)
+      </li>
+
+      <li>CollapsingToolbarLayout doesn’t handle pinnable children with top or
+      bottom margins (<a href=
+      "https://code.google.com/p/android/issues/detail?id=213001">AOSP issue
+      213001</a>)
+      </li>
+
+      <li>Leanback browse title does not support RTL alignment (<a href=
+      "https://code.google.com/p/android/issues/detail?id=213461">AOSP issue
+      213461</a>)
+      </li>
+
+      <li>PagerTabStrip disappears due to missing inherited annotation (<a href=
+      "https://code.google.com/p/android/issues/detail?id=213359">AOSP issue
+      213359</a>)
+      </li>
+
+      <li>Data binding throws NullPointerException when using Boolean to set
+      conditional flags (<a href=
+      "https://code.google.com/p/android/issues/detail?id=191841">AOSP issue
+      191841</a>)
+      </li>
+
+      <li>CoordinatorLayout does not respond to setFitsSystemWindows() (<a href=
+      "https://code.google.com/p/android/issues/detail?id=212720">AOSP issue
+      212720</a>)
+      </li>
+
+      <li>BottomSheetBehavior crashes when setting initial state (<a href=
+      "https://code.google.com/p/android/issues/detail?id=203114">AOSP issue
+      203114</a>)
+      </li>
+
+      <li>ViewPager skips pages if the page index is a large value (<a href=
+      "https://code.google.com/p/android/issues/detail?id=211734">AOSP issue
+      211734</a>)
+      </li>
+
+      <li>BottomSheetBehavior does not work with dynamic layouts (<a href=
+      "https://code.google.com/p/android/issues/detail?id=205226">AOSP issue
+      205226</a>)
+      </li>
+    </ul>
+  </div>
+</div>
+
+<!-- end of collapsible section: 24.1.0 -->
+
+<div class="toggle-content closed">
+  <p id="rev24-0-0">
+    <a href="#" onclick="return toggleContent(this)"><img src=
+    "{@docRoot}assets/images/styles/disclosure_down.png" class=
     "toggle-content-img" alt="">Android Support Library, revision 24.0.0</a>
     <em>(June 2016)</em>
   </p>
@@ -120,7 +240,7 @@ page.metaDescription=This page provides details about the Support Library packag
 <div class="toggle-content closed">
   <p id="rev23-4-0">
     <a href="#" onclick="return toggleContent(this)"><img src=
-    "{@docRoot}assets/images/styles/disclosure_up.png" class=
+    "{@docRoot}assets/images/styles/disclosure_down.png" class=
     "toggle-content-img" alt="">Android Support Library, revision 23.4.0</a>
     <em>(May 2016)</em>
   </p>
