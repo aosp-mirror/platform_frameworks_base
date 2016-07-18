@@ -32,6 +32,9 @@ import com.android.internal.util.Preconditions;
 
 import libcore.util.Objects;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -55,6 +58,9 @@ class ShortcutUser {
     private static final String ATTR_VALUE = "value";
     private static final String ATTR_KNOWN_LOCALES = "locales";
     private static final String ATTR_LAST_APP_SCAN_TIME = "last-app-scan-time";
+    private static final String KEY_USER_ID = "userId";
+    private static final String KEY_LAUNCHERS = "launchers";
+    private static final String KEY_PACKAGES = "packages";
 
     static final class PackageWithUser {
         final int userId;
@@ -502,5 +508,29 @@ class ShortcutUser {
         pw.print(" (");
         pw.print(Formatter.formatFileSize(mService.mContext, size));
         pw.println(")");
+    }
+
+    public JSONObject dumpCheckin(boolean clear) throws JSONException {
+        final JSONObject result = new JSONObject();
+
+        result.put(KEY_USER_ID, mUserId);
+
+        {
+            final JSONArray launchers = new JSONArray();
+            for (int i = 0; i < mLaunchers.size(); i++) {
+                launchers.put(mLaunchers.valueAt(i).dumpCheckin(clear));
+            }
+            result.put(KEY_LAUNCHERS, launchers);
+        }
+
+        {
+            final JSONArray packages = new JSONArray();
+            for (int i = 0; i < mPackages.size(); i++) {
+                packages.put(mPackages.valueAt(i).dumpCheckin(clear));
+            }
+            result.put(KEY_PACKAGES, packages);
+        }
+
+        return result;
     }
 }

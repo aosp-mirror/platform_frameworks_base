@@ -25,6 +25,8 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.ShortcutUser.PackageWithUser;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -286,6 +288,15 @@ class ShortcutLauncher extends ShortcutPackageItem {
                 pw.println();
             }
         }
+    }
+
+    @Override
+    public JSONObject dumpCheckin(boolean clear) throws JSONException {
+        final JSONObject result = super.dumpCheckin(clear);
+
+        // Nothing really interesting to dump.
+
+        return result;
     }
 
     @VisibleForTesting
