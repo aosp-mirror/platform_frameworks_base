@@ -546,6 +546,20 @@ public abstract class BatteryStats implements Parcelable {
          */
         public abstract long getTimeAtCpuSpeed(int cluster, int step, int which);
 
+        /**
+         * Returns the number of times this UID woke up the Application Processor to
+         * process a mobile radio packet.
+         * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
+         */
+        public abstract long getMobileRadioApWakeupCount(int which);
+
+        /**
+         * Returns the number of times this UID woke up the Application Processor to
+         * process a WiFi packet.
+         * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
+         */
+        public abstract long getWifiRadioApWakeupCount(int which);
+
         public static abstract class Sensor {
             /*
              * FIXME: it's not correct to use this magic value because it
@@ -1285,9 +1299,12 @@ public abstract class BatteryStats implements Parcelable {
         public static final int EVENT_TEMP_WHITELIST = 0x0011;
         // Event for the screen waking up.
         public static final int EVENT_SCREEN_WAKE_UP = 0x0012;
+        // Event for the UID that woke up the application processor.
+        // Used for wakeups coming from WiFi, modem, etc.
+        public static final int EVENT_WAKEUP_AP = 0x0013;
 
         // Number of event types.
-        public static final int EVENT_COUNT = 0x0013;
+        public static final int EVENT_COUNT = 0x0014;
         // Mask to extract out only the type part of the event.
         public static final int EVENT_TYPE_MASK = ~(EVENT_FLAG_START|EVENT_FLAG_FINISH);
 
@@ -1979,13 +1996,13 @@ public abstract class BatteryStats implements Parcelable {
     public static final String[] HISTORY_EVENT_NAMES = new String[] {
             "null", "proc", "fg", "top", "sync", "wake_lock_in", "job", "user", "userfg", "conn",
             "active", "pkginst", "pkgunin", "alarm", "stats", "inactive", "active", "tmpwhitelist",
-            "screenwake",
+            "screenwake", "wakeupap"
     };
 
     public static final String[] HISTORY_EVENT_CHECKIN_NAMES = new String[] {
             "Enl", "Epr", "Efg", "Etp", "Esy", "Ewl", "Ejb", "Eur", "Euf", "Ecn",
             "Eac", "Epi", "Epu", "Eal", "Est", "Eai", "Eaa", "Etw",
-            "Esw",
+            "Esw", "Ewa"
     };
 
     /**
@@ -3105,20 +3122,22 @@ public abstract class BatteryStats implements Parcelable {
             final long mobilePacketsTx = u.getNetworkActivityPackets(NETWORK_MOBILE_TX_DATA, which);
             final long mobileActiveTime = u.getMobileRadioActiveTime(which);
             final int mobileActiveCount = u.getMobileRadioActiveCount(which);
+            final long mobileWakeup = u.getMobileRadioApWakeupCount(which);
             final long wifiPacketsRx = u.getNetworkActivityPackets(NETWORK_WIFI_RX_DATA, which);
             final long wifiPacketsTx = u.getNetworkActivityPackets(NETWORK_WIFI_TX_DATA, which);
+            final long wifiWakeup = u.getWifiRadioApWakeupCount(which);
             final long btBytesRx = u.getNetworkActivityBytes(NETWORK_BT_RX_DATA, which);
             final long btBytesTx = u.getNetworkActivityBytes(NETWORK_BT_TX_DATA, which);
             if (mobileBytesRx > 0 || mobileBytesTx > 0 || wifiBytesRx > 0 || wifiBytesTx > 0
                     || mobilePacketsRx > 0 || mobilePacketsTx > 0 || wifiPacketsRx > 0
                     || wifiPacketsTx > 0 || mobileActiveTime > 0 || mobileActiveCount > 0
-                    || btBytesRx > 0 || btBytesTx > 0) {
+                    || btBytesRx > 0 || btBytesTx > 0 || mobileWakeup > 0 || wifiWakeup > 0) {
                 dumpLine(pw, uid, category, NETWORK_DATA, mobileBytesRx, mobileBytesTx,
                         wifiBytesRx, wifiBytesTx,
                         mobilePacketsRx, mobilePacketsTx,
                         wifiPacketsRx, wifiPacketsTx,
                         mobileActiveTime, mobileActiveCount,
-                        btBytesRx, btBytesTx);
+                        btBytesRx, btBytesTx, mobileWakeup, wifiWakeup);
             }
 
             // Dump modem controller data, per UID.
@@ -4125,6 +4144,9 @@ public abstract class BatteryStats implements Parcelable {
             final int wifiScanCount = u.getWifiScanCount(which);
             final long uidWifiRunningTime = u.getWifiRunningTime(rawRealtime, which);
 
+            final long mobileWakeup = u.getMobileRadioApWakeupCount(which);
+            final long wifiWakeup = u.getWifiRadioApWakeupCount(which);
+
             if (mobileRxBytes > 0 || mobileTxBytes > 0
                     || mobileRxPackets > 0 || mobileTxPackets > 0) {
                 pw.print(prefix); pw.print("    Mobile network: ");
@@ -4147,6 +4169,14 @@ public abstract class BatteryStats implements Parcelable {
                 sb.append(" @ ");
                 sb.append(BatteryStatsHelper.makemAh(uidMobileActiveTime / 1000 / (double)packets));
                 sb.append(" mspp");
+                pw.println(sb.toString());
+            }
+
+            if (mobileWakeup > 0) {
+                sb.setLength(0);
+                sb.append(prefix);
+                sb.append("    Mobile radio AP wakeups: ");
+                sb.append(mobileWakeup);
                 pw.println(sb.toString());
             }
 
@@ -4178,6 +4208,14 @@ public abstract class BatteryStats implements Parcelable {
                                 whichBatteryRealtime)); sb.append(") ");
                                 sb.append(wifiScanCount);
                                 sb.append("x");
+                pw.println(sb.toString());
+            }
+
+            if (wifiWakeup > 0) {
+                sb.setLength(0);
+                sb.append(prefix);
+                sb.append("    WiFi AP wakeups: ");
+                sb.append(wifiWakeup);
                 pw.println(sb.toString());
             }
 

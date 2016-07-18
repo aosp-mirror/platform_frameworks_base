@@ -494,7 +494,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             if (mLastPowerStateFromWifi != powerState) {
                 mLastPowerStateFromWifi = powerState;
                 try {
-                    getBatteryStats().noteWifiRadioPowerState(powerState, tsNanos);
+                    getBatteryStats().noteWifiRadioPowerState(powerState, tsNanos, uid);
                 } catch (RemoteException e) {
                 }
             }
