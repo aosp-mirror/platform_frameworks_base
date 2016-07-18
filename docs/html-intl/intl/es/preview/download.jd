@@ -370,13 +370,6 @@ que puedes usar para realizarle pruebas a tu aplicación, desde teléfonos hasta
     </td>
   </tr>
 
-  <tr id="xperia">
-    <td>Sony Xperia Z3 <br> (D6603 and D6653)</td>
-    <td>Descarga: <a class="external-link" href="http://support.sonymobile.com/xperiaz3/tools/xperia-companion/">Xperia Companion</a><br>
-      Para más información, visita la sección <a class="external-link" href="https://developer.sony.com/develop/smartphones-and-tablets/android-n-developer-preview/">Prueba la Android N Developer Preview en Xperia Z3</a>.
-    </td>
-  </tr>
-
 </table>
 
 <h3 id="revertDevice">Desinstalar la Preview de un dispositivo</h3>
