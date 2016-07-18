@@ -109,7 +109,7 @@ page.tags="analytics, user behavior"
   </h2>
 </div>
 
-<div class="resource-widget resource-flow-layout col-13" 
+<div class="resource-widget resource-flow-layout col-13"
   data-query="collection:distribute/analyzeact"
   data-sortorder="-timestamp"
   data-cardsizes="6x3"

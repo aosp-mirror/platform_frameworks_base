@@ -162,8 +162,8 @@ third-party sync adapters.</p>
 <p>The system image included in the downloadable platform provides a variety of
 built-in locales. In some cases, region-specific strings are available for the
 locales. In other cases, a default version of the language is used. The
-languages that are available in the Android {@sdkPlatformVersion} system 
-image are listed below (with <em>language</em>_<em>country/region</em> locale 
+languages that are available in the Android {@sdkPlatformVersion} system
+image are listed below (with <em>language</em>_<em>country/region</em> locale
 descriptor).</p>
 
 <table style="border:0;padding-bottom:0;margin-bottom:0;">
@@ -203,7 +203,7 @@ descriptor).</p>
 </tr>
 </table>
 
-<p>Localized UI strings match the locales that are accessible 
+<p>Localized UI strings match the locales that are accessible
 through Settings.</p>
 
 <h2 id="skins">Emulator Skins</h2>
@@ -263,8 +263,8 @@ stored in the system itself. This identifier, called the "API Level", allows the
 system to correctly determine whether an application is compatible with
 the system, prior to installing the application. </p>
 
-<p>To use APIs introduced in Android {@sdkPlatformVersion} in your application, you need to 
-set the proper value, "{@sdkPlatformApiLevel}", in the attributes of the <code>&lt;uses-sdk&gt;</code> 
+<p>To use APIs introduced in Android {@sdkPlatformVersion} in your application, you need to
+set the proper value, "{@sdkPlatformApiLevel}", in the attributes of the <code>&lt;uses-sdk&gt;</code>
 element in your application's manifest. </p>
 
 <p>For more information about how to use API Level, see the <a
@@ -345,10 +345,10 @@ package name, rather than the process name.</li>
 
 <h3 id="api-diff">API differences report</h3>
 
-<p>For a detailed view of API changes in Android {@sdkPlatformVersion} (API Level {@sdkPlatformApiLevel}), as compared to 
+<p>For a detailed view of API changes in Android {@sdkPlatformVersion} (API Level {@sdkPlatformApiLevel}), as compared to
 API Level 5, see the <a
 href="{@docRoot}sdk/api_diff/{@sdkPlatformApiLevel}/changes.html">API
-Differences Report</a>. There are very few API changes in API Level 6, 
+Differences Report</a>. There are very few API changes in API Level 6,
 so you might also be interested in reviewing the <a
 href="{@docRoot}sdk/api_diff/5/changes.html">API
 differences between 4 and 5</a>.</p>

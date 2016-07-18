@@ -221,7 +221,7 @@ page.title=Tạo một Trình cung cấp Nội dung
         có một trình cung cấp cho phép kết hợp dữ liệu bảng và các tệp.
     </li>
     <li>
-        Để làm việc với dữ liệu trên nền mạng, hãy sử dụng các lớp trong {@link java.net} và 
+        Để làm việc với dữ liệu trên nền mạng, hãy sử dụng các lớp trong {@link java.net} và
         {@link android.net}. Bạn cũng có thể đồng bộ hoá dữ liệu trên nền mạng với một kho lưu trữ dữ liệu cục bộ
         chẳng hạn như một cơ sở dữ liệu, rồi cung cấp dữ liệu dưới dạng bảng hoặc tệp.
         Ứng dụng mẫu <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">
@@ -381,7 +381,7 @@ page.title=Tạo một Trình cung cấp Nội dung
     </dt>
     <dd>
         Khớp với một URI nội dung cho các bảng <code>dataset1</code>
-        và <code>dataset2</code>, nhưng không khớp với URI nội dung cho <code>table1</code> hoặc 
+        và <code>dataset2</code>, nhưng không khớp với URI nội dung cho <code>table1</code> hoặc
         <code>table3</code>.
     </dd>
     <dt>
@@ -614,7 +614,7 @@ public class ExampleProvider extends ContentProvider {
 </p>
 <h3 id="Delete">Triển khai phương pháp delete()</h3>
 <p>
-    Phương pháp {@link android.content.ContentProvider#delete(Uri, String, String[]) delete()} 
+    Phương pháp {@link android.content.ContentProvider#delete(Uri, String, String[]) delete()}
     không cần phải xóa hàng thực chất khỏi kho lưu trữ dữ liệu của bạn. Nếu bạn đang sử dụng một trình điều hợp đồng bộ
     với trình cung cấp của mình, bạn nên cân nhắc đánh dấu một hàng đã xóa
     bằng cờ "xóa" thay vì gỡ bỏ hàng một cách hoàn toàn. Trình điều hợp đồng bộ có thể
@@ -626,7 +626,7 @@ public class ExampleProvider extends ContentProvider {
     update()} lấy cùng tham đối {@link android.content.ContentValues} được sử dụng bởi
     {@link android.content.ContentProvider#insert(Uri, ContentValues) insert()}, và
     cùng tham đối <code>selection</code> và <code>selectionArgs</code> được sử dụng bởi
-    {@link android.content.ContentProvider#delete(Uri, String, String[]) delete()} và 
+    {@link android.content.ContentProvider#delete(Uri, String, String[]) delete()} và
     {@link android.content.ContentProvider#query(Uri, String[], String, String[], String)
     ContentProvider.query()}. Điều này có thể cho phép bạn sử dụng lại mã giữa những phương pháp này.
 </p>

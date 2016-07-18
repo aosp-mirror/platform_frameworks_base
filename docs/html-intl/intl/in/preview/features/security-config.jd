@@ -739,7 +739,7 @@ Sumber sertifikat CA, bisa salah satu dari
       </dt>
 
       <dd>
-        Algoritme intisari yang digunakan untuk menghasilkan pin. Saat ini, hanya 
+        Algoritme intisari yang digunakan untuk menghasilkan pin. Saat ini, hanya
         {@code "SHA-256"} yang didukung.
       </dd>
     </dl>

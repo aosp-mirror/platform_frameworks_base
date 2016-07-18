@@ -37,7 +37,7 @@ hiện có để hỗ trợ trả lời giữa dòng trên thiết bị cầm ta
   thông báo, từng thông báo một từ khu vực hiển thị thông báo.
 </p>
 
-<p>Cuối cùng, Android N cũng thêm các API mới cho phép bạn tận dụng các trang trí 
+<p>Cuối cùng, Android N cũng thêm các API mới cho phép bạn tận dụng các trang trí
 của hệ thống trong các dạng xem thông báo tùy chỉnh của ứng dụng của bạn. Các API này giúp
 đảm bảo rằng dạng xem thông báo có chung một cách trình bày nhất quán
 với các mẫu tiêu chuẩn.</p>
@@ -69,9 +69,9 @@ của thông báo. Trên thiết bị cầm tay, hành động trả lời giữ
 </p>
 
 <ol>
-<li>Tạo thực thể{@link android.support.v4.app.RemoteInput.Builder} 
+<li>Tạo thực thể{@link android.support.v4.app.RemoteInput.Builder}
   mà bạn có thể thêm vào hành động
-thông báo của bạn. Hàm dựng của lớp này sẽ chấp nhận xâu mà hệ thống sử dụng làm khóa 
+thông báo của bạn. Hàm dựng của lớp này sẽ chấp nhận xâu mà hệ thống sử dụng làm khóa
  cho nhập liệu văn bản. Sau đó, ứng dụng cầm tay của bạn sử dụng khóa đó để truy xuất văn bản
   nhập liệu.
 

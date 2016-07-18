@@ -51,7 +51,7 @@ page.image=images/cards/card-nyc_2x.jpg
 
 <p>
   Android N cung cấp một tập nhỏ các API ICU4J thông qua
-  gói <code>android.icu</code> thay vì gói <code>com.ibm.icu</code>. 
+  gói <code>android.icu</code> thay vì gói <code>com.ibm.icu</code>.
 Khuôn khổ Android có thể chọn không
    cung cấp các API ICU4J vì nhiều lý do; ví dụ, Android N không cung cấp
    một số API bị loại bỏ hoặc những API chưa được đội ngũ ICU công bố là
@@ -79,7 +79,7 @@ Khuôn khổ Android có thể chọn không
 <ul>
 <li>Các API khuôn khổ Android ICU4J không có tất cả các API của ICU4J.</li>
 <li>Các nhà phát triển NDK cần biết rằng ICU4C Android không được hỗ trợ.</li>
-<li>Các API trong khuôn khổ Android không thay thế hỗ trợ của Android cho 
+<li>Các API trong khuôn khổ Android không thay thế hỗ trợ của Android cho
 <a href="{@docRoot}guide/topics/resources/localization.html">việc bản địa hóa bằng
 các tài nguyên</a>.</li>
 </ul>
@@ -87,7 +87,7 @@ các tài nguyên</a>.</li>
 <h2 id="migration">Chuyển nhập sang gói android.icu từ com.ibm.icu</h2>
 
 <p>
-  Nếu bạn đã sử dụng các API ICU4J trong ứng dụng và 
+  Nếu bạn đã sử dụng các API ICU4J trong ứng dụng và
    các API <code>android.icu</code> đáp ứng yêu cầu của bạn thì việc chuyển nhập sang
   các API của khuôn khổ đòi hỏi bạn phải thay đổi thành phần nhập vào của Java
   từ <code>com.ibm.icu</code> sang <code>android.icu</code>. Khi đó bạn có thể

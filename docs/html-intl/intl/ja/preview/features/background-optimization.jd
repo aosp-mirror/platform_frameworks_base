@@ -248,7 +248,7 @@ Android N では、{@link android.app.job.JobInfo} と {@link
   setPeriodic()} または {@link android.app.job.JobInfo.Builder#setPersisted
   setPersisted()} と組み合わせて使うことはできません。
 コンテンツの変更を継続的に監視するには、アプリの {@link
-  android.app.job.JobService} が最新のコールバックの処理を完了する前に、新しい 
+  android.app.job.JobService} が最新のコールバックの処理を完了する前に、新しい
 {@link android.app.job.JobInfo} をスケジュールします。
 </p>
 

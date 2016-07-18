@@ -7,14 +7,14 @@ trainingnavtop=true
 @jd:body
 
 <div id="tb-wrapper">
-  <div id="tb"> 
+  <div id="tb">
     <h2>This lesson teaches you to</h2>
 <ol>
   <li><a href="#DefineInterface">Define an Interface</a></li>
   <li><a href="#Implement">Implement the Interface</a></li>
   <li><a href="#Deliver">Deliver a Message to a Fragment</a></li>
 </ol>
-    
+
     <h2>You should also read</h2>
     <ul>
       <li><a href="{@docRoot}guide/components/fragments.html">Fragments</a></li>
@@ -31,21 +31,21 @@ class="button">Download the sample</a>
   </div>
 </div>
 
-<p>In order to reuse the Fragment UI components, you should build each as a completely 
-self-contained, modular component that defines its own layout and behavior.  Once you 
-have defined these reusable Fragments, you can associate them with an Activity and 
+<p>In order to reuse the Fragment UI components, you should build each as a completely
+self-contained, modular component that defines its own layout and behavior.  Once you
+have defined these reusable Fragments, you can associate them with an Activity and
 connect them with the application logic to realize the overall composite UI.</p>
 
-<p>Often you will want one Fragment to communicate with another, for example to change 
-the content based on a user event.  All Fragment-to-Fragment communication is done 
+<p>Often you will want one Fragment to communicate with another, for example to change
+the content based on a user event.  All Fragment-to-Fragment communication is done
 through the associated Activity.  Two Fragments should never communicate directly.</p>
 
 
 <h2 id="DefineInterface">Define an Interface</h2>
 
-<p>To allow a Fragment to communicate up to its Activity, you can define an interface 
-in the Fragment class and implement it within the Activity.  The Fragment captures 
-the interface implementation during its onAttach() lifecycle method and can then call 
+<p>To allow a Fragment to communicate up to its Activity, you can define an interface
+in the Fragment class and implement it within the Activity.  The Fragment captures
+the interface implementation during its onAttach() lifecycle method and can then call
 the Interface methods in order to communicate with the Activity.</p>
 
 <p>Here is an example of Fragment to Activity communication:</p>
@@ -62,7 +62,7 @@ public class HeadlinesFragment extends ListFragment {
     &#64;Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        
+
         // This makes sure that the container activity has implemented
         // the callback interface. If not, it throws an exception
         try {
@@ -72,7 +72,7 @@ public class HeadlinesFragment extends ListFragment {
                     + " must implement OnHeadlineSelectedListener");
         }
     }
-    
+
     ...
 }
 </pre>
@@ -105,7 +105,7 @@ implement the interface defined in the fragment class.</p>
 public static class MainActivity extends Activity
         implements HeadlinesFragment.OnHeadlineSelectedListener{
     ...
-    
+
     public void onArticleSelected(int position) {
         // The user selected the headline of an article from the HeadlinesFragment
         // Do something here to display that article
@@ -118,12 +118,12 @@ public static class MainActivity extends Activity
 <h2 id="Deliver">Deliver a Message to a Fragment</h2>
 
 <p>The host activity can deliver messages to a fragment by capturing the {@link
-android.support.v4.app.Fragment} instance 
+android.support.v4.app.Fragment} instance
 with {@link android.support.v4.app.FragmentManager#findFragmentById findFragmentById()}, then
 directly call the fragment's public methods.</p>
 
 <p>For instance, imagine that the activity shown above may contain another fragment that's used to
-display the item specified by the data returned in the above callback method. In this case, 
+display the item specified by the data returned in the above callback method. In this case,
 the activity can pass the information received in the callback method to the other fragment that
 will display the item:</p>
 
@@ -152,7 +152,7 @@ public static class MainActivity extends Activity
             Bundle args = new Bundle();
             args.putInt(ArticleFragment.ARG_POSITION, position);
             newFragment.setArguments(args);
-        
+
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
             // Replace whatever is in the fragment_container view with this fragment,

@@ -357,7 +357,7 @@ handleMessage()}.</li>
 
 
 <p>Theo cách này, không có "phương pháp" nào để máy khách gọi đối với dịch vụ. Thay vào đó, máy khách
-gửi “thông báo” (đối tượng {@link android.os.Message}) mà dịch vụ nhận được trong 
+gửi “thông báo” (đối tượng {@link android.os.Message}) mà dịch vụ nhận được trong
 {@link android.os.Handler} của mình.</p>
 
 <p>Sau đây là một dịch vụ ví dụ đơn giản sử dụng một giao diện {@link android.os.Messenger}:</p>
@@ -539,7 +539,7 @@ kỹ hơn ở bên dưới.)</p>
 </ol>
 
 <p>Ví dụ, đoạn mã HTML sau sẽ kết nối máy khách với dịch vụ được tạo bên trên bằng cách
-<a href="#Binder">mở rộng lớp Trình gắn kết</a>, vì vậy tất cả những việc mà nó phải làm là đổi kiểu 
+<a href="#Binder">mở rộng lớp Trình gắn kết</a>, vì vậy tất cả những việc mà nó phải làm là đổi kiểu
 {@link android.os.IBinder} được trả về thành lớp {@code LocalService} và yêu cầu thực thể {@code
 LocalService}:</p>
 

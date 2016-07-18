@@ -62,7 +62,7 @@ restrições:
   <li>Os aplicativos direcionados ao Preview não receberão transmissões {@link
  android.net.ConnectivityManager#CONNECTIVITY_ACTION} se estiverem
  registrados para recebê-las no seu manifesto. Os aplicativos em execução ainda
-poderão escutar {@code CONNECTIVITY_CHANGE} no encadeamento principal registrando um 
+poderão escutar {@code CONNECTIVITY_CHANGE} no encadeamento principal registrando um
 {@link android.content.BroadcastReceiver} em {@link
  android.content.Context#registerReceiver Context.registerReceiver()}.
   </li>
@@ -111,7 +111,7 @@ poderão escutar {@code CONNECTIVITY_CHANGE} no encadeamento principal registran
 </p>
 
 <p class="note">
-  <strong>Observação:</strong> Um {@link android.content.BroadcastReceiver} registrado em 
+  <strong>Observação:</strong> Um {@link android.content.BroadcastReceiver} registrado em
  {@link android.content.Context#registerReceiver Context.registerReceiver()}
  continuará a receber essas transmissões enquanto o aplicativo estiver em execução.
 </p>
@@ -185,7 +185,7 @@ public static void scheduleJob(Context context) {
 </p>
 
 <p>
-  O aplicativo continuará a receber retornos de chamada até que o aplicativo encerre ou chame 
+  O aplicativo continuará a receber retornos de chamada até que o aplicativo encerre ou chame
   {@link android.net.ConnectivityManager#unregisterNetworkCallback
   unregisterNetworkCallback()}.
 </p>

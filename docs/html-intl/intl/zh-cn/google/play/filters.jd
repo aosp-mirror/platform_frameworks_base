@@ -166,7 +166,7 @@ targetSdkVersion</a></code> 设置为 4 或更大时，所有属性的默认值�
  </p>
     <p><strong>示例 2<br />
     </strong>清单文件声明 <code>&lt;uses-sdk android:minSdkVersion="3"
-    android:targetSdkVersion="4"&gt;</code> 并且不包括 
+    android:targetSdkVersion="4"&gt;</code> 并且不包括
 <code>&lt;supports-screens&gt;</code> 元素。
     <strong>结果</strong>：Google Play 将向所有设备的用户显示该应用，除非还有其他筛选器。
  </p>
@@ -400,10 +400,10 @@ Google Play 然后根据
 
 这样，您可以只包括每种设备配置所需的纹理，从而减小
 APK 文件的大小。
-根据每个设备是否支持您的纹理压缩格式，Google Play 
+根据每个设备是否支持您的纹理压缩格式，Google Play
 将向其提供您已声明支持该设备的 APK。</p>
 
-<p>目前，只有在每个 APK 根据以下配置提供不同筛选时，Google Play 
+<p>目前，只有在每个 APK 根据以下配置提供不同筛选时，Google Play
 才允许您为同一应用发布多个 APK：</p>
 <ul>
   <li>OpenGL 纹理压缩格式

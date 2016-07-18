@@ -411,12 +411,12 @@ data to work.</p>
 <h3 id="MockAVD">Using Android Studio</h3>
 
 <p>Select <b>Tools</b> &gt; <b>Android</b> &gt; <b>AVD Manager</b>. In the Android Virtual
-Device Manager window, choose your AVD and launch it in the emulator by selecting the green 
+Device Manager window, choose your AVD and launch it in the emulator by selecting the green
 play arrow in the Actions column.</p>
 
 <p>Then, select <b>Tools</b> &gt; <b>Android</b> &gt; <b>Android Device Monitor</b>.
-Select the Emulator Control tab in the Android Device Monitor window, and enter GPS coordinates 
-under Location Controls as individual lat/long coordinates, with a GPX file for route playback, 
+Select the Emulator Control tab in the Android Device Monitor window, and enter GPS coordinates
+under Location Controls as individual lat/long coordinates, with a GPX file for route playback,
 or a KML file for multiple place marks.
 </p>
 

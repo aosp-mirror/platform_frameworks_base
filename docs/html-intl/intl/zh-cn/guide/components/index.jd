@@ -11,7 +11,7 @@ page.image=images/develop/app_components.png
 
   <div class="col-6">
     <h3>博客文章</h3>
-    
+
     <a href="http://android-developers.blogspot.com/2012/05/using-dialogfragments.html">
       <h4>使用 DialogFragments</h4>
       <p>在这篇帖子中，我将介绍如何使用带有 v4 支持库（旨在支持 Honeycomb 之前的设备实现向后兼容）的 DialogFragments 显示一个简单的编辑对话框，并使用一个接口向调用 Activity 返回一个结果。</p>
@@ -21,7 +21,7 @@ page.image=images/develop/app_components.png
       <h4>通用片段</h4>
       <p>今天，我们已发布一个展示相同 Fragments API 的静态库（以及新的 LoaderManager 和其他几个类）。因此，与 Android 1.6 或更高版本兼容的应用可以使用 Fragment 创建与平板电脑兼容的用户界面。 </p>
     </a>
-    
+
     <a href="http://android-developers.blogspot.com/2010/07/multithreading-for-performance.html">
       <h4>多线程处理，性能卓越</h4>
       <p>创建快速响应的应用的有效方法是：确保最大程度地减少主 UI
@@ -32,7 +32,7 @@ page.image=images/develop/app_components.png
 
   <div class="col-6">
     <h3>培训</h3>
-    
+
     <a href="http://developer.android.com/training/basics/activity-lifecycle/index.html">
       <h4>管理 Activity 生命周期</h4>
       <p>本课程介绍每个 Activity 实例将收到的重要生命周期回调方法，阐述可以如何利用这些方法使 Activity 达到用户预期，且避免它们在 Activity 不需要使用时消耗系统资源。

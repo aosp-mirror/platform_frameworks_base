@@ -48,7 +48,7 @@ Xnonavpage=true
 </p>
 
 <p>
-  本文档中提供了相关资源的链接，这些资源可帮助您了解文中给出的各条建议。  
+  本文档中提供了相关资源的链接，这些资源可帮助您了解文中给出的各条建议。
 
 </p>
 
@@ -56,7 +56,7 @@ Xnonavpage=true
 
 <p>为了打造上佳的平板电脑应用体验，首先要根据应用适配的所有设备和机型，确保您的应用满足相应的<em>应用核心质量标准</em>。
 
-有关完整信息，请参阅<a href="{@docRoot}distribute/essentials/quality/core.html">应用核心质量准则</a>。 
+有关完整信息，请参阅<a href="{@docRoot}distribute/essentials/quality/core.html">应用核心质量准则</a>。
 </p>
 
 <p>
@@ -116,7 +116,7 @@ style="font-weight:500;">舍弃拉伸变形的界面：在平板电脑上，单�
 
 
 <ul>
-  <li>根据需要，针对 <code>large</code> 和 
+  <li>根据需要，针对 <code>large</code> 和
 <code>xlarge</code> 屏幕提供自定义布局。您还可以提供可根据屏幕的<a href="{@docRoot}guide/practices/screens_support.html#NewQualifiers">最短尺寸</a>或<a href="{@docRoot}guide/practices/screens_support.html#NewQualifiers">最小可用宽度和高度</a>加载的布局。
 
 
@@ -207,8 +207,8 @@ style="font-weight:500;">复合视图将手机界面的多个单一视图<em>（
 android.app.Fragment} 子类实现各个内容面板。这样一来，您可以在共用内容的不同机型和不同屏幕间最大程度地重复使用代码。
 
 </li>
-<li>确定要在哪些屏幕尺寸上使用多窗格界面，然后在相应的屏幕尺寸单元（例如 
-<code>large</code>/<code>xlarge</code>）中提供不同的布局，或最小屏幕宽度（例如 
+<li>确定要在哪些屏幕尺寸上使用多窗格界面，然后在相应的屏幕尺寸单元（例如
+<code>large</code>/<code>xlarge</code>）中提供不同的布局，或最小屏幕宽度（例如
 <code>sw600dp</code>/<code>sw720</code>）。
 </li>
 </ul>
@@ -309,7 +309,7 @@ android.app.Fragment} 子类实现各个内容面板。这样一来，您可以�
   data-cardSizes="9x3"
   data-maxResults="6"></div>
 
-<div class="headerLine"><h2 id="adjust-font-sizes">5. 
+<div class="headerLine"><h2 id="adjust-font-sizes">5.
 调整字体大小和触控目标</h2></div>
 
 <p>要确保您的应用在平板电脑上易于使用，请花些时间针对您要适配的各种屏幕配置调整平板电脑界面中的字体大小和触控目标。
@@ -345,7 +345,7 @@ android.app.Fragment} 子类实现各个内容面板。这样一来，您可以�
 
 <div class="headerLine"><h2 id="adjust-widgets">6. 调整主屏幕小部件的尺寸</h2></div>
 
-<p>如果您的应用中包含主屏幕小部件，需要注意以下几点，以确保用户在平板电脑屏幕上获得良好体验：  
+<p>如果您的应用中包含主屏幕小部件，需要注意以下几点，以确保用户在平板电脑屏幕上获得良好体验：
  </p>
 
 <ul>
@@ -411,7 +411,7 @@ android.app.Fragment} 子类实现各个内容面板。这样一来，您可以�
   为确保分发到尽可能多的平板电脑，务必让应用适配各种支持平板电脑的 Android 版本。
 对平板电脑的支持是从 <a href="{@docRoot}about/versions/android-3.0.html">Android 3.0</a>（API 级别 11）开始的。
 
-  对平板电脑、手机及其他设备的统一界面框架支持是从 <a href="{@docRoot}about/versions/android-4.0.html">Android 
+  对平板电脑、手机及其他设备的统一界面框架支持是从 <a href="{@docRoot}about/versions/android-4.0.html">Android
 4.0</a> 开始的
 
 </p>
@@ -494,8 +494,8 @@ android.app.Fragment} 子类实现各个内容面板。这样一来，您可以�
 
 <li>与此类似，还请检查清单文件，找出
 <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html#permissions">表明硬件功能要求</a>不适用于平板电脑的 <a href="{@docRoot}guide/topics/manifest/permission-element.html"><code>&lt;permission&gt;</code></a> 元素。
-如果您找到这样的权限，请务必为功能明确声明对应的 
-<code>&lt;uses-feature&gt;</code> 元素并加入 
+如果您找到这样的权限，请务必为功能明确声明对应的
+<code>&lt;uses-feature&gt;</code> 元素并加入
 <code>android:required=”false”</code> 属性。
 </li>
 </ul>
@@ -529,21 +529,21 @@ android.app.Fragment} 子类实现各个内容面板。这样一来，您可以�
 </p>
 
 <ul>
-  <li>如果声明 
+  <li>如果声明
 <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html"><code>&lt;supports-screens&gt;</code></a>
  元素，就不要指定 <code>android:largeScreens="false"</code>
  或 <code>android:xlargeScreens="false"</code>。</li>
-  <li>如果应用适配的 <code>minSdkVersion</code> 值小于 13，必须使用 
+  <li>如果应用适配的 <code>minSdkVersion</code> 值小于 13，必须使用
 <code>android:largeScreens="true"</code> 和 <code>android:xlargeScreens="true"</code>
  声明 <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html"><code>&lt;supports-screens&gt;</code></a>
  元素。</li>
 </ul>
 
-<p>如果应用在清单文件中声明了 
+<p>如果应用在清单文件中声明了
 <a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html"><code>&lt;compatible-screens&gt;</code></a>
  元素，该元素应包含相关属性，
 以列举应用支持的<em>平板电脑屏幕的所有尺寸和密度组合</em>。
-请注意，如果可能，您应避免在应用中使用 
+请注意，如果可能，您应避免在应用中使用
 <a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html"><code>&lt;compatible-screens&gt;</code></a>
  元素。</p>
 
@@ -586,7 +586,7 @@ android.app.Fragment} 子类实现各个内容面板。这样一来，您可以�
   <li>添加在 7 英寸和 10 英寸平板电脑上截取的屏幕截图。
   </li>
 
-  <li>如果可能，添加横屏和竖屏截取的屏幕截图。  
+  <li>如果可能，添加横屏和竖屏截取的屏幕截图。
 
   </li>
 

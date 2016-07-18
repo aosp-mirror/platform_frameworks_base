@@ -40,17 +40,17 @@ facilmente exceder o custo do próprio dispositivo. No N Developer Preview, os u
 </p>
 
 <p>
-  Quando um usuário ativa a Economia de dados em <strong>Settings</strong> e o dispositivo está 
+  Quando um usuário ativa a Economia de dados em <strong>Settings</strong> e o dispositivo está
 em uma rede tarifada, o sistema bloqueia o uso de dados em segundo plano e avisa
- aos aplicativos para reduzir o uso de dados no primeiro plano sempre que possível. Os usuários podem 
+ aos aplicativos para reduzir o uso de dados no primeiro plano sempre que possível. Os usuários podem
 autorizar aplicativos específicos a usar dados tarifados em segundo plano, mesmo com a Economia
  de dados ativada.
 </p>
 
 <p>
   O N Developer Preview estende a API {@link android.net.ConnectivityManager}
- para oferecer aos aplicativos uma forma de <a href="#status">recuperar as 
-preferências do usuário para a Economia de dados</a> e <a href="#monitor-changes">monitorar 
+ para oferecer aos aplicativos uma forma de <a href="#status">recuperar as
+preferências do usuário para a Economia de dados</a> e <a href="#monitor-changes">monitorar
 as mudanças de preferências</a>. Como prática recomendada, os aplicativos devem verificar se o
  usuário ativou a Economia de dados e tentar limitar o uso de dados em primeiro e
  segundo plano.
@@ -147,7 +147,7 @@ if (connMgr.isActiveNetworkMetered()) {
   O envio da intenção e do URI abre o aplicativo <strong>Settings</strong> e
  exibe as configurações de uso de dados de seu aplicativo. O usuário pode decidir então se
  ativará os dados em segundo plano para o aplicativo. Antes de enviar a intenção, é
- prática recomendada perguntar primeiro ao usuário se ele deseja iniciar o 
+ prática recomendada perguntar primeiro ao usuário se ele deseja iniciar o
 aplicativo <strong>Settings</strong> com o objetivo de ativar o uso
  de dados em segundo plano.
 </p>

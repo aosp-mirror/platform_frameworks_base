@@ -39,7 +39,7 @@ XML позволяет создавать удобочитаемую струк�
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?>
 &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="fill_parent" 
+              android:layout_width="fill_parent"
               android:layout_height="fill_parent"
               android:orientation="vertical" >
     &lt;TextView android:id="@+id/text"
@@ -60,7 +60,7 @@ XML позволяет создавать удобочитаемую струк�
 <p>Полное руководство по созданию макета пользовательского интерфейса см. в документе <a href="declaring-layout.html">Макеты
 XML</a>.
 
-  
+
 <h2 id="UIComponents">Компоненты пользовательского интерфейса</h2>
 
 <p>Не обязательно создавать все элементы пользовательского интерфейса с помощью объектов {@link android.view.View} и {@link

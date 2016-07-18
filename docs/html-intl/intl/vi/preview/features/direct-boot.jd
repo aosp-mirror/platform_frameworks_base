@@ -81,7 +81,7 @@ bộ lọc ý định cho <code>LOCKED_BOOT_COMPLETED</code> trong bản kê kha
 &lt;/receiver&gt;
 </pre>
 
-<p>Khi người dùng đã mở khóa thiết bị thì mọi thành phần có thể truy cập 
+<p>Khi người dùng đã mở khóa thiết bị thì mọi thành phần có thể truy cập
 cả bộ nhớ lưu trữ mã hóa thiết bị lẫn bộ nhớ lưu trữ mã hóa thông tin xác thực.</p>
 
 <h2 id="access">Truy cập Bộ nhớ Lưu trữ Mã hóa của Thiết bị</h2>
@@ -89,7 +89,7 @@ cả bộ nhớ lưu trữ mã hóa thiết bị lẫn bộ nhớ lưu trữ mã
 <p>Để truy cập bộ nhớ lưu trữ mã hóa thiết bị, hãy tạo một thực thể
 {@link android.content.Context} thứ hai bằng cách gọi
 <code>Context.createDeviceEncryptedStorageContext()</code>. Tất cả các lệnh gọi
-API bộ nhớ lưu trữ đều sử dụng bối cảnh này để truy cập bộ nhớ lưu trữ mã hóa thiết bị. 
+API bộ nhớ lưu trữ đều sử dụng bối cảnh này để truy cập bộ nhớ lưu trữ mã hóa thiết bị.
 Ví dụ sau sẽ truy cập bộ nhớ lưu trữ mã hóa của thiết bị và mở một tệp
 dữ liệu ứng dụng có sẵn:</p>
 

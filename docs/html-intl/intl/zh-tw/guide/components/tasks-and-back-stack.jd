@@ -440,13 +440,13 @@ android.app.Activity#startActivity startActivity()} 的意圖中包含旗標，�
 
 <p>在兩種情況下會用到親和性：</p>
 <ul>
-  <li>當啟動 Activity 的意圖包含 
+  <li>當啟動 Activity 的意圖包含
 {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK} 旗標。
 
 
 <p>根據預設，新的 Activity 會啟動至 Activity (名為 {@link android.app.Activity#startActivity startActivity()}) 的工作中。
 系統會將它推入至與呼叫端相同的返回堆疊。
-不過，如果傳送至 
+不過，如果傳送至
 {@link android.app.Activity#startActivity startActivity()} 的意圖包含 {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK} 旗標，則系統會找尋不同的工作來放置新的 Activity。
 
 這通常是新工作。
@@ -455,7 +455,7 @@ android.app.Activity#startActivity startActivity()} 的意圖中包含旗標，�
 
 <p>如果此旗標導致 Activity 開始新的工作，而使用者按 [首頁] 按鈕離開它，必須要有方法可以讓使用者回來瀏覽這個工作。<em></em>
 
-有些實體 (例如，通知管理員) 總是從外部工作開始 Activity，從來不使用自己的工作，因此他們都會將 {@code FLAG_ACTIVITY_NEW_TASK} 放入傳送到 
+有些實體 (例如，通知管理員) 總是從外部工作開始 Activity，從來不使用自己的工作，因此他們都會將 {@code FLAG_ACTIVITY_NEW_TASK} 放入傳送到
 {@link android.app.Activity#startActivity startActivity()} 的意圖。
 
 如果您的 Activity 可以由外部實體呼叫且可能使用此旗標，記得要提供使用者獨立的方法回到啟動的工作，例如，透過啟動組件圖示 (工作的根 Activity 有一個 {@link android.content.Intent#CATEGORY_LAUNCHER} 意圖篩選器；請參閱下方的<a href="#Starting">開始工作</a>)。
@@ -505,7 +505,7 @@ href="{@docRoot}guide/topics/manifest/activity-element.html#always">alwaysRetain
 href="{@docRoot}guide/topics/manifest/activity-element.html#clear">clearTaskOnLaunch</a></code></dt>
 <dd>如果這項屬性在工作的根 Activity 中設為 {@code "true"}，則剛描述的預設行為不會發生。
 即使過了很長的一段時間，工作仍然會在堆疊保留所有的 Activity。
-換句話說，它與 
+換句話說，它與
 <a href="{@docRoot}guide/topics/manifest/activity-element.html#always">
 {@code alwaysRetainTaskState}</a> 相反。即便使用者只離開工作一小段時間，使用者還是會回到工作的起始狀態。
 </dd>
@@ -526,8 +526,8 @@ href="{@docRoot}guide/topics/manifest/activity-element.html#finish">finishOnTask
 
 <h3 id="Starting">開始工作</h3>
 
-<p>您可以給予 Activity 一個意圖篩選器，將 
-{@code "android.intent.action.MAIN"} 設定為指定的動作， 
+<p>您可以給予 Activity 一個意圖篩選器，將
+{@code "android.intent.action.MAIN"} 設定為指定的動作，
 {@code "android.intent.category.LAUNCHER"} 設定為指定的類別，以便將該 Activity 設定為工作的進入點。
 例如：</p>
 
@@ -547,7 +547,7 @@ href="{@docRoot}guide/topics/manifest/activity-element.html#finish">finishOnTask
 </p>
 
 <p>第二項功能很重要：使用者必須能夠在離開工作後，使用此 Activity 啟動組件回到此工作。
-由於這個原因，兩個將 Activity 標示為一律啟動工作的<a href="#LaunchModes">啟動模式</a> {@code "singleTask"} 和 
+由於這個原因，兩個將 Activity 標示為一律啟動工作的<a href="#LaunchModes">啟動模式</a> {@code "singleTask"} 和
 {@code "singleInstance"}，應只能在 Activity 有 {@link android.content.Intent#ACTION_MAIN} 和 {@link android.content.Intent#CATEGORY_LAUNCHER} 篩選器時才能使用。
 
 

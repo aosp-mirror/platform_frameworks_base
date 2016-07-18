@@ -75,7 +75,7 @@ page.article=true
 multiprocessor architectures. This document introduces issues that
 can arise when writing code for symmetric multiprocessor systems in C, C++, and the Java
 programming language (hereafter referred to simply as “Java” for the sake of
-brevity). It's intended as a primer for Android app developers, not as a complete 
+brevity). It's intended as a primer for Android app developers, not as a complete
 discussion on the subject. The focus is on the ARM CPU architecture.</p>
 
 <p>If you’re in a hurry, you can skip the <a href="#theory">Theory</a> section

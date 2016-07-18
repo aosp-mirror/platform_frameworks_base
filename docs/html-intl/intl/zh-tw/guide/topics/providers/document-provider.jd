@@ -213,7 +213,7 @@ Android 4.4 儲存空間存取架構：用戶端</a></li>
 
  </p>
 
-<p>針對搭載 Android 4.4 以上版本的裝置，您的應用程式還可以呼叫 
+<p>針對搭載 Android 4.4 以上版本的裝置，您的應用程式還可以呼叫
 {@link android.content.Intent#ACTION_OPEN_DOCUMENT} 意圖，以顯示系統所控管的挑選器 UI，方便使用者瀏覽其他應用程式提供的所有檔案。
 
 透過這個單一 UI，使用者可以從任何受支援的應用程式挑選檔案。
@@ -560,7 +560,7 @@ getContentResolver().takePersistableUriPermission(uri, takeFlags);</pre>
 <li>供應程式的名稱 (也就是供應程式的類別名稱)，包括套件名稱。範例：<code>com.example.android.storageprovider.MyCloudProvider</code>。
 </li>
 
-<li>授權的名稱 (也就是套件的名稱；在此範例中為 
+<li>授權的名稱 (也就是套件的名稱；在此範例中為
 <code>com.example.android.storageprovider</code>) 以及內容供應程式的類型
 (<code>documents</code>)。範例：{@code com.example.android.storageprovider.documents}。</li>
 
@@ -588,7 +588,7 @@ getContentResolver().takePersistableUriPermission(uri, takeFlags);</pre>
  <pre>&lt;bool name=&quot;atLeastKitKat&quot;&gt;true&lt;/bool&gt;</pre></li>
 </ul></li>
 
-<li>內含 
+<li>內含
 {@code android.content.action.DOCUMENTS_PROVIDER} 動作的意圖篩選器，讓您的供應程式能夠在系統搜尋供應程式時顯示在挑選器中。
 </li>
 
@@ -618,7 +618,7 @@ getContentResolver().takePersistableUriPermission(uri, takeFlags);</pre>
 
 <h4 id="43">支援搭載 Android 4.3 以下版本的裝置</h4>
 
-<p>只有搭載 Android 4.4 以上版本的裝置可使用 
+<p>只有搭載 Android 4.4 以上版本的裝置可使用
 {@link android.content.Intent#ACTION_OPEN_DOCUMENT} 意圖。如果您想讓應用程式支援 {@link android.content.Intent#ACTION_GET_CONTENT} 以便與搭載 Android 4.3 以下版本的裝置相容，請針對搭載 Android 4.4 以上版本的裝置停用宣示說明中的 {@link android.content.Intent#ACTION_GET_CONTENT} 意圖篩選器。
 
 
@@ -833,7 +833,7 @@ public Cursor queryDocument(String documentId, String[] projection) throws
 <h4 id="openDocument">實作 openDocument</h4>
 
 <p>您必須實作 {@link android.provider.DocumentsProvider#openDocument
-openDocument()} 來傳回代表特定檔案的 
+openDocument()} 來傳回代表特定檔案的
 {@link android.os.ParcelFileDescriptor}。其他應用程式可利用傳回的 {@link android.os.ParcelFileDescriptor} 傳輸資料。
 使用者選取檔案而且用戶端應用程式呼叫
 {@link android.content.ContentResolver#openFileDescriptor openFileDescriptor()} 要求存取該檔案後，系統就會呼叫這個方法。範例：

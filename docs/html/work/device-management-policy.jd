@@ -14,7 +14,7 @@ parent.link=index.html
   <li><a href="#ActivateDeviceAdmin">Activate the Device Administrator</a></li>
   <li><a href="#ImplementDevicePolicyController">Implement the Device Policy Controller</a></li>
 </ol>
-  
+
 <!-- related docs (NOT javadocs) -->
 <h2>You should also read</h2>
 <ul>

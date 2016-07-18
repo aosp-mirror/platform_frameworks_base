@@ -48,13 +48,13 @@ page.title=アプリケーションのバージョニング
 <p>アプリケーションのバージョン情報を定義するには、アプリケーションのマニフェスト ファイルで属性を設定します。2 つの属性を使用でき、常にこの両方に値を定義することが推奨されています: </p>
 
 <ul>
-<li><code>android:versionCode</code> - アプリケーション コードのバージョンを他のバージョンと相対的に示す整数値。 
+<li><code>android:versionCode</code> - アプリケーション コードのバージョンを他のバージョンと相対的に示す整数値。
 
 <p>この値は整数なので、その他のアプリケーションはプログラムでバージョンの値を評価して関係を確認できます（たとえば、このバージョンがアップグレードかダウングレードなのか、など）。任意の整数値を設定できますが、アプリケーションの後続のリリースでは、現在より大きな値を使用するようにしてください。システムではこのバージョン管理の基準を強制しませんが、後継リリースの値を増加させることは標準的です。 </p>
 
 <p>通常、アプリケーションの最初のバージョンの versionCode を 1 に設定してリリースし、その後は各リリースについて、リリースがメジャー リリースであってもマイナー リリースであっても、値を単調増加させます。これは、<code>android:versionCode</code> の値は、ユーザーに表示されるアプリケーション リリース バージョンと類似している必要性はないことを意味します。以下の <code>android:versionName</code> をご覧ください。アプリケーションと公開サービスでは、このバージョンの値はユーザーには表示されません。</p>
 </li>
-<li><code>android:versionName</code> - アプリケーション コードのリリース バージョンを表す文字列値で、ユーザーに表示される値です。 
+<li><code>android:versionName</code> - アプリケーション コードのリリース バージョンを表す文字列値で、ユーザーに表示される値です。
 <p>値は文字列なので、アプリケーション バージョンを「&lt;major&gt;.&lt;minor&gt;.&lt;point&gt;」といった文字列や、その他のタイプの絶対的または相対的バージョン ID として記述できます。 </p>
 
 <p><code>android:versionCode</code> の場合と同様に、システムではこの値をアプリケーションでユーザーに表示する以外の目的で内部的に利用することはありません。公開サービスでは、ユーザーに表示するために <code>android:versionName</code> 値を取り出す可能性もあります。</p>
@@ -79,7 +79,7 @@ page.title=アプリケーションのバージョニング
 
 <p>この例では、<code>android:versionCode</code> 値は現在の .apk がこのアプリケーション コードの 2 番目のリリースを含んでいることを表し、これは <code>android:codeName</code> 文字列が示すようにマイナー後継リリースであることを示します。 </p>
 
-<p>Android フレームワークには、アプリケーションがシステムに別のアプリケーションのバージョン情報を問い合わせる API が用意されています。バージョン情報を取得するため、アプリケーションは {@link android.content.pm.PackageManager#getPackageInfo(java.lang.String, int)} 
+<p>Android フレームワークには、アプリケーションがシステムに別のアプリケーションのバージョン情報を問い合わせる API が用意されています。バージョン情報を取得するため、アプリケーションは {@link android.content.pm.PackageManager#getPackageInfo(java.lang.String, int)}
 method of {@link android.content.pm.PackageManager PackageManager}. </p> を使用します。
 
 <h2 id="minsdkversion">最小システム API バージョンの指定</h2>
@@ -89,7 +89,7 @@ method of {@link android.content.pm.PackageManager PackageManager}. </p> を使�
 <p>最小システム バージョンをマニフェストに指定するには、次の属性を使用します: </p>
 
 <ul>
-<li><code>android:minSdkVersion</code> - Android プラットフォームのコード バージョンに対応する整数値。 
+<li><code>android:minSdkVersion</code> - Android プラットフォームのコード バージョンに対応する整数値。
 <p>アプリケーションのインストールを準備する際に、システムはこの属性の値を確認して、システム バージョンと比較します。<code>android:minSdkVersion</code> 値がシステム バージョンよりも大きい場合、システムはアプリケーションのインストールを中止します。 </p>
 
 <p>この属性をマニフェストに指定しない場合、システムではアプリケーションがすべてのプラットフォーム バージョンと互換性があると仮定します。</p></li>

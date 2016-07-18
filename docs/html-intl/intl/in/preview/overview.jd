@@ -167,7 +167,7 @@ page.tags="preview", "developer", "android"
 <p>
   <strong>Tiga tahapan pencapaian pratinjau pertama</strong> memberikan <strong>ujian
   pertama dan lingkungan pengembangan</strong> yang membantu Anda mengidentifikasi
-  masalah kompatibilitas dalam aplikasi Anda saat ini dan merencanakan migrasi atau menampilkan pekerjaan 
+  masalah kompatibilitas dalam aplikasi Anda saat ini dan merencanakan migrasi atau menampilkan pekerjaan
   yang diperlukan untuk menargetkan platform baru. Ini adalah periode prioritas yang akan
   memberi kami masukan dari Anda tentang fitur dan API serta masalah kompatibilitas file
   &mdash; untuk semua ini, gunakan <a href="{@docRoot}preview/bug">Issue
@@ -314,8 +314,8 @@ page.tags="preview", "developer", "android"
 </p>
 
 <ul>
-  <li> <a href="{@docRoot}preview/setup-sdk.html">Menyiapkan Pengembangan untuk 
-Android N</a> memiliki 
+  <li> <a href="{@docRoot}preview/setup-sdk.html">Menyiapkan Pengembangan untuk
+Android N</a> memiliki
  petunjuk langkah demi langkah untuk memulai.</li>
   <li> <a href="{@docRoot}preview/behavior-changes.html">Perubahan
   Perilaku</a> akan menunjukkan kepada Anda bidang-bidang utama untuk diuji.</li>
