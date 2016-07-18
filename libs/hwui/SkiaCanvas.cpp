@@ -18,6 +18,7 @@
 
 #include "CanvasProperty.h"
 #include "VectorDrawable.h"
+#include "hwui/MinikinUtils.h"
 
 #include <SkDrawable.h>
 #include <SkDevice.h>
@@ -25,6 +26,7 @@
 #include <SkDrawFilter.h>
 #include <SkGraphics.h>
 #include <SkImage.h>
+#include <SkRSXform.h>
 #include <SkShader.h>
 #include <SkTemplates.h>
 
@@ -624,9 +626,32 @@ void SkiaCanvas::drawGlyphs(const uint16_t* text, const float* positions, int co
     drawTextDecorations(x, y, totalAdvance, paint);
 }
 
-void SkiaCanvas::drawGlyphsOnPath(const uint16_t* glyphs, int count, const SkPath& path,
-        float hOffset, float vOffset, const SkPaint& paint) {
-    mCanvas->drawTextOnPathHV(glyphs, count << 1, path, hOffset, vOffset, paint);
+void SkiaCanvas::drawLayoutOnPath(const minikin::Layout& layout, float hOffset, float vOffset,
+        const SkPaint& paint, const SkPath& path, size_t start, size_t end) {
+    const int N = end - start;
+    SkAutoSMalloc<1024> storage(N * (sizeof(uint16_t) + sizeof(SkRSXform)));
+    SkRSXform* xform = (SkRSXform*)storage.get();
+    uint16_t* glyphs = (uint16_t*)(xform + N);
+    SkPathMeasure meas(path, false);
+
+    for (size_t i = start; i < end; i++) {
+        glyphs[i - start] = layout.getGlyphId(i);
+        float x = hOffset + layout.getX(i);
+        float y = vOffset + layout.getY(i);
+
+        SkPoint pos;
+        SkVector tan;
+        if (!meas.getPosTan(x, &pos, &tan)) {
+            pos.set(x, y);
+            tan.set(1, 0);
+        }
+        xform[i - start].fSCos = tan.x();
+        xform[i - start].fSSin = tan.y();
+        xform[i - start].fTx   = pos.x() - tan.y() * y;
+        xform[i - start].fTy   = pos.y() + tan.x() * y;
+    }
+
+    this->asSkCanvas()->drawTextRSXform(glyphs, sizeof(uint16_t) * N, xform, nullptr, paint);
 }
 
 // ----------------------------------------------------------------------------

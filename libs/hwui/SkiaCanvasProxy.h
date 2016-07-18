@@ -81,6 +81,8 @@ protected:
                                 SkScalar constY, const SkPaint&) override;
     virtual void onDrawTextOnPath(const void* text, size_t byteLength, const SkPath& path,
                                   const SkMatrix* matrix, const SkPaint&) override;
+    virtual void onDrawTextRSXform(const void* text, size_t byteLength, const SkRSXform[],
+                                   const SkRect* cullRect, const SkPaint& paint);
     virtual void onDrawTextBlob(const SkTextBlob* blob, SkScalar x, SkScalar y,
                                 const SkPaint& paint) override;
 

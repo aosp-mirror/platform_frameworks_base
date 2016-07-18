@@ -185,13 +185,7 @@ public:
     }
 
     void operator()(size_t start, size_t end) {
-        uint16_t glyphs[1];
-        for (size_t i = start; i < end; i++) {
-            glyphs[0] = layout.getGlyphId(i);
-            float x = hOffset + layout.getX(i);
-            float y = vOffset + layout.getY(i);
-            canvas->drawGlyphsOnPath(glyphs, 1, path, x, y, paint);
-        }
+        canvas->drawLayoutOnPath(layout, hOffset, vOffset, paint, path, start, end);
     }
 private:
     const minikin::Layout& layout;
