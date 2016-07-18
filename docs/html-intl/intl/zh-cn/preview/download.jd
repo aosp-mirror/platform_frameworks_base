@@ -370,13 +370,6 @@ page.image=images/cards/card-n-downloads_2x.png
     </td>
   </tr>
 
-  <tr id="xperia">
-    <td>Sony Xperia Z3 <br> （D6603 和 D6653）</td>
-    <td>下载：<a class="external-link" href="http://support.sonymobile.com/xperiaz3/tools/xperia-companion/">Xperia Companion</a><br>
-      如需了解详细信息，请参阅<a class="external-link" href="https://developer.sony.com/develop/smartphones-and-tablets/android-n-developer-preview/">为 Xperia Z3 尝试 Android N Developer Preview</a>。
-    </td>
-  </tr>
-
 </table>
 
 <h3 id="revertDevice">从设备卸载 Preview</h3>
