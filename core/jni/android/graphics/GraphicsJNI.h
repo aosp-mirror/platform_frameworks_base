@@ -10,7 +10,6 @@
 #include "SkMallocPixelRef.h"
 #include "SkPoint.h"
 #include "SkRect.h"
-#include "SkImageDecoder.h"
 #include <jni.h>
 #include <hwui/Canvas.h>
 

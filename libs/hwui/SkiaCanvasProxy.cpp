@@ -23,6 +23,7 @@
 #include <SkPixelRef.h>
 #include <SkRect.h>
 #include <SkRRect.h>
+#include <SkSurface.h>
 
 #include <memory>
 
@@ -153,7 +154,7 @@ void SkiaCanvasProxy::onDrawVertices(VertexMode mode, int vertexCount, const SkP
     mCanvas->drawVertices(mode, floatCount, vArray, tArray, cArray, indices, indexCount, paint);
 }
 
-SkSurface* SkiaCanvasProxy::onNewSurface(const SkImageInfo&, const SkSurfaceProps&) {
+sk_sp<SkSurface> SkiaCanvasProxy::onNewSurface(const SkImageInfo&, const SkSurfaceProps&) {
     SkDEBUGFAIL("SkiaCanvasProxy::onNewSurface is not supported");
     return NULL;
 }
