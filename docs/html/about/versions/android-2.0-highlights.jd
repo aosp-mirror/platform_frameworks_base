@@ -33,7 +33,7 @@ sdk.date=October 2009
 <object width="278 height="180">
 <param name="movie" value="http://www.youtube.com/v/opZ69P-0Jbc&hl=en&fs=1&"></param>
 <param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param>
-<embed src="//www.youtube.com/v/opZ69P-0Jbc&hl=en&fs=1&" type="application/x-shockwave-flash" 
+<embed src="//www.youtube.com/v/opZ69P-0Jbc&hl=en&fs=1&" type="application/x-shockwave-flash"
 allowscriptaccess="always" allowfullscreen="true" width="278" height="180"></embed>
 </object>
 </div>
@@ -49,7 +49,7 @@ and technologies in Android 2.0.</p>
 </ul>
 
 
-    
+
 <h2 id="UserFeatures" style="clear:right">New User Features</h2>
 
 <!-- screenshots float right -->
@@ -99,10 +99,10 @@ when you touch a contact photo or status icon.</li>
 
 <!--
 <ul>
-  <li>Sync support for contacts from multiple data sources including Exchange. 
-  Handset manufacturers can choose whether or not to include Exchange support 
+  <li>Sync support for contacts from multiple data sources including Exchange.
+  Handset manufacturers can choose whether or not to include Exchange support
   in their devices.</li>
-  <li>New way to hover on a person to see more info and select communication 
+  <li>New way to hover on a person to see more info and select communication
   mode (for example, phone, SMS, email).</li>
 </ul>
 -->
@@ -150,7 +150,7 @@ when you touch a contact photo or status icon.</li>
 <h3 id="Browser">Browser</h3>
 
 <ul>
-  <li>Refreshed UI with actionable browser URL bar enables users to directly 
+  <li>Refreshed UI with actionable browser URL bar enables users to directly
   tap the address bar for instant searches and navigation.</li>
   <li>Bookmarks with web page thumbnails.</li>
   <li>Support for double-tap zoom.</li>
@@ -192,10 +192,10 @@ hardware acceleration.</p>
 <h3 id="DeveloperAPIs">New Framework APIs</h3>
 
 <p>Android 2.0 includes several new developer APIs.
-For an overview of new APIs, see the 
+For an overview of new APIs, see the
 <a href="{@docRoot}about/versions/android-2.0.html#api">Android 2.0 version notes</a>.</p>
 
-<p>For a complete report of all API changes, see the 
+<p>For a complete report of all API changes, see the
 <a href="{@docRoot}sdk/api_diff/5/changes.html">API Differences Report</a>.</p>
 
 

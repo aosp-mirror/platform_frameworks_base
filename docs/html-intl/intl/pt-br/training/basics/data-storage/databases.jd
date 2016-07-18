@@ -118,12 +118,12 @@ ao aplicativo. Seus dados estão protegidos porque, por padrão, essa área não
 pode ser acessada por outros aplicativos.</p>
 
 <p>Um conjunto de APIs está disponível na classe {@link
-android.database.sqlite.SQLiteOpenHelper}. 
+android.database.sqlite.SQLiteOpenHelper}.
 Ao usar esta classe para obter referências para seu banco de dados, o sistema
 realiza operações
 de possível longa execução para criar e atualizar o banco de dados apenas quando
-necessário e <em>não durante a inicialização do aplicativo</em>. Basta chamar 
-{@link android.database.sqlite.SQLiteOpenHelper#getWritableDatabase} ou 
+necessário e <em>não durante a inicialização do aplicativo</em>. Basta chamar
+{@link android.database.sqlite.SQLiteOpenHelper#getWritableDatabase} ou
 {@link android.database.sqlite.SQLiteOpenHelper#getReadableDatabase}.</p>
 
 <p class="note"><strong>Observação:</strong> devido à possibilidade de serem de longa execução,

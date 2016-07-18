@@ -422,7 +422,7 @@ public class ExampleProvider extends ContentProvider {
          * in the path
          */
         sUriMatcher.addURI("com.example.app.provider", "table3", 1);
-    
+
         /*
          * Sets the code for a single row to 2. In this case, the "#" wildcard is
          * used. "content://com.example.app.provider/table3/3" matches, but
@@ -881,7 +881,7 @@ vnd.android.cursor.<strong>item</strong>/vnd.com.example.provider.table1
     A contract class also helps developers because it usually has mnemonic names for its constants,
     so developers are less likely to use incorrect values for column names or URIs. Since it's a
     class, it can contain Javadoc documentation. Integrated development environments such as
-    Android Studio can auto-complete constant names from the contract class and display Javadoc for 
+    Android Studio can auto-complete constant names from the contract class and display Javadoc for
     the constants.
 </p>
 <p>

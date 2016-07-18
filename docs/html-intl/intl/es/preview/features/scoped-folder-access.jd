@@ -41,17 +41,17 @@ directorio externo.</li>
 <code>StorageVolume</code> correcta. Luego, crea una intent llamando al
  método <code>StorageVolume.createAccessIntent()</code> de esa instancia.
 Usa esta intención para acceder a directorios de almacenamiento externo. Para obtener una lista de
-todos los volúmenes disponibles, incluidos los volúmenes de medios extraíbles, usa 
+todos los volúmenes disponibles, incluidos los volúmenes de medios extraíbles, usa
 <code>StorageManager.getVolumesList()</code>.</p>
 
-<p>Si tienes información sobre un archivo específico, usa 
-<code>StorageManager.getStorageVolume(File)</code> para obtener el 
-<code>StorageVolume</code> que contiene el archivo. Llama a 
-<code>createAccessIntent()</code> en este <code>StorageVolume</code> para acceder al 
+<p>Si tienes información sobre un archivo específico, usa
+<code>StorageManager.getStorageVolume(File)</code> para obtener el
+<code>StorageVolume</code> que contiene el archivo. Llama a
+<code>createAccessIntent()</code> en este <code>StorageVolume</code> para acceder al
 directorio de almacenamiento externo del archivo.</p>
 
 <p>
-En el caso de los volúmenes secundarios, como las tarjetas SD externas, pasa un valor nulo cuando llames a 
+En el caso de los volúmenes secundarios, como las tarjetas SD externas, pasa un valor nulo cuando llames a
 <code>StorageVolume.createAccessIntent()</code> para solicitar acceso al volumen
  completo, en lugar de un directorio específico.
 <code>StorageVolume.createAccessIntent()</code> regresa un valor nulo si pasas un
@@ -140,7 +140,7 @@ de usuario. Si el usuario deniega una solicitud y la aplicación solicita acceso
 
 <img src="{@docRoot}preview/images/scoped-folder-access-dont-ask.png" srcset="{@docRoot}preview/images/scoped-folder-access-dont-ask.png 1x,
 {@docRoot}preview/images/scoped-folder-access-dont-ask_2x.png 2x" />
-<p class="img-caption"><strong>Figura 1.</strong> Una aplicación que presenta una 
+<p class="img-caption"><strong>Figura 1.</strong> Una aplicación que presenta una
 segunda solicitud para obtener acceso a medios extraíbles.</p>
 
 <p>Si el usuario selecciona <b>Don't ask again</b> y deniega la solicitud, todas las

@@ -34,9 +34,9 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
 
 <p>
   Se você compilar o aplicativo com o N Preview SDK, poderá configurar como o aplicativo
- processa a exibição de várias janelas. Por exemplo, você pode especificar as dimensões 
+ processa a exibição de várias janelas. Por exemplo, você pode especificar as dimensões
 mínimas permitidas para a atividade. Você também pode desativar a exibição de várias janelas para
- o aplicativo, garantindo que o sistema mostre o aplicativo apenas 
+ o aplicativo, garantindo que o sistema mostre o aplicativo apenas
 em modo de tela inteira.
 </p>
 

@@ -7,8 +7,8 @@ next.title=Determining and Monitoring the Docking State and Type
 next.link=docking-monitoring.html
 
 @jd:body
- 
-<div id="tb-wrapper"> 
+
+<div id="tb-wrapper">
 <div id="tb">
 
 <h2>Содержание урока</h2>
@@ -24,9 +24,9 @@ next.link=docking-monitoring.html
   <li><a href="{@docRoot}guide/components/intents-filters.html">Намерения и фильтры намерений</a>
 </ul>
 
-</div> 
 </div>
- 
+</div>
+
 <p>Если вы хотите изменить частоту фоновых обновлений, чтобы продлить время работы устройства от батареи, сначала рекомендуется проверить текущий уровень заряда и состояние зарядки.</p>
 
 <p>Именно от этих двух факторов зависит, как обновления повлияют на время работы устройства от батареи. Когда устройство подключено к сети переменного тока, приложение можно обновлять максимально часто, поскольку процесс обновления не будет сказываться на уровне заряда батареи. Если устройство не подключено к сети, следует воздержаться от обновлений, чтобы продлить время его работы от батареи.</p>
@@ -34,8 +34,8 @@ next.link=docking-monitoring.html
 <p>Если заряд батареи практически исчерпан, можно снизить частоту обновлений (вплоть до их полного прекращения).</p>
 
 
-<h2 id="DetermineChargeState">Определение текущего состояния зарядки</h2> 
- 
+<h2 id="DetermineChargeState">Определение текущего состояния зарядки</h2>
+
 <p>Начните с определения текущего состояния зарядки. {@link android.os.BatteryManager} передает все сведения о батарее и зарядке в закрепленном намерении {@link android.content.Intent}, которое содержит также информацию о состоянии зарядки.</p>
 
 <p>Поскольку это намерение является закрепленным, регистрировать {@link android.content.BroadcastReceiver} не нужно. Чтобы получить текущее состояние батареи в виде намерения, нужно вызвать {@code registerReceiver}, передав {@code null} в качестве приемника, как показано в коде ниже. Можно также передать фактический объект {@link android.content.BroadcastReceiver}, но это необязательно, поскольку обработка обновлений будет выполняться позднее.</p>
@@ -58,7 +58,7 @@ boolean acCharge = chargePlug == BATTERY_PLUGGED_AC;</pre>
 <p>Как правило, если устройство подключено к сети переменного тока, фоновые обновления можно выполнять с максимальной частотой. Если устройство заряжается через USB, частоту можно несколько сократить, а если устройство не подключено к сети&nbsp;– сократить еще больше.</p>
 
 
-<h2 id="MonitorChargeState">Отслеживание изменений состояния зарядки</h2> 
+<h2 id="MonitorChargeState">Отслеживание изменений состояния зарядки</h2>
 
 <p>Состояние зарядки изменяется всякий раз, когда пользователь подключает устройство к источнику питания. Поскольку это случается довольно часто, важно отслеживать изменения этого состояния и соответствующим образом корректировать частоту обновления приложения.</p>
 
@@ -75,11 +75,11 @@ boolean acCharge = chargePlug == BATTERY_PLUGGED_AC;</pre>
 
 <pre>public class PowerConnectionReceiver extends BroadcastReceiver {
     &#64;Override
-    public void onReceive(Context context, Intent intent) { 
+    public void onReceive(Context context, Intent intent) {
         int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
         boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
                             status == BatteryManager.BATTERY_STATUS_FULL;
-    
+
         int chargePlug = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
         boolean usbCharge = chargePlug == BATTERY_PLUGGED_USB;
         boolean acCharge = chargePlug == BATTERY_PLUGGED_AC;
@@ -87,7 +87,7 @@ boolean acCharge = chargePlug == BATTERY_PLUGGED_AC;</pre>
 }</pre>
 
 
-<h2 id="CurrentLevel">Определение текущего уровня заряда батареи</h2> 
+<h2 id="CurrentLevel">Определение текущего уровня заряда батареи</h2>
 
 <p>В некоторых случаях целесообразно определять текущий уровень заряда батареи. Если он ниже определенного значения, частоту фоновых обновлений следует уменьшить.</p>
 
@@ -99,7 +99,7 @@ int scale = battery.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
 float batteryPct = level / (float)scale;</pre>
 
 
-<h2 id="MonitorLevel">Отслеживание существенных изменений уровня заряда батареи</h2> 
+<h2 id="MonitorLevel">Отслеживание существенных изменений уровня заряда батареи</h2>
 
 <p>Отслеживать состояние батареи непрерывно не следует,</p>
 

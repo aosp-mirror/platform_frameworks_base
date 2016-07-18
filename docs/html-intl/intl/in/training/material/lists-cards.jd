@@ -83,7 +83,7 @@ android.support.v7.widget.RecyclerView.LayoutManager RecyclerView.LayoutManager}
 <h3>Animasi</h3>
 
 <p>Animasi untuk menambahkan dan menghapus item diaktifkan secara default di {@link
-android.support.v7.widget.RecyclerView}. Untuk menyesuaikan animasi ini, perluas kelas 
+android.support.v7.widget.RecyclerView}. Untuk menyesuaikan animasi ini, perluas kelas
 {@link android.support.v7.widget.RecyclerView.ItemAnimator RecyclerView.ItemAnimator}dan gunakan
 metode {@link android.support.v7.widget.RecyclerView#setItemAnimator RecyclerView.setItemAnimator()}.
 </p>
@@ -253,7 +253,7 @@ dalam layout:</p>
 
 <p>Widget {@link android.support.v7.widget.RecyclerView} dan {@link android.support.v7.widget.CardView}
 adalah bagian dari <a href="{@docRoot}tools/support-library/features.html#v7">v7 Support
-Library</a>. Untuk menggunakan widget dalam proyek Anda, tambahkan 
+Library</a>. Untuk menggunakan widget dalam proyek Anda, tambahkan
 <a href="{@docRoot}sdk/installing/studio-build.html#dependencies">dependensi Gradle</a> ini ke
 modul aplikasi Anda:</p>
 

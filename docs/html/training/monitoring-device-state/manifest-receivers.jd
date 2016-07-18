@@ -9,7 +9,7 @@ previous.link=connectivity-monitoring.html
 
 @jd:body
 
-<div id="tb-wrapper"> 
+<div id="tb-wrapper">
 <div id="tb">
 
 <h2>This lesson teaches you to</h2>
@@ -24,7 +24,7 @@ Efficiency</a></li>
   <li><a href="{@docRoot}guide/components/intents-filters.html">Intents and Intent Filters</a>
 </ul>
 
-</div> 
+</div>
 </div>
 
 <p>The simplest way to monitor device state changes is to create a {@link
@@ -38,10 +38,10 @@ receivers is triggered&mdash;potentially much more frequently than required.</p>
 <p>A better approach is to disable or enable the broadcast receivers at runtime. That way you can
 use the receivers you declared in the manifest as passive alarms that are triggered by system events
 only when necessary.</p>
- 
 
-<h2 id="ToggleReceivers">Toggle and Cascade State Change Receivers to Improve Efficiency </h2> 
- 
+
+<h2 id="ToggleReceivers">Toggle and Cascade State Change Receivers to Improve Efficiency </h2>
+
 <p>You can use the {@link android.content.pm.PackageManager} to toggle the enabled state on any
 component defined in the manifest, including whichever broadcast receivers you wish to enable or
 disable as shown in the snippet below:</p>
@@ -59,6 +59,6 @@ your receivers except the connectivity-change receiver. Conversely, once you are
 stop listening for connectivity changes and simply check to see if you're online immediately before
 performing an update and rescheduling a recurring update alarm.</p>
 
-<p>You can use the same technique to delay a download that requires higher bandwidth to complete.  
+<p>You can use the same technique to delay a download that requires higher bandwidth to complete.
 Simply enable a broadcast receiver that listens for connectivity changes and initiates the
 download only after you are connected to Wi-Fi.</p>

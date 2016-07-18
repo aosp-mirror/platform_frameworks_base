@@ -10,9 +10,9 @@ previous.link=screendensities.html
 
 
 <!-- This is the training bar -->
-<div id="tb-wrapper"> 
-<div id="tb"> 
- 
+<div id="tb-wrapper">
+<div id="tb">
+
 <h2>本教程将指导您</h2>
 
 <ol>
@@ -27,17 +27,17 @@ previous.link=screendensities.html
 <ul>
   <li><a href="{@docRoot}guide/practices/tablets-and-handsets.html">支持平板电脑和手持设备</a></li>
 </ul>
- 
+
 <h2>试试看</h2>
- 
+
 <div class="download-box">
 <a href="http://developer.android.com/shareables/training/NewsReader.zip" class="button">下载示例应用</a>
-<p class="filename">NewsReader.zip</p> 
-</div> 
- 
- 
-</div> 
-</div> 
+<p class="filename">NewsReader.zip</p>
+</div>
+
+
+</div>
+</div>
 
 <p>根据您的应用当前显示的布局，用户界面流程可能会有所不同。例如，如果您的应用处于双面板模式下，点击左侧面板上的项即可直接在右侧面板上显示相关内容；如果该应用处于单面板模式下，相关内容就应以其他活动的形式在同一面板上显示。</p>
 
@@ -56,7 +56,7 @@ public class NewsReaderActivity extends FragmentActivity {
         setContentView(R.layout.main_layout);
 
         View articleView = findViewById(R.id.article);
-        mIsDualPane = articleView != null &amp;&amp; 
+        mIsDualPane = articleView != null &amp;&amp;
                         articleView.getVisibility() == View.VISIBLE;
     }
 }
@@ -116,7 +116,7 @@ public void onCreate(Bundle savedInstanceState) {
     else {
         /* use list navigation (spinner) */
         actionBar.setNavigationMode(android.app.ActionBar.NAVIGATION_MODE_LIST);
-        SpinnerAdapter adap = new ArrayAdapter<String>(this, 
+        SpinnerAdapter adap = new ArrayAdapter<String>(this,
                 R.layout.headline_item, CATEGORIES);
         actionBar.setListNavigationCallbacks(adap, handler);
     }
@@ -168,7 +168,7 @@ public class HeadlinesFragment extends ListFragment {
 public class HeadlinesFragment extends ListFragment {
     ...
     &#64;Override
-    public void onItemClick(AdapterView&lt;?&gt; parent, 
+    public void onItemClick(AdapterView&lt;?&gt; parent,
                             View view, int position, long id) {
         if (null != mHeadlineSelectedListener) {
             mHeadlineSelectedListener.onHeadlineSelected(position);

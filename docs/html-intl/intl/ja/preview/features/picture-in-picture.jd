@@ -72,8 +72,8 @@ PIP をアプリに追加するには、PIP をサポートするアクティビ
 
 <h2 id="declaring">アクティビティがピクチャ イン ピクチャをサポートしていることを宣言する</h2>
 
-<p>デフォルトでは、システムはアプリの PIP を自動的にサポートしません。アプリで PIP をサポートする場合、マニフェストで 
-<code>android:supportsPictureInPicture</code> および 
+<p>デフォルトでは、システムはアプリの PIP を自動的にサポートしません。アプリで PIP をサポートする場合、マニフェストで
+<code>android:supportsPictureInPicture</code> および
 <code>android:resizeableActivity</code> を <code>true</code> に設定して、動画アクティビティを登録します。
 
 また、アクティビティがレイアウトの設定変更を処理するように指定して、PIP モードの遷移中にレイアウト変更が発生しても、アクティビティが再開しないようにします。
@@ -120,14 +120,14 @@ public void onActionClicked(Action action) {
 <p class="img-caption"><strong>図 1.</strong> メディア コントロール バー上の [Picture-in-picture] ボタン
 </p>
 
-<p>Android N には、新しい 
+<p>Android N には、新しい
 <code>PlaybackControlsRow.PictureInPictureAction</code> クラスが含まれています。このクラスは、コントロール バーの PIP アクションと PIP アイコンの使用方法を定義します。
 </p>
 
 <h2 id="handling_ui">ピクチャ イン ピクチャの実行中に UI を処理する</h2>
 
 <p>アクティビティが PIP モードを開始したら、動画の再生のみを表示する必要があります。
-アクティビティが PIP を開始する前に UI 要素を削除して、再び全画面表示に戻ったら、削除した要素を復元します。<code>Activity.onPictureInPictureModeChanged()</code> または 
+アクティビティが PIP を開始する前に UI 要素を削除して、再び全画面表示に戻ったら、削除した要素を復元します。<code>Activity.onPictureInPictureModeChanged()</code> または
 <code>Fragment.onPictureInPictureModeChanged()</code> をオーバーライドして、必要に応じて UI 要素を有効または無効にします。次に例を示します。
 
 
@@ -152,7 +152,7 @@ public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode) {
 <p>アクティビティを PIP に切り替えると、システムはそのアクティビティを一時停止状態と見なして、アクティビティの <code>onPause()</code> メソッドを呼び出します。
 PIP モードによってアクティビティが一時停止になっても、動画の再生は一時停止せず、再生を続ける必要があります。
 
-アクティビティの 
+アクティビティの
 <code>onPause()</code> メソッドで PIP を確認し、適切に再生を処理してください。次に例を示します。
 </p>
 
@@ -180,7 +180,7 @@ public void onPause() {
 
 </p>
 
-<p>動画再生リクエストに対して単一のアクティビティが使用されるようにし、必要に応じて PIP モードの切り替えが行われるようにするには、マニフェストでアクティビティの 
+<p>動画再生リクエストに対して単一のアクティビティが使用されるようにし、必要に応じて PIP モードの切り替えが行われるようにするには、マニフェストでアクティビティの
 <code>android:launchMode</code> を <code>singleTask</code> に設定します。
 
 </p>

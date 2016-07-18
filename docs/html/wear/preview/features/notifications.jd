@@ -155,7 +155,7 @@ action in the notification unless a different action is specified using
 <p>If you have a chat messaging app, your notifications should use
 <a href="{@docRoot}preview/features/notification-updates.html#style">{@code Notification.MessagingStyle}</a>,
  which is new in Android N. Wear 2.0 uses the chat messages included
-  in a <a href="{@docRoot}preview/features/notification-updates.html#style">{@code MessagingStyle}</a> notification 
+  in a <a href="{@docRoot}preview/features/notification-updates.html#style">{@code MessagingStyle}</a> notification
 
   (see <a href="{@docRoot}preview/features/notification-updates.html#style">{@code addMessage()}</a>) to provide
   a rich chat app-like experience in the expanded notification.
@@ -195,7 +195,7 @@ following:
   <li>Use <a href="{@docRoot}preview/features/notification-updates.html#style">{@code Notification.MessagingStyle}</a>.
   </li>
   <li>Call the method {@code setAllowGeneratedReplies()} for the notification action.
-  For more information, see the downloadable 
+  For more information, see the downloadable
   <a href="{@docRoot}preview/setup-sdk.html#docs-dl">API reference</a>.
   </li>
   <li>Ensure that the notification action has a

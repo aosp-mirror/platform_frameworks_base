@@ -173,7 +173,7 @@ page.metaDescription=將您的應用程式、遊戲與內容散佈至 Android �
 <h3 id="track_review">5.追蹤您的檢閱與核准</h3>
 
 <p>
-  若您的應用程式符合 Android 電視的技術與品質準則 (如上所述)，則會向 Android 電視的使用者提供您的應用程式。若您的應用程式不符合該準則，您將收到<strong>傳送至您開發人員帳戶地址的通知電子郵件</strong>，內含需要修正的領域的摘要。若您已進行所需調整，可以將新版本的應用程式上傳至 Developer Console。 
+  若您的應用程式符合 Android 電視的技術與品質準則 (如上所述)，則會向 Android 電視的使用者提供您的應用程式。若您的應用程式不符合該準則，您將收到<strong>傳送至您開發人員帳戶地址的通知電子郵件</strong>，內含需要修正的領域的摘要。若您已進行所需調整，可以將新版本的應用程式上傳至 Developer Console。
 </p>
 
 <p>
@@ -190,7 +190,7 @@ page.metaDescription=將您的應用程式、遊戲與內容散佈至 Android �
   </li>
 
   <li>
-    <em>已核准</em> - 已檢閱並核准您的應用程式。會直接向 Android 電視使用者提供該應用程式。 
+    <em>已核准</em> - 已檢閱並核准您的應用程式。會直接向 Android 電視使用者提供該應用程式。
   </li>
 
   <li>
@@ -207,4 +207,4 @@ page.metaDescription=將您的應用程式、遊戲與內容散佈至 Android �
     data-query="collection:tvlanding"
     data-cardSizes="9x6, 6x3x2"
     data-maxResults="6">
-  </div> 
+  </div>

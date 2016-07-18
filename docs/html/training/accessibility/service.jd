@@ -67,7 +67,7 @@ public class MyAccessibilityService extends AccessibilityService {
 
 <p>Like any other service, you also declare it in the manifest file.
 Remember to specify that it handles the {@code android.accessibilityservice} intent,
-so that the service is called when applications fire an 
+so that the service is called when applications fire an
 {@link android.view.accessibility.AccessibilityEvent}.</p>
 
 <pre>

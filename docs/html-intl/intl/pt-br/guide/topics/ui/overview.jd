@@ -4,12 +4,12 @@ page.title=Visão geral da IU
 
 <p>Todos os elementos da interface do usuário em um aplicativo para Android são criados usando objetos {@link android.view.View} e
 {@link android.view.ViewGroup}. Uma {@link android.view.View} é um objeto que desenha
-algo na tela com o qual o usuário pode interagir. Um {@link android.view.ViewGroup} é um 
+algo na tela com o qual o usuário pode interagir. Um {@link android.view.ViewGroup} é um
 objeto que contém outros objetos {@link android.view.View} (e {@link android.view.ViewGroup}) para
 definir o layout da interface.</p>
 
 <p>O Android fornece uma coleção de subclasses {@link android.view.View} e {@link
-android.view.ViewGroup} que oferecem controles de entrada comuns (como botões e campos de 
+android.view.ViewGroup} que oferecem controles de entrada comuns (como botões e campos de
 texto) e vários modelos de layout (como um layout linear ou relativo).</p>
 
 
@@ -30,7 +30,7 @@ de uma IU.</p>
 criar uma árvore. Mas a forma mais fácil e efetiva de definir o layout é com um arquivo XML.
 O XML oferece uma estrutura legível por humanos para o layout, similar a HTML.</p>
 
-<p>O nome de um elemento XML para uma vista é respectivo à classe do Android que ele representa. Portanto, um elemento 
+<p>O nome de um elemento XML para uma vista é respectivo à classe do Android que ele representa. Portanto, um elemento
 <code>&lt;TextView&gt;</code> cria um widget {@link android.widget.TextView} na IU
 e um elemento <code>&lt;LinearLayout&gt;</code> cria um grupo de vistas de {@link android.widget.LinearLayout}
 . </p>
@@ -39,7 +39,7 @@ e um elemento <code>&lt;LinearLayout&gt;</code> cria um grupo de vistas de {@lin
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?>
 &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="fill_parent" 
+              android:layout_width="fill_parent"
               android:layout_height="fill_parent"
               android:orientation="vertical" >
     &lt;TextView android:id="@+id/text"
@@ -60,7 +60,7 @@ layout.</p>
 <p>Para obter um guia completo para criar um layout de IU, consulte <a href="declaring-layout.html">Layouts
 XML</a>.
 
-  
+
 <h2 id="UIComponents">Componentes da interface do usuário</h2>
 
 <p>Você não precisa criar toda a IU usando objetos {@link android.view.View} e {@link

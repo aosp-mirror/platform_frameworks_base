@@ -150,7 +150,7 @@ public void onPictureInPictureChanged(boolean inPictureInPicture) {
 <p>當您的活動切換到 PIP 時，系統會將活動視為暫停狀態並呼叫您活動的 <code>onPause()</code> 方法。
 影片播放不應該暫停，而且活動因為 PIP 模式而暫停時，影片應該繼續播放。
 
-查看您活動的 
+查看您活動的
 <code>onPause()</code> 方法中的 PIP 並適當地處理播放，例如：
 </p>
 

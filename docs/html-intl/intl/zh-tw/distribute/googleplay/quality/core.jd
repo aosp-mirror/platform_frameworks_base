@@ -13,7 +13,7 @@ page.image=/distribute/images/core-quality-guidelines.jpg
         <li><a href="#listing">Google Play</a></li>
 
   </ol>
-  
+
   <h2>測試</h2>
   <ol>
     <li><a href="#test-environment">設定測試環境</a></li>
@@ -25,7 +25,7 @@ page.image=/distribute/images/core-quality-guidelines.jpg
     <li><a href="{@docRoot}distribute/essentials/quality/tablets.html">平板電腦應用程式品質</a></li>
         <li><a href="{@docRoot}distribute/essentials/optimizing-your-app.html">最佳化您的應用程式</a></li>
   </ol>
-  
+
 
 </div>
 </div>
@@ -70,7 +70,7 @@ page.image=/distribute/images/core-quality-guidelines.jpg
     <th style="width:54px;">
       ID
     </th>
-    
+
 
     <th>
       描述
@@ -1011,4 +1011,4 @@ data-cardsizes="6x3,6x3,6x3,6x3,6x3,6x3" data-maxresults="6">
 
 <p>
   請確保使用{@link android.os.StrictMode.ThreadPolicy.Builder#penaltyFlashScreen() penaltyFlashScreen()}針對 <code>ThreadPolicy</code> 啟用政策違犯的<strong>視覺通知</strong>。
-</p> 
+</p>

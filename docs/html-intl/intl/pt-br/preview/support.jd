@@ -101,7 +101,7 @@ page.image=images/cards/card-n-support_2x.png
  desenvolvedores a capacidade de projetar experiências de RV móveis de alta qualidade para os usuários. Há
  diversas melhorias de desempenho, incluindo o acesso a um núcleo exclusivo da CPU
  para aplicativos de RV. Dentro dos aplicativos, é possível aproveitar o rastreamento inteligente
- da cabeça e notificações estéreo que funcionam para RV. Mais importante, 
+ da cabeça e notificações estéreo que funcionam para RV. Mais importante,
 o Android N oferece gráficos de latência muito baixa.
 </p>
 
@@ -112,7 +112,7 @@ o Android N oferece gráficos de latência muito baixa.
 <h4 id="">Modo de desempenho sustentado</h4>
 
 <p>
-  O Android N inclui compatibilidade opcional para <a href="{@docRoot}preview/api-overview.html#sustained_performance_api">modo de desempenho 
+  O Android N inclui compatibilidade opcional para <a href="{@docRoot}preview/api-overview.html#sustained_performance_api">modo de desempenho
 sustentado</a>, permitindo que OEMs ofereçam dicas sobre
  capacidades de desempenho do dispositivo para aplicativos de longa duração. Desenvolvedores de aplicativos podem usar
  essas dicas para ajustar os aplicativos para um nível de
@@ -143,7 +143,7 @@ sustentado</a>, permitindo que OEMs ofereçam dicas sobre
   No Android N, o usuário pode pressionar <code>Meta+/</code> para acionar uma tela de <strong>atalhos
  de teclado</strong> que exibe todos os atalhos disponíveis do
  sistema e do aplicativo em questão. Os desenvolvedores podem adicionar os próprios atalhos ou
- ativar a tela de atalhos nos aplicativos. Consulte o <a href="{@docRoot}preview/api-overview.html#keyboard_shortcuts_helper">Auxiliar de 
+ ativar a tela de atalhos nos aplicativos. Consulte o <a href="{@docRoot}preview/api-overview.html#keyboard_shortcuts_helper">Auxiliar de
 atalhos de teclado</a> para saber mais.
 </p>
 
@@ -223,7 +223,7 @@ API</a>
   <dd>
     Agora o sistema usa os metadados da atividade para decidir o modo do bloco.
     (Anteriormente, o modo do bloco era determinado pelo valor de retorno do
- <code>TileService.onTileAdded()</code>.) Para obter mais informações, consulte 
+ <code>TileService.onTileAdded()</code>.) Para obter mais informações, consulte
 <code>TileService.META_DATA_ACTIVE_TILE</code> na <a href="{@docRoot}preview/setup-sdk.html#docs-dl">Referência da API</a>, disponível para download.
   </dd>
 </dl>
@@ -604,7 +604,7 @@ issue tracker</a>.</p>
  problemas podem aumentar com o uso prolongado.
       </li>
 
-      <li>A vida útil da bateria pode regredir nesta versão em casos de uso de ligar e 
+      <li>A vida útil da bateria pode regredir nesta versão em casos de uso de ligar e
  desligar a tela.
       </li>
     </ul>
@@ -857,7 +857,7 @@ issue tracker</a>.</p>
  problemas podem aumentar com o uso prolongado.
   </li>
 
-  <li>A vida útil da bateria pode regredir nesta versão em casos de uso de ligar e 
+  <li>A vida útil da bateria pode regredir nesta versão em casos de uso de ligar e
  desligar a tela.
   </li>
 
@@ -885,7 +885,7 @@ issue tracker</a>.</p>
  problemas podem aumentar com o uso prolongado.
   </li>
 
-  <li>A vida útil da bateria pode regredir nesta versão em casos de uso de ligar e 
+  <li>A vida útil da bateria pode regredir nesta versão em casos de uso de ligar e
  desligar a tela.
   </li>
 </ul>
@@ -966,7 +966,7 @@ issue tracker</a>.</p>
   <li>Always on VPN
     <ul>
       <li>Se o modo Always on VPN estiver ativado, mas uma VPN não estiver disponível, os aplicativos
- não especificados como exceções na política Always on se conectarão via 
+ não especificados como exceções na política Always on se conectarão via
  rede comum. Exceto quando especificados como exceções na política Always on,
  os aplicativos deverão ficar off-line se não houver nenhuma conexão VPN disponível.
         <ul>
@@ -1124,7 +1124,7 @@ issue tracker</a>.</p>
  desenvolvedor do aplicativo.
   </li>
 
-  <li>Quando o aplicativo é destinado para uma versão da plataforma Android anterior ao N, 
+  <li>Quando o aplicativo é destinado para uma versão da plataforma Android anterior ao N,
  ele pode não funcionar com avisos de tela dividida que aparecem diversas vezes.
   </li>
 

@@ -60,23 +60,23 @@ layar ikhtisar. Selain itu, atribut <code><a href="{@docRoot}guide/topics/manife
 <h2 id="adding">Menambahkan Tugas ke Layar Ikhtisar</h2>
 
 <p>Penggunaan flag kelas {@link android.content.Intent} untuk menambahkan tugas memberi kontrol lebih besar
-atas waktu dan cara dokumen dibuka atau dibuka kembali di layar ikhtisar. Bila menggunakan atribut 
+atas waktu dan cara dokumen dibuka atau dibuka kembali di layar ikhtisar. Bila menggunakan atribut
 <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
-, Anda dapat memilih antara selalu membuka dokumen dalam tugas baru atau menggunakan kembali tugas 
+, Anda dapat memilih antara selalu membuka dokumen dalam tugas baru atau menggunakan kembali tugas
 yang ada untuk dokumen tersebut.</p>
 
 <h3 id="flag-new-doc">Menggunakan flag Intent untuk menambahkan tugas</h3>
 
-<p>Bila membuat dokumen baru untuk aktivitas, Anda memanggil metode 
+<p>Bila membuat dokumen baru untuk aktivitas, Anda memanggil metode
 {@link android.app.ActivityManager.AppTask#startActivity(android.content.Context, android.content.Intent, android.os.Bundle) startActivity()}
- dari kelas {@link android.app.ActivityManager.AppTask}, dengan meneruskannya ke intent yang 
+ dari kelas {@link android.app.ActivityManager.AppTask}, dengan meneruskannya ke intent yang
 menjalankan aktivitas tersebut. Untuk menyisipkan jeda logis agar sistem memperlakukan aktivitas Anda sebagai tugas
-baru di layar ikhtisar, teruskan flag {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT} 
+baru di layar ikhtisar, teruskan flag {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT}
 dalam metode {@link android.content.Intent#addFlags(int) addFlags()} dari {@link android.content.Intent}
 yang memulai aktivitas itu.</p>
 
 <p class="note"><strong>Catatan:</strong> Flag {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT}
-menggantikan flag {@link android.content.Intent#FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET}, 
+menggantikan flag {@link android.content.Intent#FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET},
 yang tidak digunakan lagi pada Android 5.0 (API level 21).</p>
 
 <p>Jika Anda menetapkan flag {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK} saat membuat
@@ -169,18 +169,18 @@ bila pengguna membuka dokumen dengan aplikasi:</p>
 
   <dt>"{@code none”}"</dt>
   <dd>Aktivitas ini tidak membuat tugas baru untuk dokumen. Layar ikhtisar memperlakukan
- aktivitas seperti itu secara default: satu tugas ditampilkan untuk aplikasi, yang 
+ aktivitas seperti itu secara default: satu tugas ditampilkan untuk aplikasi, yang
 dilanjutkan dari aktivitas apa pun yang terakhir dipanggil pengguna.</dd>
 
   <dt>"{@code never}"</dt>
   <dd>Aktivitas ini tidak membuat tugas baru untuk dokumen. Mengatur nilai ini akan mengesampingkan
  perilaku flag {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT}
- dan {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK}, jika salah satunya ditetapkan di 
+ dan {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK}, jika salah satunya ditetapkan di
 intent, dan layar ikhtisar menampilkan satu tugas untuk aplikasi, yang dilanjutkan dari
  aktivitas apa pun yang terakhir dipanggil pengguna.</dd>
 </dl>
 
-<p class="note"><strong>Catatan:</strong> Untuk nilai selain {@code none} dan {@code never}, 
+<p class="note"><strong>Catatan:</strong> Untuk nilai selain {@code none} dan {@code never},
 aktivitas harus didefinisikan dengan {@code launchMode="standard"}. Jika atribut ini tidak ditetapkan, maka
 {@code documentLaunchMode="none"} akan digunakan.</p>
 
@@ -219,8 +219,8 @@ public void onRemoveFromRecents(View view) {
 </pre>
 
 <p class="note"><strong>Catatan:</strong> Penggunaan metode
-{@link android.app.ActivityManager.AppTask#finishAndRemoveTask() finishAndRemoveTask()} 
-akan mengesampingkan penggunaan tag {@link android.content.Intent#FLAG_ACTIVITY_RETAIN_IN_RECENTS}, seperti 
+{@link android.app.ActivityManager.AppTask#finishAndRemoveTask() finishAndRemoveTask()}
+akan mengesampingkan penggunaan tag {@link android.content.Intent#FLAG_ACTIVITY_RETAIN_IN_RECENTS}, seperti
 dibahas di bawah ini.</p>
 
 <h3 id="#retain-finished">Mempertahankan tugas yang telah selesai</h3>

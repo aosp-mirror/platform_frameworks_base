@@ -32,7 +32,7 @@ page.tags=alertdialog,dialogfragment
       <li>{@link android.app.DialogFragment}</li>
       <li>{@link android.app.AlertDialog}</li>
     </ol>
-    
+
     <h2>See also</h2>
     <ol>
       <li><a href="{@docRoot}design/building-blocks/dialogs.html">Dialogs design guide</a></li>
@@ -238,8 +238,8 @@ AlertDialog dialog = builder.create();
 </pre>
 
 <p>The <code>set...Button()</code> methods require a title for the button (supplied
-by a <a href="{@docRoot}guide/topics/resources/string-resource.html">string resource</a>) and a 
-{@link android.content.DialogInterface.OnClickListener} that defines the action to take 
+by a <a href="{@docRoot}guide/topics/resources/string-resource.html">string resource</a>) and a
+{@link android.content.DialogInterface.OnClickListener} that defines the action to take
 when the user presses the button.</p>
 
 <p>There are three different action buttons you can add:</p>
@@ -251,7 +251,7 @@ when the user presses the button.</p>
   <dt>Neutral</dt>
   <dd>You should use this when the user may not want to proceed with the action,
   but doesn't necessarily want to cancel. It appears between the positive and negative
-  buttons. For example, the action might be "Remind me later."</dd> 
+  buttons. For example, the action might be "Remind me later."</dd>
 </dl>
 
 <p>You can add only one of each button type to an {@link
@@ -274,7 +274,7 @@ A dialog with a title and list.</p>
 <li>A persistent multiple-choice list (checkboxes)</li>
 </ul>
 
-<p>To create a single-choice list like the one in figure 3, 
+<p>To create a single-choice list like the one in figure 3,
 use the {@link android.app.AlertDialog.Builder#setItems setItems()} method:</p>
 
 <pre style="clear:right">
@@ -294,7 +294,7 @@ public Dialog onCreateDialog(Bundle savedInstanceState) {
 
 <p>Because the list appears in the dialog's content area,
 the dialog cannot show both a message and a list and you should set a title for the
-dialog with {@link android.app.AlertDialog.Builder#setTitle setTitle()}. 
+dialog with {@link android.app.AlertDialog.Builder#setTitle setTitle()}.
 To specify the items for the list, call {@link
 android.app.AlertDialog.Builder#setItems setItems()}, passing an array.
 Alternatively, you can specify a list using {@link
@@ -320,11 +320,11 @@ A list of multiple-choice items.</p>
 
 <h4 id="Checkboxes">Adding a persistent multiple-choice or single-choice list</h4>
 
-<p>To add a list of multiple-choice items (checkboxes) or 
+<p>To add a list of multiple-choice items (checkboxes) or
 single-choice items (radio buttons), use the
 {@link android.app.AlertDialog.Builder#setMultiChoiceItems(Cursor,String,String,
-DialogInterface.OnMultiChoiceClickListener) setMultiChoiceItems()} or 
-{@link android.app.AlertDialog.Builder#setSingleChoiceItems(int,int,DialogInterface.OnClickListener) 
+DialogInterface.OnMultiChoiceClickListener) setMultiChoiceItems()} or
+{@link android.app.AlertDialog.Builder#setSingleChoiceItems(int,int,DialogInterface.OnClickListener)
 setSingleChoiceItems()} methods, respectively.</p>
 
 <p>For example, here's how you can create a multiple-choice list like the
@@ -349,7 +349,7 @@ public Dialog onCreateDialog(Bundle savedInstanceState) {
                        // If the user checked the item, add it to the selected items
                        mSelectedItems.add(which);
                    } else if (mSelectedItems.contains(which)) {
-                       // Else, if the item is already in the array, remove it 
+                       // Else, if the item is already in the array, remove it
                        mSelectedItems.remove(Integer.valueOf(which));
                    }
                }
@@ -376,7 +376,7 @@ public Dialog onCreateDialog(Bundle savedInstanceState) {
 
 <p>Although both a traditional list and a list with radio buttons
 provide a "single choice" action, you should use {@link
-android.app.AlertDialog.Builder#setSingleChoiceItems(int,int,DialogInterface.OnClickListener) 
+android.app.AlertDialog.Builder#setSingleChoiceItems(int,int,DialogInterface.OnClickListener)
 setSingleChoiceItems()} if you want to persist the user's choice.
 That is, if opening the dialog again later should indicate what the user's current choice is,
 then you create a list with radio buttons.</p>
@@ -445,7 +445,7 @@ you should change its font family to {@code "sans-serif"} so that both text fiel
 a matching font style.</p>
 
 <p>To inflate the layout in your {@link android.support.v4.app.DialogFragment},
-get a {@link android.view.LayoutInflater} with 
+get a {@link android.view.LayoutInflater} with
 {@link android.app.Activity#getLayoutInflater()} and call
 {@link android.view.LayoutInflater#inflate inflate()}, where the first parameter
 is the layout resource ID and the second parameter is a parent view for the layout.
@@ -473,7 +473,7 @@ public Dialog onCreateDialog(Bundle savedInstanceState) {
                public void onClick(DialogInterface dialog, int id) {
                    LoginDialogFragment.this.getDialog().cancel();
                }
-           });      
+           });
     return builder.create();
 }
 </pre>
@@ -508,7 +508,7 @@ interface through which it delivers the events back to the host activity:</p>
 
 <pre>
 public class NoticeDialogFragment extends DialogFragment {
-    
+
     /* The activity that creates an instance of this dialog fragment must
      * implement this interface in order to receive event callbacks.
      * Each method passes the DialogFragment in case the host needs to query it. */
@@ -516,10 +516,10 @@ public class NoticeDialogFragment extends DialogFragment {
         public void onDialogPositiveClick(DialogFragment dialog);
         public void onDialogNegativeClick(DialogFragment dialog);
     }
-    
+
     // Use this instance of the interface to deliver action events
     NoticeDialogListener mListener;
-    
+
     // Override the Fragment.onAttach() method to instantiate the NoticeDialogListener
     &#64;Override
     public void onAttach(Activity activity) {
@@ -546,7 +546,7 @@ events through an implementation of the {@code NoticeDialogListener} interface:<
 public class MainActivity extends FragmentActivity
                           implements NoticeDialogFragment.NoticeDialogListener{
     ...
-    
+
     public void showNoticeDialog() {
         // Create an instance of the dialog fragment and show it
         DialogFragment dialog = new NoticeDialogFragment();
@@ -659,7 +659,7 @@ public class CustomDialogFragment extends DialogFragment {
         // Inflate the layout to use as dialog or embedded fragment
         return inflater.inflate(R.layout.purchase_items, container, false);
     }
-  
+
     /** The system calls this only when creating the layout in a dialog. */
     &#64;Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -681,7 +681,7 @@ or a fullscreen UI, based on the screen size:</p>
 public void showDialog() {
     FragmentManager fragmentManager = getSupportFragmentManager();
     CustomDialogFragment newFragment = new CustomDialogFragment();
-    
+
     if (mIsLargeLayout) {
         // The device is using a large layout, so show the fragment as a dialog
         newFragment.show(fragmentManager, "dialog");
@@ -781,7 +781,7 @@ android.support.v4.app.DialogFragment#onDismiss onDismiss()} method in your {@li
 android.support.v4.app.DialogFragment}.</p>
 
 <p>You can also <em>cancel</em> a dialog. This is a special event that indicates the user
-explicitly left the dialog without completing the task. This occurs if the user presses the 
+explicitly left the dialog without completing the task. This occurs if the user presses the
 <em>Back</em> button, touches the screen outside the dialog area,
 or if you explicitly call {@link android.app.Dialog#cancel()} on the {@link
 android.app.Dialog} (such as in response to a "Cancel" button in the dialog).</p>

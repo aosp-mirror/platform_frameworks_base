@@ -85,7 +85,7 @@ page.image=images/cards/card-n-support_2x.png
 
   <li>Developer Preview 3 está <strong>disponible en todos los dispositivos
   compatibles:</strong> Nexus 5X, Nexus 6, Nexus 6P, Nexus 9, Nexus Player, Pixel
-  C, General Mobile 4G (Android One) y Sony Xperia Z3 (modelos D6603 y 
+  C, General Mobile 4G (Android One) y Sony Xperia Z3 (modelos D6603 y
   D6653).
 
   </li>
@@ -123,7 +123,7 @@ page.image=images/cards/card-n-support_2x.png
 <h4>Multiprocess WebView</h4>
 
 <p>
-  Desde la versión 51 de Android N, WebView ejecutará contenido web en 
+  Desde la versión 51 de Android N, WebView ejecutará contenido web en
   procesos individuales de espacio aislado cuando se haya habilitado
   la opción "Multiprocess WebView". El equipo de WebView espera recibir comentarios sobre compatibilidad y
   rendimiento de tiempo de ejecución en N antes de habilitar Multiprocess WebView en
@@ -154,7 +154,7 @@ page.image=images/cards/card-n-support_2x.png
   que permite que una aplicación monitoree su rendimiento de representación de IU mediante la exposición de una
    transmisión de API Pub/Sub para transferir información sobre el intervalo de los fotogramas para la ventana actual
   de la aplicación. Puedes usar <code>FrameMetricsListener</code> para medir
-  el rendimiento de la IU del nivel de interacción en producción con una granularidad mayor y 
+  el rendimiento de la IU del nivel de interacción en producción con una granularidad mayor y
   sin la necesidad de contar con conexión USB.
 </p>
 
@@ -223,7 +223,7 @@ page.image=images/cards/card-n-support_2x.png
   <dd>
     Ahora, el sistema utiliza metadatos de la actividad para definir el modo de mosaico.
     (Antes, el valor de devolución de
-    <code>TileService.onTileAdded()</code> determinaba el modo de mosaico). Para obtener más información, consulta 
+    <code>TileService.onTileAdded()</code> determinaba el modo de mosaico). Para obtener más información, consulta
     <code>TileService.META_DATA_ACTIVE_TILE</code> en la <a href="{@docRoot}preview/setup-sdk.html#docs-dl">Referencia de la API</a> descargable.
   </dd>
 </dl>
@@ -686,9 +686,9 @@ seguimiento de problemas</a>.</p>
 <h4>OEM unlock</h4>
 
 <ul>
-  <li>En algunos dispositivos, <strong>Enable OEM unlock</strong> aparecerá inhabilitado en 
+  <li>En algunos dispositivos, <strong>Enable OEM unlock</strong> aparecerá inhabilitado en
   "Developer Options" al ejecutar DP2.<br>
-  <strong>Método alternativo:</strong> Apúntate para 
+  <strong>Método alternativo:</strong> Apúntate para
   el Programa Android Beta (si aún no lo has hecho) en
   <a href="https://www.google.com/android/beta" class="external-link">www.google.com/android/beta</a>. Luego, date de baja y acepta el
   paso a una versión anterior (OTA). Darse de baja hará que el dispositivo pase a la versión Android 6.0. Ahora deberías
@@ -764,7 +764,7 @@ seguimiento de problemas</a>.</p>
       <li>En la muestra multithreadCmdBuffer, {@code vkCmdClearColorImage()} falla cuando
       se ejecuta con el controlador N-DP2.</li>
       <li>Los valores de devolución de {@code vkGetPhysicalDeviceFormatProperties()} no configuran un valor
-      para {@code VkFormatProperties::linearTilingFeatures} que, como resultado, 
+      para {@code VkFormatProperties::linearTilingFeatures} que, como resultado,
       toma el valor de 0.</li>
       <li>Los anexos del búfer de fotogramas de punto flotante de Vulkan no se manejan de forma correcta.</li>
     </ul>
@@ -892,7 +892,7 @@ seguimiento de problemas</a>.</p>
 <h4 id="dialer">Teléfono</h4>
 
 <ul>
-  <li>La aplicación Teléfono no es compatible con el inicio directo. Este tema se abordará más adelante en 
+  <li>La aplicación Teléfono no es compatible con el inicio directo. Este tema se abordará más adelante en
   N Developer Preview.
   </li>
 
@@ -1021,7 +1021,7 @@ seguimiento de problemas</a>.</p>
       </li>
 
       <li>El primer registro en un perfil de trabajo tarda varios minutos en
-      completarse. Esto puede hacer que el dispositivo tarde más de lo normal en volverse 
+      completarse. Esto puede hacer que el dispositivo tarde más de lo normal en volverse
       visible en la API Play EMM.
       </li>
 

@@ -325,7 +325,7 @@ android:supportsPictureInPicture=["true" | "false"]
     <p class="note">
       <strong>Catatan:</strong> Mode gambar-dalam-gambar adalah kasus khusus pada
       mode multi-jendela. Jika <code>myActivity.isInPictureInPictureMode()</code>
-     mengembalikan nilai true, maka <code>myActivity.isInMultiWindowMode()</code> juga 
+     mengembalikan nilai true, maka <code>myActivity.isInMultiWindowMode()</code> juga
       mengembalikan nilai true.
     </p>
   </dd>

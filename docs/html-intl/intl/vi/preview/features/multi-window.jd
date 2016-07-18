@@ -33,7 +33,7 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
 
 <p>
   Nếu bạn dựng ứng dụng của bạn bằng N Preview SDK, bạn có thể cấu hình cách ứng dụng của bạn
-  xử lý hiển thị đa cửa sổ. Ví dụ, bạn có thể quy định 
+  xử lý hiển thị đa cửa sổ. Ví dụ, bạn có thể quy định
   các kích thước tối thiểu cho phép của hoạt động của bạn. Bạn cũng có thể vô hiệu hóa hiển thị đa cửa sổ cho
   ứng dụng của bạn, đảm bảo rằng hệ thống chỉ hiển thị ứng dụng của bạn trong chế độ
    toàn màn hình.
@@ -117,7 +117,7 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
 
 <p class="note">
   <strong>Lưu ý:</strong> Trong chế độ đa cửa sổ, một ứng dụng có thể trong trạng thái
-  tạm dừng và vẫn hiển thị với người dùng. Ứng dụng có thể cần tiếp tục 
+  tạm dừng và vẫn hiển thị với người dùng. Ứng dụng có thể cần tiếp tục
   các hoạt động của nó thậm chí trong khi đamg bị tạm dừng. Ví dụ, một ứng dụng phát video đang ở trong
   chế độ tạm dừng nhưng vẫn hiển thị thì sẽ tiếp tục hiển thị video của nó. Vì lý do
   này, chúng tôi đề nghị các hoạt động phát video <em>không</em> tạm dừng
@@ -129,13 +129,13 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
 
 <p>
   Khi người dùng đặt một ứng dụng vào trong chế độ đa cửa sổ, hệ thống sẽ thông báo về
-  hoạt động thay đổi cấu hình đó, như được quy định trong <a href="{@docRoot}guide/topics/resources/runtime-changes.html">Xử lý Thay đổi 
+  hoạt động thay đổi cấu hình đó, như được quy định trong <a href="{@docRoot}guide/topics/resources/runtime-changes.html">Xử lý Thay đổi
   Thời gian chạy</a>. Về cơ bản, thay đổi này có ngụ ý về vòng đời hoạt động tương tự
   vì khi hệ thống thông báo cho ứng dụng rằng thiết bị đã chuyển
   từ chế độ hướng dọc sang chế độ ngang, ngoại trừ trường hợp các kích thước của thiết bị
   đã được thay đổi thay vì chỉ bị hoán đổi. Như đã thảo luận trong phần <a href="{@docRoot}guide/topics/resources/runtime-changes.html">Xử lý Thay đổi
   Thời gian chạy</a>, hoạt động của bạn có thể tự xử lý thay đổi cấu hình này, hoặc nó
-  có thể cho phép hệ thống hủy hoạt động này và tạo lại nó với 
+  có thể cho phép hệ thống hủy hoạt động này và tạo lại nó với
   các kích thước mới.
 </p>
 
@@ -207,7 +207,7 @@ android:supportsPictureInPicture=["true" | "false"]
 <h3 id="layout">Thuộc tính bố trí</h3>
 
 <p>
-  Với Android N, phần tử bản kê khai <code>&lt;layout&gt;</code> 
+  Với Android N, phần tử bản kê khai <code>&lt;layout&gt;</code>
   có hỗ trợ một số thuộc tính sẽ ảnh hưởng đến cách hoạt động có hành vi như thế nào trong
   chế độ đa cửa sổ:
 </p>
@@ -244,7 +244,7 @@ android:supportsPictureInPicture=["true" | "false"]
 
   <dd>
     Chiều cao và chiều rộng tối thiểu cho hoạt động trong cả chế độ chia màn hình
-    và chế độ hình dạng tự do. Nếu người dùng di chuyển thanh phân chia trong chế độ chia màn hình 
+    và chế độ hình dạng tự do. Nếu người dùng di chuyển thanh phân chia trong chế độ chia màn hình
     để làm cho hoạt động nhỏ hơn mức tối thiểu quy định, hệ thống sẽ cắt xén
     hoạt động đó thành kích cỡ mà người dùng yêu cầu.
   </dd>
@@ -295,7 +295,7 @@ android:supportsPictureInPicture=["true" | "false"]
 
 <p>
   Các phương thức mới sau đây đã được thêm vào lớp {@link android.app.Activity}
-  để hỗ trợ hiển thị đa cửa sổ. Để biết chi tiết về mỗi phương thức, xem 
+  để hỗ trợ hiển thị đa cửa sổ. Để biết chi tiết về mỗi phương thức, xem
   <a href="{@docRoot}preview/setup-sdk.html#docs-dl">Tham chiếu N Preview SDK</a>.
 </p>
 
@@ -560,7 +560,7 @@ android:supportsPictureInPicture=["true" | "false"]
   </li>
 
   <li>Thực hiện một vài thao tác thay đổi kích cỡ nối tiếp nhau thật nhanh. Xác minh rằng ứng dụng
-  của bạn không bị lỗi hoặc bị rò rỉ bộ nhớ. Để biết thông tin về kiểm tra việc sử dụng bộ nhớ của 
+  của bạn không bị lỗi hoặc bị rò rỉ bộ nhớ. Để biết thông tin về kiểm tra việc sử dụng bộ nhớ của
   ứng dụng, xem <a href="{@docRoot}tools/debugging/debugging-memory.html">
   Kiểm tra Sử dụng RAM của bạn</a>.
   </li>

@@ -168,7 +168,7 @@ cần chụp ảnh có thể kích hoạt ứng dụng Camera, ứng dụng này
 thông tin và tất cả hành động liên kết mà người dùng có thể thực hiện. Ứng dụng của bạn là tập hợp
 của nhiều hoạt động, bao gồm cả hoạt động do bạn tạo và hoạt động mà bạn sử dụng lại từ các ứng dụng khác.</p>
 
-<p><strong>Tác vụ</strong> là trình tự các hoạt động mà một người dùng tuân theo để hoàn thành một mục tiêu. 
+<p><strong>Tác vụ</strong> là trình tự các hoạt động mà một người dùng tuân theo để hoàn thành một mục tiêu.
 Tác vụ đơn có thể sử dụng các hoạt động từ chỉ một ứng dụng, hoặc có thể dựa trên hoạt động từ nhiều
 ứng dụng khác nhau.</p>
 

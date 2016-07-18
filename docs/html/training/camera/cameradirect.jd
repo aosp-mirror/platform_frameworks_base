@@ -11,7 +11,7 @@ previous.link=videobasics.html
 
 <div id="tb-wrapper">
   <div id="tb">
-    
+
     <h2>This lesson teaches you to</h2>
     <ol>
       <li><a href="#TaskOpenCamera">Open the Camera Object</a></li>
@@ -22,7 +22,7 @@ previous.link=videobasics.html
       <li><a href="#TaskRestartPreview">Restart the Preview</a></li>
       <li><a href="#TaskReleaseCamera">Stop the Preview and Release the Camera</a></li>
     </ol>
-    
+
     <h2>You should also read</h2>
     <ul>
       <li><a href="{@docRoot}guide/topics/media/camera.html#custom-camera">Building
@@ -57,7 +57,7 @@ in a {@code try} block.</p>
 <pre>
 private boolean safeCameraOpen(int id) {
     boolean qOpened = false;
-  
+
     try {
         releaseCameraAndPreview();
         mCamera = Camera.open(id);
@@ -67,7 +67,7 @@ private boolean safeCameraOpen(int id) {
         e.printStackTrace();
     }
 
-    return qOpened;    
+    return qOpened;
 }
 
 private void releaseCameraAndPreview() {
@@ -136,22 +136,22 @@ surfaceChanged()} callback method.</p>
 <pre>
 public void setCamera(Camera camera) {
     if (mCamera == camera) { return; }
-    
+
     stopPreviewAndFreeCamera();
-    
+
     mCamera = camera;
-    
+
     if (mCamera != null) {
         List&lt;Size> localSizes = mCamera.getParameters().getSupportedPreviewSizes();
         mSupportedPreviewSizes = localSizes;
         requestLayout();
-      
+
         try {
             mCamera.setPreviewDisplay(mHolder);
         } catch (IOException e) {
             e.printStackTrace();
         }
-      
+
         // Important: Call startPreview() to start updating the preview
         // surface. Preview must be started before you can take a picture.
         mCamera.startPreview();
@@ -260,12 +260,12 @@ private void stopPreviewAndFreeCamera() {
     if (mCamera != null) {
         // Call stopPreview() to stop updating the preview surface.
         mCamera.stopPreview();
-    
+
         // Important: Call release() to release the camera for use by other
         // applications. Applications should release the camera immediately
         // during onPause() and re-open() it during onResume()).
         mCamera.release();
-    
+
         mCamera = null;
     }
 }

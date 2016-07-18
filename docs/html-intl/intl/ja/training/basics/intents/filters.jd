@@ -152,7 +152,7 @@ android.app.Activity#startActivityForResult startActivityForResult()} メソッ�
 <p>アクティビティで実行するアクションを決定するために、起動時に使用された {@link
 android.content.Intent} を読み取ることができます。</p>
 
-<p>アクティビティが開始されたら、{@link android.app.Activity#getIntent()} を呼び出して、アクティビティを開始した 
+<p>アクティビティが開始されたら、{@link android.app.Activity#getIntent()} を呼び出して、アクティビティを開始した
 {@link android.content.Intent} を取得します。アクティビティのライフサイクル中はいつでもこれを行うことができますが、通常は、
 {@link android.app.Activity#onCreate onCreate()} や {@link android.app.Activity#onStart()} などの早い段階のコールバックの間に行う必要があります。
 </p>

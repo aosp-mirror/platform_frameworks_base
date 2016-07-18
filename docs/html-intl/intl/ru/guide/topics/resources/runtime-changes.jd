@@ -125,7 +125,7 @@ android.graphics.drawable.Drawable}, {@link android.widget.Adapter}, {@link andr
 означает, что приложение удерживает их, и система не может очистить от них память, поэтому
 может теряться значительный объем памяти).</p>
 
-<p>Затем используйте {@link android.app.FragmentManager} для добавления фрагмента в операцию. 
+<p>Затем используйте {@link android.app.FragmentManager} для добавления фрагмента в операцию.
 Можно получить объект данных из фрагмента, когда операция повторно запускается в результате изменения конфигурации
 в режиме выполнения. В качестве примера операция определена следующим образом:</p>
 
@@ -168,7 +168,7 @@ public class MyActivity extends Activity {
 <p>В этом примере {@link android.app.Activity#onCreate(Bundle) onCreate()} добавляет фрагмент
 или восстанавливает ссылку на него. Метод {@link android.app.Activity#onCreate(Bundle) onCreate()} также
 хранит объект, сохраняющий состояние, внутри экземпляра фрагмента.
-Метод {@link android.app.Activity#onDestroy() onDestroy()} обновляет объект, сохраняющий состояние, внутри 
+Метод {@link android.app.Activity#onDestroy() onDestroy()} обновляет объект, сохраняющий состояние, внутри
 сохраненного экземпляра фрагмента.</p>
 
 

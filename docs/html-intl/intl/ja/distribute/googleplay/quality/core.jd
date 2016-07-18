@@ -13,7 +13,7 @@ page.image=/distribute/images/core-quality-guidelines.jpg
         <li><a href="#listing">Google Play</a></li>
 
   </ol>
-  
+
   <h2>テスト</h2>
   <ol>
     <li><a href="#test-environment">テスト環境の設定</a></li>
@@ -25,7 +25,7 @@ page.image=/distribute/images/core-quality-guidelines.jpg
     <li><a href="{@docRoot}distribute/essentials/quality/tablets.html">タブレットのアプリ品質</a></li>
         <li><a href="{@docRoot}distribute/essentials/optimizing-your-app.html">アプリを最適化する</a></li>
   </ol>
-  
+
 
 </div>
 </div>
@@ -70,7 +70,7 @@ page.image=/distribute/images/core-quality-guidelines.jpg
     <th style="width:54px;">
       ID
     </th>
-    
+
 
     <th>
       説明
@@ -1011,4 +1011,4 @@ data-cardsizes="6x3,6x3,6x3,6x3,6x3,6x3" data-maxresults="6">
 
 <p>
   {@link android.os.StrictMode.ThreadPolicy.Builder#penaltyFlashScreen() penaltyFlashScreen()}  を使用して<code>ThreadPolicy</code> に対するポリシー違反の<strong>視覚通知</strong>を有効にします。
-</p> 
+</p>

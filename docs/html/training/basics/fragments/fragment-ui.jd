@@ -7,13 +7,13 @@ trainingnavtop=true
 @jd:body
 
 <div id="tb-wrapper">
-  <div id="tb"> 
+  <div id="tb">
     <h2>This lesson teaches you to</h2>
 <ol>
   <li><a href="#AddAtRuntime">Add a Fragment to an Activity at Runtime</a></li>
   <li><a href="#Replace">Replace One Fragment with Another</a></li>
 </ol>
-    
+
     <h2>You should also read</h2>
     <ul>
       <li><a href="{@docRoot}guide/components/fragments.html">Fragments</a></li>
@@ -52,14 +52,14 @@ remove, and replace fragments to an activity at runtime in order to create a dyn
 
 
 
-<h2 id="AddAtRuntime">Add a Fragment to an Activity at Runtime</h2> 
+<h2 id="AddAtRuntime">Add a Fragment to an Activity at Runtime</h2>
 
 <p>Rather than defining the fragments for an activity in the layout file&mdash;as shown in the
 <a href="creating.html">previous lesson</a> with the {@code <fragment>} element&mdash;you can add
 a fragment to the activity during the activity runtime. This is necessary
 if you plan to change fragments during the life of the activity.</p>
 
-<p>To perform a transaction such as add or 
+<p>To perform a transaction such as add or
 remove a fragment, you must use the {@link android.support.v4.app.FragmentManager} to create a
 {@link android.support.v4.app.FragmentTransaction}, which provides APIs to add, remove, replace,
 and perform other fragment transactions.</p>
@@ -126,11 +126,11 @@ public class MainActivity extends FragmentActivity {
 
             // Create a new Fragment to be placed in the activity layout
             HeadlinesFragment firstFragment = new HeadlinesFragment();
-            
+
             // In case this activity was started with special instructions from an
             // Intent, pass the Intent's extras to the fragment as arguments
             firstFragment.setArguments(getIntent().getExtras());
-            
+
             // Add the fragment to the 'fragment_container' FrameLayout
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.fragment_container, firstFragment).commit();

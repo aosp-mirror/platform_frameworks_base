@@ -8,13 +8,13 @@ trainingnavtop=true
 
 <div id="tb-wrapper">
   <div id="tb">
-    
+
     <h2>이 과정에서 다루는 내용</h2>
     <ol>
       <li><a href="#Stop">액티비티 정지하기</a></li>
       <li><a href="#Start">액티비티 시작/재시작하기</a></li>
     </ol>
-    
+
     <h2>필독 항목</h2>
     <ul>
       <li><a href="{@docRoot}guide/components/activities.html">액티비티</a>
@@ -152,13 +152,13 @@ android.app.Activity#onStart()}를 호출하기 때문입니다.</p>
 &#64;Override
 protected void onStart() {
     super.onStart();  // Always call the superclass method first
-    
+
     // The activity is either being restarted or started for the first time
     // so this is where we should make sure that GPS is enabled
-    LocationManager locationManager = 
+    LocationManager locationManager =
             (LocationManager) getSystemService(Context.LOCATION_SERVICE);
     boolean gpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-    
+
     if (!gpsEnabled) {
         // Create a dialog here that requests the user to enable GPS, and use an intent
         // with the android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS action
@@ -169,8 +169,8 @@ protected void onStart() {
 &#64;Override
 protected void onRestart() {
     super.onRestart();  // Always call the superclass method first
-    
-    // Activity being restarted from stopped state    
+
+    // Activity being restarted from stopped state
 }
 </pre>
 

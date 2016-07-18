@@ -33,13 +33,13 @@ durante la grabación y gestionar las sesiones grabadas.</p>
 
 <p class="note"><strong>Nota:</strong> La aplicación Live Channels todavía no
  permite que los usuarios creen grabaciones ni accedan a estas. Hasta que se realicen
- cambios en la aplicación Live Channels, es posible que sea difícil probar completamente la 
+ cambios en la aplicación Live Channels, es posible que sea difícil probar completamente la
 experiencia de grabación para tu servicio de entrada de TV.</p>
 
 <h2 id="supporting">Indicar la compatibilidad para la grabación</h2>
 
-<p>Para comunicarle al sistema que tu servicio de entrada de TV permite la grabación, configura el 
-atributo <code>android:canRecord</code> de tu archivo XML de metadatos de servicio 
+<p>Para comunicarle al sistema que tu servicio de entrada de TV permite la grabación, configura el
+atributo <code>android:canRecord</code> de tu archivo XML de metadatos de servicio
 en <code>true</code>:
 </p>
 
@@ -49,7 +49,7 @@ en <code>true</code>:
   android:setupActivity="com.example.sampletvinput.SampleTvInputSetupActivity" /&gt;
 </pre>
 
-<p>Para obtener más información sobre el archivo de metadatos de servicio, consulta 
+<p>Para obtener más información sobre el archivo de metadatos de servicio, consulta
 <a href="{@docRoot}training/tv/tif/tvinput.html#manifest">Declarar el servicio de entrada
  de TV en el manifiesto</a>.
 </p>
@@ -123,7 +123,7 @@ las aplicaciones de canal con funcionalidad de grabación en la tabla de proveed
 <code>RecordedPrograms.Uri</code>. Usa API de proveedor de contenido para
 leer, agregar y borrar entradas de esta tabla.</p>
 
-<p>Para obtener más información sobre cómo trabajar con datos del proveedor de contenido, consulta 
+<p>Para obtener más información sobre cómo trabajar con datos del proveedor de contenido, consulta
 <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
 Conceptos básicos sobre el proveedor de contenido</a>.</p>
 

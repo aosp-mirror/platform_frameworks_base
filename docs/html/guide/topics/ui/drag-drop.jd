@@ -978,7 +978,7 @@ protected class myDragEventListener implements View.OnDragListener {
                 Log.e("DragDrop Example","Unknown action type received by OnDragListener.");
                 break;
         }
-        
+
         return false;
     }
 };

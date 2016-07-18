@@ -297,7 +297,7 @@ public static void scheduleJob(Context context) {
   <dd>
     Mengembalikan larik URL yang telah memicu pekerjaan. Ini akan berupa {@code
     null} jika tidak ada URI yang memicu pekerjaan (misalnya, pekerjaan
-    dipicu karena batas waktu atau alasan lainnya), atau jumlah 
+    dipicu karena batas waktu atau alasan lainnya), atau jumlah
     URI yang berubah lebih dari 50.
   </dd>
 

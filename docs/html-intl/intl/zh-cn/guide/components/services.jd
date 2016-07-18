@@ -244,7 +244,7 @@ android.content.Context#startService startService()} 方法并传递 {@link andr
 {@link android.app.Service#onStartCommand
 onStartCommand()} 方法接收此 {@link android.content.Intent}。</p>
 
-<p>例如，假设某 Activity 需要将一些数据保存到在线数据库中。该 Activity 可以启动一个协同服务，并通过向 
+<p>例如，假设某 Activity 需要将一些数据保存到在线数据库中。该 Activity 可以启动一个协同服务，并通过向
 {@link
 android.content.Context#startService startService()} 传递一个 Intent，为该服务提供要保存的数据。服务通过
 {@link
