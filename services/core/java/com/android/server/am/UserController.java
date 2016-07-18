@@ -352,9 +352,15 @@ final class UserController {
                 final UserInfo info = getUserInfo(userId);
                 if (!Objects.equals(info.lastLoggedInFingerprint, Build.FINGERPRINT)) {
                     // Suppress double notifications for managed profiles that
-                    // were unlocked automatically (no challenge token required)
-                    // as part of their parent user being unlocked.
-                    final boolean quiet = info.isManagedProfile() && !uss.tokenProvided;
+                    // were unlocked automatically as part of their parent user
+                    // being unlocked.
+                    final boolean quiet;
+                    if (info.isManagedProfile()) {
+                        quiet = !uss.tokenProvided
+                                || !mLockPatternUtils.isSeparateProfileChallengeEnabled(userId);
+                    } else {
+                        quiet = false;
+                    }
                     new PreBootBroadcaster(mService, userId, null, quiet) {
                         @Override
                         public void onFinished() {
