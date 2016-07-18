@@ -109,6 +109,32 @@ static void collapseVersions(int minSdk, ResourceEntry* entry) {
                    [](const std::unique_ptr<ResourceConfigValue>& val) -> bool {
         return val == nullptr;
     }), entry->values.end());
+
+    // Strip the version qualifiers for every resource with version <= minSdk. This will ensure
+    // that the resource entries are all packed together in the same ResTable_type struct
+    // and take up less space in the resources.arsc table.
+    bool modified = false;
+    for (std::unique_ptr<ResourceConfigValue>& configValue : entry->values) {
+        if (configValue->config.sdkVersion != 0 && configValue->config.sdkVersion <= minSdk) {
+            // Override the resource with a Configuration without an SDK.
+            std::unique_ptr<ResourceConfigValue> newValue = util::make_unique<ResourceConfigValue>(
+                    configValue->config.copyWithoutSdkVersion(), configValue->product);
+            newValue->value = std::move(configValue->value);
+            configValue = std::move(newValue);
+
+            modified = true;
+        }
+    }
+
+    if (modified) {
+        // We've modified the keys (ConfigDescription) by changing the sdkVersion to 0.
+        // We MUST re-sort to ensure ordering guarantees hold.
+        std::sort(entry->values.begin(), entry->values.end(),
+                  [](const std::unique_ptr<ResourceConfigValue>& a,
+                     const std::unique_ptr<ResourceConfigValue>& b) -> bool {
+            return a->config.compare(b->config) < 0;
+        });
+    }
 }
 
 bool VersionCollapser::consume(IAaptContext* context, ResourceTable* table) {
