@@ -225,6 +225,8 @@ public class KeyguardIndicationController {
     }
 
     KeyguardUpdateMonitorCallback mUpdateMonitor = new KeyguardUpdateMonitorCallback() {
+        public int mLastSuccessiveErrorMessage = -1;
+
         @Override
         public void onRefreshBatteryInfo(KeyguardUpdateMonitor.BatteryStatus status) {
             boolean isChargingOrFull = status.status == BatteryManager.BATTERY_STATUS_CHARGING
@@ -252,6 +254,9 @@ public class KeyguardIndicationController {
                 mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_CLEAR_FP_MSG),
                         TRANSIENT_FP_ERROR_TIMEOUT);
             }
+            // Help messages indicate that there was actually a try since the last error, so those
+            // are not two successive error messages anymore.
+            mLastSuccessiveErrorMessage = -1;
         }
 
         @Override
@@ -263,15 +268,22 @@ public class KeyguardIndicationController {
             }
             int errorColor = mContext.getResources().getColor(R.color.system_warning_color, null);
             if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
-                mStatusBarKeyguardViewManager.showBouncerMessage(errString, errorColor);
+                // When swiping up right after receiving a fingerprint error, the bouncer calls
+                // authenticate leading to the same message being shown again on the bouncer.
+                // We want to avoid this, as it may confuse the user when the message is too
+                // generic.
+                if (mLastSuccessiveErrorMessage != msgId) {
+                    mStatusBarKeyguardViewManager.showBouncerMessage(errString, errorColor);
+                }
             } else if (updateMonitor.isDeviceInteractive()) {
-                    showTransientIndication(errString, errorColor);
-                    // We want to keep this message around in case the screen was off
-                    mHandler.removeMessages(MSG_HIDE_TRANSIENT);
-                    hideTransientIndicationDelayed(5000);
-             } else {
-                    mMessageToShowOnScreenOn = errString;
+                showTransientIndication(errString, errorColor);
+                // We want to keep this message around in case the screen was off
+                mHandler.removeMessages(MSG_HIDE_TRANSIENT);
+                hideTransientIndicationDelayed(5000);
+            } else {
+                mMessageToShowOnScreenOn = errString;
             }
+            mLastSuccessiveErrorMessage = msgId;
         }
 
         @Override
@@ -292,6 +304,18 @@ public class KeyguardIndicationController {
             if (running) {
                 mMessageToShowOnScreenOn = null;
             }
+        }
+
+        @Override
+        public void onFingerprintAuthenticated(int userId) {
+            super.onFingerprintAuthenticated(userId);
+            mLastSuccessiveErrorMessage = -1;
+        }
+
+        @Override
+        public void onFingerprintAuthFailed() {
+            super.onFingerprintAuthFailed();
+            mLastSuccessiveErrorMessage = -1;
         }
     };
 
