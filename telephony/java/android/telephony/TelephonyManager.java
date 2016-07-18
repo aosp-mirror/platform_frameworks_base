@@ -37,6 +37,7 @@ import android.os.SystemProperties;
 import android.service.carrier.CarrierIdentifier;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
+import android.telephony.ClientRequestStats;
 import android.telephony.TelephonyHistogram;
 import android.util.Log;
 
@@ -5681,6 +5682,28 @@ public class TelephonyManager {
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#setPolicyDataEnabled", e);
         }
+    }
+
+    /**
+     * Get Client request stats which will contain statistical information
+     * on each request made by client.
+     * Callers require either READ_PRIVILEGED_PHONE_STATE or
+     * READ_PHONE_STATE to retrieve the information.
+     * @param subId sub id
+     * @return List of Client Request Stats
+     * @hide
+     */
+    public List<ClientRequestStats> getClientRequestStats(int subId) {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.getClientRequestStats(getOpPackageName(), subId);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#getClientRequestStats", e);
+        }
+
+        return null;
     }
 }
 
