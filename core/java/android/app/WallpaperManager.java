@@ -417,8 +417,14 @@ public class WallpaperManager {
      * This is returned as an
      * abstract Drawable that you can install in a View to display whatever
      * wallpaper the user has currently set.
+     * <p>
+     * This method can return null if there is no system wallpaper available, if
+     * wallpapers are not supported in the current user, or if the calling app is not
+     * permitted to access the system wallpaper.
      *
-     * @return Returns a Drawable object that will draw the wallpaper.
+     * @return Returns a Drawable object that will draw the system wallpaper,
+     *     or {@code null} if no system wallpaper exists or if the calling application
+     *     is not able to access the wallpaper.
      */
     public Drawable getDrawable() {
         Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, true, FLAG_SYSTEM);
