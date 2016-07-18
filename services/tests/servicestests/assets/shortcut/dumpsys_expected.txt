@@ -1,0 +1,105 @@
+{
+ "shortcut": [
+  {
+   "userId": 0,
+   "launchers": [
+    {
+     "name": "com.android.launcher.1"
+    },
+    {
+     "name": "com.android.launcher.2"
+    },
+    {
+     "name": "com.android.launcher.3"
+    },
+    {
+     "name": "com.android.launcher.4"
+    },
+    {
+     "name": "com.android.launcher.1"
+    }
+   ],
+   "packages": [
+    {
+     "name": "com.android.test.1",
+     "dynamic": 3,
+     "manifest": 0,
+     "pinned": 4,
+     "bitmaps": 0,
+     "bitmapBytes": 0
+    },
+    {
+     "name": "com.android.test.2",
+     "dynamic": 4,
+     "manifest": 0,
+     "pinned": 5,
+     "bitmaps": 2,
+     "bitmapBytes": ***BITMAP_SIZE***
+    },
+    {
+     "name": "com.android.test.3",
+     "dynamic": 3,
+     "manifest": 0,
+     "pinned": 6,
+     "bitmaps": 0,
+     "bitmapBytes": 0
+    },
+    {
+     "name": "com.android.test.4",
+     "dynamic": 0,
+     "manifest": 0,
+     "pinned": 0,
+     "bitmaps": 0,
+     "bitmapBytes": 0
+    }
+   ]
+  },
+  {
+   "userId": 10,
+   "launchers": [
+    {
+     "name": "com.android.launcher.1"
+    }
+   ],
+   "packages": [
+    {
+     "name": "com.android.test.1",
+     "dynamic": 3,
+     "manifest": 0,
+     "pinned": 2,
+     "bitmaps": 0,
+     "bitmapBytes": 0
+    }
+   ]
+  },
+  {
+   "userId": 20,
+   "launchers": [
+    {
+     "name": "com.android.launcher.1"
+    },
+    {
+     "name": "com.android.launcher.2"
+    },
+    {
+     "name": "com.android.launcher.3"
+    },
+    {
+     "name": "com.android.launcher.1"
+    }
+   ],
+   "packages": [
+    {
+     "name": "com.android.test.1",
+     "dynamic": 3,
+     "manifest": 0,
+     "pinned": 6,
+     "bitmaps": 0,
+     "bitmapBytes": 0
+    }
+   ]
+  }
+ ],
+ "lowRam": false,
+ "iconSize": 128
+}

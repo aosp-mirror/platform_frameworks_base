@@ -93,6 +93,8 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -1106,14 +1108,29 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected void dumpsysOnLogcat(String message, boolean force) {
         if (force || !ENABLE_DUMP) return;
 
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        final PrintWriter pw = new PrintWriter(out);
-        mService.dumpInner(pw, null);
-        pw.close();
-
         Log.v(TAG, "Dumping ShortcutService: " + message);
-        for (String line : out.toString().split("\n")) {
+        for (String line : dumpsys(null).split("\n")) {
             Log.v(TAG, line);
+        }
+    }
+
+    protected String dumpCheckin() {
+        return dumpsys(new String[]{"--checkin"});
+    }
+
+    private String dumpsys(String[] args) {
+        final ArrayList<String> origPermissions = new ArrayList<>(mCallerPermissions);
+        mCallerPermissions.add(android.Manifest.permission.DUMP);
+        try {
+            final ByteArrayOutputStream out = new ByteArrayOutputStream();
+            final PrintWriter pw = new PrintWriter(out);
+            mService.dump(/* fd */ null, pw, args);
+            pw.close();
+
+            return out.toString();
+        } finally {
+            mCallerPermissions.clear();
+            mCallerPermissions.addAll(origPermissions);
         }
     }
 
@@ -1792,5 +1809,19 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
             assertTrue("ID " + s.getId(), s.hasStringResourcesResolved());
         }
         return actualShortcuts;
+    }
+
+    public String readTestAsset(String assetPath) throws IOException {
+        final StringBuilder sb = new StringBuilder();
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(
+                        getTestContext().getResources().getAssets().open(assetPath)))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+                sb.append(System.lineSeparator());
+            }
+        }
+        return sb.toString();
     }
 }

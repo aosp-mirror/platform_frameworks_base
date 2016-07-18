@@ -95,6 +95,9 @@ import com.android.server.pm.ShortcutUser.PackageWithUser;
 
 import libcore.io.IoUtils;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -183,6 +186,10 @@ public class ShortcutService extends IShortcutService.Stub {
     private static final String ATTR_VALUE = "value";
 
     private static final String LAUNCHER_INTENT_CATEGORY = Intent.CATEGORY_LAUNCHER;
+
+    private static final String KEY_SHORTCUT = "shortcut";
+    private static final String KEY_LOW_RAM = "lowRam";
+    private static final String KEY_ICON_SIZE = "iconSize";
 
     @VisibleForTesting
     interface ConfigConstants {
@@ -1352,8 +1359,16 @@ public class ShortcutService extends IShortcutService.Stub {
         if (isCallerSystem()) {
             return;
         }
-        injectEnforceCallingPermission(
+        enforceCallingOrSelfPermission(
                 android.Manifest.permission.RESET_SHORTCUT_MANAGER_THROTTLING, null);
+    }
+
+    private void enforceCallingOrSelfPermission(
+            @NonNull String permission, @Nullable String message) {
+        if (isCallerSystem()) {
+            return;
+        }
+        injectEnforceCallingPermission(permission, message);
     }
 
     /**
@@ -2981,20 +2996,29 @@ public class ShortcutService extends IShortcutService.Stub {
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
-                != PackageManager.PERMISSION_GRANTED) {
-            pw.println("Permission Denial: can't dump UserManager from from pid="
-                    + Binder.getCallingPid()
-                    + ", uid=" + Binder.getCallingUid()
-                    + " without permission "
-                    + android.Manifest.permission.DUMP);
-            return;
+        enforceCallingOrSelfPermission(android.Manifest.permission.DUMP,
+                "can't dump by this caller");
+        boolean checkin = false;
+        boolean clear = false;
+        if (args != null) {
+            for (String arg : args) {
+                if ("-c".equals(arg)) {
+                    checkin = true;
+                } else if ("--checkin".equals(arg)) {
+                    checkin = true;
+                    clear = true;
+                }
+            }
         }
-        dumpInner(pw, args);
+
+        if (checkin) {
+            dumpCheckin(pw, clear);
+        } else {
+            dumpInner(pw);
+        }
     }
 
-    @VisibleForTesting
-    void dumpInner(PrintWriter pw, String[] args) {
+    private void dumpInner(PrintWriter pw) {
         synchronized (mLock) {
             final long now = injectCurrentTimeMillis();
             pw.print("Now: [");
@@ -3104,6 +3128,34 @@ public class ShortcutService extends IShortcutService.Stub {
         pw.println(String.format("%s: count=%d, total=%dms, avg=%.1fms",
                 label, count, dur,
                 (count == 0 ? 0 : ((double) dur) / count)));
+    }
+
+    /**
+     * Dumpsys for checkin.
+     *
+     * @param clear if true, clear the history information.  Some other system services have this
+     * behavior but shortcut service doesn't for now.
+     */
+    private  void dumpCheckin(PrintWriter pw, boolean clear) {
+        synchronized (mLock) {
+            try {
+                final JSONArray users = new JSONArray();
+
+                for (int i = 0; i < mUsers.size(); i++) {
+                    users.put(mUsers.valueAt(i).dumpCheckin(clear));
+                }
+
+                final JSONObject result = new JSONObject();
+
+                result.put(KEY_SHORTCUT, users);
+                result.put(KEY_LOW_RAM, injectIsLowRamDevice());
+                result.put(KEY_ICON_SIZE, mMaxIconDimension);
+
+                pw.println(result.toString(1));
+            } catch (JSONException e) {
+                Slog.e(TAG, "Unable to write in json", e);
+            }
+        }
     }
 
     // === Shell support ===
