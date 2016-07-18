@@ -140,8 +140,8 @@ public class SubscribeConfig implements Parcelable {
     public String toString() {
         return "SubscribeConfig [mServiceName='" + mServiceName + ", mServiceSpecificInfo='" + (
                 (mServiceSpecificInfo == null) ? "null" : HexEncoding.encode(mServiceSpecificInfo))
-                + ", mTxFilter=" + (new TlvBufferUtils.TlvIterable(0, 1, mTxFilter)).toString()
-                + ", mRxFilter=" + (new TlvBufferUtils.TlvIterable(0, 1, mRxFilter)).toString()
+                + ", mTxFilter=" + (new LvBufferUtils.LvIterable(1, mTxFilter)).toString()
+                + ", mRxFilter=" + (new LvBufferUtils.LvIterable(1, mRxFilter)).toString()
                 + ", mSubscribeType=" + mSubscribeType + ", mSubscribeCount=" + mSubscribeCount
                 + ", mTtlSec=" + mTtlSec + ", mMatchType=" + mMatchStyle
                 + ", mEnableTerminateNotification=" + mEnableTerminateNotification + "]";
@@ -234,11 +234,11 @@ public class SubscribeConfig implements Parcelable {
     public void validate() throws IllegalArgumentException {
         WifiNanUtils.validateServiceName(mServiceName);
 
-        if (!TlvBufferUtils.isValid(mTxFilter, 0, 1)) {
+        if (!LvBufferUtils.isValid(mTxFilter, 1)) {
             throw new IllegalArgumentException(
                     "Invalid txFilter configuration - LV fields do not match up to length");
         }
-        if (!TlvBufferUtils.isValid(mRxFilter, 0, 1)) {
+        if (!LvBufferUtils.isValid(mRxFilter, 1)) {
             throw new IllegalArgumentException(
                     "Invalid rxFilter configuration - LV fields do not match up to length");
         }
@@ -344,7 +344,7 @@ public class SubscribeConfig implements Parcelable {
          * publishers) to determine whether they match - in addition to just
          * relying on the service name.
          * <p>
-         * Format is an LV byte array - the {@link TlvBufferUtils} utility class
+         * Format is an LV byte array - the {@link LvBufferUtils} utility class
          * is available to form and parse.
          *
          * @param txFilter The byte-array containing the LV formatted transmit
@@ -364,7 +364,7 @@ public class SubscribeConfig implements Parcelable {
          * subscriber to determine whether they match transmitted publish
          * packets - in addition to just relying on the service name.
          * <p>
-         * Format is an LV byte array - the {@link TlvBufferUtils} utility class
+         * Format is an LV byte array - the {@link LvBufferUtils} utility class
          * is available to form and parse.
          *
          * @param rxFilter The byte-array containing the LV formatted receive
