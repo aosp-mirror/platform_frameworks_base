@@ -92,7 +92,7 @@ A classe {@link android.app.Notification.Builder Notification.Builder} foi adici
 <p>As notificações, como parte importante da interface do usuário do Android, possuem as próprias diretrizes de projeto.
 As alterações do Material Design introduzidas no Android 5.0 (API de nível 21) são de importância
 específica e, por isso, recomenda-se revisar o treinamento do <a href="{@docRoot}training/material/index.html">Material Design</a>
- para obter mais informações. Para saber como projetar notificações e suas interações, leia o guia de projeto 
+ para obter mais informações. Para saber como projetar notificações e suas interações, leia o guia de projeto
 <a href="{@docRoot}design/patterns/notifications.html">Notificações</a>.</p>
 
 <h2 id="CreateNotification">Criação de uma notificação</h2>
@@ -451,14 +451,14 @@ todas as notificações emitidas anteriormente.
                 Adicione compatibilidade com Android 4.0.3 e mais antigos. Para fazer isto, especifique o pai
                 da {@link android.app.Activity} que está iniciando adicionando um elemento
 <code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data&gt;</a></code>
-                como o filho de 
+                como o filho de
 <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>.
                 <p>
-                    Para este elemento, defina 
+                    Para este elemento, defina
 <code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html#nm">android:name</a>="android.support.PARENT_ACTIVITY"</code>.
                     Defina
 <code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html#val">android:value</a>="&lt;parent_activity_name&gt;"</code>,
-                    onde <code>&lt;parent_activity_name&gt;</code> é o valor de 
+                    onde <code>&lt;parent_activity_name&gt;</code> é o valor de
 <code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html#nm">android:name</a></code>
                     para o elemento
 <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>

@@ -264,7 +264,7 @@ Regardless of the solution you adopt, keep the following points in mind:
    Internet-connectivity detection problems. A library or API may think the
    Internet is available, but your service may not be accessible. Fail
    gracefully and reschedule as few of your tasks as possible.</li>
-   <li>Depending on the conditions you assign for running a task, 
+   <li>Depending on the conditions you assign for running a task,
    such as network availability, after the task is triggered, a
    change may occur so that those conditions are no longer met.
    In such a case, your operation may fail unexpectedly and repeatedly.

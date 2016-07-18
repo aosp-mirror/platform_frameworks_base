@@ -212,7 +212,7 @@ anexar a resposta do usuário ao histórico da entrada remota.
 <h2 id="bundle">Notificações empacotadas</h2>
 
 <p>O Android N oferece aos desenvolvedores uma nova forma de representar
- uma fila de notificações: <i>notificações empacotadas</i>. Essa forma é semelhante ao recurso 
+ uma fila de notificações: <i>notificações empacotadas</i>. Essa forma é semelhante ao recurso
   <a href="{@docRoot}training/wearables/notifications/stacks.html">Pilhas
  de Notificações</a> no Android Wear. Por exemplo, se o aplicativo criar notificações
  para mensagens recebidas, quando mais de uma mensagem for recebida, empacote as
@@ -243,8 +243,8 @@ Builder.setGroup()} para empacotar notificações semelhantes.</p>
  sistema as agrupará automaticamente.
 </p>
 
-<p>Para saber como adicionar notificações a um grupo, consulte 
-<a href="{@docRoot}training/wearables/notifications/stacks.html#AddGroup">Adicionar 
+<p>Para saber como adicionar notificações a um grupo, consulte
+<a href="{@docRoot}training/wearables/notifications/stacks.html#AddGroup">Adicionar
 cada notificação a um grupo</a>.</p>
 
 
@@ -278,7 +278,7 @@ cada notificação a um grupo</a>.</p>
 <p>
 Os exemplos de casos em que uma única notificação é preferível
  incluem mensagens individuais de uma única pessoa ou uma representação em lista
- de itens de texto com uma única linha. Você pode usar 
+ de itens de texto com uma única linha. Você pode usar
 ({@link android.app.Notification.InboxStyle InboxStyle} ou
  {@link android.app.Notification.BigTextStyle BigTextStyle}) para
  isso.
@@ -354,7 +354,7 @@ Os exemplos de casos em que uma única notificação é preferível
 <p>Para usar essa nova API, chame o método {@code setStyle()}, passando o
  estilo de visualização personalizada desejado.</p>
 
-<p>O snippet mostra como construir um objeto de notificação personalizada com o método 
+<p>O snippet mostra como construir um objeto de notificação personalizada com o método
 {@code DecoratedCustomViewStyle()}.</p>
 
 <pre>
@@ -370,7 +370,7 @@ Notification notification = new Notification.Builder()
 <h2 id="style">Estilo de mensagens</h2>
 <p>
   O Android N traz uma nova API para personalização do estilo de uma notificação.
-  Usando a classe <code>MessageStyle</code>, você pode alterar vários 
+  Usando a classe <code>MessageStyle</code>, você pode alterar vários
 rótulos exibidos na notificação, incluindo o título da conversa,
  mensagens adicionais e a visualização de conteúdo para a notificação.
 </p>

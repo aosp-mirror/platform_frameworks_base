@@ -89,13 +89,13 @@ excludeFromSuggestions=true
        <tr><td>pitch</td><td>Panorama center-of-view in degrees from
            -90 (look straight up) to 90 (look straight down.)</td></tr>
        <tr><td>zoom</td><td>Panorama zoom. 1.0 = normal zoom, 2.0 = zoomed in 2x, 3.0 = zoomed in 4x, and so on.<br />
-       A zoom of 1.0 is 90 degree horizontal FOV for a nominal                                             
-       landscape mode 4 x 3 aspect ratio display.                                                          
-       Android phones in portrait mode will adjust the zoom so that                                        
-       the vertical FOV is approximately the same as the landscape vertical                                
-       FOV. This means that the horizontal FOV of an Android phone in portrait                             
-       mode is much narrower than in landscape mode. This is done to minimize                              
-       the fisheye lens effect that would be present if a 90 degree horizontal                             
+       A zoom of 1.0 is 90 degree horizontal FOV for a nominal
+       landscape mode 4 x 3 aspect ratio display.
+       Android phones in portrait mode will adjust the zoom so that
+       the vertical FOV is approximately the same as the landscape vertical
+       FOV. This means that the horizontal FOV of an Android phone in portrait
+       mode is much narrower than in landscape mode. This is done to minimize
+       the fisheye lens effect that would be present if a 90 degree horizontal
        FOV was used in portrait mode.</td></tr>
        <tr><td>mapZoom</td><td>The map zoom of the map location associated with this panorama. This value is passed on to the
        Maps activity when the Street View "Go to Maps" menu item is chosen. It corresponds to the <em>z</em> parameter in

@@ -60,7 +60,7 @@ for <a href="{@docRoot}design/style/touch-feedback.html">Touch Feedback</a>.  </
         <strong><a href="detector.html">Detecting Common Gestures</a></strong>
     </dt>
     <dd>
-        Learn how to detect basic touch gestures such as scrolling, flinging, and double-tapping, using 
+        Learn how to detect basic touch gestures such as scrolling, flinging, and double-tapping, using
        {@link android.view.GestureDetector}.
     </dd>
 
@@ -84,7 +84,7 @@ touch event. </dd>
     </dt>
     <dd>
         Learn how to detect multi-pointer (finger) gestures.
-    </dd> 
+    </dd>
 <dt>
         <strong><a href="scale.html">Dragging and Scaling</a></strong>
     </dt>

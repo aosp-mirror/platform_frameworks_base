@@ -762,7 +762,7 @@ Android 扩展包</a></a> (AEP) 的所有扩展（<code>EXT_texture_sRGB_decode<
 <p>
   虽然我们建议您对您的应用采用 APK Signature Scheme v2，但这项新方案并非强制性的。
 如果您的应用在使用 APK Signature Scheme v2 时不能正确构建，您可以停用这项新方案。
-禁用过程会导致 Android Studio 2.2 和 Android Gradle 2.2 插件仅使用传统签名方案来签署您的应用。 
+禁用过程会导致 Android Studio 2.2 和 Android Gradle 2.2 插件仅使用传统签名方案来签署您的应用。
 
 若要仅用传统方案签署，打开多层 <code>build.gradle</code> 文件，然后将行 <code>v2SigningEnabled false</code> 添加到您的版本签名配置中：
 
@@ -970,7 +970,7 @@ API 提供了一个包含计时数据的 {@code FrameMetrics} 对象，其渲染
 <em></em>虚拟文件功能可以让您的 {@link android.provider.DocumentsProvider} 返回可与 {@link android.content.Intent#ACTION_VIEW}Intent 使用的文件 URI，即使它们没有直接字节码表示。
 
 
-Android N 还允许您为用户文件（虚拟或其他类）提供备用格式。 
+Android N 还允许您为用户文件（虚拟或其他类）提供备用格式。
 
 </p>
 

@@ -87,7 +87,7 @@ page.image=images/cards/card-nyc_2x.jpg
 <h2 id="access">存取裝置加密的儲存空間</h2>
 
 <p>如果要存取裝置加密的儲存空間，請透過呼叫
-<code>Context.createDeviceEncryptedStorageContext()</code> 以建立第二個 
+<code>Context.createDeviceEncryptedStorageContext()</code> 以建立第二個
 {@link android.content.Context} 實例。使用此內容建立的所有儲存 API 呼叫都可以存取裝置加密的儲存空間。
 下列範例會存取裝置加密的儲存空間並開啟現有的應用程式資料檔案：
 

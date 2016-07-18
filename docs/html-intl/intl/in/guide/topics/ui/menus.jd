@@ -60,7 +60,7 @@ dan konsisten, Anda harus menggunakan API {@link android.view.Menu} untuk menyaj
 tindakan dan opsi lain dalam aktivitas kepada pengguna.</p>
 
 <p>Mulai dengan Android 3.0 (API level 11), perangkat berbasis Android tidak perlu lagi
-menyediakan tombol <em>Menu</em> tersendiri. Dengan perubahan ini, aplikasi Android harus bermigrasi dari 
+menyediakan tombol <em>Menu</em> tersendiri. Dengan perubahan ini, aplikasi Android harus bermigrasi dari
 dependensi pada panel menu 6 item biasa, dan sebagai ganti menyediakan action-bar untuk menyajikan
 berbagai tindakan pengguna yang lazim.</p>
 
@@ -83,9 +83,9 @@ tidak memilikinya), sehingga Anda harus bermigrasi ke penggunaan action-bar untu
 opsi lainnya.</p>
   <p>Lihat bagian tentang <a href="#options-menu">Membuat Menu Opsi</a>.</p>
     </dd>
-    
+
   <dt><strong>Menu konteks dan mode tindakan kontekstual</strong></dt>
-  
+
    <dd>Menu konteks adalah <a href="#FloatingContextMenu">menu mengambang</a> yang muncul saat
 pengguna mengklik lama pada suatu elemen. Menu ini menyediakan tindakan yang memengaruhi konten atau
 bingkai konteks yang dipilih.
@@ -94,7 +94,7 @@ item tindakan yang memengaruhi konten yang dipilih dalam baris di bagian atas la
 memilih beberapa item sekaligus.</p>
   <p>Lihat bagian tentang <a href="#context-menu">Membuat Menu Kontekstual</a>.</p>
 </dd>
-    
+
   <dt><strong>Menu popup</strong></dt>
     <dd>Menu popup menampilkan daftar item secara vertikal yang dipasang pada tampilan yang
 memanggil menu. Ini cocok untuk menyediakan kelebihan tindakan yang terkait dengan konten tertentu atau
@@ -128,14 +128,14 @@ ukuran layar, dan konfigurasi lainnya dengan memanfaatkan kerangka kerja <a href
 proyek dan buat menu dengan elemen-elemen berikut:</p>
 <dl>
   <dt><code>&lt;menu></code></dt>
-    <dd>Mendefinisikan {@link android.view.Menu}, yang merupakan sebuah kontainer untuk item menu. Elemen 
+    <dd>Mendefinisikan {@link android.view.Menu}, yang merupakan sebuah kontainer untuk item menu. Elemen
 <code>&lt;menu></code> harus menjadi simpul akar untuk file dan bisa menampung salah satu atau beberapa dari elemen
 <code>&lt;item></code> dan <code>&lt;group></code>.</dd>
 
   <dt><code>&lt;item></code></dt>
     <dd>Membuat {@link android.view.MenuItem}, yang mewakili satu item menu. Elemen ini
 bisa berisi elemen <code>&lt;menu></code> tersarang guna untuk membuat submenu.</dd>
-    
+
   <dt><code>&lt;group></code></dt>
     <dd>Kontainer opsional tak terlihat untuk elemen-elemen {@code &lt;item&gt;}. Kontainer ini memungkinkan Anda
 mengelompokkan item menu untuk berbagi properti seperti status aktif dan visibilitas. Untuk informasi
@@ -253,7 +253,7 @@ aktivitas. Jika perlu, Anda bisa menyusun ulang item menu dengan atribut {@code 
 dalam setiap {@code &lt;item&gt;} yang perlu Anda pindahkan.</p>
 
 <p>Untuk menetapkan menu opsi suatu aktivitas, kesampingkan {@link
-android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()} (fragmen-fragmen menyediakan 
+android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()} (fragmen-fragmen menyediakan
 callback {@link android.app.Fragment#onCreateOptionsMenu onCreateOptionsMenu()} sendiri). Dalam metode ini
 , Anda bisa memekarkan sumber daya menu (<a href="#xml">yang didefinisikan dalam XML</a>) menjadi {@link
 android.view.Menu} yang disediakan dalam callback. Misalnya:</p>
@@ -273,7 +273,7 @@ dengan API {@link android.view.MenuItem}.</p>
 
 <p>Jika Anda mengembangkan aplikasi untuk Android 2.3.x dan yang lebih rendah, sistem akan memanggil {@link
 android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()} untuk membuat menu opsi
-bila pengguna membuka menu untuk pertama kali. Jika Anda mengembangkan aplikasi untuk Android 3.0 dan yang lebih tinggi, 
+bila pengguna membuka menu untuk pertama kali. Jika Anda mengembangkan aplikasi untuk Android 3.0 dan yang lebih tinggi,
 sistem akan memanggil {@link android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()} saat
 memulai aktivitas, untuk menampilkan item menu pada action-bar.</p>
 
@@ -285,7 +285,7 @@ memulai aktivitas, untuk menampilkan item menu pada action-bar.</p>
 sistem akan memanggil metode {@link android.app.Activity#onOptionsItemSelected(MenuItem)
 onOptionsItemSelected()} aktivitas Anda. Metode ini meneruskan {@link android.view.MenuItem} yang dipilih. Anda
 bisa mengidentifikasi item dengan memanggil {@link android.view.MenuItem#getItemId()}, yang menghasilkan
-ID unik untuk item menu itu (yang didefinisikan oleh atribut {@code android:id} dalam sumber daya menu atau dengan 
+ID unik untuk item menu itu (yang didefinisikan oleh atribut {@code android:id} dalam sumber daya menu atau dengan
 integer yang diberikan ke metode {@link android.view.Menu#add(int,int,int,int) add()}). Anda bisa mencocokkan
 ID ini dengan item menu yang diketahui untuk melakukan tindakan yang sesuai. Misalnya:</p>
 
@@ -317,7 +317,7 @@ untuk setiap fragmen (sesuai dengan urutan penambahan fragmen) hingga satu fragm
 {@code true} atau semua fragmen telah dipanggil.</p>
 
 <p class="note"><strong>Tip:</strong> Android 3.0 menambahkan kemampuan mendefinisikan perilaku on-click
-untuk item menu dalam XML, dengan menggunakan atribut {@code android:onClick}. Nilai atribut 
+untuk item menu dalam XML, dengan menggunakan atribut {@code android:onClick}. Nilai atribut
 harus berupa nama metode yang didefinisikan aktivitas dengan menggunakan menu. Metode
 harus bersifat publik dan menerima satu parameter {@link android.view.MenuItem}&mdash;bila sistem
 memanggilnya, metode ini akan meneruskan item menu yang dipilih. Untuk informasi selengkapnya dan contoh, lihat dokumen <a href="{@docRoot}guide/topics/resources/menu-resource.html">Sumber Daya Menu</a>.</p>
@@ -346,7 +346,7 @@ lagi kecuali menu diinvalidkan karena suatu alasan. Akan tetapi, Anda harus meng
 android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()} hanya untuk membuat
 status menu awal dan tidak untuk membuat perubahan selama daur hidup aktivitas.</p>
 
-<p>Jika Anda ingin mengubah menu opsi berdasarkan 
+<p>Jika Anda ingin mengubah menu opsi berdasarkan
 kejadian yang terjadi selama daur hidup aktivitas, Anda bisa melakukannya dalam metode
 {@link android.app.Activity#onPrepareOptionsMenu(Menu) onPrepareOptionsMenu()}. Metode ini
 meneruskan objek {@link android.view.Menu} sebagaimana adanya saat ini sehingga Anda bisa mengubahnya,
@@ -363,7 +363,7 @@ ditampilkan pada action-bar. Bila ada kejadian dan Anda ingin melakukan pembarua
 memanggil {@link android.app.Activity#invalidateOptionsMenu invalidateOptionsMenu()} untuk meminta
 sistem memanggil {@link android.app.Activity#onPrepareOptionsMenu(Menu) onPrepareOptionsMenu()}.</p>
 
-<p class="note"><strong>Catatan:</strong> 
+<p class="note"><strong>Catatan:</strong>
 Anda tidak boleh mengubah item dalam menu opsi berdasarkan {@link android.view.View} yang saat ini
 difokus. Saat dalam mode sentuh (bila pengguna tidak sedang menggunakan trackball atau d-pad), tampilan
 tidak bisa mengambil fokus, sehingga Anda tidak boleh menggunakan fokus sebagai dasar untuk mengubah
@@ -419,7 +419,7 @@ android.app.Activity#registerForContextMenu(View) registerForContextMenu()}.</p>
 </li>
 
   <li>Implementasikan metode {@link
-android.view.View.OnCreateContextMenuListener#onCreateContextMenu onCreateContextMenu()} 
+android.view.View.OnCreateContextMenuListener#onCreateContextMenu onCreateContextMenu()}
 dalam {@link android.app.Activity} atau {@link android.app.Fragment} Anda.
   <p>Bila tampilan yang terdaftar menerima kejadian klik-lama, sistem akan memanggil metode {@link
 android.view.View.OnCreateContextMenuListener#onCreateContextMenu onCreateContextMenu()}
@@ -445,7 +445,7 @@ dimekarkan.</p>
 
 <li>Implementasikan {@link android.app.Activity#onContextItemSelected(MenuItem)
 onContextItemSelected()}.
-  <p>Bila pengguna memilih item menu, sistem akan memanggil metode ini sehingga Anda bisa melakukan 
+  <p>Bila pengguna memilih item menu, sistem akan memanggil metode ini sehingga Anda bisa melakukan
 tindakan yang sesuai. Misalnya:</p>
 
 <pre>
@@ -609,7 +609,7 @@ someView.setOnLongClickListener(new View.OnLongClickListener() {
 
 <p>Bila Anda memanggil {@link android.app.Activity#startActionMode startActionMode()}, sistem akan mengembalikan
 {@link android.view.ActionMode} yang dibuat. Dengan menyimpannya dalam variabel anggota, Anda bisa
-membuat perubahan ke action-bar kontekstual sebagai respons terhadap kejadian lainnya. Dalam contoh di atas, 
+membuat perubahan ke action-bar kontekstual sebagai respons terhadap kejadian lainnya. Dalam contoh di atas,
 {@link android.view.ActionMode} digunakan untuk memastikan bahwa instance {@link android.view.ActionMode}
 tidak dibuat kembali jika sudah aktif, dengan memeriksa apakah anggota bernilai nol sebelum memulai
 mode tindakan.</p>
@@ -742,8 +742,8 @@ yang menampilkan menu popup:</p>
 
 <pre>
 &lt;ImageButton
-    android:layout_width="wrap_content" 
-    android:layout_height="wrap_content" 
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:src="@drawable/ic_overflow_holo_dark"
     android:contentDescription="@string/descr_overflow_button"
     android:onClick="showPopup" />
@@ -1010,7 +1010,7 @@ pertama.</p>
 <p>Anda juga bisa menawarkan layanan aktivitas Anda pada aplikasi lainnya, sehingga
 aplikasi Anda bisa disertakan dalam menu aplikasi lain (membalik peran yang dijelaskan di atas).</p>
 
-<p>Agar bisa dimasukkan dalam menu aplikasi lain, Anda perlu mendefinisikan 
+<p>Agar bisa dimasukkan dalam menu aplikasi lain, Anda perlu mendefinisikan
 filter intent seperti biasa, tetapi pastikan menyertakan nilai-nilai {@link android.content.Intent#CATEGORY_ALTERNATIVE}
 dan/atau {@link android.content.Intent#CATEGORY_SELECTED_ALTERNATIVE} untuk
 kategori filter intent. Misalnya:</p>
@@ -1026,6 +1026,6 @@ kategori filter intent. Misalnya:</p>
 <p>Baca selengkapnya tentang penulisan filter intent dalam dokumen
 <a href="/guide/components/intents-filters.html">Intent dan Filter Intent</a>.</p>
 
-<p>Untuk contoh aplikasi yang menggunakan teknik ini, lihat contoh kode 
+<p>Untuk contoh aplikasi yang menggunakan teknik ini, lihat contoh kode
 <a href="{@docRoot}resources/samples/NotePad/src/com/example/android/notepad/NoteEditor.html">Note
 Pad</a>.</p>

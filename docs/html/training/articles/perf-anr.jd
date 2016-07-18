@@ -64,10 +64,10 @@ concern.)</p>
 and Window Manager system services. Android will display the ANR dialog
 for a particular application when it detects one of the following
 conditions:</p>
-<ul>  
-    <li>No response to an input event (such as key press or screen touch events) 
+<ul>
+    <li>No response to an input event (such as key press or screen touch events)
     within 5 seconds.</li>
-    <li>A {@link android.content.BroadcastReceiver BroadcastReceiver} 
+    <li>A {@link android.content.BroadcastReceiver BroadcastReceiver}
     hasn't finished executing within 10 seconds.</li>
 </ul>
 
@@ -100,7 +100,7 @@ To post progress changes to the user, you can call
  {@link android.os.AsyncTask#onProgressUpdate onProgressUpdate()} callback method. From your
  implementation of {@link android.os.AsyncTask#onProgressUpdate onProgressUpdate()} (which
  runs on the UI thread), you can notify the user. For example:</p>
- 
+
 <pre>
 private class DownloadFilesTask extends AsyncTask&lt;URL, Integer, Long> {
     // Do the long-running work in here
@@ -127,14 +127,14 @@ private class DownloadFilesTask extends AsyncTask&lt;URL, Integer, Long> {
     }
 }
 </pre>
- 
+
  <p>To execute this worker thread, simply create an instance and
  call {@link android.os.AsyncTask#execute execute()}:</p>
- 
+
 <pre>
 new DownloadFilesTask().execute(url1, url2, url3);
 </pre>
- 
+
 
 <p>Although it's more complicated than {@link android.os.AsyncTask}, you might want to instead
 create your own {@link java.lang.Thread} or {@link android.os.HandlerThread} class. If you do,
@@ -143,7 +143,7 @@ android.os.Process#setThreadPriority Process.setThreadPriority()} and passing {@
 android.os.Process#THREAD_PRIORITY_BACKGROUND}. If you don't set the thread to a lower priority
 this way, then the thread could still slow down your app because it operates at the same priority
 as the UI thread by default.</p>
- 
+
 <p>If you implement {@link java.lang.Thread} or {@link android.os.HandlerThread},
 be sure that your UI thread does not block while waiting for the worker thread to
 complete&mdash;do not call {@link java.lang.Thread#wait Thread.wait()} or
@@ -183,16 +183,16 @@ make your application seem responsive to users:</p>
     <li>If your application is doing work in the background in response to
     user input, show that progress is being made (such as with a {@link
     android.widget.ProgressBar} in your UI).</li>
-    
+
     <li>For games specifically, do calculations for moves in a worker
     thread.</li>
-    
+
     <li>If your application has a time-consuming initial setup phase, consider
     showing a splash screen or rendering the main view as quickly as possible, indicate that
     loading is in progress and fill the information asynchronously. In either case, you should
     indicate somehow that progress is being made, lest the user perceive that
     the application is frozen.</li>
-    
+
     <li>Use performance tools such as <a href="{@docRoot}tools/help/systrace.html">Systrace</a>
     and <a href="{@docRoot}tools/help/traceview.html">Traceview</a> to determine bottlenecks
     in your app's responsiveness.</li>

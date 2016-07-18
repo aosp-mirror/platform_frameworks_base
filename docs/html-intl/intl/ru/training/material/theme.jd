@@ -42,7 +42,7 @@ page.title=Использование темы Material Design
   <li><code>@android:style/Theme.Material.Light.DarkActionBar</code>.</li>
 </ul>
 
-<p>Список доступных стилей Material Design см. в справке по API для 
+<p>Список доступных стилей Material Design см. в справке по API для
 {@link android.R.style R.style}.</p>
 
 <!-- two columns, dark/light material theme example -->
@@ -66,7 +66,7 @@ page.title=Использование темы Material Design
 <strong>Примечание.</strong> Темы Material Design доступны только в ОС Android 5.0 (уровень API 21) и более поздних версий.
  Во <a href="{@docRoot}tools/support-library/features.html#v7">вспомогательных библиотеках v7</a>
  представлены темы со стилями Material Design для некоторых виджетов. Эти библиотеки также обеспечивают поддержку настройки цветовой палитры.
- Дополнительные сведения см. на странице 
+ Дополнительные сведения см. на странице
 <a href="{@docRoot}training/material/compatibility.html">Обеспечение совместимости</a>.
 </p>
 
@@ -108,7 +108,7 @@ page.title=Использование темы Material Design
 
 <p>Кроме того, можно самостоятельно разместить элемент за строкой состояния. Например, если требуется наложить прозрачную строку состояния поверх фотографии, применив еле уловимый темный градиент, чтобы были видны белые значки состояния.
 
- Для этого задайте для атрибута <code>android:statusBarColor</code> значение 
+ Для этого задайте для атрибута <code>android:statusBarColor</code> значение
 <code>&#64;android:color/transparent</code> и настройте флаги окна требуемым образом. Также можно воспользоваться
 методом {@link android.view.Window#setStatusBarColor Window.setStatusBarColor()} для применения анимации или эффекта постепенного исчезания.
 </p>

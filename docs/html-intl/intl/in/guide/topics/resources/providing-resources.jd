@@ -176,7 +176,7 @@ string</a>.</li>
         <li>styles.xml untuk <a href="style-resource.html">gaya</a>.</li>
       </ul>
       <p>Lihat <a href="string-resource.html">Sumber Daya String</a>,
-        <a href="style-resource.html">Sumber Daya Gaya</a>, dan 
+        <a href="style-resource.html">Sumber Daya Gaya</a>, dan
         <a href="more-resources.html">Tipe Sumber Daya Lainnya</a>.</p>
     </td>
   </tr>
@@ -289,7 +289,7 @@ qualifier konfigurasi.</p>
  dari kartu SIM dalam perangkat. Misalnya, <code>mcc310</code> adalah AS untuk operator mana saja,
  <code>mcc310-mnc004</code> adalah AS untuk Verizon, dan <code>mcc208-mnc00</code> Prancis untuk
 Orange.</p>
-        <p>Jika perangkat menggunakan koneksi radio (ponsel GSM), nilai-nilai MCC dan MNC berasal 
+        <p>Jika perangkat menggunakan koneksi radio (ponsel GSM), nilai-nilai MCC dan MNC berasal
 dari kartu SIM.</p>
         <p>Anda juga dapat menggunakan MNC saja (misalnya, untuk menyertakan sumber daya legal
 spesifik untuk negara itu di aplikasi Anda). Jika Anda perlu menetapkan hanya berdasarkan bahasa, maka gunakan qualifier
@@ -312,7 +312,7 @@ dan kode jaringan seluler.</p>
         dll.
       </td>
       <td><p>Bahasa didefinisikan oleh kode bahasa dua huruf <a href="http://www.loc.gov/standards/iso639-2/php/code_list.php">ISO
-639-1</a>, bisa juga diikuti dengan kode wilayah 
+639-1</a>, bisa juga diikuti dengan kode wilayah
 dua huruf <a href="http://www.iso.org/iso/en/prods-services/iso3166ma/02iso-3166-code-lists/list-en1.html">ISO
 3166-1-alpha-2</a> (diawali dengan huruf kecil "{@code r}").
         </p><p>
@@ -428,8 +428,8 @@ berubah antara lanskap dan potret agar cocok dengan lebar sebenarnya saat ini.</
         <p>Bila aplikasi Anda menyediakan beberapa direktori sumber daya dengan nilai yang berbeda
  untuk konfigurasi ini, sistem akan menggunakan nilai terdekat dengan (tanpa melebihi)
  lebar layar perangkat saat ini.  Nilai
-di sini memperhitungkan dekorasi layar akun, jadi jika perangkat memiliki beberapa 
-elemen UI persisten di tepi kiri atau kanan, layar 
+di sini memperhitungkan dekorasi layar akun, jadi jika perangkat memiliki beberapa
+elemen UI persisten di tepi kiri atau kanan, layar
 menggunakan nilai lebar yang lebih kecil daripada ukuran layar sebenarnya, yang memperhitungkan
 elemen UI ini dan mengurangi ruang aplikasi yang tersedia.</p>
         <p><em>Ditambahkan dalam API level 13.</em></p>
@@ -455,14 +455,14 @@ sumber daya &mdash;bersama nilai yang didefinisikan oleh <code>&lt;N&gt;</code>.
 berubah antara lanskap dan potret agar cocok dengan tinggi sebenarnya saat ini.</p>
         <p>Bila aplikasi menyediakan beberapa direktori sumber daya dengan nilai yang berbeda
  untuk konfigurasi ini, sistem akan menggunakan nilai yang terdekat dengan (tanpa melebihi)
- tinggi layar perangkat saat ini.  Nilai 
+ tinggi layar perangkat saat ini.  Nilai
 di sini memperhitungkan dekorasi layar akun, jadi jika perangkat memiliki beberapa
 elemen UI persisten di tepi atas atau bawah, layar akan
 menggunakan nilai tinggi yang lebih kecil daripada ukuran layar sebenarnya, memperhitungkan
-elemen UI ini dan mengurangi ruang aplikasi yang tersedia.  Dekorasi 
-layar yang tidak tetap (misalnya baris status (status-bar) telepon yang bisa 
-disembunyikan saat layar penuh) di sini <em>tidak</em> diperhitungkan, demikian pula 
-dekorasi jendela seperti baris judul (title-bar)atau baris tindakan (action-bar), jadi aplikasi harus disiapkan 
+elemen UI ini dan mengurangi ruang aplikasi yang tersedia.  Dekorasi
+layar yang tidak tetap (misalnya baris status (status-bar) telepon yang bisa
+disembunyikan saat layar penuh) di sini <em>tidak</em> diperhitungkan, demikian pula
+dekorasi jendela seperti baris judul (title-bar)atau baris tindakan (action-bar), jadi aplikasi harus disiapkan
 untuk menangani ruang yang agak lebih kecil daripada yang ditetapkan.
         <p><em>Ditambahkan dalam API level 13.</em></p>
         <p>Lihat juga bidang konfigurasi {@link android.content.res.Configuration#screenHeightDp}
@@ -482,35 +482,35 @@ Multi Layar</a>.</p>
       </td>
       <td>
         <ul class="nolist">
-        <li>{@code small}: Layar yang berukuran serupa dengan 
-layar QVGA densitas rendah. Ukuran layout minimum untuk layar kecil 
-adalah sekitar 320x426 satuan dp.  Misalnya QVGA densitas rendah 
+        <li>{@code small}: Layar yang berukuran serupa dengan
+layar QVGA densitas rendah. Ukuran layout minimum untuk layar kecil
+adalah sekitar 320x426 satuan dp.  Misalnya QVGA densitas rendah
 dan VGA densitas tinggi.</li>
-        <li>{@code normal}: Layar yang berukuran serupa dengan 
+        <li>{@code normal}: Layar yang berukuran serupa dengan
 layar HVGA densitas sedang. Ukuran layout minimum untuk
-layar normal adalah sekitar 320x470 satuan dp.  Contoh layar seperti itu adalah 
+layar normal adalah sekitar 320x470 satuan dp.  Contoh layar seperti itu adalah
 WQVGA densitas rendah, HVGA densitas sedang, WVGA
      densitas tinggi.</li>
-        <li>{@code large}: Layar yang berukuran serupa dengan 
+        <li>{@code large}: Layar yang berukuran serupa dengan
 layar VGA densitas sedang.
         Ukuran layout minimum untuk layar besar adalah sekitar 480x640 satuan dp.
         Misalnya layar VGA dan WVGA densitas sedang.</li>
-        <li>{@code xlarge}: Layar yang jauh lebih besar dari layar HVGA 
-densitas sedang tradisional. Ukuran layout minimum untuk 
-layar ekstra besar adalah sekitar 720x960 satuan dp.  Perangkat dengan layar ekstra besar 
+        <li>{@code xlarge}: Layar yang jauh lebih besar dari layar HVGA
+densitas sedang tradisional. Ukuran layout minimum untuk
+layar ekstra besar adalah sekitar 720x960 satuan dp.  Perangkat dengan layar ekstra besar
 seringkali terlalu besar untuk dibawa dalam saku dan kemungkinan besar
  berupa perangkat bergaya tablet. <em>Ditambahkan dalam API level 9.</em></li>
         </ul>
-        <p class="note"><strong>Catatan:</strong> Menggunakan qualifier ukuran tidak berarti bahwa 
+        <p class="note"><strong>Catatan:</strong> Menggunakan qualifier ukuran tidak berarti bahwa
 sumber daya <em>hanya</em> untuk layar ukuran itu saja. Jika Anda tidak menyediakan sumber
 daya alternatif dengan qualifier yang lebih cocok dengan konfigurasi perangkat saat ini, sistem dapat menggunakan sumber daya
 mana saja yang <a href="#BestMatch">paling cocok</a>.</p>
-        <p class="caution"><strong>Perhatian:</strong> Jika semua sumber daya Anda menggunakan 
-qualifier yang berukuran <em>lebih besar</em> daripada layar saat ini, sistem <strong>tidak</strong> akan menggunakannya dan aplikasi 
+        <p class="caution"><strong>Perhatian:</strong> Jika semua sumber daya Anda menggunakan
+qualifier yang berukuran <em>lebih besar</em> daripada layar saat ini, sistem <strong>tidak</strong> akan menggunakannya dan aplikasi
 Anda akan crash saat runtime (misalnya, jika semua sumber daya layout ditandai dengan qualifier {@code
 xlarge}, namun perangkat memiliki ukuran layar normal).</p>
         <p><em>Ditambahkan dalam API level 4.</em></p>
-        
+
         <p>Lihat <a href="{@docRoot}guide/practices/screens_support.html">Mendukung Beberapa
 Layar</a> untuk informasi selengkapnya.</p>
         <p>Lihat juga bidang konfigurasi {@link android.content.res.Configuration#screenLayout},
@@ -552,7 +552,7 @@ tidak ada kaitannya dengan orientasi layar.</p>
         <p>Ini bisa berubah selama masa pakai aplikasi Anda jika pengguna memutar
 layar. Lihat <a href="runtime-changes.html">Menangani Perubahan Runtime</a> untuk
  informasi tentang bagaimana hal ini memengaruhi aplikasi Anda selama runtime.</p>
-        <p>Lihat juga bidang konfigurasi {@link android.content.res.Configuration#orientation}, 
+        <p>Lihat juga bidang konfigurasi {@link android.content.res.Configuration#orientation},
 yang menunjukkan orientasi perangkat saat ini.</p>
       </td>
     </tr>
@@ -569,19 +569,19 @@ yang menunjukkan orientasi perangkat saat ini.</p>
         <ul class="nolist">
           <li>{@code car}: Perangkat sedang menampilkan di dudukan perangkat di mobil</li>
           <li>{@code desk}: Perangkat sedang menampilkan di dudukan perangkat di meja</li>
-          <li>{@code television}: Perangkat sedang menampilkan di televisi, yang menyediakan 
+          <li>{@code television}: Perangkat sedang menampilkan di televisi, yang menyediakan
 pengalaman "sepuluh kaki" dengan UI-nya pada layar besar yang berada jauh dari pengguna,
-terutama diorientasikan seputar DPAD atau 
+terutama diorientasikan seputar DPAD atau
 interaksi non-pointer lainnya</li>
-          <li>{@code appliance}: Perangkat berlaku sebagai 
+          <li>{@code appliance}: Perangkat berlaku sebagai
 alat, tanpa tampilan</li>
           <li>{@code watch}: Perangkat memiliki tampilan dan dikenakan di pergelangan tangan</li>
         </ul>
         <p><em>Ditambahkan dalam API level 8, televisi ditambahkan dalam API 13, jam ditambahkan dalam API 20.</em></p>
-        <p>Untuk informasi tentang cara aplikasi merespons saat perangkat dimasukkan 
+        <p>Untuk informasi tentang cara aplikasi merespons saat perangkat dimasukkan
 ke dalam atau dilepaskan dari dudukannya, bacalah <a href="{@docRoot}training/monitoring-device-state/docking-monitoring.html">Menentukan
 dan Memantau Kondisi dan Tipe Dudukan</a>.</p>
-        <p>Ini bisa berubah selama masa pakai aplikasi jika pengguna menempatkan perangkat di 
+        <p>Ini bisa berubah selama masa pakai aplikasi jika pengguna menempatkan perangkat di
 dudukannya. Anda dapat mengaktifkan atau menonaktifkan sebagian mode ini menggunakan {@link
 android.app.UiModeManager}. Lihat <a href="runtime-changes.html">Menangani Perubahan Runtime</a> untuk
 informasi tentang bagaimana hal ini memengaruhi aplikasi Anda selama runtime.</p>
@@ -601,7 +601,7 @@ informasi tentang bagaimana hal ini memengaruhi aplikasi Anda selama runtime.</p
         <p><em>Ditambahkan dalam API level 8.</em></p>
         <p>Ini bisa berubah selama masa pakai aplikasi jika mode malam dibiarkan dalam
 mode otomatis (default), dalam hal ini perubahan mode berdasarkan pada waktu hari.  Anda dapat mengaktifkan
-atau menonaktifkan mode ini menggunakan {@link android.app.UiModeManager}. Lihat <a href="runtime-changes.html">Menangani Perubahan Runtime</a> untuk informasi tentang bagaimana hal ini memengaruhi 
+atau menonaktifkan mode ini menggunakan {@link android.app.UiModeManager}. Lihat <a href="runtime-changes.html">Menangani Perubahan Runtime</a> untuk informasi tentang bagaimana hal ini memengaruhi
 aplikasi Anda selama runtime.</p>
       </td>
     </tr>
@@ -627,8 +627,8 @@ aplikasi Anda selama runtime.</p>
 Level 8.</em></li>
           <li>{@code xxhdpi}: Layar densitas ekstra-ekstra-tinggi; sekitar 480 dpi. <em>Ditambahkan dalam API
 Level 16.</em></li>
-          <li>{@code xxxhdpi}: Densitas ekstra-ekstra-ekstra-tinggi (hanya ikon launcher, 
-lihat <a href="{@docRoot}guide/practices/screens_support.html#xxxhdpi-note">catatan</a> 
+          <li>{@code xxxhdpi}: Densitas ekstra-ekstra-ekstra-tinggi (hanya ikon launcher,
+lihat <a href="{@docRoot}guide/practices/screens_support.html#xxxhdpi-note">catatan</a>
  dalam <em>Mendukung Beberapa Layar</em>); sekitar 640 dpi. <em>Ditambahkan dalam API
 Level 18.</em></li>
           <li>{@code nodpi}: Ini bisa digunakan untuk sumber daya bitmap yang tidak ingin Anda
@@ -696,7 +696,7 @@ fisik. Lihat <a href="runtime-changes.html">Menangani Perubahan Runtime</a> untu
 hal ini memengaruhi aplikasi Anda selama runtime.</p>
         <p>Lihat juga bidang konfigurasi {@link
 android.content.res.Configuration#hardKeyboardHidden} dan {@link
-android.content.res.Configuration#keyboardHidden}, yang menunjukkan visibilitas 
+android.content.res.Configuration#keyboardHidden}, yang menunjukkan visibilitas
 keyboard fisik dan visibilitas segala jenis keyboard (termasuk keyboard perangkat lunak), masing-masing.</p>
       </td>
     </tr>
@@ -716,7 +716,7 @@ pengguna
           <li>{@code 12key}: Perangkat memiliki keyboard fisik 12 tombol, baik terlihat maupun tidak
 pada pengguna.</li>
         </ul>
-        <p>Lihat juga bidang konfigurasi {@link android.content.res.Configuration#keyboard}, 
+        <p>Lihat juga bidang konfigurasi {@link android.content.res.Configuration#keyboard},
 yang menunjukkan metode utama input teks yang tersedia.</p>
       </td>
     </tr>
@@ -810,7 +810,7 @@ Sumber Daya</a>.</p>
     <li>Anda bisa menetapkan beberapa qualifier untuk satu set sumber daya, yang dipisahkan dengan tanda hubung. Misalnya,
 <code>drawable-en-rUS-land</code> berlaku untuk perangkat bahasa Inggris-AS dalam orientasi
 lanskap.</li>
-    <li>Qualifier harus dalam urutan seperti yang tercantum dalam <a href="#table2">tabel 2</a>. 
+    <li>Qualifier harus dalam urutan seperti yang tercantum dalam <a href="#table2">tabel 2</a>.
 Misalnya:
       <ul>
         <li>Salah: <code>drawable-hdpi-port/</code></li>
@@ -947,7 +947,7 @@ layout-land/} untuk lanskap dan {@code layout-port/} untuk potret, biarkan salah
 {@code layout/} untuk lanskap dan {@code layout-port/} untuk potret.</p>
 
 <p>Sumber daya default perlu disediakan bukan hanya karena aplikasi mungkin berjalan pada
-konfigurasi yang belum Anda antisipasi, namun juga karena versi baru Android terkadang menambahkan 
+konfigurasi yang belum Anda antisipasi, namun juga karena versi baru Android terkadang menambahkan
 qualifier konfigurasi yang tidak didukung oleh versi lama. Jika Anda menggunakan qualifier sumber daya baru,
 namun mempertahankan kompatibilitas kode dengan versi Android yang lebih lama, maka saat versi lama
 Android menjalankan aplikasi, aplikasi itu akan crash jika Anda tidak menyediakan sumber daya default, aplikasi
@@ -1058,7 +1058,7 @@ Layar</a>.</p>
   </li>
 
   <li>Kembali dan ulangi langkah 2, 3, dan 4 hingga tersisa satu direktori. Dalam contoh ini, orientasi
-layar adalah qualifier berikutnya yang memiliki kecocokan. 
+layar adalah qualifier berikutnya yang memiliki kecocokan.
 Jadi, sumber daya yang tidak menetapkan orientasi layar akan dihapus:
 <pre class="classic no-pretty-print">
 <strike>drawable-en/</strike>

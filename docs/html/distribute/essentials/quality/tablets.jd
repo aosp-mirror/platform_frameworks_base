@@ -57,7 +57,7 @@ Xnonavpage=true
 <p>The first step in delivering a great tablet app experience is making sure
 that it meets the <em>core app quality criteria</em> for all of the devices
 and form factors that the app is targeting. For complete information, see the <a
-href="{@docRoot}distribute/essentials/quality/core.html">Core App Quality Guidelines</a>. 
+href="{@docRoot}distribute/essentials/quality/core.html">Core App Quality Guidelines</a>.
 </p>
 
 <p>
@@ -73,7 +73,7 @@ Before publishing, also ensure that your app passes the basic technical checks a
 </ul>
 
 <p>If your app is already uploaded to the Google Play Developer Console, you
-  can see how it is doing against these checks  
+  can see how it is doing against these checks
   by visiting the <a href="#google-play-optimization-tips">Optimization
   Tips page</a>.</p>
 
@@ -505,7 +505,7 @@ attribute.
 
 <pre>&lt;uses-feature android:name="android.hardware.telephony" android:required="false" /&gt;</pre></li>
 
-<li>Similarly, check the manifest for <a href="{@docRoot}guide/topics/manifest/permission-element.html"><code>&lt;permission&gt;</code></a> elements that 
+<li>Similarly, check the manifest for <a href="{@docRoot}guide/topics/manifest/permission-element.html"><code>&lt;permission&gt;</code></a> elements that
 <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html#permissions">imply hardware
 feature requirements</a> that not be appropriate for tablets. If you find such
 permissions, make sure to explicitly declare a corresponding

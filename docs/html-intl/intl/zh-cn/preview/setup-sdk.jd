@@ -55,7 +55,7 @@ page.image=images/cards/card-n-sdk_2x.png
 </p>
 
 <ol>
-  <li>点击 <strong>Tools &gt;Android &gt; 
+  <li>点击 <strong>Tools &gt;Android &gt;
 SDK Manager</strong> 来打开 SDK 管理器。</li>
 
   <li>在 <strong>SDK Platforms</strong> 选项卡中选中 <strong>Android N Preview</strong> 复选框。
@@ -92,7 +92,7 @@ SDK Manager</strong> 来打开 SDK 管理器。</li>
     <a href="{@docRoot}shareables/preview/n-preview-3-docs.zip">n-preview-3-docs.zip</a></td>
     <td width="100%">
       MD5:19bcfd057a1f9dd01ffbb3d8ff7b8d81<br>
-      SHA-1:9224bd4445cd7f653c4c294d362ccb195a2101e7 
+      SHA-1:9224bd4445cd7f653c4c294d362ccb195a2101e7
     </td>
   </tr>
 <table>

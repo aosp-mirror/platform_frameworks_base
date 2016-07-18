@@ -175,7 +175,7 @@ page.tags="preview", "developer", "android"
 </p>
 
 <p>
-  Tại <strong>Preview 4 và 5</strong> bạn sẽ được sử dụng <strong>các   
+  Tại <strong>Preview 4 và 5</strong> bạn sẽ được sử dụng <strong>các
 API và SDK N cuối cùng</strong> để phát triển, và cả các ảnh hệ thống gần hoàn thiện
   để kiểm thử các hành vi, tính năng của hệ thống. Android N sẽ cung cấp một mức
   API chuẩn vào thời điểm này. Bạn có thể tiến hành kiểm thử khả năng tương thích cuối cùng đối với các ứng dụng
@@ -321,7 +321,7 @@ Android N</a> có
   Hành vi</a> chỉ ra cho bạn các phần chính yếu để kiểm thử.</li>
   <li> Tổng quan về các API mới, bao gồm một phần <a href="{@docRoot}preview/api-overview.html">Tổng quan về API</a>, bản tải xuống được
   <a href="{@docRoot}preview/setup-sdk.html#docs-dl">Tham khảo
- API</a> và các hướng dẫn chi tiết cho nhà phát triển đối với các tính năng quan trọng như 
+ API</a> và các hướng dẫn chi tiết cho nhà phát triển đối với các tính năng quan trọng như
   hỗ trợ đa cửa sổ, thông báo gộp, hỗ trợ đa bản địa và các tính năng khác.
   <li> <a href="{@docRoot}preview/samples.html">Mã mẫu</a> trong đó
   minh họa cách hỗ trợ các quyền và tính năng mới.

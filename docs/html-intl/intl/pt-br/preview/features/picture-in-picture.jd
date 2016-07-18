@@ -9,13 +9,13 @@ page.tags=androidn
 
 <h2>Neste documento</h2>
 <ol>
-  <li><a href="#declaring">Declarar que sua atividade oferece suporte ao modo de 
+  <li><a href="#declaring">Declarar que sua atividade oferece suporte ao modo de
 imagem em imagem</a></li>
   <li><a href="#pip_button">Alternar a atividade para o modo de imagem em imagem</a>
 </li>
   <li><a href="#handling_ui">Lidar com a IU durante o modo de imagem em imagem</a>
 </li>
-  <li><a href="#continuing_playback">Continuar reprodução de vídeo no modo de 
+  <li><a href="#continuing_playback">Continuar reprodução de vídeo no modo de
 imagem em imagem</a></li>
   <li><a href="#single_playback">Usar uma única atividade de reprodução para
 imagem em imagem</a></li>
@@ -99,7 +99,7 @@ na janela do PIP.</p>
 <h2 id="pip_button">Alternar a atividade para o modo de imagem em imagem</h2>
 
 Quando precisar colocar a atividade no modo de PIP, chame
-<code>Activity.enterPictureInPictureMode()</code>. O exemplo a seguir 
+<code>Activity.enterPictureInPictureMode()</code>. O exemplo a seguir
 entra no modo de PIP quando o usuário seleciona um botão dedicado ao PIP na barra de controle de
 uma mídia:</p>
 
@@ -146,7 +146,7 @@ public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode) {
 }
 </pre>
 
-<h2 id="continuing_playback">Continuar reprodução de vídeo no modo de 
+<h2 id="continuing_playback">Continuar reprodução de vídeo no modo de
 imagem em imagem</h2>
 
 <p>Quando a atividade entra no modo de PIP, o sistema a considera
@@ -177,11 +177,11 @@ imagem em imagem</h2>
 
 <p>Ao navegar pelo conteúdo
  da tela principal de seu aplicativo, um usuário pode selecionar um novo vídeo enquanto uma atividade de reprodução de vídeo estiver em modo de PIP. Reproduza o novo
- vídeo na atividade de reprodução existente em modo de tela cheia em vez de 
+ vídeo na atividade de reprodução existente em modo de tela cheia em vez de
 lançar uma nova atividade que pode confundir o usuário.</p>
 
 <p>Para que uma única atividade seja usada para solicitações de reprodução de vídeo e
-com o modo de PIP ativado ou desativado, conforme necessário, configure o 
+com o modo de PIP ativado ou desativado, conforme necessário, configure o
 <code>android:launchMode</code> da atividade para <code>singleTask</code> em seu manifesto.
 </p>
 
@@ -194,7 +194,7 @@ com o modo de PIP ativado ou desativado, conforme necessário, configure o
 </pre>
 
 <p>Na atividade, modifique {@link android.app.Activity#onNewIntent
-Activity.onNewIntent()} e processe o novo vídeo, interrompendo qualquer 
+Activity.onNewIntent()} e processe o novo vídeo, interrompendo qualquer
 reprodução existente, caso necessário.</p>
 
 <h2 id="best">Práticas recomendadas</h2>

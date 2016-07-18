@@ -18,7 +18,7 @@ page.tags="preview", "developer preview"
 
 <p>
   Android N te brinda la oportunidad de garantizar que tus aplicaciones funcionen con la próxima versión de la plataforma.
- Esta versión preliminar incluye diversas API y cambios en los comportamientos que pueden 
+ Esta versión preliminar incluye diversas API y cambios en los comportamientos que pueden
 tener impactos en tu aplicación, como se describe en las secciones <a href="{@docRoot}preview/api-overview.html">Información general de la API</a> y <a href="{@docRoot}preview/behavior-changes.html">Cambios en los comportamientos</a>.
  Al probar tu aplicación con la versión preliminar, te debes centrar en algunos cambios específicos del sistema para garantizar que los usuarios disfruten de una buena experiencia.
 

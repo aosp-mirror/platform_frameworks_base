@@ -59,7 +59,7 @@ href="{@docRoot}reference/android/widget/LinearLayout.LayoutParams.html#attr_and
 >{@code android:layout_weight}</a> attribute.
 This attribute assigns an "importance" value to a view in
 terms of how much space it should occupy on the screen. A larger weight value allows it to expand
-to fill any remaining space in the parent view. 
+to fill any remaining space in the parent view.
 Child views can specify a weight value, and then any remaining space in the view group is
 assigned to children in the proportion of their declared weight. Default
 weight is zero.</p>

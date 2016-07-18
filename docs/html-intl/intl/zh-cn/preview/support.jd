@@ -223,7 +223,7 @@ WebView 团队正在寻求关于 N 中的兼容性和运行时性能的反馈，
   <dd>
     系统现在使用 Activity 的元数据来决定图块模式。
     （之前平铺模式是由 <code>TileService.onTileAdded()</code> 的返回值决定。）
-如需了解详细信息，请参阅可下载的 <a href="{@docRoot}preview/setup-sdk.html#docs-dl">API 参考</a> 中的 
+如需了解详细信息，请参阅可下载的 <a href="{@docRoot}preview/setup-sdk.html#docs-dl">API 参考</a> 中的
 <code>TileService.META_DATA_ACTIVE_TILE</code>。
   </dd>
 </dl>
@@ -334,7 +334,7 @@ WebView 团队正在寻求关于 N 中的兼容性和运行时性能的反馈，
 </h4>
 
 <ul>
-  <li>在将一个运行 Android 6.0 或更早版本的设备更新到 N Developer Preview 时，Google 键盘不会保留首选项数据，如最近的表情符号和声音设置。 
+  <li>在将一个运行 Android 6.0 或更早版本的设备更新到 N Developer Preview 时，Google 键盘不会保留首选项数据，如最近的表情符号和声音设置。
 
 
   </li>

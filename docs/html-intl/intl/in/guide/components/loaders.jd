@@ -21,14 +21,14 @@ parent.link=activities.html
         </ol>
     </li>
   </ol>
-    
+
   <h2>Kelas-kelas utama</h2>
     <ol>
       <li>{@link android.app.LoaderManager}</li>
       <li>{@link android.content.Loader}</li>
 
-    </ol>   
-    
+    </ol>
+
     <h2>Contoh-contoh terkait</h2>
    <ol>
      <li> <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderCursor.html">
@@ -51,7 +51,7 @@ konten berubah.</li>
 dibuat kembali setelah perubahan konfigurasi. Karena itu, loader tidak perlu melakukan query ulang
 datanya.</li>
   </ul>
- 
+
 <h2 id="summary">Rangkuman Loader API</h2>
 
 <p>Ada beberapa kelas dan antarmuka yang mungkin dilibatkan dalam menggunakan
@@ -64,11 +64,11 @@ loader pada aplikasi. Semuanya dirangkum dalam tabel ini:</p>
   </tr>
   <tr>
     <td>{@link android.app.LoaderManager}</td>
-    <td>Kelas abstrak yang dikaitkan dengan {@link android.app.Activity} atau 
+    <td>Kelas abstrak yang dikaitkan dengan {@link android.app.Activity} atau
 {@link android.app.Fragment} untuk mengelola satu atau beberapa instance {@link
 android.content.Loader}. Ini membantu aplikasi mengelola
 operasi berjalan lebih lama bersamaan dengan daur hidup {@link android.app.Activity}
-atau {@link android.app.Fragment}; penggunaan paling umumnya adalah dengan 
+atau {@link android.app.Fragment}; penggunaan paling umumnya adalah dengan
 {@link android.content.CursorLoader}, akan tetapi aplikasi bebas menulis loader-nya
  sendiri untuk memuat tipe data lainnya.
     <br />
@@ -97,7 +97,7 @@ baru bila konten berubah. </td>
   </tr>
   <tr>
     <td>{@link android.content.CursorLoader}</td>
-    <td>Subkelas {@link android.content.AsyncTaskLoader} yang meng-query 
+    <td>Subkelas {@link android.content.AsyncTaskLoader} yang meng-query
 {@link android.content.ContentResolver} dan mengembalikan {@link
 android.database.Cursor}. Kelas ini mengimplementasikan protokol {@link
 android.content.Loader} dengan cara standar untuk query kursor,
@@ -124,15 +124,15 @@ yang menggunakan loader biasanya berisi yang berikut ini:</p>
   <li>{@link android.app.Activity} atau {@link android.app.Fragment}.</li>
   <li>Instance {@link android.app.LoaderManager}.</li>
   <li>{@link android.content.CursorLoader} akan memuat data yang didukung oleh {@link
-android.content.ContentProvider}. Atau, Anda dapat mengimplementasikan subkelas sendiri 
+android.content.ContentProvider}. Atau, Anda dapat mengimplementasikan subkelas sendiri
  dari {@link android.content.Loader} atau {@link android.content.AsyncTaskLoader} untuk
 memuat data dari beberapa sumber lain.</li>
   <li>Implementasi untuk {@link android.app.LoaderManager.LoaderCallbacks}.
 Di sinilah Anda membuat loader baru dan mengelola acuan bagi loader
-yang ada.</li> 
+yang ada.</li>
 <li>Cara menampilkan data loader, seperti {@link
 android.widget.SimpleCursorAdapter}.</li>
-  <li>Sumber data, seperti {@link android.content.ContentProvider}, saat menggunakan 
+  <li>Sumber data, seperti {@link android.content.ContentProvider}, saat menggunakan
 {@link android.content.CursorLoader}.</li>
 </ul>
 <h3 id="starting">Memulai Loader</h3>
@@ -140,11 +140,11 @@ android.widget.SimpleCursorAdapter}.</li>
 <p>{@link android.app.LoaderManager} mengelola satu atau beberapa instance {@link
 android.content.Loader} dalam {@link android.app.Activity} atau
 {@link android.app.Fragment}. Hanya ada satu {@link
-android.app.LoaderManager} per aktivitas atau fragmen.</p> 
+android.app.LoaderManager} per aktivitas atau fragmen.</p>
 
 <p>Anda biasanya
 memulai {@link android.content.Loader} dalam metode {@link
-android.app.Activity#onCreate onCreate()} aktivitas, atau dalam metode 
+android.app.Activity#onCreate onCreate()} aktivitas, atau dalam metode
 {@link android.app.Fragment#onActivityCreated onActivityCreated()} fragmen. Anda
 melakukannya dengan cara berikut ini:</p>
 
@@ -157,13 +157,13 @@ parameter berikut:</p>
 <ul>
   <li>ID unik yang mengidentifikasi loader. Dalam contoh ini, ID-nya adalah 0.</li>
 <li>Argumen opsional untuk dipasok ke loader
-pada saat pembuatan (dalam contoh ini <code>null</code>).</li> 
+pada saat pembuatan (dalam contoh ini <code>null</code>).</li>
 
 <li>Implementasi {@link android.app.LoaderManager.LoaderCallbacks}, yang
 akan dipanggil {@link android.app.LoaderManager} untuk melaporkan kejadian loader. Dalam contoh
 ini, kelas lokal mengimplementasikan antarmuka {@link
 android.app.LoaderManager.LoaderCallbacks}, sehingga meneruskan acuan
-ke dirinya sendiri, {@code this}.</li> 
+ke dirinya sendiri, {@code this}.</li>
 </ul>
 <p>Panggilan {@link android.app.LoaderManager#initLoader initLoader()} memastikan bahwa loader
 telah dimulai dan aktif. Ia memiliki dua kemungkinan hasil:</p>
@@ -193,7 +193,7 @@ masa hidup loader secara otomatis. {@link android.app.LoaderManager}
 memulai dan menghentikan pemuatan jika perlu, dan menjaga status loader
 dan konten terkaitnya. Seperti yang tersirat di sini, Anda akan jarang berinteraksi dengan loader
 secara langsung (meskipun misalnya menggunakan metode loader untuk menyempurnakan perilaku
-loader, lihat contoh <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderThrottle.html"> LoaderThrottle</a>). 
+loader, lihat contoh <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderThrottle.html"> LoaderThrottle</a>).
 Anda paling sering akan menggunakan metode {@link
 android.app.LoaderManager.LoaderCallbacks} untuk mengintervensi proses
 pemuatan saat terjadi kejadian tertentu. Untuk diskusi selengkapnya mengenai topik ini, lihat <a href="#callback">Menggunakan Callback LoaderManager</a>.</p>
@@ -245,7 +245,7 @@ Membuat instance dan mengembalikan {@link android.content.Loader} baru untuk ID 
 — Dipanggil bila loader yang dibuat sebelumnya selesai dimuat.
 </li></ul>
 <ul>
-  <li>{@link android.app.LoaderManager.LoaderCallbacks#onLoaderReset onLoaderReset()}  
+  <li>{@link android.app.LoaderManager.LoaderCallbacks#onLoaderReset onLoaderReset()}
     — Dipanggil bila loader yang dibuat sebelumnya sedang di-reset, sehingga datanya
 tidak tersedia.
 </li>
@@ -322,7 +322,7 @@ data tersebut karena loader memilikinya dan akan menanganinya.</p>
 <p>Loader akan melepas data setelah mengetahui bahwa aplikasi tidak
 lagi menggunakannya.  Misalnya, jika data adalah kursor dari {@link
 android.content.CursorLoader}, Anda tidak boleh memanggil {@link
-android.database.Cursor#close close()} sendiri. Jika kursor ditempatkan 
+android.database.Cursor#close close()} sendiri. Jika kursor ditempatkan
 dalam {@link android.widget.CursorAdapter}, Anda harus menggunakan metode {@link
 android.widget.SimpleCursorAdapter#swapCursor swapCursor()} agar
 {@link android.database.Cursor} lama tidak ditutup. Misalnya:</p>
@@ -343,7 +343,7 @@ public void onLoadFinished(Loader&lt;Cursor&gt; loader, Cursor data) {
 <p>Metode ini dipanggil bila loader yang dibuat sebelumnya sedang di-reset, sehingga datanya
 tidak tersedia. Callback ini memungkinkan Anda mengetahui
 kapan data akan dilepas sehingga dapat menghapus acuannya ke callback.  </p>
-<p>Implementasi ini memanggil 
+<p>Implementasi ini memanggil
 {@link android.widget.SimpleCursorAdapter#swapCursor swapCursor()}
 dengan nilai <code>null</code>:</p>
 
@@ -366,7 +366,7 @@ public void onLoaderReset(Loader&lt;Cursor&gt; loader) {
 android.app.Fragment} yang menampilkan {@link android.widget.ListView} berisi
 hasil query terhadap penyedia konten kontak. Ia menggunakan {@link
 android.content.CursorLoader} untuk mengelola query pada penyedia.</p>
- 
+
 <p>Agar aplikasi dapat mengakses kontak pengguna, seperti yang ditampilkan dalam contoh ini,
 manifesnya harus menyertakan izin
 {@link android.Manifest.permission#READ_CONTACTS READ_CONTACTS}.</p>

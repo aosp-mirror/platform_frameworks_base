@@ -69,7 +69,7 @@ semacam kontrol input tertentu, Anda bisa membangun <a href="{@docRoot}guide/top
     <tr>
         <td><a href="controls/radiobutton.html">Tombol radio</a></td>
         <td>Mirip dengan kotak cek, hanya saja cuma satu opsi yang bisa dipilih dalam kumpulan tersebut.</td>
-	<td>{@link android.widget.RadioGroup RadioGroup} 
+	<td>{@link android.widget.RadioGroup RadioGroup}
 	<br>{@link android.widget.RadioButton RadioButton} </td>
     </tr>
     <tr>

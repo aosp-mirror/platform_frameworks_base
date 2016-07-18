@@ -180,7 +180,7 @@ sau khi người dùng mở một tài liệu bằng ứng dụng:</p>
   bất kỳ hoạt động nào mà người dùng đã gọi ra cuối cùng.</dd>
 </dl>
 
-<p class="note"><strong>Lưu ý:</strong> Đối với những giá trị ngoài {@code none} và {@code never} 
+<p class="note"><strong>Lưu ý:</strong> Đối với những giá trị ngoài {@code none} và {@code never}
 hoạt động phải được định nghĩa bằng {@code launchMode="standard"}. Nếu thuộc tính này không được quy định thì
 {@code documentLaunchMode="none"} sẽ được sử dụng.</p>
 
@@ -191,7 +191,7 @@ hoàn thành. Bạn có thể khống chế hành vi này bằng lớp {@link an
 bằng một cờ {@link android.content.Intent}, hoặc bằng một thuộc tính<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">
 &lt;activity&gt;</a></code>.</p>
 
-<p>Bạn có thể luôn loại trừ hoàn toàn một tác vụ khỏi màn hình tổng quan bằng cách thiết đặt thuộc tính 
+<p>Bạn có thể luôn loại trừ hoàn toàn một tác vụ khỏi màn hình tổng quan bằng cách thiết đặt thuộc tính
 <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
 , <a href="{@docRoot}guide/topics/manifest/activity-element.html#exclude">
 {@code android:excludeFromRecents}</a> thành {@code true}.</p>

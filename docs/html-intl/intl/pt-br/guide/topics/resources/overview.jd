@@ -24,8 +24,8 @@ para que você possa mantê-los independentemente. Exteriorizar os recursos
 também permite fornecer recursos alternativos que sejam compatíveis com configurações
 de dispositivos específicos, como idiomas ou tamanhos de tela diferentes, que se tornam cada vez
 mais importantes à medida que mais dispositivos com Android são disponibilizados com configurações diferentes. Para fornecer
-compatibilidade com diferentes configurações, é preciso organizar recursos no 
-diretório {@code res/} de seu projeto usando vários subdiretórios que agrupem recursos por tipo e 
+compatibilidade com diferentes configurações, é preciso organizar recursos no
+diretório {@code res/} de seu projeto usando vários subdiretórios que agrupem recursos por tipo e
 configuração.</p>
 
 <div class="figure" style="width:429px">

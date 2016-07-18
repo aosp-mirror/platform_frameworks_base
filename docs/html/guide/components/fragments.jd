@@ -36,7 +36,7 @@ parent.link=activities.html
     <li>{@link android.app.FragmentManager}</li>
     <li>{@link android.app.FragmentTransaction}</li>
   </ol>
-  
+
   <h2>See also</h2>
   <ol>
     <li><a href="{@docRoot}training/basics/fragments/index.html">Building a Dynamic UI with Fragments</a></li>
@@ -306,7 +306,7 @@ ID for a fragment:</p>
   <ul>
     <li>Supply the {@code android:id} attribute with a unique ID.</li>
     <li>Supply the {@code android:tag} attribute with a unique string.</li>
-    <li>If you provide neither of the previous two, the system uses the ID of the container 
+    <li>If you provide neither of the previous two, the system uses the ID of the container
 view.</li>
   </ul>
 </div>
@@ -365,7 +365,7 @@ findFragmentByTag()}.</p>
 
 <p>For an example activity that uses a fragment as a background worker, without a UI, see the {@code
 FragmentRetainInstance.java} sample, which is included in the SDK samples (available through the
-Android SDK Manager) and located on your system as 
+Android SDK Manager) and located on your system as
 <code>&lt;sdk_root&gt;/APIDemos/app/src/main/java/com/example/android/apis/app/FragmentRetainInstance.java</code>.</p>
 
 
@@ -381,7 +381,7 @@ get it, call {@link android.app.Activity#getFragmentManager()} from your activit
   <li>Get fragments that exist in the activity, with {@link
 android.app.FragmentManager#findFragmentById findFragmentById()} (for fragments that provide a UI in
 the activity layout) or {@link android.app.FragmentManager#findFragmentByTag
-findFragmentByTag()} (for fragments that do or don't provide a UI).</li> 
+findFragmentByTag()} (for fragments that do or don't provide a UI).</li>
   <li>Pop fragments off the back stack, with {@link
 android.app.FragmentManager#popBackStack()} (simulating a <em>Back</em> command by the user).</li>
   <li>Register a listener for changes to the back stack, with {@link
@@ -568,7 +568,7 @@ public static class FragmentA extends ListFragment {
 
 <p>If the activity has not implemented the interface, then the fragment throws a
 {@link java.lang.ClassCastException}.
-On success, the {@code mListener} member holds a reference to activity's implementation of 
+On success, the {@code mListener} member holds a reference to activity's implementation of
 {@code OnArticleSelectedListener}, so that fragment A can share events with the activity by calling
 methods defined by the {@code OnArticleSelectedListener} interface. For example, if fragment A is an
 extension of {@link android.app.ListFragment}, each time
@@ -798,7 +798,7 @@ android.widget.FrameLayout}), or start a new activity (where the fragment can be
 
 <p>The second fragment, {@code DetailsFragment} shows the play summary for the item selected from
 the list from {@code TitlesFragment}:</p>
- 
+
 {@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java details}
 
 <p>Recall from the {@code TitlesFragment} class, that, if the user clicks a list item and the
@@ -811,7 +811,7 @@ the selected play summary when the screen is in portrait orientation:</p>
 
 {@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java
 details_activity}
- 
+
 <p>Notice that this activity finishes itself if the configuration is landscape, so that the main
 activity can take over and display the {@code DetailsFragment} alongside the {@code TitlesFragment}.
 This can happen if the user begins the {@code DetailsActivity} while in portrait orientation, but

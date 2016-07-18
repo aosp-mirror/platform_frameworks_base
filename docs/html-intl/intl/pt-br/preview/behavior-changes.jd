@@ -44,7 +44,7 @@ Visão geral da API do Android N</a></li>
 
 
 <p>
-  Junto com novos recursos e funcionalidades, o Android N 
+  Junto com novos recursos e funcionalidades, o Android N
 inclui uma variedade de mudanças de comportamento do sistema e da API. Este documento
 destaca algumas das principais mudanças que você deve entender e considerar
 nos aplicativos.
@@ -88,7 +88,7 @@ recursos do sistema, bem como a forma como ele interage com outros aplicativos p
  período, o dispositivo entrará no modo de soneca e aplicará o primeiro subconjunto de restrições: o
 acesso do aplicativo à rede será desativado e os trabalhos e sincronizações serão adiados. Se o dispositivo permanecer
 estacionário por um determinado período após entrar no modo soneca, o sistema aplicará
-as demais restrições de soneca a {@link android.os.PowerManager.WakeLock}, aos alarmes 
+as demais restrições de soneca a {@link android.os.PowerManager.WakeLock}, aos alarmes
 {@link android.app.AlarmManager} e às verificações de GPS e Wi-Fi. Independentemente
  de as restrições de soneca serem aplicadas parcial ou totalmente, o sistema despertará o
  dispositivo para breves janelas de manutenção, quando os aplicativos
@@ -151,7 +151,7 @@ do dispositivo e a experiência do usuário.
 <ul>
   <li>Os aplicativos direcionados ao Android N não receberão transmissões {@link
  android.net.ConnectivityManager#CONNECTIVITY_ACTION}, mesmo
- se tiverem entradas no manifesto solicitando notificação desses eventos. Os aplicativos em execução 
+ se tiverem entradas no manifesto solicitando notificação desses eventos. Os aplicativos em execução
 ainda poderão escutar {@code CONNECTIVITY_CHANGE} no encadeamento principal
  se solicitarem a notificação com {@link android.content.BroadcastReceiver}.
   </li>
@@ -175,7 +175,7 @@ android.app.job.JobScheduler} para reagir a mudanças em provedores de conteúdo
 
 <p>
   Para obter mais informações sobre otimizações em segundo plano no N e como adaptar seu aplicativo,
- consulte <a href="{@docRoot}preview/features/background-optimization.html">Otimizações 
+ consulte <a href="{@docRoot}preview/features/background-optimization.html">Otimizações
 em segundo plano</a>.
 </p>
 
@@ -245,14 +245,14 @@ ContentResolver.openFileDescriptor()}.
 
 <p>
 Para aplicativos direcionados ao Android N, a estrutura do Android cumpre com
-a política de API {@link android.os.StrictMode} que proíbe a exposição de URIs {@code file://} 
+a política de API {@link android.os.StrictMode} que proíbe a exposição de URIs {@code file://}
 fora do aplicativo. Se uma intenção que contenha o URI de um arquivo deixar o aplicativo, ele falhará
  com uma exceção {@code FileUriExposedException}.
 </p>
 
 <p>
 Para compartilhar arquivos entre aplicativos, você deve enviar um URI {@code content://}
-e conceder uma permissão de acesso temporária ao URI. A forma mais fácil de conceder essa permissão é 
+e conceder uma permissão de acesso temporária ao URI. A forma mais fácil de conceder essa permissão é
 usar a classe {@link android.support.v4.content.FileProvider}. Para obter mais informações
  sobre permissões e compartilhamento de arquivos,
 consulte <a href="{@docRoot}training/secure-file-sharing/index.html">Compartilhamento de Arquivos</a>.
@@ -334,7 +334,7 @@ sw320dp</a>, que é a largura do Nexus 4, um telefone comum de tamanho médio.
  rede. Verifique a ocorrência de alterações de configuração quando o aplicativo sair do estado pausado e retomar
  a execução.
     <p class="note">
-      <strong>Observação:</strong> se você armazenar em cache dados dependentes de configuração, 
+      <strong>Observação:</strong> se você armazenar em cache dados dependentes de configuração,
 recomendamos incluir metadados relevantes, como o tamanho de tela
  adequado ou a densidade de pixels desses dados. Salvar esses dados permitirá que você
  decida se será necessário atualizar os dados armazenados em cache após uma mudança
@@ -373,7 +373,7 @@ configurações ativadas. As configurações podem ser encontradas em <strong>Se
 <p>
   Para alertar sobre o uso de APIs não públicas, os aplicativos executados em um dispositivo
  Android N geram um erro na saída logcat quando um aplicativo chama uma API não pública.
-  Esse erro também é exibido na tela do dispositivo como mensagem para que o usuário 
+  Esse erro também é exibido na tela do dispositivo como mensagem para que o usuário
 fique ciente da situação. Revise o código do seu aplicativo para
  remover o uso de APIs de plataformas não públicas e faça testes completos do aplicativo usando
  um dispositivo de visualização ou um emulador.
@@ -384,7 +384,7 @@ fique ciente da situação. Revise o código do seu aplicativo para
  para obter soluções usuais de substituição de APIs privadas comuns por APIs públicas equivalentes.
   Também é possível que você esteja vinculando bibliotecas de plataforma sem perceber,
  particularmente se o aplicativo usar uma biblioteca que faz parte da plataforma (como
- <code>libpng</code>), mas não faz parte do NDK. Nesse caso, verifique se 
+ <code>libpng</code>), mas não faz parte do NDK. Nesse caso, verifique se
 o APK contém todos os arquivos .so que você pretende vincular.
 </p>
 
@@ -398,9 +398,9 @@ o APK contém todos os arquivos .so que você pretende vincular.
   Os aplicativos não devem depender de nem usar bibliotecas nativas não incluídas
  no NDK, pois elas podem ser alteradas ou removidas entre uma versão do Android
  e outra. A mudança de OpenSSL para BoringSSL é um exemplo dessas alterações.
-  Além disso, dispositivos diferentes podem oferecer níveis distintos de compatibilidade, pois 
- não há requisitos de compatibilidade para bibliotecas de plataforma não incluídas 
-no NDK. Se você precisar acessar bibliotecas que não são do NDK em dispositivos mais antigos, torne o carregamento 
+  Além disso, dispositivos diferentes podem oferecer níveis distintos de compatibilidade, pois
+ não há requisitos de compatibilidade para bibliotecas de plataforma não incluídas
+no NDK. Se você precisar acessar bibliotecas que não são do NDK em dispositivos mais antigos, torne o carregamento
 dependente do nível da Android API.
 </p>
 
@@ -528,28 +528,28 @@ Se o seu aplicativo se baseou neste comportamento, adicione uma política de ret
 
 <ul>
 <li>Quando um aplicativo for executado no Android N, mas for direcionado a um nível da API menor
- e o usuário alterar o tamanho da tela, o processo do aplicativo será eliminado. O aplicativo 
-deverá ser capaz de processar corretamente esse cenário. Caso contrário, ele falhará 
+ e o usuário alterar o tamanho da tela, o processo do aplicativo será eliminado. O aplicativo
+deverá ser capaz de processar corretamente esse cenário. Caso contrário, ele falhará
 quando o usuário restaurá-lo usando Recents.
 
 <p>
-Você deve testar o aplicativo para verificar 
-se esse comportamento não ocorre. 
-Isso pode ser feito causando uma falha idêntica 
+Você deve testar o aplicativo para verificar
+se esse comportamento não ocorre.
+Isso pode ser feito causando uma falha idêntica
 eliminando o aplicativo manualmente usando o DDMS.
 </p>
 
 <p>
-Aplicativos direcionados ao Android N e versões posteriores não serão eliminados automaticamente em mudanças de densidade. 
+Aplicativos direcionados ao Android N e versões posteriores não serão eliminados automaticamente em mudanças de densidade.
 No entanto, podem continuar a responder a alterações de configurações de forma não ideal.
 </p>
 </li>
 
 <li>
-Os aplicativos no Android N devem ser capazes de processar corretamente mudanças de configuração 
-e não devem falhar em inicializações subsequentes. Você pode verificar o comportamento do aplicativo 
+Os aplicativos no Android N devem ser capazes de processar corretamente mudanças de configuração
+e não devem falhar em inicializações subsequentes. Você pode verificar o comportamento do aplicativo
 alterando o tamanho da fonte (<strong>Setting</strong> &gt;
-<strong>Display</strong> &gt; <strong>Font size</strong>) e depois restaurando 
+<strong>Display</strong> &gt; <strong>Font size</strong>) e depois restaurando
 o aplicativo em Recents.
 </li>
 
@@ -557,12 +557,12 @@ o aplicativo em Recents.
 Devido a um erro em versões anteriores do Android, o sistema não sinaliza gravações
  em um soquete TCP no encadeamento principal como violações do modo estrito. O Android N corrigiu esse erro.
 Agora, os aplicativos que exibirem este comportamento gerarão uma{@code android.os.NetworkOnMainThreadException}.
-Geralmente, a realização de operações de rede no encadeamento principal é uma má ideia porque essas operações 
+Geralmente, a realização de operações de rede no encadeamento principal é uma má ideia porque essas operações
 geralmente têm alta latência no final, causando ANRs e problemas.
 </li>
 
 <li>
-Agora, por padrão, a família de métodos {@code Debug.startMethodTracing()} armazena 
+Agora, por padrão, a família de métodos {@code Debug.startMethodTracing()} armazena
 os resultados no diretório específico do pacote no armazenamento compartilhado,
  e não no nível mais alto
  do cartão SD.  Isso significa que os aplicativos não precisam mais solicitar a permissão {@code WRITE_EXTERNAL_STORAGE} para usar estas APIs.
@@ -583,9 +583,9 @@ que faz com que {@code ActivityThread.StopInfo} gere uma
 Se um aplicativo publica tarefas {@link java.lang.Runnable} para uma {@link android.view.View} e
  esta {@link android.view.View}
 não está anexada a uma janela, o sistema
-coloca a tarefa {@link java.lang.Runnable} em fila com a {@link android.view.View}. 
-A tarefa {@link java.lang.Runnable} não é executada até que a 
-{@link android.view.View} esteja anexada 
+coloca a tarefa {@link java.lang.Runnable} em fila com a {@link android.view.View}.
+A tarefa {@link java.lang.Runnable} não é executada até que a
+{@link android.view.View} esteja anexada
 a uma janela. Este comportamento corrige os seguintes erros:
 <ul>
    <li>Se um aplicativo publicasse em uma {@link android.view.View} de um encadeamento que não fosse o encadeamento de IU da janela pretendida
