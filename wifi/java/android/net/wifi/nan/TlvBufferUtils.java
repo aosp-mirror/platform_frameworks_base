@@ -24,6 +24,7 @@ import java.nio.BufferOverflowException;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
  * Utility class to construct and parse byte arrays using the TLV format -
@@ -464,6 +465,10 @@ public class TlvBufferUtils {
 
                 @Override
                 public TlvElement next() {
+                    if (!hasNext()) {
+                        throw new NoSuchElementException();
+                    }
+
                     int type = 0;
                     if (mTypeSize == 1) {
                         type = mArray[mOffset];
