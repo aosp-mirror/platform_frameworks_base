@@ -126,7 +126,7 @@ memasang Android N Preview SDK, lihat <a href="{@docRoot}preview/setup-sdk.html"
 </h2>
 
 <p>
-  Agar dapat menggunakan fitur bahasa Java 8 yang baru, Anda juga perlu menggunakan 
+  Agar dapat menggunakan fitur bahasa Java 8 yang baru, Anda juga perlu menggunakan
   <a class="external-link" href="https://source.android.com/source/jack.html">Jack toolchain</a> yang baru.  Toolchain Android
  yang baru ini mengompilasi sumber bahasa Java menjadi dex
   bytecode yang bisa dibaca Android, memiliki format  pustaka {@code .jack} sendiri, dan menyediakan sebagian besar fitur toolchain

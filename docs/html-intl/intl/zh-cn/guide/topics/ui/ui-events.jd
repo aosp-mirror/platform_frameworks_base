@@ -181,14 +181,14 @@ dispatchKeyEvent()}</code> 方法的分派过程。除了通过视图捕获按�
 </p>
 <ul>
   <li><code>{@link  android.app.Activity#dispatchTouchEvent(MotionEvent)
-    Activity.dispatchTouchEvent(MotionEvent)}</code>：此方法允许 {@link 
+    Activity.dispatchTouchEvent(MotionEvent)}</code>：此方法允许 {@link
     android.app.Activity} 在分派给窗口之前截获所有触摸事件。</li>
   <li><code>{@link  android.view.ViewGroup#onInterceptTouchEvent(MotionEvent)
     ViewGroup.onInterceptTouchEvent(MotionEvent)}</code>：此方法允许 {@link
     android.view.ViewGroup} 监视分派给子视图的事件。</li>
   <li><code>{@link  android.view.ViewParent#requestDisallowInterceptTouchEvent(boolean)
     ViewParent.requestDisallowInterceptTouchEvent(boolean)}</code>：
-对父视图调用此方法表明不应使用 <code>{@link 
+对父视图调用此方法表明不应使用 <code>{@link
     android.view.ViewGroup#onInterceptTouchEvent(MotionEvent)}</code> 截获触摸事件。</li>
 </ul>
 
@@ -199,7 +199,7 @@ dispatchKeyEvent()}</code> 方法的分派过程。除了通过视图捕获按�
 但是，如果设备具有触摸功能且用户开始通过触摸界面与之交互，则不再需要突出显示项目或聚焦到特定视图对象上。
 
 因此，有一种交互模式称为“触摸模式”。
- 
+
 </p>
 <p>
 对于支持触摸功能的设备，当用户触摸屏幕时，设备会立即进入触摸模式。
@@ -282,7 +282,7 @@ ID。<em></em>例如：</p>
     the framework will take care of measuring, laying out, and drawing the tree
     as appropriate.</li>
    </ol>
-   
+
    <p class="note"><strong>Note:</strong> The entire View tree is single threaded. You must always be on
    the UI thread when calling any method on any View.
    If you are doing work on other threads and want to update the state of a View

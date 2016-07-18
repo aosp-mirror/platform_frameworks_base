@@ -186,7 +186,7 @@ dari komponen aplikasi lain.</p>
 aplikasi Anda.</p>
 
 <p>Untuk mendeklarasikan layanan Anda, tambahkan sebuah elemen <a href="{@docRoot}guide/topics/manifest/service-element.html">{@code &lt;service&gt;}</a>
-sebagai anak 
+sebagai anak
 elemen <a href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>. Misalnya:</p>
 
 <pre>
@@ -539,7 +539,7 @@ layanan tersebut harus berhenti sendiri dengan memanggil {@link android.app.Serv
 komponen lain bisa menghentikannya dengan memanggil {@link android.content.Context#stopService stopService()}.</p>
 
 <p>Setelah diminta untuk berhenti dengan {@link android.app.Service#stopSelf stopSelf()} atau {@link
-android.content.Context#stopService stopService()}, sistem akan menghapus layanan 
+android.content.Context#stopService stopService()}, sistem akan menghapus layanan
 secepatnya.</p>
 
 <p>Akan tetapi, bila layanan Anda menangani beberapa permintaan ke {@link

@@ -223,7 +223,7 @@ and {@link android.app.Activity#onPause()}
 </ul>
 
 <p>
-Starting from Marshmallow, if your app is whitelisted by an EMM using {@link 
+Starting from Marshmallow, if your app is whitelisted by an EMM using {@link
 android.app.admin.DevicePolicyManager#setLockTaskPackages setLockTaskPackages},
 your activities can automatically start lock task mode when the app is
 launched.
@@ -253,15 +253,15 @@ launch into lock task mode. Non-privileged apps are treated as normal.
 
 <li>
 The default value of the {@link android.R.attr#lockTaskMode} attribute is
-normal. When this attribute is set to normal, tasks don’t launch into 
-{@link android.R.attr#lockTaskMode}, unless {@link android.app.Activity#startLockTask()} 
+normal. When this attribute is set to normal, tasks don’t launch into
+{@link android.R.attr#lockTaskMode}, unless {@link android.app.Activity#startLockTask()}
 is called. To call {@link android.app.Activity#startLockTask()},
-applications still need to be whitelisted using 
-{@link android.app.admin.DevicePolicyManager#setLockTaskPackages setLockTaskPackages}, 
+applications still need to be whitelisted using
+{@link android.app.admin.DevicePolicyManager#setLockTaskPackages setLockTaskPackages},
 otherwise, the user sees a dialog to approve entering pinned mode.
 </li>
 </ul>
-  
+
 <p>To have your activity <em>automatically</em> enter {@link android.R.attr#lockTaskMode},
 change the value of this attribute to <code>if_whitelisted</code>.
 Doing so causes your app to behave in this manner:
@@ -289,7 +289,7 @@ Example XML as follows:
 <p>
 Given either of these options, you still need to create a mechanism for
 calling {@link android.app.Activity#stopLockTask()} so that users can
-exit {@link android.R.attr#lockTaskMode}. 
+exit {@link android.R.attr#lockTaskMode}.
 </p>
 
 <h2 id="create-dpc">
@@ -298,7 +298,7 @@ exit {@link android.R.attr#lockTaskMode}.
 
 <p>
 To manage applications in COSU, you need a DPC running as device
-owner to set several policies on the device. 
+owner to set several policies on the device.
 </p>
 
 <p class="note">

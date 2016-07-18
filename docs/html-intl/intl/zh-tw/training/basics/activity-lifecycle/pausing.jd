@@ -8,13 +8,13 @@ trainingnavtop=true
 
 <div id="tb-wrapper">
   <div id="tb">
-    
+
     <h2>本課程示範</h2>
     <ol>
       <li><a href="#Pause">暫停您的應用行為顯示</a></li>
       <li><a href="#Resume">繼續您的應用行為顯示</a></li>
     </ol>
-    
+
     <h2>您也應該閱讀</h2>
     <ul>
       <li><a href="{@docRoot}guide/components/activities.html">應用行為顯示</a>
@@ -59,7 +59,7 @@ android.app.Activity#onPause()} 的呼叫，可能表示該應用行為顯示將
 
 
 <h2 id="Pause">暫停您的應用行為顯示</h2>
-      
+
 <p>若系統為您的應用行為顯示呼叫 {@link android.app.Activity#onPause()}，嚴格來說意味著您的應用行為顯示仍是部分可見，但多數情況下表示使用者離開應用行為顯示，該應用行為顯示很快將進入「已停止」狀態。
 
 通常，您應使用 {@link android.app.Activity#onPause()} 回呼執行以下操作：

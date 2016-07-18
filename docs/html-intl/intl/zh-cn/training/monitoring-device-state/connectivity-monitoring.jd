@@ -11,7 +11,7 @@ next.link=manifest-receivers.html
 
 @jd:body
 
-<div id="tb-wrapper"> 
+<div id="tb-wrapper">
 <div id="tb">
 
 <h2>本教程将指导您</h2>
@@ -27,7 +27,7 @@ next.link=manifest-receivers.html
   <li><a href="{@docRoot}guide/components/intents-filters.html">intent 和 intent 过滤器</a>
 </ul>
 
-</div> 
+</div>
 </div>
 
 <p>重复提醒和后台服务最常见的用途之一，就是为来自互联网资源的应用数据、缓存数据安排定期更新或执行长时间运行的下载任务。但是，如果您没有连接互联网，或因连接过慢而无法完成下载，那就根本没必要唤醒设备并安排更新了。</p>
@@ -35,18 +35,18 @@ next.link=manifest-receivers.html
 <p>您可以使用 {@link android.net.ConnectivityManager} 查看是否确实已连接互联网，如果已连接，您还可以了解当前的连接类型。</p>
 
 
-<h2 id="DetermineConnection">确定是否已连接互联网</h2> 
- 
+<h2 id="DetermineConnection">确定是否已连接互联网</h2>
+
 <p>如果设备未连接互联网，就没有必要根据互联网资源安排更新了。以下代码段说明如何使用 {@link android.net.ConnectivityManager} 查询有效网络并确定该网络是否已连接互联网。</p>
 
 <pre>ConnectivityManager cm =
         (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
- 
+
 NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
 boolean isConnected = activeNetwork.isConnectedOrConnecting();</pre>
 
 
-<h2 id="DetermineType">确定互联网连接的类型</h2> 
+<h2 id="DetermineType">确定互联网连接的类型</h2>
 
 <p>您也可以确定当前可用的互联网连接的类型。</p>
 
@@ -59,7 +59,7 @@ boolean isConnected = activeNetwork.isConnectedOrConnecting();</pre>
 <p>停用更新后，请务必侦听连接情况的变化，以便在建立互联网连接后恢复更新。</p>
 
 
-<h2 id="MonitorChanges">监控连接情况的变化</h2> 
+<h2 id="MonitorChanges">监控连接情况的变化</h2>
 
 <p>只要连接的具体情况发生变化，{@link android.net.ConnectivityManager} 就会广播 {@link android.net.ConnectivityManager#CONNECTIVITY_ACTION} ({@code "android.net.conn.CONNECTIVITY_CHANGE"}) 操作。您可以在清单中注册广播接收器，以便侦听这些变化并相应地恢复（或暂停）后台更新。</p>
 

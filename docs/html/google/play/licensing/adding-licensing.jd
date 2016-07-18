@@ -7,7 +7,7 @@ parent.link=index.html
 
 <div id="qv-wrapper">
 <div id="qv">
-  
+
   <h2>In this document</h2>
   <ol>
   <li><a href="#manifest-permission">Adding the Licensing Permission</a></li>
@@ -42,7 +42,7 @@ to close IPC connections</a></li>
   <li><a href="#app-publishing">Publishing a Licensed Application</a></li>
   <li><a href="#support">Where to Get Support</a></li>
 </ol>
-  
+
 </div>
 </div>
 
@@ -572,7 +572,7 @@ the <code>dontAllow()</code> method on {@code LicenseCheckerCallback}. </li>
 </li>
 <li>In case of a recoverable local or server error, such as when the network is
 not available to send the request, {@code LicenseChecker} passes a {@code RETRY} response to
-your {@code Policy} object's <code>processServerResponse()</code> method. 
+your {@code Policy} object's <code>processServerResponse()</code> method.
   <p>Also, both the {@code allow()} and {@code dontAllow()} callback methods receive a
 <code>reason</code> argument. The {@code allow()} method's reason is usually {@code
 Policy.LICENSED} or {@code Policy.RETRY} and the {@code dontAllow()} reason is usually {@code
@@ -672,7 +672,7 @@ private class MyLicenseCheckerCallback implements LicenseCheckerCallback {
             return;
         }
         displayResult(getString(R.string.dont_allow));
-        
+
         if (reason == Policy.RETRY) {
             // If the reason received from the policy is RETRY, it was probably
             // due to a loss of connection with the service, so we should give the
@@ -854,9 +854,9 @@ sample application calls <code>checkAccess()</code> from a
 <h3 id="account-key">Embed your public key for licensing</h3>
 
 <p>For each application, the Google Play service automatically
-generates a  2048-bit RSA public/private key pair that is used for 
-licensing and in-app billing. The key pair is uniquely associated with the 
-application. Although associated with the application, the key pair is 
+generates a  2048-bit RSA public/private key pair that is used for
+licensing and in-app billing. The key pair is uniquely associated with the
+application. Although associated with the application, the key pair is
 <em>not</em> the same as the key that you use to sign your applications (or derived from it).</p>
 
 <p>The Google Play Developer Console exposes the public key for licensing to any
@@ -876,11 +876,11 @@ your application's public key for licensing:</p>
 href="http://play.google.com/apps/publish">Developer Console</a> and sign in.
 Make sure that you sign in to the account from which the application you are
 licensing is published (or will be published). </li>
-<li>In the application details page, locate the <strong>Services & APIs</strong> 
+<li>In the application details page, locate the <strong>Services & APIs</strong>
 link and click it. </li>
-<li>In the <strong>Services & APIs</strong> page, locate the 
-<strong>Licensing & In-App Billing</strong> section. Your public key for 
-licensing is given in the 
+<li>In the <strong>Services & APIs</strong> page, locate the
+<strong>Licensing & In-App Billing</strong> section. Your public key for
+licensing is given in the
 <strong>Your License Key For This Application</strong> field. </li>
 </ol>
 

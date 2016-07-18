@@ -123,7 +123,7 @@ os aplicativos de canais com recursos de gravação na tabela de provedor de con
 <code>RecordedPrograms.Uri</code>. Use APIs de provedores de conteúdo para
 ler, adicionar e excluir entradas dessa tabela.</p>
 
-<p>Para saber mais sobre como trabalhar com dados de provedores de conteúdo, consulte 
+<p>Para saber mais sobre como trabalhar com dados de provedores de conteúdo, consulte
 <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
 Fundamentos do provedor de conteúdo</a> .</p>
 

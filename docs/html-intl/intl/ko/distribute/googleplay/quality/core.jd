@@ -12,7 +12,7 @@ page.image=/distribute/images/core-quality-guidelines.jpg
         <li><a href="#listing">Google Play</a></li>
 
   </ol>
-  
+
   <h2>테스트</h2>
   <ol>
     <li><a href="#test-environment">테스트 환경 설정</a></li>
@@ -24,7 +24,7 @@ page.image=/distribute/images/core-quality-guidelines.jpg
     <li><a href="{@docRoot}distribute/essentials/quality/tablets.html">태블릿 앱 품질</a></li>
         <li><a href="{@docRoot}distribute/essentials/optimizing-your-app.html">앱 최적화</a></li>
   </ol>
-  
+
 
 </div>
 </div>
@@ -59,7 +59,7 @@ page.image=/distribute/images/core-quality-guidelines.jpg
 
 
 
-  
+
 </p>
 
 <div class="headerLine">
@@ -84,7 +84,7 @@ page.image=/distribute/images/core-quality-guidelines.jpg
     <th style="width:54px;">
       ID
     </th>
-    
+
 
     <th>
       설명
@@ -166,7 +166,7 @@ page.image=/distribute/images/core-quality-guidelines.jpg
   </td>
   <td>
     어디서든지 홈 버튼을 누르면 장치의 홈 화면으로 이동합니다.
-    
+
   </td>
   <td>
     <a href="#core">CR-1</a>
@@ -292,7 +292,7 @@ data-maxresults="6">
     앱이 핵심 기능과 관련되지 않은 경우 사용자가 비용을 지불할 수 있는 서비스(예: 전화 걸기 또는 SMS) 또는 민감한 데이터(예: 연락처 또는 시스템 로그)에 대한 액세스 권한을 요청하지 않습니다.
 
 
-    
+
     </p>
   </td>
   </tr>
@@ -594,7 +594,7 @@ data-sortorder="-timestamp" data-cardsizes="6x3" data-maxresults="6">
   </td>
   <td>
     정상적인 앱 사용 및 로드 시 음악 및 동영상 재생이 매끄럽고 잔금, 버벅거림 또는 기타 아티팩트가 없습니다.
- 
+
   </td>
   <td>
     <a href="#core">CR-all</a>, <a href="#SD-1">SD-1</a>, <a href="#HA-1">HA-1</a>

@@ -1171,7 +1171,7 @@ metadata lain yang melekat ke penyedia. Kelas
             <li>
                 <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#label">
                 android:label</a></code>: Label informatif yang menjelaskan penyedia atau
-                datanya, atau keduanya. Label ini muncul dalam daftar aplikasi di 
+                datanya, atau keduanya. Label ini muncul dalam daftar aplikasi di
                 <em>Settings</em> &gt; <em>Apps</em> &gt; <em>All</em>.
             </li>
         </ul>
@@ -1189,7 +1189,7 @@ metadata lain yang melekat ke penyedia. Kelas
     Aplikasi bisa mengakses penyedia konten secara tidak langsung dengan sebuah {@link android.content.Intent}.
     Aplikasi tidak memanggil satu pun dari metode-metode {@link android.content.ContentResolver} atau
     {@link android.content.ContentProvider}. Sebagai gantinya, aplikasi mengirim intent yang memulai aktivitas,
-    yang sering kali merupakan bagian dari aplikasi penyedia sendiri. Aktivitas tujuan bertugas 
+    yang sering kali merupakan bagian dari aplikasi penyedia sendiri. Aktivitas tujuan bertugas
     mengambil dan menampilkan data dalam UI-nya. Bergantung pada tindakan dalam intent,
     aktivitas tujuan juga bisa meminta pengguna untuk membuat modifikasi pada data penyedia.
     Intent juga bisa berisi data "ekstra" yang menampilkan aktivitas tujuan

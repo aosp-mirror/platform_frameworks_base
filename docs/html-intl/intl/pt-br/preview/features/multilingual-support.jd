@@ -29,7 +29,7 @@ se seu aplicativo oferecer suporte a vários idiomas, você deverá garantir que
 esperada. Por fim, garanta que seu aplicativo possa lidar corretamente
 com idiomas que ele não tenha sido explicitamente projetado para suportar.</p>
 
-<p>Este documento começa explicando a estratégia de resolução de recursos anterior ao 
+<p>Este documento começa explicando a estratégia de resolução de recursos anterior ao
 Android N. Em seguida, ele descreve a estratégia
 de resolução de recursos aprimorada do Android N. Por fim, ele explica como aproveitar as vantagens
 do maior número de localidades para oferecer suporte a usuários multilíngues.</p>
@@ -215,7 +215,7 @@ não deixe de usar formatadores em vez de strings no código para números e dat
 <p>Um bom exemplo é o árabe, cujo suporte no Android N foi expandido de
 uma {@code ar_EG} para 27 localidades de árabe. Essas localidades podem compartilhar a maioria dos recursos,
 mas algumas preferem dígitos ASCII, enquanto outras preferem dígitos nativos. Por exemplo,
-quando você quer criar uma frase com uma variável em dígito, como 
+quando você quer criar uma frase com uma variável em dígito, como
 “Choose a 4 digit pin”, use formatadores como mostrado abaixo:</p>
 
 <pre> format(locale, "Choose a %d-digit PIN", 4)</pre>

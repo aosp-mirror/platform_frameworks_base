@@ -4,8 +4,8 @@ page.image=/distribute/images/developer-console.jpg
 Xnonavpage=true
 
 @jd:body
-    
-    <div id="qv-wrapper">           
+
+    <div id="qv-wrapper">
   <div id="qv">
     <h2>Características de la publicación</h2>
     <ol>
@@ -303,7 +303,7 @@ Xnonavpage=true
 <p>
   En la mayoría de los casos, todo lo que necesitas es un solo paquete de aplicaciones (APK), y generalmente es la manera
  más sencilla de administrar y mantener la aplicación. Sin embargo, si necesitas
- proporcionar un APK distinto para diferentes dispositivos, Google Play te 
+ proporcionar un APK distinto para diferentes dispositivos, Google Play te
  permite hacerlo.
 </p>
 

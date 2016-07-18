@@ -32,7 +32,7 @@ cells empty, but cells cannot span columns, as they can in HTML.</p>
 Each row has zero or more cells, each of which is defined by any kind of other View. So, the cells of a row may be
 composed of a variety of View objects, like ImageView or TextView objects.
 A cell may also be a ViewGroup object (for example, you can nest another TableLayout as a cell).</p>
-<p>The following sample layout has two rows and two cells in each. The accompanying screenshot shows the 
+<p>The following sample layout has two rows and two cells in each. The accompanying screenshot shows the
 result, with cell borders displayed as dotted lines (added for visual effect). </p>
 
 <table class="columns">
@@ -71,7 +71,7 @@ result, with cell borders displayed as dotted lines (added for visual effect). <
 
 <p>Columns can be hidden, marked to stretch and fill the available screen space,
     or can be marked as shrinkable to force the column to shrink until the table
-    fits the screen. See the {@link android.widget.TableLayout TableLayout reference} 
+    fits the screen. See the {@link android.widget.TableLayout TableLayout reference}
 documentation for more details. </p>
 
 

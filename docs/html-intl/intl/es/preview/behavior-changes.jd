@@ -88,7 +88,7 @@ determinadas intents implícitas.
   determinado, se activa en este el modo Descanso y se aplica el primer subconjunto de restricciones: se
   desactiva el acceso de las aplicaciones a la red y se aplazan tareas y sincronizaciones. Si el dispositivo
   permanece quieto durante un tiempo determinado tras activarse el modo Descanso, el sistema aplica el
-  resto de las restricciones del modo a {@link android.os.PowerManager.WakeLock}, 
+  resto de las restricciones del modo a {@link android.os.PowerManager.WakeLock},
   alarmas de {@link android.app.AlarmManager}, GPS y análisis de Wi-Fi. Independientemente de que
   se apliquen algunas o todas las restricciones del modo Descanso, el sistema activa el
   dispositivo durante plazos de mantenimiento breves en los cuales las aplicaciones tienen
@@ -199,7 +199,7 @@ determinadas intents implícitas.
     Los propietarios ya no pueden reducir los permisos de archivo de los archivos privados,
     y un intento de hacerlo utilizando
     {@link android.content.Context#MODE_WORLD_READABLE} o
-    {@link android.content.Context#MODE_WORLD_WRITEABLE} activará una 
+    {@link android.content.Context#MODE_WORLD_WRITEABLE} activará una
    {@link java.lang.SecurityException}.
     <p class="note">
       <strong>Nota:</strong> Desde ahora, esta restricción no se aplica planamente.
@@ -211,7 +211,7 @@ determinadas intents implícitas.
   <li>
     Pasar URI <code>file://</code> fuera del dominio del paquete puede dar al
     receptor una ruta de acceso inaccesible. Por lo tanto, los intentos de pasar un
-    URI <code>file://</code> activan una 
+    URI <code>file://</code> activan una
     <code>FileUriExposedException</code>. La manera recomendada para compartir el
     contenido de un archivo privado consiste en utilizar el {@link
     android.support.v4.content.FileProvider}.
@@ -221,8 +221,8 @@ determinadas intents implícitas.
     almacenados de manera privada por nombre de archivo. Las aplicaciones heredadas pueden terminar con una
     ruta de acceso inaccesible cuando acceden a {@link
     android.app.DownloadManager#COLUMN_LOCAL_FILENAME}. Las aplicaciones orientadas a
-    Android N o versiones posteriores activan una {@link java.lang.SecurityException} cuando 
-    intentan acceder a 
+    Android N o versiones posteriores activan una {@link java.lang.SecurityException} cuando
+    intentan acceder a
     {@link android.app.DownloadManager#COLUMN_LOCAL_FILENAME}.
     Las aplicaciones heredadas que establecen la ubicación de descarga en una ubicación pública
     usando
@@ -573,7 +573,7 @@ Muchas API de la plataforma han comenzado a controlar en busca del envío de car
 a través de transacciones {@link android.os.Binder}. Además, el
 sistema ahora vuelve a emitir {@code TransactionTooLargeExceptions}
 como {@code RuntimeExceptions}, en lugar de registrarlas o suprimirlas silenciosamente.  Un
-ejemplo común es almacenar demasiados datos en 
+ejemplo común es almacenar demasiados datos en
 {@link android.app.Activity#onSaveInstanceState Activity.onSaveInstanceState()},
  lo que hace que {@code ActivityThread.StopInfo} emita una
 {@code RuntimeException} cuando la aplicación se orienta a Android N.
@@ -585,7 +585,7 @@ la {@link android.view.View}
 no está anexada a una ventana, el sistema
 pone en cola la tarea {@link java.lang.Runnable} con la {@link android.view.View}.
 La tarea {@link java.lang.Runnable} no se ejecuta hasta que la
-{@link android.view.View} esté anexada 
+{@link android.view.View} esté anexada
 a una ventana. Este comportamiento soluciona los siguientes errores:
 <ul>
    <li>Si una aplicación publicaba una {@link android.view.View} desde un subproceso que no fuera el subproceso de la IU
@@ -600,7 +600,7 @@ a una ventana. Este comportamiento soluciona los siguientes errores:
 Si una aplicación en Android N con el permiso
 {@link android.Manifest.permission#DELETE_PACKAGES DELETE_PACKAGES}
 intentaba borrar un paquete instalado por otra aplicación,
-el sistema solicitaba la confirmación del usuario. En este escenario, las aplicaciones debían esperar recibir el estado 
+el sistema solicitaba la confirmación del usuario. En este escenario, las aplicaciones debían esperar recibir el estado
 {@link android.content.pm.PackageInstaller#STATUS_PENDING_USER_ACTION STATUS_PENDING_USER_ACTION}
 al invocar
 {@link android.content.pm.PackageInstaller#uninstall PackageInstaller.uninstall()}.

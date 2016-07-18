@@ -171,7 +171,7 @@ page.image=images/cards/card-nyc_2x.jpg
 <p>
   Agrega las CA de confianza, en formato PEM o DER, a {@code res/raw/trusted_roots}.
   Ten en cuenta que, si usas el formato PEM, el archivo debe incluir <em>solo</em> datos PEM
- y ningún texto adicional. También puedes brindar elementos 
+ y ningún texto adicional. También puedes brindar elementos
 <a href="#certificates"><code>&lt;certificates&gt;</code></a>
  múltiples en lugar de solo uno.
 </p>
@@ -338,7 +338,7 @@ base-config}, si no están anidados. Los valores no establecidos en la {@code ba
 example.com} deben usar un conjunto personalizado de CA. Además, el tráfico de Cleartext a
  estos dominios se permite <em>excepto</em> con las conexiones a {@code
  secure.example.com}. Anidando la configuración para {@code
-secure.example.com} dentro de la configuración para {@code example.com}, 
+secure.example.com} dentro de la configuración para {@code example.com},
  {@code trust-anchors} no necesita duplicación.
 </p>
 

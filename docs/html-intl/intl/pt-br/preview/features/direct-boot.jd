@@ -18,7 +18,7 @@ page.image=images/cards/card-nyc_2x.jpg
 </div>
 </div>
 
-<p>O Android N é executado em um modo seguro de <i>inicialização direta</i> 
+<p>O Android N é executado em um modo seguro de <i>inicialização direta</i>
 quando o dispositivo é ligado, mas o usuário não o
 desbloqueia. Para isso, o sistema oferece dois locais de armazenamento para dados:</p>
 

@@ -567,7 +567,7 @@ SAF, написав собственный поставщик документо
 <li>Атрибут <code>android:exported</code>, установленный в значение <code>&quot;true&quot;</code>.
  Необходимо экспортировать поставщик, чтобы он был виден другим приложениям.</li>
 
-<li>Атрибут <code>android:grantUriPermissions</code>, установленный в значение 
+<li>Атрибут <code>android:grantUriPermissions</code>, установленный в значение
 <code>&quot;true&quot;</code>. Этот параметр позволяет системе предоставлять другим приложениям доступ
 к контенту поставщика. Обсуждение того, как следует удерживать права доступа
 к конкретному документу см. в разделе <a href="#permissions">Удержание прав доступа</a>.</li>
@@ -776,7 +776,7 @@ public Cursor queryRoots(String[] projection) throws FileNotFoundException {
 
 <h4 id="queryChildDocuments">Реализация метода queryChildDocuments</h4>
 
-<p>Реализация метода 
+<p>Реализация метода
 {@link android.provider.DocumentsProvider#queryChildDocuments queryChildDocuments()}
 должна возвращать объект{@link android.database.Cursor}, указывающий на все файлы в
 заданном каталоге, используя столбцы, определенные в

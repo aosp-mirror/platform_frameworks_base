@@ -321,7 +321,7 @@ page.tags="preview", "developer", "android"
   comportamientos</a> se indican áreas clave que debes probar.</li>
   <li> Documentación de nuevas API, entre la que se incluye <a href="{@docRoot}preview/api-overview.html">Información general de API</a>, una <a href="{@docRoot}preview/setup-sdk.html#docs-dl">Referencia
   de API</a> descargable
-  y guías exhaustivas para desarrolladores que muestran, por ejemplo, soporte 
+  y guías exhaustivas para desarrolladores que muestran, por ejemplo, soporte
   de múltiples ventanas, notificaciones integradas, soporte de múltiples configuraciones regionales y mucho más.
   <li> <a href="{@docRoot}preview/samples.html">Ejemplo de código</a>, en el que se
   demuestra la manera de admitir permisos y otras funciones nuevas.

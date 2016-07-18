@@ -38,7 +38,7 @@ page.title=Работа с элементами дизайна
 
 <p>Тонирование можно применить к объектам {@link android.graphics.drawable.BitmapDrawable} и {@link
 android.graphics.drawable.NinePatchDrawable} с помощью метода {@code setTint()}. Также можно
-задать цвет и способ тонирования в макетах, используя для этого атрибуты <code>android:tint</code> и 
+задать цвет и способ тонирования в макетах, используя для этого атрибуты <code>android:tint</code> и
 <code>android:tintMode</code>.</p>
 
 

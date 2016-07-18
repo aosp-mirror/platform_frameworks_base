@@ -50,7 +50,7 @@ Android 프레임워크에서 ICU4J API를 사용하는 방법을 설명합니�
 
 <p>
   Android N은
-<code>com.ibm.icu</code>가 아니라 <code>android.icu</code> 패키지를 통해 ICU4J API의 하위 세트를 노출합니다. 
+<code>com.ibm.icu</code>가 아니라 <code>android.icu</code> 패키지를 통해 ICU4J API의 하위 세트를 노출합니다.
 Android 프레임워크는 여러 가지 이유로
 ICU4J API를 노출하지 않을 수 있습니다. 예컨대 Android N은
 일부 사용 중단된 API나 ICU 팀에서 안정적이라고 선언하지 않은 API를

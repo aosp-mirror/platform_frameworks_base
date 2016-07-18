@@ -56,7 +56,7 @@ Android, esta se omitirá
 </ul>
 
 <p class="note"><strong>Nota:</strong> El diseño de las notificaciones de esta versión de
-Android se diferencia 
+Android se diferencia
 de manera significativa del diseño de las versiones anteriores. Para obtener información sobre el diseño de las notificaciones en versiones
 anteriores, consulte <a href="./notifications_k.html">Notificaciones en Android 4.4 y versiones anteriores</a>.</p>
 
@@ -189,7 +189,7 @@ que aparece en la parte superior de una
 a los usuarios
 durante un período breve, con un diseño expandido que expone las posibles acciones.</p>
 <p> Luego de este período, la notificación se retira hacia el
-panel de notificaciones. Si la <a href="#correctly_set_and_manage_notification_priority">prioridad</a> de una notificación 
+panel de notificaciones. Si la <a href="#correctly_set_and_manage_notification_priority">prioridad</a> de una notificación
 se marca como Alta, Máxima o Pantalla completa, se obtiene una notificación emergente.</p>
 
 <p><b>Buenos ejemplos de notificaciones emergentes</b></p>
@@ -291,8 +291,8 @@ Las notificaciones de alta prioridad activan la pantalla de notificaciones emerg
 <p>Utilícelo para las notificaciones que desea que el usuario reciba, pero
 que son menos urgentes. Las notificaciones de baja prioridad tienden a aparecer en la parte inferior de la lista,
 por lo que son ideales para
-eventos como actualizaciones sociales públicas o indirectas: El usuario solicitó que se le notifiquen 
-estas 
+eventos como actualizaciones sociales públicas o indirectas: El usuario solicitó que se le notifiquen
+estas
 actualizaciones, pero estas notificaciones nunca tendrán prioridad sobre las comunicaciones
 urgentes o directas.</p>
 </td>
@@ -545,7 +545,7 @@ iconos de notificaciones para
 
     <p><strong>Lo que debe hacer</strong></p>
     <p>Utilizar el <a href="/design/style/iconography.html#notification">estilo de icono de notificación</a>
- adecuado para los iconos pequeños y el 
+ adecuado para los iconos pequeños y el
 <a href="/design/style/iconography.html#action-bar">estilo
 de icono de barra de acción</a> del diseño Material Light para los iconos
  de acciones.</p>
@@ -571,7 +571,7 @@ deben ser una imagen sobre un fondo blanco o transparente.</p>
 <h3 id="pulse_the_notification_led_appropriately">Pulsación adecuada del
 LED de notificaciones</h3>
 
-<p>Muchos dispositivos con Android incluyen un LED de notificaciones, que se utiliza para mantener al 
+<p>Muchos dispositivos con Android incluyen un LED de notificaciones, que se utiliza para mantener al
 usuario informado sobre los
 eventos cuando la pantalla está apagada. Las notificaciones con un nivel de prioridad <code>MAX</code>,
 <code>HIGH</code> o <code>DEFAULT</code> deben
@@ -701,7 +701,7 @@ comentarios sobre tareas más extensas, como descargar un archivo o codificar un
 eliminar las notificaciones constantes del panel lateral de notificaciones.</p>
 
 <h3 id="ongoing_notifications">Reproducción de medios</h3>
-<p>En Android 5.0, la pantalla de bloqueo no muestra los controles de transporte para la clase 
+<p>En Android 5.0, la pantalla de bloqueo no muestra los controles de transporte para la clase
 {@link android.media.RemoteControlClient} obsoleta. Sin embargo, <em>sí</em> muestra las notificaciones, de modo que las notificaciones de reproducción de cada
 aplicación ahora son la forma principal
 en la que los usuarios controlan la reproducción desde el estado bloqueado. A través de este comportamiento, se le otorga más control
@@ -771,7 +771,7 @@ para cualquier persona que agarre el dispositivo y encienda la pantalla.</p>
 <ul>
   <li> En el caso de los dispositivos que posean una pantalla de bloqueo segura (PIN, patrón o contraseña), la interface está formada por
  partes públicas y privadas. La interfaz pública se puede mostrar en una pantalla de bloqueo segura y,
- por ende, cualquier persona puede verla. La interfaz privada es el mundo detrás de esa pantalla de bloqueo y 
+ por ende, cualquier persona puede verla. La interfaz privada es el mundo detrás de esa pantalla de bloqueo y
  solo se revela cuando el usuario se registra en el dispositivo.</li>
 </ul>
 
@@ -799,7 +799,7 @@ Se muestra todo el contenido de la notificación.
   Esta es la opción predeterminada del sistema si no se especificó el grado de visibilidad.</li>
   <li><code><a
 href="/reference/android/app/Notification.html#VISIBILITY_PRIVATE">VISIBILITY_PRIVATE</a></code>.
-En la pantalla de bloqueo se muestra la información básica sobre la existencia de esta notificación, incluido 
+En la pantalla de bloqueo se muestra la información básica sobre la existencia de esta notificación, incluido
 el icono y el nombre de la aplicación a través de la cual se publicó. No se muestra el resto de los detalles de la notificación.
 A continuación, especificamos algunos puntos que se deben tener en cuenta:
   <ul>

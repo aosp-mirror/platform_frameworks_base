@@ -101,7 +101,7 @@ ao dispositivo.
   Donos de perfis podem exigir que os usuários especifiquem um desafio de segurança para aplicativos
 em execução no perfil de trabalho. O sistema mostra o desafio de segurança quando o
 usuário tenta abrir qualquer aplicativo de trabalho. Se o usuário preencher corretamente o
- desafio de segurança, o sistema desbloqueará e, se necessário, descriptografará o 
+ desafio de segurança, o sistema desbloqueará e, se necessário, descriptografará o
 perfil de trabalho.
 </p>
 
@@ -126,14 +126,14 @@ android.app.admin.DevicePolicyManager#setPasswordMinimumLength
 setPasswordMinimumLength()}. O dono de perfil também pode definir o bloqueio de dispositivo
 usando a instância de {@link android.app.admin.DevicePolicyManager} retornada
 pelo novo método <code>DevicePolicyManager.getParentProfileInstance()</code>
-. Além disso, donos de perfil podem personalizar a tela de credenciais do 
+. Além disso, donos de perfil podem personalizar a tela de credenciais do
 desafio de trabalho usando os novos métodos <code>setOrganizationColor()</code> e
  <code>setOrganizationName()</code> da classe {@link android.app.admin.DevicePolicyManager}
 .
 </p>
 
 <p>
-  Para obter detalhes sobre os novos métodos e constantes, consulte a 
+  Para obter detalhes sobre os novos métodos e constantes, consulte a
 página de referência <code>DevicePolicyManager</code> na <a href="{@docRoot}preview/setup-sdk.html#docs-dl">referência do N Preview SDK</a>.
 </p>
 
@@ -149,7 +149,7 @@ página de referência <code>DevicePolicyManager</code> na <a href="{@docRoot}pr
   Enquanto está suspenso, um pacote não consegue iniciar atividades, as notificações
  são suspensas e a entrada do aplicativo na <a href="{@docRoot}guide/components/recents.html">tela de visão geral</a> é ocultada.
   Os pacotes suspensos não são exibidos na <a href="{@docRoot}guide/components/recents.html">tela de visão geral</a> e não
- podem mostrar caixas de diálogo (incluindo avisos e snackbars). Também não conseguem reproduzir 
+ podem mostrar caixas de diálogo (incluindo avisos e snackbars). Também não conseguem reproduzir
  áudio nem vibrar o dispositivo.
 </p>
 
@@ -175,13 +175,13 @@ de trabalho. A tela de início indica que os aplicativos e widgets de trabalho n
 <h2 id="always-on-vpn">Always-On VPN</h2>
 
 <p>
-  Os donos de dispositivo e perfil podem exigir que os aplicativos de trabalho se conectem sempre 
+  Os donos de dispositivo e perfil podem exigir que os aplicativos de trabalho se conectem sempre
 por meio de uma VPN especificada. Se os donos definirem este requisito, o
  dispositivo iniciará a VPN automaticamente na inicialização.
 </p>
 
 <p>
-  Os donos podem exigir o uso de uma VPN chamando o novo 
+  Os donos podem exigir o uso de uma VPN chamando o novo
 método <code>DevicePolicyManager.setAlwaysOnVpnPackage()</code>. Para descobrir
  se o dono definiu um requisito de VPN, chame o novo
  método <code>DevicePolicyManager.GetAlwaysOnVpnPackage()</code>.
@@ -319,7 +319,7 @@ o registro no dispositivo usando <code>DevicePolicyManager.setSecurityLoggingEna
 </p>
 
 <p>
-  O Android N inclui as seguintes adições de API para dar suporte a este recurso. Para 
+  O Android N inclui as seguintes adições de API para dar suporte a este recurso. Para
 obter detalhes, consulte a <a href="{@docRoot}preview/setup-sdk.html#docs-dl"> Referência do N
  Preview SDK</a>.
 </p>
@@ -353,7 +353,7 @@ obter detalhes, consulte a <a href="{@docRoot}preview/setup-sdk.html#docs-dl"> R
 <h2 id="remove-cert">Remoção de certificado do cliente</h2>
 
 <p>
-  Agora, donos de perfis e dispositivos podem remover certificados de cliente que foram 
+  Agora, donos de perfis e dispositivos podem remover certificados de cliente que foram
 instalados por meio do {@link android.app.admin.DevicePolicyManager#installKeyPair
  installKeyPair()} chamando o novo método
  <code>DevicePolicyManager.removeKeyPair()</code>.
@@ -404,7 +404,7 @@ na instalação</h2>
   O dono do dispositivo ou perfil pode habilitar outro aplicativo para gerenciar restrições de aplicativo
  por meio do novo
  método <code>DevicePolicyManager.setApplicationRestrictionsManagingPackage()</code>
-. O aplicativo indicado pode verificar se a permissão foi 
+. O aplicativo indicado pode verificar se a permissão foi
 concedida chamando
  <code>DevicePolicyManager.isCallerApplicationRestrictionsManagingPackage()</code>.
 </p>
@@ -421,7 +421,7 @@ getApplicationRestrictions()} para quaisquer pacotes dentro daquele usuário ou 
 
 <p>
   Os usuários podem desativar as permissões de localidade para aplicativos de trabalho sem deixar de
- acessar informações de localidade em seus aplicativos pessoais. Um interruptor de acesso de localidade 
+ acessar informações de localidade em seus aplicativos pessoais. Um interruptor de acesso de localidade
  em separado em Location Settings permite que o usuário impeça atualizações de localização ou
  consultas de última localidade em aplicativos executados no perfil de trabalho.
 </p>

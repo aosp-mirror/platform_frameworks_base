@@ -62,7 +62,7 @@ las nuevas funciones para desarrolladores. </p>
 <h2 id="multi-window_support">Compatibilidad con ventanas múltiples</h2>
 
 
-<p>En Android N, presentamos una nueva y muy solicitada función multitarea 
+<p>En Android N, presentamos una nueva y muy solicitada función multitarea
 en la plataforma: la compatibilidad con ventanas múltiples. </p>
 
   <p>Los usuarios ahora pueden abrir dos aplicaciones al mismo tiempo en la pantalla. </p>
@@ -815,7 +815,7 @@ externo. Cuando se usan las nuevas API, el sistema emplea una IU de
 permisos simple en la que se detallan claramente los directorios a los cuales
 la aplicación solicita acceso.</p>
 
-<p>Para obtener más información, consulta la documentación 
+<p>Para obtener más información, consulta la documentación
 <a href="{@docRoot}preview/features/scoped-folder-access.html">Acceso
 a directorios determinados</a> para desarrolladores.</p>
 
@@ -846,7 +846,7 @@ de aplicaciones que crean aplicaciones de alto rendimiento y ejecución prolonga
 </p>
 
 <p>
-Android N incluye compatibilidad opcional para un 
+Android N incluye compatibilidad opcional para un
 <em>modo de rendimiento sostenido</em>, que permite que los fabricantes de equipo original (OEM) arrojen datos sobre las capacidades de rendimiento del dispositivo
 para las aplicaciones de ejecución prolongada. Los desarrolladores
 de aplicaciones pueden usar estos datos para perfeccionar sus aplicaciones y alcanzar un nivel
@@ -854,7 +854,7 @@ uniforme y predecible de rendimiento en el dispositivo durante períodos prolong
 </p>
 
 <p>
-Los desarrolladores de aplicaciones solo pueden probar esta API nueva en la N Developer Preview instalada solo en dispositivos con 
+Los desarrolladores de aplicaciones solo pueden probar esta API nueva en la N Developer Preview instalada solo en dispositivos con
 Nexus 6P. Para usar esta función,
 establece el indicador de rendimiento sostenido de la ventana
 que deseas ejecutar en el modo de rendimiento sostenido. Establece este indicador con el método
@@ -888,7 +888,7 @@ consulta <a href="https://developers.google.com/vr/android/">Google VR SDK para 
 </p>
 
 <ul>
-  <li>Puedes establecer un ícono desde el id. de un recurso llamando a 
+  <li>Puedes establecer un ícono desde el id. de un recurso llamando a
   <code>PrinterInfo.Builder.setResourceIconId()</code>.
   </li>
 

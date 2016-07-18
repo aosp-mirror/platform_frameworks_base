@@ -1,7 +1,7 @@
 page.title=Komponen Aplikasi
 page.landing=true
-page.landing.intro=Kerangka kerja aplikasi Android memungkinkan Anda membuat aplikasi yang kaya dan inovatif menggunakan seperangkat komponen yang dapat digunakan kembali. Bagian ini menjelaskan cara membangun komponen yang mendefinisikan blok pembangun aplikasi Anda dan cara menghubungkannya bersama menggunakan intent. 
-page.metaDescription=Kerangka kerja aplikasi Android memungkinkan Anda membuat aplikasi yang kaya dan inovatif menggunakan seperangkat komponen yang dapat digunakan kembali. Bagian ini menjelaskan cara membangun komponen yang mendefinisikan blok pembangun aplikasi Anda dan cara menghubungkannya bersama menggunakan intent. 
+page.landing.intro=Kerangka kerja aplikasi Android memungkinkan Anda membuat aplikasi yang kaya dan inovatif menggunakan seperangkat komponen yang dapat digunakan kembali. Bagian ini menjelaskan cara membangun komponen yang mendefinisikan blok pembangun aplikasi Anda dan cara menghubungkannya bersama menggunakan intent.
+page.metaDescription=Kerangka kerja aplikasi Android memungkinkan Anda membuat aplikasi yang kaya dan inovatif menggunakan seperangkat komponen yang dapat digunakan kembali. Bagian ini menjelaskan cara membangun komponen yang mendefinisikan blok pembangun aplikasi Anda dan cara menghubungkannya bersama menggunakan intent.
 page.landing.image=images/develop/app_components.png
 page.image=images/develop/app_components.png
 
@@ -11,7 +11,7 @@ page.image=images/develop/app_components.png
 
   <div class="col-6">
     <h3>Artikel Blog</h3>
-    
+
     <a href="http://android-developers.blogspot.com/2012/05/using-dialogfragments.html">
       <h4>Menggunakan DialogFragments</h4>
       <p>Dalam posting ini, saya akan menunjukkan cara menggunakan DialogFragments dengan pustaka dukungan v4 (untuk kompatibilitas mundur pada perangkat sebelum Honeycomb) untuk menunjukkan dialog edit sederhana dan mengembalikan hasil ke Aktivitas pemanggil menggunakan antarmuka.</p>
@@ -21,7 +21,7 @@ page.image=images/develop/app_components.png
       <h4>Fragmen Untuk Semua</h4>
       <p>Hari ini kami telah merilis pustaka statis yang memperlihatkan API Fragment yang sama (serta LoaderManager baru dan beberapa kelas lain) agar aplikasi yang kompatibel dengan Android 1.6 atau yang lebih baru bisa menggunakan fragmen untuk membuat antarmuka pengguna yang kompatibel dengan tablet. </p>
     </a>
-    
+
     <a href="http://android-developers.blogspot.com/2010/07/multithreading-for-performance.html">
       <h4>Multithreading untuk Kinerja</h4>
       <p>Praktik yang baik dalam membuat aplikasi yang responsif adalah memastikan thread UI utama Anda
@@ -32,7 +32,7 @@ ditangani di thread berbeda.</p>
 
   <div class="col-6">
     <h3>Pelatihan</h3>
-    
+
     <a href="http://developer.android.com/training/basics/activity-lifecycle/index.html">
       <h4>Mengelola Daur Hidup Aktivitas</h4>
       <p>Bagian ini menjelaskan pentingnya metode callback daur hidup yang diterima setiap instance Aktivitas

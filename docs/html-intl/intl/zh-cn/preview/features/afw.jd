@@ -127,7 +127,7 @@ page.keywords="android for work", "android N", "enterprise", "QR code"
   android.app.admin.DevicePolicyManager#setPasswordMinimumLength
   setPasswordMinimumLength()}。
 
-个人资料所有者还能通过使用由新的 <code>DevicePolicyManager.getParentProfileInstance()</code> 方法返回的 {@link android.app.admin.DevicePolicyManager} 实例来设置设备锁定， 
+个人资料所有者还能通过使用由新的 <code>DevicePolicyManager.getParentProfileInstance()</code> 方法返回的 {@link android.app.admin.DevicePolicyManager} 实例来设置设备锁定，
 
 
 此外，个人资料所有者可以使用 {@link android.app.admin.DevicePolicyManager} 类的新 <code>setOrganizationColor()</code> 和 <code>setOrganizationName()</code> 方法来自定义工作挑战的凭据屏幕。
@@ -286,7 +286,7 @@ page.keywords="android for work", "android N", "enterprise", "QR code"
 <ul>
 
   <li>
-    新类 <code>android.app.admin.SecurityLog</code> 和它的方法 
+    新类 <code>android.app.admin.SecurityLog</code> 和它的方法
 
   </li>
 
@@ -539,7 +539,7 @@ Location Settings 中的一个单独的位置访问开关允许用户拒绝对�
 <h2 id="lock-user-icon">锁定用户图标</h2>
 
 <p>
-  新的用户限制 (<code>DISALLOW_SET_USER_ICON</code>) 阻止用户更改其用户图标。 
+  新的用户限制 (<code>DISALLOW_SET_USER_ICON</code>) 阻止用户更改其用户图标。
 用户的设备所有者或个人资料所有者仍可以更改图标。
 但是个人资料所有者只能更改其控制的个人资料的用户图标。
 

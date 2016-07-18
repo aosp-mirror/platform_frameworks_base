@@ -45,7 +45,7 @@ page.image=images/cards/card-n-changes_2x.png
 
 <p>
   Bersama fitur dan kemampuan baru, Android N
-  menyertakan berbagai macam perubahan sistem dan perubahan perilaku API. Dokumen ini 
+  menyertakan berbagai macam perubahan sistem dan perubahan perilaku API. Dokumen ini
   menyoroti beberapa perubahan utama yang harus dipahami dan diperhitungkan
   dalam aplikasi Anda.
 </p>
@@ -482,7 +482,7 @@ JavaVM::AttachCurrentThread from &lt;jni.h&gt;.
   </li>
 
   <li>Pemilik perangkat bisa mengelola pengguna tambahan lebih mudah. Bila perangkat
-  berjalan dalam mode pemilik perangkat, maka pembatasan <code>DISALLOW_ADD_USER</code> 
+  berjalan dalam mode pemilik perangkat, maka pembatasan <code>DISALLOW_ADD_USER</code>
   secara otomatis akan ditetapkan. Ini mencegah pengguna membuat pengguna tambahan yang
   tidak terkelola. Selain itu, <code>CreateUser()</code> dan
   <code>createAndInitializeUser()</code> metode tidak digunakan lagi; metode
