@@ -11503,5 +11503,16 @@ public class WindowManagerService extends IWindowManager.Stub
                 return getDefaultDisplayContentLocked().getDockedDividerController().isResizing();
             }
         }
+
+        @Override
+        public void computeWindowsForAccessibility() {
+            final AccessibilityController accessibilityController;
+            synchronized (mWindowMap) {
+                accessibilityController = mAccessibilityController;
+            }
+            if (accessibilityController != null) {
+                accessibilityController.performComputeChangedWindowsNotLocked();
+            }
+        }
     }
 }
