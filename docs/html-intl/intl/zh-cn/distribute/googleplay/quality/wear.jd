@@ -91,7 +91,7 @@ page.image=/distribute/images/gp-wear-quality.png
   <td>
     <p style="margin-bottom:.5em;">
       手持类应用包括具有可穿戴设备特有功能的通知或直接在穿戴设备上运行的可穿戴类应用。
- 
+
       （<a href="{@docRoot}training/building-wearables.html">了解方法</a>）
     </p>
   </td>
@@ -441,7 +441,7 @@ data-sortorder="-timestamp" data-cardsizes="6x2" data-maxresults="6">
 
 
 <p style="margin-top:30px;">
-  <strong>如果我的应用不符合穿戴设备的要求，是否仍会在 Google Play 
+  <strong>如果我的应用不符合穿戴设备的要求，是否仍会在 Google Play
 上向手机和平板电脑显示我的新应用或更新版本并且仍可在可穿戴设备上安装？</strong>
 </p>
 <p>

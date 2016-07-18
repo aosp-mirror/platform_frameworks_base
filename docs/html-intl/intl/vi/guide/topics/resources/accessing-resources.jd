@@ -259,8 +259,8 @@ tham chiếu một tài nguyên hệ thống, bạn sẽ cần đưa vào tên g
     android:text=&quot;&#64;string/hello&quot; /&gt;
 </pre>
 
-<p class="note"><strong>Lưu ý:</strong> Bạn nên sử dụng các tài nguyên xâu 
-vào mọi lúc, để ứng dụng của bạn có thể được bản địa hóa cho các ngôn ngữ khác. 
+<p class="note"><strong>Lưu ý:</strong> Bạn nên sử dụng các tài nguyên xâu
+vào mọi lúc, để ứng dụng của bạn có thể được bản địa hóa cho các ngôn ngữ khác.
 Để biết thông tin về việc tạo các tài nguyên
 thay thế (chẳng hạn như xâu được bản địa hóa), hãy xem phần <a href="providing-resources.html#AlternativeResources">Cung cấp Tài nguyên
 Thay thế</a>. Để được hướng dẫn đầy đủ về việc bản địa hóa ứng dụng của bạn cho các ngôn ngữ khác,

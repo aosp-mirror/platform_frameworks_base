@@ -11,7 +11,7 @@ next.link=manifest-receivers.html
 
 @jd:body
 
-<div id="tb-wrapper"> 
+<div id="tb-wrapper">
 <div id="tb">
 
 <h2>This lesson teaches you to</h2>
@@ -27,7 +27,7 @@ next.link=manifest-receivers.html
   <li><a href="{@docRoot}guide/components/intents-filters.html">Intents and Intent Filters</a>
 </ul>
 
-</div> 
+</div>
 </div>
 
 <p>Some of the most common uses for repeating alarms and background services is to schedule regular
@@ -39,21 +39,21 @@ download, why both waking the device to schedule the update at all?</p>
 connected to the Internet, and if so, what type of connection is in place.</p>
 
 
-<h2 id="DetermineConnection">Determine if You Have an Internet Connection</h2> 
- 
+<h2 id="DetermineConnection">Determine if You Have an Internet Connection</h2>
+
 <p>There's no need to schedule an update based on an Internet resource if you aren't connected to
-the Internet. The following snippet shows how to use the {@link android.net.ConnectivityManager} 
+the Internet. The following snippet shows how to use the {@link android.net.ConnectivityManager}
 to query the active network and determine if it has Internet connectivity.</p>
 
 <pre>ConnectivityManager cm =
         (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
- 
+
 NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
 boolean isConnected = activeNetwork != null &&
                       activeNetwork.isConnectedOrConnecting();</pre>
 
 
-<h2 id="DetermineType">Determine the Type of your Internet Connection</h2> 
+<h2 id="DetermineType">Determine the Type of your Internet Connection</h2>
 
 <p>It's also possible to determine the type of Internet connection currently available.</p>
 
@@ -71,7 +71,7 @@ suspended until you have a Wi-Fi connection.</p>
 to resume them once an Internet connection has been established.</p>
 
 
-<h2 id="MonitorChanges">Monitor for Changes in Connectivity</h2> 
+<h2 id="MonitorChanges">Monitor for Changes in Connectivity</h2>
 
 <p>The {@link android.net.ConnectivityManager} broadcasts the {@link
 android.net.ConnectivityManager#CONNECTIVITY_ACTION} ({@code

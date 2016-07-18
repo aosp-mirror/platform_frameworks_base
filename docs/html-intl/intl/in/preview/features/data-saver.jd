@@ -50,7 +50,7 @@ page.image=images/cards/card-nyc_2x.jpg
 <p>
   N Developer Preview memperluas {@link android.net.ConnectivityManager}
   API untuk menyediakan cara pada aplikasi untuk <a href="#status">menerima preferensi Data Saver
-  pengguna</a> dan <a href="#monitor-changes">memantau perubahan 
+  pengguna</a> dan <a href="#monitor-changes">memantau perubahan
   preferensi</a>. Hal ini dianggap praktik terbaik bagi aplikasi untuk memeriksa apakah
   pengguna telah mengaktifkan DataSaver dan berusaha membatasi penggunaan data latar depan dan
   data latar belakang.

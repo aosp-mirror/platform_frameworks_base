@@ -268,7 +268,7 @@ trainingnavtop=true
                         Uri.withAppendedPath(
                                 contactUri, Photo.CONTENT_DIRECTORY);
             }
-    
+
         /*
          * Retrieves an AssetFileDescriptor object for the thumbnail
          * URI

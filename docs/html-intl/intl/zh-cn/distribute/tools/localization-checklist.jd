@@ -62,7 +62,7 @@ page.image=/distribute/images/localization-checklist.jpg
 
 用户可以控制其 Android 设备上使用的语言和语言区域，反过来这些因素也会影响应用的显示方式。
 
-  
+
 </p>
 
 <p>
@@ -820,7 +820,7 @@ data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
 </h4>
 
 <p>
-  如果您正在准备国际化营销，请务必加入<a href="{@docRoot}distribute/tools/promote/badges.html">本地化的 Google Play 
+  如果您正在准备国际化营销，请务必加入<a href="{@docRoot}distribute/tools/promote/badges.html">本地化的 Google Play
 徽章</a>，让用户知道您是在 Google Play 上发布应用的。您可以使用徽章生成器快速构建本地化的徽章，然后用到您的网站或营销材料中。
 
 您还可以获得高分辨率的资源。

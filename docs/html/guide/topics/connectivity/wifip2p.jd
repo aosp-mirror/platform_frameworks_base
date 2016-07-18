@@ -66,7 +66,7 @@ a photo sharing application.</p>
   methods. A {@link android.net.wifi.p2p.WifiP2pManager#WIFI_P2P_PEERS_CHANGED_ACTION} intent is
   also broadcast if the {@link android.net.wifi.p2p.WifiP2pManager#discoverPeers discoverPeers()}
   method discovers that the peers list has changed.</p>
-  
+
   <h2 id="api">API Overview</h2>
 
 <p>The {@link android.net.wifi.p2p.WifiP2pManager} class provides methods to allow you to interact with
@@ -135,7 +135,7 @@ a photo sharing application.</p>
   are described in the following table:</p>
 
  <p class="table-caption"><strong>Table 2.</strong> Wi-Fi P2P Listeners</p>
- 
+
  <table>
     <tr>
       <th>Listener interface</th>
@@ -395,7 +395,7 @@ protected void onPause() {
   available peers that are in range. The call to this function is asynchronous and a success or
   failure is communicated to your application with {@link
   android.net.wifi.p2p.WifiP2pManager.ActionListener#onSuccess onSuccess()} and {@link
-  android.net.wifi.p2p.WifiP2pManager.ActionListener#onFailure onFailure()} if you created a 
+  android.net.wifi.p2p.WifiP2pManager.ActionListener#onFailure onFailure()} if you created a
   {@link android.net.wifi.p2p.WifiP2pManager.ActionListener}. The
   {@link android.net.wifi.p2p.WifiP2pManager.ActionListener#onSuccess onSuccess()} method only notifies you
   that the discovery process succeeded and does not provide any information about the actual peers

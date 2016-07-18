@@ -24,7 +24,7 @@ aplikasi, agar Anda bisa memeliharanya secara independen. Mengeksternalkan
 sumber daya juga membuat Anda dapat menyediakan sumber daya alternatif yang mendukung konfigurasi
 perangkat tertentu seperti bahasa atau ukuran layar yang berbeda, yang semakin penting
 seiring semakin banyak tersedianya perangkat berbasis Android dengan konfigurasi berbeda. Untuk
-memberikan kompatibilitas dengan konfigurasi berbeda, Anda harus menata sumber daya dalam 
+memberikan kompatibilitas dengan konfigurasi berbeda, Anda harus menata sumber daya dalam
 direktori {@code res/} proyek Anda, menggunakan berbagai subdirektori yang mengelompokkan sumber daya menurut tipe
 dan konfigurasinya.</p>
 
@@ -46,7 +46,7 @@ ukuran layar berbeda.</p>
 <em>alternatif</em> untuk aplikasi Anda:</p>
 <ul>
   <li>Sumber daya default adalah sumber daya yang harus digunakan apa pun
-konfigurasi perangkatnya atau jika tidak ada sumber daya alternatif yang sesuai 
+konfigurasi perangkatnya atau jika tidak ada sumber daya alternatif yang sesuai
 dengan konfigurasi saat ini.</li>
   <li>Sumber daya alternatif adalah sumber daya yang Anda desain untuk digunakan dengan
 konfigurasi tertentu. Untuk menetapkan bahwa satu kelompok sumber daya ditujukan bagi konfigurasi tertentu,

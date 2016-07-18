@@ -35,7 +35,7 @@ page.keywords="android for work", "android N", "enterprise", "QR code"
         <li><a href="#process-logging">Registros de procesos empresariales
                 </a></li>
 
-        <li><a href="#bug-reports">Informes de errores remotos 
+        <li><a href="#bug-reports">Informes de errores remotos
                 </a></li>
 
         <li><a href="#remove-cert">Quitar un certificado de cliente
@@ -109,7 +109,7 @@ Android N.</p>
   Si el propietario de un perfil envía una intent {@link
   android.app.admin.DevicePolicyManager#ACTION_SET_NEW_PASSWORD}, el
  sistema le pide al usuario que configure una comprobación de seguridad. El propietario del perfil también puede
- enviar una intent <code>ACTION_SET_NEW_PARENT_PROFILE_PASSWORD</code> 
+ enviar una intent <code>ACTION_SET_NEW_PARENT_PROFILE_PASSWORD</code>
  para que el usuario establezca un bloqueo de dispositivo.
 </p>
 
@@ -133,7 +133,7 @@ Android N.</p>
 </p>
 
 <p>
-  Para obtener detalles sobre los nuevos métodos y constantes, consulta la página de referencia de 
+  Para obtener detalles sobre los nuevos métodos y constantes, consulta la página de referencia de
   <code>DevicePolicyManager</code> en la <a href="{@docRoot}preview/setup-sdk.html#docs-dl">Referencia sobre N Preview SDK</a>.
 </p>
 
@@ -156,7 +156,7 @@ Android N.</p>
 <p>
   Los lanzadores deben aplicar una IU distintiva para las aplicaciones suspendidas a fin de mostrar que las
  aplicaciones no están actualmente disponibles; por ejemplo, el ícono de la aplicación puede aparecer en color
- gris. Los lanzadores pueden averiguar si una aplicación está suspendida llamando al nuevo método 
+ gris. Los lanzadores pueden averiguar si una aplicación está suspendida llamando al nuevo método
   <code>DevicePolicyManager.getPackageSuspended()</code>.
 </p>
 
@@ -181,9 +181,9 @@ Android N.</p>
 </p>
 
 <p>
-  Los propietarios pueden requerir el uso de una VPN llamando al nuevo método 
+  Los propietarios pueden requerir el uso de una VPN llamando al nuevo método
  <code>DevicePolicyManager.setAlwaysOnVpnPackage()</code>. Para averiguar
- si el propietario ha establecido un requisito de VPN, llama al nuevo método 
+ si el propietario ha establecido un requisito de VPN, llama al nuevo método
   <code>DevicePolicyManager.GetAlwaysOnVpnPackage()</code>.
 </p>
 
@@ -255,7 +255,7 @@ Android N.</p>
 <p>
   Los propietarios pueden reiniciar sus dispositivos de forma remota. En algunos casos, no se puede acceder al botón de encendido de los dispositivos implementados en
  lugares públicos dentro de recintos. Si se debe
- reiniciar un dispositivo, los administradores pueden hacerlo utilizando el nuevo método 
+ reiniciar un dispositivo, los administradores pueden hacerlo utilizando el nuevo método
   <code>DevicePolicyManager.reboot()</code>.
 </p>
 
@@ -271,7 +271,7 @@ Android N.</p>
 <p>
   Los propietarios de dispositivos pueden identificar actividades sospechosas mediante un rastreo remoto de la actividad del
  dispositivo, incluidos inicios de aplicaciones, actividad adb y desbloqueos de pantalla. Los registros de
- procesos no requieren del consentimiento del usuario. Para recuperar registros, los propietarios de dispositivos habilitan 
+ procesos no requieren del consentimiento del usuario. Para recuperar registros, los propietarios de dispositivos habilitan
  los registros de dispositivos mediante <code>DevicePolicyManager.setSecurityLoggingEnabled()</code>.
 </p>
 
@@ -402,10 +402,10 @@ Android N.</p>
 
 <p>
   El propietario del dispositivo o perfil puede habilitar otra aplicación para que administre las restricciones de
- aplicaciones mediante el nuevo método 
+ aplicaciones mediante el nuevo método
   <code>DevicePolicyManager.setApplicationRestrictionsManagingPackage()</code>
 . La aplicación nominada puede controlar si se otorgó este permiso
- llamando a 
+ llamando a
   <code>DevicePolicyManager.isCallerApplicationRestrictionsManagingPackage()</code>.
 </p>
 
@@ -461,8 +461,8 @@ Android N.</p>
 <p>
   Los propietarios de perfiles y dispositivos pueden configurar múltiples certificados de CA para una configuración
  de Wi-Fi determinada. Cuando las redes de Wi-Fi corporativas tienen CA independientes para
- diferentes puntos de acceso con el mismo SSID, los administradores de TI pueden incluir todas las 
- CA relevantes en la configuración Wi-Fi utilizando el nuevo método 
+ diferentes puntos de acceso con el mismo SSID, los administradores de TI pueden incluir todas las
+ CA relevantes en la configuración Wi-Fi utilizando el nuevo método
   <code>setCaCertificates()</code>.
 </p>
 
@@ -511,7 +511,7 @@ Android N.</p>
 </p>
 
 <p>
-  El teléfono debe controlar el nuevo marcador 
+  El teléfono debe controlar el nuevo marcador
   <code>android.telecom.Call.PROPERTY_WORK_CALL</code> para determinar si una llamada es
  de tipo laboral. Si se trata de una llamada laboral, el teléfono debe indicarlo
 , por ejemplo, mediante el agregado de una insignia de trabajo.
@@ -524,7 +524,7 @@ Android N.</p>
  usuario modifique el fondo de pantalla. Los propietarios de dispositivos o perfiles aún pueden
  modificar el fondo de pantalla. Sin embargo, solo pueden hacerlo para el
  usuario o perfil que controlan. Por ejemplo, el propietario de un perfil no puede modificar el
- fondo de pantalla del usuario primario, 
+ fondo de pantalla del usuario primario,
  pero sí pueden hacerlo el propietario de un dispositivo o el propietario de un perfil en el perfil principal. El propietario de un dispositivo o perfil que desea modificar el
  fondo de pantalla debe controlar si el usuario o perfil que administra posee un
  fondo de pantalla ({@link android.app.WallpaperManager#isWallpaperSupported
@@ -544,7 +544,7 @@ Android N.</p>
 <h2 id="health-monitoring">Control del estado del dispositivo</h2>
 
 <p>
-  El propietario de un perfil o dispositivo puede usar la nueva interfaz 
+  El propietario de un perfil o dispositivo puede usar la nueva interfaz
   <code>HardwarePropertiesManager</code> para recuperar información
  sobre el estado del dispositivo, como por ejemplo, las temperaturas de CPU o GPU y el uso de la CPU. La nueva interfaz
  de control es especialmente útil para controlar dispositivos sin supervisión

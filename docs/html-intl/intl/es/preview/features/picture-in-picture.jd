@@ -181,7 +181,7 @@ video en la actividad de reproducción actual en modo de pantalla completa, en l
 iniciar una nueva actividad que podría confundir al usuario.</p>
 
 <p>A fin de garantizar que se utilice una única actividad para las solicitudes de reproducción de video y que esta
- ingrese en el modo PIP o salga de este cuando sea necesario, configura el 
+ ingrese en el modo PIP o salga de este cuando sea necesario, configura el
 <code>android:launchMode</code> de la actividad en <code>singleTask</code>, en el manifiesto:
 </p>
 
@@ -209,5 +209,5 @@ esquina de la pantalla, debes evitar mostrar información importante en la panta
 en cualquier área que pueda quedar oculta detrás de la ventana de PIP.</p>
 
 <p>Cuando una actividad se encuentra en modo PIP, de forma predeterminada, no tiene focalización en las entradas. Para
-recibir eventos de entradas durante este modo, usa 
+recibir eventos de entradas durante este modo, usa
 <code>MediaSession.setMediaButtonReceiver()</code>.</p>

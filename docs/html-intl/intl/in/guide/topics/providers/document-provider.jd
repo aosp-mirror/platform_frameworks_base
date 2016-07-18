@@ -96,7 +96,7 @@ walaupun cara penyedia dokumen Anda secara fisik menyimpan data adalah terserah 
 Platform Android terdiri dari beberapa penyedia dokumen bawaan, seperti
 Downloads, Images, dan Videos.</li>
 
-<li><strong>Aplikasi klien</strong>&mdash;Aplikasi custom yang memanggil intent 
+<li><strong>Aplikasi klien</strong>&mdash;Aplikasi custom yang memanggil intent
 {@link android.content.Intent#ACTION_OPEN_DOCUMENT} dan/atau
 {@link android.content.Intent#ACTION_CREATE_DOCUMENT} dan menerima
 file yang dihasilkan penyedia dokumen.</li>
@@ -446,7 +446,7 @@ bisa terus menulis ke dokumen itu.</p>
 
 <h3 id="delete">Menghapus dokumen</h3>
 
-<p>Jika Anda memiliki URI dokumen dan 
+<p>Jika Anda memiliki URI dokumen dan
 {@link android.provider.DocumentsContract.Document#COLUMN_FLAGS Document.COLUMN_FLAGS}
  dokumen berisi
 {@link android.provider.DocumentsContract.Document#FLAG_SUPPORTS_DELETE SUPPORTS_DELETE},

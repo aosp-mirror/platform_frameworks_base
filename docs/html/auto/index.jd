@@ -568,7 +568,7 @@ nonavpage=true
                       width="120" height="120" class="img-logo" />
               </a>
             </div>
-           
+
             <div class="col-5">
               <a href="http://www.ramtrucks.com/">
                   <img src="{@docRoot}auto/images/logos/auto/ram.png"
@@ -590,7 +590,7 @@ nonavpage=true
                       width="120" height="120" class="img-logo" />
               </a>
             </div>
-           
+
             <div class="col-5">
               <a href="http://www.seat.com/">
                   <img src="{@docRoot}auto/images/logos/auto/seat.png"
@@ -604,7 +604,7 @@ nonavpage=true
                       width="120" height="120" class="img-logo" />
               </a>
             </div>
-            
+
             <div class="col-5">
               <a href="http://www.smotor.com/">
                   <img src="{@docRoot}auto/images/logos/auto/ssangyong.png"
@@ -626,7 +626,7 @@ nonavpage=true
                       width="120" height="120" class="img-logo" />
               </a>
             </div>
-            
+
             <div class="col-5">
               <a href="http://www.tatamotors.com/">
                   <img src="{@docRoot}auto/images/logos/auto/tata.png"
@@ -648,8 +648,8 @@ nonavpage=true
                       width="120" height="120" class="img-logo" />
               </a>
             </div>
-			
-			
+
+
             <div class="col-5">
               <a href="http://www.volvocars.com/intl">
                   <img src="{@docRoot}auto/images/logos/auto/volvo.png"

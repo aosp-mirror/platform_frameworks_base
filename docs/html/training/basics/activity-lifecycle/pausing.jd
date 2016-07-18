@@ -8,13 +8,13 @@ trainingnavtop=true
 
 <div id="tb-wrapper">
   <div id="tb">
-    
+
     <h2>This lesson teaches you to</h2>
     <ol>
       <li><a href="#Pause">Pause Your Activity</a></li>
       <li><a href="#Resume">Resume Your Activity</a></li>
     </ol>
-    
+
     <h2>You should also read</h2>
     <ul>
       <li><a href="{@docRoot}guide/components/activities.html">Activities</a>
@@ -32,7 +32,7 @@ class="button">Download the demo</a>
   </div>
 </div>
 
-<p>During normal app use, the foreground activity is sometimes obstructed by other 
+<p>During normal app use, the foreground activity is sometimes obstructed by other
 visual components that cause the activity to <em>pause</em>.  For example, when a semi-transparent
 activity opens (such as one in the style of a dialog), the previous activity pauses. As long as the
 activity is still partially visible but currently not the activity in focus, it remains paused.</p>
@@ -60,7 +60,7 @@ system calls {@link android.app.Activity#onResume onResume()} (2).</p>
 
 
 <h2 id="Pause">Pause Your Activity</h2>
-      
+
 <p>When the system calls {@link android.app.Activity#onPause()} for your activity, it
 technically means your activity is still partially visible, but most often is an indication that
 the user is leaving the activity and it will soon enter the Stopped state.  You should usually use

@@ -49,7 +49,7 @@ Android N では、アプリのデベロッパー向けの Android フレーム�
 <h2 id="relation">ICU4J との関係</h2>
 
 <p>
-  Android N では、<code>com.ibm.icu</code> ではなく 
+  Android N では、<code>com.ibm.icu</code> ではなく
 <code>android.icu</code> パッケージを介して ICU4J API のサブセットを公開しています。Android フレームワークでは、さまざまな理由により ICU4J API を公開しないという選択も考えられます。たとえば、Android N で廃止された API を公開しないため、または ICU チームからまだ安定版の発表がないため、などの理由があります。
 
 

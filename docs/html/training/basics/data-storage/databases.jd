@@ -119,11 +119,11 @@ application. Your data is secure, because by default this area is not
 accessible to other applications.</p>
 
 <p>A useful set of APIs is available in the {@link
-android.database.sqlite.SQLiteOpenHelper} class. 
+android.database.sqlite.SQLiteOpenHelper} class.
 When you use this class to obtain references to your database, the system
-performs the potentially 
+performs the potentially
 long-running operations of creating and updating the database only when
-needed and <em>not during app startup</em>. All you need to do is call 
+needed and <em>not during app startup</em>. All you need to do is call
 {@link android.database.sqlite.SQLiteOpenHelper#getWritableDatabase} or
 {@link android.database.sqlite.SQLiteOpenHelper#getReadableDatabase}.</p>
 

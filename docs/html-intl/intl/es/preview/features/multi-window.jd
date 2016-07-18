@@ -158,7 +158,7 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
   si quieres que las actividades de tu aplicación admitan la visualización de ventanas múltiples. Puedes establecer
   atributos en tu manifiesto para controlar el tamaño y el diseño.
   La configuración de atributos de una actividad raíz se aplica a todas las actividades
- de su pila de tareas. Por ejemplo, si 
+ de su pila de tareas. Por ejemplo, si
   <code>android:resizeableActivity</code> está configurado en true para la actividad raíz, se puede modificar el tamaño de todas las actividades
  de la pila de tareas.
 </p>
@@ -474,7 +474,7 @@ android:supportsPictureInPicture=["true" | "false"]
 
 <p>
   Ya sea que actualices o no tu aplicación para Android N, debes
-  verificar la forma en que se comporta en modo de ventanas múltiples en caso de que un usuario intente iniciarla 
+  verificar la forma en que se comporta en modo de ventanas múltiples en caso de que un usuario intente iniciarla
   en modo de ventanas múltiples en un dispositivo con Android N.
 </p>
 
@@ -526,7 +526,7 @@ android:supportsPictureInPicture=["true" | "false"]
   </li>
 
   <li>Cambia el tamaño de tu aplicación en modo de pantalla dividida al arrastrar la línea divisoria.
-  Verifica que la aplicación cambie de tamaño sin fallar y que estén visibles los elementos 
+  Verifica que la aplicación cambie de tamaño sin fallar y que estén visibles los elementos
  necesarios de la IU.
   </li>
 

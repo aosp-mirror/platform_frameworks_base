@@ -14,7 +14,7 @@ excludeFromSuggestions=true
 <a name="0.9_r1" id="0.9_r1"></a>
 <h2>Android 0.9 SDK Beta (r1)</h2>
 
-<p>This beta SDK release contains a large number of bug fixes and improvements from the early-look SDKs.&nbsp; 
+<p>This beta SDK release contains a large number of bug fixes and improvements from the early-look SDKs.&nbsp;
 The sections below describe the highlights of the release.
 
 <h3>New Features and Notable Changes</h3>
@@ -109,7 +109,7 @@ The sections below describe the highlights of the release.
 </ul>
 
 <p>Known issues/limitations for Graphical Layout Editor include:</p>
-	
+
 		<ul>
 			<li>Font display is very close but not equals to on-device rendering since the font engine in Java slightly differs from the font engine in Android. This should not have any impact on your layouts.
 			</li>
@@ -123,7 +123,7 @@ The sections below describe the highlights of the release.
 			</li>
 			<li>No support for WebView, MapView and SurfaceView.
 			</li>
-			<li>No UI support for &lt;merge&gt;, &lt;include&gt;, &lt;ViewStub&gt; elements. You can add these elements to your manifest using the xml editor only. 
+			<li>No UI support for &lt;merge&gt;, &lt;include&gt;, &lt;ViewStub&gt; elements. You can add these elements to your manifest using the xml editor only.
 			</li>
 			<li>If a layout fails to render in a way that prevents the whole editor from opening, you can:
 
@@ -221,7 +221,7 @@ specify which port the emulator should bind to for the console. &lt;port&gt; mus
 	</li>
 	<li>The DDMS utility has been refactored into library form. This is not of direct interest to application developers, but may be of interest to vendors interested in integrating the Android SDK into their products. Watch for more information about the ddmlib library soon.
 	</li>
-	<li>For performance and maintainability reasons, some APIs were moved into separate modules that must be explicitly included in the application via a directive in AndroidManifest.xml.&nbsp; Notable APIs that fall into this category are the MapView, and the java.awt.* classes, which each now reside in separate modules that must be imported.&nbsp; Developers who overlook this requirement will see ClassNotFoundExceptions that seem spurious. 
+	<li>For performance and maintainability reasons, some APIs were moved into separate modules that must be explicitly included in the application via a directive in AndroidManifest.xml.&nbsp; Notable APIs that fall into this category are the MapView, and the java.awt.* classes, which each now reside in separate modules that must be imported.&nbsp; Developers who overlook this requirement will see ClassNotFoundExceptions that seem spurious.
 	</li>
 	<li>Developers who use 'adb push' to install applications must now use 'adb install', since the full package manager is now implemented. 'adb push' will no longer work to install .apk files.
 	</li>
@@ -386,14 +386,14 @@ specify which port the emulator should bind to for the console. &lt;port&gt; mus
 
 <h4>Emulator Console</h4>
 <ul>
-<li>Now provides support for emulating inbound SMS messages. The ADT plugin and DDMS provide integrated access to 
-this capability. For more information about how to emulate inbound SMS from the console, 
+<li>Now provides support for emulating inbound SMS messages. The ADT plugin and DDMS provide integrated access to
+this capability. For more information about how to emulate inbound SMS from the console,
 see <a href="{@docRoot}tools/help/emulator.html#sms">SMS Emulation</a>. </li>
 </ul>
 
 <h4>Emulator</h4>
-<ul><li>The default emulator skin has been changed to HVGA-P from QVGA-L. For information 
-about emulator skins and how to load a specific skin when starting the emulator, see 
+<ul><li>The default emulator skin has been changed to HVGA-P from QVGA-L. For information
+about emulator skins and how to load a specific skin when starting the emulator, see
 <a href="{@docRoot}tools/help/emulator.html#skins">Using Emulator Skins</a>.</li>
 </ul>
 

@@ -88,7 +88,7 @@ page.image=images/cards/card-nyc_2x.jpg
 </p>
 
 <p>
-  在此文件中，我們將學習如何使用替代方法 (例如 
+  在此文件中，我們將學習如何使用替代方法 (例如
   {@link android.app.job.JobScheduler}) 改寫您的應用程式以配合這些新的限制。
 
 </p>

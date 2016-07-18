@@ -147,7 +147,7 @@ pemberitahuan, Anda meneruskan objek {@link android.app.Notification} ke sistem 
 </p>
 <p>
     Dalam {@link android.app.Notification}, tindakan itu sendiri didefinisikan oleh
-    {@link android.app.PendingIntent} berisi 
+    {@link android.app.PendingIntent} berisi
     {@link android.content.Intent} yang memulai
     {@link android.app.Activity} dalam aplikasi Anda. Untuk mengaitkan
     {@link android.app.PendingIntent} dengan gestur, panggil metode
@@ -174,12 +174,12 @@ pemberitahuan, Anda meneruskan objek {@link android.app.Notification} ke sistem 
     android.support.v4.app.NotificationCompat}. Ada
     lima level prioritas, mulai dari {@link
     android.support.v4.app.NotificationCompat#PRIORITY_MIN} (-2) hingga {@link
-    android.support.v4.app.NotificationCompat#PRIORITY_MAX} (2); jika tidak diatur, 
+    android.support.v4.app.NotificationCompat#PRIORITY_MAX} (2); jika tidak diatur,
     prioritas default akan ditetapkan {@link
     android.support.v4.app.NotificationCompat#PRIORITY_DEFAULT} (0).
 </p>
 <p> Untuk informasi tentang mengatur level prioritas, lihat "Mengatur
-    dan mengelola prioritas pemberitahuan dengan benar" dalam panduan 
+    dan mengelola prioritas pemberitahuan dengan benar" dalam panduan
 Desain <a href="{@docRoot}design/patterns/notifications.html">Pemberitahuan</a>.
 </p>
 <!-- ------------------------------------------------------------------------------------------ -->
@@ -310,7 +310,7 @@ mBuilder.setStyle(inBoxStyle);
 <!-- ------------------------------------------------------------------------------------------ -->
 <h2 id="Managing">Mengelola Pemberitahuan</h2>
 <p>
-    Bila perlu mengeluarkan pemberitahuan beberapa kali untuk tipe kejadian yang sama, 
+    Bila perlu mengeluarkan pemberitahuan beberapa kali untuk tipe kejadian yang sama,
 hindari membuat pemberitahuan yang sama sekali baru. Sebagai gantinya, Anda harus mempertimbangkan untuk memperbarui
     pemberitahuan sebelumnya, baik dengan mengubah sebagian nilainya atau dengan menambahkan nilai, atau keduanya.
 </p>
@@ -506,7 +506,7 @@ numMessages = 0;
                 TaskStackBuilder.create()}.
             </li>
             <li>
-                Tambahkan back-stack ke stack-builder dengan memanggil 
+                Tambahkan back-stack ke stack-builder dengan memanggil
                 {@link android.support.v4.app.TaskStackBuilder#addParentStack addParentStack()}.
                 Untuk setiap {@link android.app.Activity} dalam hierarki yang telah Anda definisikan dalam
                 manifes, back-stack berisi objek {@link android.content.Intent} yang
@@ -933,7 +933,7 @@ untuk informasi selengkapnya tentang API baru untuk mengelola sesi media dan men
     tampilan normal dibatasi hingga 64 dp, dan layout tampilan yang diperluas dibatasi hingga 256 dp.
 </p>
 <p>
-    Untuk mendefinisikan layout pemberitahuan custom, mulailah dengan membuat instance 
+    Untuk mendefinisikan layout pemberitahuan custom, mulailah dengan membuat instance
     objek {@link android.widget.RemoteViews} yang memekarkan file layout XML. Kemudian,
     sebagai ganti memanggil metode seperti
     {@link android.support.v4.app.NotificationCompat.Builder#setContentTitle setContentTitle()},

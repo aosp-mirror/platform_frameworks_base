@@ -8,13 +8,13 @@ trainingnavtop=true
 
 <div id="tb-wrapper">
   <div id="tb">
-    
+
     <h2>이 과정에서 다루는 내용</h2>
     <ol>
       <li><a href="#Pause">액티비티 일지정지하기</a></li>
       <li><a href="#Resume">액티비티 재개하기</a></li>
     </ol>
-    
+
     <h2>필독 항목</h2>
     <ul>
       <li><a href="{@docRoot}guide/components/activities.html">액티비티</a>
@@ -31,7 +31,7 @@ trainingnavtop=true
   </div>
 </div>
 
-<p>일반적인 앱 사용 중에 가끔 다른 
+<p>일반적인 앱 사용 중에 가끔 다른
 비주얼 구성요소로 인해 전면의 액티비티가 <em>일시정지</em>되는 경우가 있습니다.  예를 들어, 대화 상자 스타일과 같은 반투명
 액티비티가 열리면, 그 이전 액티비티는 일시정지됩니다. 액티비티가
 부분적으로 보이지만 현재 포커스 내에 있지 않는 한 일시정지된 상태로 유지됩니다.</p>
@@ -59,7 +59,7 @@ android.app.Activity#onPause()}에 대한 호출을 수신하는 경우, 이는 
 
 
 <h2 id="Pause">액티비티 일지정지하기</h2>
-      
+
 <p>시스템이 액티비티에 대해 {@link android.app.Activity#onPause()}를 호출하면, 이는
 엄밀해 말해 액티비티가 여전히 부분적으로 보일 수 있음을 의미하지만,
 대개의 경우 사용자가 액티비티를 떠나 곧 정지 상태로 전환될 것임을 나타냅니다.  일반적으로 다음 작업을 수행할 때
