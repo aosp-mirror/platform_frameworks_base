@@ -157,7 +157,7 @@ page.tags="preview", "developer", "android"
   <li><strong><a href="{@docRoot}preview/support.html#dp2">Preview 2</a></strong> (incremental update, alpha)</li>
   <li><strong><a href="{@docRoot}preview/support.html#dp3">Preview 3</a></strong> (incremental update, beta)</li>
   <li><strong><a href="{@docRoot}preview/support.html#dp4">Preview 4</a></strong> (final APIs and official SDK, Play publishing)</li>
-  <li><strong>Preview 5</strong> (near-final system images for final testing)</li>
+  <li><strong><a href="{@docRoot}preview/support.html#dp5">Preview 5</a></strong> (near-final system images for final testing)</li>
   <li><strong>Final release</strong> to AOSP and ecosystem</li>
 </ul>
 
@@ -433,8 +433,10 @@ Android N</a> has
   <li> Set up your environment by following the instructions for <a
   href="{@docRoot}preview/setup-sdk.html">Setting up the Preview SDK</a>
   and configuring test devices.</li>
-  <li> Follow the <a href="https://developers.google.com/android/nexus/images">flashing
-  instructions</a> to flash the latest Android N system image for your device. </li>
+  <li> Follow the <a href="{@docRoot}preview/download.html">
+  instructions</a> to update your device to the latest build of the N Developer
+  Preview. The easiest way is to enroll your device in
+  <a href="https://www.google.com/android/beta">Android Beta</a> program. </li>
   <li> Review the <a href="{@docRoot}preview/setup-sdk.html#docs-dl">API Reference</a>
   and <a href="{@docRoot}preview/samples.html">Android N samples</a> to gain more
   insight into new API features and how to use them in your app.
