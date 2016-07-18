@@ -2286,7 +2286,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 if (VDBG) log("NetworkFactory connected");
                 // A network factory has connected.  Send it all current NetworkRequests.
                 for (NetworkRequestInfo nri : mNetworkRequests.values()) {
-                    if (!nri.request.isRequest()) continue;
+                    if (nri.request.isListen()) continue;
                     NetworkAgentInfo nai = mNetworkForRequestId.get(nri.request.requestId);
                     ac.sendMessage(android.net.NetworkFactory.CMD_REQUEST_NETWORK,
                             (nai != null ? nai.getCurrentScore() : 0), 0, nri.request);
@@ -2428,7 +2428,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private void handleRegisterNetworkRequest(NetworkRequestInfo nri) {
         mNetworkRequests.put(nri.request, nri);
         mNetworkRequestInfoLogs.log("REGISTER " + nri);
-        if (!nri.request.isRequest()) {
+        if (nri.request.isListen()) {
             for (NetworkAgentInfo network : mNetworkAgentInfos.values()) {
                 if (nri.request.networkCapabilities.hasSignalStrength() &&
                         network.satisfiesImmutableCapabilitiesOf(nri.request)) {
@@ -4576,7 +4576,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         for (int i = 0; i < nai.numNetworkRequests(); i++) {
             NetworkRequest nr = nai.requestAt(i);
             // Don't send listening requests to factories. b/17393458
-            if (!nr.isRequest()) continue;
+            if (nr.isListen()) continue;
             sendUpdatedScoreToFactories(nr, nai.getCurrentScore());
         }
     }
@@ -4670,7 +4670,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             for (int i = 0; i < nai.numNetworkRequests(); i++) {
                 NetworkRequest nr = nai.requestAt(i);
                 // Ignore listening requests.
-                if (!nr.isRequest()) continue;
+                if (nr.isListen()) continue;
                 loge("Dead network still had at least " + nr);
                 break;
             }
@@ -4762,7 +4762,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // check if it satisfies the NetworkCapabilities
             if (VDBG) log("  checking if request is satisfied: " + nri.request);
             if (satisfies) {
-                if (!nri.request.isRequest()) {
+                if (nri.request.isListen()) {
                     // This is not a request, it's a callback listener.
                     // Add it to newNetwork regardless of score.
                     if (newNetwork.addRequest(nri.request)) addedRequests.add(nri);
