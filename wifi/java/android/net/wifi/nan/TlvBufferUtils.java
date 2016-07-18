@@ -295,75 +295,75 @@ public class TlvBufferUtils {
          * formatted byte-arrays (i.e. TLV whose Type/T size is 0) the value of
          * this field is undefined.
          */
-        public int mType;
+        public int type;
 
         /**
          * The Length (L) field of the current TLV element.
          */
-        public int mLength;
+        public int length;
 
         /**
          * The Value (V) field - a raw byte array representing the current TLV
-         * element where the entry starts at {@link TlvElement#mOffset}.
+         * element where the entry starts at {@link TlvElement#offset}.
          */
-        public byte[] mRefArray;
+        public byte[] refArray;
 
         /**
-         * The offset to be used into {@link TlvElement#mRefArray} to access the
+         * The offset to be used into {@link TlvElement#refArray} to access the
          * raw data representing the current TLV element.
          */
-        public int mOffset;
+        public int offset;
 
         private TlvElement(int type, int length, @Nullable byte[] refArray, int offset) {
-            mType = type;
-            mLength = length;
-            mRefArray = refArray;
-            mOffset = offset;
+            this.type = type;
+            this.length = length;
+            this.refArray = refArray;
+            this.offset = offset;
         }
 
         /**
          * Utility function to return a byte representation of a TLV element of
          * length 1. Note: an attempt to call this function on a TLV item whose
-         * {@link TlvElement#mLength} is != 1 will result in an exception.
+         * {@link TlvElement#length} is != 1 will result in an exception.
          *
          * @return byte representation of current TLV element.
          */
         public byte getByte() {
-            if (mLength != 1) {
+            if (length != 1) {
                 throw new IllegalArgumentException(
-                        "Accesing a byte from a TLV element of length " + mLength);
+                        "Accesing a byte from a TLV element of length " + length);
             }
-            return mRefArray[mOffset];
+            return refArray[offset];
         }
 
         /**
          * Utility function to return a short representation of a TLV element of
          * length 2. Note: an attempt to call this function on a TLV item whose
-         * {@link TlvElement#mLength} is != 2 will result in an exception.
+         * {@link TlvElement#length} is != 2 will result in an exception.
          *
          * @return short representation of current TLV element.
          */
         public short getShort() {
-            if (mLength != 2) {
+            if (length != 2) {
                 throw new IllegalArgumentException(
-                        "Accesing a short from a TLV element of length " + mLength);
+                        "Accesing a short from a TLV element of length " + length);
             }
-            return Memory.peekShort(mRefArray, mOffset, ByteOrder.BIG_ENDIAN);
+            return Memory.peekShort(refArray, offset, ByteOrder.BIG_ENDIAN);
         }
 
         /**
          * Utility function to return an integer representation of a TLV element
          * of length 4. Note: an attempt to call this function on a TLV item
-         * whose {@link TlvElement#mLength} is != 4 will result in an exception.
+         * whose {@link TlvElement#length} is != 4 will result in an exception.
          *
          * @return integer representation of current TLV element.
          */
         public int getInt() {
-            if (mLength != 4) {
+            if (length != 4) {
                 throw new IllegalArgumentException(
-                        "Accesing an int from a TLV element of length " + mLength);
+                        "Accesing an int from a TLV element of length " + length);
             }
-            return Memory.peekInt(mRefArray, mOffset, ByteOrder.BIG_ENDIAN);
+            return Memory.peekInt(refArray, offset, ByteOrder.BIG_ENDIAN);
         }
 
         /**
@@ -372,7 +372,7 @@ public class TlvBufferUtils {
          * @return String repersentation of the current TLV element.
          */
         public String getString() {
-            return new String(mRefArray, mOffset, mLength);
+            return new String(refArray, offset, length);
         }
     }
 
@@ -426,21 +426,21 @@ public class TlvBufferUtils {
                 first = false;
                 builder.append(" (");
                 if (mTypeSize != 0) {
-                    builder.append("T=" + tlv.mType + ",");
+                    builder.append("T=" + tlv.type + ",");
                 }
-                builder.append("L=" + tlv.mLength + ") ");
-                if (tlv.mLength == 0) {
+                builder.append("L=" + tlv.length + ") ");
+                if (tlv.length == 0) {
                     builder.append("<null>");
-                } else if (tlv.mLength == 1) {
+                } else if (tlv.length == 1) {
                     builder.append(tlv.getByte());
-                } else if (tlv.mLength == 2) {
+                } else if (tlv.length == 2) {
                     builder.append(tlv.getShort());
-                } else if (tlv.mLength == 4) {
+                } else if (tlv.length == 4) {
                     builder.append(tlv.getInt());
                 } else {
                     builder.append("<bytes>");
                 }
-                if (tlv.mLength != 0) {
+                if (tlv.length != 0) {
                     builder.append(" (S='" + tlv.getString() + "')");
                 }
             }
