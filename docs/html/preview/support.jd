@@ -135,13 +135,6 @@ page.image=images/cards/card-n-support_2x.png
   </li>
 </ul>
 
-<h4>Camera</h4>
-<ul>
-  <li>Apps may encounter Intermittent issues recording and playing back
-  video at 240fps.
-  </li>
-</ul>
-
 <h4>Do Not Disturb</h4>
 <ul>
   <li>Do Not Disturb mode may be set at device reboot. To work around
