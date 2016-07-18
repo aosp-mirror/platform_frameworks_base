@@ -2322,7 +2322,7 @@ public class WebView extends AbsoluteLayout
         }
     }
 
-    private static synchronized WebViewFactoryProvider getFactory() {
+    private static WebViewFactoryProvider getFactory() {
         return WebViewFactory.getProvider();
     }
 
