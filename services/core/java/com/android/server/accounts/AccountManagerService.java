@@ -1553,9 +1553,15 @@ public class AccountManagerService
                 }
             }
         }
-
-        logRecord(accounts, DebugDbHelper.ACTION_CALLED_ACCOUNT_REMOVE, TABLE_ACCOUNTS);
-
+        SQLiteDatabase db = accounts.openHelper.getReadableDatabase();
+        final long accountId = getAccountIdLocked(db, account);
+        logRecord(
+                db,
+                DebugDbHelper.ACTION_CALLED_ACCOUNT_REMOVE,
+                TABLE_ACCOUNTS,
+                accountId,
+                accounts,
+                callingUid);
         try {
             new RemoveAccountSession(accounts, response, account, expectActivityLaunch).bind();
         } finally {
@@ -1587,7 +1593,15 @@ public class AccountManagerService
             throw new SecurityException(msg);
         }
         UserAccounts accounts = getUserAccountsForCaller();
-        logRecord(accounts, DebugDbHelper.ACTION_CALLED_ACCOUNT_REMOVE, TABLE_ACCOUNTS);
+        SQLiteDatabase db = accounts.openHelper.getReadableDatabase();
+        final long accountId = getAccountIdLocked(db, account);
+        logRecord(
+                db,
+                DebugDbHelper.ACTION_CALLED_ACCOUNT_REMOVE,
+                TABLE_ACCOUNTS,
+                accountId,
+                accounts,
+                callingUid);
         long identityToken = clearCallingIdentity();
         try {
             return removeAccountInternal(accounts, account, callingUid);
