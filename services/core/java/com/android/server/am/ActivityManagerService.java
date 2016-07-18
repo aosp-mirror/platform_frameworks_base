@@ -20265,10 +20265,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                         if (mUseFifoUiScheduling) {
                             // Reset UI pipeline to SCHED_OTHER
                             Process.setThreadScheduler(app.pid, Process.SCHED_OTHER, 0);
-                            Process.setThreadScheduler(app.renderThreadTid,
-                                Process.SCHED_OTHER, 0);
                             Process.setThreadPriority(app.pid, app.savedPriority);
-                            Process.setThreadPriority(app.renderThreadTid, -4);
+                            if (app.renderThreadTid != 0) {
+                                Process.setThreadScheduler(app.renderThreadTid,
+                                    Process.SCHED_OTHER, 0);
+                                Process.setThreadPriority(app.renderThreadTid, -4);
+                            }
                         }
                     }
                 } catch (Exception e) {
