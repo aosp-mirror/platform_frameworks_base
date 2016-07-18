@@ -388,7 +388,7 @@
             android:theme="@style/PipTheme"
             android:launchMode="singleTop"
             android:taskAffinity=""
-            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|locale|layoutDirection"
             android:resizeableActivity="true"
             android:supportsPictureInPicture="true"
             androidprv:alwaysFocusable="true"
@@ -398,7 +398,7 @@
             android:exported="true"
             android:theme="@style/PipTheme"
             android:taskAffinity=""
-            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|locale|layoutDirection"
             android:resizeableActivity="true"
             android:supportsPictureInPicture="true"
             android:excludeFromRecents="true" />

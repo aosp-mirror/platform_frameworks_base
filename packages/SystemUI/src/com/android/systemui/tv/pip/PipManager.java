@@ -196,7 +196,23 @@ public class PipManager {
         }
         mInitialized = true;
         mContext = context;
-        Resources res = context.getResources();
+
+        mActivityManager = ActivityManagerNative.getDefault();
+        SystemServicesProxy.getInstance(context).registerTaskStackListener(mTaskStackListener);
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Intent.ACTION_MEDIA_RESOURCE_GRANTED);
+        mContext.registerReceiver(mBroadcastReceiver, intentFilter);
+        mOnboardingShown = Prefs.getBoolean(
+                mContext, TV_PICTURE_IN_PICTURE_ONBOARDING_SHOWN, false);
+
+        loadConfigurationsAndApply();
+        mPipRecentsOverlayManager = new PipRecentsOverlayManager(context);
+        mMediaSessionManager =
+                (MediaSessionManager) mContext.getSystemService(Context.MEDIA_SESSION_SERVICE);
+    }
+
+    private void loadConfigurationsAndApply() {
+        Resources res = mContext.getResources();
         mDefaultPipBounds = Rect.unflattenFromString(res.getString(
                 com.android.internal.R.string.config_defaultPictureInPictureBounds));
         mSettingsPipBounds = Rect.unflattenFromString(res.getString(
@@ -209,25 +225,19 @@ public class PipManager {
                 R.string.pip_recents_focused_bounds));
         mRecentsFocusChangedAnimationDurationMs = res.getInteger(
                 R.integer.recents_tv_pip_focus_anim_duration);
-        mPipBounds = mDefaultPipBounds;
 
-        mActivityManager = ActivityManagerNative.getDefault();
-        SystemServicesProxy.getInstance(context).registerTaskStackListener(mTaskStackListener);
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(Intent.ACTION_MEDIA_RESOURCE_GRANTED);
-        mContext.registerReceiver(mBroadcastReceiver, intentFilter);
-        mOnboardingShown = Prefs.getBoolean(
-                mContext, TV_PICTURE_IN_PICTURE_ONBOARDING_SHOWN, false);
-
-        mPipRecentsOverlayManager = new PipRecentsOverlayManager(context);
-        mMediaSessionManager =
-                (MediaSessionManager) mContext.getSystemService(Context.MEDIA_SESSION_SERVICE);
+        // Reset the PIP bounds and apply. PIP bounds can be changed by two reasons.
+        //   1. Configuration changed due to the language change (RTL <-> RTL)
+        //   2. SystemUI restarts after the crash
+        mPipBounds = isSettingsShown() ? mSettingsPipBounds : mDefaultPipBounds;
+        resizePinnedStack(getPinnedStackInfo() == null ? STATE_NO_PIP : STATE_PIP_OVERLAY);
     }
 
     /**
      * Updates the PIP per configuration changed.
      */
     void onConfigurationChanged() {
+        loadConfigurationsAndApply();
         mPipRecentsOverlayManager.onConfigurationChanged(mContext);
     }
 
@@ -443,6 +453,16 @@ public class PipManager {
         return mState != STATE_NO_PIP;
     }
 
+    private StackInfo getPinnedStackInfo() {
+        StackInfo stackInfo = null;
+        try {
+            stackInfo = mActivityManager.getStackInfo(PINNED_STACK_ID);
+        } catch (RemoteException e) {
+            Log.e(TAG, "getStackInfo failed", e);
+        }
+        return stackInfo;
+    }
+
     private void handleMediaResourceGranted(String[] packageNames) {
         if (mState == STATE_NO_PIP) {
             mLastPackagesResourceGranted = packageNames;
@@ -525,7 +545,18 @@ public class PipManager {
         return PLAYBACK_STATE_UNAVAILABLE;
     }
 
-    private static boolean isSettingsShown(ComponentName topActivity) {
+    private boolean isSettingsShown() {
+        List<RunningTaskInfo> runningTasks;
+        try {
+            runningTasks = mActivityManager.getTasks(1, 0);
+            if (runningTasks == null || runningTasks.size() == 0) {
+                return false;
+            }
+        } catch (RemoteException e) {
+            Log.d(TAG, "Failed to detect top activity", e);
+            return false;
+        }
+        ComponentName topActivity = runningTasks.get(0).topActivity;
         for (Pair<String, String> componentName : sSettingsPackageAndClassNamePairList) {
             String packageName = componentName.first;
             if (topActivity.getPackageName().equals(packageName)) {
@@ -544,16 +575,10 @@ public class PipManager {
             if (mState != STATE_NO_PIP) {
                 boolean hasPip = false;
 
-                StackInfo stackInfo = null;
-                try {
-                    stackInfo = mActivityManager.getStackInfo(PINNED_STACK_ID);
-                    if (stackInfo == null) {
-                        Log.w(TAG, "There is no pinned stack");
-                        closePipInternal(false);
-                        return;
-                    }
-                } catch (RemoteException e) {
-                    Log.e(TAG, "getStackInfo failed", e);
+                StackInfo stackInfo = getPinnedStackInfo();
+                if (stackInfo == null || stackInfo.taskIds == null) {
+                    Log.w(TAG, "There is nothing in pinned stack");
+                    closePipInternal(false);
                     return;
                 }
                 for (int i = stackInfo.taskIds.length - 1; i >= 0; --i) {
@@ -570,20 +595,10 @@ public class PipManager {
                 }
             }
             if (mState == STATE_PIP_OVERLAY) {
-                try {
-                    List<RunningTaskInfo> runningTasks = mActivityManager.getTasks(1, 0);
-                    if (runningTasks == null || runningTasks.size() == 0) {
-                        return;
-                    }
-                    RunningTaskInfo topTask = runningTasks.get(0);
-                    Rect bounds = isSettingsShown(topTask.topActivity)
-                          ? mSettingsPipBounds : mDefaultPipBounds;
-                    if (mPipBounds != bounds) {
-                        mPipBounds = bounds;
-                        resizePinnedStack(STATE_PIP_OVERLAY);
-                    }
-                } catch (RemoteException e) {
-                    Log.d(TAG, "Failed to detect top activity", e);
+                Rect bounds = isSettingsShown() ? mSettingsPipBounds : mDefaultPipBounds;
+                if (mPipBounds != bounds) {
+                    mPipBounds = bounds;
+                    resizePinnedStack(STATE_PIP_OVERLAY);
                 }
             }
         }
@@ -591,15 +606,9 @@ public class PipManager {
         @Override
         public void onActivityPinned() {
             if (DEBUG) Log.d(TAG, "onActivityPinned()");
-            StackInfo stackInfo = null;
-            try {
-                stackInfo = mActivityManager.getStackInfo(PINNED_STACK_ID);
-                if (stackInfo == null) {
-                    Log.w(TAG, "Cannot find pinned stack");
-                    return;
-                }
-            } catch (RemoteException e) {
-                Log.e(TAG, "getStackInfo failed", e);
+            StackInfo stackInfo = getPinnedStackInfo();
+            if (stackInfo == null) {
+                Log.w(TAG, "Cannot find pinned stack");
                 return;
             }
             if (DEBUG) Log.d(TAG, "PINNED_STACK:" + stackInfo);
