@@ -108,7 +108,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 147 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 148 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -3554,6 +3554,14 @@ public class BatteryStatsImpl extends BatteryStats {
         mNumConnectivityChange++;
     }
 
+    private void noteMobileRadioApWakeupLocked(final long elapsedRealtimeMillis,
+            final long uptimeMillis, int uid) {
+        uid = mapUid(uid);
+        addHistoryEventLocked(elapsedRealtimeMillis, uptimeMillis, HistoryItem.EVENT_WAKEUP_AP, "",
+                uid);
+        getUidStatsLocked(uid).noteMobileRadioApWakeupLocked();
+    }
+
     public void noteMobileRadioPowerState(int powerState, long timestampNs, int uid) {
         final long elapsedRealtime = mClocks.elapsedRealtime();
         final long uptime = mClocks.uptimeMillis();
@@ -3563,6 +3571,10 @@ public class BatteryStatsImpl extends BatteryStats {
                     powerState == DataConnectionRealTimeInfo.DC_POWER_STATE_MEDIUM
                             || powerState == DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH;
             if (active) {
+                if (uid > 0) {
+                    noteMobileRadioApWakeupLocked(elapsedRealtime, uptime, uid);
+                }
+
                 mMobileRadioActiveStartTime = realElapsedRealtimeMs = timestampNs / (1000 * 1000);
                 mHistoryCur.states |= HistoryItem.STATE_MOBILE_RADIO_ACTIVE_FLAG;
             } else {
@@ -4239,7 +4251,15 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    public void noteWifiRadioPowerState(int powerState, long timestampNs) {
+    private void noteWifiRadioApWakeupLocked(final long elapsedRealtimeMillis,
+            final long uptimeMillis, int uid) {
+        uid = mapUid(uid);
+        addHistoryEventLocked(elapsedRealtimeMillis, uptimeMillis, HistoryItem.EVENT_WAKEUP_AP, "",
+                uid);
+        getUidStatsLocked(uid).noteWifiRadioApWakeupLocked();
+    }
+
+    public void noteWifiRadioPowerState(int powerState, long timestampNs, int uid) {
         final long elapsedRealtime = mClocks.elapsedRealtime();
         final long uptime = mClocks.uptimeMillis();
         if (mWifiRadioPowerState != powerState) {
@@ -4247,6 +4267,9 @@ public class BatteryStatsImpl extends BatteryStats {
                     powerState == DataConnectionRealTimeInfo.DC_POWER_STATE_MEDIUM
                             || powerState == DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH;
             if (active) {
+                if (uid > 0) {
+                    noteWifiRadioApWakeupLocked(elapsedRealtime, uptime, uid);
+                }
                 mHistoryCur.states |= HistoryItem.STATE_WIFI_RADIO_ACTIVE_FLAG;
             } else {
                 mHistoryCur.states &= ~HistoryItem.STATE_WIFI_RADIO_ACTIVE_FLAG;
@@ -4874,6 +4897,33 @@ public class BatteryStatsImpl extends BatteryStats {
         return mUidStats;
     }
 
+    private static void detachTimerIfNotNull(BatteryStatsImpl.Timer timer) {
+        if (timer != null) {
+            timer.detach();
+        }
+    }
+
+    private static boolean resetTimerIfNotNull(BatteryStatsImpl.Timer timer,
+            boolean detachIfReset) {
+        if (timer != null) {
+            return timer.reset(detachIfReset);
+        }
+        return true;
+    }
+
+    private static void detachLongCounterIfNotNull(LongSamplingCounter counter) {
+        if (counter != null) {
+            counter.detach();
+        }
+    }
+
+    private static void resetLongCounterIfNotNull(LongSamplingCounter counter,
+            boolean detachIfReset) {
+        if (counter != null) {
+            counter.reset(detachIfReset);
+        }
+    }
+
     /**
      * The statistics associated with a particular uid.
      */
@@ -4919,6 +4969,16 @@ public class BatteryStatsImpl extends BatteryStats {
         LongSamplingCounter[] mNetworkPacketActivityCounters;
         LongSamplingCounter mMobileRadioActiveTime;
         LongSamplingCounter mMobileRadioActiveCount;
+
+        /**
+         * How many times this UID woke up the Application Processor due to a Mobile radio packet.
+         */
+        private LongSamplingCounter mMobileRadioApWakeupCount;
+
+        /**
+         * How many times this UID woke up the Application Processor due to a Wifi packet.
+         */
+        private LongSamplingCounter mWifiRadioApWakeupCount;
 
         /**
          * The amount of time this uid has kept the WiFi controller in idle, tx, and rx mode.
@@ -5629,6 +5689,36 @@ public class BatteryStatsImpl extends BatteryStats {
             return 0;
         }
 
+        public void noteMobileRadioApWakeupLocked() {
+            if (mMobileRadioApWakeupCount == null) {
+                mMobileRadioApWakeupCount = new LongSamplingCounter(mBsi.mOnBatteryTimeBase);
+            }
+            mMobileRadioApWakeupCount.addCountLocked(1);
+        }
+
+        @Override
+        public long getMobileRadioApWakeupCount(int which) {
+            if (mMobileRadioApWakeupCount != null) {
+                return mMobileRadioApWakeupCount.getCountLocked(which);
+            }
+            return 0;
+        }
+
+        public void noteWifiRadioApWakeupLocked() {
+            if (mWifiRadioApWakeupCount == null) {
+                mWifiRadioApWakeupCount = new LongSamplingCounter(mBsi.mOnBatteryTimeBase);
+            }
+            mWifiRadioApWakeupCount.addCountLocked(1);
+        }
+
+        @Override
+        public long getWifiRadioApWakeupCount(int which) {
+            if (mWifiRadioApWakeupCount != null) {
+                return mWifiRadioApWakeupCount.getCountLocked(which);
+            }
+            return 0;
+        }
+
         void initNetworkActivityLocked() {
             mNetworkByteActivityCounters = new LongSamplingCounter[NUM_NETWORK_ACTIVITY_TYPES];
             mNetworkPacketActivityCounters = new LongSamplingCounter[NUM_NETWORK_ACTIVITY_TYPES];
@@ -5671,24 +5761,14 @@ public class BatteryStatsImpl extends BatteryStats {
                 active |= !mWifiMulticastTimer.reset(false);
                 active |= mWifiMulticastEnabled;
             }
-            if (mAudioTurnedOnTimer != null) {
-                active |= !mAudioTurnedOnTimer.reset(false);
-            }
-            if (mVideoTurnedOnTimer != null) {
-                active |= !mVideoTurnedOnTimer.reset(false);
-            }
-            if (mFlashlightTurnedOnTimer != null) {
-                active |= !mFlashlightTurnedOnTimer.reset(false);
-            }
-            if (mCameraTurnedOnTimer != null) {
-                active |= !mCameraTurnedOnTimer.reset(false);
-            }
-            if (mForegroundActivityTimer != null) {
-                active |= !mForegroundActivityTimer.reset(false);
-            }
-            if (mBluetoothScanTimer != null) {
-                active |= !mBluetoothScanTimer.reset(false);
-            }
+
+            active |= !resetTimerIfNotNull(mAudioTurnedOnTimer, false);
+            active |= !resetTimerIfNotNull(mVideoTurnedOnTimer, false);
+            active |= !resetTimerIfNotNull(mFlashlightTurnedOnTimer, false);
+            active |= !resetTimerIfNotNull(mCameraTurnedOnTimer, false);
+            active |= !resetTimerIfNotNull(mForegroundActivityTimer, false);
+            active |= !resetTimerIfNotNull(mBluetoothScanTimer, false);
+
             if (mProcessStateTimer != null) {
                 for (int i = 0; i < NUM_PROCESS_STATE; i++) {
                     if (mProcessStateTimer[i] != null) {
@@ -5748,6 +5828,9 @@ public class BatteryStatsImpl extends BatteryStats {
                     }
                 }
             }
+
+            resetLongCounterIfNotNull(mMobileRadioApWakeupCount, false);
+            resetLongCounterIfNotNull(mWifiRadioApWakeupCount, false);
 
             final ArrayMap<String, Wakelock> wakeStats = mWakelockStats.getMap();
             for (int iw=wakeStats.size()-1; iw>=0; iw--) {
@@ -5908,6 +5991,9 @@ public class BatteryStatsImpl extends BatteryStats {
                         }
                     }
                 }
+
+                detachLongCounterIfNotNull(mMobileRadioApWakeupCount);
+                detachLongCounterIfNotNull(mWifiRadioApWakeupCount);
             }
 
             return !active;
@@ -6111,6 +6197,20 @@ public class BatteryStatsImpl extends BatteryStats {
                         out.writeInt(0);
                     }
                 }
+            } else {
+                out.writeInt(0);
+            }
+
+            if (mMobileRadioApWakeupCount != null) {
+                out.writeInt(1);
+                mMobileRadioApWakeupCount.writeToParcel(out);
+            } else {
+                out.writeInt(0);
+            }
+
+            if (mWifiRadioApWakeupCount != null) {
+                out.writeInt(1);
+                mWifiRadioApWakeupCount.writeToParcel(out);
             } else {
                 out.writeInt(0);
             }
@@ -6337,6 +6437,18 @@ public class BatteryStatsImpl extends BatteryStats {
                 }
             } else {
                 mCpuClusterSpeed = null;
+            }
+
+            if (in.readInt() != 0) {
+                mMobileRadioApWakeupCount = new LongSamplingCounter(mBsi.mOnBatteryTimeBase, in);
+            } else {
+                mMobileRadioApWakeupCount = null;
+            }
+
+            if (in.readInt() != 0) {
+                mWifiRadioApWakeupCount = new LongSamplingCounter(mBsi.mOnBatteryTimeBase, in);
+            } else {
+                mWifiRadioApWakeupCount = null;
             }
         }
 
@@ -10348,6 +10460,20 @@ public class BatteryStatsImpl extends BatteryStats {
                 u.mCpuClusterSpeed = null;
             }
 
+            if (in.readInt() != 0) {
+                u.mMobileRadioApWakeupCount = new LongSamplingCounter(mOnBatteryTimeBase);
+                u.mMobileRadioApWakeupCount.readSummaryFromParcelLocked(in);
+            } else {
+                u.mMobileRadioApWakeupCount = null;
+            }
+
+            if (in.readInt() != 0) {
+                u.mWifiRadioApWakeupCount = new LongSamplingCounter(mOnBatteryTimeBase);
+                u.mWifiRadioApWakeupCount.readSummaryFromParcelLocked(in);
+            } else {
+                u.mWifiRadioApWakeupCount = null;
+            }
+
             int NW = in.readInt();
             if (NW > 100) {
                 throw new ParcelFormatException("File corrupt: too many wake locks " + NW);
@@ -10704,6 +10830,20 @@ public class BatteryStatsImpl extends BatteryStats {
                         out.writeInt(0);
                     }
                 }
+            } else {
+                out.writeInt(0);
+            }
+
+            if (u.mMobileRadioApWakeupCount != null) {
+                out.writeInt(1);
+                u.mMobileRadioApWakeupCount.writeSummaryFromParcelLocked(out);
+            } else {
+                out.writeInt(0);
+            }
+
+            if (u.mWifiRadioApWakeupCount != null) {
+                out.writeInt(1);
+                u.mWifiRadioApWakeupCount.writeSummaryFromParcelLocked(out);
             } else {
                 out.writeInt(0);
             }
