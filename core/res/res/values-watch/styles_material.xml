@@ -61,8 +61,13 @@ please see styles_device_defaults.xml.
         <item name="breakStrategy">balanced</item>
     </style>
 
+    <style name="Widget.Material.ButtonBar" parent="Widget.Material.BaseButtonBar" />
+
     <!-- Alert dialog button bar button -->
     <style name="Widget.Material.Button.ButtonBar.AlertDialog" parent="Widget.Material.Button.Borderless.Small">
+        <item name="paddingStart">@dimen/list_item_padding_start_material</item>
+        <item name="paddingEnd">@dimen/list_item_padding_end_material</item>
+        <item name="drawablePadding">8dp</item>
         <item name="gravity">center_vertical|left</item>
         <item name="minWidth">64dp</item>
         <item name="minHeight">@dimen/alert_dialog_button_bar_height</item>

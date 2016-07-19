@@ -618,7 +618,7 @@ public class AlertController {
         }
     }
 
-    private void setupTitle(ViewGroup topPanel) {
+    protected void setupTitle(ViewGroup topPanel) {
         if (mCustomTitleView != null && mShowTitle) {
             // Add the custom title view directly to the topPanel layout
             final LayoutParams lp = new LayoutParams(
@@ -701,7 +701,7 @@ public class AlertController {
         }
     }
 
-    private void setupButtons(ViewGroup buttonPanel) {
+    protected void setupButtons(ViewGroup buttonPanel) {
         int BIT_BUTTON_POSITIVE = 1;
         int BIT_BUTTON_NEGATIVE = 2;
         int BIT_BUTTON_NEUTRAL = 4;
