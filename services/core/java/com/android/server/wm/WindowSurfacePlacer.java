@@ -215,7 +215,7 @@ class WindowSurfacePlacer {
             while (!mService.mForceRemoves.isEmpty()) {
                 final WindowState ws = mService.mForceRemoves.remove(0);
                 Slog.i(TAG, "Force removing: " + ws);
-                ws.removeLocked();
+                ws.remove();
             }
             Slog.w(TAG, "Due to memory failure, waiting a bit for next layout");
             Object tmp = new Object();
@@ -545,7 +545,7 @@ class WindowSurfacePlacer {
             DisplayContentList displayList = new DisplayContentList();
             for (i = 0; i < N; i++) {
                 final WindowState w = mService.mPendingRemoveTmp[i];
-                w.removeLocked();
+                w.remove();
                 final DisplayContent displayContent = w.getDisplayContent();
                 if (displayContent != null && !displayList.contains(displayContent)) {
                     displayList.add(displayContent);

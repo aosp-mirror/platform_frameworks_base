@@ -57,6 +57,8 @@ import com.android.server.input.InputWindowHandle;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedList;
 
 import static android.app.ActivityManager.StackId;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
@@ -113,6 +115,8 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.WindowManagerService.TYPE_LAYER_MULTIPLIER;
+import static com.android.server.wm.WindowManagerService.TYPE_LAYER_OFFSET;
 import static com.android.server.wm.WindowStateAnimator.COMMIT_DRAW_PENDING;
 import static com.android.server.wm.WindowStateAnimator.HAS_DRAWN;
 import static com.android.server.wm.WindowStateAnimator.READY_TO_SHOW;
@@ -127,7 +131,7 @@ class WindowList extends ArrayList<WindowState> {
 /**
  * A window in the window manager.
  */
-final class WindowState implements WindowManagerPolicy.WindowState {
+class WindowState extends WindowContainer implements WindowManagerPolicy.WindowState {
     static final String TAG = TAG_WITH_CLASS_NAME ? "WindowState" : TAG_WM;
 
     // The minimal size of a window within the usable area of the freeform stack.
@@ -160,8 +164,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     // modified they will need to be locked.
     final WindowManager.LayoutParams mAttrs = new WindowManager.LayoutParams();
     final DeathRecipient mDeathRecipient;
-    private final WindowState mParentWindow;
-    private final WindowList mChildWindows = new WindowList();
+    private boolean mIsChildWindow;
     final int mBaseLayer;
     final int mSubLayer;
     final boolean mLayoutAttached;
@@ -511,6 +514,22 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      */
     boolean mSeamlesslyRotated = false;
 
+    /**
+     * Compares to window sub-layers and returns -1 if the first is lesser than the second in terms
+     * of z-order and 1 otherwise.
+     */
+    private static final Comparator<WindowContainer> sWindowSubLayerComparator = (w1, w2) -> {
+        final int layer1 = ((WindowState)w1).mSubLayer;
+        final int layer2 = ((WindowState)w2).mSubLayer;
+        if (layer1 < layer2 || (layer1 == layer2 && layer2 < 0 )) {
+            // We insert the child window into the list ordered by the sub-layer.
+            // For same sub-layers, the negative one should go below others; the positive one should
+            // go above others.
+            return -1;
+        }
+        return 1;
+    };
+
     WindowState(WindowManagerService service, Session s, IWindow c, WindowToken token,
            WindowState parentWindow, int appOp, int seq, WindowManager.LayoutParams a,
            int viewVisibility, final DisplayContent displayContent, int ownerId) {
@@ -549,7 +568,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             c.asBinder().linkToDeath(deathRecipient, 0);
         } catch (RemoteException e) {
             mDeathRecipient = null;
-            mParentWindow = null;
+            mIsChildWindow = false;
             mLayoutAttached = false;
             mIsImWindow = false;
             mIsWallpaper = false;
@@ -562,60 +581,35 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
         mDeathRecipient = deathRecipient;
 
-        if ((mAttrs.type >= FIRST_SUB_WINDOW &&
-                mAttrs.type <= LAST_SUB_WINDOW)) {
+        if ((mAttrs.type >= FIRST_SUB_WINDOW && mAttrs.type <= LAST_SUB_WINDOW)) {
             // The multiplier here is to reserve space for multiple
             // windows in the same type layer.
-            mBaseLayer = mPolicy.windowTypeToLayerLw(
-                    parentWindow.mAttrs.type) * WindowManagerService.TYPE_LAYER_MULTIPLIER
-                    + WindowManagerService.TYPE_LAYER_OFFSET;
+            mBaseLayer = mPolicy.windowTypeToLayerLw(parentWindow.mAttrs.type)
+                    * TYPE_LAYER_MULTIPLIER + TYPE_LAYER_OFFSET;
             mSubLayer = mPolicy.subWindowTypeToLayerLw(a.type);
-            mParentWindow = parentWindow;
-            if (DEBUG_ADD_REMOVE) Slog.v(TAG, "Adding " + this + " to " + mParentWindow);
+            mIsChildWindow = true;
 
-            final WindowList childWindows = mParentWindow.mChildWindows;
-            final int numChildWindows = childWindows.size();
-            if (numChildWindows == 0) {
-                childWindows.add(this);
-            } else {
-                boolean added = false;
-                for (int i = 0; i < numChildWindows; i++) {
-                    final int childSubLayer = childWindows.get(i).mSubLayer;
-                    if (mSubLayer < childSubLayer
-                            || (mSubLayer == childSubLayer && childSubLayer < 0)) {
-                        // We insert the child window into the list ordered by the sub-layer. For
-                        // same sub-layers, the negative one should go below others; the positive
-                        // one should go above others.
-                        childWindows.add(i, this);
-                        added = true;
-                        break;
-                    }
-                }
-                if (!added) {
-                    childWindows.add(this);
-                }
-            }
+            if (DEBUG_ADD_REMOVE) Slog.v(TAG, "Adding " + this + " to " + parentWindow);
+            parentWindow.addChild(this, sWindowSubLayerComparator);
 
             mLayoutAttached = mAttrs.type !=
                     WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
             mIsImWindow = parentWindow.mAttrs.type == TYPE_INPUT_METHOD
                     || parentWindow.mAttrs.type == TYPE_INPUT_METHOD_DIALOG;
             mIsWallpaper = parentWindow.mAttrs.type == TYPE_WALLPAPER;
-            mIsFloatingLayer = mIsImWindow || mIsWallpaper;
         } else {
             // The multiplier here is to reserve space for multiple
             // windows in the same type layer.
             mBaseLayer = mPolicy.windowTypeToLayerLw(a.type)
-                    * WindowManagerService.TYPE_LAYER_MULTIPLIER
-                    + WindowManagerService.TYPE_LAYER_OFFSET;
+                    * TYPE_LAYER_MULTIPLIER + TYPE_LAYER_OFFSET;
             mSubLayer = 0;
-            mParentWindow = null;
+            mIsChildWindow = false;
             mLayoutAttached = false;
             mIsImWindow = mAttrs.type == TYPE_INPUT_METHOD
                     || mAttrs.type == TYPE_INPUT_METHOD_DIALOG;
             mIsWallpaper = mAttrs.type == TYPE_WALLPAPER;
-            mIsFloatingLayer = mIsImWindow || mIsWallpaper;
         }
+        mIsFloatingLayer = mIsImWindow || mIsWallpaper;
 
         final WindowState appWin = getTopParentWindow();
         WindowToken appToken = appWin.mToken;
@@ -1407,7 +1401,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return mHasSurface && (mContentChanged || mMovedByResize)
                 && !mAnimatingExit && mService.okToDisplay()
                 && (mFrame.top != mLastFrame.top || mFrame.left != mLastFrame.left)
-                && (!isChildWindow() || !mParentWindow.hasMoved());
+                && (!mIsChildWindow || !getParentWindow().hasMoved());
     }
 
     boolean isObscuringFullscreen(final DisplayInfo displayInfo) {
@@ -1448,17 +1442,14 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 && mAppToken.mTask.mStack.isAdjustedForMinimizedDock();
     }
 
-    void removeLocked() {
+    @Override
+    void remove() {
+        super.remove();
+
         if (mRemoved) {
             // Nothing to do.
-            if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "WS.removeLocked: " + this + " Already removed...");
+            if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "WS.remove: " + this + " Already removed...");
             return;
-        }
-
-        for (int i = mChildWindows.size() - 1; i >= 0; i--) {
-            final WindowState child = mChildWindows.get(i);
-            Slog.w(TAG_WM, "Force-removing child win " + child + " from container " + this);
-            child.removeLocked();
         }
 
         mRemoved = true;
@@ -1476,10 +1467,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
         disposeInputChannel();
 
-        if (isChildWindow()) {
-            if (DEBUG_ADD_REMOVE) Slog.v(TAG, "Removing " + this + " from " + mParentWindow);
-            mParentWindow.mChildWindows.remove(this);
-        }
         mWinAnimator.destroyDeferredSurfaceLocked();
         mWinAnimator.destroySurfaceLocked();
         mSession.windowRemovedLocked();
@@ -1652,7 +1639,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 win.mReplacingWindow = null;
                 mSkipEnterAnimationForSeamlessReplacement = false;
                 if (win.mAnimatingExit || !animateReplacingWindow) {
-                    win.removeLocked();
+                    win.remove();
                 }
             }
         }
@@ -2556,8 +2543,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             pw.print(prefix); pw.print("LastRequested w="); pw.print(mLastRequestedWidth);
                     pw.print(" h="); pw.println(mLastRequestedHeight);
         }
-        if (isChildWindow() || mLayoutAttached) {
-            pw.print(prefix); pw.print("mParentWindow="); pw.print(mParentWindow);
+        if (mIsChildWindow || mLayoutAttached) {
+            pw.print(prefix); pw.print("mParentWindow="); pw.print(getParentWindow());
                     pw.print(" mLayoutAttached="); pw.println(mLayoutAttached);
         }
         if (mIsImWindow || mIsWallpaper || mIsFloatingLayer) {
@@ -2743,7 +2730,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mLastTitle = title;
             mWasExiting = mAnimatingExit;
             mStringNameCache = "Window{" + Integer.toHexString(System.identityHashCode(this))
-                    + " u" + UserHandle.getUserId(mSession.mUid)
+                    + " u" + UserHandle.getUserId(mOwnerUid)
                     + " " + mLastTitle + (mAnimatingExit ? " EXITING}" : "}");
         }
         return mStringNameCache;
@@ -2775,7 +2762,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         // but SurfaceViews want to be always at a specific location so we don't fit it to the
         // display.
         final boolean fitToDisplay = (task == null || !nonFullscreenTask)
-                || (isChildWindow() && !noLimits);
+                || (mIsChildWindow && !noLimits);
         float x, y;
         int w,h;
 
@@ -2846,16 +2833,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     boolean isChildWindow() {
-        return mParentWindow != null;
-    }
-
-    boolean hasChild(WindowState child) {
-        for (int i = mChildWindows.size() - 1; i >= 0; --i) {
-            if (mChildWindows.get(i) == child) {
-                return true;
-            }
-        }
-        return false;
+        return mIsChildWindow;
     }
 
     /**
@@ -2864,29 +2842,33 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     WindowState getBottomChild() {
         // Child windows are z-ordered based on sub-layer using {@link #sWindowSubLayerComparator}
         // and the child with the lowest z-order will be at the head of the list.
-        return mChildWindows.isEmpty() ? null : mChildWindows.get(0);
+        return (WindowState) mChildren.peekFirst();
     }
 
     boolean layoutInParentFrame() {
-        return isChildWindow() && (mAttrs.privateFlags & PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME) != 0;
+        return mIsChildWindow
+                && (mAttrs.privateFlags & PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME) != 0;
     }
 
     /** Returns the parent window if this is a child of another window, else null. */
     WindowState getParentWindow() {
-        return mParentWindow;
+        // NOTE: We are not calling getParent() directly as the WindowState might be a child of a
+        // WindowContainer that isn't a WindowState.
+        return (mIsChildWindow) ? ((WindowState) super.getParent()) : null;
     }
 
     /** Returns the topmost parent window if this is a child of another window, else this. */
     WindowState getTopParentWindow() {
         WindowState w = this;
-        while (w.isChildWindow()) {
+        while (w.mIsChildWindow) {
             w = w.getParentWindow();
         }
         return w;
     }
 
     boolean isParentWindowHidden() {
-        return (mParentWindow != null) ? mParentWindow.mHidden : false;
+        final WindowState parent = getParentWindow();
+        return (parent == null) ? false : parent.mHidden;
     }
 
     void setReplacing(boolean animate) {
@@ -2950,7 +2932,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     // them at such phases, as they won't be covered by window preservation,
     // and in general we expect them to return following relaunch.
     boolean shouldBeReplacedWithChildren() {
-        return isChildWindow() || mAttrs.type == TYPE_APPLICATION;
+        return mIsChildWindow || mAttrs.type == TYPE_APPLICATION;
     }
 
     public int getRotationAnimationHint() {
@@ -2991,8 +2973,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mHidden = false;
             final DisplayContent displayContent = getDisplayContent();
 
-            for (int i = mChildWindows.size(); i >= 0; --i) {
-                final WindowState c = mChildWindows.get(i);
+            for (int i = mChildren.size() - 1; i >= 0; --i) {
+                final WindowState c = (WindowState) mChildren.get(i);
                 if (c.mWinAnimator.mSurfaceController != null) {
                     c.performShowLocked();
                     // It hadn't been shown, which means layout not performed on it, so now we
@@ -3044,30 +3026,29 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         windowInfo.accessibilityIdOfAnchor = mAttrs.accessibilityIdOfAnchor;
         windowInfo.focused = isFocused();
 
-        if (isChildWindow()) {
-            windowInfo.parentToken = mParentWindow.mClient.asBinder();
+        if (mIsChildWindow) {
+            windowInfo.parentToken = getParentWindow().mClient.asBinder();
         }
 
-        final int childCount = mChildWindows.size();
+        final int childCount = mChildren.size();
         if (childCount > 0) {
             if (windowInfo.childTokens == null) {
-                windowInfo.childTokens = new ArrayList<>();
+                windowInfo.childTokens = new ArrayList(childCount);
             }
             for (int j = 0; j < childCount; j++) {
-                final WindowState child = mChildWindows.get(j);
+                final WindowState child = (WindowState) mChildren.get(j);
                 windowInfo.childTokens.add(child.mClient.asBinder());
             }
         }
-
         return windowInfo;
     }
 
     void adjustAnimLayer(int adj) {
         mWinAnimator.mAnimLayer = mLayer + adj;
         if (DEBUG_LAYERS) Slog.v(TAG_WM, "win=" + this + " anim layer: " + mWinAnimator.mAnimLayer);
-        for (int i = mChildWindows.size() - 1; i >= 0; i--) {
-            final WindowState child = mChildWindows.get(i);
-            child.adjustAnimLayer(adj);
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            final WindowState childWindow = (WindowState) mChildren.get(i);
+            childWindow.adjustAnimLayer(adj);
         }
     }
 
@@ -3078,10 +3059,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         final WindowList windows = getWindowList();
         // Adding child windows relies on child windows being ordered by mSubLayer using
         // {@link #sWindowSubLayerComparator}.
-        final int childCount = mChildWindows.size();
+        final int childCount = mChildren.size();
         boolean winAdded = false;
         for (int j = 0; j < childCount; j++) {
-            WindowState child = mChildWindows.get(j);
+            final WindowState child = (WindowState) mChildren.get(j);
             if (!winAdded && child.mSubLayer >= 0) {
                 if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG_WM,
                         "Re-adding child window at " + index + ": " + child);
@@ -3116,10 +3097,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG_WM, "Temp removing at " + wpos + ": " + this);
         windows.remove(wpos);
         mService.mWindowsChanged = true;
-        int childCount = mChildWindows.size();
+        int childCount = mChildren.size();
         while (childCount > 0) {
             childCount--;
-            final WindowState cw = mChildWindows.get(childCount);
+            final WindowState cw = (WindowState) mChildren.get(childCount);
             int cpos = windows.indexOf(cw);
             if (cpos >= 0) {
                 if (cpos < interestingPos) interestingPos--;
@@ -3136,11 +3117,12 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 + ": exiting=" + mAnimatingExit + " remove=" + mRemoveOnExit
                 + " windowAnimating=" + mWinAnimator.isWindowAnimationSet());
 
-        if (!mChildWindows.isEmpty()) {
+        if (!mChildren.isEmpty()) {
             // Copying to a different list as multiple children can be removed.
-            final WindowList childWindows = new WindowList(mChildWindows);
+            // TODO: Not sure if we really need to copy this into a different list.
+            final LinkedList childWindows = new LinkedList(mChildren);
             for (int i = childWindows.size() - 1; i >= 0; i--) {
-                childWindows.get(i).onExitAnimationDone();
+                ((WindowState)childWindows.get(i)).onExitAnimationDone();
             }
         }
 
