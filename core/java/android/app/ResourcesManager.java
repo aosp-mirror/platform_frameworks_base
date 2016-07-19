@@ -364,6 +364,26 @@ public class ResourcesManager {
         return null;
     }
 
+    /**
+     * Check if activity resources have same override config as the provided on.
+     * @param activityToken The Activity that resources should be associated with.
+     * @param overrideConfig The override configuration to be checked for equality with.
+     * @return true if activity resources override config matches the provided one or they are both
+     *         null, false otherwise.
+     */
+    boolean isSameResourcesOverrideConfig(@Nullable IBinder activityToken,
+            @Nullable Configuration overrideConfig) {
+        synchronized (this) {
+            final ActivityResources activityResources
+                    = activityToken != null ? mActivityResourceReferences.get(activityToken) : null;
+            if (activityResources == null) {
+                return overrideConfig == null;
+            } else {
+                return Objects.equals(activityResources.overrideConfig, overrideConfig);
+            }
+        }
+    }
+
     private ActivityResources getOrCreateActivityResourcesStructLocked(
             @NonNull IBinder activityToken) {
         ActivityResources activityResources = mActivityResourceReferences.get(activityToken);
