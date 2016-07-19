@@ -16,17 +16,21 @@
 
 package com.android.wallpaperbackup;
 
+import static android.app.WallpaperManager.FLAG_LOCK;
+import static android.app.WallpaperManager.FLAG_SYSTEM;
+
 import android.app.WallpaperManager;
 import android.app.backup.BackupAgent;
 import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
 import android.app.backup.FullBackupDataOutput;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Rect;
 import android.os.Environment;
+import android.os.FileUtils;
 import android.os.ParcelFileDescriptor;
 import android.os.UserHandle;
-import android.system.Os;
 import android.util.Slog;
 import android.util.Xml;
 
@@ -40,7 +44,7 @@ import java.nio.charset.StandardCharsets;
 
 public class WallpaperBackupAgent extends BackupAgent {
     private static final String TAG = "WallpaperBackup";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     // NB: must be kept in sync with WallpaperManagerService but has no
     // compile-time visibility.
@@ -56,6 +60,11 @@ public class WallpaperBackupAgent extends BackupAgent {
     static final String INFO_STAGE = "wallpaper-info-stage";
     static final String EMPTY_SENTINEL = "empty";
     static final String QUOTA_SENTINEL = "quota";
+
+    // Not-for-backup bookkeeping
+    static final String PREFS_NAME = "wbprefs.xml";
+    static final String SYSTEM_GENERATION = "system_gen";
+    static final String LOCK_GENERATION = "lock_gen";
 
     private File mWallpaperInfo;        // wallpaper metadata file
     private File mWallpaperFile;        // primary wallpaper image file
@@ -106,27 +115,48 @@ public class WallpaperBackupAgent extends BackupAgent {
             // only back up the wallpaper if we've been told it's allowed
             if (mWm.isWallpaperBackupEligible()) {
                 if (DEBUG) {
-                    Slog.v(TAG, "Wallpaper is backup-eligible; linking & writing");
+                    Slog.v(TAG, "Wallpaper is backup-eligible");
                 }
 
-                // In case of prior muddled state
-                infoStage.delete();
-                imageStage.delete();
-                lockImageStage.delete();
+                SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+                final int lastSysGeneration = prefs.getInt(SYSTEM_GENERATION, -1);
+                final int lastLockGeneration = prefs.getInt(LOCK_GENERATION, -1);
 
+                final int sysGeneration =
+                        mWm.getWallpaperIdForUser(FLAG_SYSTEM, UserHandle.USER_SYSTEM);
+                final int lockGeneration =
+                        mWm.getWallpaperIdForUser(FLAG_LOCK, UserHandle.USER_SYSTEM);
+                final boolean sysChanged = (sysGeneration != lastSysGeneration);
+                final boolean lockChanged = (lockGeneration != lastLockGeneration);
+
+                if (DEBUG) {
+                    Slog.v(TAG, "sysGen=" + sysGeneration + " : sysChanged=" + sysChanged);
+                    Slog.v(TAG, "lockGen=" + lockGeneration + " : lockChanged=" + lockChanged);
+                }
                 if (mWallpaperInfo.exists()) {
-                    Os.link(mWallpaperInfo.getCanonicalPath(), infoStage.getCanonicalPath());
+                    if (sysChanged || lockChanged || !infoStage.exists()) {
+                        if (DEBUG) Slog.v(TAG, "New wallpaper configuration; copying");
+                        FileUtils.copyFileOrThrow(mWallpaperInfo, infoStage);
+                    }
                     fullBackupFile(infoStage, data);
                 }
                 if (mWallpaperFile.exists()) {
-                    Os.link(mWallpaperFile.getCanonicalPath(), imageStage.getCanonicalPath());
+                    if (sysChanged || !imageStage.exists()) {
+                        if (DEBUG) Slog.v(TAG, "New system wallpaper; copying");
+                        FileUtils.copyFileOrThrow(mWallpaperFile, imageStage);
+                    }
                     fullBackupFile(imageStage, data);
+                    prefs.edit().putInt(SYSTEM_GENERATION, sysGeneration).apply();
                 }
 
                 // Don't try to store the lock image if we overran our quota last time
                 if (mLockWallpaperFile.exists() && !mQuotaExceeded) {
-                    Os.link(mLockWallpaperFile.getCanonicalPath(), lockImageStage.getCanonicalPath());
+                    if (lockChanged || !lockImageStage.exists()) {
+                        if (DEBUG) Slog.v(TAG, "New lock wallpaper; copying");
+                        FileUtils.copyFileOrThrow(mLockWallpaperFile, lockImageStage);
+                    }
                     fullBackupFile(lockImageStage, data);
+                    prefs.edit().putInt(LOCK_GENERATION, lockGeneration).apply();
                 }
             } else {
                 if (DEBUG) {
@@ -136,13 +166,6 @@ public class WallpaperBackupAgent extends BackupAgent {
         } catch (Exception e) {
             Slog.e(TAG, "Unable to back up wallpaper", e);
         } finally {
-            if (DEBUG) {
-                Slog.v(TAG, "Removing backup stage links");
-            }
-            infoStage.delete();
-            imageStage.delete();
-            lockImageStage.delete();
-
             // Even if this time we had to back off on attempting to store the lock image
             // due to exceeding the data quota, try again next time.  This will alternate
             // between "try both" and "only store the primary image" until either there
@@ -189,26 +212,30 @@ public class WallpaperBackupAgent extends BackupAgent {
             Slog.e(TAG, "Unable to restore wallpaper: " + e.getMessage());
         } finally {
             if (DEBUG) {
-                Slog.v(TAG, "Removing restore stage files");
+                Slog.v(TAG, "Restore finished; clearing backup bookkeeping");
             }
             infoStage.delete();
             imageStage.delete();
             lockImageStage.delete();
+
+            SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+            prefs.edit()
+                    .putInt(SYSTEM_GENERATION, -1)
+                    .putInt(LOCK_GENERATION, -1)
+                    .commit();
         }
     }
 
     private void restoreFromStage(File stage, File info, String hintTag, int which)
             throws IOException {
         if (stage.exists()) {
-            if (DEBUG) {
-                Slog.v(TAG, "Got restored wallpaper; applying which=" + which);
-            }
             // Parse the restored info file to find the crop hint.  Note that this currently
             // relies on a priori knowledge of the wallpaper info file schema.
             Rect cropHint = parseCropHint(info, hintTag);
             if (cropHint != null) {
+                Slog.i(TAG, "Got restored wallpaper; applying which=" + which);
                 if (DEBUG) {
-                    Slog.v(TAG, "Restored crop hint " + cropHint + "; now writing data");
+                    Slog.v(TAG, "Restored crop hint " + cropHint);
                 }
                 try (FileInputStream in = new FileInputStream(stage)) {
                     mWm.setStream(in, cropHint, true, which);
