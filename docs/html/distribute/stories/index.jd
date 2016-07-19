@@ -19,21 +19,43 @@ page.metaDescription=Android developers, their apps, and their successes with An
 <section class="dac-section dac-small" id="latest-apps"><div class="wrap">
   <h2 class="norule">Latest from apps</h2>
 
+  <h3 class="norule">Videos</h3>
+
   <div class="resource-widget resource-flow-layout col-16"
-      data-query="type:distribute+tag:developerstory+tag:apps, type:youtube+tag:developerstory+tag:apps"
+      data-query="type:youtube+tag:developerstory+tag:apps"
       data-sortOrder="-timestamp"
       data-cardSizes="6x6"
       data-items-per-page="15"
-      data-initial-results="9"></div>
+      data-initial-results="6"></div>
+
+  <h3 class="norule">Articles</h3>
+
+  <div class="resource-widget resource-flow-layout col-16"
+      data-query="type:distribute+tag:developerstory+tag:apps"
+      data-sortOrder="-timestamp"
+      data-cardSizes="6x6"
+      data-items-per-page="15"
+      data-initial-results="6"></div>
 </div></section>
 
 <section class="dac-section dac-small" id="latest-games"><div class="wrap">
   <h2 class="norule">Latest from games</h2>
 
+  <h3 class="norule">Videos</h3>
+
   <div class="resource-widget resource-flow-layout col-16"
-      data-query="type:distribute+tag:developerstory+tag:games,type:youtube+tag:developerstory+tag:games"
+      data-query="type:youtube+tag:developerstory+tag:games"
       data-sortOrder="-timestamp"
       data-cardSizes="6x6"
       data-items-per-page="15"
-      data-initial-results="9"></div>
+      data-initial-results="6"></div>
+
+  <h3 class="norule">Articles</h3>
+
+  <div class="resource-widget resource-flow-layout col-16"
+      data-query="type:distribute+tag:developerstory+tag:games"
+      data-sortOrder="-timestamp"
+      data-cardSizes="6x6"
+      data-items-per-page="15"
+      data-initial-results="6"></div>
 </div></section>
