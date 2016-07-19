@@ -440,6 +440,23 @@ static void android_os_Process_setCanSelfBackground(JNIEnv* env, jobject clazz, 
 #endif
 }
 
+jint android_os_Process_getThreadScheduler(JNIEnv* env, jclass clazz,
+                                              jint tid)
+{
+    int policy = 0;
+// linux has sched_getscheduler(), others don't.
+#if defined(__linux__)
+    errno = 0;
+    policy = sched_getscheduler(tid);
+    if (errno != 0) {
+        signalExceptionForPriorityError(env, errno);
+    }
+#else
+    signalExceptionForPriorityError(env, ENOSYS);
+#endif
+    return policy;
+}
+
 void android_os_Process_setThreadScheduler(JNIEnv* env, jclass clazz,
                                               jint tid, jint policy, jint pri)
 {
@@ -1189,6 +1206,7 @@ static const JNINativeMethod methods[] = {
     {"setCanSelfBackground", "(Z)V", (void*)android_os_Process_setCanSelfBackground},
     {"setThreadPriority",   "(I)V", (void*)android_os_Process_setCallingThreadPriority},
     {"getThreadPriority",   "(I)I", (void*)android_os_Process_getThreadPriority},
+    {"getThreadScheduler",   "(I)I", (void*)android_os_Process_getThreadScheduler},
     {"setThreadGroup",      "(II)V", (void*)android_os_Process_setThreadGroup},
     {"setProcessGroup",     "(II)V", (void*)android_os_Process_setProcessGroup},
     {"getProcessGroup",     "(I)I", (void*)android_os_Process_getProcessGroup},

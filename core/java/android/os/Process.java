@@ -16,6 +16,9 @@
 
 package android.os;
 
+import android.annotation.TestApi;
+import android.net.LocalSocket;
+import android.net.LocalSocketAddress;
 import android.system.Os;
 import android.system.OsConstants;
 import android.util.Log;
@@ -717,6 +720,24 @@ public class Process {
             throws IllegalArgumentException;
     
     /**
+     * Return the current scheduling policy of a thread, based on Linux.
+     *
+     * @param tid The identifier of the thread/process to get the scheduling policy.
+     *
+     * @throws IllegalArgumentException Throws IllegalArgumentException if
+     * <var>tid</var> does not exist, or if <var>priority</var> is out of range for the policy.
+     * @throws SecurityException Throws SecurityException if your process does
+     * not have permission to modify the given thread, or to use the given
+     * scheduling policy or priority.
+     *
+     * {@hide}
+     */
+    
+    @TestApi
+    public static final native int getThreadScheduler(int tid)
+            throws IllegalArgumentException;
+
+    /**
      * Set the scheduling policy and priority of a thread, based on Linux.
      *
      * @param tid The identifier of the thread/process to change.
@@ -731,6 +752,7 @@ public class Process {
      *
      * {@hide}
      */
+
     public static final native void setThreadScheduler(int tid, int policy, int priority)
             throws IllegalArgumentException;
 
