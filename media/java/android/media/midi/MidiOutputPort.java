@@ -83,7 +83,7 @@ public final class MidiOutputPort extends MidiSender implements Closeable {
                 }
             } catch (IOException e) {
                 // FIXME report I/O failure?
-                Log.e(TAG, "read failed");
+                Log.e(TAG, "read failed", e);
             } finally {
                 IoUtils.closeQuietly(mInputStream);
             }
