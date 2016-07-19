@@ -2929,6 +2929,19 @@ writeProguardForAndroidManifest(ProguardKeepSet* keep, const sp<AaptAssets>& ass
         if (!keepTag && inApplication && depth == 3) {
             if (tag == "activity" || tag == "service" || tag == "receiver" || tag == "provider") {
                 keepTag = true;
+
+                if (mainDex) {
+                    String8 componentProcess = AaptXml::getAttribute(tree,
+                            "http://schemas.android.com/apk/res/android", "process", &error);
+                    if (error != "") {
+                        fprintf(stderr, "ERROR: %s\n", error.string());
+                        return -1;
+                    }
+
+                    const String8& process =
+                            componentProcess.length() > 0 ? componentProcess : defaultProcess;
+                    keepTag = process.length() > 0 && process.find(":") != 0;
+                }
             }
         }
         if (keepTag) {
@@ -2940,19 +2953,6 @@ writeProguardForAndroidManifest(ProguardKeepSet* keep, const sp<AaptAssets>& ass
             }
 
             keepTag = name.length() > 0;
-
-            if (keepTag && mainDex) {
-                String8 componentProcess = AaptXml::getAttribute(tree,
-                        "http://schemas.android.com/apk/res/android", "process", &error);
-                if (error != "") {
-                    fprintf(stderr, "ERROR: %s\n", error.string());
-                    return -1;
-                }
-
-                const String8& process =
-                        componentProcess.length() > 0 ? componentProcess : defaultProcess;
-                keepTag = process.length() > 0 && process.find(":") != 0;
-            }
 
             if (keepTag) {
                 addProguardKeepRule(keep, name, pkg.string(),
