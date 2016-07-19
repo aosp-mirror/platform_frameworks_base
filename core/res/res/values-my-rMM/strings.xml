@@ -1024,6 +1024,7 @@
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"သိုလှောင်မှုအား ပြုပြင်ခြင်း။"</string>
     <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android ကိုအဆင့်မြှင့်တင်နေပါသည်"</string>
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"အဆင့်မြှင့်တင်ခြင်း မပြီးဆုံးသေးသ၍ အချို့အက်ပ်များကို ကောင်းမွန်စွာအသုံးပြုနိုင်ဦးမည် မဟုတ်ပါ"</string>
+    <string name="app_upgrading_toast" msgid="3008139776215597053">"<xliff:g id="APPLICATION">%1$s</xliff:g> ကို အဆင့်မြှင့်တင်နေပါသည်…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_0">%1$d</xliff:g> ထဲက အက်ပ်<xliff:g id="NUMBER_1">%2$d</xliff:g>ကို ဆီလျော်အောင် လုပ်နေ"</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> အားပြင်ဆင်နေသည်။"</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"အက်ပ်များကို စတင်နေ"</string>

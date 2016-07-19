@@ -1024,6 +1024,7 @@
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"A otimizar o armazenamento."</string>
     <string name="android_upgrading_notification_title" msgid="1619393112444671028">"O Android está a ser atualizado"</string>
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Algumas aplicações podem não funcionar corretamente enquanto a atualização não for concluída"</string>
+    <string name="app_upgrading_toast" msgid="3008139776215597053">"O <xliff:g id="APPLICATION">%1$s</xliff:g> está a ser atualizado…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"A otimizar a aplicação <xliff:g id="NUMBER_0">%1$d</xliff:g> de <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"A preparar o <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"A iniciar aplicações"</string>

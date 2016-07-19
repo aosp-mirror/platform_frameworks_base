@@ -1024,6 +1024,7 @@
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"저장소 최적화 중"</string>
     <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android 업그레이드 중"</string>
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"특정 앱은 업그레이드가 완료될 때까지 제대로 작동하지 않을 수 있습니다."</string>
+    <string name="app_upgrading_toast" msgid="3008139776215597053">"<xliff:g id="APPLICATION">%1$s</xliff:g> 업그레이드 중…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"앱 <xliff:g id="NUMBER_1">%2$d</xliff:g>개 중 <xliff:g id="NUMBER_0">%1$d</xliff:g>개 최적화 중"</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> 준비 중..."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"앱을 시작하는 중입니다."</string>
