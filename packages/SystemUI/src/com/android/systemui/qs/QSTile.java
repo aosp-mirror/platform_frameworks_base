@@ -150,6 +150,9 @@ public abstract class QSTile<TState extends State> {
     public interface DetailAdapter {
         CharSequence getTitle();
         Boolean getToggleState();
+        default boolean getToggleEnabled() {
+            return true;
+        }
         View createDetailView(Context context, View convertView, ViewGroup parent);
         Intent getSettingsIntent();
         void setToggleState(boolean state);
