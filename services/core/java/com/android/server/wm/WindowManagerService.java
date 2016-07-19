@@ -389,7 +389,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final boolean mLimitedAlphaCompositing;
 
-    final WindowManagerPolicy mPolicy = new PhoneWindowManager();
+    final WindowManagerPolicy mPolicy;
 
     final IActivityManager mActivityManager;
     final ActivityManagerInternal mAmInternal;
@@ -925,14 +925,11 @@ public class WindowManagerService extends IWindowManager.Stub
     public static WindowManagerService main(final Context context,
             final InputManagerService im,
             final boolean haveInputMethods, final boolean showBootMsgs,
-            final boolean onlyCore) {
+            final boolean onlyCore, WindowManagerPolicy policy) {
         final WindowManagerService[] holder = new WindowManagerService[1];
-        DisplayThread.getHandler().runWithScissors(new Runnable() {
-            @Override
-            public void run() {
-                holder[0] = new WindowManagerService(context, im,
-                        haveInputMethods, showBootMsgs, onlyCore);
-            }
+        DisplayThread.getHandler().runWithScissors(() -> {
+            holder[0] = new WindowManagerService(context, im, haveInputMethods, showBootMsgs,
+                    onlyCore, policy);
         }, 0);
         return holder[0];
     }
@@ -949,7 +946,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private WindowManagerService(Context context, InputManagerService inputManager,
-            boolean haveInputMethods, boolean showBootMsgs, boolean onlyCore) {
+            boolean haveInputMethods, boolean showBootMsgs, boolean onlyCore,
+            WindowManagerPolicy policy) {
         mContext = context;
         mHaveInputMethods = haveInputMethods;
         mAllowBootMessages = showBootMsgs;
@@ -972,10 +970,12 @@ public class WindowManagerService extends IWindowManager.Stub
         mWallpaperControllerLocked = new WallpaperController(this);
         mWindowPlacerLocked = new WindowSurfacePlacer(this);
         mLayersController = new WindowLayersController(this);
+        mPolicy = policy;
 
         LocalServices.addService(WindowManagerPolicy.class, mPolicy);
 
-        mPointerEventDispatcher = new PointerEventDispatcher(mInputManager.monitorInput(TAG_WM));
+        mPointerEventDispatcher = mInputManager != null
+                ? new PointerEventDispatcher(mInputManager.monitorInput(TAG_WM)) : null;
 
         mFxSession = new SurfaceSession();
         mDisplayManager = (DisplayManager)context.getSystemService(Context.DISPLAY_SERVICE);
@@ -988,19 +988,18 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mPowerManager = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
-        mPowerManagerInternal.registerLowPowerModeObserver(
-                new PowerManagerInternal.LowPowerModeListener() {
-            @Override
-            public void onLowPowerModeChanged(boolean enabled) {
+
+        if (mPowerManagerInternal != null) {
+            mPowerManagerInternal.registerLowPowerModeObserver((enabled) -> {
                 synchronized (mWindowMap) {
                     if (mAnimationsDisabled != enabled && !mAllowAnimationsInLowPowerMode) {
                         mAnimationsDisabled = enabled;
                         dispatchNewAnimatorScaleLocked(null);
                     }
                 }
-            }
-        });
-        mAnimationsDisabled = mPowerManagerInternal.getLowPowerModeEnabled();
+            });
+            mAnimationsDisabled = mPowerManagerInternal.getLowPowerModeEnabled();
+        }
         mScreenFrozenLock = mPowerManager.newWakeLock(
                 PowerManager.PARTIAL_WAKE_LOCK, "SCREEN_FROZEN");
         mScreenFrozenLock.setReferenceCounted(false);
@@ -2032,8 +2031,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 addToken = true;
             }
 
-            WindowState win = new WindowState(this, session, client, token,
-                    attachedWindow, appOp[0], seq, attrs, viewVisibility, displayContent);
+            WindowState win = new WindowState(this, session, client, token, attachedWindow,
+                    appOp[0], seq, attrs, viewVisibility, displayContent, session.mUid);
             if (win.mDeathRecipient == null) {
                 // Client has apparently died, so there is no reason to
                 // continue.
@@ -10808,14 +10807,16 @@ public class WindowManagerService extends IWindowManager.Stub
         displayInfo.overscanTop = rect.top;
         displayInfo.overscanRight = rect.right;
         displayInfo.overscanBottom = rect.bottom;
-        mDisplayManagerInternal.setDisplayInfoOverrideFromWindowManager(displayId, displayInfo);
-        configureDisplayPolicyLocked(displayContent);
+        if (mDisplayManagerInternal != null) {
+            mDisplayManagerInternal.setDisplayInfoOverrideFromWindowManager(displayId, displayInfo);
+            configureDisplayPolicyLocked(displayContent);
 
-        // TODO: Create an input channel for each display with touch capability.
-        if (displayId == Display.DEFAULT_DISPLAY) {
-            displayContent.mTapDetector = new TaskTapPointerEventListener(this, displayContent);
-            registerPointerEventListener(displayContent.mTapDetector);
-            registerPointerEventListener(mMousePositionTracker);
+            // TODO: Create an input channel for each display with touch capability.
+            if (displayId == Display.DEFAULT_DISPLAY) {
+                displayContent.mTapDetector = new TaskTapPointerEventListener(this, displayContent);
+                registerPointerEventListener(displayContent.mTapDetector);
+                registerPointerEventListener(mMousePositionTracker);
+            }
         }
 
         return displayContent;
