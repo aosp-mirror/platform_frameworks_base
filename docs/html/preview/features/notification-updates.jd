@@ -395,5 +395,6 @@ Notification notification = new Notification.Builder()
                  .addMessage("Hi", timestamp1, null) // Pass in null for user.
                  .addMessage("What's up?", timestamp2, "Coworker")
                  .addMessage("Not much", timestamp3, null)
-                 .addMessage("How about lunch?", timestamp4, "Coworker"));
+                 .addMessage("How about lunch?", timestamp4, "Coworker"))
+             .build();
 </pre>
