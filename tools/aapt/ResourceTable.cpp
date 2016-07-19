@@ -4521,6 +4521,7 @@ bool ResourceTable::shouldGenerateVersionedResource(
         const ConfigDescription& sourceConfig,
         const int sdkVersionToGenerate) {
     assert(sdkVersionToGenerate > sourceConfig.sdkVersion);
+    assert(configList != NULL);
     const DefaultKeyedVector<ConfigDescription, sp<ResourceTable::Entry>>& entries
             = configList->getEntries();
     ssize_t idx = entries.indexOfKey(sourceConfig);
