@@ -1026,6 +1026,7 @@
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"ආචයනය ප්‍රශස්තිකරණය කිරීම."</string>
     <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android උත්ශ්‍රේණි කරමින්"</string>
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"උත්ශ්‍රේණි කිරීම අවසන් වන තෙක් සමහර යෙදුම් නිසි ලෙස ක්‍රියා නොකළ හැකිය"</string>
+    <string name="app_upgrading_toast" msgid="3008139776215597053">"<xliff:g id="APPLICATION">%1$s</xliff:g> උත්ශ්‍රේණි කරමින්…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_1">%2$d</xliff:g> කින් <xliff:g id="NUMBER_0">%1$d</xliff:g> වැනි යෙදුම ප්‍රශස්ත කරමින්."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> සූදානම් කරමින්."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"යෙදුම් ආරම්භ කරමින්."</string>
