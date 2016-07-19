@@ -1024,8 +1024,7 @@
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Speicher wird optimiert"</string>
     <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android wird aktualisiert"</string>
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Einige Apps funktionieren unter Umständen nicht richtig, bis das Upgrade abgeschlossen ist"</string>
-    <!-- no translation found for app_upgrading_toast (3008139776215597053) -->
-    <skip />
+    <string name="app_upgrading_toast" msgid="3008139776215597053">"Für <xliff:g id="APPLICATION">%1$s</xliff:g> wird gerade ein Upgrade ausgeführt…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"App <xliff:g id="NUMBER_0">%1$d</xliff:g> von <xliff:g id="NUMBER_1">%2$d</xliff:g> wird optimiert..."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> wird vorbereitet"</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Apps werden gestartet..."</string>

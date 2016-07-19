@@ -44,7 +44,7 @@
     <string name="unknownName" msgid="6867811765370350269">"Noma’lum"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Ovozli pochta"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
-    <string name="mmiError" msgid="5154499457739052907">"Ulanishda xato yoki noto‘g‘ri MMI kodi."</string>
+    <string name="mmiError" msgid="5154499457739052907">"Tarmoqda xato yoki MMI kod noto‘g‘ri."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Bu amal faqat ruxsat etilgan raqamlar uchun mavjud."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Xizmat yoqildi."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Xizmat quyidagi uchun yoqildi:"</string>
@@ -143,7 +143,7 @@
     <string name="cfTemplateRegistered" msgid="5073237827620166285">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Yo‘naltirilmadi"</string>
     <string name="cfTemplateRegisteredTime" msgid="6781621964320635172">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: yo‘naltirilmadi"</string>
     <string name="fcComplete" msgid="3118848230966886575">"Maxsus kod bajarildi."</string>
-    <string name="fcError" msgid="3327560126588500777">"Ulanishda muammo yoki maxsus kod xato."</string>
+    <string name="fcError" msgid="3327560126588500777">"Tarmoqda xato yoki maxsus kod noto‘g‘ri."</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"OK"</string>
     <string name="httpError" msgid="7956392511146698522">"Tarmoqda xato yuz berdi."</string>
     <string name="httpErrorLookup" msgid="4711687456111963163">"URL topilmadi."</string>
@@ -985,7 +985,7 @@
     <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"%1$s yordamida suratga oling"</string>
     <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"Suratga olish"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Ushbu amaldan standart sifatida foydalanish"</string>
-    <string name="use_a_different_app" msgid="8134926230585710243">"Boshqa ilovadan foydalanish"</string>
+    <string name="use_a_different_app" msgid="8134926230585710243">"Boshqa ilova"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Birlamchi sozlamalarni Tizim sozlamalari &gt; Ilovalar &gt; Yuklab olingan menyusidan tozalang."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Amalni tanlash"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"USB qurilma uchun ilovani tanlang"</string>
@@ -998,16 +998,16 @@
     <string name="aerr_report" msgid="5371800241488400617">"Fikr-mulohaza yuborish"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Yopish"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Qurilma o‘chib yonguncha e’tiborsiz qoldirish"</string>
-    <string name="aerr_wait" msgid="3199956902437040261">"Kuting"</string>
+    <string name="aerr_wait" msgid="3199956902437040261">"Kutish"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"Ilovani yopish"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="8493290105678066167">"<xliff:g id="APPLICATION">%2$s</xliff:g> javob bermayapti"</string>
-    <string name="anr_activity_process" msgid="1622382268908620314">"<xliff:g id="ACTIVITY">%1$s</xliff:g> javob bermayapti"</string>
-    <string name="anr_application_process" msgid="6417199034861140083">"<xliff:g id="APPLICATION">%1$s</xliff:g> javob bermayapti"</string>
+    <string name="anr_activity_application" msgid="8493290105678066167">"<xliff:g id="APPLICATION">%2$s</xliff:g> ilovasi javob bermayapti"</string>
+    <string name="anr_activity_process" msgid="1622382268908620314">"<xliff:g id="ACTIVITY">%1$s</xliff:g> harakati javob bermayapti"</string>
+    <string name="anr_application_process" msgid="6417199034861140083">"<xliff:g id="APPLICATION">%1$s</xliff:g> ilovasi javob bermayapti"</string>
     <string name="anr_process" msgid="6156880875555921105">"<xliff:g id="PROCESS">%1$s</xliff:g> ilovasi javob bermayapti"</string>
     <string name="force_close" msgid="8346072094521265605">"OK"</string>
     <string name="report" msgid="4060218260984795706">"Xabar berish"</string>
-    <string name="wait" msgid="7147118217226317732">"Kuting"</string>
+    <string name="wait" msgid="7147118217226317732">"Kutish"</string>
     <string name="webpage_unresponsive" msgid="3272758351138122503">"Sahifa javob bermayapti.\n\nUni yopishni xohlaysizmi?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"Ilova qayta yo‘naltirildi"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> hozirda ishlamoqda"</string>
@@ -1024,8 +1024,7 @@
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Xotira optimallashtirilmoqda."</string>
     <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android yangilanmoqda"</string>
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Yangilanish vaqtida ba’zi ilovalar to‘g‘ri ishlamasligi mumkin"</string>
-    <!-- no translation found for app_upgrading_toast (3008139776215597053) -->
-    <skip />
+    <string name="app_upgrading_toast" msgid="3008139776215597053">"<xliff:g id="APPLICATION">%1$s</xliff:g> ilovasi yangilanmoqda…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Ilovalar optimallashtirilmoqda (<xliff:g id="NUMBER_0">%1$d</xliff:g> / <xliff:g id="NUMBER_1">%2$d</xliff:g>)."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> tayyorlanmoqda."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Ilovalar ishga tushirilmoqda."</string>
@@ -1317,7 +1316,7 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB xotira qurilmasi"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB xotira"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Tahrirlash"</string>
-    <string name="data_usage_warning_title" msgid="1955638862122232342">"Ma’lumotlardan foydalanish ogohlantirilishi"</string>
+    <string name="data_usage_warning_title" msgid="1955638862122232342">"Trafik kam qoldi"</string>
     <string name="data_usage_warning_body" msgid="6660692274311972007">"Trafik sarfi va sozlamalarni ko‘rish uchun bosing."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G trafik chekloviga yetdi"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G trafik chekloviga yetdi"</string>
@@ -1352,7 +1351,7 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Brauzer ishga tushirilsinmi?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Qo‘ng‘iroqni qabul qilasizmi?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Har doim"</string>
-    <string name="activity_resolver_use_once" msgid="2404644797149173758">"Bir marta"</string>
+    <string name="activity_resolver_use_once" msgid="2404644797149173758">"Faqat hozir"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"“%1$s” ishchi profilni qo‘llab-quvvatlamaydi"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Planshet"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"TV"</string>
