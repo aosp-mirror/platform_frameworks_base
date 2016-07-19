@@ -30,7 +30,7 @@ import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 
-import libcore.io.IoUtils;
+import libcore.io.IoBridge;
 import libcore.util.HexEncoding;
 
 import java.io.FileDescriptor;
@@ -457,7 +457,9 @@ public class RouterAdvertisementDaemon {
 
     private void closeSocket() {
         if (mSocket != null) {
-            IoUtils.closeQuietly(mSocket);
+            try {
+                IoBridge.closeAndSignalBlockedThreads(mSocket);
+            } catch (IOException ignored) {}
         }
         mSocket = null;
     }
