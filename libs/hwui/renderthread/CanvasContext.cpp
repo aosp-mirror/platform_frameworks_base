@@ -236,6 +236,7 @@ bool CanvasContext::isSwapChainStuffed() {
     }
 
     // All signs point to a stuffed swap chain
+    ATRACE_NAME("swap chain stuffed");
     return true;
 }
 
