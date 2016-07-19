@@ -107,8 +107,6 @@ BootAnimation::BootAnimation() : Thread(false), mClockEnabled(true), mTimeIsAccu
     mSystemBoot = !property_get_bool(BOOT_COMPLETED_PROP_NAME, 0);
 }
 
-BootAnimation::~BootAnimation() {}
-
 void BootAnimation::onFirstRef() {
     status_t err = mSession->linkToComposerDeath(this);
     ALOGE_IF(err, "linkToComposerDeath failed (%s) ", strerror(-err));
@@ -778,11 +776,12 @@ bool BootAnimation::preloadZip(Animation& animation)
     }
 
     // Create and initialize audioplay if there is a wav file in any of the animations.
+    // Do it on a separate thread so we don't hold up the animation intro.
     if (partWithAudio != NULL) {
         ALOGD("found audio.wav, creating playback engine");
-        if (!audioplay::create(partWithAudio->audioData, partWithAudio->audioLength)) {
-            return false;
-        }
+        mInitAudioThread = new InitAudioThread(partWithAudio->audioData,
+                                               partWithAudio->audioLength);
+        mInitAudioThread->run("BootAnimation::InitAudioThread", PRIORITY_NORMAL);
     }
 
     zip->endIteration(cookie);
@@ -850,9 +849,14 @@ bool BootAnimation::movie()
 
     playAnimation(*animation);
 
-    if (mTimeCheckThread != NULL) {
+    if (mTimeCheckThread != nullptr) {
         mTimeCheckThread->requestExit();
-        mTimeCheckThread = NULL;
+        mTimeCheckThread = nullptr;
+    }
+
+    if (mInitAudioThread != nullptr) {
+        mInitAudioThread->requestExit();
+        mInitAudioThread = nullptr;
     }
 
     releaseAnimation(animation);
@@ -892,6 +896,10 @@ bool BootAnimation::playAnimation(const Animation& animation)
             // only play audio file the first time we animate the part
             if (r == 0 && part.audioData && playSoundsAllowed()) {
                 ALOGD("playing clip for part%d, size=%d", (int) i, part.audioLength);
+                // Block until the audio engine is finished initializing.
+                if (mInitAudioThread != nullptr) {
+                    mInitAudioThread->join();
+                }
                 audioplay::playClip(part.audioData, part.audioLength);
             }
 
@@ -1183,6 +1191,17 @@ status_t BootAnimation::TimeCheckThread::readyToRun() {
     }
 
     return NO_ERROR;
+}
+
+BootAnimation::InitAudioThread::InitAudioThread(uint8_t* exampleAudioData, int exampleAudioLength)
+    : Thread(false),
+      mExampleAudioData(exampleAudioData),
+      mExampleAudioLength(exampleAudioLength) {}
+
+bool BootAnimation::InitAudioThread::threadLoop() {
+    audioplay::create(mExampleAudioData, mExampleAudioLength);
+    // Exit immediately
+    return false;
 }
 
 // ---------------------------------------------------------------------------
