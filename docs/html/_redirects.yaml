@@ -479,6 +479,14 @@ redirects:
   to: /distribute/stories/index.html
 - from: /distribute/stories/tablets.html
   to: /distribute/stories/index.html
+- from: /distribute/stories/glu-dh.html
+  to: /distribute/stories/games/glu-dh.html
+- from: /distribute/stories/apps/tapps.html
+  to: /distribute/stories/games/tapps.html
+- from: /distribute/stories/apps/upbeat-games.html
+  to: /distribute/stories/games/upbeat-games.html
+- from: /distribute/stories/games/two-dots.html
+  to: /distribute/stories/games/dots.html
 - from: /distribute/googleplay/edu/index.html
   to: /distribute/googleplay/edu/about.html
 - from: /distribute/googleplay/edu/contact.html
