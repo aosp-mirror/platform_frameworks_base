@@ -276,7 +276,15 @@ AndroidRuntime::~AndroidRuntime()
     return jniRegisterNativeMethods(env, className, gMethods, numMethods);
 }
 
-void AndroidRuntime::setArgv0(const char* argv0) {
+void AndroidRuntime::setArgv0(const char* argv0, bool setProcName) {
+    if (setProcName) {
+        int len = strlen(argv0);
+        if (len < 15) {
+            pthread_setname_np(pthread_self(), argv0);
+        } else {
+            pthread_setname_np(pthread_self(), argv0 + len - 15);
+        }
+    }
     memset(mArgBlockStart, 0, mArgBlockLength);
     strlcpy(mArgBlockStart, argv0, mArgBlockLength);
 }

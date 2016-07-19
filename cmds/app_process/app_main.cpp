@@ -299,9 +299,7 @@ int main(int argc, char* const argv[])
     }
 
     if (!niceName.isEmpty()) {
-        const char* procName = niceName.string();
-        pthread_setname_np(pthread_self(), procName);
-        runtime.setArgv0(procName);
+        runtime.setArgv0(niceName.string(), true /* setProcName */);
     }
 
     if (zygote) {
