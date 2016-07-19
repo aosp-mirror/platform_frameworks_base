@@ -245,7 +245,7 @@ public class ResolverDrawerLayout extends ViewGroup {
                 final float y = ev.getY();
                 mInitialTouchX = x;
                 mInitialTouchY = mLastTouchY = y;
-                mOpenOnClick = isListChildUnderClipped(x, y) && mCollapsibleHeight > 0;
+                mOpenOnClick = isListChildUnderClipped(x, y) && mCollapseOffset > 0;
             }
             break;
 
