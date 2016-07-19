@@ -44,7 +44,7 @@ public:
         Tool,
     };
 
-    void setArgv0(const char* argv0);
+    void setArgv0(const char* argv0, bool setProcName = false);
     void addOption(const char* optionString, void* extra_info = NULL);
 
     /**
