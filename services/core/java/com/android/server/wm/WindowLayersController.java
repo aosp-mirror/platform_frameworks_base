@@ -119,18 +119,13 @@ public class WindowLayersController {
         mInputMethodAnimLayerAdjustment = adj;
         final WindowState imw = mService.mInputMethodWindow;
         if (imw != null) {
-            imw.mWinAnimator.mAnimLayer = imw.mLayer + adj;
-            if (DEBUG_LAYERS) Slog.v(TAG_WM, "IM win " + imw
-                    + " anim layer: " + imw.mWinAnimator.mAnimLayer);
-            for (int i = imw.mChildWindows.size() - 1; i >= 0; i--) {
-                final WindowState childWindow = imw.mChildWindows.get(i);
-                childWindow.mWinAnimator.mAnimLayer = childWindow.mLayer + adj;
-                if (DEBUG_LAYERS) Slog.v(TAG_WM, "IM win " + childWindow
-                        + " anim layer: " + childWindow.mWinAnimator.mAnimLayer);
-            }
+            imw.adjustAnimLayer(adj);
         }
         for (int i = mService.mInputMethodDialogs.size() - 1; i >= 0; i--) {
             final WindowState dialog = mService.mInputMethodDialogs.get(i);
+            // TODO: This and other places setting mAnimLayer can probably use WS.adjustAnimLayer,
+            // but need to make sure we are not setting things twice for child windows that are
+            // already in the list.
             dialog.mWinAnimator.mAnimLayer = dialog.mLayer + adj;
             if (DEBUG_LAYERS) Slog.v(TAG_WM, "IM win " + imw
                     + " anim layer: " + dialog.mWinAnimator.mAnimLayer);

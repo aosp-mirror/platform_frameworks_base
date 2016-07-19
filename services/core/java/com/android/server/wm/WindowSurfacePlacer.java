@@ -213,9 +213,9 @@ class WindowSurfacePlacer {
             recoveringMemory = true;
             // Wait a little bit for things to settle down, and off we go.
             while (!mService.mForceRemoves.isEmpty()) {
-                WindowState ws = mService.mForceRemoves.remove(0);
+                final WindowState ws = mService.mForceRemoves.remove(0);
                 Slog.i(TAG, "Force removing: " + ws);
-                mService.removeWindowInnerLocked(ws);
+                ws.removeLocked();
             }
             Slog.w(TAG, "Due to memory failure, waiting a bit for next layout");
             Object tmp = new Object();
@@ -544,8 +544,8 @@ class WindowSurfacePlacer {
             mService.mPendingRemove.clear();
             DisplayContentList displayList = new DisplayContentList();
             for (i = 0; i < N; i++) {
-                WindowState w = mService.mPendingRemoveTmp[i];
-                mService.removeWindowInnerLocked(w);
+                final WindowState w = mService.mPendingRemoveTmp[i];
+                w.removeLocked();
                 final DisplayContent displayContent = w.getDisplayContent();
                 if (displayContent != null && !displayList.contains(displayContent)) {
                     displayList.add(displayContent);
@@ -1269,7 +1269,7 @@ class WindowSurfacePlacer {
                     // We also don't clear the mAnimatingExit flag for windows which have the
                     // mRemoveOnExit flag. This indicates an explicit remove request has been issued
                     // by the client. We should let animation proceed and not clear this flag or
-                    // they won't eventually be removed by WindowStateAnimator#finishExit.
+                    // they won't eventually be removed by WindowState#onExitAnimationDone.
                     if (!win.mWillReplaceWindow && !win.mRemoveOnExit) {
                         win.mAnimatingExit = false;
                         // Clear mAnimating flag together with mAnimatingExit. When animation

@@ -1146,13 +1146,8 @@ public class WindowManagerService extends IWindowManager.Stub
     private int indexOfWinInWindowList(WindowState targetWin, WindowList windows) {
         for (int i = windows.size() - 1; i >= 0; i--) {
             final WindowState w = windows.get(i);
-            if (w == targetWin) {
+            if (w == targetWin || w.hasChild(targetWin)) {
                 return i;
-            }
-            if (!w.mChildWindows.isEmpty()) {
-                if (indexOfWinInWindowList(targetWin, w.mChildWindows) >= 0) {
-                    return i;
-                }
             }
         }
         return -1;
@@ -1646,30 +1641,6 @@ public class WindowManagerService extends IWindowManager.Stub
         moveInputMethodDialogsLocked(pos);
     }
 
-    private int tmpRemoveWindowLocked(int interestingPos, WindowState win) {
-        WindowList windows = win.getWindowList();
-        int wpos = windows.indexOf(win);
-        if (wpos >= 0) {
-            if (wpos < interestingPos) interestingPos--;
-            if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG_WM, "Temp removing at " + wpos + ": " + win);
-            windows.remove(wpos);
-            mWindowsChanged = true;
-            int NC = win.mChildWindows.size();
-            while (NC > 0) {
-                NC--;
-                WindowState cw = win.mChildWindows.get(NC);
-                int cpos = windows.indexOf(cw);
-                if (cpos >= 0) {
-                    if (cpos < interestingPos) interestingPos--;
-                    if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG_WM, "Temp removing child at "
-                            + cpos + ": " + cw);
-                    windows.remove(cpos);
-                }
-            }
-        }
-        return interestingPos;
-    }
-
     private void reAddWindowToListInOrderLocked(WindowState win) {
         addWindowToListInOrderLocked(win, false);
         // This is a hack to get all of the child windows added as well
@@ -1681,7 +1652,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG_WM, "ReAdd removing from " + wpos + ": " + win);
             windows.remove(wpos);
             mWindowsChanged = true;
-            reAddWindowLocked(wpos, win);
+            win.reAddWindowLocked(wpos);
         }
     }
 
@@ -1701,7 +1672,7 @@ public class WindowManagerService extends IWindowManager.Stub
         final int N = dialogs.size();
         if (DEBUG_INPUT_METHOD) Slog.v(TAG_WM, "Removing " + N + " dialogs w/pos=" + pos);
         for (int i=0; i<N; i++) {
-            pos = tmpRemoveWindowLocked(pos, dialogs.get(i));
+            pos = dialogs.get(i).removeFromWindowList(pos);
         }
         if (DEBUG_INPUT_METHOD) {
             Slog.v(TAG_WM, "Window list w/pos=" + pos);
@@ -1725,7 +1696,7 @@ public class WindowManagerService extends IWindowManager.Stub
             for (int i=0; i<N; i++) {
                 WindowState win = dialogs.get(i);
                 win.mTargetAppToken = targetAppToken;
-                pos = reAddWindowLocked(pos, win);
+                pos = win.reAddWindowLocked(pos);
             }
             if (DEBUG_INPUT_METHOD) {
                 Slog.v(TAG_WM, "Final window list:");
@@ -1762,16 +1733,14 @@ public class WindowManagerService extends IWindowManager.Stub
             // First check to see if the input method windows are already
             // located here, and contiguous.
             final int N = windows.size();
-            WindowState firstImWin = imPos < N
-                    ? windows.get(imPos) : null;
+            final WindowState firstImWin = imPos < N ? windows.get(imPos) : null;
 
             // Figure out the actual input method window that should be
             // at the bottom of their stack.
-            WindowState baseImWin = imWin != null
-                    ? imWin : mInputMethodDialogs.get(0);
-            if (baseImWin.mChildWindows.size() > 0) {
-                WindowState cw = baseImWin.mChildWindows.get(0);
-                if (cw.mSubLayer < 0) baseImWin = cw;
+            WindowState baseImWin = imWin != null ? imWin : mInputMethodDialogs.get(0);
+            final WindowState cw = baseImWin.getBottomChild();
+            if (cw != null && cw.mSubLayer < 0) {
+                baseImWin = cw;
             }
 
             if (firstImWin == baseImWin) {
@@ -1807,13 +1776,13 @@ public class WindowManagerService extends IWindowManager.Stub
                     Slog.v(TAG_WM, "Moving IM from " + imPos);
                     logWindowList(windows, "  ");
                 }
-                imPos = tmpRemoveWindowLocked(imPos, imWin);
+                imPos = imWin.removeFromWindowList(imPos);
                 if (DEBUG_INPUT_METHOD) {
                     Slog.v(TAG_WM, "List after removing with new pos " + imPos + ":");
                     logWindowList(windows, "  ");
                 }
                 imWin.mTargetAppToken = mInputMethodTarget.mAppToken;
-                reAddWindowLocked(imPos, imWin);
+                imWin.reAddWindowLocked(imPos);
                 if (DEBUG_INPUT_METHOD) {
                     Slog.v(TAG_WM, "List after moving IM to " + imPos + ":");
                     logWindowList(windows, "  ");
@@ -1829,7 +1798,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (imWin != null) {
                 if (DEBUG_INPUT_METHOD) Slog.v(TAG_WM, "Moving IM from " + imPos);
-                tmpRemoveWindowLocked(0, imWin);
+                imWin.removeFromWindowList(0);
                 imWin.mTargetAppToken = null;
                 reAddWindowToListInOrderLocked(imWin);
                 if (DEBUG_INPUT_METHOD) {
@@ -1850,7 +1819,7 @@ public class WindowManagerService extends IWindowManager.Stub
         return true;
     }
 
-    private static boolean excludeWindowTypeFromTapOutTask(int windowType) {
+    static boolean excludeWindowTypeFromTapOutTask(int windowType) {
         switch (windowType) {
             case TYPE_STATUS_BAR:
             case TYPE_NAVIGATION_BAR:
@@ -2454,7 +2423,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        removeWindowInnerLocked(win);
+        win.removeLocked();
         // Removing a visible window will effect the computed orientation
         // So just update orientation if needed.
         if (wasVisible && updateOrientationFromAppTokensLocked(false)) {
@@ -2464,41 +2433,12 @@ public class WindowManagerService extends IWindowManager.Stub
         Binder.restoreCallingIdentity(origId);
     }
 
-    void removeWindowInnerLocked(WindowState win) {
-        if (win.mRemoved) {
-            // Nothing to do.
-            if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
-                    "removeWindowInnerLocked: " + win + " Already removed...");
-            return;
-        }
-
-        for (int i = win.mChildWindows.size() - 1; i >= 0; i--) {
-            WindowState cwin = win.mChildWindows.get(i);
-            Slog.w(TAG_WM, "Force-removing child win " + cwin + " from container " + win);
-            removeWindowInnerLocked(cwin);
-        }
-
-        win.mRemoved = true;
-
-        if (mInputMethodTarget == win) {
-            moveInputMethodWindowsIfNeededLocked(false);
-        }
-
-        if (false) {
-            RuntimeException e = new RuntimeException("here");
-            e.fillInStackTrace();
-            Slog.w(TAG_WM, "Removing window " + win, e);
-        }
-
-        final int type = win.mAttrs.type;
-        if (excludeWindowTypeFromTapOutTask(type)) {
-            final DisplayContent displaycontent = win.getDisplayContent();
-            displaycontent.mTapExcludedWindows.remove(win);
-        }
-        mPolicy.removeWindowLw(win);
-        win.removeLocked();
-
-        if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "removeWindowInnerLocked: " + win);
+    /**
+     * Performs some centralized bookkeeping clean-up on the window that is being removed.
+     * NOTE: Should only be called from {@link WindowState#removeLocked()}
+     */
+    void postWindowRemoveCleanupLocked(WindowState win) {
+        if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "postWindowRemoveCleanupLocked: " + win);
         mWindowMap.remove(win.mClient.asBinder());
         if (win.mAppOp != AppOpsManager.OP_NONE) {
             mAppOps.finishOp(win.mAppOp, win.getOwningUid(), win.getOwningPackage());
@@ -2551,7 +2491,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        if (type == TYPE_WALLPAPER) {
+        if (win.mAttrs.type == TYPE_WALLPAPER) {
             mWallpaperControllerLocked.clearLastWallpaperTimeoutTime();
             getDefaultDisplayContentLocked().pendingLayoutChanges |=
                     WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
@@ -4377,7 +4317,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 WindowState win = wtoken.allAppWindows.get(i);
                 if (win == wtoken.startingWindow) {
                     // Starting window that's exiting will be removed when the animation
-                    // finishes. Mark all relevant flags for that finishExit will proceed
+                    // finishes. Mark all relevant flags for that onExitAnimationDone will proceed
                     // all the way to actually remove it.
                     if (!visible && win.isVisibleNow() && wtoken.mAppAnimator.isAnimating()) {
                         win.mAnimatingExit = true;
@@ -4865,38 +4805,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private final int reAddWindowLocked(int index, WindowState win) {
-        final WindowList windows = win.getWindowList();
-        // Adding child windows relies on mChildWindows being ordered by mSubLayer.
-        final int NCW = win.mChildWindows.size();
-        boolean winAdded = false;
-        for (int j=0; j<NCW; j++) {
-            WindowState cwin = win.mChildWindows.get(j);
-            if (!winAdded && cwin.mSubLayer >= 0) {
-                if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG_WM, "Re-adding child window at "
-                        + index + ": " + cwin);
-                win.mRebuilding = false;
-                windows.add(index, win);
-                index++;
-                winAdded = true;
-            }
-            if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG_WM, "Re-adding window at "
-                    + index + ": " + cwin);
-            cwin.mRebuilding = false;
-            windows.add(index, cwin);
-            index++;
-        }
-        if (!winAdded) {
-            if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG_WM, "Re-adding window at "
-                    + index + ": " + win);
-            win.mRebuilding = false;
-            windows.add(index, win);
-            index++;
-        }
-        mWindowsChanged = true;
-        return index;
-    }
-
     private final int reAddAppWindowsLocked(final DisplayContent displayContent, int index,
                                             WindowToken token) {
         final int NW = token.windows.size();
@@ -4905,7 +4813,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final DisplayContent winDisplayContent = win.getDisplayContent();
             if (winDisplayContent == displayContent || winDisplayContent == null) {
                 win.mDisplayContent = displayContent;
-                index = reAddWindowLocked(index, win);
+                index = win.reAddWindowLocked(index);
             }
         }
         return index;
