@@ -360,8 +360,10 @@ class Layout extends RelativeLayout {
                 return;
             }
             // Check if an actionbar is needed
-            boolean windowActionBar = getBooleanThemeValue(mResources, ATTR_WINDOW_ACTION_BAR,
-                    !mContext.isAppCompatTheme(), true);
+            boolean isMenu = "menu".equals(mParams.getFlag(RenderParamsFlags.FLAG_KEY_ROOT_TAG));
+            boolean windowActionBar = isMenu ||
+                    getBooleanThemeValue(mResources, ATTR_WINDOW_ACTION_BAR,
+                            !mContext.isAppCompatTheme(), true);
             if (windowActionBar) {
                 mActionBarSize = getDimension(ATTR_ACTION_BAR_SIZE, true, DEFAULT_TITLE_BAR_HEIGHT);
             } else {
