@@ -2982,7 +2982,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "url": "https://developers.google.com/identity/sign-in/android/people",
     "timestamp": 1383243492000,
     "image": "images/cards/google-sign-in_2x.png",
-    "title": "Get user profile details",
+    "title": "Get User Profile Details",
     "summary": "After users sign-in with Google, you can access their age range, language, and public profile information.",
     "keywords": ["signin", "identity", "google"],
     "type": "distribute",
