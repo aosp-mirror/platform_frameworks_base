@@ -27,6 +27,7 @@ import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.Settings.Global;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -115,6 +116,8 @@ public class TileUtils {
     public static List<DashboardCategory> getCategories(Context context,
             HashMap<Pair<String, String>, Tile> cache) {
         final long startTime = System.currentTimeMillis();
+        boolean setup = Global.getInt(context.getContentResolver(), Global.DEVICE_PROVISIONED, 0)
+                != 0;
         ArrayList<Tile> tiles = new ArrayList<>();
         UserManager userManager = UserManager.get(context);
         for (UserHandle user : userManager.getUserProfiles()) {
@@ -127,7 +130,9 @@ public class TileUtils {
                 getTilesForAction(context, user, MANUFACTURER_SETTINGS, cache,
                         MANUFACTURER_DEFAULT_CATEGORY, tiles, false);
             }
-            getTilesForAction(context, user, EXTRA_SETTINGS_ACTION, cache, null, tiles, false);
+            if (setup) {
+                getTilesForAction(context, user, EXTRA_SETTINGS_ACTION, cache, null, tiles, false);
+            }
         }
         HashMap<String, DashboardCategory> categoryMap = new HashMap<>();
         for (Tile tile : tiles) {
