@@ -512,11 +512,11 @@ public class ImageReader implements AutoCloseable {
             mAcquiredImages.clear();
 
             nativeClose();
-        }
 
-        if (mEstimatedNativeAllocBytes > 0) {
-            VMRuntime.getRuntime().registerNativeFree(mEstimatedNativeAllocBytes);
-            mEstimatedNativeAllocBytes = 0;
+            if (mEstimatedNativeAllocBytes > 0) {
+                VMRuntime.getRuntime().registerNativeFree(mEstimatedNativeAllocBytes);
+                mEstimatedNativeAllocBytes = 0;
+            }
         }
     }
 
