@@ -20,4 +20,7 @@
     <dimen name="list_item_padding_horizontal_material">16dp</dimen>
     <dimen name="list_item_padding_start_material">16dp</dimen>
     <dimen name="list_item_padding_end_material">16dp</dimen>
+
+    <dimen name="dialog_list_padding_top_no_title">8dp</dimen>
+    <dimen name="dialog_list_padding_bottom_no_buttons">8dp</dimen>
 </resources>
