@@ -82,4 +82,20 @@ public class MicroAlertController extends AlertController {
             }
         }
     }
+
+    @Override
+    protected void setupTitle(ViewGroup topPanel) {
+        super.setupTitle(topPanel);
+        if (topPanel.getVisibility() == View.GONE) {
+            topPanel.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    @Override
+    protected void setupButtons(ViewGroup buttonPanel) {
+        super.setupButtons(buttonPanel);
+        if (buttonPanel.getVisibility() == View.GONE) {
+            buttonPanel.setVisibility(View.INVISIBLE);
+        }
+    }
 }
