@@ -85,14 +85,14 @@ public class BandController extends RecyclerView.OnScrollListener {
                 new RecyclerView.OnItemTouchListener() {
                     @Override
                     public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
-                        try (MotionInputEvent event = MotionInputEvent.obtain(e, view)) {
+                        try (InputEvent event = MotionInputEvent.obtain(e, view)) {
                             return handleEvent(event);
                         }
                     }
                     @Override
                     public void onTouchEvent(RecyclerView rv, MotionEvent e) {
                         if (Events.isMouseEvent(e)) {
-                            try (MotionInputEvent event = MotionInputEvent.obtain(e, view)) {
+                            try (InputEvent event = MotionInputEvent.obtain(e, view)) {
                                 processInputEvent(event);
                             }
                         }
@@ -177,7 +177,7 @@ public class BandController extends RecyclerView.OnScrollListener {
         mSelection = selection;
     }
 
-    private boolean handleEvent(MotionInputEvent e) {
+    private boolean handleEvent(InputEvent e) {
         // Don't start, or extend bands on right click.
         if (e.isSecondaryButtonPressed()) {
             return false;
@@ -230,7 +230,7 @@ public class BandController extends RecyclerView.OnScrollListener {
         }
     }
 
-    boolean shouldStart(MotionInputEvent e) {
+    boolean shouldStart(InputEvent e) {
         return !isActive()
                 && e.isActionDown()  // the initial button press
                 && mAdapter.getItemCount() > 0
