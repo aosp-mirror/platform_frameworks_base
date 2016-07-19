@@ -1462,6 +1462,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 "ConnectivityService");
     }
 
+    private void enforceConnectivityRestrictedNetworksPermission() {
+        try {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS,
+                    "ConnectivityService");
+            return;
+        } catch (SecurityException e) { /* fallback to ConnectivityInternalPermission */ }
+        enforceConnectivityInternalPermission();
+    }
+
     private void enforceKeepalivePermission() {
         mContext.enforceCallingOrSelfPermission(KeepaliveTracker.PERMISSION, "ConnectivityService");
     }
@@ -3694,7 +3704,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private void enforceNetworkRequestPermissions(NetworkCapabilities networkCapabilities) {
         if (networkCapabilities.hasCapability(NET_CAPABILITY_NOT_RESTRICTED) == false) {
-            enforceConnectivityInternalPermission();
+            enforceConnectivityRestrictedNetworksPermission();
         } else {
             enforceChangePermission();
         }
