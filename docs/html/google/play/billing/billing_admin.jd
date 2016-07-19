@@ -748,10 +748,9 @@ you at the conclusion of the purchase flow, as the value of the
 intent.</p>
 
 <p class="note">
-  <strong>Note:</strong> When a user completes a test purchase, the
-  <code>orderId</code> field remains blank. To track test transactions, use
-  the <code>purchaseToken</code> field instead. For more information about
-  working with test purchases, see <a
+  <strong>Note:</strong> Test purchases don't have an <code>orderId</code>
+  field. To track test transactions, you use the <code>purchaseToken</code>
+  field instead. For more information about working with test purchases, see <a
   href="{@docRoot}google/play/billing/billing_testing.html">Testing In-app
   Billing</a>.
 </p>
@@ -766,14 +765,14 @@ assigned and managed by Google.</p>
 
 <p>For transactions dated 5 December 2012 or later, Google payments assigns a
 Merchant Order Number (rather than a Google Order Number) and reports the Merchant
-Order Number as the value of <code>orderID</code>. Here's an
+Order Number as the value of <code>orderId</code>. Here's an
 example:</p>
 
 <pre>"orderId" : "GPA.1234-5678-9012-34567"</pre>
 
 <p>For transactions dated previous to 5 December 2012, Google checkout assigned
 a Google Order Number and reported that number as the value of
-<code>orderID</code>. Here's an example of an <code>orderID</code> holding a
+<code>orderId</code>. Here's an example of an <code>orderId</code> holding a
 Google Order Number:</p>
 
 <pre>"orderId" : "556515565155651"</pre>
