@@ -24,6 +24,7 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.UserIdInt;
+import android.annotation.WorkerThread;
 import android.app.Activity;
 import android.app.admin.SecurityLog.SecurityEvent;
 import android.content.ComponentName;
@@ -4226,6 +4227,8 @@ public class DevicePolicyManager {
      * owner, and the application restrictions managing package via
      * {@link #getApplicationRestrictions}.
      *
+     * <p>NOTE: The method performs disk I/O and shouldn't be called on the main thread
+     *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
      *            {@code null} if called by the application restrictions managing package.
      * @param packageName The name of the package to update restricted settings for.
@@ -4235,6 +4238,7 @@ public class DevicePolicyManager {
      * @see #setApplicationRestrictionsManagingPackage
      * @see UserManager#KEY_RESTRICTIONS_PENDING
      */
+    @WorkerThread
     public void setApplicationRestrictions(@Nullable ComponentName admin, String packageName,
             Bundle settings) {
         throwIfParentInstance("setApplicationRestrictions");
@@ -4981,6 +4985,8 @@ public class DevicePolicyManager {
      * application restrictions via {@link #setApplicationRestrictionsManagingPackage}; otherwise a
      * security exception will be thrown.
      *
+     * <p>NOTE: The method performs disk I/O and shouldn't be called on the main thread
+     *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
      *            {@code null} if called by the application restrictions managing package.
      * @param packageName The name of the package to fetch restricted settings of.
@@ -4990,6 +4996,7 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      * @see {@link #setApplicationRestrictionsManagingPackage}
      */
+    @WorkerThread
     public Bundle getApplicationRestrictions(@Nullable ComponentName admin, String packageName) {
         throwIfParentInstance("getApplicationRestrictions");
         if (mService != null) {

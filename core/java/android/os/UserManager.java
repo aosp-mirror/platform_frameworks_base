@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.UserIdInt;
+import android.annotation.WorkerThread;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
@@ -2072,12 +2073,15 @@ public class UserManager {
      * <li>From {@link android.os.Build.VERSION_CODES#M}, {@code Bundle} or {@code Bundle[]}
      * </ul>
      *
+     * <p>NOTE: The method performs disk I/O and shouldn't be called on the main thread
+     *
      * @param packageName the package name of the calling application
      * @return a {@link Bundle} with the restrictions for that package, or an empty {@link Bundle}
      * if there are no saved restrictions.
      *
      * @see #KEY_RESTRICTIONS_PENDING
      */
+    @WorkerThread
     public Bundle getApplicationRestrictions(String packageName) {
         try {
             return mService.getApplicationRestrictions(packageName);
@@ -2089,6 +2093,7 @@ public class UserManager {
     /**
      * @hide
      */
+    @WorkerThread
     public Bundle getApplicationRestrictions(String packageName, UserHandle user) {
         try {
             return mService.getApplicationRestrictionsForUser(packageName, user.getIdentifier());
@@ -2100,6 +2105,7 @@ public class UserManager {
     /**
      * @hide
      */
+    @WorkerThread
     public void setApplicationRestrictions(String packageName, Bundle restrictions,
             UserHandle user) {
         try {
