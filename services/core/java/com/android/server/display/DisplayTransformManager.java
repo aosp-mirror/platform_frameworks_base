@@ -24,6 +24,10 @@ import android.os.ServiceManager;
 import android.util.Slog;
 import android.util.SparseArray;
 
+import com.android.internal.annotations.GuardedBy;
+
+import java.util.Arrays;
+
 /**
  * Manager for applying color transformations to the display.
  */
@@ -44,19 +48,34 @@ public class DisplayTransformManager {
      */
     public static final int LEVEL_COLOR_MATRIX_INVERT_COLOR = 300;
 
+    /**
+     * Map of level -> color transformation matrix.
+     */
+    @GuardedBy("mColorMatrix")
     private final SparseArray<float[]> mColorMatrix = new SparseArray<>(3);
+    /**
+     * Temporary matrix used internally by {@link #computeColorMatrixLocked()}.
+     */
+    @GuardedBy("mColorMatrix")
+    private final float[][] mTempColorMatrix = new float[2][16];
 
+    /**
+     * Lock used for synchronize access to {@link #mDaltonizerMode}.
+     */
+    private final Object mDaltonizerModeLock = new Object();
+    @GuardedBy("mDaltonizerModeLock")
     private int mDaltonizerMode = -1;
 
     /* package */ DisplayTransformManager() {
     }
 
     /**
-     * Returns the color transform matrix set for a given level.
+     * Returns a copy of the color transform matrix set for a given level.
      */
     public float[] getColorMatrix(int key) {
         synchronized (mColorMatrix) {
-            return mColorMatrix.get(key);
+            final float[] value = mColorMatrix.get(key);
+            return value == null ? null : Arrays.copyOf(value, value.length);
         }
     }
 
@@ -66,53 +85,59 @@ public class DisplayTransformManager {
      * Note: all color transforms are first composed to a single matrix in ascending order based
      * on level before being applied to the display.
      *
-     * @param key   the level used to identify and compose the color transform (low -> high)
+     * @param level the level used to identify and compose the color transform (low -> high)
      * @param value the 4x4 color transform matrix (in column-major order), or {@code null} to
      *              remove the color transform matrix associated with the provided level
      */
-    public void setColorMatrix(int key, float[] value) {
+    public void setColorMatrix(int level, float[] value) {
         if (value != null && value.length != 16) {
             throw new IllegalArgumentException("Expected length: 16 (4x4 matrix)"
                     + ", actual length: " + value.length);
         }
 
         synchronized (mColorMatrix) {
-            if (value != null) {
-                mColorMatrix.put(key, value);
-            } else {
-                mColorMatrix.remove(key);
-            }
+            final float[] oldValue = mColorMatrix.get(level);
+            if (!Arrays.equals(oldValue, value)) {
+                if (value == null) {
+                    mColorMatrix.remove(level);
+                } else if (oldValue == null) {
+                    mColorMatrix.put(level, Arrays.copyOf(value, value.length));
+                } else {
+                    System.arraycopy(value, 0, oldValue, 0, value.length);
+                }
 
-            // Update the current color transform.
-            applyColorMatrix(computeColorMatrix());
+                // Update the current color transform.
+                applyColorMatrix(computeColorMatrixLocked());
+            }
         }
     }
 
     /**
      * Returns the composition of all current color matrices, or {@code null} if there are none.
      */
-    private float[] computeColorMatrix() {
-        synchronized (mColorMatrix) {
-            final int count = mColorMatrix.size();
-            if (count == 0) {
-                return null;
-            }
-
-            final float[][] result = new float[2][16];
-            Matrix.setIdentityM(result[0], 0);
-            for (int i = 0; i < count; i++) {
-                float[] rhs = mColorMatrix.valueAt(i);
-                Matrix.multiplyMM(result[(i + 1) % 2], 0, result[i % 2], 0, rhs, 0);
-            }
-            return result[count % 2];
+    @GuardedBy("mColorMatrix")
+    private float[] computeColorMatrixLocked() {
+        final int count = mColorMatrix.size();
+        if (count == 0) {
+            return null;
         }
+
+        final float[][] result = mTempColorMatrix;
+        Matrix.setIdentityM(result[0], 0);
+        for (int i = 0; i < count; i++) {
+            float[] rhs = mColorMatrix.valueAt(i);
+            Matrix.multiplyMM(result[(i + 1) % 2], 0, result[i % 2], 0, rhs, 0);
+        }
+        return result[count % 2];
     }
 
     /**
      * Returns the current Daltonization mode.
      */
     public int getDaltonizerMode() {
-        return mDaltonizerMode;
+        synchronized (mDaltonizerModeLock) {
+            return mDaltonizerMode;
+        }
     }
 
     /**
@@ -122,9 +147,11 @@ public class DisplayTransformManager {
      * @param mode the new Daltonization mode, or -1 to disable
      */
     public void setDaltonizerMode(int mode) {
-        if (mDaltonizerMode != mode) {
-            mDaltonizerMode = mode;
-            applyDaltonizerMode(mode);
+        synchronized (mDaltonizerModeLock) {
+            if (mDaltonizerMode != mode) {
+                mDaltonizerMode = mode;
+                applyDaltonizerMode(mode);
+            }
         }
     }
 

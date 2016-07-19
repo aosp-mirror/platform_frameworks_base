@@ -16,6 +16,10 @@
 
 package com.android.server.display;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.TypeEvaluator;
+import android.animation.ValueAnimator;
 import android.app.AlarmManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -24,11 +28,14 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.ContentObserver;
 import android.net.Uri;
+import android.opengl.Matrix;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.provider.Settings.Secure;
+import android.util.MathUtils;
 import android.util.Slog;
+import android.view.animation.AnimationUtils;
 
 import com.android.internal.app.NightDisplayController;
 import com.android.server.SystemService;
@@ -38,6 +45,8 @@ import com.android.server.twilight.TwilightState;
 
 import java.util.Calendar;
 import java.util.TimeZone;
+
+import static com.android.server.display.DisplayTransformManager.LEVEL_COLOR_MATRIX_NIGHT_DISPLAY;
 
 /**
  * Tints the display at night.
@@ -58,6 +67,19 @@ public final class NightDisplayService extends SystemService
         0,      0,      0, 1
     };
 
+    /**
+     * The identity matrix, used if one of the given matrices is {@code null}.
+     */
+    private static final float[] MATRIX_IDENTITY = new float[16];
+    static {
+        Matrix.setIdentityM(MATRIX_IDENTITY, 0);
+    }
+
+    /**
+     * Evaluator used to animate color matrix transitions.
+     */
+    private static final ColorMatrixEvaluator COLOR_MATRIX_EVALUATOR = new ColorMatrixEvaluator();
+
     private final Handler mHandler;
 
     private int mCurrentUser = UserHandle.USER_NULL;
@@ -65,6 +87,7 @@ public final class NightDisplayService extends SystemService
     private boolean mBootCompleted;
 
     private NightDisplayController mController;
+    private ValueAnimator mColorMatrixAnimator;
     private Boolean mIsActivated;
     private AutoMode mAutoMode;
 
@@ -181,6 +204,11 @@ public final class NightDisplayService extends SystemService
             mAutoMode = null;
         }
 
+        if (mColorMatrixAnimator != null) {
+            mColorMatrixAnimator.end();
+            mColorMatrixAnimator = null;
+        }
+
         mIsActivated = null;
     }
 
@@ -195,10 +223,49 @@ public final class NightDisplayService extends SystemService
                 mAutoMode.onActivated(activated);
             }
 
-            // Update the current color matrix.
+            // Cancel the old animator if still running.
+            if (mColorMatrixAnimator != null) {
+                mColorMatrixAnimator.cancel();
+            }
+
             final DisplayTransformManager dtm = getLocalService(DisplayTransformManager.class);
-            dtm.setColorMatrix(DisplayTransformManager.LEVEL_COLOR_MATRIX_NIGHT_DISPLAY,
-                    activated ? MATRIX_NIGHT : null);
+            final float[] from = dtm.getColorMatrix(LEVEL_COLOR_MATRIX_NIGHT_DISPLAY);
+            final float[] to = mIsActivated ? MATRIX_NIGHT : null;
+
+            mColorMatrixAnimator = ValueAnimator.ofObject(COLOR_MATRIX_EVALUATOR,
+                    from == null ? MATRIX_IDENTITY : from, to == null ? MATRIX_IDENTITY : to);
+            mColorMatrixAnimator.setDuration(getContext().getResources()
+                    .getInteger(android.R.integer.config_longAnimTime));
+            mColorMatrixAnimator.setInterpolator(AnimationUtils.loadInterpolator(
+                    getContext(), android.R.interpolator.fast_out_slow_in));
+            mColorMatrixAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator animator) {
+                    final float[] value = (float[]) animator.getAnimatedValue();
+                    dtm.setColorMatrix(LEVEL_COLOR_MATRIX_NIGHT_DISPLAY, value);
+                }
+            });
+            mColorMatrixAnimator.addListener(new AnimatorListenerAdapter() {
+
+                private boolean mIsCancelled;
+
+                @Override
+                public void onAnimationCancel(Animator animator) {
+                    mIsCancelled = true;
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animator) {
+                    if (!mIsCancelled) {
+                        // Ensure final color matrix is set at the end of the animation. If the
+                        // animation is cancelled then don't set the final color matrix so the new
+                        // animator can pick up from where this one left off.
+                        dtm.setColorMatrix(LEVEL_COLOR_MATRIX_NIGHT_DISPLAY, to);
+                    }
+                    mColorMatrixAnimator = null;
+                }
+            });
+            mColorMatrixAnimator.start();
         }
     }
 
@@ -392,6 +459,25 @@ public final class NightDisplayService extends SystemService
         public void onTwilightStateChanged() {
             if (DEBUG) Slog.d(TAG, "onTwilightStateChanged");
             updateActivated();
+        }
+    }
+
+    /**
+     * Interpolates between two 4x4 color transform matrices (in column-major order).
+     */
+    private static class ColorMatrixEvaluator implements TypeEvaluator<float[]> {
+
+        /**
+         * Result matrix returned by {@link #evaluate(float, float[], float[])}.
+         */
+        private final float[] mResultMatrix = new float[16];
+
+        @Override
+        public float[] evaluate(float fraction, float[] startValue, float[] endValue) {
+            for (int i = 0; i < mResultMatrix.length; i++) {
+                mResultMatrix[i] = MathUtils.lerp(startValue[i], endValue[i], fraction);
+            }
+            return mResultMatrix;
         }
     }
 }
