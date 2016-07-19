@@ -3150,6 +3150,12 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
+    private void recordCallerLocked(NotificationRecord record) {
+        if (mZenModeHelper.isCall(record)) {
+            mZenModeHelper.recordCaller(record);
+        }
+    }
+
     // let zen mode evaluate this record
     private void applyZenModeLocked(NotificationRecord record) {
         record.setIntercepted(mZenModeHelper.shouldIntercept(record));
@@ -3289,6 +3295,10 @@ public class NotificationManagerService extends SystemService {
     }
 
     private void cancelNotificationLocked(NotificationRecord r, boolean sendDelete, int reason) {
+
+        // Record caller.
+        recordCallerLocked(r);
+
         // tell the app
         if (sendDelete) {
             if (r.getNotification().deleteIntent != null) {
