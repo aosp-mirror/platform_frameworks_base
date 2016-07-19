@@ -21,6 +21,7 @@
         android:layout_height="match_parent">
     <ScrollView
             android:id="@+id/scrollView"
+            android:fillViewport="true"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
         <LinearLayout
@@ -33,7 +34,8 @@
                     android:paddingRight="?dialogPreferredPadding"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:id="@+id/topPanel">
+                    android:id="@+id/topPanel"
+                    android:minHeight="@dimen/dialog_list_padding_top_no_title">
                 <include android:id="@+id/title_template"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -68,41 +70,33 @@
             <!-- Button Panel -->
             <FrameLayout
                     android:id="@+id/buttonPanel"
+                    android:minHeight="@dimen/dialog_list_padding_bottom_no_buttons"
+                    android:layout_weight="1"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
                 <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:divider="?android:attr/dividerHorizontal"
-                        android:showDividers="beginning"
-                        android:dividerPadding="0dip"
                         android:orientation="vertical"
                         android:minHeight="@dimen/alert_dialog_button_bar_height"
                         android:paddingBottom="?dialogPreferredPadding"
                         style="?android:attr/buttonBarStyle"
-                        android:layoutDirection="locale"
                         android:measureWithLargestChild="true">
                     <Button android:id="@+id/button1"
                             android:layout_gravity="start"
                             android:layout_weight="1"
-                            android:layout_marginLeft="?dialogPreferredPadding"
-                            android:layout_marginRight="?dialogPreferredPadding"
                             style="?android:attr/buttonBarButtonStyle"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content" />
                     <Button android:id="@+id/button3"
                             android:layout_gravity="start"
                             android:layout_weight="1"
-                            android:layout_marginLeft="?dialogPreferredPadding"
-                            android:layout_marginRight="?dialogPreferredPadding"
                             style="?android:attr/buttonBarButtonStyle"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content" />
                     <Button android:id="@+id/button2"
                             android:layout_gravity="start"
                             android:layout_weight="1"
-                            android:layout_marginLeft="?dialogPreferredPadding"
-                            android:layout_marginRight="?dialogPreferredPadding"
                             style="?android:attr/buttonBarButtonStyle"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content" />
