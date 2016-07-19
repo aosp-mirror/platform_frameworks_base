@@ -1116,8 +1116,7 @@
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"جارٍ تحسين السعة التخزينية."</string>
     <string name="android_upgrading_notification_title" msgid="1619393112444671028">"‏جارٍ ترقية Android"</string>
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"قد لا تعمل بعض التطبيقات بشكل مناسب إلا بعد انتهاء الترقية"</string>
-    <!-- no translation found for app_upgrading_toast (3008139776215597053) -->
-    <skip />
+    <string name="app_upgrading_toast" msgid="3008139776215597053">"جارٍ ترقية <xliff:g id="APPLICATION">%1$s</xliff:g>…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"جارٍ تحسين التطبيق <xliff:g id="NUMBER_0">%1$d</xliff:g> من <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"جارٍ تحضير <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"بدء التطبيقات."</string>
