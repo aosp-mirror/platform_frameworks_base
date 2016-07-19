@@ -17,6 +17,7 @@
 package com.android.shell;
 
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
+
 import static com.android.shell.BugreportPrefs.STATE_HIDE;
 import static com.android.shell.BugreportPrefs.STATE_UNKNOWN;
 import static com.android.shell.BugreportPrefs.getWarningState;
@@ -44,6 +45,7 @@ import libcore.io.Streams;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
+
 import com.google.android.collect.Lists;
 
 import android.accounts.Account;
@@ -78,6 +80,7 @@ import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.Patterns;
 import android.util.SparseArray;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.View.OnFocusChangeListener;
@@ -543,6 +546,7 @@ public class BugreportProgressService extends Service {
             deleteScreenshots(info);
         }
         stopProgress(id);
+        mInfoDialog.cancel();
     }
 
     /**
@@ -1404,7 +1408,7 @@ public class BugreportProgressService extends Service {
         /**
          * Sets its internal state and displays the dialog.
          */
-        private void initialize(final Context context, BugreportInfo info) {
+        void initialize(final Context context, BugreportInfo info) {
             final String dialogTitle =
                     context.getString(R.string.bugreport_info_dialog_title, info.id);
             // First initializes singleton.
@@ -1450,6 +1454,7 @@ public class BugreportProgressService extends Service {
                                     }
                                 })
                         .create();
+                mDialog.setCancelable(true);
 
                 mDialog.getWindow().setAttributes(
                         new WindowManager.LayoutParams(
@@ -1545,13 +1550,18 @@ public class BugreportProgressService extends Service {
          * <p>Once the bugreport is finished dumpstate has already generated the final files, so
          * changing the name would have no effect.
          */
-        private void onBugreportFinished(int id) {
+        void onBugreportFinished(int id) {
             if (mInfoName != null) {
                 mInfoName.setEnabled(false);
                 mInfoName.setText(mSavedName);
             }
         }
 
+        void cancel() {
+            if (mDialog != null) {
+                mDialog.cancel();
+            }
+        }
     }
 
     /**

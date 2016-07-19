@@ -16,6 +16,8 @@
 
 package com.android.shell;
 
+import android.app.Instrumentation;
+import android.app.StatusBarManager;
 import android.support.test.uiautomator.By;
 import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObject;
@@ -24,6 +26,8 @@ import android.support.test.uiautomator.UiScrollable;
 import android.support.test.uiautomator.UiSelector;
 import android.support.test.uiautomator.Until;
 import android.util.Log;
+
+import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 /**
@@ -34,11 +38,13 @@ final class UiBot {
     private static final String TAG = "UiBot";
     private static final String SYSTEMUI_PACKAGE = "com.android.systemui";
 
+    private final Instrumentation mInstrumentation;
     private final UiDevice mDevice;
     private final int mTimeout;
 
-    public UiBot(UiDevice device, int timeout) {
-        mDevice = device;
+    public UiBot(Instrumentation instrumentation, int timeout) {
+        mInstrumentation = instrumentation;
+        mDevice = UiDevice.getInstance(instrumentation);
         mTimeout = timeout;
     }
 
@@ -55,6 +61,13 @@ final class UiBot {
         assertTrue("could not get system ui (" + SYSTEMUI_PACKAGE + ")", gotIt);
 
         return getObject(text);
+    }
+
+    public void closeNotifications() throws Exception {
+        // TODO: mDevice should provide such method..
+        StatusBarManager sbm =
+                (StatusBarManager) mInstrumentation.getContext().getSystemService("statusbar");
+        sbm.collapsePanels();
     }
 
     /**
@@ -109,6 +122,16 @@ final class UiBot {
         UiObject uiObject = mDevice.findObject(new UiSelector().resourceId(id));
         assertTrue("could not find object with id '" + id+ "'", uiObject.exists());
         return uiObject;
+    }
+
+    /**
+     * Asserts an object is not visible.
+     */
+    public void assertNotVisibleById(String id) {
+        // TODO: not working when the bugreport dialog is shown, it hangs until the dialog is
+        // dismissed and hence always work.
+        boolean hasIt = mDevice.hasObject(By.res(id));
+        assertFalse("should not have found object with id '" + id+ "'", hasIt);
     }
 
 
