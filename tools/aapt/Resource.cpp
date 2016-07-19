@@ -326,13 +326,18 @@ static status_t makeFileResources(Bundle* bundle, const sp<AaptAssets>& assets,
         }
         String8 resPath = it.getPath();
         resPath.convertToResPath();
-        table->addEntry(SourcePos(it.getPath(), 0), String16(assets->getPackage()),
+        status_t result = table->addEntry(SourcePos(it.getPath(), 0),
+                        String16(assets->getPackage()),
                         type16,
                         baseName,
                         String16(resPath),
                         NULL,
                         &it.getParams());
-        assets->addResource(it.getLeafName(), resPath, it.getFile(), type8);
+        if (result != NO_ERROR) {
+            hasErrors = true;
+        } else {
+            assets->addResource(it.getLeafName(), resPath, it.getFile(), type8);
+        }
     }
 
     return hasErrors ? STATUST(UNKNOWN_ERROR) : NO_ERROR;
@@ -1368,6 +1373,10 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
         if (err != NO_ERROR) {
             hasErrors = true;
         }
+    }
+
+    if (hasErrors) {
+        return UNKNOWN_ERROR;
     }
 
     // --------------------------------------------------------------------
