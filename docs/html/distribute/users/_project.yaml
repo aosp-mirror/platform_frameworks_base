@@ -1,0 +1,6 @@
+name: "Get Users"
+home_url: /distribute/users/
+description: "There are some common themes from successful Google Play developers. These best practices are critical to your app or game's success."
+content_license: cc3-apache2
+buganizer_id: 30209417
+parent_project_metadata_path: /distribute/_project.yaml

@@ -1,0 +1,6 @@
+name: "API Guides"
+home_url: /guide/
+description: "Android provides a rich application framework that allows you to build innovative apps and games for mobile devices in a Java language environment."
+content_license: cc3-apache2
+buganizer_id: 30209417
+parent_project_metadata_path: /develop/_project.yaml
