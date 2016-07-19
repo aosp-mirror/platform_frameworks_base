@@ -547,9 +547,7 @@ void android_os_Process_setArgV0(JNIEnv* env, jobject clazz, jstring name)
     }
 
     if (!name8.isEmpty()) {
-        const char* procName = name8.string();
-        pthread_setname_np(pthread_self(), procName);
-        AndroidRuntime::getRuntime()->setArgv0(procName);
+        AndroidRuntime::getRuntime()->setArgv0(name8.string(), true /* setProcName */);
     }
 }
 
