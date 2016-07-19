@@ -158,15 +158,31 @@ bool createBufferQueueAudioPlayer(const ChunkFormat* chunkFormat) {
     SLDataSink audioSnk = {&loc_outmix, NULL};
 
     // create audio player
-    const SLInterfaceID ids[2] = {SL_IID_BUFFERQUEUE, SL_IID_VOLUME};
-    const SLboolean req[2] = {SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE};
+    const SLInterfaceID ids[3] = {SL_IID_BUFFERQUEUE, SL_IID_VOLUME, SL_IID_ANDROIDCONFIGURATION};
+    const SLboolean req[3] = {SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE};
     result = (*engineEngine)->CreateAudioPlayer(engineEngine, &bqPlayerObject, &audioSrc, &audioSnk,
-            2, ids, req);
+            3, ids, req);
     if (result != SL_RESULT_SUCCESS) {
         ALOGE("sl CreateAudioPlayer failed with result %d", result);
         return false;
     }
     (void)result;
+
+    // Use the System stream for boot sound playback.
+    SLAndroidConfigurationItf playerConfig;
+    result = (*bqPlayerObject)->GetInterface(bqPlayerObject,
+        SL_IID_ANDROIDCONFIGURATION, &playerConfig);
+    if (result != SL_RESULT_SUCCESS) {
+        ALOGE("config GetInterface failed with result %d", result);
+        return false;
+    }
+    SLint32 streamType = SL_ANDROID_STREAM_SYSTEM;
+    result = (*playerConfig)->SetConfiguration(playerConfig,
+        SL_ANDROID_KEY_STREAM_TYPE, &streamType, sizeof(SLint32));
+    if (result != SL_RESULT_SUCCESS) {
+        ALOGE("SetConfiguration failed with result %d", result);
+        return false;
+    }
 
     // realize the player
     result = (*bqPlayerObject)->Realize(bqPlayerObject, SL_BOOLEAN_FALSE);
