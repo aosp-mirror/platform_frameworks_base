@@ -725,11 +725,23 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     public static final int NATIVE_CONFIG_LAYOUTDIR = 0x4000;
 
     /**
-     * Construct an invalid Configuration.  You must call {@link #setToDefaults}
-     * for this object to be valid.  {@more}
+     * <p>Construct an invalid Configuration. This state is only suitable for constructing a
+     * Configuration delta that will be applied to some valid Configuration object. In order to
+     * create a valid standalone Configuration, you must call {@link #setToDefaults}. </p>
+     *
+     * <p>Example:</p>
+     * <pre class="prettyprint">
+     *     Configuration validConfig = new Configuration();
+     *     validConfig.setToDefaults();
+     *
+     *     Configuration deltaOnlyConfig = new Configuration();
+     *     deltaOnlyConfig.orientation = Configuration.ORIENTATION_LANDSCAPE;
+     *
+     *     validConfig.updateFrom(deltaOnlyConfig);
+     * </pre>
      */
     public Configuration() {
-        setToDefaults();
+        unset();
     }
 
     /**
@@ -937,6 +949,15 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         smallestScreenWidthDp = compatSmallestScreenWidthDp = SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
         densityDpi = DENSITY_DPI_UNDEFINED;
         seq = 0;
+    }
+
+    /**
+     * Set this object to completely undefined.
+     * @hide
+     */
+    public void unset() {
+        setToDefaults();
+        fontScale = 0;
     }
 
     /** {@hide} */

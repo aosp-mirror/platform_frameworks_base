@@ -7218,7 +7218,6 @@ public class WindowManagerService extends IWindowManager.Stub
             return null;
         }
         Configuration config = new Configuration();
-        config.fontScale = 0;
         computeScreenConfigurationLocked(config);
         return config;
     }
