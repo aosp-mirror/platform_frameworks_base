@@ -19,6 +19,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.TaskStackBuilder;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -920,6 +921,19 @@ public final class ShortcutInfo implements Parcelable {
         }
 
         /**
+         * Sets multiple intents instead of a single intent.
+         *
+         * @see Builder#setIntent(Intent)
+         * @see ShortcutInfo#getIntents()
+         * @see Context#startActivities(Intent[])
+         * @see TaskStackBuilder
+         */
+        @NonNull
+        public Builder setIntents(@NonNull Intent[] intents) {
+            throw new RuntimeException("NOT SUPPORTED YET");
+        }
+
+        /**
          * "Rank" of a shortcut, which is a non-negative value that's used by the launcher app
          * to sort shortcuts.
          *
@@ -1084,7 +1098,7 @@ public final class ShortcutInfo implements Parcelable {
     }
 
     /**
-     * Return the intent.
+     * Return the intent.  (Or the last intent set with {@link Builder#setIntents(Intent[])}.
      *
      * <p>Launcher applications <b>cannot</b> see the intent.  If a {@link ShortcutInfo} is
      * obtained via {@link LauncherApps}, then this method will always return null.
@@ -1101,6 +1115,20 @@ public final class ShortcutInfo implements Parcelable {
         intent.replaceExtras(
                 mIntentPersistableExtras != null ? new Bundle(mIntentPersistableExtras) : null);
         return intent;
+    }
+
+    /**
+     * Return the intent set with {@link Builder#setIntents(Intent[])}.
+     *
+     * <p>Launcher applications <b>cannot</b> see the intents.  If a {@link ShortcutInfo} is
+     * obtained via {@link LauncherApps}, then this method will always return null.
+     * Launchers can only start a shortcut intent with {@link LauncherApps#startShortcut}.
+     *
+     * @see Builder#setIntents(Intent[])
+     */
+    @Nullable
+    public Intent getIntents() {
+        throw new RuntimeException("NOT SUPPORTED YET");
     }
 
     /**

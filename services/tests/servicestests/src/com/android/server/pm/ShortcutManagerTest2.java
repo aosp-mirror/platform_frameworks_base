@@ -1566,12 +1566,22 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                 ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
             assertEquals(3, mManager.getRemainingCallCount());
+            assertFalse(mManager.isRateLimitingActive());
 
             mManager.setDynamicShortcuts(list(makeShortcut("s")));
+
+            assertEquals(2, mManager.getRemainingCallCount());
+            assertFalse(mManager.isRateLimitingActive());
+
             mManager.setDynamicShortcuts(list(makeShortcut("s")));
+
+            assertEquals(1, mManager.getRemainingCallCount());
+            assertFalse(mManager.isRateLimitingActive());
+
             mManager.setDynamicShortcuts(list(makeShortcut("s")));
 
             assertEquals(0, mManager.getRemainingCallCount());
+            assertTrue(mManager.isRateLimitingActive());
         });
         runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
             assertEquals(3, mManager.getRemainingCallCount());
@@ -1581,6 +1591,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
             mManager.setDynamicShortcuts(list(makeShortcut("s")));
 
             assertEquals(0, mManager.getRemainingCallCount());
+            assertTrue(mManager.isRateLimitingActive());
         });
         runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
@@ -1590,6 +1601,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
             mManager.setDynamicShortcuts(list(makeShortcut("s")));
 
             assertEquals(0, mManager.getRemainingCallCount());
+            assertTrue(mManager.isRateLimitingActive());
         });
         runWithCaller(CALLING_PACKAGE_4, USER_0, () -> {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
@@ -1599,6 +1611,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
             mManager.setDynamicShortcuts(list(makeShortcut("s")));
 
             assertEquals(0, mManager.getRemainingCallCount());
+            assertTrue(mManager.isRateLimitingActive());
         });
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
@@ -1608,6 +1621,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
             mManager.setDynamicShortcuts(list(makeShortcut("s")));
 
             assertEquals(0, mManager.getRemainingCallCount());
+            assertTrue(mManager.isRateLimitingActive());
         });
         runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
             assertEquals(3, mManager.getRemainingCallCount());
@@ -1617,6 +1631,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
             mManager.setDynamicShortcuts(list(makeShortcut("s")));
 
             assertEquals(3, mManager.getRemainingCallCount()); // Still 3!
+            assertFalse(mManager.isRateLimitingActive());
         });
     }
 
