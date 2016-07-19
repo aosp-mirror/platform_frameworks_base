@@ -25,6 +25,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.os.Debug;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.RemoteCallbackList;
@@ -103,9 +104,14 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_POWER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_RESIZE;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WINDOW;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SURFACE_TRACE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.WindowStateAnimator.COMMIT_DRAW_PENDING;
+import static com.android.server.wm.WindowStateAnimator.HAS_DRAWN;
+import static com.android.server.wm.WindowStateAnimator.READY_TO_SHOW;
 
 class WindowList extends ArrayList<WindowState> {
     WindowList() {}
@@ -166,7 +172,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     boolean mPolicyVisibilityAfterAnim = true;
     boolean mAppOpVisibility = true;
     boolean mAppFreezing;
-    boolean mAttachedHidden;    // is our parent window hidden?
+    boolean mHidden;    // Used to determine if to show child windows.
     boolean mWallpaperVisible;  // for wallpaper, what was last vis report?
     boolean mDragResizing;
     boolean mDragResizingChangeReported;
@@ -1169,7 +1175,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      * TODO: See if there are other places we can use this check below instead of duplicating...
      */
     private boolean isVisibleUnchecked() {
-        return mHasSurface && mPolicyVisibility && !mAttachedHidden
+        return mHasSurface && mPolicyVisibility && !isParentWindowHidden()
                 && !mAnimatingExit && !mDestroying && (!mIsWallpaper || mWallpaperVisible);
     }
 
@@ -1197,7 +1203,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         final boolean animating = atoken != null && atoken.mAppAnimator.animation != null;
         return mHasSurface && !mDestroying && !mAnimatingExit
                 && (atoken == null ? mPolicyVisibility : !atoken.hiddenRequested)
-                && ((!mAttachedHidden && mViewVisibility == View.VISIBLE && !mRootToken.hidden)
+                && ((!isParentWindowHidden() && mViewVisibility == View.VISIBLE && !mRootToken.hidden)
                         || mWinAnimator.mAnimation != null || animating);
     }
 
@@ -1236,7 +1242,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     boolean isVisibleOrAdding() {
         final AppWindowToken atoken = mAppToken;
         return (mHasSurface || (!mRelayoutCalled && mViewVisibility == View.VISIBLE))
-                && mPolicyVisibility && !mAttachedHidden
+                && mPolicyVisibility && !isParentWindowHidden()
                 && (atoken == null || !atoken.hiddenRequested)
                 && !mAnimatingExit && !mDestroying;
     }
@@ -1260,10 +1266,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
         final AppWindowToken atoken = mAppToken;
         if (atoken != null) {
-            return ((!mAttachedHidden && !atoken.hiddenRequested)
+            return ((!isParentWindowHidden() && !atoken.hiddenRequested)
                     || mWinAnimator.mAnimation != null || atoken.mAppAnimator.animation != null);
         }
-        return !mAttachedHidden || mWinAnimator.mAnimation != null;
+        return !isParentWindowHidden() || mWinAnimator.mAnimation != null;
     }
 
     /**
@@ -1301,7 +1307,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             return false;
         }
         return mHasSurface && mPolicyVisibility && !mDestroying
-                && ((!mAttachedHidden && mViewVisibility == View.VISIBLE && !mRootToken.hidden)
+                && ((!isParentWindowHidden() && mViewVisibility == View.VISIBLE && !mRootToken.hidden)
                         || mWinAnimator.mAnimation != null
                         || ((mAppToken != null) && (mAppToken.mAppAnimator.animation != null)));
     }
@@ -1321,7 +1327,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             return false;
         }
         return mHasSurface && !mDestroying
-                && ((!mAttachedHidden && mViewVisibility == View.VISIBLE && !mRootToken.hidden)
+                && ((!isParentWindowHidden() && mViewVisibility == View.VISIBLE && !mRootToken.hidden)
                         || mWinAnimator.mAnimation != null
                         || ((atoken != null) && (atoken.mAppAnimator.animation != null)
                                 && !mWinAnimator.isDummyAnimation()));
@@ -1335,7 +1341,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     public boolean isDisplayedLw() {
         final AppWindowToken atoken = mAppToken;
         return isDrawnLw() && mPolicyVisibility
-            && ((!mAttachedHidden &&
+            && ((!isParentWindowHidden() &&
                     (atoken == null || !atoken.hiddenRequested))
                         || mWinAnimator.mAnimating
                         || (atoken != null && atoken.mAppAnimator.animation != null));
@@ -1357,7 +1363,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 || !mRelayoutCalled
                 || (atoken == null && mRootToken.hidden)
                 || (atoken != null && atoken.hiddenRequested)
-                || mAttachedHidden
+                || isParentWindowHidden()
                 || (mAnimatingExit && !isAnimatingLw())
                 || mDestroying;
     }
@@ -1368,9 +1374,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      */
     public boolean isDrawFinishedLw() {
         return mHasSurface && !mDestroying &&
-                (mWinAnimator.mDrawState == WindowStateAnimator.COMMIT_DRAW_PENDING
-                || mWinAnimator.mDrawState == WindowStateAnimator.READY_TO_SHOW
-                || mWinAnimator.mDrawState == WindowStateAnimator.HAS_DRAWN);
+                (mWinAnimator.mDrawState == COMMIT_DRAW_PENDING
+                || mWinAnimator.mDrawState == READY_TO_SHOW
+                || mWinAnimator.mDrawState == HAS_DRAWN);
     }
 
     /**
@@ -1380,8 +1386,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     @Override
     public boolean isDrawnLw() {
         return mHasSurface && !mDestroying &&
-                (mWinAnimator.mDrawState == WindowStateAnimator.READY_TO_SHOW
-                || mWinAnimator.mDrawState == WindowStateAnimator.HAS_DRAWN);
+                (mWinAnimator.mDrawState == READY_TO_SHOW
+                || mWinAnimator.mDrawState == HAS_DRAWN);
     }
 
     /**
@@ -2086,7 +2092,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mSurfaceSaved = false;
         if (mWinAnimator.mSurfaceController != null) {
             setHasSurface(true);
-            mWinAnimator.mDrawState = WindowStateAnimator.READY_TO_SHOW;
+            mWinAnimator.mDrawState = READY_TO_SHOW;
             mAnimatingWithSavedSurface = true;
 
             if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) {
@@ -2572,14 +2578,14 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             pw.println(Integer.toHexString(mSystemUiVisibility));
         }
         if (!mPolicyVisibility || !mPolicyVisibilityAfterAnim || !mAppOpVisibility
-                || mAttachedHidden) {
+                || isParentWindowHidden()) {
             pw.print(prefix); pw.print("mPolicyVisibility=");
                     pw.print(mPolicyVisibility);
                     pw.print(" mPolicyVisibilityAfterAnim=");
                     pw.print(mPolicyVisibilityAfterAnim);
                     pw.print(" mAppOpVisibility=");
                     pw.print(mAppOpVisibility);
-                    pw.print(" mAttachedHidden="); pw.println(mAttachedHidden);
+                    pw.print(" parentHidden="); pw.println(isParentWindowHidden());
         }
         if (!mRelayoutCalled || mLayoutNeeded) {
             pw.print(prefix); pw.print("mRelayoutCalled="); pw.print(mRelayoutCalled);
@@ -2828,6 +2834,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return isChildWindow() && (mAttrs.privateFlags & PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME) != 0;
     }
 
+    boolean isParentWindowHidden() {
+        return (mParentWindow != null) ? mParentWindow.mHidden : false;
+    }
+
     void setReplacing(boolean animate) {
         if ((mAttrs.privateFlags & PRIVATE_FLAG_WILL_NOT_REPLACE_ON_RELAUNCH) != 0
                 || mAttrs.type == TYPE_APPLICATION_STARTING) {
@@ -2897,6 +2907,80 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             return mAppToken.mRotationAnimationHint;
         } else {
             return -1;
+        }
+    }
+
+    // This must be called while inside a transaction.
+    boolean performShowLocked() {
+        if (isHiddenFromUserLocked()) {
+            if (DEBUG_VISIBILITY) Slog.w(TAG, "hiding " + this + ", belonging to " + mOwnerUid);
+            hideLw(false);
+            return false;
+        }
+
+        logPerformShow("performShow on ");
+
+        if (mWinAnimator.mDrawState != READY_TO_SHOW || !isReadyForDisplayIgnoringKeyguard()) {
+            return false;
+        }
+
+        logPerformShow("Showing ");
+
+        mService.enableScreenIfNeededLocked();
+        mWinAnimator.applyEnterAnimationLocked();
+
+        // Force the show in the next prepareSurfaceLocked() call.
+        mWinAnimator.mLastAlpha = -1;
+        if (DEBUG_SURFACE_TRACE || DEBUG_ANIM) Slog.v(TAG,
+                "performShowLocked: mDrawState=HAS_DRAWN in " + this);
+        mWinAnimator.mDrawState = HAS_DRAWN;
+        mService.scheduleAnimationLocked();
+
+        if (mHidden) {
+            mHidden = false;
+            final DisplayContent displayContent = getDisplayContent();
+
+            for (int i = mChildWindows.size(); i >= 0; --i) {
+                final WindowState c = mChildWindows.get(i);
+                if (c.mWinAnimator.mSurfaceController != null) {
+                    c.performShowLocked();
+                    // It hadn't been shown, which means layout not performed on it, so now we
+                    // want to make sure to do a layout.  If called from within the transaction
+                    // loop, this will cause it to restart with a new layout.
+                    if (displayContent != null) {
+                        displayContent.layoutNeeded = true;
+                    }
+                }
+            }
+        }
+
+        if (mAttrs.type != TYPE_APPLICATION_STARTING && mAppToken != null) {
+            mAppToken.onFirstWindowDrawn(this, mWinAnimator);
+        }
+
+        if (mAttrs.type == TYPE_INPUT_METHOD) {
+            mDisplayContent.mDividerControllerLocked.resetImeHideRequested();
+        }
+
+        return true;
+    }
+
+    void logPerformShow(String prefix) {
+        if (DEBUG_VISIBILITY
+                || (DEBUG_STARTING_WINDOW && mAttrs.type == TYPE_APPLICATION_STARTING)) {
+            Slog.v(TAG, prefix + this
+                    + ": mDrawState=" + mWinAnimator.drawStateToString()
+                    + " readyForDisplay=" + isReadyForDisplayIgnoringKeyguard()
+                    + " starting=" + (mAttrs.type == TYPE_APPLICATION_STARTING)
+                    + " during animation: policyVis=" + mPolicyVisibility
+                    + " parentHidden=" + isParentWindowHidden()
+                    + " tok.hiddenRequested="
+                    + (mAppToken != null ? mAppToken.hiddenRequested : false)
+                    + " tok.hidden=" + (mAppToken != null ? mAppToken.hidden : false)
+                    + " animating=" + mWinAnimator.mAnimating
+                    + " tok animating="
+                    + (mWinAnimator.mAppAnimator != null ? mWinAnimator.mAppAnimator.animating : false)
+                    + " Callers=" + Debug.getCallers(4));
         }
     }
 }

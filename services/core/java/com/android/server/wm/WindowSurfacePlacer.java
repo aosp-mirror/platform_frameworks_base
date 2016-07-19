@@ -9,7 +9,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE;
-import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
@@ -811,7 +810,7 @@ class WindowSurfacePlacer {
                                         + winAnimator.mSurfaceController
                                         + " pv=" + w.mPolicyVisibility
                                         + " mDrawState=" + winAnimator.drawStateToString()
-                                        + " ah=" + w.mAttachedHidden
+                                        + " ph=" + w.isParentWindowHidden()
                                         + " th=" + atoken.hiddenRequested
                                         + " a=" + winAnimator.mAnimating);
                             }
@@ -959,13 +958,13 @@ class WindowSurfacePlacer {
                         + win.mRelayoutCalled + " hidden="
                         + win.mRootToken.hidden + " hiddenRequested="
                         + (atoken != null && atoken.hiddenRequested)
-                        + " mAttachedHidden=" + win.mAttachedHidden);
+                        + " parentHidden=" + win.isParentWindowHidden());
                 else Slog.v(TAG, "  VIS: mViewVisibility="
                         + win.mViewVisibility + " mRelayoutCalled="
                         + win.mRelayoutCalled + " hidden="
                         + win.mRootToken.hidden + " hiddenRequested="
                         + (atoken != null && atoken.hiddenRequested)
-                        + " mAttachedHidden=" + win.mAttachedHidden);
+                        + " parentHidden=" + win.isParentWindowHidden());
             }
 
             // If this view is GONE, then skip it -- keep the current
