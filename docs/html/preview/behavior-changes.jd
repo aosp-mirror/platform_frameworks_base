@@ -765,6 +765,23 @@ JavaVM::AttachCurrentThread from &lt;jni.h&gt;.
   is returned, even if the encryption key is specific to the user or profile.
   </li>
 
+  <li>In Android N, several methods that would ordinarily affect the entire
+  device behave differently if the device has a work profile installed with a
+  separate work challenge. Rather than affecting the entire device, these
+  methods apply only to the work profile. (The complete list of such methods is
+  in the {@link android.app.admin.DevicePolicyManager#getParentProfileInstance
+  DevicePolicyManager.getParentProfileInstance()} documentation.) For example,
+  {@link android.app.admin.DevicePolicyManager#lockNow
+  DevicePolicyManager.lockNow()} locks just the work profile, instead of
+  locking the entire device. For each of these methods, you can get the old
+  behavior by calling the method on the parent instance of the
+  {@link android.app.admin.DevicePolicyManager}; you can get this parent by
+  calling {@link android.app.admin.DevicePolicyManager#getParentProfileInstance
+  DevicePolicyManager.getParentProfileInstance()}. So for example, if you call
+  the parent instance's {@link android.app.admin.DevicePolicyManager#lockNow}
+  method, the entire device is locked.
+  </li>
+
 </ul>
 
 <p>
