@@ -40,9 +40,6 @@ LOCAL_SHARED_LIBRARIES := \
     libexif \
     libstagefright_amrnb_common \
 
-LOCAL_REQUIRED_MODULES := \
-    libjhead_jni
-
 LOCAL_STATIC_LIBRARIES := \
     libstagefright_amrnbenc
 
