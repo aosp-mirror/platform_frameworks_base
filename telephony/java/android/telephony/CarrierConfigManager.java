@@ -837,6 +837,12 @@ public class CarrierConfigManager {
             "allow_merge_wifi_calls_when_vowifi_off_bool";
 
     /**
+     * Flag indicating whether the carrier supports the Hold command while in an IMS call.
+     * @hide
+     */
+    public static final String KEY_ALLOW_HOLD_IN_IMS_CALL_BOOL = "allow_hold_in_ims_call";
+
+    /**
      * When true, indicates that adding a call is disabled when there is an ongoing video call
      * or when there is an ongoing call on wifi which was downgraded from video and VoWifi is
      * turned off.
@@ -868,6 +874,7 @@ public class CarrierConfigManager {
 
     static {
         sDefaults = new PersistableBundle();
+        sDefaults.putBoolean(KEY_ALLOW_HOLD_IN_IMS_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_ADDITIONAL_CALL_SETTING_BOOL, true);
         sDefaults.putBoolean(KEY_ALLOW_EMERGENCY_NUMBERS_IN_CALL_LOG_BOOL, false);
         sDefaults.putBoolean(KEY_ALLOW_LOCAL_DTMF_TONES_BOOL, true);
