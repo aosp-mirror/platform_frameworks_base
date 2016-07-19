@@ -1107,6 +1107,16 @@ interface ITelephony {
     String getEsn(int subId);
 
     /**
+    * Return the Preferred Roaming List Version
+    *
+    * Requires that the calling app has READ_PRIVILEGED_PHONE_STATE permission
+    * @param subId the subscription ID that this request applies to.
+    * @return PRLVersion or null if error.
+    * @hide
+    */
+    String getCdmaPrlVersion(int subId);
+
+    /**
      * Get snapshot of Telephony histograms
      * @return List of Telephony histograms
      * Requires Permission:
