@@ -215,7 +215,11 @@ public class EnabledComponentsObserver implements SettingChangeListener {
      */
     public ArraySet<ComponentName> getInstalled(int userId) {
         synchronized (mLock) {
-            return mInstalledSet.get(userId);
+            ArraySet<ComponentName> ret = mInstalledSet.get(userId);
+            if (ret == null) {
+                return new ArraySet<ComponentName>();
+            }
+            return ret;
         }
     }
 
@@ -227,7 +231,12 @@ public class EnabledComponentsObserver implements SettingChangeListener {
      */
     public ArraySet<ComponentName> getEnabled(int userId) {
         synchronized (mLock) {
-            return mEnabledSet.get(userId);
+            ArraySet<ComponentName> ret = mEnabledSet.get(userId);
+            if (ret == null) {
+                return new ArraySet<ComponentName>();
+            }
+            return ret;
+
         }
     }
 
