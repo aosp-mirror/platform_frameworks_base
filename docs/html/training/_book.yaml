@@ -695,6 +695,8 @@ toc:
       path: /training/tv/playback/guided-step.html
     - title: Enabling Background Playback
       path: /training/tv/playback/options.html
+    - title: Adding Picture-in-picture
+      path: /training/tv/playback/picture-in-picture.html
   - title: Helping Users Find Content on TV
     path: /training/tv/discovery/index.html
     path_attributes:
