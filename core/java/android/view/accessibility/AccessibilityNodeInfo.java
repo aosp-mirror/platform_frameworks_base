@@ -3801,7 +3801,8 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     /**
      * Class with information if a node is a range. Use
-     * {@link RangeInfo#obtain(int, float, float, float)} to get an instance.
+     * {@link RangeInfo#obtain(int, float, float, float)} to get an instance. Recycling is
+     * handled by the {@link AccessibilityNodeInfo} to which this object is attached.
      */
     public static final class RangeInfo {
         private static final int MAX_POOL_SIZE = 10;
@@ -3926,7 +3927,8 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     /**
      * Class with information if a node is a collection. Use
-     * {@link CollectionInfo#obtain(int, int, boolean)} to get an instance.
+     * {@link CollectionInfo#obtain(int, int, boolean)} to get an instance. Recycling is
+     * handled by the {@link AccessibilityNodeInfo} to which this object is attached.
      * <p>
      * A collection of items has rows and columns and may be hierarchical.
      * For example, a horizontal list is a collection with one column, as
@@ -4082,7 +4084,8 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * Class with information if a node is a collection item. Use
      * {@link CollectionItemInfo#obtain(int, int, int, int, boolean)}
-     * to get an instance.
+     * to get an instance. Recycling is handled by the {@link AccessibilityNodeInfo} to which this
+     * object is attached.
      * <p>
      * A collection item is contained in a collection, it starts at
      * a given row and column in the collection, and spans one or
