@@ -5424,6 +5424,39 @@ public class TelephonyManager {
     }
 
     /**
+     * Return the Preferred Roaming List Version
+     *
+     * Requires that the calling app has READ_PRIVILEGED_PHONE_STATE permission
+     *
+     * @return PRLVersion or null if error.
+     * @hide
+     */
+    public String getCdmaPrlVersion() {
+        return getCdmaPrlVersion(getDefaultSubscription());
+    }
+
+    /**
+     * Return the Preferred Roaming List Version
+     *
+     * Requires that the calling app has READ_PRIVILEGED_PHONE_STATE permission
+     *
+     * @param subId the subscription ID that this request applies to.
+     * @return PRLVersion or null if error.
+     * @hide
+     */
+    public String getCdmaPrlVersion(int subId) {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.getCdmaPrlVersion(subId);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#getCdmaPrlVersion", e);
+        }
+        return null;
+    }
+
+    /**
      * Get snapshot of Telephony histograms
      * @return List of Telephony histograms
      * Requires Permission:
