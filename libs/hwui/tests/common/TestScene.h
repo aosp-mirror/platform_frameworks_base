@@ -33,7 +33,7 @@ public:
     struct Options {
         int count = 0;
         int reportFrametimeWeight = 0;
-        bool renderOffscreen = false;
+        bool renderOffscreen = true;
     };
 
     template <class T>
