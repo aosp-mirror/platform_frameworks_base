@@ -249,6 +249,9 @@ public class QSDetail extends LinearLayout {
             return;
         }
         mQsDetailHeaderSwitch.setChecked(state);
+        final boolean toggleEnabled = mDetailAdapter != null && mDetailAdapter.getToggleEnabled();
+        mQsDetailHeader.setEnabled(toggleEnabled);
+        mQsDetailHeaderSwitch.setEnabled(toggleEnabled);
     }
 
     private void handleScanStateChanged(boolean state) {
