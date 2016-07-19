@@ -16,18 +16,12 @@
 
 package com.android.server.twilight;
 
-import com.android.server.SystemService;
-import com.android.server.TwilightCalculator;
-
-import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.ContentObserver;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -36,64 +30,52 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
-import android.os.UserHandle;
-import android.provider.Settings;
-import android.provider.Settings.Secure;
 import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
+import com.android.server.SystemService;
+import com.android.server.TwilightCalculator;
+
 import java.util.ArrayList;
 import java.util.Iterator;
-
-import libcore.util.Objects;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Figures out whether it's twilight time based on the user's location.
- *
+ * <p>
  * Used by the UI mode manager and other components to adjust night mode
  * effects based on sunrise and sunset.
  */
 public final class TwilightService extends SystemService {
-    static final String TAG = "TwilightService";
-    static final boolean DEBUG = false;
-    static final String ACTION_UPDATE_TWILIGHT_STATE =
+
+    private static final String TAG = "TwilightService";
+    private static final boolean DEBUG = false;
+
+    private static final String ACTION_UPDATE_TWILIGHT_STATE =
             "com.android.server.action.UPDATE_TWILIGHT_STATE";
 
-    // The amount of time after or before sunrise over which to start adjusting
-    // twilight affected things.  We want the change to happen gradually so that
-    // it is below the threshold of perceptibility and so that the adjustment has
-    // maximum effect well after dusk.
+    /**
+     * The amount of time after or before sunrise over which to start adjusting twilight affected
+     * things. We want the change to happen gradually so that it is below the threshold of
+     * perceptibility and so that the adjustment has and so that the adjustment has
+     * maximum effect well after dusk.
+     */
     private static final long TWILIGHT_ADJUSTMENT_TIME = DateUtils.HOUR_IN_MILLIS * 2;
 
-    // Broadcast when twilight changes.
-    public static final String ACTION_TWILIGHT_CHANGED = "android.intent.action.TWILIGHT_CHANGED";
+    private final Object mLock = new Object();
 
-    public static final String EXTRA_IS_NIGHT = "isNight";
-    public static final String EXTRA_AMOUNT = "amount";
+    @GuardedBy("mLock")
+    private final List<TwilightListenerRecord> mListeners = new ArrayList<>();
 
-    // Amount of time the TwilightService will stay locked in an override state before switching
-    // back to auto.
-    private static final long RESET_TIME = DateUtils.HOUR_IN_MILLIS * 2;
-    private static final String EXTRA_RESET_USER = "user";
+    private AlarmManager mAlarmManager;
+    private LocationManager mLocationManager;
+    private LocationHandler mLocationHandler;
 
-    private static final String ACTION_RESET_TWILIGHT_AUTO =
-            "com.android.server.action.RESET_TWILIGHT_AUTO";
-
-    final Object mLock = new Object();
-
-    AlarmManager mAlarmManager;
-    LocationManager mLocationManager;
-    LocationHandler mLocationHandler;
-
-    final ArrayList<TwilightListenerRecord> mListeners =
-            new ArrayList<TwilightListenerRecord>();
-
-    TwilightState mTwilightState;
-
-    private int mCurrentUser;
-    private boolean mLocked;
-    private boolean mBootCompleted;
+    @GuardedBy("mLock")
+    private TwilightState mTwilightState;
 
     public TwilightService(Context context) {
         super(context);
@@ -105,13 +87,11 @@ public final class TwilightService extends SystemService {
         mLocationManager = (LocationManager) getContext().getSystemService(
                 Context.LOCATION_SERVICE);
         mLocationHandler = new LocationHandler();
-        mCurrentUser = ActivityManager.getCurrentUser();
 
         IntentFilter filter = new IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         filter.addAction(Intent.ACTION_TIME_CHANGED);
         filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
         filter.addAction(Intent.ACTION_USER_SWITCHED);
-        filter.addAction(ACTION_UPDATE_TWILIGHT_STATE);
         getContext().registerReceiver(mReceiver, filter);
 
         publishLocalService(TwilightManager.class, mService);
@@ -120,81 +100,29 @@ public final class TwilightService extends SystemService {
     @Override
     public void onBootPhase(int phase) {
         if (phase == PHASE_BOOT_COMPLETED) {
-            getContext().getContentResolver().registerContentObserver(
-                    Secure.getUriFor(Secure.TWILIGHT_MODE), false, mContentObserver, mCurrentUser);
-            mContentObserver.onChange(true);
-            mBootCompleted = true;
-            sendBroadcast();
-        }
-    }
-
-    private void reregisterSettingObserver() {
-        final ContentResolver contentResolver = getContext().getContentResolver();
-        contentResolver.unregisterContentObserver(mContentObserver);
-        contentResolver.registerContentObserver(Secure.getUriFor(Secure.TWILIGHT_MODE), false,
-                mContentObserver, mCurrentUser);
-        mContentObserver.onChange(true);
-    }
-
-    private void setLockedState(TwilightState state) {
-        synchronized (mLock) {
-            // Make sure we aren't locked so we can set the state.
-            mLocked = false;
-            setTwilightState(state);
-            // Make sure we leave the state locked, so it cant be changed.
-            mLocked = true;
-            // TODO: Don't bother updating state when locked.
+            // Initialize the current twilight state.
+            mLocationHandler.requestTwilightUpdate();
         }
     }
 
     private void setTwilightState(TwilightState state) {
         synchronized (mLock) {
-            if (mLocked) {
-                // State has been locked by secure setting, shouldn't be changed.
-                return;
-            }
-            if (!Objects.equal(mTwilightState, state)) {
+            if (!Objects.equals(mTwilightState, state)) {
                 if (DEBUG) {
                     Slog.d(TAG, "Twilight state changed: " + state);
                 }
 
                 mTwilightState = state;
 
-                final int listenerLen = mListeners.size();
-                for (int i = 0; i < listenerLen; i++) {
-                    mListeners.get(i).postUpdate();
+                for (TwilightListenerRecord mListener : mListeners) {
+                    mListener.postUpdate();
                 }
             }
         }
-        sendBroadcast();
-    }
-
-    private void sendBroadcast() {
-        synchronized (mLock) {
-            if (mTwilightState == null) {
-                return;
-            }
-            if (mBootCompleted) {
-                Intent intent = new Intent(ACTION_TWILIGHT_CHANGED);
-                intent.putExtra(EXTRA_IS_NIGHT, mTwilightState.isNight());
-                intent.putExtra(EXTRA_AMOUNT, mTwilightState.getAmount());
-                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-                getContext().sendStickyBroadcastAsUser(intent, UserHandle.ALL);
-            }
-        }
-    }
-
-    private void scheduleReset() {
-        long resetTime = System.currentTimeMillis() + RESET_TIME;
-        Intent resetIntent = new Intent(ACTION_RESET_TWILIGHT_AUTO);
-        resetIntent.putExtra(EXTRA_RESET_USER, mCurrentUser);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                getContext(), 0, resetIntent, 0);
-        mAlarmManager.cancel(pendingIntent);
-        mAlarmManager.setExact(AlarmManager.RTC, resetTime, pendingIntent);
     }
 
     private static class TwilightListenerRecord implements Runnable {
+
         private final TwilightListener mListener;
         private final Handler mHandler;
 
@@ -211,15 +139,9 @@ public final class TwilightService extends SystemService {
         public void run() {
             mListener.onTwilightStateChanged();
         }
-
     }
 
     private final TwilightManager mService = new TwilightManager() {
-        /**
-         * Gets the current twilight state.
-         *
-         * @return The current twilight state, or null if no information is available.
-         */
         @Override
         public TwilightState getCurrentState() {
             synchronized (mLock) {
@@ -227,11 +149,6 @@ public final class TwilightService extends SystemService {
             }
         }
 
-        /**
-         * Listens for twilight time.
-         *
-         * @param listener The listener.
-         */
         @Override
         public void registerListener(TwilightListener listener, Handler handler) {
             synchronized (mLock) {
@@ -286,6 +203,7 @@ public final class TwilightService extends SystemService {
     }
 
     private final class LocationHandler extends Handler {
+
         private static final int MSG_ENABLE_LOCATION_UPDATES = 1;
         private static final int MSG_GET_NEW_LOCATION_UPDATE = 2;
         private static final int MSG_PROCESS_NEW_LOCATION = 3;
@@ -301,13 +219,14 @@ public final class TwilightService extends SystemService {
         private static final double FACTOR_GMT_OFFSET_LONGITUDE =
                 1000.0 * 360.0 / DateUtils.DAY_IN_MILLIS;
 
+        private final TwilightCalculator mTwilightCalculator = new TwilightCalculator();
+
         private boolean mPassiveListenerEnabled;
         private boolean mNetworkListenerEnabled;
         private boolean mDidFirstInit;
         private long mLastNetworkRegisterTime = -MIN_LOCATION_UPDATE_MS;
         private long mLastUpdateInterval;
         private Location mLocation;
-        private final TwilightCalculator mTwilightCalculator = new TwilightCalculator();
 
         public void processNewLocation(Location location) {
             Message msg = obtainMessage(MSG_PROCESS_NEW_LOCATION, location);
@@ -334,14 +253,14 @@ public final class TwilightService extends SystemService {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_PROCESS_NEW_LOCATION: {
-                    final Location location = (Location)msg.obj;
+                    final Location location = (Location) msg.obj;
                     final boolean hasMoved = hasMoved(mLocation, location);
                     final boolean hasBetterAccuracy = mLocation == null
                             || location.getAccuracy() < mLocation.getAccuracy();
                     if (DEBUG) {
                         Slog.d(TAG, "Processing new location: " + location
-                               + ", hasMoved=" + hasMoved
-                               + ", hasBetterAccuracy=" + hasBetterAccuracy);
+                                + ", hasMoved=" + hasMoved
+                                + ", hasBetterAccuracy=" + hasBetterAccuracy);
                     }
                     if (hasMoved || hasBetterAccuracy) {
                         setLocation(location);
@@ -373,8 +292,8 @@ public final class TwilightService extends SystemService {
                     // distance.
                     boolean networkLocationEnabled;
                     try {
-                        networkLocationEnabled =
-                            mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+                        networkLocationEnabled = mLocationManager.isProviderEnabled(
+                                LocationManager.NETWORK_PROVIDER);
                     } catch (Exception e) {
                         // we may get IllegalArgumentException if network location provider
                         // does not exist or is not yet installed.
@@ -398,8 +317,8 @@ public final class TwilightService extends SystemService {
                     // and network).
                     boolean passiveLocationEnabled;
                     try {
-                        passiveLocationEnabled =
-                            mLocationManager.isProviderEnabled(LocationManager.PASSIVE_PROVIDER);
+                        passiveLocationEnabled = mLocationManager.isProviderEnabled(
+                                LocationManager.PASSIVE_PROVIDER);
                     } catch (Exception e) {
                         // we may get IllegalArgumentException if passive location provider
                         // does not exist or is not yet installed.
@@ -409,7 +328,7 @@ public final class TwilightService extends SystemService {
                     if (!mPassiveListenerEnabled && passiveLocationEnabled) {
                         mPassiveListenerEnabled = true;
                         mLocationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER,
-                                0, LOCATION_UPDATE_DISTANCE_METER , mLocationListener);
+                                0, LOCATION_UPDATE_DISTANCE_METER, mLocationListener);
                     }
 
                     if (!(mNetworkListenerEnabled && mPassiveListenerEnabled)) {
@@ -444,14 +363,14 @@ public final class TwilightService extends SystemService {
                 // pick the most recent location
                 if (location == null || (lastKnownLocation != null &&
                         location.getElapsedRealtimeNanos() <
-                        lastKnownLocation.getElapsedRealtimeNanos())) {
+                                lastKnownLocation.getElapsedRealtimeNanos())) {
                     location = lastKnownLocation;
                 }
             }
 
             // In the case there is no location available (e.g. GPS fix or network location
-            // is not available yet), the longitude of the location is estimated using the timezone,
-            // latitude and accuracy are set to get a good average.
+            // is not available yet), the longitude of the location is estimated using the
+            // timezone, latitude and accuracy are set to get a good average.
             if (location == null) {
                 Time currentTime = new Time();
                 currentTime.set(System.currentTimeMillis());
@@ -543,56 +462,20 @@ public final class TwilightService extends SystemService {
                 Slog.d(TAG, "Next update in " + (nextUpdate - now) + " ms");
             }
 
-            Intent updateIntent = new Intent(ACTION_UPDATE_TWILIGHT_STATE);
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                    getContext(), 0, updateIntent, 0);
+            final PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                    getContext(), 0, new Intent(ACTION_UPDATE_TWILIGHT_STATE), 0);
             mAlarmManager.cancel(pendingIntent);
             mAlarmManager.setExact(AlarmManager.RTC, nextUpdate, pendingIntent);
         }
     }
 
-    private final ContentObserver mContentObserver = new ContentObserver(new Handler()) {
-        @Override
-        public void onChange(boolean selfChange) {
-            super.onChange(selfChange);
-            int value = Secure.getIntForUser(getContext().getContentResolver(),
-                    Secure.TWILIGHT_MODE, Secure.TWILIGHT_MODE_AUTO, mCurrentUser);
-            if (value == Secure.TWILIGHT_MODE_LOCKED_OFF) {
-                setLockedState(new TwilightState(false, 0));
-            } else if (value == Secure.TWILIGHT_MODE_LOCKED_ON) {
-                setLockedState(new TwilightState(true, 1));
-            } else if (value == Secure.TWILIGHT_MODE_AUTO_OVERRIDE_OFF) {
-                setLockedState(new TwilightState(false, 0));
-                scheduleReset();
-            } else if (value == Secure.TWILIGHT_MODE_AUTO_OVERRIDE_ON) {
-                setLockedState(new TwilightState(true, 1));
-                scheduleReset();
-            } else {
-                mLocked = false;
-                mLocationHandler.requestTwilightUpdate();
-            }
-        }
-    };
-
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (Intent.ACTION_USER_SWITCHED.equals(intent.getAction())) {
-                mCurrentUser = ActivityManager.getCurrentUser();
-                reregisterSettingObserver();
-                return;
-            }
             if (Intent.ACTION_AIRPLANE_MODE_CHANGED.equals(intent.getAction())
                     && !intent.getBooleanExtra("state", false)) {
                 // Airplane mode is now off!
                 mLocationHandler.requestLocationUpdate();
-                return;
-            }
-
-            if (ACTION_RESET_TWILIGHT_AUTO.equals(intent.getAction())) {
-                int user = intent.getIntExtra(EXTRA_RESET_USER, 0);
-                Settings.Secure.putIntForUser(getContext().getContentResolver(),
-                        Secure.TWILIGHT_MODE, Secure.TWILIGHT_MODE_AUTO, user);
                 return;
             }
             // Time zone has changed or alarm expired.
@@ -602,32 +485,40 @@ public final class TwilightService extends SystemService {
 
     // A LocationListener to initialize the network location provider. The location updates
     // are handled through the passive location provider.
-    private final LocationListener mEmptyLocationListener =  new LocationListener() {
+    private final LocationListener mEmptyLocationListener = new LocationListener() {
+        @Override
         public void onLocationChanged(Location location) {
         }
 
-        public void onProviderDisabled(String provider) {
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
         }
 
+        @Override
         public void onProviderEnabled(String provider) {
         }
 
-        public void onStatusChanged(String provider, int status, Bundle extras) {
+        @Override
+        public void onProviderDisabled(String provider) {
         }
     };
 
     private final LocationListener mLocationListener = new LocationListener() {
+        @Override
         public void onLocationChanged(Location location) {
             mLocationHandler.processNewLocation(location);
         }
 
-        public void onProviderDisabled(String provider) {
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
         }
 
+        @Override
         public void onProviderEnabled(String provider) {
         }
 
-        public void onStatusChanged(String provider, int status, Bundle extras) {
+        @Override
+        public void onProviderDisabled(String provider) {
         }
     };
 }

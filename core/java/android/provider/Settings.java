@@ -6173,44 +6173,6 @@ public final class Settings {
         public static final String NIGHT_DISPLAY_CUSTOM_END_TIME = "night_display_custom_end_time";
 
         /**
-         * Behavior of twilight on the device.
-         * One of {@link #TWILIGHT_MODE_LOCKED_OFF}, {@link #TWILIGHT_MODE_LOCKED_ON}
-         * or {@link #TWILIGHT_MODE_AUTO}.
-         * @hide
-         */
-        public static final String TWILIGHT_MODE = "twilight_mode";
-
-        /**
-         * Twilight mode always off.
-         * @hide
-         */
-        public static final int TWILIGHT_MODE_LOCKED_OFF = 0;
-
-        /**
-         * Twilight mode always on.
-         * @hide
-         */
-        public static final int TWILIGHT_MODE_LOCKED_ON = 1;
-
-        /**
-         * Twilight mode auto.
-         * @hide
-         */
-        public static final int TWILIGHT_MODE_AUTO = 2;
-
-        /**
-         * Twilight mode auto, temporarily overriden to on.
-         * @hide
-         */
-        public static final int TWILIGHT_MODE_AUTO_OVERRIDE_OFF = 3;
-
-        /**
-         * Twilight mode auto, temporarily overriden to off.
-         * @hide
-         */
-        public static final int TWILIGHT_MODE_AUTO_OVERRIDE_ON = 4;
-
-        /**
          * Whether brightness should automatically adjust based on twilight state.
          * @hide
          */
