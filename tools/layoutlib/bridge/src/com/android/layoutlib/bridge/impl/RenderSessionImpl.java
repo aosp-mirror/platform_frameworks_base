@@ -45,6 +45,7 @@ import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
 import com.android.layoutlib.bridge.android.RenderParamsFlags;
 import com.android.layoutlib.bridge.android.graphics.NopCanvas;
 import com.android.layoutlib.bridge.android.support.DesignLibUtil;
+import com.android.layoutlib.bridge.android.support.SupportPreferencesUtil;
 import com.android.layoutlib.bridge.impl.binding.FakeAdapter;
 import com.android.layoutlib.bridge.impl.binding.FakeExpandableAdapter;
 import com.android.resources.ResourceType;
@@ -326,8 +327,14 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             boolean isPreference = "PreferenceScreen".equals(rootTag);
             View view;
             if (isPreference) {
-                view = Preference_Delegate.inflatePreference(getContext(), mBlockParser,
+                // First try to use the support library inflater. If something fails, fallback
+                // to the system preference inflater.
+                view = SupportPreferencesUtil.inflatePreference(getContext(), mBlockParser,
                         mContentRoot);
+                if (view == null) {
+                    view = Preference_Delegate.inflatePreference(getContext(), mBlockParser,
+                            mContentRoot);
+                }
             } else {
                 view = mInflater.inflate(mBlockParser, mContentRoot);
             }
