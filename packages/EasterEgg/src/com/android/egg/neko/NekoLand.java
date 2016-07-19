@@ -24,6 +24,7 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
@@ -50,6 +51,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 public class NekoLand extends Activity implements PrefsListener {
     public static boolean DEBUG = false;
@@ -98,7 +102,19 @@ public class NekoLand extends Activity implements PrefsListener {
                 cats[i] = Cat.create(this);
             }
         } else {
-            cats = mPrefs.getCats().toArray(new Cat[0]);
+            final float[] hsv = new float[3];
+            List<Cat> list = mPrefs.getCats();
+            Collections.sort(list, new Comparator<Cat>() {
+                @Override
+                public int compare(Cat cat, Cat cat2) {
+                    Color.colorToHSV(cat.getBodyColor(), hsv);
+                    float bodyH1 = hsv[0];
+                    Color.colorToHSV(cat2.getBodyColor(), hsv);
+                    float bodyH2 = hsv[0];
+                    return Float.compare(bodyH1, bodyH2);
+                }
+            });
+            cats = list.toArray(new Cat[0]);
         }
         mAdapter.setCats(cats);
         return cats.length;
