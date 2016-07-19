@@ -50,4 +50,8 @@ LOCAL_SHARED_LIBRARIES := liblog libutils libfilterfw
 
 LOCAL_CFLAGS += -Wall -Werror -Wunused -Wunreachable-code
 
+# Bug: http://b/29823425 Disable constant-conversion warning triggered in
+# native/imageproc/to_rgba.c
+LOCAL_CFLAGS += -Wno-constant-conversion
+
 include $(BUILD_SHARED_LIBRARY)
