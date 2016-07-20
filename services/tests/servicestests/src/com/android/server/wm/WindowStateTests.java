@@ -16,8 +16,6 @@
 
 package com.android.server.wm;
 
-import com.android.server.LocalServices;
-
 import android.content.Context;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -27,7 +25,6 @@ import android.view.WindowManagerPolicy;
 
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
 
@@ -127,6 +124,27 @@ public class WindowStateTests extends AndroidTestCase {
         // We would also expect additional negative layers to be added below existing negative
         // layers.
         assertEquals(child4, parentWindow.getBottomChild());
+    }
+
+    public void testGetParentWindow() throws Exception {
+        final WindowState parentWindow = createWindow(null, TYPE_APPLICATION);
+        final WindowState child1 = createWindow(parentWindow, FIRST_SUB_WINDOW);
+        final WindowState child2 = createWindow(parentWindow, FIRST_SUB_WINDOW);
+
+        assertNull(parentWindow.getParentWindow());
+        assertEquals(parentWindow, child1.getParentWindow());
+        assertEquals(parentWindow, child2.getParentWindow());
+    }
+
+    public void testGetTopParentWindow() throws Exception {
+        final WindowState root = createWindow(null, TYPE_APPLICATION);
+        final WindowState child1 = createWindow(root, FIRST_SUB_WINDOW);
+        final WindowState child2 = createWindow(child1, FIRST_SUB_WINDOW);
+
+        assertEquals(root, root.getTopParentWindow());
+        assertEquals(root, child1.getTopParentWindow());
+        assertEquals(child1, child2.getParentWindow());
+        assertEquals(root, child2.getTopParentWindow());
     }
 
     private WindowState createWindow(WindowState parent, int type) {

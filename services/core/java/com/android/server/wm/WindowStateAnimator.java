@@ -258,7 +258,7 @@ class WindowStateAnimator {
         }
 
         mWin = win;
-        mParentWinAnimator = !win.isChildWindow() ? null : win.mParentWindow.mWinAnimator;
+        mParentWinAnimator = !win.isChildWindow() ? null : win.getParentWindow().mWinAnimator;
         mAppAnimator = win.mAppToken == null ? null : win.mAppToken.mAppAnimator;
         mSession = win.mSession;
         mAttrType = win.mAttrs.type;
@@ -1080,7 +1080,7 @@ class WindowStateAnimator {
 
         // Initialize the decor rect to the entire frame.
         if (w.isDockedResizing() ||
-                (w.isChildWindow() && w.mParentWindow.isDockedResizing())) {
+                (w.isChildWindow() && w.getParentWindow().isDockedResizing())) {
 
             // If we are resizing with the divider, the task bounds might be smaller than the
             // stack bounds. The system decor is used to clip to the task bounds, which we don't
@@ -1883,8 +1883,7 @@ class WindowStateAnimator {
         mDeferTransactionUntilFrame = frameNumber;
         mDeferTransactionTime = System.currentTimeMillis();
         mSurfaceController.deferTransactionUntil(
-                mWin.mParentWindow.mWinAnimator.mSurfaceController.getHandle(),
-                frameNumber);
+                mWin.getParentWindow().mWinAnimator.mSurfaceController.getHandle(), frameNumber);
     }
 
     // Defer the current transaction to the frame number of the last saved transaction.
@@ -1903,7 +1902,7 @@ class WindowStateAnimator {
             mDeferTransactionUntilFrame = -1;
         } else {
             mSurfaceController.deferTransactionUntil(
-                    mWin.mParentWindow.mWinAnimator.mSurfaceController.getHandle(),
+                    mWin.getParentWindow().mWinAnimator.mSurfaceController.getHandle(),
                     mDeferTransactionUntilFrame);
         }
     }
@@ -1986,11 +1985,12 @@ class WindowStateAnimator {
         //     (in the new coordinate space). We then freeze layer updates until the resize
         //     occurs, at which point we undo, them.
         if (w.isChildWindow() && mSurfaceController.getTransformToDisplayInverse()) {
-            frameRect.set(x, y, x+width, y+height);
+            frameRect.set(x, y, x + width, y + height);
             transform.mapRect(frameRect);
 
-            w.mAttrs.x = (int) frameRect.left - w.mParentWindow.mFrame.left;
-            w.mAttrs.y = (int) frameRect.top - w.mParentWindow.mFrame.top;
+            final Rect parentWindowFrame = w.getParentWindow().mFrame;
+            w.mAttrs.x = (int) frameRect.left - parentWindowFrame.left;
+            w.mAttrs.y = (int) frameRect.top - parentWindowFrame.top;
             w.mAttrs.width = (int) Math.ceil(frameRect.width());
             w.mAttrs.height = (int) Math.ceil(frameRect.height());
 
