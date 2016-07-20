@@ -110,20 +110,20 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Aucun service"</string>
     <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"Changer de méthode d\'entrée"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Mode Avion"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Le motif est exigé après le redémarrage de l\'appareil"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Le schéma est exigé après le redémarrage de l\'appareil"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"Le NIP est exigé après le redémarrage de l\'appareil"</string>
     <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"Le mot de passe est exigé après le redémarrage de l\'appareil"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"Le motif est exigé pour plus de sécurité"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"Le schéma est exigé pour plus de sécurité"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"Le NIP est exigé pour plus de sécurité"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"Le mot de passe est exigé pour plus de sécurité"</string>
-    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Le motif est exigé lorsque vous changez de profil"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Le schéma est exigé lorsque vous changez de profil"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Le NIP est exigé lorsque vous changez de profil"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Le mot de passe est exigé lorsque vous changez de profil"</string>
     <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"L\'administrateur de l\'appareil l\'a verrouillé"</string>
     <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"L\'appareil a été verrouillé manuellement"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
-      <item quantity="one">L\'appareil n\'a pas été déverrouillé depuis <xliff:g id="NUMBER_1">%d</xliff:g> heure. Confirmez le motif.</item>
-      <item quantity="other">L\'appareil n\'a pas été déverrouillé depuis <xliff:g id="NUMBER_1">%d</xliff:g> heures. Confirmez le motif.</item>
+      <item quantity="one">L\'appareil n\'a pas été déverrouillé depuis <xliff:g id="NUMBER_1">%d</xliff:g> heure. Confirmez le schéma.</item>
+      <item quantity="other">L\'appareil n\'a pas été déverrouillé depuis <xliff:g id="NUMBER_1">%d</xliff:g> heures. Confirmez le schéma.</item>
     </plurals>
     <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
       <item quantity="one">L\'appareil n\'a pas été déverrouillé depuis <xliff:g id="NUMBER_1">%d</xliff:g> heure. Confirmez le NIP.</item>

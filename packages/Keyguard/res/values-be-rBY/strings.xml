@@ -58,7 +58,7 @@
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Выдаліць"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Забылі ключ"</string>
-    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Няправільна ключ"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Няправільны ўзор"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Няправiльны пароль"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"Няправільны PIN-код"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Паўтарыце спробу праз <xliff:g id="NUMBER">%d</xliff:g> с."</string>
@@ -123,10 +123,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Пры пераключэнні профіляў патрабуецца ўзор"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Пры пераключэнні профіляў патрабуецца PIN-код"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Пры пераключэнні профіляў патрабуецца пароль"</string>
-    <!-- no translation found for kg_prompt_reason_device_admin (5838877342219587193) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_user_request (500999297306031595) -->
-    <skip />
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"Адміністратар прылады заблакіраваў прыладу"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"Прылада была заблакіравана ўручную"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="one">Прылада не была разблакіравана на працягу <xliff:g id="NUMBER_1">%d</xliff:g> гадзіны. Увядзіце ўзор.</item>
       <item quantity="few">Прылада не была разблакіравана на працягу <xliff:g id="NUMBER_1">%d</xliff:g> гадзін. Увядзіце ўзор.</item>
