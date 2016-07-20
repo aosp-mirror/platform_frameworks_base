@@ -17,6 +17,8 @@
 package com.android.documentsui.dirlist;
 
 import android.content.Context;
+import android.content.res.TypedArray;
+import android.support.annotation.ColorRes;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -28,12 +30,20 @@ import com.android.documentsui.Events;
  */
 public class TouchSwipeRefreshLayout extends SwipeRefreshLayout {
 
+    private static final int[] COLOR_RES = new int[] { android.R.attr.colorAccent };
+    private static int COLOR_ACCENT_INDEX = 0;
+
     public TouchSwipeRefreshLayout(Context context) {
         this(context, null);
     }
 
     public TouchSwipeRefreshLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
+
+        TypedArray a = context.obtainStyledAttributes(COLOR_RES);
+        @ColorRes int colorId = a.getResourceId(COLOR_ACCENT_INDEX, -1);
+        a.recycle();
+        setColorSchemeResources(colorId);
     }
 
     @Override
