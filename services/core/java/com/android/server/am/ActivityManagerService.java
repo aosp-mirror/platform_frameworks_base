@@ -1693,11 +1693,14 @@ public final class ActivityManagerService extends ActivityManagerNative
             } break;
             case SHOW_FINGERPRINT_ERROR_UI_MSG: {
                 if (mShowDialogs) {
+                    String buildfingerprint = SystemProperties.get("ro.build.fingerprint");
+                    String[] splitfingerprint = buildfingerprint.split("/");
+                    String vendorid = splitfingerprint[3];
                     AlertDialog d = new BaseErrorDialog(mContext);
                     d.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ERROR);
                     d.setCancelable(false);
                     d.setTitle(mContext.getText(R.string.android_system_label));
-                    d.setMessage(mContext.getText(R.string.system_error_vendorprint));
+                    d.setMessage(mContext.getString(R.string.system_error_vendorprint, vendorid));
                     d.setButton(DialogInterface.BUTTON_POSITIVE, mContext.getText(R.string.ok),
                             obtainMessage(DISMISS_DIALOG_UI_MSG, d));
                     d.show();
