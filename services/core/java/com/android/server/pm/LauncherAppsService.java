@@ -17,7 +17,6 @@
 package com.android.server.pm;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -30,7 +29,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.ILauncherApps;
 import android.content.pm.IOnAppsChangedListener;
 import android.content.pm.IPackageManager;
-import android.content.pm.LauncherApps;
 import android.content.pm.LauncherApps.ShortcutQuery;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -461,7 +459,8 @@ public class LauncherAppsService extends SystemService {
             }
             // Note the target activity doesn't have to be exported.
 
-            prepareIntentForLaunch(intent, sourceBounds);
+            intent.setSourceBounds(sourceBounds);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
             return startShortcutIntentAsPublisher(
                     intent, packageName, startActivityOptions, userId);
@@ -521,7 +520,9 @@ public class LauncherAppsService extends SystemService {
 
             Intent launchIntent = new Intent(Intent.ACTION_MAIN);
             launchIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-            prepareIntentForLaunch(launchIntent, sourceBounds);
+            launchIntent.setSourceBounds(sourceBounds);
+            launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                    | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
             launchIntent.setPackage(component.getPackageName());
 
             long ident = Binder.clearCallingIdentity();
@@ -560,13 +561,6 @@ public class LauncherAppsService extends SystemService {
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
-        }
-
-        private void prepareIntentForLaunch(@NonNull Intent launchIntent,
-                @Nullable Rect sourceBounds) {
-            launchIntent.setSourceBounds(sourceBounds);
-            launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                    | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
         }
 
         @Override
