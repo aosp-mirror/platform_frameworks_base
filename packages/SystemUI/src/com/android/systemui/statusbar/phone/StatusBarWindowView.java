@@ -190,6 +190,12 @@ public class StatusBarWindowView extends FrameLayout {
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
+        if (mService.interceptMediaKey(event)) {
+            return true;
+        }
+        if (super.dispatchKeyEvent(event)) {
+            return true;
+        }
         boolean down = event.getAction() == KeyEvent.ACTION_DOWN;
         switch (event.getKeyCode()) {
             case KeyEvent.KEYCODE_BACK:
@@ -214,10 +220,7 @@ public class StatusBarWindowView extends FrameLayout {
                 }
                 break;
         }
-        if (mService.interceptMediaKey(event)) {
-            return true;
-        }
-        return super.dispatchKeyEvent(event);
+        return false;
     }
 
     @Override
