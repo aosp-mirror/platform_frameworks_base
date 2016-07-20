@@ -320,6 +320,35 @@ public class Main {
         }
     }
 
+    @Test
+    public void testActivityActionBar() throws ClassNotFoundException {
+        LayoutPullParser parser = createLayoutPullParser("simple_activity.xml");
+        LayoutLibTestCallback layoutLibCallback = new LayoutLibTestCallback(getLogger());
+        layoutLibCallback.initResources();
+
+        SessionParams params = getSessionParams(parser, ConfigGenerator.NEXUS_5,
+                layoutLibCallback, "Theme.Material.Light.NoActionBar", false,
+                RenderingMode.V_SCROLL, 22);
+
+        renderAndVerify(params, "simple_activity_noactionbar.png");
+
+        parser = createLayoutPullParser("simple_activity.xml");
+        params = getSessionParams(parser, ConfigGenerator.NEXUS_5,
+                layoutLibCallback, "Theme.Material.Light", false,
+                RenderingMode.V_SCROLL, 22);
+
+        renderAndVerify(params, "simple_activity.png");
+
+        // This also tests that a theme with "NoActionBar" DOES HAVE an action bar when we are
+        // displaying menus.
+        parser = createLayoutPullParser("simple_activity.xml");
+        params = getSessionParams(parser, ConfigGenerator.NEXUS_5,
+                layoutLibCallback, "Theme.Material.Light.NoActionBar", false,
+                RenderingMode.V_SCROLL, 22);
+        params.setFlag(RenderParamsFlags.FLAG_KEY_ROOT_TAG, "menu");
+        renderAndVerify(params, "simple_activity.png");
+    }
+
     /** Test allwidgets.xml */
     @Test
     public void testAllWidgets() throws ClassNotFoundException {
