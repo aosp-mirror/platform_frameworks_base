@@ -366,7 +366,6 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
      * @return true if a matching action was found, false otherwise
      */
     public boolean updatePendingIntentFromActions(Notification.Action[] actions) {
-        boolean found = false;
         if (mPendingIntent == null || actions == null) {
             return false;
         }
@@ -473,14 +472,21 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         }
 
         @Override
-        public boolean onKeyPreIme(int keyCode, KeyEvent event) {
-            if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_UP) {
-                defocusIfNeeded(true /* animate */);
-                final InputMethodManager imm = InputMethodManager.getInstance();
-                imm.hideSoftInputFromWindow(getWindowToken(), 0);
+        public boolean onKeyDown(int keyCode, KeyEvent event) {
+            if (keyCode == KeyEvent.KEYCODE_BACK) {
+                // Eat the DOWN event here to prevent any default behavior.
                 return true;
             }
-            return super.onKeyPreIme(keyCode, event);
+            return super.onKeyDown(keyCode, event);
+        }
+
+        @Override
+        public boolean onKeyUp(int keyCode, KeyEvent event) {
+            if (keyCode == KeyEvent.KEYCODE_BACK) {
+                defocusIfNeeded(true /* animate */);
+                return true;
+            }
+            return super.onKeyUp(keyCode, event);
         }
 
         @Override
