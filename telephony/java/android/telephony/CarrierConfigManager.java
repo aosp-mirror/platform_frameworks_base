@@ -691,6 +691,8 @@ public class CarrierConfigManager {
     public static final String KEY_MMS_UA_PROF_TAG_NAME_STRING = "uaProfTagName";
     public static final String KEY_MMS_UA_PROF_URL_STRING = "uaProfUrl";
     public static final String KEY_MMS_USER_AGENT_STRING = "userAgent";
+    /** @hide */
+    public static final String KEY_MMS_CLOSE_CONNECTION_BOOL = "mmsCloseConnection";
 
     /**
      * If carriers require differentiate un-provisioned status: cold sim or out of credit sim
@@ -1005,6 +1007,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_MMS_SMS_DELIVERY_REPORT_ENABLED_BOOL, true);
         sDefaults.putBoolean(KEY_MMS_SUPPORT_HTTP_CHARSET_HEADER_BOOL, false);
         sDefaults.putBoolean(KEY_MMS_SUPPORT_MMS_CONTENT_DISPOSITION_BOOL, true);
+        sDefaults.putBoolean(KEY_MMS_CLOSE_CONNECTION_BOOL, false);
         sDefaults.putInt(KEY_MMS_ALIAS_MAX_CHARS_INT, 48);
         sDefaults.putInt(KEY_MMS_ALIAS_MIN_CHARS_INT, 2);
         sDefaults.putInt(KEY_MMS_HTTP_SOCKET_TIMEOUT_INT, 60 * 1000);
