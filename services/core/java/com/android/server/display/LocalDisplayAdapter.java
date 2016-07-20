@@ -39,6 +39,8 @@ import android.view.SurfaceControl;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * A display adapter for the local displays managed by Surface Flinger.
@@ -100,14 +102,25 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         builtInDisplayId);
                 return;
             }
+            int activeColorMode = SurfaceControl.getActiveColorMode(displayToken);
+            if (activeColorMode < 0) {
+                // We failed to get the active color mode. We don't bail out here since on the next
+                // configuration pass we'll go ahead and set it to whatever it was set to last (or
+                // COLOR_MODE_NATIVE if this is the first configuration).
+                Slog.w(TAG, "Unable to get active color mode for display device " +
+                        builtInDisplayId);
+                activeColorMode = Display.COLOR_MODE_INVALID;
+            }
+            int[] colorModes = SurfaceControl.getDisplayColorModes(displayToken);
             LocalDisplayDevice device = mDevices.get(builtInDisplayId);
             if (device == null) {
                 // Display was added.
                 device = new LocalDisplayDevice(displayToken, builtInDisplayId,
-                        configs, activeConfig);
+                        configs, activeConfig, colorModes, activeColorMode);
                 mDevices.put(builtInDisplayId, device);
                 sendDisplayDeviceEventLocked(device, DISPLAY_DEVICE_EVENT_ADDED);
-            } else if (device.updatePhysicalDisplayInfoLocked(configs, activeConfig)) {
+            } else if (device.updatePhysicalDisplayInfoLocked(configs, activeConfig,
+                        colorModes, activeColorMode)) {
                 // Display properties changed.
                 sendDisplayDeviceEventLocked(device, DISPLAY_DEVICE_EVENT_CHANGED);
             }
@@ -144,8 +157,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         private final int mBuiltInDisplayId;
         private final Light mBacklight;
         private final SparseArray<DisplayModeRecord> mSupportedModes = new SparseArray<>();
-        private final SparseArray<Display.ColorTransform> mSupportedColorTransforms =
-                new SparseArray<>();
+        private final ArrayList<Integer> mSupportedColorModes = new ArrayList<>();
 
         private DisplayDeviceInfo mInfo;
         private boolean mHavePendingChanges;
@@ -155,18 +167,20 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         private int mDefaultModeId;
         private int mActiveModeId;
         private boolean mActiveModeInvalid;
-        private int mDefaultColorTransformId;
-        private int mActiveColorTransformId;
-        private boolean mActiveColorTransformInvalid;
+        private int mActiveColorMode;
+        private boolean mActiveColorModeInvalid;
         private Display.HdrCapabilities mHdrCapabilities;
 
         private  SurfaceControl.PhysicalDisplayInfo mDisplayInfos[];
 
         public LocalDisplayDevice(IBinder displayToken, int builtInDisplayId,
-                SurfaceControl.PhysicalDisplayInfo[] physicalDisplayInfos, int activeDisplayInfo) {
+                SurfaceControl.PhysicalDisplayInfo[] physicalDisplayInfos, int activeDisplayInfo,
+                int[] colorModes, int activeColorMode) {
             super(LocalDisplayAdapter.this, displayToken, UNIQUE_ID_PREFIX + builtInDisplayId);
             mBuiltInDisplayId = builtInDisplayId;
-            updatePhysicalDisplayInfoLocked(physicalDisplayInfos, activeDisplayInfo);
+            updatePhysicalDisplayInfoLocked(physicalDisplayInfos, activeDisplayInfo,
+                    colorModes, activeColorMode);
+            updateColorModesLocked(colorModes, activeColorMode);
             if (mBuiltInDisplayId == SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN) {
                 LightsManager lights = LocalServices.getService(LightsManager.class);
                 mBacklight = lights.getLight(LightsManager.LIGHT_ID_BACKLIGHT);
@@ -176,39 +190,16 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             mHdrCapabilities = SurfaceControl.getHdrCapabilities(displayToken);
         }
 
+        @Override
+        public boolean hasStableUniqueId() {
+            return true;
+        }
+
         public boolean updatePhysicalDisplayInfoLocked(
-                SurfaceControl.PhysicalDisplayInfo[] physicalDisplayInfos, int activeDisplayInfo) {
+                SurfaceControl.PhysicalDisplayInfo[] physicalDisplayInfos, int activeDisplayInfo,
+                int[] colorModes, int activeColorMode) {
             mDisplayInfos = Arrays.copyOf(physicalDisplayInfos, physicalDisplayInfos.length);
             mActivePhysIndex = activeDisplayInfo;
-            ArrayList<Display.ColorTransform> colorTransforms = new ArrayList<>();
-
-            // Build an updated list of all existing color transforms.
-            boolean colorTransformsAdded = false;
-            Display.ColorTransform activeColorTransform = null;
-            for (int i = 0; i < physicalDisplayInfos.length; i++) {
-                SurfaceControl.PhysicalDisplayInfo info = physicalDisplayInfos[i];
-                // First check to see if we've already added this color transform
-                boolean existingMode = false;
-                for (int j = 0; j < colorTransforms.size(); j++) {
-                    if (colorTransforms.get(j).getColorTransform() == info.colorTransform) {
-                        existingMode = true;
-                        break;
-                    }
-                }
-                if (existingMode) {
-                    continue;
-                }
-                Display.ColorTransform colorTransform = findColorTransform(info);
-                if (colorTransform == null) {
-                    colorTransform = createColorTransform(info.colorTransform);
-                    colorTransformsAdded = true;
-                }
-                colorTransforms.add(colorTransform);
-                if (i == activeDisplayInfo) {
-                    activeColorTransform = colorTransform;
-                }
-            }
-
             // Build an updated list of all existing modes.
             ArrayList<DisplayModeRecord> records = new ArrayList<DisplayModeRecord>();
             boolean modesAdded = false;
@@ -254,21 +245,10 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 mActiveModeInvalid = true;
                 sendTraversalRequestLocked();
             }
-            // Check whether surface flinger spontaneously changed color transforms out from under
-            // us.
-            if (mActiveColorTransformId != 0
-                    && mActiveColorTransformId != activeColorTransform.getId()) {
-                mActiveColorTransformInvalid = true;
-                sendTraversalRequestLocked();
-            }
 
-            boolean colorTransformsChanged =
-                    colorTransforms.size() != mSupportedColorTransforms.size()
-                    || colorTransformsAdded;
             boolean recordsChanged = records.size() != mSupportedModes.size() || modesAdded;
-            // If neither the records nor the supported color transforms have changed then we're
-            // done here.
-            if (!recordsChanged && !colorTransformsChanged) {
+            // If the records haven't changed then we're done here.
+            if (!recordsChanged) {
                 return false;
             }
             // Update the index of modes.
@@ -278,24 +258,13 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             for (DisplayModeRecord record : records) {
                 mSupportedModes.put(record.mMode.getModeId(), record);
             }
-            mSupportedColorTransforms.clear();
-            for (Display.ColorTransform colorTransform : colorTransforms) {
-                mSupportedColorTransforms.put(colorTransform.getId(), colorTransform);
-            }
-
-            // Update the default mode and color transform if needed. This needs to be done in
-            // tandem so we always have a default state to fall back to.
-            if (findDisplayInfoIndexLocked(mDefaultColorTransformId, mDefaultModeId) < 0) {
+            // Update the default mode, if needed.
+            if (findDisplayInfoIndexLocked(mDefaultModeId) < 0) {
                 if (mDefaultModeId != 0) {
                     Slog.w(TAG, "Default display mode no longer available, using currently"
                             + " active mode as default.");
                 }
                 mDefaultModeId = activeRecord.mMode.getModeId();
-                if (mDefaultColorTransformId != 0) {
-                    Slog.w(TAG, "Default color transform no longer available, using currently"
-                            + " active color transform as default");
-                }
-                mDefaultColorTransformId = activeColorTransform.getId();
             }
             // Determine whether the active mode is still there.
             if (mSupportedModes.indexOfKey(mActiveModeId) < 0) {
@@ -307,17 +276,59 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 mActiveModeInvalid = true;
             }
 
-            // Determine whether the active color transform is still there.
-            if (mSupportedColorTransforms.indexOfKey(mActiveColorTransformId) < 0) {
-                if (mActiveColorTransformId != 0) {
-                    Slog.w(TAG, "Active color transform no longer available, reverting"
-                            + " to default transform.");
-                }
-                mActiveColorTransformId = mDefaultColorTransformId;
-                mActiveColorTransformInvalid = true;
-            }
             // Schedule traversals so that we apply pending changes.
             sendTraversalRequestLocked();
+            return true;
+        }
+
+        private boolean updateColorModesLocked(int[] colorModes,
+                int activeColorMode) {
+            List<Integer> pendingColorModes = new ArrayList<>();
+
+            // Build an updated list of all existing color modes.
+            boolean colorModesAdded = false;
+            for (int colorMode: colorModes) {
+                if (!mSupportedColorModes.contains(colorMode)) {
+                    colorModesAdded = true;
+                }
+                pendingColorModes.add(colorMode);
+            }
+
+            boolean colorModesChanged =
+                    pendingColorModes.size() != mSupportedColorModes.size()
+                    || colorModesAdded;
+
+            // If the supported color modes haven't changed then we're done here.
+            if (!colorModesChanged) {
+                return false;
+            }
+
+            mHavePendingChanges = true;
+
+            mSupportedColorModes.clear();
+            mSupportedColorModes.addAll(pendingColorModes);
+            Collections.sort(mSupportedColorModes);
+
+            // Determine whether the active color mode is still there.
+            if (!mSupportedColorModes.contains(mActiveColorMode)) {
+                if (mActiveColorMode != 0) {
+                    Slog.w(TAG, "Active color mode no longer available, reverting"
+                            + " to default mode.");
+                    mActiveColorMode = Display.COLOR_MODE_DEFAULT;
+                    mActiveColorModeInvalid = true;
+                } else {
+                    if (!mSupportedColorModes.isEmpty()) {
+                        // This should never happen.
+                        Slog.e(TAG, "Default and active color mode is no longer available!"
+                                + " Reverting to first available mode.");
+                        mActiveColorMode = mSupportedColorModes.get(0);
+                        mActiveColorModeInvalid = true;
+                    } else {
+                        // This should really never happen.
+                        Slog.e(TAG, "No color modes available!");
+                    }
+                }
+            }
             return true;
         }
 
@@ -326,16 +337,6 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 DisplayModeRecord record = mSupportedModes.valueAt(i);
                 if (record.hasMatchingMode(info)) {
                     return record;
-                }
-            }
-            return null;
-        }
-
-        private Display.ColorTransform findColorTransform(SurfaceControl.PhysicalDisplayInfo info) {
-            for (int i = 0; i < mSupportedColorTransforms.size(); i++) {
-                Display.ColorTransform transform = mSupportedColorTransforms.valueAt(i);
-                if (transform.getColorTransform() == info.colorTransform) {
-                    return transform;
                 }
             }
             return null;
@@ -363,12 +364,11 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                     DisplayModeRecord record = mSupportedModes.valueAt(i);
                     mInfo.supportedModes[i] = record.mMode;
                 }
-                mInfo.colorTransformId = mActiveColorTransformId;
-                mInfo.defaultColorTransformId = mDefaultColorTransformId;
-                mInfo.supportedColorTransforms =
-                        new Display.ColorTransform[mSupportedColorTransforms.size()];
-                for (int i = 0; i < mSupportedColorTransforms.size(); i++) {
-                    mInfo.supportedColorTransforms[i] = mSupportedColorTransforms.valueAt(i);
+                mInfo.colorMode = mActiveColorMode;
+                mInfo.supportedColorModes =
+                        new int[mSupportedColorModes.size()];
+                for (int i = 0; i < mSupportedColorModes.size(); i++) {
+                    mInfo.supportedColorModes[i] = mSupportedColorModes.get(i);
                 }
                 mInfo.hdrCapabilities = mHdrCapabilities;
                 mInfo.appVsyncOffsetNanos = phys.appVsyncOffsetNanos;
@@ -520,8 +520,15 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         }
 
         @Override
-        public void requestColorTransformAndModeInTransactionLocked(
-                int colorTransformId, int modeId) {
+        public void requestDisplayModesInTransactionLocked(
+                int colorMode, int modeId) {
+            if (requestModeInTransactionLocked(modeId) ||
+                    requestColorModeInTransactionLocked(colorMode)) {
+                updateDeviceInfoLocked();
+            }
+        }
+
+        public boolean requestModeInTransactionLocked(int modeId) {
             if (modeId == 0) {
                 modeId = mDefaultModeId;
             } else if (mSupportedModes.indexOfKey(modeId) < 0) {
@@ -530,37 +537,36 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 modeId = mDefaultModeId;
             }
 
-            if (colorTransformId == 0) {
-                colorTransformId = mDefaultColorTransformId;
-            } else if (mSupportedColorTransforms.indexOfKey(colorTransformId) < 0) {
-                Slog.w(TAG, "Requested color transform " + colorTransformId + " is not supported"
-                        + " by this display, reverting to the default color transform");
-                colorTransformId = mDefaultColorTransformId;
-            }
-            int physIndex = findDisplayInfoIndexLocked(colorTransformId, modeId);
+            int physIndex = findDisplayInfoIndexLocked(modeId);
             if (physIndex < 0) {
-                Slog.w(TAG, "Requested color transform, mode ID pair (" + colorTransformId + ", "
-                        + modeId + ") not available, trying color transform with default mode ID");
+                Slog.w(TAG, "Requested mode ID " + modeId + " not available,"
+                        + " trying with default mode ID");
                 modeId = mDefaultModeId;
-                physIndex = findDisplayInfoIndexLocked(colorTransformId, modeId);
-                if (physIndex < 0) {
-                    Slog.w(TAG, "Requested color transform with default mode ID still not"
-                            + " available, falling back to default color transform with default"
-                            + " mode.");
-                    colorTransformId = mDefaultColorTransformId;
-                    physIndex = findDisplayInfoIndexLocked(colorTransformId, modeId);
-                }
+                physIndex = findDisplayInfoIndexLocked(modeId);
             }
             if (mActivePhysIndex == physIndex) {
-                return;
+                return false;
             }
             SurfaceControl.setActiveConfig(getDisplayTokenLocked(), physIndex);
             mActivePhysIndex = physIndex;
             mActiveModeId = modeId;
             mActiveModeInvalid = false;
-            mActiveColorTransformId = colorTransformId;
-            mActiveColorTransformInvalid = false;
-            updateDeviceInfoLocked();
+            return true;
+        }
+
+        public boolean requestColorModeInTransactionLocked(int colorMode) {
+            if (mActiveColorMode == colorMode) {
+                return false;
+            }
+            if (!mSupportedColorModes.contains(colorMode)) {
+                Slog.w(TAG, "Unable to find color mode " + colorMode
+                        + ", ignoring request.");
+                return false;
+            }
+            SurfaceControl.setActiveColorMode(getDisplayTokenLocked(), colorMode);
+            mActiveColorMode = colorMode;
+            mActiveColorModeInvalid = false;
+            return true;
         }
 
         @Override
@@ -569,7 +575,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             pw.println("mBuiltInDisplayId=" + mBuiltInDisplayId);
             pw.println("mActivePhysIndex=" + mActivePhysIndex);
             pw.println("mActiveModeId=" + mActiveModeId);
-            pw.println("mActiveColorTransformId=" + mActiveColorTransformId);
+            pw.println("mActiveColorMode=" + mActiveColorMode);
             pw.println("mState=" + Display.stateToString(mState));
             pw.println("mBrightness=" + mBrightness);
             pw.println("mBacklight=" + mBacklight);
@@ -581,24 +587,22 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             for (int i = 0; i < mSupportedModes.size(); i++) {
                 pw.println("  " + mSupportedModes.valueAt(i));
             }
-            pw.println("mSupportedColorTransforms=[");
-            for (int i = 0; i < mSupportedColorTransforms.size(); i++) {
+            pw.print("mSupportedColorModes=[");
+            for (int i = 0; i < mSupportedColorModes.size(); i++) {
                 if (i != 0) {
                     pw.print(", ");
                 }
-                pw.print(mSupportedColorTransforms.valueAt(i));
+                pw.print(mSupportedColorModes.get(i));
             }
             pw.println("]");
         }
 
-        private int findDisplayInfoIndexLocked(int colorTransformId, int modeId) {
+        private int findDisplayInfoIndexLocked(int modeId) {
             DisplayModeRecord record = mSupportedModes.get(modeId);
-            Display.ColorTransform transform = mSupportedColorTransforms.get(colorTransformId);
-            if (record != null && transform != null) {
+            if (record != null) {
                 for (int i = 0; i < mDisplayInfos.length; i++) {
                     SurfaceControl.PhysicalDisplayInfo info = mDisplayInfos[i];
-                    if (info.colorTransform == transform.getColorTransform()
-                            && record.hasMatchingMode(info)){
+                    if (record.hasMatchingMode(info)){
                         return i;
                     }
                 }

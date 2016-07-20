@@ -36,7 +36,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 
-import static android.Manifest.permission.CONFIGURE_DISPLAY_COLOR_TRANSFORM;
+import static android.Manifest.permission.CONFIGURE_DISPLAY_COLOR_MODE;
 
 /**
  * Provides information about the size and density of a logical display.
@@ -283,6 +283,27 @@ public final class Display {
      * @see android.os.PowerManager#isInteractive
      */
     public static final int STATE_DOZE_SUSPEND = 4;
+
+    /* The color mode constants defined below must be kept in sync with the ones in
+     * system/graphics.h */
+
+    /**
+     * Display color mode: The current color mode is unknown or invalid.
+     * @hide
+     */
+    public static final int COLOR_MODE_INVALID = -1;
+
+    /**
+     * Display color mode: The default or native gamut of the display.
+     * @hide
+     */
+    public static final int COLOR_MODE_DEFAULT = 0;
+
+    /**
+     * Display color mode: SRGB
+     * @hide
+     */
+    public static final int COLOR_MODE_SRGB = 7;
 
     /**
      * Internal method to create a display.
@@ -696,33 +717,22 @@ public final class Display {
     }
 
     /**
-     * Request the display applies a color transform.
+     * Request the display applies a color mode.
      * @hide
      */
-    @RequiresPermission(CONFIGURE_DISPLAY_COLOR_TRANSFORM)
-    public void requestColorTransform(ColorTransform colorTransform) {
-        mGlobal.requestColorTransform(mDisplayId, colorTransform.getId());
+    @RequiresPermission(CONFIGURE_DISPLAY_COLOR_MODE)
+    public void requestColorMode(int colorMode) {
+        mGlobal.requestColorMode(mDisplayId, colorMode);
     }
 
     /**
-     * Returns the active color transform of this display
+     * Returns the active color mode of this display
      * @hide
      */
-    public ColorTransform getColorTransform() {
+    public int getColorMode() {
         synchronized (this) {
             updateDisplayInfoLocked();
-            return mDisplayInfo.getColorTransform();
-        }
-    }
-
-    /**
-     * Returns the default color transform of this display
-     * @hide
-     */
-    public ColorTransform getDefaultColorTransform() {
-        synchronized (this) {
-            updateDisplayInfoLocked();
-            return mDisplayInfo.getDefaultColorTransform();
+            return mDisplayInfo.colorMode;
         }
     }
 
@@ -737,14 +747,14 @@ public final class Display {
     }
 
     /**
-     * Gets the supported color transforms of this device.
+     * Gets the supported color modes of this device.
      * @hide
      */
-    public ColorTransform[] getSupportedColorTransforms() {
+    public int[] getSupportedColorModes() {
         synchronized (this) {
             updateDisplayInfoLocked();
-            ColorTransform[] transforms = mDisplayInfo.supportedColorTransforms;
-            return Arrays.copyOf(transforms, transforms.length);
+            int[] colorModes = mDisplayInfo.supportedColorModes;
+            return Arrays.copyOf(colorModes, colorModes.length);
         }
     }
 
@@ -1262,90 +1272,5 @@ public final class Display {
         public int describeContents() {
             return 0;
         }
-    }
-
-    /**
-     * A color transform supported by a given display.
-     *
-     * @see Display#getSupportedColorTransforms()
-     * @hide
-     */
-    public static final class ColorTransform implements Parcelable {
-        public static final ColorTransform[] EMPTY_ARRAY = new ColorTransform[0];
-
-        private final int mId;
-        private final int mColorTransform;
-
-        public ColorTransform(int id, int colorTransform) {
-            mId = id;
-            mColorTransform = colorTransform;
-        }
-
-        public int getId() {
-            return mId;
-        }
-
-        public int getColorTransform() {
-            return mColorTransform;
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            if (this == other) {
-                return true;
-            }
-            if (!(other instanceof ColorTransform)) {
-                return false;
-            }
-            ColorTransform that = (ColorTransform) other;
-            return mId == that.mId
-                && mColorTransform == that.mColorTransform;
-        }
-
-        @Override
-        public int hashCode() {
-            int hash = 1;
-            hash = hash * 17 + mId;
-            hash = hash * 17 + mColorTransform;
-            return hash;
-        }
-
-        @Override
-        public String toString() {
-            return new StringBuilder("{")
-                    .append("id=").append(mId)
-                    .append(", colorTransform=").append(mColorTransform)
-                    .append("}")
-                    .toString();
-        }
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        private ColorTransform(Parcel in) {
-            this(in.readInt(), in.readInt());
-        }
-
-        @Override
-        public void writeToParcel(Parcel out, int parcelableFlags) {
-            out.writeInt(mId);
-            out.writeInt(mColorTransform);
-        }
-
-        @SuppressWarnings("hiding")
-        public static final Parcelable.Creator<ColorTransform> CREATOR
-                = new Parcelable.Creator<ColorTransform>() {
-            @Override
-            public ColorTransform createFromParcel(Parcel in) {
-                return new ColorTransform(in);
-            }
-
-            @Override
-            public ColorTransform[] newArray(int size) {
-                return new ColorTransform[size];
-            }
-        };
     }
 }
