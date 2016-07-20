@@ -2551,7 +2551,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 storageFlags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
             }
             reconcileAppsDataLI(StorageManager.UUID_PRIVATE_INTERNAL, UserHandle.USER_SYSTEM,
-                    storageFlags);
+                    storageFlags, true /* migrateAppData */);
 
             // If this is first boot after an OTA, and a normal boot, then
             // we need to clear code cache directories.
@@ -19208,7 +19208,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             try {
                 sm.prepareUserStorage(volumeUuid, user.id, user.serialNumber, flags);
                 synchronized (mInstallLock) {
-                    reconcileAppsDataLI(volumeUuid, user.id, flags);
+                    reconcileAppsDataLI(volumeUuid, user.id, flags, true /* migrateAppData */);
                 }
             } catch (IllegalStateException e) {
                 // Device was probably ejected, and we'll process that event momentarily
@@ -19511,12 +19511,12 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
      * Verifies that directories exist and that ownership and labeling is
      * correct for all installed apps on all mounted volumes.
      */
-    void reconcileAppsData(int userId, int flags) {
+    void reconcileAppsData(int userId, int flags, boolean migrateAppsData) {
         final StorageManager storage = mContext.getSystemService(StorageManager.class);
         for (VolumeInfo vol : storage.getWritablePrivateVolumes()) {
             final String volumeUuid = vol.getFsUuid();
             synchronized (mInstallLock) {
-                reconcileAppsDataLI(volumeUuid, userId, flags);
+                reconcileAppsDataLI(volumeUuid, userId, flags, migrateAppsData);
             }
         }
     }
@@ -19530,9 +19530,10 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
      * Verifies that directories exist and that ownership and labeling is
      * correct for all installed apps.
      */
-    private void reconcileAppsDataLI(String volumeUuid, int userId, int flags) {
+    private void reconcileAppsDataLI(String volumeUuid, int userId, int flags,
+            boolean migrateAppData) {
         Slog.v(TAG, "reconcileAppsData for " + volumeUuid + " u" + userId + " 0x"
-                + Integer.toHexString(flags));
+                + Integer.toHexString(flags) + " migrateAppData=" + migrateAppData);
 
         final File ceDir = Environment.getDataUserCeDirectory(volumeUuid, userId);
         final File deDir = Environment.getDataUserDeDirectory(volumeUuid, userId);
@@ -19606,7 +19607,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             if (ps.getInstalled(userId)) {
                 prepareAppDataLIF(ps.pkg, userId, flags, restoreconNeeded);
 
-                if (maybeMigrateAppDataLIF(ps.pkg, userId)) {
+                if (migrateAppData && maybeMigrateAppDataLIF(ps.pkg, userId)) {
                     // We may have just shuffled around app data directories, so
                     // prepare them one more time
                     prepareAppDataLIF(ps.pkg, userId, flags, restoreconNeeded);
