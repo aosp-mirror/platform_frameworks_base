@@ -82,6 +82,10 @@ public class SurfaceControl {
             IBinder displayToken);
     private static native int nativeGetActiveConfig(IBinder displayToken);
     private static native boolean nativeSetActiveConfig(IBinder displayToken, int id);
+    private static native int[] nativeGetDisplayColorModes(IBinder displayToken);
+    private static native int nativeGetActiveColorMode(IBinder displayToken);
+    private static native boolean nativeSetActiveColorMode(IBinder displayToken,
+            int colorMode);
     private static native void nativeSetDisplayPowerMode(
             IBinder displayToken, int mode);
     private static native void nativeDeferTransactionUntil(long nativeObject,
@@ -547,7 +551,6 @@ public class SurfaceControl {
         public boolean secure;
         public long appVsyncOffsetNanos;
         public long presentationDeadlineNanos;
-        public int colorTransform;
 
         public PhysicalDisplayInfo() {
         }
@@ -571,8 +574,7 @@ public class SurfaceControl {
                     && yDpi == other.yDpi
                     && secure == other.secure
                     && appVsyncOffsetNanos == other.appVsyncOffsetNanos
-                    && presentationDeadlineNanos == other.presentationDeadlineNanos
-                    && colorTransform == other.colorTransform;
+                    && presentationDeadlineNanos == other.presentationDeadlineNanos;
         }
 
         @Override
@@ -590,7 +592,6 @@ public class SurfaceControl {
             secure = other.secure;
             appVsyncOffsetNanos = other.appVsyncOffsetNanos;
             presentationDeadlineNanos = other.presentationDeadlineNanos;
-            colorTransform = other.colorTransform;
         }
 
         // For debugging purposes
@@ -599,8 +600,7 @@ public class SurfaceControl {
             return "PhysicalDisplayInfo{" + width + " x " + height + ", " + refreshRate + " fps, "
                     + "density " + density + ", " + xDpi + " x " + yDpi + " dpi, secure " + secure
                     + ", appVsyncOffset " + appVsyncOffsetNanos
-                    + ", bufferDeadline " + presentationDeadlineNanos
-                    + ", colorTransform " + colorTransform + "}";
+                    + ", bufferDeadline " + presentationDeadlineNanos + "}";
         }
     }
 
@@ -630,6 +630,27 @@ public class SurfaceControl {
             throw new IllegalArgumentException("displayToken must not be null");
         }
         return nativeSetActiveConfig(displayToken, id);
+    }
+
+    public static int[] getDisplayColorModes(IBinder displayToken) {
+        if (displayToken == null) {
+            throw new IllegalArgumentException("displayToken must not be null");
+        }
+        return nativeGetDisplayColorModes(displayToken);
+    }
+
+    public static int getActiveColorMode(IBinder displayToken) {
+        if (displayToken == null) {
+            throw new IllegalArgumentException("displayToken must not be null");
+        }
+        return nativeGetActiveColorMode(displayToken);
+    }
+
+    public static boolean setActiveColorMode(IBinder displayToken, int colorMode) {
+        if (displayToken == null) {
+            throw new IllegalArgumentException("displayToken must not be null");
+        }
+        return nativeSetActiveColorMode(displayToken, colorMode);
     }
 
     public static void setDisplayProjection(IBinder displayToken,

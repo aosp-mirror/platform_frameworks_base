@@ -2508,11 +2508,10 @@
     <permission android:name="android.permission.CONTROL_WIFI_DISPLAY"
         android:protectionLevel="signature" />
 
-    <!-- Allows an application to control the color transforms applied to
-         displays system-wide.
+    <!-- Allows an application to control the color modes set for displays system-wide.
          <p>Not for use by third-party applications.</p>
          @hide -->
-    <permission android:name="android.permission.CONFIGURE_DISPLAY_COLOR_TRANSFORM"
+    <permission android:name="android.permission.CONFIGURE_DISPLAY_COLOR_MODE"
         android:protectionLevel="signature" />
 
     <!-- @SystemApi Allows an application to control VPN.
