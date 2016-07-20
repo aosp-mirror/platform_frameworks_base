@@ -2406,7 +2406,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        win.removeLocked();
+        win.remove();
         // Removing a visible window will effect the computed orientation
         // So just update orientation if needed.
         if (wasVisible && updateOrientationFromAppTokensLocked(false)) {
@@ -2418,7 +2418,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /**
      * Performs some centralized bookkeeping clean-up on the window that is being removed.
-     * NOTE: Should only be called from {@link WindowState#removeLocked()}
+     * NOTE: Should only be called from {@link WindowState#remove()}
      */
     void postWindowRemoveCleanupLocked(WindowState win) {
         if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "postWindowRemoveCleanupLocked: " + win);

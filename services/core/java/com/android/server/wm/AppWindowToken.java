@@ -362,7 +362,7 @@ class AppWindowToken extends WindowToken {
 
             win.destroyOrSaveSurface();
             if (win.mRemoveOnExit) {
-                win.removeLocked();
+                win.remove();
             }
             final DisplayContent displayContent = win.getDisplayContent();
             if (displayContent != null && !displayList.contains(displayContent)) {
@@ -680,10 +680,10 @@ class AppWindowToken extends WindowToken {
                 candidate.mReplacingWindow.mSkipEnterAnimationForSeamlessReplacement = false;
             }
             // Since the window already timed out, remove it immediately now.
-            // Use WindowState#removeLocked() instead of removeWindowLocked(), as the latter
+            // Use WindowState#remove() instead of removeWindowLocked(), as the latter
             // delays removal on certain conditions, which will leave the stale window in the
             // stack and marked mWillReplaceWindow=false, so the window will never be removed.
-            candidate.removeLocked();
+            candidate.remove();
         }
     }
 
