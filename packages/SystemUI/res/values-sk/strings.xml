@@ -593,7 +593,7 @@
     <string name="end" msgid="125797972524818282">"Koniec"</string>
     <string name="space" msgid="804232271282109749">"Medzerník"</string>
     <string name="menu_ime" msgid="4943221416525250684">"Prepínač – ponuka/klávesnica"</string>
-    <string name="select_button" msgid="1597989540662710653">"Výber tlačidla, ktoré sa má pridať"</string>
+    <string name="select_button" msgid="1597989540662710653">"Výber tlačidla"</string>
     <string name="add_button" msgid="4134946063432258161">"Pridať tlačidlo"</string>
     <string name="save" msgid="2311877285724540644">"Uložiť"</string>
     <string name="reset" msgid="2448168080964209908">"Obnoviť"</string>
