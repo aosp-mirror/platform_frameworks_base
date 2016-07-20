@@ -484,6 +484,20 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     }
 
+    public void noteLongPartialWakelockStart(String name, String historyName, int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteLongPartialWakelockStart(name, historyName, uid);
+        }
+    }
+
+    public void noteLongPartialWakelockFinish(String name, String historyName, int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteLongPartialWakelockFinish(name, historyName, uid);
+        }
+    }
+
     public void noteStartSensor(int uid, int sensor) {
         enforceCallingPermission();
         synchronized (mStats) {
