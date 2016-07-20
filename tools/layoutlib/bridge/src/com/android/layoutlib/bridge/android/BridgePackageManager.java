@@ -712,12 +712,22 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
+    public void setComponentEnabledSettingAsUser(ComponentName componentName, int newState,
+            int flags, int userId) {
+    }
+
+    @Override
     public int getComponentEnabledSetting(ComponentName componentName) {
         return 0;
     }
 
     @Override
     public void setApplicationEnabledSetting(String packageName, int newState, int flags) {
+    }
+
+    @Override
+    public void setApplicationEnabledSettingAsUser(String packageName, int newState, int flags,
+            int userId) {
     }
 
     @Override
