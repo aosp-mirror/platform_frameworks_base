@@ -487,6 +487,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     final SparseArray<WallpaperData> mWallpaperMap = new SparseArray<WallpaperData>();
     final SparseArray<WallpaperData> mLockWallpaperMap = new SparseArray<WallpaperData>();
 
+    final SparseArray<Boolean> mUserRestorecon = new SparseArray<Boolean>();
     int mCurrentUserId;
 
     static class WallpaperData {
@@ -944,26 +945,32 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
 
     void onUnlockUser(final int userId) {
         synchronized (mLock) {
-            if (mCurrentUserId == userId && mWaitingForUnlock) {
-                switchUser(userId, null);
+            if (mCurrentUserId == userId) {
+                if (mWaitingForUnlock) {
+                    // If we're switching users, now is when we transition the wallpaper
+                    switchUser(userId, null);
+                }
 
                 // Make sure that the SELinux labeling of all the relevant files is correct.
                 // This corrects for mislabeling bugs that might have arisen from move-to
                 // operations involving the wallpaper files.  This isn't timing-critical,
                 // so we do it in the background to avoid holding up the user unlock operation.
-                Runnable relabeler = new Runnable() {
-                    @Override
-                    public void run() {
-                        final File wallpaperDir = getWallpaperDir(userId);
-                        for (String filename : sPerUserFiles) {
-                            File f = new File(wallpaperDir, filename);
-                            if (f.exists()) {
-                                SELinux.restorecon(f);
+                if (mUserRestorecon.get(userId) != Boolean.TRUE) {
+                    mUserRestorecon.put(userId, Boolean.TRUE);
+                    Runnable relabeler = new Runnable() {
+                        @Override
+                        public void run() {
+                            final File wallpaperDir = getWallpaperDir(userId);
+                            for (String filename : sPerUserFiles) {
+                                File f = new File(wallpaperDir, filename);
+                                if (f.exists()) {
+                                    SELinux.restorecon(f);
+                                }
                             }
                         }
-                    }
-                };
-                BackgroundThread.getHandler().post(relabeler);
+                    };
+                    BackgroundThread.getHandler().post(relabeler);
+                }
             }
         }
     }
