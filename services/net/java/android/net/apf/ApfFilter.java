@@ -131,6 +131,7 @@ public class ApfFilter {
 
     private static final int ICMP6_TYPE_OFFSET = ETH_HEADER_LEN + IPV6_HEADER_LEN;
     private static final int ICMP6_NEIGHBOR_ANNOUNCEMENT = 136;
+    private static final int ICMP6_ROUTER_ADVERTISEMENT = 134;
 
     // NOTE: this must be added to the IPv4 header length in IPV4_HEADER_SIZE_MEMORY_SLOT
     private static final int UDP_DESTINATION_PORT_OFFSET = ETH_HEADER_LEN + 2;
@@ -306,7 +307,11 @@ public class ApfFilter {
         }
 
         private long uint32(int s) {
-            return s & 0xffffffff;
+            return s & 0xffffffffL;
+        }
+
+        private long getUint16(ByteBuffer buffer, int position) {
+            return uint16(buffer.getShort(position));
         }
 
         private void prefixOptionToString(StringBuffer sb, int offset) {
@@ -374,6 +379,15 @@ public class ApfFilter {
             mPacket = ByteBuffer.allocate(length).put(ByteBuffer.wrap(packet, 0, length));
             mPacket.clear();
             mLastSeen = curTime();
+
+            // Sanity check packet in case a packet arrives before we attach RA filter
+            // to our packet socket. b/29586253
+            if (getUint16(mPacket, ETH_ETHERTYPE_OFFSET) != ETH_P_IPV6 ||
+                    uint8(mPacket.get(IPV6_NEXT_HEADER_OFFSET)) != IPPROTO_ICMPV6 ||
+                    uint8(mPacket.get(ICMP6_TYPE_OFFSET)) != ICMP6_ROUTER_ADVERTISEMENT) {
+                throw new IllegalArgumentException("Not an ICMP6 router advertisement");
+            }
+
 
             // Ignore the checksum.
             int lastNonLifetimeStart = addNonLifetime(0,
