@@ -47,6 +47,7 @@ import android.view.KeyEvent;
 import android.view.WindowManagerPolicy;
 import com.android.server.accessibility.KeyEventDispatcher.KeyEventFilter;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -71,8 +72,11 @@ public class KeyEventDispatcherTest {
     private ArgumentCaptor<Integer> mFilter1SequenceCaptor = ArgumentCaptor.forClass(Integer.class);
     private ArgumentCaptor<Integer> mFilter2SequenceCaptor = ArgumentCaptor.forClass(Integer.class);
 
-    static {
-        Looper.prepare();
+    @BeforeClass
+    public static void oneTimeInitialization() {
+        if (Looper.myLooper() == null) {
+            Looper.prepare();
+        }
     }
 
     @Before
