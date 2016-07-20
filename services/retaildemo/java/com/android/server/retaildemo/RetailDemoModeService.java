@@ -51,6 +51,7 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.MediaStore;
@@ -78,6 +79,7 @@ public class RetailDemoModeService extends SystemService {
     private static final String DEMO_USER_NAME = "Demo";
     private static final String ACTION_RESET_DEMO =
             "com.android.server.retaildemo.ACTION_RESET_DEMO";
+    private static final String SYSTEM_PROPERTY_RETAIL_DEMO_ENABLED = "sys.retaildemo.enabled";
 
     private static final int MSG_TURN_SCREEN_ON = 0;
     private static final int MSG_INACTIVITY_TIME_OUT = 1;
@@ -220,9 +222,13 @@ public class RetailDemoModeService extends SystemService {
             if (mDeviceDemoModeUri.equals(uri)) {
                 mDeviceInDemoMode = UserManager.isDeviceInDemoMode(getContext());
                 if (mDeviceInDemoMode) {
+                    SystemProperties.set(SYSTEM_PROPERTY_RETAIL_DEMO_ENABLED, "1");
                     mHandler.sendEmptyMessage(MSG_START_NEW_SESSION);
-                } else if (mWakeLock.isHeld()) {
-                    mWakeLock.release();
+                } else {
+                    SystemProperties.set(SYSTEM_PROPERTY_RETAIL_DEMO_ENABLED, "0");
+                    if (mWakeLock.isHeld()) {
+                        mWakeLock.release();
+                    }
                 }
             }
             // If device is provisioned and left demo mode - run the cleanup in demo folder
@@ -470,6 +476,7 @@ public class RetailDemoModeService extends SystemService {
 
         if (UserManager.isDeviceInDemoMode(getContext())) {
             mDeviceInDemoMode = true;
+            SystemProperties.set(SYSTEM_PROPERTY_RETAIL_DEMO_ENABLED, "1");
             mHandler.sendEmptyMessage(MSG_START_NEW_SESSION);
         }
         SettingsObserver settingsObserver = new SettingsObserver(mHandler);
