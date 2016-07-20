@@ -3285,6 +3285,36 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    public void noteLongPartialWakelockStart(String name, String historyName, int uid) {
+        uid = mapUid(uid);
+        final long elapsedRealtime = mClocks.elapsedRealtime();
+        final long uptime = mClocks.uptimeMillis();
+        if (historyName == null) {
+            historyName = name;
+        }
+        if (!mActiveEvents.updateState(HistoryItem.EVENT_LONG_WAKE_LOCK_START, historyName, uid,
+                0)) {
+            return;
+        }
+        addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_LONG_WAKE_LOCK_START,
+                historyName, uid);
+    }
+
+    public void noteLongPartialWakelockFinish(String name, String historyName, int uid) {
+        uid = mapUid(uid);
+        final long elapsedRealtime = mClocks.elapsedRealtime();
+        final long uptime = mClocks.uptimeMillis();
+        if (historyName == null) {
+            historyName = name;
+        }
+        if (!mActiveEvents.updateState(HistoryItem.EVENT_LONG_WAKE_LOCK_FINISH, historyName, uid,
+                0)) {
+            return;
+        }
+        addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_LONG_WAKE_LOCK_FINISH,
+                historyName, uid);
+    }
+
     void aggregateLastWakeupUptimeLocked(long uptimeMs) {
         if (mLastWakeupReason != null) {
             long deltaUptime = uptimeMs - mLastWakeupUptimeMs;

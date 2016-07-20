@@ -1302,9 +1302,11 @@ public abstract class BatteryStats implements Parcelable {
         // Event for the UID that woke up the application processor.
         // Used for wakeups coming from WiFi, modem, etc.
         public static final int EVENT_WAKEUP_AP = 0x0013;
+        // Event for reporting that a specific partial wake lock has been held for a long duration.
+        public static final int EVENT_LONG_WAKE_LOCK = 0x0014;
 
         // Number of event types.
-        public static final int EVENT_COUNT = 0x0014;
+        public static final int EVENT_COUNT = 0x0015;
         // Mask to extract out only the type part of the event.
         public static final int EVENT_TYPE_MASK = ~(EVENT_FLAG_START|EVENT_FLAG_FINISH);
 
@@ -1332,6 +1334,10 @@ public abstract class BatteryStats implements Parcelable {
                 EVENT_TEMP_WHITELIST | EVENT_FLAG_START;
         public static final int EVENT_TEMP_WHITELIST_FINISH =
                 EVENT_TEMP_WHITELIST | EVENT_FLAG_FINISH;
+        public static final int EVENT_LONG_WAKE_LOCK_START =
+                EVENT_LONG_WAKE_LOCK | EVENT_FLAG_START;
+        public static final int EVENT_LONG_WAKE_LOCK_FINISH =
+                EVENT_LONG_WAKE_LOCK | EVENT_FLAG_FINISH;
 
         // For CMD_EVENT.
         public int eventCode;
@@ -1996,13 +2002,13 @@ public abstract class BatteryStats implements Parcelable {
     public static final String[] HISTORY_EVENT_NAMES = new String[] {
             "null", "proc", "fg", "top", "sync", "wake_lock_in", "job", "user", "userfg", "conn",
             "active", "pkginst", "pkgunin", "alarm", "stats", "inactive", "active", "tmpwhitelist",
-            "screenwake", "wakeupap"
+            "screenwake", "wakeupap", "longwake"
     };
 
     public static final String[] HISTORY_EVENT_CHECKIN_NAMES = new String[] {
             "Enl", "Epr", "Efg", "Etp", "Esy", "Ewl", "Ejb", "Eur", "Euf", "Ecn",
             "Eac", "Epi", "Epu", "Eal", "Est", "Eai", "Eaa", "Etw",
-            "Esw", "Ewa"
+            "Esw", "Ewa", "Elw"
     };
 
     /**
