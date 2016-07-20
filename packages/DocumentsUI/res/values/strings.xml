@@ -16,7 +16,7 @@
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- Title of the documents application [CHAR LIMIT=32] -->
-    <string name="app_label">Documents</string>
+    <string name="app_label">Files</string>
 
     <!-- Title of the standalone downloads activity. [CHAR LIMIT=32] -->
     <string name="downloads_label">Downloads</string>
