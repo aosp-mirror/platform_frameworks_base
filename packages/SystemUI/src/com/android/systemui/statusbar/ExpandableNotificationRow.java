@@ -1175,7 +1175,20 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
      * @see #canViewBeDismissed()
      */
     public boolean isClearable() {
-        return mStatusBarNotification != null && mStatusBarNotification.isClearable();
+        if (mStatusBarNotification == null || !mStatusBarNotification.isClearable()) {
+            return false;
+        }
+        if (mIsSummaryWithChildren) {
+            List<ExpandableNotificationRow> notificationChildren =
+                    mChildrenContainer.getNotificationChildren();
+            for (int i = 0; i < notificationChildren.size(); i++) {
+                ExpandableNotificationRow child = notificationChildren.get(i);
+                if (!child.isClearable()) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     @Override
