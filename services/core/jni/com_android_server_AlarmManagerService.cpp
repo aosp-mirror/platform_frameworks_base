@@ -37,10 +37,38 @@
 #include <errno.h>
 #include <unistd.h>
 #include <linux/ioctl.h>
-#include <linux/android_alarm.h>
 #include <linux/rtc.h>
 
 #include <memory>
+
+//--------------------------------------------------------------------------
+// The android_alarm.h header has been deleted from the kernel headers.
+// Add only the parts still needed, this should be deleted in the future.
+#include <linux/ioctl.h>
+
+enum android_alarm_type {
+  ANDROID_ALARM_RTC_WAKEUP,
+  ANDROID_ALARM_RTC,
+  ANDROID_ALARM_ELAPSED_REALTIME_WAKEUP,
+  ANDROID_ALARM_ELAPSED_REALTIME,
+  ANDROID_ALARM_SYSTEMTIME,
+  ANDROID_ALARM_TYPE_COUNT,
+};
+
+enum android_alarm_return_flags {
+  ANDROID_ALARM_RTC_WAKEUP_MASK = 1U << ANDROID_ALARM_RTC_WAKEUP,
+  ANDROID_ALARM_RTC_MASK = 1U << ANDROID_ALARM_RTC,
+  ANDROID_ALARM_ELAPSED_REALTIME_WAKEUP_MASK = 1U << ANDROID_ALARM_ELAPSED_REALTIME_WAKEUP,
+  ANDROID_ALARM_ELAPSED_REALTIME_MASK = 1U << ANDROID_ALARM_ELAPSED_REALTIME,
+  ANDROID_ALARM_SYSTEMTIME_MASK = 1U << ANDROID_ALARM_SYSTEMTIME,
+  ANDROID_ALARM_TIME_CHANGE_MASK = 1U << 16
+};
+
+#define ALARM_IOW(c,type,size) _IOW('a', (c) | ((type) << 4), size)
+#define ANDROID_ALARM_WAIT _IO('a', 1)
+#define ANDROID_ALARM_SET(type) ALARM_IOW(2, type, struct timespec)
+#define ANDROID_ALARM_SET_RTC _IOW('a', 5, struct timespec)
+//--------------------------------------------------------------------------
 
 namespace android {
 
