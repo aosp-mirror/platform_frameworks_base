@@ -2962,8 +2962,6 @@ public final class ActivityManagerService extends ActivityManagerNative
      * {@link ActivityStack#setResumedActivityLocked} when an activity is resumed.
      */
     void setResumedActivityUncheckLocked(ActivityRecord r, String reason) {
-        r.state = ActivityState.RESUMED;
-
         if (r.task.isApplicationTask()) {
             if (mCurAppTimeTracker != r.appTimeTracker) {
                 // We are switching app tracking.  Complete the current one.
