@@ -26,6 +26,8 @@ toc:
   path: /topic/performance/threads.html
 - title: Optimizing View Hierarchies
   path: /topic/performance/optimizing-view-hierarchies.html
+- title: Background Optimization
+  path: /topic/performance/background-optimization.html
 - title: Intelligent Job-Scheduling
   path: /topic/performance/scheduling.html
 - title: Reducing APK Size

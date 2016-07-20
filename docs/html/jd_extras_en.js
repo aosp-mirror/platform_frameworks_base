@@ -5556,15 +5556,12 @@ METADATA['en'].collections = {
     "https://medium.com/google-developers/writing-more-code-by-writing-less-code-with-android-studio-live-templates-244f648d17c7#.hczcm02du",
     ]
   },
-  "preview/landing/resources": {
+  "nougat/landing/resources": {
     "title": "",
     "resources": [
-      "preview/overview.html",
-      "preview/api-overview.html",
-      "preview/behavior-changes.html",
-      "preview/setup-sdk.html",
-      "preview/samples.html",
-      "preview/support.html"
+      "about/versions/nougat/api-overview.html",
+      "about/versions/nougat/behavior-changes.html",
+      "about/versions/nougat/samples.html",
     ]
   },
 

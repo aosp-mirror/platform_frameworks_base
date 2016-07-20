@@ -1,42 +1,39 @@
-page.title=Data Saver
-metaDescription=User-enabled data usage optimization.
-page.keywords="android N", "data usage", "metered network"
-page.image=images/cards/card-nyc_2x.jpg
+page.title=Optimizing Network Data Usage
+parent.title=Performing Network Operations
+parent.link=index.html
+
+trainingnavtop=true
+next.title=Parsing XML Data
+next.link=xml.html
+
 @jd:body
 
-<div id="qv-wrapper">
-  <div id="qv">
-    <h2>
-      In this document
-    </h2>
+<div id="tb-wrapper">
+<div id="tb">
 
-    <ol>
-      <li>
-        <a href="#status">Checking Data Saver Preferences</a>
-        <ol>
-          <li>
-            <a href="#request-whitelist">Requesting whitelist permissions</a>
-          </li>
-        </ol>
-      </li>
 
-      <li>
-        <a href="#monitor-changes">Monitoring Changes to Data Saver
-        Preferences</a>
-      </li>
 
-      <li>
-        <a href="#testing">Testing with Android Debug Bridge Commands</a>
-      </li>
-    </ol>
-  </div>
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#status">Check Data-Saver Preferences</a>
+  <ul>
+     <li><a href="#request-whitelist">Request whitelist permissions</a></li>
+  </ul>
+  </li>
+  <li><a href="#monitor-changes">Monitor Changes to Data Saver Preferences</a></li>
+  <li><a href="#testing">Test with Android Debug Bridge Commands</a></li>
+</ol>
+
+</div>
 </div>
 
 <p>
   Over the life of a smartphone, the cost of a cellular data plan can easily
-  exceed the cost of the device itself. In the N Developer Preview, users can
-  enable Data Saver on a device-wide basis in order to use less data, whether
-  roaming, near the end of the billing cycle, or on a small prepaid data pack.
+  exceed the cost of the device itself. From Android 7.0 (API level 24),
+  users users can enable Data Saver on a device-wide basis in order
+  optimize their device's data usage, and use less data. This ability
+  is especially useful when roaming, near the end of the billing cycle,
+  or for a small prepaid data pack.
 </p>
 
 <p>

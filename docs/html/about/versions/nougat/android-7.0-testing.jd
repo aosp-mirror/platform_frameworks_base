@@ -1,4 +1,4 @@
-page.title=Testing Guide
+page.title=Android 7.0 Testing Guide
 page.image=images/cards/card-n-guide_2x.png
 meta.tags="preview", "testing"
 page.tags="preview", "developer preview"
@@ -17,7 +17,7 @@ page.tags="preview", "developer preview"
 </div>
 
 <p>
-  Android N gives you an opportunity to ensure your apps work with the next
+  Android 7.0 gives you an opportunity to ensure your apps work with the next
   version of the platform. This preview includes a number of APIs and behavior changes that can
   impact your app, as described in the <a href="{@docRoot}preview/api-overview.html">API
   Overview</a> and <a href="{@docRoot}preview/behavior-changes.html">Behavior Changes</a>. In testing

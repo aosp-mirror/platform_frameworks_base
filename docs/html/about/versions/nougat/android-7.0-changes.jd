@@ -1,7 +1,7 @@
-page.title=Behavior Changes
+page.title=Android 7.0 Changes
 page.keywords=preview,sdk,compatibility
-meta.tags="preview", "compatibility"
-page.tags="preview", "developer preview"
+meta.tags="Android 7.0", "Nougat", "android n", "compatibility"
+page.tags="Android 7.0", "Nougat", "android n", "developer preview"
 page.image=images/cards/card-n-changes_2x.png
 @jd:body
 
@@ -44,7 +44,7 @@ page.image=images/cards/card-n-changes_2x.png
 <h2>See Also</h2>
 <ol>
   <li><a href="{@docRoot}preview/api-overview.html">
-    Android N for Developers</a></li>
+    Android 7.0 APIs</a></li>
 </ol>
 
 </div>
@@ -52,7 +52,7 @@ page.image=images/cards/card-n-changes_2x.png
 
 
 <p>
-  Along with new features and capabilities, Android N
+  Along with new features and capabilities, Android 7.0
   includes a variety of system and API behavior changes. This document
   highlights some of the key changes that you should understand and account for
   in your apps.
@@ -67,7 +67,7 @@ page.image=images/cards/card-n-changes_2x.png
 <h2 id="perf">Battery and Memory</h2>
 
 <p>
-Android N includes system behavior changes aimed at improving the battery life
+Android 7.0 includes system behavior changes aimed at improving the battery life
 of devices and reducing RAM usage. These changes can affect your app’s access to
 system resources, along with the way your app interacts with other apps via
 certain implicit intents.
@@ -78,14 +78,14 @@ certain implicit intents.
 <p>
   Introduced in Android 6.0 (API level 23), Doze improves battery life by
   deferring CPU and network activities when a user leaves a device unplugged,
-  stationary, and with the screen turned off. Android N brings further
+  stationary, and with the screen turned off. Android 7.0 brings further
   enhancements to Doze by applying a subset of CPU and network restrictions
   while the device is unplugged with the screen turned off, but not necessarily
   stationary, for example, when a handset is traveling in a user’s pocket.
 </p>
 
 
-<img src="{@docRoot}preview/images/doze-diagram-1.png"
+<img src="{@docRoot}images/android-7.0/doze-diagram-1.png"
   alt="" height="251px" id="figure1" />
 <p class="img-caption">
   <strong>Figure 1.</strong> Illustration of how Doze applies a first level of
@@ -105,7 +105,7 @@ certain implicit intents.
 </p>
 
 
-<img src="{@docRoot}preview/images/doze-diagram-2.png"
+<img src="{@docRoot}images/android-7.0/doze-diagram-2.png"
   alt="" id="figure2" />
 <p class="img-caption">
   <strong>Figure 2.</strong> Illustration of how Doze applies a second level of
@@ -128,7 +128,7 @@ certain implicit intents.
 <h3 id="bg-opt">Project Svelte: Background Optimizations</h3>
 
 <p>
-  Android N removes three implicit broadcasts in order to help optimize both
+  Android 7.0 removes three implicit broadcasts in order to help optimize both
   memory use and power consumption. This change is necessary because implicit
   broadcasts frequently start apps that have registered to listen for them in
   the background. Removing these broadcasts can substantially benefit device
@@ -154,12 +154,12 @@ certain implicit intents.
 </p>
 
 <p>
-  To alleviate these issues, Android N applies the following
+  To alleviate these issues, Android 7.0 applies the following
   optimizations:
 </p>
 
 <ul>
-  <li>Apps targeting Android N do not receive {@link
+  <li>Apps targeting Android 7.0 do not receive {@link
   android.net.ConnectivityManager#CONNECTIVITY_ACTION} broadcasts, even if they
   have manifest entries to request notification of these events. Apps that are
   running can still listen for {@code CONNECTIVITY_CHANGE} on their main thread
@@ -169,12 +169,12 @@ certain implicit intents.
   <li>Apps cannot send or receive {@link
   android.hardware.Camera#ACTION_NEW_PICTURE} or {@link
   android.hardware.Camera#ACTION_NEW_VIDEO} broadcasts. This optimization
-  affects all apps, not only those targeting Android N.
+  affects all apps, not only those targeting Android 7.0.
   </li>
 </ul>
 
 <p>If your app uses any of these intents, you should remove dependencies
-  on them as soon as possible so that you can target Android N devices properly.
+  on them as soon as possible so that you can target Android 7.0 devices properly.
   The Android framework provides several solutions to mitigate the need for
   these implicit broadcasts. For example, the {@link
   android.app.job.JobScheduler} API provides a robust mechanism to schedule
@@ -193,14 +193,14 @@ certain implicit intents.
 <h2 id="perm">Permissions Changes</h2>
 
 <p>
-  Android N includes changes to permissions that may affect your app.
+  Android 7.0 includes changes to permissions that may affect your app.
 </p>
 
 <h3 id="permfilesys">File system permission changes</h3>
 
 <p>
   In order to improve the security of private files, the private directory of
-  apps targeting Android N or higher has restricted access (<code>0700</code>).
+  apps targeting Android 7.0 or higher has restricted access (<code>0700</code>).
   This setting prevents leakage of metadata of private files, such as their size
   or existence. This permission change has multiple side effects:
 </p>
@@ -232,7 +232,7 @@ certain implicit intents.
     stored files by filename. Legacy applications may end up with an
     unaccessible path when accessing {@link
     android.app.DownloadManager#COLUMN_LOCAL_FILENAME}. Apps targeting
-    Android N or higher trigger a {@link java.lang.SecurityException} when
+    Android 7.0 or higher trigger a {@link java.lang.SecurityException} when
     attempting to access
     {@link android.app.DownloadManager#COLUMN_LOCAL_FILENAME}.
     Legacy applications that set the download location to a public location by
@@ -255,7 +255,7 @@ certain implicit intents.
 <h2 id="sharing-files">Sharing Files Between Apps</h2>
 
 <p>
-For apps targeting Android N, the Android framework enforces
+For apps targeting Android 7.0, the Android framework enforces
 the {@link android.os.StrictMode} API policy that prohibits exposing {@code file://} URIs
 outside your app. If an intent containing a file URI leaves your app, the app fails
 with a {@code FileUriExposedException} exception.
@@ -272,7 +272,7 @@ see <a href="{@docRoot}training/secure-file-sharing/index.html">Sharing Files</a
 <h2 id="accessibility">Accessibility Improvements</h2>
 
 <p>
-  Android N includes changes intended to improve the usability of the
+  Android 7.0 includes changes intended to improve the usability of the
   platform for users with low or impaired vision. These changes should
   generally not require code changes in your app, however you should review
   these feature and test them with your app to assess potential impacts to user
@@ -283,7 +283,7 @@ see <a href="{@docRoot}training/secure-file-sharing/index.html">Sharing Files</a
 <h3 id="screen-zoom">Screen Zoom</h3>
 
 <p>
-  Android N enables users to set <strong>Display size</strong>which magnifies
+  Android 7.0 enables users to set <strong>Display size</strong>which magnifies
   or shrinks all elements on the screen, thereby improving device accessibility
   for users with low vision. Users cannot zoom the screen past a minimum screen
   width of <a href=
@@ -294,16 +294,16 @@ see <a href="{@docRoot}training/secure-file-sharing/index.html">Sharing Files</a
 <div class="cols">
 
 <div class="col-6">
-  <img src="{@docRoot}preview/images/screen-zoom-1.png" alt="" height="XXX" id="figure1" />
+  <img src="{@docRoot}images/android-7.0/screen-zoom-1.png" alt="" height="XXX" id="figure1" />
 </div>
 <div class="col-6">
-  <img src="{@docRoot}preview/images/screen-zoom-2.png" alt="" height="XXX" id="figure1" />
+  <img src="{@docRoot}images/android-7.0/screen-zoom-2.png" alt="" height="XXX" id="figure1" />
 </div>
 
 </div> <!-- end cols -->
 <p class="img-caption">
   <strong>Figure 3.</strong> The screen on the right shows the effect of
-  increasing the Display size of a device running an Android N system image.
+  increasing the Display size of a device running an Android 7.0 system image.
 </p>
 
 
@@ -323,7 +323,7 @@ see <a href="{@docRoot}training/secure-file-sharing/index.html">Sharing Files</a
   Runtime Changes</a>, just as if the device's orientation had changed.
   </li>
 
-  <li>If an app targets Android N, all of its processes
+  <li>If an app targets Android 7.0, all of its processes
   (foreground and background) are notified of the configuration change as
   described in <a href=
   "{@docRoot}guide/topics/resources/runtime-changes.html">Handling
@@ -365,7 +365,7 @@ see <a href="{@docRoot}training/secure-file-sharing/index.html">Sharing Files</a
 <h3 id="vision-settings">Vision Settings in Setup Wizard</h3>
 
 <p>
-  Android N includes Vision Settings on the Welcome screen, where users can
+  Android 7.0 includes Vision Settings on the Welcome screen, where users can
   set up the following accessibility settings on a new device:
   <strong>Magnification gesture</strong>, <strong>Font size</strong>,
   <strong>Display size</strong> and <strong>TalkBack</strong>. This change
@@ -378,13 +378,13 @@ see <a href="{@docRoot}training/secure-file-sharing/index.html">Sharing Files</a
 <h2 id="ndk">NDK Apps Linking to Platform Libraries</h2>
 
 <p>
-  Starting in Android N, the system prevents apps from dynamically linking
+  Starting in Android 7.0, the system prevents apps from dynamically linking
   against non-NDK libraries, which may cause your app to crash. This change in
   behavior aims to create a consistent app experience across platform updates
   and different devices. Even though your code might not be linking against
   private libraries, it's possible that a third-party static library in your
   app could be doing so. Therefore, all developers should check to make sure
-  that their apps do not crash on devices running Android N. If your app uses
+  that their apps do not crash on devices running Android 7.0. If your app uses
   native code, you should only be using <a href=
   "{@docRoot}ndk/guides/stable_apis.html">public NDK APIs</a>.
 </p>
@@ -595,7 +595,7 @@ see <a href="{@docRoot}training/secure-file-sharing/index.html">Sharing Files</a
 <p>
   To help you identify issues loading private libraries, logcat may generate a
   warning or runtime error. For example, if your app targets API level 23 or
-  lower, and tries to access a private library on a device running Android N,
+  lower, and tries to access a private library on a device running Android 7.0,
   you may see a warning similar to the following:
 </p>
 
@@ -626,7 +626,7 @@ java.lang.UnsatisfiedLinkError: dlopen failed: library "libcutils.so"
 <p>
   You may also see these logcat outputs if your app uses third-party libraries
   that dynamically link to private platform APIs. The readelf tool in the
-  Android NDK allows you to generate a list of all dynamically linked shared
+  Android 7.0DK allows you to generate a list of all dynamically linked shared
   libraries of a given <code>.so</code> file by running the following command:
 </p>
 
@@ -692,7 +692,7 @@ JavaVM::AttachCurrentThread from &lt;jni.h&gt;.
 
 <h2 id="afw">Android for Work</h2>
 <p>
-  Android N contains changes for apps that target Android for Work, including
+  Android 7.0 contains changes for apps that target Android for Work, including
   changes to certificate installation, password resetting, secondary user
   management, and access to device identifiers. If you are building apps for
   Android for Work environments, you should review these changes and modify
@@ -749,7 +749,7 @@ JavaVM::AttachCurrentThread from &lt;jni.h&gt;.
   DER-encoded format under a .crt or .cer file extension.
   </li>
 
-  <li>Starting in Android N, fingerprint enrollment and storage are managed per user.
+  <li>Starting in Android 7.0, fingerprint enrollment and storage are managed per user.
   If a profile owner’s Device Policy Client (DPC) targets pre-N on an N device,
   the user is still able to set fingerprint on the device, but work
   applications cannot access device fingerprint. When the DPC targets N and
@@ -765,7 +765,7 @@ JavaVM::AttachCurrentThread from &lt;jni.h&gt;.
   is returned, even if the encryption key is specific to the user or profile.
   </li>
 
-  <li>In Android N, several methods that would ordinarily affect the entire
+  <li>In Android 7.0, several methods that would ordinarily affect the entire
   device behave differently if the device has a work profile installed with a
   separate work challenge. Rather than affecting the entire device, these
   methods apply only to the work profile. (The complete list of such methods is
@@ -785,14 +785,14 @@ JavaVM::AttachCurrentThread from &lt;jni.h&gt;.
 </ul>
 
 <p>
-  For more information about changes to Android for Work in Android N, see
+  For more information about changes to Android for Work in Android 7.0, see
   <a href="{@docRoot}preview/features/afw.html">Android for Work Updates</a>.
 </p>
 
 <h2 id="annotations">Annotations Retention</h2>
 
 <p>
-Android N fixes a bug where the visibility of annotations was being ignored.
+Android 7.0 fixes a bug where the visibility of annotations was being ignored.
 This issue enabled the runtime to access annotations that it should not have been
 able to. These annotations included:
 </p>
@@ -811,7 +811,7 @@ be available at runtime. You do so by using {@code @Retention(RetentionPolicy.RU
 <h2 id="other">Other Important Points</h2>
 
 <ul>
-<li>When an app is running on Android N, but targets a lower API level,
+<li>When an app is running on Android 7.0, but targets a lower API level,
 and the user changes display size, the app process is killed. The app
 must be able to gracefully handle this scenario. Otherwise, it crashes
 when the user restores it from Recents.
@@ -830,7 +830,7 @@ however, they may still respond poorly to configuration changes.
 </li>
 
 <li>
-Apps on Android N should be able to gracefully handle configuration changes,
+Apps on Android 7.0 should be able to gracefully handle configuration changes,
 and should not crash on subsequent starts. You can verify app behavior
 by changing font size (<strong>Setting</strong> >
 <strong>Display</strong> > <strong>Font size</strong>), and then restoring
@@ -839,7 +839,7 @@ the app from Recents.
 
 <li>
 Due to a bug in previous versions of Android, the system did not flag writing
-to a TCP socket on the main thread as a strict-mode violation. Android N fixes this bug.
+to a TCP socket on the main thread as a strict-mode violation. Android 7.0 fixes this bug.
 Apps that exhibit this behavior now throw an {@code android.os.NetworkOnMainThreadException}.
 Generally, performing network operations on the main thread is a bad idea because these operations
 usually have a high tail latency that causes ANRs and jank.
@@ -860,7 +860,7 @@ as {@code RuntimeExceptions}, instead of silently logging or suppressing them.  
 common example is storing too much data in
 {@link android.app.Activity#onSaveInstanceState Activity.onSaveInstanceState()},
 which causes {@code ActivityThread.StopInfo} to throw a
-{@code RuntimeException} when your app targets Android N.
+{@code RuntimeException} when your app targets Android 7.0.
 </li>
 
 <li>
@@ -881,7 +881,7 @@ to a window. This behavior fixes the following bugs:
 </li>
 
 <li>
-If an app on Android N with
+If an app on Android 7.0 with
 {@link android.Manifest.permission#DELETE_PACKAGES DELETE_PACKAGES}
 permission tries to delete a package, but a different app had installed that package,
 the system requires user confirmation. In this scenario, apps should expect
