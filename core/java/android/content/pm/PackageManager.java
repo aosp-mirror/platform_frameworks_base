@@ -5381,6 +5381,14 @@ public abstract class PackageManager {
             int newState, int flags);
 
     /**
+     * Per-user version of {@link #setComponentEnabledSetting(ComponentName, int, int)}
+     *
+     * @hide
+     */
+    public abstract void setComponentEnabledSettingAsUser(ComponentName componentName,
+            int newState, int flags, int userId);
+
+    /**
      * Return the enabled setting for a package component (activity,
      * receiver, service, provider).  This returns the last value set by
      * {@link #setComponentEnabledSetting(ComponentName, int, int)}; in most
@@ -5417,6 +5425,14 @@ public abstract class PackageManager {
      */
     public abstract void setApplicationEnabledSetting(String packageName,
             int newState, int flags);
+
+    /**
+     * Per-user version of {@link #setApplicationEnabledSetting(String, int, int)}
+     *
+     * @hide
+     */
+    public abstract void setApplicationEnabledSettingAsUser(String packageName,
+            int newState, int flags, int userId);
 
     /**
      * Return the enabled setting for an application. This returns
