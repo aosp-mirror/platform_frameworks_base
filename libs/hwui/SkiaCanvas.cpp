@@ -45,7 +45,7 @@ SkiaCanvas::SkiaCanvas(const SkBitmap& bitmap) {
 }
 
 void SkiaCanvas::reset(SkCanvas* skiaCanvas) {
-    mCanvas.reset(skiaCanvas);
+    mCanvas.reset(SkRef(skiaCanvas));
     mSaveStack.reset(nullptr);
     mHighContrastText = false;
 }
