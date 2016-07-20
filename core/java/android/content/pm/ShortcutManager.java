@@ -614,6 +614,20 @@ public class ShortcutManager {
     }
 
     /**
+     * Return {@code true} when rate-limiting is active for the caller application.
+     *
+     * <p>See the class level javadoc for details.
+     */
+    public boolean isRateLimitingActive() {
+        try {
+            return mService.getRemainingCallCount(mContext.getPackageName(), injectMyUserId())
+                    == 0;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Return the max width for icons, in pixels.
      */
     public int getIconMaxWidth() {
