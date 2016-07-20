@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-#include "CanvasProperty.h"
-#include "Layer.h"
-#include "RenderNode.h"
-#include "hwui/Canvas.h"
+#include "SkiaCanvas.h"
 
-#include <SkCanvas.h>
-#include <SkClipStack.h>
+#include "CanvasProperty.h"
+#include "VectorDrawable.h"
+
 #include <SkDrawable.h>
 #include <SkDevice.h>
 #include <SkDeque.h>
@@ -28,166 +26,11 @@
 #include <SkGraphics.h>
 #include <SkImage.h>
 #include <SkShader.h>
-#include <SkTArray.h>
 #include <SkTemplates.h>
-
-#include "VectorDrawable.h"
 
 #include <memory>
 
 namespace android {
-
-// Holds an SkCanvas reference plus additional native data.
-class SkiaCanvas : public Canvas {
-public:
-    explicit SkiaCanvas(const SkBitmap& bitmap);
-
-    /**
-     *  Create a new SkiaCanvas.
-     *
-     *  @param canvas SkCanvas to handle calls made to this SkiaCanvas. Must
-     *      not be NULL. This constructor will ref() the SkCanvas, and unref()
-     *      it in its destructor.
-     */
-    explicit SkiaCanvas(SkCanvas* canvas) : mCanvas(canvas) {
-        SkASSERT(canvas);
-        canvas->ref();
-    }
-
-    virtual SkCanvas* asSkCanvas() override {
-        return mCanvas.get();
-    }
-
-    virtual void resetRecording(int width, int height) override {
-        LOG_ALWAYS_FATAL("SkiaCanvas cannot be reset as a recording canvas");
-    }
-
-    virtual uirenderer::DisplayList* finishRecording() override {
-        LOG_ALWAYS_FATAL("SkiaCanvas does not produce a DisplayList");
-        return nullptr;
-    }
-    virtual void insertReorderBarrier(bool enableReorder) override {
-        LOG_ALWAYS_FATAL("SkiaCanvas does not support reordering barriers");
-    }
-
-    virtual void setBitmap(const SkBitmap& bitmap) override;
-
-    virtual bool isOpaque() override;
-    virtual int width() override;
-    virtual int height() override;
-
-    virtual void setHighContrastText(bool highContrastText) override {
-        mHighContrastText = highContrastText;
-    }
-    virtual bool isHighContrastText() override { return mHighContrastText; }
-
-    virtual int getSaveCount() const override;
-    virtual int save(SaveFlags::Flags flags) override;
-    virtual void restore() override;
-    virtual void restoreToCount(int saveCount) override;
-
-    virtual int saveLayer(float left, float top, float right, float bottom,
-                const SkPaint* paint, SaveFlags::Flags flags) override;
-    virtual int saveLayerAlpha(float left, float top, float right, float bottom,
-            int alpha, SaveFlags::Flags flags) override;
-
-    virtual void getMatrix(SkMatrix* outMatrix) const override;
-    virtual void setMatrix(const SkMatrix& matrix) override;
-    virtual void concat(const SkMatrix& matrix) override;
-    virtual void rotate(float degrees) override;
-    virtual void scale(float sx, float sy) override;
-    virtual void skew(float sx, float sy) override;
-    virtual void translate(float dx, float dy) override;
-
-    virtual bool getClipBounds(SkRect* outRect) const override;
-    virtual bool quickRejectRect(float left, float top, float right, float bottom) const override;
-    virtual bool quickRejectPath(const SkPath& path) const override;
-    virtual bool clipRect(float left, float top, float right, float bottom,
-            SkRegion::Op op) override;
-    virtual bool clipPath(const SkPath* path, SkRegion::Op op) override;
-    virtual bool clipRegion(const SkRegion* region, SkRegion::Op op) override;
-
-    virtual SkDrawFilter* getDrawFilter() override;
-    virtual void setDrawFilter(SkDrawFilter* drawFilter) override;
-
-    virtual void drawColor(int color, SkXfermode::Mode mode) override;
-    virtual void drawPaint(const SkPaint& paint) override;
-
-    virtual void drawPoint(float x, float y, const SkPaint& paint) override;
-    virtual void drawPoints(const float* points, int count, const SkPaint& paint) override;
-    virtual void drawLine(float startX, float startY, float stopX, float stopY,
-            const SkPaint& paint) override;
-    virtual void drawLines(const float* points, int count, const SkPaint& paint) override;
-    virtual void drawRect(float left, float top, float right, float bottom,
-            const SkPaint& paint) override;
-    virtual void drawRegion(const SkRegion& region, const SkPaint& paint) override;
-    virtual void drawRoundRect(float left, float top, float right, float bottom,
-            float rx, float ry, const SkPaint& paint) override;
-    virtual void drawCircle(float x, float y, float radius, const SkPaint& paint) override;
-    virtual void drawOval(float left, float top, float right, float bottom,
-            const SkPaint& paint) override;
-    virtual void drawArc(float left, float top, float right, float bottom,
-            float startAngle, float sweepAngle, bool useCenter, const SkPaint& paint) override;
-    virtual void drawPath(const SkPath& path, const SkPaint& paint) override;
-    virtual void drawVertices(SkCanvas::VertexMode vertexMode, int vertexCount,
-            const float* verts, const float* tex, const int* colors,
-            const uint16_t* indices, int indexCount, const SkPaint& paint) override;
-
-    virtual void drawBitmap(const SkBitmap& bitmap, float left, float top,
-            const SkPaint* paint) override;
-    virtual void drawBitmap(const SkBitmap& bitmap, const SkMatrix& matrix,
-            const SkPaint* paint) override;
-    virtual void drawBitmap(const SkBitmap& bitmap, float srcLeft, float srcTop,
-            float srcRight, float srcBottom, float dstLeft, float dstTop,
-            float dstRight, float dstBottom, const SkPaint* paint) override;
-    virtual void drawBitmapMesh(const SkBitmap& bitmap, int meshWidth, int meshHeight,
-            const float* vertices, const int* colors, const SkPaint* paint) override;
-    virtual void drawNinePatch(const SkBitmap& bitmap, const android::Res_png_9patch& chunk,
-            float dstLeft, float dstTop, float dstRight, float dstBottom,
-            const SkPaint* paint) override;
-
-    virtual bool drawTextAbsolutePos() const  override { return true; }
-    virtual void drawVectorDrawable(VectorDrawableRoot* vectorDrawable) override;
-
-    virtual void drawRoundRect(uirenderer::CanvasPropertyPrimitive* left,
-            uirenderer::CanvasPropertyPrimitive* top, uirenderer::CanvasPropertyPrimitive* right,
-            uirenderer::CanvasPropertyPrimitive* bottom, uirenderer::CanvasPropertyPrimitive* rx,
-            uirenderer::CanvasPropertyPrimitive* ry, uirenderer::CanvasPropertyPaint* paint) override;
-    virtual void drawCircle(uirenderer::CanvasPropertyPrimitive* x,
-            uirenderer::CanvasPropertyPrimitive* y, uirenderer::CanvasPropertyPrimitive* radius,
-            uirenderer::CanvasPropertyPaint* paint) override;
-
-    virtual void drawLayer(uirenderer::DeferredLayerUpdater* layerHandle) override;
-    virtual void drawRenderNode(uirenderer::RenderNode* renderNode) override;
-    virtual void callDrawGLFunction(Functor* functor,
-            uirenderer::GlFunctorLifecycleListener* listener) override;
-
-protected:
-    virtual void drawGlyphs(const uint16_t* text, const float* positions, int count,
-            const SkPaint& paint, float x, float y,
-            float boundsLeft, float boundsTop, float boundsRight, float boundsBottom,
-            float totalAdvance) override;
-    virtual void drawGlyphsOnPath(const uint16_t* glyphs, int count, const SkPath& path,
-            float hOffset, float vOffset, const SkPaint& paint) override;
-
-private:
-    struct SaveRec {
-        int              saveCount;
-        SaveFlags::Flags saveFlags;
-    };
-
-    bool mHighContrastText = false;
-
-    void recordPartialSave(SaveFlags::Flags flags);
-    void saveClipsForFrame(SkTArray<SkClipStack::Element>& clips, int frameSaveCount);
-    void applyClips(const SkTArray<SkClipStack::Element>& clips);
-
-    void drawPoints(const float* points, int count, const SkPaint& paint,
-                    SkCanvas::PointMode mode);
-
-    SkAutoTUnref<SkCanvas> mCanvas;
-    std::unique_ptr<SkDeque> mSaveStack; // lazily allocated, tracks partial saves.
-};
 
 Canvas* Canvas::create_canvas(const SkBitmap& bitmap) {
     return new SkiaCanvas(bitmap);
@@ -199,6 +42,12 @@ Canvas* Canvas::create_canvas(SkCanvas* skiaCanvas) {
 
 SkiaCanvas::SkiaCanvas(const SkBitmap& bitmap) {
     mCanvas.reset(new SkCanvas(bitmap));
+}
+
+void SkiaCanvas::reset(SkCanvas* skiaCanvas) {
+    mCanvas.reset(skiaCanvas);
+    mSaveStack.reset(nullptr);
+    mHighContrastText = false;
 }
 
 // ----------------------------------------------------------------------------
@@ -224,18 +73,18 @@ private:
 };
 
 void SkiaCanvas::setBitmap(const SkBitmap& bitmap) {
-    SkCanvas* newCanvas = new SkCanvas(bitmap);
+    sk_sp<SkCanvas> newCanvas(new SkCanvas(bitmap));
 
     if (!bitmap.isNull()) {
         // Copy the canvas matrix & clip state.
         newCanvas->setMatrix(mCanvas->getTotalMatrix());
 
-        ClipCopier copier(newCanvas);
+        ClipCopier copier(newCanvas.get());
         mCanvas->replayClips(&copier);
     }
 
     // unrefs the existing canvas
-    mCanvas.reset(newCanvas);
+    mCanvas = std::move(newCanvas);
 
     // clean up the old save stack
     mSaveStack.reset(NULL);
@@ -402,7 +251,7 @@ void SkiaCanvas::saveClipsForFrame(SkTArray<SkClipStack::Element>& clips,
 }
 
 void SkiaCanvas::applyClips(const SkTArray<SkClipStack::Element>& clips) {
-    ClipCopier clipCopier(mCanvas);
+    ClipCopier clipCopier(mCanvas.get());
 
     // The clip stack stores clips in device space.
     SkMatrix origMatrix = mCanvas->getTotalMatrix();
@@ -494,7 +343,12 @@ bool SkiaCanvas::clipRect(float left, float top, float right, float bottom, SkRe
 }
 
 bool SkiaCanvas::clipPath(const SkPath* path, SkRegion::Op op) {
-    mCanvas->clipPath(*path, op);
+    SkRRect roundRect;
+    if (path->isRRect(&roundRect)) {
+        mCanvas->clipRRect(roundRect, op);
+    } else {
+        mCanvas->clipPath(*path, op);
+    }
     return !mCanvas->isClipEmpty();
 }
 
@@ -606,7 +460,15 @@ void SkiaCanvas::drawArc(float left, float top, float right, float bottom,
 }
 
 void SkiaCanvas::drawPath(const SkPath& path, const SkPaint& paint) {
-    mCanvas->drawPath(path, paint);
+    SkRect rect;
+    SkRRect roundRect;
+    if (path.isOval(&rect)) {
+        mCanvas->drawOval(rect, paint);
+    } else if (path.isRRect(&roundRect)) {
+        mCanvas->drawRRect(roundRect, paint);
+    } else {
+        mCanvas->drawPath(path, paint);
+    }
 }
 
 void SkiaCanvas::drawVertices(SkCanvas::VertexMode vertexMode, int vertexCount,
@@ -629,7 +491,7 @@ void SkiaCanvas::drawBitmap(const SkBitmap& bitmap, float left, float top, const
 }
 
 void SkiaCanvas::drawBitmap(const SkBitmap& bitmap, const SkMatrix& matrix, const SkPaint* paint) {
-    SkAutoCanvasRestore acr(mCanvas, true);
+    SkAutoCanvasRestore acr(mCanvas.get(), true);
     mCanvas->concat(matrix);
     mCanvas->drawBitmap(bitmap, 0, 0, paint);
 }
@@ -742,7 +604,7 @@ void SkiaCanvas::drawBitmapMesh(const SkBitmap& bitmap, int meshWidth, int meshH
 void SkiaCanvas::drawNinePatch(const SkBitmap& bitmap, const Res_png_9patch& chunk,
         float dstLeft, float dstTop, float dstRight, float dstBottom, const SkPaint* paint) {
     SkRect bounds = SkRect::MakeLTRB(dstLeft, dstTop, dstRight, dstBottom);
-    NinePatch::Draw(mCanvas, bounds, bitmap, chunk, paint, nullptr);
+    NinePatch::Draw(mCanvas.get(), bounds, bitmap, chunk, paint, nullptr);
 }
 
 void SkiaCanvas::drawVectorDrawable(VectorDrawableRoot* vectorDrawable) {
@@ -826,14 +688,14 @@ void SkiaCanvas::drawRoundRect(uirenderer::CanvasPropertyPrimitive* left,
         uirenderer::CanvasPropertyPrimitive* top, uirenderer::CanvasPropertyPrimitive* right,
         uirenderer::CanvasPropertyPrimitive* bottom, uirenderer::CanvasPropertyPrimitive* rx,
         uirenderer::CanvasPropertyPrimitive* ry, uirenderer::CanvasPropertyPaint* paint) {
-    SkAutoTUnref<AnimatedRoundRect> drawable(
+    sk_sp<AnimatedRoundRect> drawable(
             new AnimatedRoundRect(left, top, right, bottom, rx, ry, paint));
     mCanvas->drawDrawable(drawable.get());
 }
 
 void SkiaCanvas::drawCircle(uirenderer::CanvasPropertyPrimitive* x, uirenderer::CanvasPropertyPrimitive* y,
         uirenderer::CanvasPropertyPrimitive* radius, uirenderer::CanvasPropertyPaint* paint) {
-    SkAutoTUnref<AnimatedCircle> drawable(new AnimatedCircle(x, y, radius, paint));
+    sk_sp<AnimatedCircle> drawable(new AnimatedCircle(x, y, radius, paint));
     mCanvas->drawDrawable(drawable.get());
 }
 
@@ -841,11 +703,17 @@ void SkiaCanvas::drawCircle(uirenderer::CanvasPropertyPrimitive* x, uirenderer::
 // Canvas draw operations: View System
 // ----------------------------------------------------------------------------
 
-void SkiaCanvas::drawLayer(uirenderer::DeferredLayerUpdater* layer) { }
+void SkiaCanvas::drawLayer(uirenderer::DeferredLayerUpdater* layer) {
+    LOG_ALWAYS_FATAL("SkiaCanvas can't directly draw Layers");
+}
 
-void SkiaCanvas::drawRenderNode(uirenderer::RenderNode* renderNode) { }
+void SkiaCanvas::drawRenderNode(uirenderer::RenderNode* renderNode) {
+    LOG_ALWAYS_FATAL("SkiaCanvas can't directly draw RenderNodes");
+}
 
 void SkiaCanvas::callDrawGLFunction(Functor* functor,
-        uirenderer::GlFunctorLifecycleListener* listener) { }
+        uirenderer::GlFunctorLifecycleListener* listener) {
+    LOG_ALWAYS_FATAL("SkiaCanvas can't directly draw GL Content");
+}
 
 } // namespace android
