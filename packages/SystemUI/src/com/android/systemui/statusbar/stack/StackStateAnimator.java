@@ -44,6 +44,7 @@ public class StackStateAnimator {
     public static final int ANIMATION_DURATION_GO_TO_FULL_SHADE = 448;
     public static final int ANIMATION_DURATION_APPEAR_DISAPPEAR = 464;
     public static final int ANIMATION_DURATION_DIMMED_ACTIVATED = 220;
+    public static final int ANIMATION_DURATION_CLOSE_REMOTE_INPUT = 150;
     public static final int ANIMATION_DURATION_HEADS_UP_APPEAR = 650;
     public static final int ANIMATION_DURATION_HEADS_UP_DISAPPEAR = 230;
     public static final int ANIMATION_DELAY_PER_ELEMENT_INTERRUPTING = 80;
