@@ -3672,12 +3672,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private boolean isActivePasswordSufficientForUserLocked(
             DevicePolicyData policy, int userHandle, boolean parent) {
-        if (policy.mActivePasswordQuality < getPasswordQuality(null, userHandle, parent)
-                || policy.mActivePasswordLength < getPasswordMinimumLength(
+        final int requiredPasswordQuality = getPasswordQuality(null, userHandle, parent);
+        if (policy.mActivePasswordQuality < requiredPasswordQuality) {
+            return false;
+        }
+        if (requiredPasswordQuality >= DevicePolicyManager.PASSWORD_QUALITY_NUMERIC
+                && policy.mActivePasswordLength < getPasswordMinimumLength(
                         null, userHandle, parent)) {
             return false;
         }
-        if (policy.mActivePasswordQuality != DevicePolicyManager.PASSWORD_QUALITY_COMPLEX) {
+        if (requiredPasswordQuality != DevicePolicyManager.PASSWORD_QUALITY_COMPLEX) {
             return true;
         }
         return policy.mActivePasswordUpperCase >= getPasswordMinimumUpperCase(
