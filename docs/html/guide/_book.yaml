@@ -69,6 +69,9 @@ toc:
     path: /guide/topics/resources/runtime-changes.html
   - title: Localization
     path: /guide/topics/resources/localization.html
+    section:
+    - title: ICU4J Android Framework APIs
+      path: /guide/topics/resources/icu4j-framework.html
   - title: Resource Types
     path: /guide/topics/resources/available-resources.html
     section:
