@@ -132,10 +132,15 @@ public class StorageManager {
     public static final int FLAG_INCLUDE_INVISIBLE = 1 << 10;
 
     private static volatile IMountService sMountService = null;
-    private static final String INTERNAL_STORAGE_SIZE_PATH =
-            "/sys/block/mmcblk0/size";
-    private static final String INTERNAL_STORAGE_SECTOR_SIZE =
-            "/sys/block/mmcblk0/queue/hw_sector_size";
+
+    // TODO: the location of the primary storage block varies from device to device, so we need to
+    // try the most likely candidates - a long-term solution would be a device-specific vold
+    // function that returns the calculated size.
+    private static final String[] INTERNAL_STORAGE_SIZE_PATHS = {
+            "/sys/block/mmcblk0/size",
+            "/sys/block/sda/size"
+    };
+    private static final int INTERNAL_STORAGE_SECTOR_SIZE = 512;
 
     private final Context mContext;
     private final ContentResolver mResolver;
@@ -926,9 +931,13 @@ public class StorageManager {
 
     /** {@hide} */
     public long getPrimaryStorageSize() {
-        final long numberBlocks = readLong(INTERNAL_STORAGE_SIZE_PATH);
-        final long sectorSize = readLong(INTERNAL_STORAGE_SECTOR_SIZE);
-        return numberBlocks * sectorSize;
+        for (String path : INTERNAL_STORAGE_SIZE_PATHS) {
+            final long numberBlocks = readLong(path);
+            if (numberBlocks > 0) {
+                return numberBlocks * INTERNAL_STORAGE_SECTOR_SIZE;
+            }
+        }
+        return 0;
     }
 
     private long readLong(String path) {
