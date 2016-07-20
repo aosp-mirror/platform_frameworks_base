@@ -287,6 +287,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     // "Real" frame that the application sees, in display coordinate space.
     final Rect mFrame = new Rect();
     final Rect mLastFrame = new Rect();
+    boolean mFrameSizeChanged = false;
     // Frame that is scaled to the application's coordinate space when in
     // screen size compatibility mode.
     final Rect mCompatFrame = new Rect();
@@ -1055,14 +1056,16 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return mAppToken != null && mAppToken.voiceInteraction;
     }
 
-    boolean setInsetsChanged() {
+    boolean setReportResizeHints() {
         mOverscanInsetsChanged |= !mLastOverscanInsets.equals(mOverscanInsets);
         mContentInsetsChanged |= !mLastContentInsets.equals(mContentInsets);
         mVisibleInsetsChanged |= !mLastVisibleInsets.equals(mVisibleInsets);
         mStableInsetsChanged |= !mLastStableInsets.equals(mStableInsets);
         mOutsetsChanged |= !mLastOutsets.equals(mOutsets);
+        mFrameSizeChanged |= (mLastFrame.width() != mFrame.width()) ||
+                (mLastFrame.height() != mFrame.height());
         return mOverscanInsetsChanged || mContentInsetsChanged || mVisibleInsetsChanged
-                || mOutsetsChanged;
+                || mOutsetsChanged || mFrameSizeChanged;
     }
 
     public DisplayContent getDisplayContent() {
@@ -2344,6 +2347,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mVisibleInsetsChanged = false;
             mStableInsetsChanged = false;
             mOutsetsChanged = false;
+            mFrameSizeChanged = false;
             mResizedWhileNotDragResizingReported = true;
             mWinAnimator.mSurfaceResized = false;
         } catch (RemoteException e) {
