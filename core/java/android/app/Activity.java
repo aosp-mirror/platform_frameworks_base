@@ -159,11 +159,11 @@ import java.util.List;
  * part of the platform's application model. For a detailed perspective on the structure of an
  * Android application and how activities behave, please read the
  * <a href="{@docRoot}guide/topics/fundamentals.html">Application Fundamentals</a> and
- * <a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back Stack</a>
+ * <a href="{@docRoot}guide/components/tasks-and-back-stack.html">Tasks and Back Stack</a>
  * developer guides.</p>
  *
  * <p>You can also find a detailed discussion about how to create activities in the
- * <a href="{@docRoot}guide/topics/fundamentals/activities.html">Activities</a>
+ * <a href="{@docRoot}guide/components/activities.html">Activities</a>
  * developer guide.</p>
  * </div>
  *
@@ -3076,7 +3076,7 @@ public class Activity extends ContextThemeWrapper
      * should override the method {@link #onPrepareNavigateUpTaskStack(TaskStackBuilder)}
      * to supply those arguments.</p>
      *
-     * <p>See <a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back Stack</a>
+     * <p>See <a href="{@docRoot}guide/components/tasks-and-back-stack.html">Tasks and Back Stack</a>
      * from the developer guide and <a href="{@docRoot}design/patterns/navigation.html">Navigation</a>
      * from the design guide for more information about navigating within your app.</p>
      *
@@ -5306,7 +5306,7 @@ public class Activity extends ContextThemeWrapper
      * <p>
      * This method is deprecated starting in API Level 11 and replaced by action
      * bar styles. For information on styling the Action Bar, read the <a
-     * href="{@docRoot} guide/topics/ui/actionbar.html">Action Bar</a> developer
+     * href="{@docRoot}training/appbar/index.html">Action Bar</a> developer
      * guide.
      *
      * @deprecated Use action bar styles instead.
