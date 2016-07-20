@@ -178,8 +178,8 @@ public class TileServices extends IQSService.Stub {
     @Override
     public void updateQsTile(Tile tile, IBinder token) {
         CustomTile customTile = getTileForToken(token);
-        verifyCaller(customTile);
         if (customTile != null) {
+            verifyCaller(customTile);
             synchronized (mServices) {
                 final TileServiceManager tileServiceManager = mServices.get(customTile);
                 tileServiceManager.clearPendingBind();
@@ -193,8 +193,8 @@ public class TileServices extends IQSService.Stub {
     @Override
     public void onStartSuccessful(IBinder token) {
         CustomTile customTile = getTileForToken(token);
-        verifyCaller(customTile);
         if (customTile != null) {
+            verifyCaller(customTile);
             synchronized (mServices) {
                 final TileServiceManager tileServiceManager = mServices.get(customTile);
                 tileServiceManager.clearPendingBind();
@@ -206,8 +206,8 @@ public class TileServices extends IQSService.Stub {
     @Override
     public void onShowDialog(IBinder token) {
         CustomTile customTile = getTileForToken(token);
-        verifyCaller(customTile);
         if (customTile != null) {
+            verifyCaller(customTile);
             customTile.onDialogShown();
             mHost.collapsePanels();
             mServices.get(customTile).setShowingDialog(true);
@@ -217,8 +217,8 @@ public class TileServices extends IQSService.Stub {
     @Override
     public void onDialogHidden(IBinder token) {
         CustomTile customTile = getTileForToken(token);
-        verifyCaller(customTile);
         if (customTile != null) {
+            verifyCaller(customTile);
             mServices.get(customTile).setShowingDialog(false);
             customTile.onDialogHidden();
         }
@@ -227,8 +227,8 @@ public class TileServices extends IQSService.Stub {
     @Override
     public void onStartActivity(IBinder token) {
         CustomTile customTile = getTileForToken(token);
-        verifyCaller(customTile);
         if (customTile != null) {
+            verifyCaller(customTile);
             mHost.collapsePanels();
         }
     }
@@ -236,8 +236,8 @@ public class TileServices extends IQSService.Stub {
     @Override
     public void updateStatusIcon(IBinder token, Icon icon, String contentDescription) {
         CustomTile customTile = getTileForToken(token);
-        verifyCaller(customTile);
         if (customTile != null) {
+            verifyCaller(customTile);
             try {
                 ComponentName componentName = customTile.getComponent();
                 String packageName = componentName.getPackageName();
@@ -266,8 +266,8 @@ public class TileServices extends IQSService.Stub {
     @Override
     public Tile getTile(IBinder token) {
         CustomTile customTile = getTileForToken(token);
-        verifyCaller(customTile);
         if (customTile != null) {
+            verifyCaller(customTile);
             return customTile.getQsTile();
         }
         return null;
@@ -276,8 +276,8 @@ public class TileServices extends IQSService.Stub {
     @Override
     public void startUnlockAndRun(IBinder token) {
         CustomTile customTile = getTileForToken(token);
-        verifyCaller(customTile);
         if (customTile != null) {
+            verifyCaller(customTile);
             customTile.startUnlockAndRun();
         }
     }
