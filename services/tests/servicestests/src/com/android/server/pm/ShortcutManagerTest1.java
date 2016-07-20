@@ -58,10 +58,12 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.Manifest.permission;
 import android.app.ActivityManager;
@@ -1681,7 +1683,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     .areAllPinned()
                     .areAllNotWithKeyFieldsOnly()
                     .areAllDisabled();
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s2", USER_0,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s2", USER_0,
                     ActivityNotFoundException.class);
 
             // Here, s4 is still enabled and launchable, but s3 is disabled.
@@ -1698,7 +1700,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     .selectByIds("s4")
                     .areAllEnabled();
 
-            assertShortcutNotLaunchable(CALLING_PACKAGE_2, "s3", USER_0,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_2, "s3", USER_0,
                     ActivityNotFoundException.class);
             assertShortcutLaunchable(CALLING_PACKAGE_2, "s4", USER_0);
 
@@ -2130,17 +2132,17 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             assertShortcutLaunchable(CALLING_PACKAGE_2, "s2", USER_0);
             assertShortcutLaunchable(CALLING_PACKAGE_2, "s3", USER_0);
 
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s1", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s1", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s2", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s2", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s3", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s3", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s4", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s4", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s5", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s5", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s6", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s6", USER_10,
                     SecurityException.class);
         });
         runWithCaller(LAUNCHER_1, USER_P0, () -> {
@@ -2178,17 +2180,17 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             assertShortcutLaunchable(CALLING_PACKAGE_2, "s2", USER_0);
             assertShortcutLaunchable(CALLING_PACKAGE_2, "s3", USER_0);
 
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s1", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s1", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s2", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s2", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s3", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s3", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s4", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s4", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s5", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s5", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s6", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s6", USER_10,
                     SecurityException.class);
         });
         runWithCaller(LAUNCHER_2, USER_P0, () -> {
@@ -2226,17 +2228,17 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             assertShortcutLaunchable(CALLING_PACKAGE_2, "s2", USER_0);
             assertShortcutLaunchable(CALLING_PACKAGE_2, "s3", USER_0);
 
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s1", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s1", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s2", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s2", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s3", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s3", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s4", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s4", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s5", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s5", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s6", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s6", USER_10,
                     SecurityException.class);
         });
         runWithCaller(LAUNCHER_2, USER_10, () -> {
@@ -2297,26 +2299,26 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     "s1", "s2", "s3");
 
             assertShortcutLaunchable(CALLING_PACKAGE_1, "s1", USER_0);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s2", USER_0,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s2", USER_0,
                     ActivityNotFoundException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s3", USER_0,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s3", USER_0,
                     ActivityNotFoundException.class);
 
             assertShortcutLaunchable(CALLING_PACKAGE_2, "s1", USER_0);
             assertShortcutLaunchable(CALLING_PACKAGE_2, "s2", USER_0);
             assertShortcutLaunchable(CALLING_PACKAGE_2, "s3", USER_0);
 
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s1", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s1", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s2", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s2", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s3", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s3", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s4", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s4", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s5", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s5", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s6", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s6", USER_10,
                     SecurityException.class);
         });
         runWithCaller(LAUNCHER_1, USER_P0, () -> {
@@ -2348,24 +2350,24 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
             assertShortcutLaunchable(CALLING_PACKAGE_1, "s1", USER_0);
             assertShortcutLaunchable(CALLING_PACKAGE_1, "s2", USER_0);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s3", USER_0,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s3", USER_0,
                     ActivityNotFoundException.class);
 
             assertShortcutLaunchable(CALLING_PACKAGE_2, "s1", USER_0);
             assertShortcutLaunchable(CALLING_PACKAGE_2, "s2", USER_0);
             assertShortcutLaunchable(CALLING_PACKAGE_2, "s3", USER_0);
 
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s1", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s1", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s2", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s2", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s3", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s3", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s4", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s4", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s5", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s5", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s6", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s6", USER_10,
                     SecurityException.class);
         });
         runWithCaller(LAUNCHER_2, USER_P0, () -> {
@@ -2396,26 +2398,26 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     "s1", "s3");
 
             assertShortcutLaunchable(CALLING_PACKAGE_1, "s1", USER_0);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s2", USER_0,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s2", USER_0,
                     ActivityNotFoundException.class);
             assertShortcutLaunchable(CALLING_PACKAGE_1, "s3", USER_0);
 
             assertShortcutLaunchable(CALLING_PACKAGE_2, "s1", USER_0);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_2, "s2", USER_0,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_2, "s2", USER_0,
                     ActivityNotFoundException.class);
             assertShortcutLaunchable(CALLING_PACKAGE_2, "s3", USER_0);
 
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s1", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s1", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s2", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s2", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s3", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s3", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s4", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s4", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s5", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s5", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s6", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s6", USER_10,
                     SecurityException.class);
         });
         runWithCaller(LAUNCHER_2, USER_10, () -> {
@@ -2432,28 +2434,28 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     /* activity =*/ null, PIN_AND_DYNAMIC), HANDLE_USER_10)),
                     "s1", "s2", "s3");
 
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s1", USER_0,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s1", USER_0,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s2", USER_0,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s2", USER_0,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s3", USER_0,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s3", USER_0,
                     SecurityException.class);
 
-            assertShortcutNotLaunchable(CALLING_PACKAGE_2, "s1", USER_0,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_2, "s1", USER_0,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_2, "s2", USER_0,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_2, "s2", USER_0,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_2, "s3", USER_0,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_2, "s3", USER_0,
                     SecurityException.class);
 
             assertShortcutLaunchable(CALLING_PACKAGE_1, "s1", USER_10);
             assertShortcutLaunchable(CALLING_PACKAGE_1, "s2", USER_10);
             assertShortcutLaunchable(CALLING_PACKAGE_1, "s3", USER_10);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s4", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s4", USER_10,
                     ActivityNotFoundException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s5", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s5", USER_10,
                     ActivityNotFoundException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s6", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s6", USER_10,
                     ActivityNotFoundException.class);
         });
 
@@ -2490,26 +2492,26 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     "s1", "s2", "s3");
 
             assertShortcutLaunchable(CALLING_PACKAGE_1, "s1", USER_0);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s2", USER_0,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s2", USER_0,
                     ActivityNotFoundException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s3", USER_0,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s3", USER_0,
                     ActivityNotFoundException.class);
 
             assertShortcutLaunchable(CALLING_PACKAGE_2, "s1", USER_0);
             assertShortcutLaunchable(CALLING_PACKAGE_2, "s2", USER_0);
             assertShortcutLaunchable(CALLING_PACKAGE_2, "s3", USER_0);
 
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s1", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s1", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s2", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s2", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s3", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s3", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s4", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s4", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s5", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s5", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s6", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s6", USER_10,
                     SecurityException.class);
         });
         runWithCaller(LAUNCHER_1, USER_P0, () -> {
@@ -2541,24 +2543,24 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
             assertShortcutLaunchable(CALLING_PACKAGE_1, "s1", USER_0);
             assertShortcutLaunchable(CALLING_PACKAGE_1, "s2", USER_0);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s3", USER_0,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s3", USER_0,
                     ActivityNotFoundException.class);
 
             assertShortcutLaunchable(CALLING_PACKAGE_2, "s1", USER_0);
             assertShortcutLaunchable(CALLING_PACKAGE_2, "s2", USER_0);
             assertShortcutLaunchable(CALLING_PACKAGE_2, "s3", USER_0);
 
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s1", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s1", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s2", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s2", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s3", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s3", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s4", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s4", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s5", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s5", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s6", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s6", USER_10,
                     SecurityException.class);
         });
         runWithCaller(LAUNCHER_2, USER_P0, () -> {
@@ -2589,26 +2591,26 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     "s1", "s3");
 
             assertShortcutLaunchable(CALLING_PACKAGE_1, "s1", USER_0);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s2", USER_0,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s2", USER_0,
                     ActivityNotFoundException.class);
             assertShortcutLaunchable(CALLING_PACKAGE_1, "s3", USER_0);
 
             assertShortcutLaunchable(CALLING_PACKAGE_2, "s1", USER_0);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_2, "s2", USER_0,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_2, "s2", USER_0,
                     ActivityNotFoundException.class);
             assertShortcutLaunchable(CALLING_PACKAGE_2, "s3", USER_0);
 
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s1", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s1", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s2", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s2", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s3", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s3", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s4", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s4", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s5", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s5", USER_10,
                     SecurityException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s6", USER_10,
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s6", USER_10,
                     SecurityException.class);
         });
     }
@@ -2680,10 +2682,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
             assertShortcutLaunchable(CALLING_PACKAGE_1, "s3", USER_0);
 
-            assertShortcutNotLaunchable("no-such-package", "s2", USER_0,
-                    ActivityNotFoundException.class);
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "xxxx", USER_0,
-                    ActivityNotFoundException.class);
+            assertShortcutNotLaunched("no-such-package", "s2", USER_0);
+            assertShortcutNotLaunched(CALLING_PACKAGE_1, "xxxx", USER_0);
         });
 
         // LAUNCHER_1 is no longer the default launcher
@@ -2710,19 +2710,18 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         // Test inner errors.
         runWithCaller(LAUNCHER_1, USER_0, () -> {
             // Not launchable.
-            doAnswer(new AnswerWithSystemCheck<>(inv -> {
-                return ActivityManager.START_CLASS_NOT_FOUND;
-            })).when(mMockActivityManagerInternal).startActivityAsPackage(anyString(), anyInt(),
-                    any(Intent.class), any(Bundle.class));
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s1", USER_0,
+            doReturn(ActivityManager.START_CLASS_NOT_FOUND)
+                    .when(mMockActivityManagerInternal).startActivitiesAsPackage(
+                            anyString(), anyInt(), any(Intent[].class), any(Bundle.class));
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s1", USER_0,
                     ActivityNotFoundException.class);
 
             // Still not launchable.
-            doAnswer(new AnswerWithSystemCheck<>(inv -> {
-                return ActivityManager.START_PERMISSION_DENIED;
-            })).when(mMockActivityManagerInternal).startActivityAsPackage(anyString(), anyInt(),
-                    any(Intent.class), any(Bundle.class));
-            assertShortcutNotLaunchable(CALLING_PACKAGE_1, "s1", USER_0,
+            doReturn(ActivityManager.START_CLASS_NOT_FOUND)
+                    .when(mMockActivityManagerInternal)
+                    .startActivitiesAsPackage(
+                            anyString(), anyInt(), any(Intent[].class), any(Bundle.class));
+            assertStartShortcutThrowsException(CALLING_PACKAGE_1, "s1", USER_0,
                     ActivityNotFoundException.class);
         });
 
@@ -5924,11 +5923,41 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     .areAllEnabled()
                     .forShortcutWithId("ms1", si -> {
                         assertTrue(si.isEnabled());
+                        assertEquals(1, si.getIntents().length);
+
                         assertEquals("action1", si.getIntent().getAction());
+                        assertEquals("value1", si.getIntent().getStringExtra("key1"));
+                        assertEquals(Intent.FLAG_ACTIVITY_NEW_TASK |
+                                Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                                Intent.FLAG_ACTIVITY_TASK_ON_HOME, si.getIntent().getFlags());
+
+                        assertEquals("action1", si.getIntents()[0].getAction());
+                        assertEquals("value1", si.getIntents()[0].getStringExtra("key1"));
+                        assertEquals(Intent.FLAG_ACTIVITY_NEW_TASK |
+                                Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                                Intent.FLAG_ACTIVITY_TASK_ON_HOME, si.getIntents()[0].getFlags());
                     })
                     .forShortcutWithId("ms2", si -> {
                         assertTrue(si.isEnabled());
-                        assertEquals("action2_1", si.getIntent().getAction());
+                        assertEquals(2, si.getIntents().length);
+
+                        // getIntent will return the last one.
+                        assertEquals("action2_2", si.getIntent().getAction());
+                        assertEquals("value2", si.getIntent().getStringExtra("key2"));
+                        assertEquals(0, si.getIntent().getFlags());
+
+                        final Intent i1 = si.getIntents()[0];
+                        final Intent i2 = si.getIntents()[1];
+
+                        assertEquals("action2_1", i1.getAction());
+                        assertEquals("value1", i1.getStringExtra("key1"));
+                        assertEquals(Intent.FLAG_ACTIVITY_NEW_TASK |
+                                        Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                                        Intent.FLAG_ACTIVITY_TASK_ON_HOME, i1.getFlags());
+
+                        assertEquals("action2_2", i2.getAction());
+                        assertEquals("value2", i2.getStringExtra("key2"));
+                        assertEquals(0, i2.getFlags());
                     });
         });
 
@@ -6001,7 +6030,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                         assertEquals(si.getId(), "action1", si.getIntent().getAction());
                     })
                     .forShortcutWithId("ms2", si -> {
-                        assertEquals(si.getId(), "action2_1", si.getIntent().getAction());
+                        // getIntent returns the last one.
+                        assertEquals(si.getId(), "action2_2", si.getIntent().getAction());
                     })
                     .forShortcutWithId("ms3", si -> {
                         assertEquals(si.getId(), Intent.ACTION_VIEW, si.getIntent().getAction());

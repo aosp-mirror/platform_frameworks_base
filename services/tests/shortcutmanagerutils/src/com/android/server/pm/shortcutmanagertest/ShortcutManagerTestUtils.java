@@ -861,8 +861,8 @@ public class ShortcutManagerTestUtils {
         if (b1 == null && b2 == null) {
             return; // pass
         }
-        assertNotNull(b1);
-        assertNotNull(b2);
+        assertNotNull("b1 is null but b2 is not", b1);
+        assertNotNull("b2 is null but b1 is not", b2);
 
         // HashSet makes the error message readable.
         assertEquals(set(b1.keySet()), set(b2.keySet()));
@@ -973,7 +973,8 @@ public class ShortcutManagerTestUtils {
 
         waitOnMainThread();
 
-        launcherApps.unregisterCallback(asserter.getMockCallback());
+        // TODO unregister doesn't work well during unit tests.  Figure out and fix it.
+        // launcherApps.unregisterCallback(asserter.getMockCallback());
 
         return asserter;
     }

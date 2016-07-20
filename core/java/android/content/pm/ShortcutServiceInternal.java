@@ -53,7 +53,8 @@ public abstract class ShortcutServiceInternal {
             @NonNull String callingPackage, @NonNull String packageName,
             @NonNull List<String> shortcutIds, int userId);
 
-    public abstract Intent createShortcutIntent(int launcherUserId, @NonNull String callingPackage,
+    public abstract Intent[] createShortcutIntents(
+            int launcherUserId, @NonNull String callingPackage,
             @NonNull String packageName, @NonNull String shortcutId, int userId);
 
     public abstract void addListener(@NonNull ShortcutChangeListener listener);
