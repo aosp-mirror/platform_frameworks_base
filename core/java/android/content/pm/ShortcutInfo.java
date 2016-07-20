@@ -182,16 +182,16 @@ public final class ShortcutInfo implements Parcelable {
     private ArraySet<String> mCategories;
 
     /**
-     * Intent *with extras removed*.
+     * Intents *with extras removed*.
      */
     @Nullable
-    private Intent mIntent;
+    private Intent[] mIntents;
 
     /**
-     * Extras for the intent.
+     * Extras for the intents.
      */
     @Nullable
-    private PersistableBundle mIntentPersistableExtras;
+    private PersistableBundle[] mIntentPersistableExtrases;
 
     private int mRank;
 
@@ -241,20 +241,36 @@ public final class ShortcutInfo implements Parcelable {
         mDisabledMessage = b.mDisabledMessage;
         mDisabledMessageResId = b.mDisabledMessageResId;
         mCategories = cloneCategories(b.mCategories);
-        mIntent = b.mIntent;
-        if (mIntent != null) {
-            final Bundle intentExtras = mIntent.getExtras();
-            if (intentExtras != null) {
-                mIntent.replaceExtras((Bundle) null);
-                mIntentPersistableExtras = new PersistableBundle(intentExtras);
-            }
-        }
+        mIntents = cloneIntents(b.mIntents);
+        fixUpIntentExtras();
         mRank = b.mRank;
         mExtras = b.mExtras;
         updateTimestamp();
     }
 
-    private ArraySet<String> cloneCategories(Set<String> source) {
+    /**
+     * Extract extras from {@link #mIntents} and set them to {@link #mIntentPersistableExtrases}
+     * as {@link PersistableBundle}, and remove extras from the original intents.
+     */
+    private void fixUpIntentExtras() {
+        if (mIntents == null) {
+            mIntentPersistableExtrases = null;
+            return;
+        }
+        mIntentPersistableExtrases = new PersistableBundle[mIntents.length];
+        for (int i = 0; i < mIntents.length; i++) {
+            final Intent intent = mIntents[i];
+            final Bundle extras = intent.getExtras();
+            if (extras == null) {
+                mIntentPersistableExtrases[i] = null;
+            } else {
+                mIntentPersistableExtrases[i] = new PersistableBundle(extras);
+                intent.replaceExtras((Bundle) null);
+            }
+        }
+    }
+
+    private static ArraySet<String> cloneCategories(Set<String> source) {
         if (source == null) {
             return null;
         }
@@ -262,6 +278,32 @@ public final class ShortcutInfo implements Parcelable {
         for (CharSequence s : source) {
             if (!TextUtils.isEmpty(s)) {
                 ret.add(s.toString().intern());
+            }
+        }
+        return ret;
+    }
+
+    private static Intent[] cloneIntents(Intent[] intents) {
+        if (intents == null) {
+            return null;
+        }
+        final Intent[] ret = new Intent[intents.length];
+        for (int i = 0; i < ret.length; i++) {
+            if (intents[i] != null) {
+                ret[i] = new Intent(intents[i]);
+            }
+        }
+        return ret;
+    }
+
+    private static PersistableBundle[] clonePersistableBundle(PersistableBundle[] bundle) {
+        if (bundle == null) {
+            return null;
+        }
+        final PersistableBundle[] ret = new PersistableBundle[bundle.length];
+        for (int i = 0; i < ret.length; i++) {
+            if (bundle[i] != null) {
+                ret[i] = new PersistableBundle(bundle[i]);
             }
         }
         return ret;
@@ -278,7 +320,8 @@ public final class ShortcutInfo implements Parcelable {
         if (mTitle == null && mTitleResId == 0) {
             throw new IllegalArgumentException("Short label must be provided");
         }
-        Preconditions.checkNotNull(mIntent, "Shortcut Intent must be provided");
+        Preconditions.checkNotNull(mIntents, "Shortcut Intent must be provided");
+        Preconditions.checkArgument(mIntents.length > 0, "Shortcut Intent must be provided");
     }
 
     /**
@@ -310,8 +353,9 @@ public final class ShortcutInfo implements Parcelable {
             mDisabledMessageResId = source.mDisabledMessageResId;
             mCategories = cloneCategories(source.mCategories);
             if ((cloneFlags & CLONE_REMOVE_INTENT) == 0) {
-                mIntent = source.mIntent;
-                mIntentPersistableExtras = source.mIntentPersistableExtras;
+                mIntents = cloneIntents(source.mIntents);
+                mIntentPersistableExtrases =
+                        clonePersistableBundle(source.mIntentPersistableExtrases);
             }
             mRank = source.mRank;
             mExtras = source.mExtras;
@@ -620,9 +664,10 @@ public final class ShortcutInfo implements Parcelable {
         if (source.mCategories != null) {
             mCategories = cloneCategories(source.mCategories);
         }
-        if (source.mIntent != null) {
-            mIntent = source.mIntent;
-            mIntentPersistableExtras = source.mIntentPersistableExtras;
+        if (source.mIntents != null) {
+            mIntents = cloneIntents(source.mIntents);
+            mIntentPersistableExtrases =
+                    clonePersistableBundle(source.mIntentPersistableExtrases);
         }
         if (source.mRank != RANK_NOT_SET) {
             mRank = source.mRank;
@@ -684,7 +729,7 @@ public final class ShortcutInfo implements Parcelable {
 
         private Set<String> mCategories;
 
-        private Intent mIntent;
+        private Intent[] mIntents;
 
         private int mRank = RANK_NOT_SET;
 
@@ -912,12 +957,11 @@ public final class ShortcutInfo implements Parcelable {
          * supported so the system can persist them.
          *
          * @see ShortcutInfo#getIntent()
+         * @see #setIntents(Intent[])
          */
         @NonNull
         public Builder setIntent(@NonNull Intent intent) {
-            mIntent = Preconditions.checkNotNull(intent, "intent cannot be null");
-            Preconditions.checkNotNull(mIntent.getAction(), "intent's action must be set");
-            return this;
+            return setIntents(new Intent[]{intent});
         }
 
         /**
@@ -930,7 +974,15 @@ public final class ShortcutInfo implements Parcelable {
          */
         @NonNull
         public Builder setIntents(@NonNull Intent[] intents) {
-            throw new RuntimeException("NOT SUPPORTED YET");
+            Preconditions.checkNotNull(intents, "intents cannot be null");
+            Preconditions.checkNotNull(intents.length, "intents cannot be empty");
+            for (Intent intent : intents) {
+                Preconditions.checkNotNull(intent, "intents cannot contain null");
+                Preconditions.checkNotNull(intent.getAction(), "intent's action must be set");
+            }
+            // Make sure always clone incoming intents.
+            mIntents = cloneIntents(intents);
+            return this;
         }
 
         /**
@@ -1098,7 +1150,7 @@ public final class ShortcutInfo implements Parcelable {
     }
 
     /**
-     * Return the intent.  (Or the last intent set with {@link Builder#setIntents(Intent[])}.
+     * Return the intent. If setIntents() was used, then return the last intent in the array.
      *
      * <p>Launcher applications <b>cannot</b> see the intent.  If a {@link ShortcutInfo} is
      * obtained via {@link LauncherApps}, then this method will always return null.
@@ -1108,13 +1160,12 @@ public final class ShortcutInfo implements Parcelable {
      */
     @Nullable
     public Intent getIntent() {
-        if (mIntent == null) {
+        if (mIntents == null || mIntents.length == 0) {
             return null;
         }
-        final Intent intent = new Intent(mIntent);
-        intent.replaceExtras(
-                mIntentPersistableExtras != null ? new Bundle(mIntentPersistableExtras) : null);
-        return intent;
+        final int last = mIntents.length - 1;
+        final Intent intent = new Intent(mIntents[last]);
+        return setIntentExtras(intent, mIntentPersistableExtrases[last]);
     }
 
     /**
@@ -1127,27 +1178,34 @@ public final class ShortcutInfo implements Parcelable {
      * @see Builder#setIntents(Intent[])
      */
     @Nullable
-    public Intent getIntents() {
-        throw new RuntimeException("NOT SUPPORTED YET");
+    public Intent[] getIntents() {
+        final Intent[] ret = new Intent[mIntents.length];
+
+        for (int i = 0; i < ret.length; i++) {
+            ret[i] = new Intent(mIntents[i]);
+            setIntentExtras(ret[i], mIntentPersistableExtrases[i]);
+        }
+
+        return ret;
     }
 
     /**
-     * Return "raw" intent, which is the original intent without the extras.
+     * Return "raw" intents, which is the original intents without the extras.
      * @hide
      */
     @Nullable
-    public Intent getIntentNoExtras() {
-        return mIntent;
+    public Intent[] getIntentsNoExtras() {
+        return mIntents;
     }
 
     /**
-     * The extras in the intent.  We convert extras into {@link PersistableBundle} so we can
+     * The extras in the intents.  We convert extras into {@link PersistableBundle} so we can
      * persist them.
      * @hide
      */
     @Nullable
-    public PersistableBundle getIntentPersistableExtras() {
-        return mIntentPersistableExtras;
+    public PersistableBundle[] getIntentPersistableExtrases() {
+        return mIntentPersistableExtrases;
     }
 
     /**
@@ -1500,19 +1558,22 @@ public final class ShortcutInfo implements Parcelable {
      *
      * @hide
      */
-    public void setIntent(Intent intent) throws IllegalArgumentException {
-        Preconditions.checkNotNull(intent);
+    public void setIntents(Intent[] intents) throws IllegalArgumentException {
+        Preconditions.checkNotNull(intents);
+        Preconditions.checkArgument(intents.length > 0);
 
-        final Bundle intentExtras = intent.getExtras();
+        mIntents = cloneIntents(intents);
+        fixUpIntentExtras();
+    }
 
-        mIntent = intent;
-
-        if (intentExtras != null) {
+    /** @hide */
+    public static Intent setIntentExtras(Intent intent, PersistableBundle extras) {
+        if (extras == null) {
             intent.replaceExtras((Bundle) null);
-            mIntentPersistableExtras = new PersistableBundle(intentExtras);
         } else {
-            mIntentPersistableExtras = null;
+            intent.replaceExtras(new Bundle(extras));
         }
+        return intent;
     }
 
     /**
@@ -1546,8 +1607,8 @@ public final class ShortcutInfo implements Parcelable {
         mTextResId = source.readInt();
         mDisabledMessage = source.readCharSequence();
         mDisabledMessageResId = source.readInt();
-        mIntent = source.readParcelable(cl);
-        mIntentPersistableExtras = source.readParcelable(cl);
+        mIntents = source.readParcelableArray(cl, Intent.class);
+        mIntentPersistableExtrases = source.readParcelableArray(cl, PersistableBundle.class);
         mRank = source.readInt();
         mExtras = source.readParcelable(cl);
         mBitmapPath = source.readString();
@@ -1592,8 +1653,8 @@ public final class ShortcutInfo implements Parcelable {
         dest.writeCharSequence(mDisabledMessage);
         dest.writeInt(mDisabledMessageResId);
 
-        dest.writeParcelable(mIntent, flags);
-        dest.writeParcelable(mIntentPersistableExtras, flags);
+        dest.writeParcelableArray(mIntents, flags);
+        dest.writeParcelableArray(mIntentPersistableExtrases, flags);
         dest.writeInt(mRank);
         dest.writeParcelable(mExtras, flags);
         dest.writeString(mBitmapPath);
@@ -1723,11 +1784,27 @@ public final class ShortcutInfo implements Parcelable {
         sb.append(", timestamp=");
         sb.append(mLastChangedTimestamp);
 
-        sb.append(", intent=");
-        sb.append(mIntent);
-
-        sb.append(", intentExtras=");
-        sb.append(secure ? "***" : mIntentPersistableExtras);
+        sb.append(", intents=");
+        if (mIntents == null) {
+            sb.append("null");
+        } else {
+            if (secure) {
+                sb.append("size:");
+                sb.append(mIntents.length);
+            } else {
+                final int size = mIntents.length;
+                sb.append("[");
+                String sep = "";
+                for (int i = 0; i < size; i++) {
+                    sb.append(sep);
+                    sep = ", ";
+                    sb.append(mIntents[i]);
+                    sb.append("/");
+                    sb.append(mIntentPersistableExtrases[i]);
+                }
+                sb.append("]");
+            }
+        }
 
         sb.append(", extras=");
         sb.append(mExtras);
@@ -1754,9 +1831,8 @@ public final class ShortcutInfo implements Parcelable {
             Icon icon, CharSequence title, int titleResId, String titleResName,
             CharSequence text, int textResId, String textResName,
             CharSequence disabledMessage, int disabledMessageResId, String disabledMessageResName,
-            Set<String> categories,
-            Intent intent, PersistableBundle intentPersistableExtras,
-            int rank, PersistableBundle extras, long lastChangedTimestamp,
+            Set<String> categories, Intent[] intentsWithExtras, int rank, PersistableBundle extras,
+            long lastChangedTimestamp,
             int flags, int iconResId, String iconResName, String bitmapPath) {
         mUserId = userId;
         mId = id;
@@ -1773,8 +1849,8 @@ public final class ShortcutInfo implements Parcelable {
         mDisabledMessageResId = disabledMessageResId;
         mDisabledMessageResName = disabledMessageResName;
         mCategories = cloneCategories(categories);
-        mIntent = intent;
-        mIntentPersistableExtras = intentPersistableExtras;
+        mIntents = cloneIntents(intentsWithExtras);
+        fixUpIntentExtras();
         mRank = rank;
         mExtras = extras;
         mLastChangedTimestamp = lastChangedTimestamp;

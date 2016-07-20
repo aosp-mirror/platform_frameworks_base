@@ -127,6 +127,7 @@ public class ShortcutParser {
             ShortcutInfo currentShortcut = null;
 
             Set<String> categories = null;
+            final ArrayList<Intent> intents = new ArrayList<>();
 
             outer:
             while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
@@ -143,9 +144,15 @@ public class ShortcutParser {
                     final ShortcutInfo si = currentShortcut;
                     currentShortcut = null; // Make sure to null out for the next iteration.
 
-                    if (si.getIntent() == null) {
-                        Log.e(TAG, "Shortcut " + si.getId() + " has no intent. Skipping it.");
-                        continue;
+                    if (si.isEnabled()) {
+                        if (intents.size() == 0) {
+                            Log.e(TAG, "Shortcut " + si.getId() + " has no intent. Skipping it.");
+                            continue;
+                        }
+                    } else {
+                        // Just set the default intent to disabled shortcuts.
+                        intents.clear();
+                        intents.add(new Intent(Intent.ACTION_VIEW));
                     }
 
                     if (numShortcuts >= maxShortcuts) {
@@ -153,6 +160,23 @@ public class ShortcutParser {
                                 + activityInfo.getComponentName() + ". Skipping the rest.");
                         return result;
                     }
+
+                    // Same flag as what TaskStackBuilder adds.
+                    intents.get(0).addFlags(
+                            Intent.FLAG_ACTIVITY_NEW_TASK |
+                            Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                            Intent.FLAG_ACTIVITY_TASK_ON_HOME);
+                    try {
+                        si.setIntents(intents.toArray(new Intent[intents.size()]));
+                    } catch (RuntimeException e) {
+                        // This shouldn't happen because intents in XML can't have complicated
+                        // extras, but just in case Intent.parseIntent() supports such a thing one
+                        // day.
+                        Log.e(TAG, "Shortcut's extras contain un-persistable values. Skipping it.");
+                        continue;
+                    }
+                    intents.clear();
+
                     if (categories != null) {
                         si.setCategories(categories);
                         categories = null;
@@ -196,17 +220,12 @@ public class ShortcutParser {
                             }
                         }
                     }
-                    if (!si.isEnabled()) {
-                        // Just set the default intent to disabled shortcuts.
-                        si.setIntent(new Intent(Intent.ACTION_VIEW));
-                    }
                     currentShortcut = si;
                     categories = null;
                     continue;
                 }
                 if (depth == 3 && TAG_INTENT.equals(tag)) {
                     if ((currentShortcut == null)
-                            || (currentShortcut.getIntentNoExtras() != null)
                             || !currentShortcut.isEnabled()) {
                         Log.e(TAG, "Ignoring excessive intent tag.");
                         continue;
@@ -216,17 +235,10 @@ public class ShortcutParser {
                             parser, attrs);
                     if (TextUtils.isEmpty(intent.getAction())) {
                         Log.e(TAG, "Shortcut intent action must be provided. activity=" + activity);
+                        currentShortcut = null; // Invalidate the current shortcut.
                         continue;
                     }
-                    try {
-                        currentShortcut.setIntent(intent);
-                    } catch (RuntimeException e) {
-                        // This shouldn't happen because intents in XML can't have complicated
-                        // extras, but just in case Intent.parseIntent() supports such a thing one
-                        // day.
-                        Log.e(TAG, "Shortcut's extras contain un-persistable values. Skipping it.");
-                        continue;
-                    }
+                    intents.add(intent);
                     continue;
                 }
                 if (depth == 3 && TAG_CATEGORIES.equals(tag)) {
@@ -345,7 +357,6 @@ public class ShortcutParser {
                 null, // disabled message res name
                 null, // categories
                 null, // intent
-                null, // intent extras
                 rank,
                 null, // extras
                 service.injectCurrentTimeMillis(),

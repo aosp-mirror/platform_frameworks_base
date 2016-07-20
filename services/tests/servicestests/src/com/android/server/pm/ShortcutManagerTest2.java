@@ -90,7 +90,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
 
         assertExpectException(
                 RuntimeException.class,
-                "intent cannot be null",
+                "intents cannot contain null",
                 () -> new ShortcutInfo.Builder(getTestContext(), "id").setIntent(null));
 
         assertExpectException(
@@ -879,10 +879,15 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         final long now = mInjectedCurrentTimeMillis;
         mInjectedCurrentTimeMillis += 1;
 
+        dumpsysOnLogcat("before save");
+
         // Save and load.
         mService.saveDirtyInfo();
         initService();
         mService.handleUnlockUser(USER_10);
+
+        dumpUserFile(USER_10);
+        dumpsysOnLogcat("after load");
 
         ShortcutInfo si;
         si = mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "id", USER_10);
@@ -912,6 +917,8 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         // to test it.
         si = mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "id2", USER_10);
         assertEquals(1, si.getRank());
+
+        dumpUserFile(USER_10);
     }
 
     public void testShortcutInfoSaveAndLoad_resId() throws InterruptedException {
@@ -1133,7 +1140,30 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                     assertEquals(intent.getAction(), si.getIntent().getAction());
                     assertEquals(intent.getData(), si.getIntent().getData());
                     assertEquals(intent.getComponent(), si.getIntent().getComponent());
-                    assertBundlesEqual(intent.getExtras(), si.getExtras());
+                    assertBundlesEqual(intent.getExtras(), si.getIntent().getExtras());
+                });
+    }
+
+    private void checkShortcutInfoSaveAndLoad_intents(Intent... intents) {
+        assertTrue(mManager.setDynamicShortcuts(list(
+                makeShortcutWithIntents("s1", intents))));
+        initService();
+        mService.handleUnlockUser(USER_0);
+
+        assertWith(getCallerShortcuts())
+                .haveIds("s1")
+                .forShortcutWithId("s1", si -> {
+
+                    final Intent[] actual = si.getIntents();
+                    assertEquals(intents.length, actual.length);
+
+                    for (int i = 0; i < intents.length; i++) {
+                        assertEquals(intents[i].getAction(), actual[i].getAction());
+                        assertEquals(intents[i].getData(), actual[i].getData());
+                        assertEquals(intents[i].getComponent(), actual[i].getComponent());
+                        assertEquals(intents[i].getFlags(), actual[i].getFlags());
+                        assertBundlesEqual(intents[i].getExtras(), actual[i].getExtras());
+                    }
                 });
     }
 
@@ -1176,6 +1206,30 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                 .putExtras(makeBundle("a", "b")));
 
         mInjectedCurrentTimeMillis += INTERVAL; // reset throttling.
+
+        // Multi-intents
+        checkShortcutInfoSaveAndLoad_intents(
+                new Intent(Intent.ACTION_MAIN).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK),
+                new Intent(Intent.ACTION_VIEW).setFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT)
+        );
+
+        checkShortcutInfoSaveAndLoad_intents(
+                new Intent(Intent.ACTION_MAIN).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                        .setComponent(new ComponentName("a", "b")),
+                new Intent(Intent.ACTION_VIEW)
+                        .setComponent(new ComponentName("a", "b"))
+                );
+
+        checkShortcutInfoSaveAndLoad_intents(
+                new Intent(Intent.ACTION_MAIN)
+                        .setComponent(new ComponentName("a", "b")),
+                new Intent(Intent.ACTION_VIEW).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                        .setComponent(new ComponentName("a", "b")),
+                new Intent("xyz").setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        | Intent.FILL_IN_COMPONENT)
+                        .setComponent(new ComponentName("a", "b")).putExtras(
+                        makeBundle("xx", "yy"))
+                );
     }
 
     public void testThrottling() {

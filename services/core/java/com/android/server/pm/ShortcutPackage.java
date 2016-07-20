@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.ShortcutInfo;
 import android.content.res.Resources;
+import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.text.format.Formatter;
 import android.util.ArrayMap;
@@ -63,7 +64,8 @@ class ShortcutPackage extends ShortcutPackageItem {
     private static final String TAG_VERIFY = ShortcutService.TAG + ".verify";
 
     static final String TAG_ROOT = "package";
-    private static final String TAG_INTENT_EXTRAS = "intent-extras";
+    private static final String TAG_INTENT_EXTRAS_LEGACY = "intent-extras";
+    private static final String TAG_INTENT = "intent";
     private static final String TAG_EXTRAS = "extras";
     private static final String TAG_SHORTCUT = "shortcut";
     private static final String TAG_CATEGORIES = "categories";
@@ -82,7 +84,8 @@ class ShortcutPackage extends ShortcutPackageItem {
     private static final String ATTR_DISABLED_MESSAGE = "dmessage";
     private static final String ATTR_DISABLED_MESSAGE_RES_ID = "dmessageid";
     private static final String ATTR_DISABLED_MESSAGE_RES_NAME = "dmessagename";
-    private static final String ATTR_INTENT = "intent";
+    private static final String ATTR_INTENT_LEGACY = "intent";
+    private static final String ATTR_INTENT_NO_EXTRA = "intent-base";
     private static final String ATTR_RANK = "rank";
     private static final String ATTR_TIMESTAMP = "timestamp";
     private static final String ATTR_FLAGS = "flags";
@@ -1288,7 +1291,6 @@ class ShortcutPackage extends ShortcutPackageItem {
                 si.getDisabledMessageResourceId());
         ShortcutService.writeAttr(out, ATTR_DISABLED_MESSAGE_RES_NAME,
                 si.getDisabledMessageResName());
-        ShortcutService.writeAttr(out, ATTR_INTENT, si.getIntentNoExtras());
         ShortcutService.writeAttr(out, ATTR_TIMESTAMP,
                 si.getLastChangedTimestamp());
         if (forBackup) {
@@ -1317,9 +1319,16 @@ class ShortcutPackage extends ShortcutPackageItem {
                 out.endTag(null, TAG_CATEGORIES);
             }
         }
+        final Intent[] intentsNoExtras = si.getIntentsNoExtras();
+        final PersistableBundle[] intentsExtras = si.getIntentPersistableExtrases();
+        final int numIntents = intentsNoExtras.length;
+        for (int i = 0; i < numIntents; i++) {
+            out.startTag(null, TAG_INTENT);
+            ShortcutService.writeAttr(out, ATTR_INTENT_NO_EXTRA, intentsNoExtras[i]);
+            ShortcutService.writeTagExtra(out, TAG_EXTRAS, intentsExtras[i]);
+            out.endTag(null, TAG_INTENT);
+        }
 
-        ShortcutService.writeTagExtra(out, TAG_INTENT_EXTRAS,
-                si.getIntentPersistableExtras());
         ShortcutService.writeTagExtra(out, TAG_EXTRAS, si.getExtras());
 
         out.endTag(null, TAG_SHORTCUT);
@@ -1382,8 +1391,9 @@ class ShortcutPackage extends ShortcutPackageItem {
         String disabledMessage;
         int disabledMessageResId;
         String disabledMessageResName;
-        Intent intent;
-        PersistableBundle intentPersistableExtras = null;
+        Intent intentLegacy;
+        PersistableBundle intentPersistableExtrasLegacy = null;
+        ArrayList<Intent> intents = new ArrayList<>();
         int rank;
         PersistableBundle extras = null;
         long lastChangedTimestamp;
@@ -1407,7 +1417,7 @@ class ShortcutPackage extends ShortcutPackageItem {
                 ATTR_DISABLED_MESSAGE_RES_ID);
         disabledMessageResName = ShortcutService.parseStringAttribute(parser,
                 ATTR_DISABLED_MESSAGE_RES_NAME);
-        intent = ShortcutService.parseIntentAttribute(parser, ATTR_INTENT);
+        intentLegacy = ShortcutService.parseIntentAttributeNoDefault(parser, ATTR_INTENT_LEGACY);
         rank = (int) ShortcutService.parseLongAttribute(parser, ATTR_RANK);
         lastChangedTimestamp = ShortcutService.parseLongAttribute(parser, ATTR_TIMESTAMP);
         flags = (int) ShortcutService.parseLongAttribute(parser, ATTR_FLAGS);
@@ -1429,8 +1439,11 @@ class ShortcutPackage extends ShortcutPackageItem {
                         depth, type, tag));
             }
             switch (tag) {
-                case TAG_INTENT_EXTRAS:
-                    intentPersistableExtras = PersistableBundle.restoreFromXml(parser);
+                case TAG_INTENT_EXTRAS_LEGACY:
+                    intentPersistableExtrasLegacy = PersistableBundle.restoreFromXml(parser);
+                    continue;
+                case TAG_INTENT:
+                    intents.add(parseIntent(parser));
                     continue;
                 case TAG_EXTRAS:
                     extras = PersistableBundle.restoreFromXml(parser);
@@ -1453,13 +1466,51 @@ class ShortcutPackage extends ShortcutPackageItem {
             throw ShortcutService.throwForInvalidTag(depth, tag);
         }
 
+        if (intentLegacy != null) {
+            // For the legacy file format which supported only one intent per shortcut.
+            ShortcutInfo.setIntentExtras(intentLegacy, intentPersistableExtrasLegacy);
+            intents.clear();
+            intents.add(intentLegacy);
+        }
+
         return new ShortcutInfo(
                 userId, id, packageName, activityComponent, /* icon =*/ null,
                 title, titleResId, titleResName, text, textResId, textResName,
                 disabledMessage, disabledMessageResId, disabledMessageResName,
-                categories, intent,
-                intentPersistableExtras, rank, extras, lastChangedTimestamp, flags,
+                categories,
+                intents.toArray(new Intent[intents.size()]),
+                rank, extras, lastChangedTimestamp, flags,
                 iconResId, iconResName, bitmapPath);
+    }
+
+    private static Intent parseIntent(XmlPullParser parser)
+            throws IOException, XmlPullParserException {
+
+        Intent intent = ShortcutService.parseIntentAttribute(parser,
+                ATTR_INTENT_NO_EXTRA);
+
+        final int outerDepth = parser.getDepth();
+        int type;
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+            if (type != XmlPullParser.START_TAG) {
+                continue;
+            }
+            final int depth = parser.getDepth();
+            final String tag = parser.getName();
+            if (ShortcutService.DEBUG_LOAD) {
+                Slog.d(TAG, String.format("  depth=%d type=%d name=%s",
+                        depth, type, tag));
+            }
+            switch (tag) {
+                case TAG_EXTRAS:
+                    ShortcutInfo.setIntentExtras(intent,
+                            PersistableBundle.restoreFromXml(parser));
+                    continue;
+            }
+            throw ShortcutService.throwForInvalidTag(depth, tag);
+        }
+        return intent;
     }
 
     @VisibleForTesting
