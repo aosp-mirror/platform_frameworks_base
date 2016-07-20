@@ -28,6 +28,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
@@ -43,7 +44,9 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -396,10 +399,11 @@ public final class JobSchedulerService extends com.android.server.SystemService
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
             if (DEBUG) {
-                Slog.d(TAG, "Receieved: " + intent.getAction());
+                Slog.d(TAG, "Receieved: " + action);
             }
-            if (Intent.ACTION_PACKAGE_CHANGED.equals(intent.getAction())) {
+            if (Intent.ACTION_PACKAGE_CHANGED.equals(action)) {
                 // Purge the app's jobs if the whole package was just disabled.  When this is
                 // the case the component name will be a bare package name.
                 final String pkgName = getPackageName(intent);
@@ -433,7 +437,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 } else {
                     Slog.w(TAG, "PACKAGE_CHANGED for " + pkgName + " / uid " + pkgUid);
                 }
-            } else if (Intent.ACTION_PACKAGE_REMOVED.equals(intent.getAction())) {
+            } else if (Intent.ACTION_PACKAGE_REMOVED.equals(action)) {
                 // If this is an outright uninstall rather than the first half of an
                 // app update sequence, cancel the jobs associated with the app.
                 if (!intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
@@ -443,12 +447,43 @@ public final class JobSchedulerService extends com.android.server.SystemService
                     }
                     cancelJobsForUid(uidRemoved, true);
                 }
-            } else if (Intent.ACTION_USER_REMOVED.equals(intent.getAction())) {
+            } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
                 final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
                 if (DEBUG) {
                     Slog.d(TAG, "Removing jobs for user: " + userId);
                 }
                 cancelJobsForUser(userId);
+            } else if (Intent.ACTION_QUERY_PACKAGE_RESTART.equals(action)) {
+                // Has this package scheduled any jobs, such that we will take action
+                // if it were to be force-stopped?
+                final int pkgUid = intent.getIntExtra(Intent.EXTRA_UID, -1);
+                final String pkgName = intent.getData().getSchemeSpecificPart();
+                if (pkgUid != -1) {
+                    List<JobStatus> jobsForUid;
+                    synchronized (mLock) {
+                        jobsForUid = mJobs.getJobsByUid(pkgUid);
+                    }
+                    for (int i = jobsForUid.size() - 1; i >= 0; i--) {
+                        if (jobsForUid.get(i).getSourcePackageName().equals(pkgName)) {
+                            if (DEBUG) {
+                                Slog.d(TAG, "Restart query: package " + pkgName + " at uid "
+                                        + pkgUid + " has jobs");
+                            }
+                            setResultCode(Activity.RESULT_OK);
+                            break;
+                        }
+                    }
+                }
+            } else if (Intent.ACTION_PACKAGE_RESTARTED.equals(action)) {
+                // possible force-stop
+                final int pkgUid = intent.getIntExtra(Intent.EXTRA_UID, -1);
+                final String pkgName = intent.getData().getSchemeSpecificPart();
+                if (pkgUid != -1) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Removing jobs for pkg " + pkgName + " at uid " + pkgUid);
+                    }
+                    cancelJobsForPackageAndUid(pkgName, pkgUid);
+                }
             }
         }
     };
@@ -580,6 +615,19 @@ public final class JobSchedulerService extends com.android.server.SystemService
         for (int i=0; i<jobsForUser.size(); i++) {
             JobStatus toRemove = jobsForUser.get(i);
             cancelJobImpl(toRemove, null);
+        }
+    }
+
+    void cancelJobsForPackageAndUid(String pkgName, int uid) {
+        List<JobStatus> jobsForUid;
+        synchronized (mLock) {
+            jobsForUid = mJobs.getJobsByUid(uid);
+        }
+        for (int i = jobsForUid.size() - 1; i >= 0; i--) {
+            final JobStatus job = jobsForUid.get(i);
+            if (job.getSourcePackageName().equals(pkgName)) {
+                cancelJobImpl(job, null);
+            }
         }
     }
 
@@ -754,6 +802,8 @@ public final class JobSchedulerService extends com.android.server.SystemService
             final IntentFilter filter = new IntentFilter();
             filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
             filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
+            filter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
+            filter.addAction(Intent.ACTION_QUERY_PACKAGE_RESTART);
             filter.addDataScheme("package");
             getContext().registerReceiverAsUser(
                     mBroadcastReceiver, UserHandle.ALL, filter, null, null);
