@@ -717,6 +717,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
     }
 
     public void tearDown() throws Exception {
+        setMobileDataAlwaysOn(false);
         if (mCellNetworkAgent != null) { mCellNetworkAgent.disconnect(); }
         if (mWiFiNetworkAgent != null) { mWiFiNetworkAgent.disconnect(); }
         mCellNetworkAgent = mWiFiNetworkAgent = null;
@@ -1814,6 +1815,85 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         mCm.unregisterNetworkCallback(cellNetworkCallback);
     }
 
+    private void setMobileDataAlwaysOn(boolean enable) {
+        ContentResolver cr = mServiceContext.getContentResolver();
+        Settings.Global.putInt(cr, Settings.Global.MOBILE_DATA_ALWAYS_ON, enable ? 1 : 0);
+        mService.updateMobileDataAlwaysOn();
+        mService.waitForIdle();
+    }
+
+    private boolean isForegroundNetwork(MockNetworkAgent network) {
+        NetworkCapabilities nc = mCm.getNetworkCapabilities(network.getNetwork());
+        assertNotNull(nc);
+        return nc.hasCapability(NET_CAPABILITY_FOREGROUND);
+    }
+
+    @SmallTest
+    public void testBackgroundNetworks() throws Exception {
+        // Create a background request. We can't do this ourselves because ConnectivityService
+        // doesn't have an API for it. So just turn on mobile data always on.
+        setMobileDataAlwaysOn(true);
+        final NetworkRequest request = new NetworkRequest.Builder().build();
+        final NetworkRequest fgRequest = new NetworkRequest.Builder()
+                .addCapability(NET_CAPABILITY_FOREGROUND).build();
+        final TestNetworkCallback callback = new TestNetworkCallback();
+        final TestNetworkCallback fgCallback = new TestNetworkCallback();
+        mCm.registerNetworkCallback(request, callback);
+        mCm.registerNetworkCallback(fgRequest, fgCallback);
+
+        mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
+        mCellNetworkAgent.connect(true);
+        callback.expectCallback(CallbackState.AVAILABLE, mCellNetworkAgent);
+        fgCallback.expectCallback(CallbackState.AVAILABLE, mCellNetworkAgent);
+        assertTrue(isForegroundNetwork(mCellNetworkAgent));
+
+        mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
+        mWiFiNetworkAgent.connect(true);
+
+        // When wifi connects, cell lingers.
+        callback.expectCallback(CallbackState.AVAILABLE, mWiFiNetworkAgent);
+        fgCallback.expectCallback(CallbackState.AVAILABLE, mWiFiNetworkAgent);
+        callback.expectCallback(CallbackState.LOSING, mCellNetworkAgent);
+        fgCallback.expectCallback(CallbackState.LOSING, mCellNetworkAgent);
+        assertTrue(isForegroundNetwork(mCellNetworkAgent));
+        assertTrue(isForegroundNetwork(mWiFiNetworkAgent));
+
+        // When lingering is complete, cell is still there but is now in the background.
+        fgCallback.expectCallback(CallbackState.LOST, mCellNetworkAgent, TEST_LINGER_DELAY_MS);
+        callback.assertNoCallback();
+        assertFalse(isForegroundNetwork(mCellNetworkAgent));
+        assertTrue(isForegroundNetwork(mWiFiNetworkAgent));
+
+        // File a cell request and check that cell comes into the foreground.
+        final NetworkRequest cellRequest = new NetworkRequest.Builder()
+                .addTransportType(TRANSPORT_CELLULAR).build();
+        final TestNetworkCallback cellCallback = new TestNetworkCallback();
+        mCm.requestNetwork(cellRequest, cellCallback);
+        cellCallback.expectCallback(CallbackState.AVAILABLE, mCellNetworkAgent);
+        fgCallback.expectCallback(CallbackState.AVAILABLE, mCellNetworkAgent);
+        callback.assertNoCallback();  // Because the network is already up.
+        assertTrue(isForegroundNetwork(mCellNetworkAgent));
+        assertTrue(isForegroundNetwork(mWiFiNetworkAgent));
+
+        // Release the request. The network immediately goes into the background, since it was not
+        // lingering.
+        mCm.unregisterNetworkCallback(cellCallback);
+        fgCallback.expectCallback(CallbackState.LOST, mCellNetworkAgent);
+        callback.assertNoCallback();
+        assertFalse(isForegroundNetwork(mCellNetworkAgent));
+        assertTrue(isForegroundNetwork(mWiFiNetworkAgent));
+
+        // Disconnect wifi and check that cell is foreground again.
+        mWiFiNetworkAgent.disconnect();
+        callback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
+        fgCallback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
+        fgCallback.expectCallback(CallbackState.AVAILABLE, mCellNetworkAgent);
+        assertTrue(isForegroundNetwork(mCellNetworkAgent));
+
+        mCm.unregisterNetworkCallback(callback);
+        mCm.unregisterNetworkCallback(fgCallback);
+    }
+
     @SmallTest
     public void testRequestBenchmark() throws Exception {
         // Benchmarks connecting and switching performance in the presence of a large number of
@@ -1919,8 +1999,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
 
         // Turn on mobile data always on. The factory starts looking again.
         testFactory.expectAddRequests(1);
-        Settings.Global.putInt(cr, Settings.Global.MOBILE_DATA_ALWAYS_ON, 1);
-        mService.updateMobileDataAlwaysOn();
+        setMobileDataAlwaysOn(true);
         testFactory.waitForNetworkRequests(2);
         assertTrue(testFactory.getMyStartRequested());
 
@@ -1940,8 +2019,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
 
         // Turn off mobile data always on and expect the request to disappear...
         testFactory.expectRemoveRequests(1);
-        Settings.Global.putInt(cr, Settings.Global.MOBILE_DATA_ALWAYS_ON, 0);
-        mService.updateMobileDataAlwaysOn();
+        setMobileDataAlwaysOn(false);
         testFactory.waitForNetworkRequests(1);
 
         // ...  and cell data to be torn down.
