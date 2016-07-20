@@ -19,7 +19,9 @@
         android:shortcutId="ms1"
         android:shortcutShortLabel="@string/shortcut_title1"
         >
-        <intent android:action="action1" />
+        <intent android:action="action1" >
+            <extra android:name="key1" android:value="value1" />
+        </intent>
     </shortcut>
 
     <!-- Invalid: no intent -->
@@ -28,13 +30,17 @@
         android:shortcutShortLabel="@string/shortcut_title1"
         />
 
-    <!-- Valid: more than one intent; first one will be picked. -->
+    <!-- Valid: more than one intent -->
     <shortcut
         android:shortcutId="ms2"
         android:shortcutShortLabel="@string/shortcut_title1"
         >
-        <intent android:action="action2_1" />
-        <intent android:action="action2_2" />
+        <intent android:action="action2_1" >
+            <extra android:name="key1" android:value="value1" />
+        </intent>
+        <intent android:action="action2_2">
+            <extra android:name="key2" android:value="value2" />
+        </intent>
     </shortcut>
 
     <!-- Valid: disabled shortcut doesn't need an intent -->
@@ -53,11 +59,12 @@
         <intent android:action="action4" />
     </shortcut>
 
-    <!-- Invalid, no intent action -->
+    <!-- Invalid, no intent action (if any of the intents is invalid, the entire shortcut will be invalid.) -->
     <shortcut
         android:shortcutId="ms_ignored2"
         android:shortcutShortLabel="@string/shortcut_title1"
         >
         <intent android:data="x"/>
+        <intent android:action="actionx"/>
     </shortcut>
 </shortcuts>

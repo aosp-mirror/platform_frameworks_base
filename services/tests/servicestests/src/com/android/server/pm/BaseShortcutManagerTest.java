@@ -34,14 +34,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
-import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.IUidObserver;
 import android.app.usage.UsageStatsManagerInternal;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -187,11 +185,6 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
         void injectRestoreCallingIdentity(long token) {
             mInjectedCallingUid = (int) token;
-        }
-
-        @Override
-        public void startActivityAsUser(@RequiresPermission Intent intent, @Nullable Bundle options,
-                UserHandle userId) {
         }
 
         @Override
@@ -705,17 +698,6 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         mUnlockedUsers.put(USER_10, true);
         mUnlockedUsers.put(USER_11, true);
         mUnlockedUsers.put(USER_P0, true);
-
-        // Set up mMockActivityManagerInternal.
-        // By default, startActivityAsPackage() will simply forward to startActivityAsUser().
-        doAnswer(new AnswerWithSystemCheck<>(inv -> {
-            mServiceContext.startActivityAsUser(
-                    (Intent) inv.getArguments()[2],
-                    (Bundle) inv.getArguments()[3],
-                    UserHandle.of((Integer) inv.getArguments()[1]));
-            return ActivityManager.START_SUCCESS;
-        })).when(mMockActivityManagerInternal).startActivityAsPackage(anyString(), anyInt(),
-                any(Intent.class), any(Bundle.class));
 
         // Set up resources
         setUpAppResources();
@@ -1303,6 +1285,35 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         return s;
     }
 
+    protected ShortcutInfo makeShortcutWithIntents(String id, Intent... intents) {
+        return makeShortcut(
+                id, "Title-" + id, /* activity =*/ null, /* icon =*/ null,
+                intents, /* rank =*/ 0);
+    }
+
+    /**
+     * Make a shortcut with details.
+     */
+    protected ShortcutInfo makeShortcut(String id, String title, ComponentName activity,
+            Icon icon, Intent[] intents, int rank) {
+        final ShortcutInfo.Builder  b = new ShortcutInfo.Builder(mClientContext, id)
+                .setActivity(new ComponentName(mClientContext.getPackageName(), "dummy"))
+                .setShortLabel(title)
+                .setRank(rank)
+                .setIntents(intents);
+        if (icon != null) {
+            b.setIcon(icon);
+        }
+        if (activity != null) {
+            b.setActivity(activity);
+        }
+        final ShortcutInfo s = b.build();
+
+        s.setTimestamp(mInjectedCurrentTimeMillis); // HACK
+
+        return s;
+    }
+
     /**
      * Make a shortcut with details.
      */
@@ -1388,33 +1399,53 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         assertTrue(getPackageShortcut(packageName, shortcutId, userId) == null);
     }
 
+    protected Intent[] launchShortcutAndGetIntentsInner(Runnable shortcutStarter,
+            @NonNull String packageName, @NonNull String shortcutId, int userId) {
+        reset(mMockActivityManagerInternal);
+        shortcutStarter.run();
+
+        final ArgumentCaptor<Intent[]> intentsCaptor = ArgumentCaptor.forClass(Intent[].class);
+        verify(mMockActivityManagerInternal).startActivitiesAsPackage(
+                eq(packageName),
+                eq(userId),
+                intentsCaptor.capture(),
+                any(Bundle.class));
+        return intentsCaptor.getValue();
+    }
+
+    protected Intent[] launchShortcutAndGetIntents(
+            @NonNull String packageName, @NonNull String shortcutId, int userId) {
+        return launchShortcutAndGetIntentsInner(
+                () -> {
+                    mLauncherApps.startShortcut(packageName, shortcutId, null, null,
+                            UserHandle.of(userId));
+                }, packageName, shortcutId, userId
+        );
+    }
+
     protected Intent launchShortcutAndGetIntent(
             @NonNull String packageName, @NonNull String shortcutId, int userId) {
-        reset(mServiceContext);
-        mLauncherApps.startShortcut(packageName, shortcutId, null, null,
-                UserHandle.of(userId));
+        final Intent[] intents = launchShortcutAndGetIntents(packageName, shortcutId, userId);
+        assertEquals(1, intents.length);
+        return intents[0];
+    }
 
-        final ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
-        verify(mServiceContext).startActivityAsUser(
-                intentCaptor.capture(),
-                any(Bundle.class),
-                eq(UserHandle.of(userId)));
-        return intentCaptor.getValue();
+    protected Intent[] launchShortcutAndGetIntents_withShortcutInfo(
+            @NonNull String packageName, @NonNull String shortcutId, int userId) {
+        return launchShortcutAndGetIntentsInner(
+                () -> {
+                    mLauncherApps.startShortcut(
+                            getShortcutInfoAsLauncher(packageName, shortcutId, userId), null, null);
+                }, packageName, shortcutId, userId
+        );
     }
 
     protected Intent launchShortcutAndGetIntent_withShortcutInfo(
             @NonNull String packageName, @NonNull String shortcutId, int userId) {
-        reset(mServiceContext);
-
-        mLauncherApps.startShortcut(
-                getShortcutInfoAsLauncher(packageName, shortcutId, userId), null, null);
-
-        final ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
-        verify(mServiceContext).startActivityAsUser(
-                intentCaptor.capture(),
-                any(Bundle.class),
-                eq(UserHandle.of(userId)));
-        return intentCaptor.getValue();
+        final Intent[] intents = launchShortcutAndGetIntents_withShortcutInfo(
+                packageName, shortcutId, userId);
+        assertEquals(1, intents.length);
+        return intents[0];
     }
 
     protected void assertShortcutLaunchable(@NonNull String packageName, @NonNull String shortcutId,
@@ -1423,9 +1454,25 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         assertNotNull(launchShortcutAndGetIntent_withShortcutInfo(packageName, shortcutId, userId));
     }
 
-    protected void assertShortcutNotLaunchable(@NonNull String packageName,
+    protected void assertShortcutNotLaunched(@NonNull String packageName,
+            @NonNull String shortcutId, int userId) {
+        reset(mMockActivityManagerInternal);
+        try {
+            mLauncherApps.startShortcut(packageName, shortcutId, null, null,
+                    UserHandle.of(userId));
+            fail("ActivityNotFoundException was not thrown");
+        } catch (ActivityNotFoundException expected) {
+        }
+        // This shouldn't have been called.
+        verify(mMockActivityManagerInternal, times(0)).startActivitiesAsPackage(
+                anyString(),
+                anyInt(),
+                any(Intent[].class),
+                any(Bundle.class));
+    }
+
+    protected void assertStartShortcutThrowsException(@NonNull String packageName,
             @NonNull String shortcutId, int userId, Class<?> expectedException) {
-        reset(mServiceContext);
         Exception thrown = null;
         try {
             mLauncherApps.startShortcut(packageName, shortcutId, null, null,
@@ -1433,11 +1480,6 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         } catch (Exception e) {
             thrown = e;
         }
-        // This shouldn't have been called.
-        verify(mServiceContext, times(0)).startActivityAsUser(
-                any(Intent.class),
-                any(Bundle.class),
-                any(UserHandle.class));
         assertNotNull("Exception was not thrown", thrown);
         assertEquals("Exception type different", expectedException, thrown.getClass());
     }

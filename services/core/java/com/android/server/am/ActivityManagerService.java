@@ -21800,10 +21800,13 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         @Override
-        public int startActivityAsPackage(String packageName, int userId, Intent intent,
+        public int startActivitiesAsPackage(String packageName, int userId, Intent[] intents,
                 Bundle bOptions) {
-            Preconditions.checkNotNull(intent, "intent");
-            final String resolvedType = intent.resolveTypeIfNeeded(mContext.getContentResolver());
+            Preconditions.checkNotNull(intents, "intents");
+            final String[] resolvedTypes = new String[intents.length];
+            for (int i = 0; i < intents.length; i++) {
+                resolvedTypes[i] = intents[i].resolveTypeIfNeeded(mContext.getContentResolver());
+            }
 
             // UID of the package on user userId.
             // "= 0" is needed because otherwise catch(RemoteException) would make it look like
@@ -21817,9 +21820,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
 
             synchronized (ActivityManagerService.this) {
-                return startActivityInPackage(packageUid, packageName, intent, resolvedType,
-                        /*resultTo*/ null, /*resultWho*/ null, /*requestCode*/ 0, /*startFlags*/ 0,
-                        bOptions, userId, /*container*/ null, /*inTask*/ null);
+                return startActivitiesInPackage(packageUid, packageName, intents, resolvedTypes,
+                        /*resultTo*/ null, bOptions, userId);
             }
         }
     }
