@@ -974,7 +974,7 @@ class WindowSurfacePlacer {
             // windows, since that means "perform layout as normal,
             // just don't display").
             if (!gone || !win.mHaveFrame || win.mLayoutNeeded
-                    || ((win.isConfigChanged() || win.setInsetsChanged())
+                    || ((win.isConfigChanged() || win.setReportResizeHints())
                             && !win.isGoneForLayoutLw() &&
                             ((win.mAttrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0 ||
                             (win.mHasSurface && win.mAppToken != null &&
