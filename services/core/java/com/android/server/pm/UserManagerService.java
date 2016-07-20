@@ -2879,9 +2879,15 @@ public class UserManagerService extends IUserManager.Stub {
      * app storage and apply any user restrictions.
      */
     public void onBeforeStartUser(int userId) {
-        final int userSerial = getUserSerialNumber(userId);
+        UserInfo userInfo = getUserInfo(userId);
+        if (userInfo == null) {
+            return;
+        }
+        final int userSerial = userInfo.serialNumber;
+        // Migrate only if build fingerprints mismatch
+        boolean migrateAppsData = !Build.FINGERPRINT.equals(userInfo.lastLoggedInFingerprint);
         mPm.prepareUserData(userId, userSerial, StorageManager.FLAG_STORAGE_DE);
-        mPm.reconcileAppsData(userId, StorageManager.FLAG_STORAGE_DE);
+        mPm.reconcileAppsData(userId, StorageManager.FLAG_STORAGE_DE, migrateAppsData);
 
         if (userId != UserHandle.USER_SYSTEM) {
             synchronized (mRestrictionsLock) {
@@ -2897,9 +2903,15 @@ public class UserManagerService extends IUserManager.Stub {
      * app storage.
      */
     public void onBeforeUnlockUser(@UserIdInt int userId) {
-        final int userSerial = getUserSerialNumber(userId);
+        UserInfo userInfo = getUserInfo(userId);
+        if (userInfo == null) {
+            return;
+        }
+        final int userSerial = userInfo.serialNumber;
+        // Migrate only if build fingerprints mismatch
+        boolean migrateAppsData = !Build.FINGERPRINT.equals(userInfo.lastLoggedInFingerprint);
         mPm.prepareUserData(userId, userSerial, StorageManager.FLAG_STORAGE_CE);
-        mPm.reconcileAppsData(userId, StorageManager.FLAG_STORAGE_CE);
+        mPm.reconcileAppsData(userId, StorageManager.FLAG_STORAGE_CE, migrateAppsData);
     }
 
     /**
