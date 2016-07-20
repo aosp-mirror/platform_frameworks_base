@@ -452,27 +452,28 @@ public class LauncherAppsService extends SystemService {
                 ensureShortcutPermission(callingPackage, userId);
             }
 
-            final Intent intent = mShortcutServiceInternal.createShortcutIntent(getCallingUserId(),
-                    callingPackage, packageName, shortcutId, userId);
-            if (intent == null) {
+            final Intent[] intents = mShortcutServiceInternal.createShortcutIntents(
+                    getCallingUserId(), callingPackage, packageName, shortcutId, userId);
+            if (intents == null || intents.length == 0) {
                 return false;
             }
             // Note the target activity doesn't have to be exported.
 
-            intent.setSourceBounds(sourceBounds);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            // TODO Use sourceBounds
 
-            return startShortcutIntentAsPublisher(
-                    intent, packageName, startActivityOptions, userId);
+            intents[0].addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+            return startShortcutIntentsAsPublisher(
+                    intents, packageName, startActivityOptions, userId);
         }
 
-        private boolean startShortcutIntentAsPublisher(@NonNull Intent intent,
+        private boolean startShortcutIntentsAsPublisher(@NonNull Intent[] intents,
                 @NonNull String publisherPackage, Bundle startActivityOptions, int userId) {
             final int code;
             final long ident = injectClearCallingIdentity();
             try {
-                code = mActivityManagerInternal.startActivityAsPackage(publisherPackage,
-                        userId, intent, startActivityOptions);
+                code = mActivityManagerInternal.startActivitiesAsPackage(publisherPackage,
+                        userId, intents, startActivityOptions);
                 if (code >= ActivityManager.START_SUCCESS) {
                     return true; // Success
                 } else {

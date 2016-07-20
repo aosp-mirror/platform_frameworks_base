@@ -165,10 +165,10 @@ public abstract class ActivityManagerInternal {
             int userId);
 
     /**
-     * Start an activity {@code intent} as if {@code packageName} on user {@code userId} did it.
+     * Start activity {@code intents} as if {@code packageName} on user {@code userId} did it.
      *
      * @return error codes used by {@link IActivityManager#startActivity} and its siblings.
      */
-    public abstract int startActivityAsPackage(String packageName,
-            int userId, Intent intent, Bundle bOptions);
+    public abstract int startActivitiesAsPackage(String packageName,
+            int userId, Intent[] intents, Bundle bOptions);
 }

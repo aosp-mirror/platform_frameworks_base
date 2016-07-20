@@ -687,7 +687,7 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     @Nullable
-    static Intent parseIntentAttribute(XmlPullParser parser, String attribute) {
+    static Intent parseIntentAttributeNoDefault(XmlPullParser parser, String attribute) {
         final String value = parseStringAttribute(parser, attribute);
         Intent parsed = null;
         if (!TextUtils.isEmpty(value)) {
@@ -697,6 +697,12 @@ public class ShortcutService extends IShortcutService.Stub {
                 Slog.e(TAG, "Error parsing intent", e);
             }
         }
+        return parsed;
+    }
+
+    @Nullable
+    static Intent parseIntentAttribute(XmlPullParser parser, String attribute) {
+        Intent parsed = parseIntentAttributeNoDefault(parser, attribute);
         if (parsed == null) {
             // Default intent.
             parsed = new Intent(Intent.ACTION_VIEW);
@@ -2240,7 +2246,7 @@ public class ShortcutService extends IShortcutService.Stub {
         }
 
         @Override
-        public Intent createShortcutIntent(int launcherUserId,
+        public Intent[] createShortcutIntents(int launcherUserId,
                 @NonNull String callingPackage,
                 @NonNull String packageName, @NonNull String shortcutId, int userId) {
             // Calling permission must be checked by LauncherAppsImpl.
@@ -2259,7 +2265,7 @@ public class ShortcutService extends IShortcutService.Stub {
                     Log.e(TAG, "Shortcut " + shortcutId + " does not exist or disabled");
                     return null;
                 }
-                return si.getIntent();
+                return si.getIntents();
             }
         }
 

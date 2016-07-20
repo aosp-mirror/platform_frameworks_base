@@ -100,7 +100,7 @@ public class ShortcutManagerTest4 extends BaseShortcutManagerTest {
     );
 
     public void testPersistingWeirdCharacters() {
-        final Intent intent = new Intent(Intent.ACTION_VIEW)
+        final Intent intent = new Intent(Intent.ACTION_MAIN)
                 .putExtras(sIntentExtras);
 
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {

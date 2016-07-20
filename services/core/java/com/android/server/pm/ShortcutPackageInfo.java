@@ -171,7 +171,7 @@ class ShortcutPackageInfo {
 
         final int versionCode = ShortcutService.parseIntAttribute(parser, ATTR_VERSION);
 
-        final long lastUpdateTime = ShortcutService.parseIntAttribute(
+        final long lastUpdateTime = ShortcutService.parseLongAttribute(
                 parser, ATTR_LAST_UPDATE_TIME);
 
         // When restoring from backup, it's always shadow.
