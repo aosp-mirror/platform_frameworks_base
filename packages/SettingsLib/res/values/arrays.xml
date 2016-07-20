@@ -386,4 +386,12 @@
         <item>3</item>
     </string-array>
 
+    <!-- IDs for each color mode. The values must match the corresponding constants in
+         android.view.Display -->
+    <integer-array name="color_mode_ids">
+        <item>0</item>
+        <item>-1</item>
+        <item>7</item>
+    </integer-array>
+
 </resources>

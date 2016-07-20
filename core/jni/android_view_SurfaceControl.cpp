@@ -32,6 +32,7 @@
 #include <jni.h>
 #include <memory>
 #include <stdio.h>
+#include <system/graphics.h>
 #include <ui/DisplayInfo.h>
 #include <ui/HdrCapabilities.h>
 #include <ui/FrameStats.h>
@@ -58,7 +59,6 @@ static struct {
     jfieldID secure;
     jfieldID appVsyncOffsetNanos;
     jfieldID presentationDeadlineNanos;
-    jfieldID colorTransform;
 } gPhysicalDisplayInfoClassInfo;
 
 static struct {
@@ -429,8 +429,6 @@ static jobjectArray nativeGetDisplayConfigs(JNIEnv* env, jclass clazz,
                 info.appVsyncOffset);
         env->SetLongField(infoObj, gPhysicalDisplayInfoClassInfo.presentationDeadlineNanos,
                 info.presentationDeadline);
-        env->SetIntField(infoObj, gPhysicalDisplayInfoClassInfo.colorTransform,
-                info.colorTransform);
         env->SetObjectArrayElement(configArray, static_cast<jsize>(c), infoObj);
         env->DeleteLocalRef(infoObj);
     }
@@ -448,6 +446,43 @@ static jboolean nativeSetActiveConfig(JNIEnv* env, jclass clazz, jobject tokenOb
     sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
     if (token == NULL) return JNI_FALSE;
     status_t err = SurfaceComposerClient::setActiveConfig(token, static_cast<int>(id));
+    return err == NO_ERROR ? JNI_TRUE : JNI_FALSE;
+}
+
+static jintArray nativeGetDisplayColorModes(JNIEnv* env, jclass, jobject tokenObj) {
+    sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
+    if (token == NULL) return NULL;
+    Vector<android_color_mode_t> colorModes;
+    if (SurfaceComposerClient::getDisplayColorModes(token, &colorModes) != NO_ERROR ||
+            colorModes.isEmpty()) {
+        return NULL;
+    }
+
+    jintArray colorModesArray = env->NewIntArray(colorModes.size());
+    if (colorModesArray == NULL) {
+        jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
+        return NULL;
+    }
+    jint* colorModesArrayValues = env->GetIntArrayElements(colorModesArray, 0);
+    for (size_t i = 0; i < colorModes.size(); i++) {
+        colorModesArrayValues[i] = static_cast<jint>(colorModes[i]);
+    }
+    env->ReleaseIntArrayElements(colorModesArray, colorModesArrayValues, 0);
+    return colorModesArray;
+}
+
+static jint nativeGetActiveColorMode(JNIEnv* env, jclass, jobject tokenObj) {
+    sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
+    if (token == NULL) return -1;
+    return static_cast<jint>(SurfaceComposerClient::getActiveColorMode(token));
+}
+
+static jboolean nativeSetActiveColorMode(JNIEnv* env, jclass,
+        jobject tokenObj, jint colorMode) {
+    sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
+    if (token == NULL) return JNI_FALSE;
+    status_t err = SurfaceComposerClient::setActiveColorMode(token,
+            static_cast<android_color_mode_t>(colorMode));
     return err == NO_ERROR ? JNI_TRUE : JNI_FALSE;
 }
 
@@ -715,6 +750,12 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeGetActiveConfig },
     {"nativeSetActiveConfig", "(Landroid/os/IBinder;I)Z",
             (void*)nativeSetActiveConfig },
+    {"nativeGetDisplayColorModes", "(Landroid/os/IBinder;)[I",
+            (void*)nativeGetDisplayColorModes},
+    {"nativeGetActiveColorMode", "(Landroid/os/IBinder;)I",
+            (void*)nativeGetActiveColorMode},
+    {"nativeSetActiveColorMode", "(Landroid/os/IBinder;I)Z",
+            (void*)nativeSetActiveColorMode},
     {"nativeGetHdrCapabilities", "(Landroid/os/IBinder;)Landroid/view/Display$HdrCapabilities;",
             (void*)nativeGetHdrCapabilities },
     {"nativeClearContentFrameStats", "(J)Z",
@@ -757,8 +798,6 @@ int register_android_view_SurfaceControl(JNIEnv* env)
             clazz, "appVsyncOffsetNanos", "J");
     gPhysicalDisplayInfoClassInfo.presentationDeadlineNanos = GetFieldIDOrDie(env,
             clazz, "presentationDeadlineNanos", "J");
-    gPhysicalDisplayInfoClassInfo.colorTransform = GetFieldIDOrDie(env, clazz,
-            "colorTransform", "I");
 
     jclass rectClazz = FindClassOrDie(env, "android/graphics/Rect");
     gRectClassInfo.bottom = GetFieldIDOrDie(env, rectClazz, "bottom", "I");
