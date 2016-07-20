@@ -188,13 +188,18 @@ public:
     virtual void prepareTree(TreeInfo& info) override {
         info.errorHandler = this;
 
-        for (auto& anim : mVectorDrawableAnimators) {
+        for (auto& anim : mRunningVDAnimators) {
             // Assume that the property change in VD from the animators will not be consumed. Mark
             // otherwise if the VDs are found in the display list tree. For VDs that are not in
             // the display list tree, we stop providing animation pulses by 1) removing them from
             // the animation list, 2) post a delayed message to end them at end time so their
             // listeners can receive the corresponding callbacks.
             anim->getVectorDrawable()->setPropertyChangeWillBeConsumed(false);
+        }
+        if (info.mode == TreeInfo::MODE_FULL) {
+            for (auto &anim : mPausedVDAnimators) {
+                anim->getVectorDrawable()->setPropertyChangeWillBeConsumed(false);
+            }
         }
         // TODO: This is hacky
         info.windowInsetLeft = -stagingProperties().getLeft();
@@ -206,17 +211,33 @@ public:
         info.windowInsetTop = 0;
         info.errorHandler = nullptr;
 
-        for (auto it = mVectorDrawableAnimators.begin(); it != mVectorDrawableAnimators.end();) {
+        for (auto it = mRunningVDAnimators.begin(); it != mRunningVDAnimators.end();) {
             if (!(*it)->getVectorDrawable()->getPropertyChangeWillBeConsumed()) {
                 // Vector Drawable is not in the display list, we should remove this animator from
-                // the list and post a delayed message to end the animator.
+                // the list, put it in the paused list, and post a delayed message to end the
+                // animator.
                 detachVectorDrawableAnimator(it->get());
-                it = mVectorDrawableAnimators.erase(it);
+                mPausedVDAnimators.insert(*it);
+                it = mRunningVDAnimators.erase(it);
             } else {
-                ++it;
+                it++;
             }
         }
-        info.out.hasAnimations |= !mVectorDrawableAnimators.empty();
+
+        if (info.mode == TreeInfo::MODE_FULL) {
+            // Check whether any paused animator's target is back in Display List. If so, put the
+            // animator back in the running list.
+            for (auto it = mPausedVDAnimators.begin(); it != mPausedVDAnimators.end();) {
+                if ((*it)->getVectorDrawable()->getPropertyChangeWillBeConsumed()) {
+                    mRunningVDAnimators.insert(*it);
+                    it = mPausedVDAnimators.erase(it);
+                } else {
+                    it++;
+                }
+            }
+        }
+        info.out.hasAnimations |= !mRunningVDAnimators.empty();
+
     }
 
     void sendMessage(const sp<MessageHandler>& handler) {
@@ -232,17 +253,18 @@ public:
     }
 
     void attachPendingVectorDrawableAnimators() {
-        mVectorDrawableAnimators.insert(mPendingVectorDrawableAnimators.begin(),
+        mRunningVDAnimators.insert(mPendingVectorDrawableAnimators.begin(),
                 mPendingVectorDrawableAnimators.end());
         mPendingVectorDrawableAnimators.clear();
     }
 
     void detachAnimators() {
         // Remove animators from the list and post a delayed message in future to end the animator
-        for (auto& anim : mVectorDrawableAnimators) {
+        for (auto& anim : mRunningVDAnimators) {
             detachVectorDrawableAnimator(anim.get());
         }
-        mVectorDrawableAnimators.clear();
+        mRunningVDAnimators.clear();
+        mPausedVDAnimators.clear();
     }
 
     void doAttachAnimatingNodes(AnimationContext* context) {
@@ -253,18 +275,48 @@ public:
         mPendingAnimatingRenderNodes.clear();
     }
 
-    void runVectorDrawableAnimators(AnimationContext* context) {
-        for (auto it = mVectorDrawableAnimators.begin(); it != mVectorDrawableAnimators.end();) {
+    void runVectorDrawableAnimators(AnimationContext* context, TreeInfo::TraversalMode mode) {
+        for (auto it = mRunningVDAnimators.begin(); it != mRunningVDAnimators.end();) {
             if ((*it)->animate(*context)) {
-                it = mVectorDrawableAnimators.erase(it);
+                it = mRunningVDAnimators.erase(it);
             } else {
-                ++it;
+                it++;
+            }
+        }
+
+        if (mode == TreeInfo::MODE_FULL) {
+            // During full sync we also need to pulse paused animators, in case their targets
+            // have been added back to the display list. All the animators that passed the
+            // scheduled finish time will be removed from the paused list.
+            for (auto it = mPausedVDAnimators.begin(); it != mPausedVDAnimators.end();) {
+                if ((*it)->animate(*context)) {
+                    // Animator has finished, remove from the list.
+                    it = mPausedVDAnimators.erase(it);
+                } else {
+                    it++;
+                }
+            }
+        }
+    }
+
+    void trimPausedVDAnimators(AnimationContext* context) {
+        // Trim paused vector drawable animator list.
+        for (auto it = mPausedVDAnimators.begin(); it != mPausedVDAnimators.end();) {
+            // Remove paused VD animator if no one else is referencing it. Note that animators that
+            // have passed scheduled finish time are removed from list when they are being pulsed
+            // before prepare tree.
+            // TODO: this is a bit hacky, need to figure out a better way to track when the paused
+            // animators should be freed.
+            if ((*it)->getStrongCount() == 1) {
+                it = mPausedVDAnimators.erase(it);
+            } else {
+                it++;
             }
         }
     }
 
     void pushStagingVectorDrawableAnimators(AnimationContext* context) {
-        for (auto& anim : mVectorDrawableAnimators) {
+        for (auto& anim : mRunningVDAnimators) {
             anim->pushStaging(*context);
         }
     }
@@ -286,7 +338,15 @@ private:
     JavaVM* mVm;
     std::vector< sp<RenderNode> > mPendingAnimatingRenderNodes;
     std::set< sp<PropertyValuesAnimatorSet> > mPendingVectorDrawableAnimators;
-    std::set< sp<PropertyValuesAnimatorSet> > mVectorDrawableAnimators;
+    std::set< sp<PropertyValuesAnimatorSet> > mRunningVDAnimators;
+    // mPausedVDAnimators stores a list of animators that have not yet passed the finish time, but
+    // their VectorDrawable targets are no longer in the DisplayList. We skip these animators when
+    // render thread runs animators independent of UI thread (i.e. RT_ONLY mode). These animators
+    // need to be re-activated once their VD target is added back into DisplayList. Since that could
+    // only happen when we do a full sync, we need to make sure to pulse these paused animators at
+    // full sync. If any animator's VD target is found in DisplayList during a full sync, we move
+    // the animator back to the running list.
+    std::set< sp<PropertyValuesAnimatorSet> > mPausedVDAnimators;
     void detachVectorDrawableAnimator(PropertyValuesAnimatorSet* anim) {
         if (anim->isInfinite() || !anim->isRunning()) {
             // Do not need to post anything if the animation is infinite (i.e. no meaningful
@@ -336,13 +396,20 @@ public:
         if (mode == TreeInfo::MODE_FULL) {
             mRootNode->pushStagingVectorDrawableAnimators(this);
         }
-        mRootNode->runVectorDrawableAnimators(this);
+        mRootNode->runVectorDrawableAnimators(this, mode);
     }
 
     // Runs any animations still left in mCurrentFrameAnimations
     virtual void runRemainingAnimations(TreeInfo& info) {
         AnimationContext::runRemainingAnimations(info);
         postOnFinishedEvents();
+        if (info.mode == TreeInfo::MODE_FULL) {
+            // Trim paused VD animators at full sync, so that when Java loses reference to an
+            // animator, we know we won't be requested to animate it any more, then we remove such
+            // animators from the paused list so they can be properly freed. We also remove the
+            // animators from paused list when the time elapsed since start has exceeded duration.
+            mRootNode->trimPausedVDAnimators(this);
+        }
     }
 
     virtual void detachAnimators() override {
