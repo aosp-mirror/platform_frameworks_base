@@ -780,20 +780,20 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     public static void performDismiss(View v, NotificationGroupManager groupManager,
             boolean fromAccessibility) {
-        if (v instanceof ExpandableNotificationRow) {
-            ExpandableNotificationRow row = (ExpandableNotificationRow) v;
-            if (groupManager.isOnlyChildInGroup(row.getStatusBarNotification())) {
-                ExpandableNotificationRow groupSummary =
-                        groupManager.getLogicalGroupSummary(row.getStatusBarNotification());
-                if (groupSummary.isClearable()) {
-                    performDismiss(groupSummary, groupManager, fromAccessibility);
-                }
-            }
-            row.setDismissed(true, fromAccessibility);
+        if (!(v instanceof ExpandableNotificationRow)) {
+            return;
         }
-        final View veto = v.findViewById(R.id.veto);
-        if (veto != null && veto.getVisibility() != View.GONE) {
-            veto.performClick();
+        ExpandableNotificationRow row = (ExpandableNotificationRow) v;
+        if (groupManager.isOnlyChildInGroup(row.getStatusBarNotification())) {
+            ExpandableNotificationRow groupSummary =
+                    groupManager.getLogicalGroupSummary(row.getStatusBarNotification());
+            if (groupSummary.isClearable()) {
+                performDismiss(groupSummary, groupManager, fromAccessibility);
+            }
+        }
+        row.setDismissed(true, fromAccessibility);
+        if (row.isClearable()) {
+            row.performDismiss();
         }
         if (DEBUG) Log.v(TAG, "onChildDismissed: " + v);
     }
