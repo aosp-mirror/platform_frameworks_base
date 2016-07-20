@@ -472,20 +472,28 @@ public abstract class BaseStatusBar extends SystemUI implements
                 }
             }
 
-            riv.setVisibility(View.VISIBLE);
-            int cx = view.getLeft() + view.getWidth() / 2;
+            int width = view.getWidth();
+            if (view instanceof TextView) {
+                // Center the reveal on the text which might be off-center from the TextView
+                TextView tv = (TextView) view;
+                if (tv.getLayout() != null) {
+                    int innerWidth = (int) tv.getLayout().getLineWidth(0);
+                    innerWidth += tv.getCompoundPaddingLeft() + tv.getCompoundPaddingRight();
+                    width = Math.min(width, innerWidth);
+                }
+            }
+            int cx = view.getLeft() + width / 2;
             int cy = view.getTop() + view.getHeight() / 2;
             int w = riv.getWidth();
             int h = riv.getHeight();
             int r = Math.max(
                     Math.max(cx + cy, cx + (h - cy)),
                     Math.max((w - cx) + cy, (w - cx) + (h - cy)));
-            ViewAnimationUtils.createCircularReveal(riv, cx, cy, 0, r)
-                    .start();
 
+            riv.setRevealParameters(cx, cy, r);
             riv.setPendingIntent(pendingIntent);
             riv.setRemoteInput(inputs, input);
-            riv.focus();
+            riv.focusAnimated();
 
             return true;
         }
