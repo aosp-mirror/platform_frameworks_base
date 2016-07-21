@@ -146,8 +146,7 @@
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
     <string name="accessibility_data_connection_4g_plus" msgid="3032226872470658661">"4G+"</string>
     <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"LTE"</string>
-    <!-- no translation found for accessibility_data_connection_lte_plus (361876866906946007) -->
-    <skip />
+    <string name="accessibility_data_connection_lte_plus" msgid="361876866906946007">"LTE+"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"Roaming"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"EDGE"</string>
@@ -324,12 +323,9 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Limită de <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Avertizare: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"Modul de lucru"</string>
-    <!-- no translation found for quick_settings_night_display_label (3577098011487644395) -->
-    <skip />
-    <!-- no translation found for quick_settings_night_display_summary_on (1814901757887526769) -->
-    <skip />
-    <!-- no translation found for quick_settings_night_display_summary_off (7892102914128777905) -->
-    <skip />
+    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Lumină de noapte"</string>
+    <string name="quick_settings_night_display_summary_on" msgid="1814901757887526769">"Lumina de noapte este activată; atingeți pentru a o dezactiva"</string>
+    <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"Lumina de noapte este dezactivată; atingeți pentru a o activa"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"Niciun element recent"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Ați șters tot"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Informații despre aplicație"</string>

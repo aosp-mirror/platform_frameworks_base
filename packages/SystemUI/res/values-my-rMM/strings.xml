@@ -320,8 +320,8 @@
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> သတိပေးချက်"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"အလုပ် မုဒ်"</string>
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"ညအလင်းရောင်"</string>
-    <string name="quick_settings_night_display_summary_on" msgid="1814901757887526769">"ညအလင်းရောင်ကိုဖွင့်ထားသည်၊ ပိတ်ရန်တို့ပါ"</string>
-    <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"ညအလင်းရောင်ကိုပိတ်ထားသည်၊ ဖွင့်ရန်တို့ပါ"</string>
+    <string name="quick_settings_night_display_summary_on" msgid="1814901757887526769">"ညအလင်းရောင်ကို ဖွင့်ထားသည်၊ ပိတ်ရန်တို့ပါ"</string>
+    <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"ညအလင်းရောင်ကို ပိတ်ထားသည်၊ ဖွင့်ရန်တို့ပါ"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"မကြာမီကဖွင့်ထားသည်များ မရှိပါ"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"သင်အားလုံးကို ရှင်းလင်းပြီးပါပြီ"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"အပလီကေးရှင်းအင်ဖို"</string>
