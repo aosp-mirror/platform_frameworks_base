@@ -130,7 +130,6 @@ static jobject getRawAttributes(JNIEnv* env, SkStream* stream, bool returnThumbn
     piex::PreviewImageData image_data;
 
     if (!GetExifFromRawImage(piexStream.get(), String8("[piex stream]"), image_data)) {
-        ALOGI("Raw image not detected");
         return NULL;
     }
 

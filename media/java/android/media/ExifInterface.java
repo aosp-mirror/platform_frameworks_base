@@ -1578,9 +1578,11 @@ public class ExifInterface {
         } catch (IOException e) {
             // Ignore exceptions in order to keep the compatibility with the old versions of
             // ExifInterface.
-            Log.w(TAG, "Invalid image: ExifInterface got an unsupported image format file"
-                    + "(ExifInterface supports JPEG and some RAW image formats only) "
-                    + "or a corrupted JPEG file to ExifInterface.", e);
+            if (DEBUG) {
+                Log.w(TAG, "Invalid image: ExifInterface got an unsupported image format file"
+                        + "(ExifInterface supports JPEG and some RAW image formats only) "
+                        + "or a corrupted JPEG file to ExifInterface.", e);
+            }
         } finally {
             addDefaultValuesForCompatibility();
 
@@ -1601,6 +1603,9 @@ public class ExifInterface {
 
     private boolean handleRawResult(HashMap map) {
         if (map == null) {
+            if (DEBUG) {
+                Log.d(TAG, "Raw image file not detected");
+            }
             return false;
         }
 
