@@ -56,12 +56,21 @@ public class FilesJankPerfTest extends JankTestBase {
         final Intent intent = new Intent(context, FilesActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         mActivity = getInstrumentation().startActivitySync(intent);
+        try {
+            device.setOrientationNatural();
+        } catch (RemoteException e) {
+        }
     }
 
     public void tearDownInLoop() {
         if (mActivity != null) {
             mActivity.finish();
             mActivity = null;
+        }
+        try {
+            final UiDevice device = UiDevice.getInstance(getInstrumentation());
+            device.unfreezeRotation();
+        } catch (RemoteException e) {
         }
     }
 
