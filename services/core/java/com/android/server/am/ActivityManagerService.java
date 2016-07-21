@@ -8607,7 +8607,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (uri == null) {
                 owner.removeUriPermissionsLocked(mode);
             } else {
-                owner.removeUriPermissionLocked(new GrantUri(userId, uri, false), mode);
+                final boolean prefix = (mode & Intent.FLAG_GRANT_PREFIX_URI_PERMISSION) != 0;
+                owner.removeUriPermissionLocked(new GrantUri(userId, uri, prefix), mode);
             }
         }
     }
