@@ -2757,12 +2757,12 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         // We need to fit it to the display if either
         // a) The task is fullscreen, or we don't have a task (we assume fullscreen for the taskless
         // windows)
-        // b) If it's a child window, we also need to fit it to the display unless
-        // FLAG_LAYOUT_NO_LIMITS is set. This is so we place Popup and similar windows on screen,
+        // b) If it's a secondary app window, we also need to fit it to the display unless
+        // FLAG_LAYOUT_NO_LIMITS is set. This is so we place Popups, dialogs, and similar windows on screen,
         // but SurfaceViews want to be always at a specific location so we don't fit it to the
         // display.
         final boolean fitToDisplay = (task == null || !nonFullscreenTask)
-                || (mIsChildWindow && !noLimits);
+                || ((mAttrs.type != TYPE_BASE_APPLICATION) && !noLimits);
         float x, y;
         int w,h;
 
