@@ -128,12 +128,12 @@
     <item msgid="1340692776955662664">"Выклікаць стэк на glGetError"</item>
   </string-array>
   <string-array name="show_non_rect_clip_entries">
-    <item msgid="993742912147090253">"Адключана"</item>
+    <item msgid="993742912147090253">"Выключана"</item>
     <item msgid="675719912558941285">"Намаляваць непрамавугольную вобласць кліпа сінім колерам"</item>
     <item msgid="1064373276095698656">"Вылучыце выпрабаваныя каманды малявання зялёным колерам"</item>
   </string-array>
   <string-array name="track_frame_time_entries">
-    <item msgid="2193584639058893150">"Адключана"</item>
+    <item msgid="2193584639058893150">"Выключана"</item>
     <item msgid="2751513398307949636">"На экране ў выглядзе слупкоў"</item>
     <item msgid="1851438178120770973">"У абалонцы adb dumpsys gfxinfo"</item>
   </string-array>

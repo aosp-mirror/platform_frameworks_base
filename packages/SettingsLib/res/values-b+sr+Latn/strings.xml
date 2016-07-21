@@ -91,7 +91,7 @@
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Bluetooth privezivanje"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Povezivanje sa internetom"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"Povezivanje i prenosni hotspot"</string>
-    <string name="managed_user_title" msgid="8101244883654409696">"Profil za posao"</string>
+    <string name="managed_user_title" msgid="8109605045406748842">"Sve radne aplikacije"</string>
     <string name="user_guest" msgid="8475274842845401871">"Gost"</string>
     <string name="unknown" msgid="1592123443519355854">"Nepoznato"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"Korisnik: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
@@ -123,6 +123,8 @@
     <string name="tts_engine_settings_button" msgid="1030512042040722285">"Pokreni podešavanja mašine"</string>
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Željena mašina"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"Opšte"</string>
+    <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"Resetujte visinu tona govora"</string>
+    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"Resetujte visinu tona kojom se tekst izgovara na podrazumevanu."</string>
   <string-array name="tts_rate_entries">
     <item msgid="6695494874362656215">"Veoma sporo"</item>
     <item msgid="4795095314303559268">"Sporo"</item>
@@ -165,7 +167,6 @@
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Omogući detaljniju evidenciju za Wi‑Fi"</string>
     <string name="wifi_aggressive_handover" msgid="9194078645887480917">"Agresivan prelaz sa Wi‑Fi mreže na mobilnu"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Uvek dozvoli skeniranje Wi‑Fi-ja u romingu"</string>
-    <string name="legacy_dhcp_client" msgid="694426978909127287">"Koristi zastareli DHCP klijent"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Podaci za mobilne uređaje su uvek aktivni"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Onemogući glavno podešavanje jačine zvuka"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Prikaz opcija za sertifikaciju bežičnog ekrana"</string>
@@ -179,7 +180,6 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Dozvoli lažne lokacije"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Dozvoli lažne lokacije"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Omogući proveru atributa za pregled"</string>
-    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"Koristite DHCP klijent iz Lollipop-a umesto novog Android DHCP klijenta."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Neka podaci za mobilne uređaje uvek budu aktivni, čak i kada je Wi‑Fi aktivan (radi brze promene mreže)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Dozvoli otklanjanje USB grešaka?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Otklanjanje USB grešaka namenjeno je samo za svrhe programiranja. Koristite ga za kopiranje podataka sa računara na uređaj i obrnuto, instaliranje aplikacija na uređaju bez obaveštenja i čitanje podataka iz evidencije."</string>
@@ -274,8 +274,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Aktivna. Dodirnite da biste je deaktivirali."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Pokrenute usluge"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Prikaz i kontrola trenutno pokrenutih usluga"</string>
-    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"Omogući višeprocesni WebView"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"Pokrećite WebView prikazivače u okviru izolovanog procesa."</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"Višeprocesni WebView"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Pokrećite WebView prikazivače zasebno"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Primena WebView-a"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Podesite primenu WebView-a"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Ovaj izbor više nije važeći. Pokušajte ponovo."</string>
@@ -323,6 +323,11 @@
     <string name="enabled_by_admin" msgid="2386503803463071894">"Omogućio je administrator"</string>
     <string name="disabled_by_admin" msgid="3669999613095206948">"Onemogućio je administrator"</string>
     <string name="home" msgid="3256884684164448244">"Početna za Podešavanja"</string>
+  <string-array name="battery_labels">
+    <item msgid="8494684293649631252">"0%"</item>
+    <item msgid="8934126114226089439">"50%"</item>
+    <item msgid="1286113608943010849">"100%"</item>
+  </string-array>
     <string name="charge_length_format" msgid="8978516217024434156">"Pre <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"Još <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="screen_zoom_summary_small" msgid="5867245310241621570">"Mali"</string>
