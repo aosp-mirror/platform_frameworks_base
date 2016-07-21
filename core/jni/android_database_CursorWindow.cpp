@@ -280,7 +280,7 @@ static void fillCharArrayBufferUTF(JNIEnv* env, jobject bufferObj,
         if (size) {
             jchar* data = static_cast<jchar*>(env->GetPrimitiveArrayCritical(dataObj, NULL));
             utf8_to_utf16_no_null_terminator(reinterpret_cast<const uint8_t*>(str), len,
-                    reinterpret_cast<char16_t*>(data));
+                    reinterpret_cast<char16_t*>(data), (size_t) size);
             env->ReleasePrimitiveArrayCritical(dataObj, data, 0);
         }
         env->SetIntField(bufferObj, gCharArrayBufferClassInfo.sizeCopied, size);
