@@ -63,7 +63,7 @@ amount of cores available on a processor.
   <code>llvm</code> compiler that runs as part of an Android build. When your application
   runs on a device, the bytecode is then compiled (just-in-time) to machine code by another
   <code>llvm</code> compiler that resides on the device. The machine code is optimized for the
-  device and also cached, so subsequent uses of the RenderScript enabled application does not
+  device and also cached, so subsequent uses of the RenderScript enabled application do not
   recompile the bytecode.</p>
 
   <p>Some key features of the RenderScript runtime libraries include:</p>
@@ -128,7 +128,7 @@ generated.</p></li>
 <h3 id="func">Functions</h3>
 <p>Functions are reflected into the script class itself, located in
 <code>project_root/gen/package/name/ScriptC_renderscript_filename</code>. For
-example, if you declare the following function in your RenderScript code:</p>
+example, if you define the following function in your RenderScript code:</p>
 
 <pre>
 void touch(float x, float y, float pressure, int id) {
@@ -142,7 +142,7 @@ void touch(float x, float y, float pressure, int id) {
 }
 </pre>
 
-<p>then the following code is generated:</p>
+<p>then the following Java code is generated:</p>
 
 <pre>
 public void invoke_touch(float x, float y, float pressure, int id) {
@@ -155,7 +155,7 @@ public void invoke_touch(float x, float y, float pressure, int id) {
 }
 </pre>
 <p>
-Functions cannot have a return value, because the RenderScript system is designed to be
+Functions cannot have return values, because the RenderScript system is designed to be
 asynchronous. When your Android framework code calls into RenderScript, the call is queued and is
 executed when possible. This restriction allows the RenderScript system to function without constant
 interruption and increases efficiency. If functions were allowed to have return values, the call
@@ -171,11 +171,11 @@ function.
 
   <p>Variables of supported types are reflected into the script class itself, located in
 <code>project_root/gen/package/name/ScriptC_renderscript_filename</code>. A set of accessor
-methods are generated for each variable. For example, if you declare the following variable in
+methods is generated for each variable. For example, if you define the following variable in
 your RenderScript code:</p>
   <pre>uint32_t unsignedInteger = 1;</pre>
 
-  <p>then the following code is generated:</p>
+  <p>then the following Java code is generated:</p>
 
 <pre>
 private long mExportVar_unsignedInteger;
@@ -194,7 +194,7 @@ public long get_unsignedInteger(){
   <p>Structs are reflected into their own classes, located in
     <code>&lt;project_root&gt;/gen/com/example/renderscript/ScriptField_struct_name</code>. This
     class represents an array of the <code>struct</code> and allows you to allocate memory for a
-    specified number of <code>struct</code>s. For example, if you declare the following struct:</p>
+    specified number of <code>struct</code>s. For example, if you define the following struct:</p>
 <pre>
 typedef struct Point {
     float2 position;
@@ -373,7 +373,7 @@ in memory. Each <code>struct</code>'s class defines the following methods and co
 the array. The RenderScript runtime automatically has access to the newly written memory.
 
       <li>Accessor methods to get and set the values of each field in a struct. Each of these
-        accessor methods have an <code>index</code> parameter to specify the <code>struct</code> in
+        accessor methods has an <code>index</code> parameter to specify the <code>struct</code> in
         the array that you want to read or write to. Each setter method also has a
 <code>copyNow</code> parameter that specifies whether or not to immediately sync this memory
 to the RenderScript runtime. To sync any memory that has not been synced, call
@@ -395,10 +395,10 @@ properties that are not yet synchronized.</li>
     </ul>
 
   <h3 id="pointer">Pointers</h3>
-  <p>Pointers are reflected into the script class itself, located in
+  <p>Global pointers are reflected into the script class itself, located in
 <code>project_root/gen/package/name/ScriptC_renderscript_filename</code>. You
 can declare pointers to a <code>struct</code> or any of the supported RenderScript types, but a
-<code>struct</code> cannot contain pointers or nested arrays. For example, if you declare the
+<code>struct</code> cannot contain pointers or nested arrays. For example, if you define the
 following pointers to a <code>struct</code> and <code>int32_t</code></p>
 
 <pre>
@@ -410,7 +410,7 @@ typedef struct Point {
 Point_t *touchPoints;
 int32_t *intPointer;
 </pre>
-  <p>then the following code is generated in:</p>
+  <p>then the following Java code is generated:</p>
 
 <pre>
 private ScriptField_Point mExportVar_touchPoints;
@@ -437,7 +437,7 @@ public Allocation get_intPointer() {
   </pre>
 
 <p>A <code>get</code> method and a special method named <code>bind_<em>pointer_name</em></code>
-(instead of a <code>set()</code> method) is generated. This method allows you to bind the memory
+(instead of a <code>set()</code> method) are generated. The <code>bind_<em>pointer_name</em></code> method allows you to bind the memory
 that is allocated in the Android VM to the RenderScript runtime (you cannot allocate
 memory in your <code>.rs</code> file). For more information, see <a href="#memory">Working
 with Allocated Memory</a>.
@@ -521,7 +521,7 @@ understand how these classes work, it is useful to think of them in relation to 
         describes.</p>
 
         <p>A type consists of five dimensions: X, Y, Z, LOD (level of detail), and Faces (of a cube
-        map). You can assign the X,Y,Z dimensions to any positive integer value within the
+        map). You can set the X,Y,Z dimensions to any positive integer value within the
         constraints of available memory. A single dimension allocation has an X dimension of
         greater than zero while the Y and Z dimensions are zero to indicate not present. For
         example, an allocation of x=10, y=1 is considered two dimensional and x=10, y=0 is
