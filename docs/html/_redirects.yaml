@@ -1210,3 +1210,5 @@ redirects:
   to: /training/articles/security-config.html
 - from: /preview/features/picture-in-picture.html
   to: /training/tv/playback/picture-in-picture.html
+- from: /preview/features/tv-recording-api.html
+  to: /training/tv/tif/content-recording.html
