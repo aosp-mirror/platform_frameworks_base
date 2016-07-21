@@ -33,7 +33,7 @@
     <string name="pages_range_example" msgid="8558694453556945172">"ဥပမာ ၁-၅၊ ၈၊ ၁၁-၁၃"</string>
     <string name="print_preview" msgid="8010217796057763343">"အစမ်းကြည့်ရှုရန်"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"အစမ်းကြည့်ရန် ပီဒီအက်ဖ် ဖတ်ရှုစရာ ထည့်သွင်းပါ"</string>
-    <string name="printing_app_crashed" msgid="854477616686566398">"စာထုတ်လုပ်သော အက်ပ် ခဏ ပျက်သွားပါသည်"</string>
+    <string name="printing_app_crashed" msgid="854477616686566398">"စာထုတ်လုပ်သော အက်ပ်ခဏ ပျက်သွားပါသည်"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"စာထုတ်အလုပ်ကို လုပ်နေပါသည်"</string>
     <string name="save_as_pdf" msgid="5718454119847596853">"ပီဒီအက်ဖ် အဖြစ်သိမ်းဆည်းရန်"</string>
     <string name="all_printers" msgid="5018829726861876202">"စာထုတ်စက် အားလုံး"</string>
@@ -81,7 +81,7 @@
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> ကို ပယ်ဖျက်နေပါသည်"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"စာထုတ်စက်မှ အမှား <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>ကိုစာထုတ်စက်ကငြင်းလိုက်သည်"</string>
-    <string name="cancel" msgid="4373674107267141885">"မလုပ်တော့ပါ"</string>
+    <string name="cancel" msgid="4373674107267141885">"မလုပ်တော့"</string>
     <string name="restart" msgid="2472034227037808749">"အစက ပြန်စရန်"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"စာထုတ်စက်နဲ့ ဆက်သွယ်ထားမှု မရှိပါ"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"အကြောင်းအရာ မသိရှိ"</string>
