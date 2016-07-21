@@ -26,6 +26,7 @@ import android.app.PendingIntent;
 import android.app.RetailDemoModeServiceInternal;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -54,6 +55,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.CallLog;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.KeyValueListParser;
@@ -333,6 +335,8 @@ public class RetailDemoModeService extends SystemService {
         um.setUserRestriction(UserManager.DISALLOW_USB_FILE_TRANSFER, true, user);
         um.setUserRestriction(UserManager.DISALLOW_MODIFY_ACCOUNTS, true, user);
         um.setUserRestriction(UserManager.DISALLOW_CONFIG_BLUETOOTH, true, user);
+        // Set this to false because the default is true on user creation
+        um.setUserRestriction(UserManager.DISALLOW_OUTGOING_CALLS, false, user);
         // Disallow rebooting in safe mode - controlled by user 0
         getUserManager().setUserRestriction(UserManager.DISALLOW_SAFE_BOOT, true,
                 UserHandle.SYSTEM);
@@ -341,7 +345,8 @@ public class RetailDemoModeService extends SystemService {
         Settings.Secure.putIntForUser(getContext().getContentResolver(),
                 Settings.Global.PACKAGE_VERIFIER_ENABLE, 0, userInfo.id);
 
-        grantRuntimePermissionToCamera(userInfo.getUserHandle());
+        grantRuntimePermissionToCamera(user);
+        clearPrimaryCallLog();
     }
 
     private void grantRuntimePermissionToCamera(UserHandle user) {
@@ -359,7 +364,18 @@ public class RetailDemoModeService extends SystemService {
         } catch (Exception e) {
             // Ignore
         }
+    }
 
+    private void clearPrimaryCallLog() {
+        final ContentResolver resolver = getContext().getContentResolver();
+
+        // Deleting primary user call log so that it doesn't get copied to the new demo user
+        final Uri uri = CallLog.Calls.CONTENT_URI;
+        try {
+            resolver.delete(uri, null, null);
+        } catch (Exception e) {
+            Slog.w(TAG, "Deleting call log failed: " + e);
+        }
     }
 
     void logSessionDuration() {
