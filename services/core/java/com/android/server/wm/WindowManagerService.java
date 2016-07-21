@@ -9425,7 +9425,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (task != null && task.mStack.getBoundsAnimating()) {
                 return;
             }
-            w.setInsetsChanged();
+            w.setReportResizeHints();
             boolean configChanged = w.isConfigChanged();
             if (DEBUG_CONFIGURATION && configChanged) {
                 Slog.v(TAG_WM, "Win " + w + " config changed: "
@@ -9437,11 +9437,11 @@ public class WindowManagerService extends IWindowManager.Stub
                     + ": configChanged=" + configChanged
                     + " dragResizingChanged=" + dragResizingChanged
                     + " last=" + w.mLastFrame + " frame=" + w.mFrame);
-            w.mLastFrame.set(w.mFrame);
             if (w.mContentInsetsChanged
                     || w.mVisibleInsetsChanged
                     || winAnimator.mSurfaceResized
                     || w.mOutsetsChanged
+                    || w.mFrameSizeChanged
                     || configChanged
                     || dragResizingChanged
                     || !w.isResizedWhileNotDragResizingReported()) {
@@ -9474,6 +9474,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 w.mLastVisibleInsets.set(w.mVisibleInsets);
                 w.mLastStableInsets.set(w.mStableInsets);
                 w.mLastOutsets.set(w.mOutsets);
+                w.mLastFrame.set(w.mFrame);
                 makeWindowFreezingScreenIfNeededLocked(w);
                 // If the orientation is changing, or we're starting or ending
                 // a drag resizing action, then we need to hold off on unfreezing
