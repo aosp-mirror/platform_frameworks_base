@@ -18,6 +18,8 @@ package android.widget;
 
 import com.android.internal.R;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.LocalActivityManager;
 import android.content.Context;
 import android.content.Intent;
@@ -108,10 +110,15 @@ public class TabHost extends FrameLayout implements ViewTreeObserver.OnTouchMode
     }
 
     /**
-     * Get a new {@link TabSpec} associated with this tab host.
-     * @param tag required tag of tab.
+     * Creates a new {@link TabSpec} associated with this tab host.
+     *
+     * @param tag tag for the tab specification, must be non-null
      */
-    public TabSpec newTabSpec(String tag) {
+    @NonNull
+    public TabSpec newTabSpec(@NonNull String tag) {
+        if (tag == null) {
+            throw new IllegalArgumentException("tag must be non-null");
+        }
         return new TabSpec(tag);
     }
 
@@ -240,10 +247,23 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
         return mTabWidget;
     }
 
+    /**
+     * Returns the current tab.
+     *
+     * @return the current tab, may be {@code null} if no tab is set as current
+     */
+    @Nullable
     public int getCurrentTab() {
         return mCurrentTab;
     }
 
+    /**
+     * Returns the tag for the current tab.
+     *
+     * @return the tag for the current tab, may be {@code null} if no tab is
+     *         set as current
+     */
+    @Nullable
     public String getCurrentTabTag() {
         if (mCurrentTab >= 0 && mCurrentTab < mTabSpecs.size()) {
             return mTabSpecs.get(mCurrentTab).getTag();
@@ -251,6 +271,13 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
         return null;
     }
 
+    /**
+     * Returns the view for the current tab.
+     *
+     * @return the view for the current tab, may be {@code null} if no tab is
+     *         set as current
+     */
+    @Nullable
     public View getCurrentTabView() {
         if (mCurrentTab >= 0 && mCurrentTab < mTabSpecs.size()) {
             return mTabWidget.getChildTabViewAt(mCurrentTab);
@@ -262,9 +289,13 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
         return mCurrentView;
     }
 
+    /**
+     * Sets the current tab based on its tag.
+     *
+     * @param tag the tag for the tab to set as current
+     */
     public void setCurrentTabByTag(String tag) {
-        int i;
-        for (i = 0; i < mTabSpecs.size(); i++) {
+        for (int i = 0, count = mTabSpecs.size(); i < count; i++) {
             if (mTabSpecs.get(i).getTag().equals(tag)) {
                 setCurrentTab(i);
                 break;
@@ -462,12 +493,17 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
      */
     public class TabSpec {
 
-        private String mTag;
+        private final @NonNull String mTag;
 
         private IndicatorStrategy mIndicatorStrategy;
         private ContentStrategy mContentStrategy;
 
-        private TabSpec(String tag) {
+        /**
+         * Constructs a new tab specification with the specified tag.
+         *
+         * @param tag the tag for the tag specification, must be non-null
+         */
+        private TabSpec(@NonNull String tag) {
             mTag = tag;
         }
 
@@ -521,7 +557,12 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
             return this;
         }
 
-
+        /**
+         * Returns the tag for this tab specification.
+         *
+         * @return the tag for this tab specification
+         */
+        @NonNull
         public String getTag() {
             return mTag;
         }
