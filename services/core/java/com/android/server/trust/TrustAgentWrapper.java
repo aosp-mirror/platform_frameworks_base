@@ -51,7 +51,7 @@ public class TrustAgentWrapper {
     private static final String EXTRA_COMPONENT_NAME = "componentName";
     private static final String TRUST_EXPIRED_ACTION = "android.server.trust.TRUST_EXPIRED_ACTION";
     private static final String PERMISSION = android.Manifest.permission.PROVIDE_TRUST_AGENT;
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = TrustManagerService.DEBUG;
     private static final String TAG = "TrustAgentWrapper";
 
     private static final int MSG_GRANT_TRUST = 1;
@@ -128,7 +128,7 @@ public class TrustAgentWrapper {
                             // DevicePolicyManager#KEYGUARD_DISABLE_TRUST_AGENTS.
                             duration = Math.min(durationMs, mMaximumTimeToLock);
                             if (DEBUG) {
-                                Log.v(TAG, "DPM lock timeout in effect. Timeout adjusted from "
+                                Slog.d(TAG, "DPM lock timeout in effect. Timeout adjusted from "
                                     + durationMs + " to " + duration);
                             }
                         } else {
@@ -146,7 +146,7 @@ public class TrustAgentWrapper {
                     mTrustManagerService.updateTrust(mUserId, flags);
                     break;
                 case MSG_TRUST_TIMEOUT:
-                    if (DEBUG) Slog.v(TAG, "Trust timed out : " + mName.flattenToShortString());
+                    if (DEBUG) Slog.d(TAG, "Trust timed out : " + mName.flattenToShortString());
                     mTrustManagerService.mArchive.logTrustTimeout(mUserId, mName);
                     onTrustTimeout();
                     // Fall through.
@@ -160,6 +160,8 @@ public class TrustAgentWrapper {
                     mTrustManagerService.updateTrust(mUserId, 0);
                     break;
                 case MSG_RESTART_TIMEOUT:
+                    Slog.w(TAG, "Connection attempt to agent " + mName.flattenToShortString()
+                            + " timed out, rebinding");
                     destroy();
                     mTrustManagerService.resetAgent(mName, mUserId);
                     break;
@@ -169,14 +171,14 @@ public class TrustAgentWrapper {
                     if (mSetTrustAgentFeaturesToken == token) {
                         mSetTrustAgentFeaturesToken = null;
                         if (mTrustDisabledByDpm && result) {
-                            if (DEBUG) Log.v(TAG, "Re-enabling agent because it acknowledged "
-                                    + "enabled features: " + mName);
+                            if (DEBUG) Slog.d(TAG, "Re-enabling agent because it acknowledged "
+                                    + "enabled features: " + mName.flattenToShortString());
                             mTrustDisabledByDpm = false;
                             mTrustManagerService.updateTrust(mUserId, 0);
                         }
                     } else {
-                        if (DEBUG) Log.w(TAG, "Ignoring MSG_SET_TRUST_AGENT_FEATURES_COMPLETED "
-                                + "with obsolete token: " + mName);
+                        if (DEBUG) Slog.w(TAG, "Ignoring MSG_SET_TRUST_AGENT_FEATURES_COMPLETED "
+                                + "with obsolete token: " + mName.flattenToShortString());
                     }
                     break;
                 case MSG_MANAGING_TRUST:
@@ -196,7 +198,7 @@ public class TrustAgentWrapper {
 
         @Override
         public void grantTrust(CharSequence userMessage, long durationMs, int flags) {
-            if (DEBUG) Slog.v(TAG, "enableTrust(" + userMessage + ", durationMs = " + durationMs
+            if (DEBUG) Slog.d(TAG, "enableTrust(" + userMessage + ", durationMs = " + durationMs
                         + ", flags = " + flags + ")");
 
             Message msg = mHandler.obtainMessage(
@@ -207,19 +209,19 @@ public class TrustAgentWrapper {
 
         @Override
         public void revokeTrust() {
-            if (DEBUG) Slog.v(TAG, "revokeTrust()");
+            if (DEBUG) Slog.d(TAG, "revokeTrust()");
             mHandler.sendEmptyMessage(MSG_REVOKE_TRUST);
         }
 
         @Override
         public void setManagingTrust(boolean managingTrust) {
-            if (DEBUG) Slog.v(TAG, "managingTrust()");
+            if (DEBUG) Slog.d(TAG, "managingTrust()");
             mHandler.obtainMessage(MSG_MANAGING_TRUST, managingTrust ? 1 : 0, 0).sendToTarget();
         }
 
         @Override
         public void onConfigureCompleted(boolean result, IBinder token) {
-            if (DEBUG) Slog.v(TAG, "onSetTrustAgentFeaturesEnabledCompleted(result=" + result);
+            if (DEBUG) Slog.d(TAG, "onSetTrustAgentFeaturesEnabledCompleted(result=" + result);
             mHandler.obtainMessage(MSG_SET_TRUST_AGENT_FEATURES_COMPLETED,
                     result ? 1 : 0, 0, token).sendToTarget();
         }
@@ -228,7 +230,7 @@ public class TrustAgentWrapper {
     private final ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            if (DEBUG) Log.v(TAG, "TrustAgent started : " + name.flattenToString());
+            if (DEBUG) Slog.d(TAG, "TrustAgent started : " + name.flattenToString());
             mHandler.removeMessages(MSG_RESTART_TIMEOUT);
             mTrustAgentService = ITrustAgentService.Stub.asInterface(service);
             mTrustManagerService.mArchive.logAgentConnected(mUserId, name);
@@ -249,7 +251,7 @@ public class TrustAgentWrapper {
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            if (DEBUG) Log.v(TAG, "TrustAgent disconnected : " + name.flattenToShortString());
+            if (DEBUG) Slog.d(TAG, "TrustAgent disconnected : " + name.flattenToShortString());
             mTrustAgentService = null;
             mManagingTrust = false;
             mSetTrustAgentFeaturesToken = null;
@@ -352,7 +354,7 @@ public class TrustAgentWrapper {
 
     boolean updateDevicePolicyFeatures() {
         boolean trustDisabled = false;
-        if (DEBUG) Slog.v(TAG, "updateDevicePolicyFeatures(" + mName + ")");
+        if (DEBUG) Slog.d(TAG, "updateDevicePolicyFeatures(" + mName + ")");
         try {
             if (mTrustAgentService != null) {
                 DevicePolicyManager dpm =
@@ -363,10 +365,10 @@ public class TrustAgentWrapper {
                     List<PersistableBundle> config = dpm.getTrustAgentConfiguration(
                             null, mName, mUserId);
                     trustDisabled = true;
-                    if (DEBUG) Slog.v(TAG, "Detected trust agents disabled. Config = " + config);
+                    if (DEBUG) Slog.d(TAG, "Detected trust agents disabled. Config = " + config);
                     if (config != null && config.size() > 0) {
                         if (DEBUG) {
-                            Slog.v(TAG, "TrustAgent " + mName.flattenToShortString()
+                            Slog.d(TAG, "TrustAgent " + mName.flattenToShortString()
                                     + " disabled until it acknowledges "+ config);
                         }
                         mSetTrustAgentFeaturesToken = new Binder();
@@ -415,7 +417,7 @@ public class TrustAgentWrapper {
         if (!mBound) {
             return;
         }
-        if (DEBUG) Log.v(TAG, "TrustAgent unbound : " + mName.flattenToShortString());
+        if (DEBUG) Slog.d(TAG, "TrustAgent unbound : " + mName.flattenToShortString());
         mTrustManagerService.mArchive.logAgentStopped(mUserId, mName);
         mContext.unbindService(mConnection);
         mBound = false;
