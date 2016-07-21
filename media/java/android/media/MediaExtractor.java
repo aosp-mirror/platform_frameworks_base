@@ -68,6 +68,9 @@ import java.util.UUID;
  * extractor.release();
  * extractor = null;
  * </pre>
+ *
+ * <p>This class requires the {@link android.Manifest.permission#INTERNET} permission
+ * when used with network-based content.
  */
 final public class MediaExtractor {
     public MediaExtractor() {
@@ -89,6 +92,10 @@ final public class MediaExtractor {
      *
      * @param context the Context to use when resolving the Uri
      * @param uri the Content URI of the data you want to extract from.
+     *
+     * <p>When <code>uri</code> refers to a network file the
+     * {@link android.Manifest.permission#INTERNET} permission is required.
+     *
      * @param headers the headers to be sent together with the request for the data.
      *        This can be {@code null} if no specific headers are to be sent with the
      *        request.
@@ -136,6 +143,10 @@ final public class MediaExtractor {
      * Sets the data source (file-path or http URL) to use.
      *
      * @param path the path of the file, or the http URL
+     *
+     * <p>When <code>path</code> refers to a network file the
+     * {@link android.Manifest.permission#INTERNET} permission is required.
+     *
      * @param headers the headers associated with the http request for the stream you want to play.
      *        This can be {@code null} if no specific headers are to be sent with the
      *        request.
@@ -181,6 +192,9 @@ final public class MediaExtractor {
      * directory), and that the pathname should reference a world-readable file.
      * As an alternative, the application could first open the file for reading,
      * and then use the file descriptor form {@link #setDataSource(FileDescriptor)}.
+     *
+     * <p>When <code>path</code> refers to a network file the
+     * {@link android.Manifest.permission#INTERNET} permission is required.
      */
     public final void setDataSource(@NonNull String path) throws IOException {
         nativeSetDataSource(
