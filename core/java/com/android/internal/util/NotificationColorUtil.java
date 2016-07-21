@@ -271,7 +271,7 @@ public class NotificationColorUtil {
      * Finds a text color with sufficient contrast over bg that has the same hue as the original
      * color, assuming it is for large text.
      */
-    private static int ensureLargeTextContrast(int color, int bg) {
+    public static int ensureLargeTextContrast(int color, int bg) {
         return findContrastColor(color, bg, true, 3);
     }
 
