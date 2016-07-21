@@ -22,11 +22,6 @@ public class TestInputEvent implements Events.InputEvent {
     }
 
     @Override
-    public boolean isTouchEvent() {
-        return !mouseEvent;
-    }
-
-    @Override
     public boolean isMouseEvent() {
         return mouseEvent;
     }

@@ -35,29 +35,8 @@ public final class Events {
      * Returns true if event was triggered by a mouse.
      */
     public static boolean isMouseEvent(MotionEvent e) {
-        return isMouseType(e.getToolType(0));
-    }
-
-    /**
-     * Returns true if event was triggered by a finger or stylus touch.
-     */
-    public static boolean isTouchEvent(MotionEvent e) {
-        return isTouchType(e.getToolType(0));
-    }
-
-    /**
-     * Returns true if event was triggered by a mouse.
-     */
-    public static boolean isMouseType(int toolType) {
+        int toolType = e.getToolType(0);
         return toolType == MotionEvent.TOOL_TYPE_MOUSE;
-    }
-
-    /**
-     * Returns true if event was triggered by a finger or stylus touch.
-     */
-    public static boolean isTouchType(int toolType) {
-        return toolType == MotionEvent.TOOL_TYPE_FINGER
-                || toolType == MotionEvent.TOOL_TYPE_STYLUS;
     }
 
     /**
@@ -116,7 +95,6 @@ public final class Events {
      * of related code.
      */
     public interface InputEvent extends AutoCloseable {
-        boolean isTouchEvent();
         boolean isMouseEvent();
         boolean isPrimaryButtonPressed();
         boolean isSecondaryButtonPressed();
@@ -209,11 +187,6 @@ public final class Events {
         @Override
         public void close() {
             recycle();
-        }
-
-        @Override
-        public boolean isTouchEvent() {
-            return Events.isTouchEvent(mEvent);
         }
 
         @Override
