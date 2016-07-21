@@ -217,9 +217,9 @@ bool CanvasContext::isSwapChainStuffed() {
     for (size_t i = 1; i < mSwapHistory.size(); i++) {
         auto& swapB = mSwapHistory[i];
 
-        // If there's a frameInterval gap we effectively already dropped a frame,
+        // If there's a multi-frameInterval gap we effectively already dropped a frame,
         // so consider the queue healthy.
-        if (swapA.swapCompletedTime - swapB.swapCompletedTime > frameInterval) {
+        if (swapA.swapCompletedTime - swapB.swapCompletedTime > frameInterval * 3) {
             return false;
         }
 
@@ -298,12 +298,17 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo,
             // Already drew for this vsync pulse, UI draw request missed
             // the deadline for RT animations
             info.out.canDrawThisFrame = false;
-        } else if (vsyncDelta >= mRenderThread.timeLord().frameIntervalNanos()) {
-            // It's been at least an entire frame interval, assume
-            // the buffer queue is fine
+        } else if (vsyncDelta >= mRenderThread.timeLord().frameIntervalNanos() * 3
+                || (latestVsync - mLastDropVsync) < 500_ms) {
+            // It's been several frame intervals, assume the buffer queue is fine
+            // or the last drop was too recent
             info.out.canDrawThisFrame = true;
         } else {
             info.out.canDrawThisFrame = !isSwapChainStuffed();
+            if (!info.out.canDrawThisFrame) {
+                // dropping frame
+                mLastDropVsync = mRenderThread.timeLord().latestVsync();
+            }
         }
     } else {
         info.out.canDrawThisFrame = true;
