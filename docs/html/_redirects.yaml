@@ -1,11 +1,6 @@
 # For information about this file's format, see
 # https://developers.google.com/internal/publishing/redirects
 redirects:
-
-# Redirects from (removed) N Preview documentation
-- from: /preview/features/afw.html
-  to: https://developers.google.com/android/work/overview
-
 - from: /about/versions/index.html
   to: /about/index.html
 - from: /about/versions/api-levels.html
@@ -1207,6 +1202,11 @@ redirects:
 - from: /r/studio-ui/menu-start.html
   to: /training/index.html?utm_medium=android-studio
 
+# Redirects from (removed) N Preview documentation
+- from: /preview/features/afw.html
+  to: https://developers.google.com/android/work/overview
+- from: /preview/features/multi-window.html
+  to: /guide/topics/ui/multi-window.html
 - from: /preview/features/icu4j-framework.html
   to: /guide/topics/resources/icu4j-framework.html
 - from: /preview/features/key-attestation.html
