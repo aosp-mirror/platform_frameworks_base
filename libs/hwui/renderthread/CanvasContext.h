@@ -200,6 +200,9 @@ private:
     RingBuffer<SwapHistory, 3> mSwapHistory;
     int64_t mFrameNumber = -1;
 
+    // last vsync for a dropped frame due to stuffed queue
+    nsecs_t mLastDropVsync = 0;
+
     bool mOpaque;
     BakedOpRenderer::LightInfo mLightInfo;
     FrameBuilder::LightGeometry mLightGeometry = { {0, 0, 0}, 0 };
