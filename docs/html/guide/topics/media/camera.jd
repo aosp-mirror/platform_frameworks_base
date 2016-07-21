@@ -1243,7 +1243,7 @@ support and to what level. After making that decision, you should plan on includ
 camera application that checks to see if device hardware supports those features and fails
 gracefully if a feature is not available.</p>
 
-<p>You can check the availabilty of camera features by getting an instance of a camera’s parameters
+<p>You can check the availabilty of camera features by getting an instance of a camera's parameters
 object, and checking the relevant methods. The following code sample shows you how to obtain a
 {@link android.hardware.Camera.Parameters} object and check if the camera supports the autofocus
 feature:</p>
@@ -1290,7 +1290,7 @@ mCamera.setParameters(params);
 
 <p>This technique works for nearly all camera features, and most parameters can be changed at any
 time after you have obtained an instance of the {@link android.hardware.Camera} object. Changes to
-parameters are typically visible to the user immediately in the application’s camera preview.
+parameters are typically visible to the user immediately in the application's camera preview.
 On the software side, parameter changes may take several frames to actually take effect as the
 camera hardware processes the new instructions and then sends updated image data.</p>
 
@@ -1341,7 +1341,7 @@ mCamera.setParameters(params);
 </pre>
 
 <p>The {@link android.hardware.Camera.Area} object contains two data parameters: A {@link
-android.graphics.Rect} object for specifying an area within the camera’s field of view and a weight
+android.graphics.Rect} object for specifying an area within the camera's field of view and a weight
 value, which tells the camera what level of importance this area should be given in light metering
 or focus calculations.</p>
 
@@ -1405,7 +1405,7 @@ class MyFaceDetectionListener implements Camera.FaceDetectionListener {
 }
 </pre>
 
-<p>After creating this class, you then set it into your application’s
+<p>After creating this class, you then set it into your application's
 {@link android.hardware.Camera} object, as shown in the example code below:</p>
 
 <pre>
@@ -1480,7 +1480,7 @@ public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
 
 <p class="note"><strong>Note:</strong> Remember to call this method <em>after</em> calling
 {@link android.hardware.Camera#startPreview startPreview()}. Do not attempt to start face detection
-in the {@link android.app.Activity#onCreate onCreate()} method of your camera app’s main activity,
+in the {@link android.app.Activity#onCreate onCreate()} method of your camera app's main activity,
 as the preview is not available by this point in your application's the execution.</p>
 
 
