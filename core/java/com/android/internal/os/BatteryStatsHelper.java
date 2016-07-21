@@ -125,6 +125,7 @@ public final class BatteryStatsHelper {
     PowerCalculator mSensorPowerCalculator;
     PowerCalculator mCameraPowerCalculator;
     PowerCalculator mFlashlightPowerCalculator;
+    PowerCalculator mMemoryPowerCalculator;
 
     boolean mHasWifiPowerReporting = false;
     boolean mHasBluetoothPowerReporting = false;
@@ -341,6 +342,11 @@ public final class BatteryStatsHelper {
             mCpuPowerCalculator = new CpuPowerCalculator(mPowerProfile);
         }
         mCpuPowerCalculator.reset();
+
+        if (mMemoryPowerCalculator == null) {
+            mMemoryPowerCalculator = new MemoryPowerCalculator(mPowerProfile);
+        }
+        mMemoryPowerCalculator.reset();
 
         if (mWakelockPowerCalculator == null) {
             mWakelockPowerCalculator = new WakelockPowerCalculator(mPowerProfile);
@@ -672,12 +678,23 @@ public final class BatteryStatsHelper {
         }
     }
 
+    private void addMemoryUsage() {
+        BatterySipper memory = new BatterySipper(DrainType.MEMORY, null, 0);
+        mMemoryPowerCalculator.calculateRemaining(memory, mStats, mRawRealtimeUs, mRawUptimeUs,
+                mStatsType);
+        memory.sumPower();
+        if (memory.totalPowerMah > 0) {
+            mUsageList.add(memory);
+        }
+    }
+
     private void processMiscUsage() {
         addUserUsage();
         addPhoneUsage();
         addScreenUsage();
         addWiFiUsage();
         addBluetoothUsage();
+        addMemoryUsage();
         addIdleUsage(); // Not including cellular idle power
         // Don't compute radio usage if it's a wifi-only device
         if (!mWifiOnly) {

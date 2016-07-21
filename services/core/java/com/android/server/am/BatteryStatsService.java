@@ -1516,6 +1516,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
                 mStats.updateCpuTimeLocked();
                 mStats.updateKernelWakelocksLocked();
+                mStats.updateKernelMemoryBandwidthLocked();
 
                 if (wifiInfo != null) {
                     if (wifiInfo.isValid()) {
