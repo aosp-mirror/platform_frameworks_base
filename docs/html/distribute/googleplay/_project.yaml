@@ -1,0 +1,6 @@
+name: "Google Play"
+home_url: /distribute/googleplay/
+description: "The premier store for distributing Android apps and games, with global reach and tools to help you gain traction in the marketplace."
+content_license: cc3-apache2
+buganizer_id: 30209417
+parent_project_metadata_path: /distribute/_project.yaml
