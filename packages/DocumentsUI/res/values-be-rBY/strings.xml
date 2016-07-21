@@ -16,7 +16,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="2783841764617238354">"Дакументы"</string>
+    <!-- no translation found for app_label (1551050262492398204) -->
+    <skip />
     <string name="downloads_label" msgid="959113951084633612">"Спампоўкі"</string>
     <string name="title_open" msgid="4353228937663917801">"Адкрыць з"</string>
     <string name="title_save" msgid="2433679664882857999">"Захаваць у"</string>
@@ -46,14 +47,14 @@
     <string name="button_dismiss" msgid="3714065566893946085">"Адхіліць"</string>
     <string name="button_retry" msgid="4392027584153752797">"Паўтарыце спробу"</string>
     <string name="sort_name" msgid="9183560467917256779">"Па назве"</string>
-    <string name="sort_date" msgid="586080032956151448">"Па даце ўнясення змен"</string>
+    <string name="sort_date" msgid="586080032956151448">"Па даце змянення"</string>
     <string name="sort_size" msgid="3350681319735474741">"Па памеры"</string>
     <string name="drawer_open" msgid="4545466532430226949">"Паказаць каранёвыя папкі"</string>
     <string name="drawer_close" msgid="7602734368552123318">"Схаваць каранёвыя папкі"</string>
     <string name="save_error" msgid="6167009778003223664">"Не атрымалася захаваць дакумент"</string>
     <string name="create_error" msgid="3735649141335444215">"Не атрымалася стварыць папку"</string>
     <string name="query_error" msgid="5999895349602476581">"Зараз немагчыма загрузіць змесціва"</string>
-    <string name="root_recent" msgid="4470053704320518133">"Апошнія"</string>
+    <string name="root_recent" msgid="4470053704320518133">"Нядаўнія"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"<xliff:g id="SIZE">%1$s</xliff:g> свабодна"</string>
     <string name="root_type_service" msgid="2178854894416775409">"Службы захоўвання"</string>
     <string name="root_type_shortcut" msgid="3318760609471618093">"Ярлыкі"</string>
@@ -112,6 +113,7 @@
     <string name="close" msgid="3043722427445528732">"Закрыць"</string>
     <string name="copy_failure_alert_content" msgid="4563147454522476183">"Не былі скапіраваны наступныя файлы: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="2635075788682922861">"Не былі перамешчаны наступныя файлы: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="delete_failure_alert_content" msgid="892393767207938353">"Не былі выдалены наступныя файлы: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"Гэтыя файлы былі сканвертаваныя ў іншы фармат: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="one">У буфер абмену скапіраваны <xliff:g id="COUNT_1">%1$d</xliff:g> файл.</item>
@@ -128,7 +130,7 @@
     <string name="open_external_dialog_root_request" msgid="8899108702926347720">"Даць <xliff:g id="APPNAME"><b>^1</b></xliff:g> доступ да вашых даных, у тым ліку фатаграфій і відэа, на <xliff:g id="STORAGE"><i>^2</i></xliff:g>?"</string>
     <string name="never_ask_again" msgid="4295278542972859268">"Больш не пытацца"</string>
     <string name="allow" msgid="7225948811296386551">"Дазволіць"</string>
-    <string name="deny" msgid="2081879885755434506">"Забараніць"</string>
+    <string name="deny" msgid="2081879885755434506">"Адмовіць"</string>
     <plurals name="elements_selected" formatted="false" msgid="1376955402452875047">
       <item quantity="one">Выбраны <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="few">Выбраны <xliff:g id="COUNT_1">%1$d</xliff:g></item>
@@ -161,4 +163,6 @@
       <item quantity="many">Выдаліць <xliff:g id="COUNT_1">%1$d</xliff:g> элементаў?</item>
       <item quantity="other">Выдаліць <xliff:g id="COUNT_1">%1$d</xliff:g> элемента?</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"На жаль, вы можаце выбраць не больш за 1000 элементаў адначасова"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"Атрымалася выбраць толькі 1000 элементаў"</string>
 </resources>
