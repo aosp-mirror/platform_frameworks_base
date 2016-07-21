@@ -381,7 +381,7 @@ $(document).ready(function(){
     $divtable.append($table);
     $divchart.append($chart);
     $div.append($divtable).append($divchart);
-    $("#version-chart").append($div);
+    $("#version-chart").replaceWith($div);
   });
 
 
@@ -449,7 +449,7 @@ $(document).ready(function(){
 
     // stack up and insert the elements
     $div.append($table).append($sizechart).append($densitychart);
-    $("#screens-chart").append($div);
+    $("#screens-chart").replaceWith($div);
   });
 
   // TODO (akassay): Remove this.
