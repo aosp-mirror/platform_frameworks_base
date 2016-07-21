@@ -30,7 +30,7 @@
     <color name="batterymeter_charge_color">#FFFFFFFF</color>
     <color name="batterymeter_bolt_color">#FFFFFFFF</color>
     <color name="qs_batterymeter_frame_color">#FF404040</color>
-    <color name="system_warning_color">#fff4511e</color><!-- deep orange 600 -->
+    <color name="system_warning_color">@*android:color/system_error</color>
     <color name="qs_text">#FFFFFFFF</color>
     <color name="qs_tile_divider">#29ffffff</color><!-- 16% white -->
     <color name="qs_subhead">#99FFFFFF</color><!-- 60% white -->
