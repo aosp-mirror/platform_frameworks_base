@@ -1621,7 +1621,6 @@ public class WindowManagerService extends IWindowManager.Stub
     void addInputMethodWindowToListLocked(WindowState win) {
         int pos = findDesiredInputMethodWindowIndexLocked(true);
         if (pos >= 0) {
-            win.mTargetAppToken = mInputMethodTarget.mAppToken;
             if (DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(
                     TAG_WM, "Adding input method window " + win + " at " + pos);
             // TODO(multidisplay): IMEs are only supported on the default display.
@@ -1630,7 +1629,6 @@ public class WindowManagerService extends IWindowManager.Stub
             moveInputMethodDialogsLocked(pos + 1);
             return;
         }
-        win.mTargetAppToken = null;
         addWindowToListInOrderLocked(win, true);
         moveInputMethodDialogsLocked(pos);
     }
@@ -1674,7 +1672,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         if (pos >= 0) {
-            final AppWindowToken targetAppToken = mInputMethodTarget.mAppToken;
             // Skip windows owned by the input method.
             if (mInputMethodWindow != null) {
                 while (pos < windows.size()) {
@@ -1689,7 +1686,6 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_INPUT_METHOD) Slog.v(TAG_WM, "Adding " + N + " dialogs at pos=" + pos);
             for (int i=0; i<N; i++) {
                 WindowState win = dialogs.get(i);
-                win.mTargetAppToken = targetAppToken;
                 pos = win.reAddWindowLocked(pos);
             }
             if (DEBUG_INPUT_METHOD) {
@@ -1700,7 +1696,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         for (int i=0; i<N; i++) {
             WindowState win = dialogs.get(i);
-            win.mTargetAppToken = null;
             reAddWindowToListInOrderLocked(win);
             if (DEBUG_INPUT_METHOD) {
                 Slog.v(TAG_WM, "No IM target, final list:");
@@ -1756,11 +1751,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     pos++;
                 }
                 if (pos >= N) {
-                    // Z order is good.
-                    // The IM target window may be changed, so update the mTargetAppToken.
-                    if (imWin != null) {
-                        imWin.mTargetAppToken = mInputMethodTarget.mAppToken;
-                    }
                     return false;
                 }
             }
@@ -1775,7 +1765,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     Slog.v(TAG_WM, "List after removing with new pos " + imPos + ":");
                     logWindowList(windows, "  ");
                 }
-                imWin.mTargetAppToken = mInputMethodTarget.mAppToken;
                 imWin.reAddWindowLocked(imPos);
                 if (DEBUG_INPUT_METHOD) {
                     Slog.v(TAG_WM, "List after moving IM to " + imPos + ":");
@@ -1793,7 +1782,6 @@ public class WindowManagerService extends IWindowManager.Stub
             if (imWin != null) {
                 if (DEBUG_INPUT_METHOD) Slog.v(TAG_WM, "Moving IM from " + imPos);
                 imWin.removeFromWindowList(0);
-                imWin.mTargetAppToken = null;
                 reAddWindowToListInOrderLocked(imWin);
                 if (DEBUG_INPUT_METHOD) {
                     Slog.v(TAG_WM, "List with no IM target:");
