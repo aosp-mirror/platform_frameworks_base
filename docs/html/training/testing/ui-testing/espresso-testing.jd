@@ -188,9 +188,9 @@ The following section describes how to create a new Espresso test in the JUnit 4
 {@code ActivityTestRule}</a> to reduce the amount of boilerplate code you need to write. By using
 <a href="{@docRoot}reference/android/support/test/rule/ActivityTestRule.html">
 {@code ActivityTestRule}</a>, the testing framework launches the activity under test
-before each test method annotated with {@code &#64;Test} and before any method annotated with
-{@code &#64;Before}. The framework handles shutting down the activity after the test finishes
-and all methods annotated with {@code &#64;After} are run.</p>
+before each test method annotated with <code>&#64;Test</code> and before any method annotated with
+<code>&#64;Before</code>. The framework handles shutting down the activity after the test finishes
+and all methods annotated with <code>&#64;After</code> are run.</p>
 
 <pre>
 package com.example.android.testing.espresso.BasicSample;
