@@ -1208,7 +1208,11 @@ please see styles_device_defaults.xml.
     <style name="AlertDialog.Material.Light" />
 
     <style name="DatePickerDialog.Material" parent="AlertDialog.Material">
-        <item name="showTitle">true</item>
+        <item name="showTitle">false</item>
+    </style>
+
+    <style name="TimePickerDialog.Material" parent="AlertDialog.Material">
+        <item name="showTitle">false</item>
     </style>
 
     <!-- Window title -->
