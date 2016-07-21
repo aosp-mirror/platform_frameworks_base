@@ -170,6 +170,21 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
     }
 
     @SmallTest
+    public void testLongPressAndDragToSelect_emoji() throws Exception {
+        final String text = "\uD83D\uDE00\uD83D\uDE01\uD83D\uDE02\uD83D\uDE03";
+        onView(withId(R.id.textview)).perform(click());
+        onView(withId(R.id.textview)).perform(replaceText(text));
+
+        onView(withId(R.id.textview)).perform(longPressAndDragOnText(4, 6));
+        onView(withId(R.id.textview)).check(hasSelection("\uD83D\uDE02"));
+
+        onView(withId(R.id.textview)).perform(click());
+
+        onView(withId(R.id.textview)).perform(longPressAndDragOnText(4, 2));
+        onView(withId(R.id.textview)).check(hasSelection("\uD83D\uDE01"));
+    }
+
+    @SmallTest
     public void testDragAndDrop() throws Exception {
         final String text = "abc def ghi.";
         onView(withId(R.id.textview)).perform(click());
