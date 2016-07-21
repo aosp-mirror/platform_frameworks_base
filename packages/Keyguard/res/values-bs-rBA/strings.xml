@@ -121,10 +121,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Potreban je uzorak nakon prelaska na drugi profil"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Potreban je PIN nakon prelaska na drugi profil"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Potrebna je lozinka nakon prelaska na drugi profil"</string>
-    <!-- no translation found for kg_prompt_reason_device_admin (5838877342219587193) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_user_request (500999297306031595) -->
-    <skip />
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"Administrator je zaključao uređaj."</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"Uređaj je ručno zaključan"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="one">Uređaj nije bio otključan <xliff:g id="NUMBER_1">%d</xliff:g> sat. Potvrdite obrazac.</item>
       <item quantity="few">Uređaj nije bio otključan <xliff:g id="NUMBER_1">%d</xliff:g> sata. Potvrdite obrazac.</item>
