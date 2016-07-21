@@ -35,7 +35,10 @@ enterprise administrator to:</p>
 </ul>
 
 <p>
-  This guide shows how to implement these configuration settings in your app.
+  This guide shows how to implement managed configuration settings in
+  your app. If you're an EMM developer, refer to the
+  <a href="https://developers.google.com/android/work/build-dpc"
+  >Build a Device Policy Controller</a> guide.
 </p>
 
 <p class="note">
@@ -71,8 +74,8 @@ enterprise administrator to:</p>
 
 <ul>
   <li>Declare the managed configurations in your app manifest. Doing
-  so allows the enterprise administrator to read the app's
-  configurations through Google Play APIs.
+    so allows the enterprise administrator to read the app's
+    configurations through Google Play APIs.
   </li>
 
   <li>Whenever the app resumes, use the {@link
@@ -82,11 +85,11 @@ enterprise administrator to:</p>
   </li>
 
   <li>Listen for the
-  {@link android.content.Intent#ACTION_APPLICATION_RESTRICTIONS_CHANGED
-  ACTION_APPLICATION_RESTRICTIONS_CHANGED} intent. When you receive this
-  broadcast, check the {@link android.content.RestrictionsManager} to see what
-  the current managed configurations are, and make any necessary changes to your
-  app's behavior.
+    {@link android.content.Intent#ACTION_APPLICATION_RESTRICTIONS_CHANGED
+    ACTION_APPLICATION_RESTRICTIONS_CHANGED} intent. When you receive this
+    broadcast, check the {@link android.content.RestrictionsManager} to see what
+    the current managed configurations are, and make any necessary changes to your
+    app's behavior.
   </li>
 </ul>
 
@@ -96,11 +99,11 @@ enterprise administrator to:</p>
 
 <p>
   Your app can support any managed configuration you want to define. You declare the
-  app's managed configurations in a <em>managed configurations file</em>, and declare the
-  configurations file in the manifest. Creating a configurations file allows other
-  apps to examine the managed configurations your app provides. Enterprise Mobility
-  Management (EMM) partners can read your app's configurations by using Google
-  Play APIs.
+  app's managed configurations in a <em>managed configurations file</em>, and declare
+  the configurations file in the manifest. Creating a configurations file allows
+  other apps to examine the managed configurations your app provides. Enterprise
+  Mobility Management (EMM) partners can read your app's configurations by using
+  Google Play APIs.
 </p>
 
 <p>
@@ -138,6 +141,14 @@ enterprise administrator to:</p>
 </p>
 
 <p>
+  The managed configuration provider can query the app to find details
+  on the app's available configurations, including their description
+  text. The configurations provider and enterprise administrator can
+  change your app's managed configurations at any time, even when the
+  app is not running.
+</p>
+
+<p>
   For example, suppose your app can be remotely configured to allow or forbid
   it to download data over a cellular connection. Your app could have a
   <code>&lt;restriction&gt;</code> element like this:
@@ -145,7 +156,7 @@ enterprise administrator to:</p>
 
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?&gt;
-&lt;restrictions xmlns:android="http://schemas.android.com/apk/res/android" &gt;
+&lt;restrictions xmlns:android="http://schemas.android.com/apk/res/android"&gt;
 
   &lt;restriction
     android:key="downloadOnCellular"
@@ -158,11 +169,6 @@ enterprise administrator to:</p>
 </pre>
 
 <p>
-  The supported types for the <code>android:restrictionType</code> element are
-  documented in the reference for {@link android.content.RestrictionsManager}.
-</p>
-
-<p>
   You use each configuration's <code>android:key</code> attribute to
   read its value from a managed configuration bundle. For this reason,
   each configuration must have a unique key string, and the string
@@ -172,18 +178,144 @@ enterprise administrator to:</p>
 <p class="note">
   <strong>Note:</strong> In a production app, <code>android:title</code> and
   <code>android:description</code> should be drawn from a localized resource
-  file, as described in <a href=
-  "{@docRoot}guide/topics/resources/localization.html">Localizing with
-  Resources</a>.
+  file, as described in
+  <a href="{@docRoot}guide/topics/resources/localization.html"
+  >Localizing with Resources</a>.
 </p>
 
-<p>
-  The managed configuration provider can query the app to find details
-  on the app's available configurations, including their description
-  text. Configurations providers and enterprise administrators can
-  change your app's managed configurations at any time, even when the
-  app is not running.
+<p id="nested-restrictions">
+  An app can define one or multiple nested restriction elements using
+  the restriction types
+  {@link android.content.RestrictionEntry#TYPE_BUNDLE bundle} and
+  {@link android.content.RestrictionEntry#TYPE_BUNDLE_ARRAY bundle_array}.
+  For example, an app with multiple VPN connection options could define
+  each VPN server configuration in a bundle, with multiple bundles grouped
+  together in a bundle array:
 </p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;restrictions xmlns:android="http://schemas.android.com/apk/res/android" &gt;
+
+  &lt;restriction
+    android:key="vpn_configuration_list"
+    android:restrictionType="bundle_array"&gt;
+    &lt;restriction
+      android:key="vpn_configuration"
+      android:restrictionType="bundle"&gt;
+      &lt;restriction
+        android:key="vpn_server"
+        android:restrictionType="string"/&gt;
+      &lt;restriction
+        android:key="vpn_username"
+        android:restrictionType="string"/&gt;
+      &lt;restriction
+        android:key="vpn_password"
+        android:restrictionType="string"/&gt;
+    &lt;/restriction&gt;
+  &lt;/restriction&gt;
+
+&lt;/restrictions&gt;
+</pre>
+
+<p>
+  The supported types for the <code>android:restrictionType</code> element
+  are listed in <a href="#restriction-types">Table 1</a> and documented in
+  the reference for {@link android.content.RestrictionsManager} and
+  {@link android.content.RestrictionEntry}.
+</p>
+
+<p class="table-caption" id="restriction-types">
+  <strong>Table 1.</strong> Restriction entry types and usage.
+</p>
+<table>
+  <tbody>
+    <tr>
+      <th>Type</th>
+      <th>android:restrictionType</th>
+      <th>Typical usage</th>
+    </tr>
+    <tr>
+      <td>
+        {@link android.content.RestrictionEntry#TYPE_BOOLEAN TYPE_BOOLEAN}
+      </td>
+      <td><code>"bool"</code></td>
+      <td>
+        A boolean value, true or false.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        {@link android.content.RestrictionEntry#TYPE_STRING TYPE_STRING}
+      </td>
+      <td><code>"string"</code></td>
+      <td>
+        A string value, such as a name.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        {@link android.content.RestrictionEntry#TYPE_INTEGER TYPE_INTEGER}
+      </td>
+      <td><code>"integer"</code></td>
+      <td>
+        An integer with a value from
+        {@link java.lang.Integer#MIN_VALUE MIN_VALUE} to
+        {@link java.lang.Integer#MAX_VALUE MAX_VALUE}.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        {@link android.content.RestrictionEntry#TYPE_CHOICE TYPE_CHOICE}
+      </td>
+      <td><code>"choice"</code></td>
+      <td>
+        A string value, typically presented as a single-select list.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        {@link android.content.RestrictionEntry#TYPE_MULTI_SELECT TYPE_MULTI_SELECT}
+      </td>
+      <td><code>"multi-select"</code></td>
+      <td>
+        Use this for presenting a multi-select list where more than
+        one entry can be selected, such as for choosing specific
+        titles to white-list.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        {@link android.content.RestrictionEntry#TYPE_NULL TYPE_NULL}
+      </td>
+      <td><code>"hidden"</code></td>
+      <td>
+        Hidden restriction type. Use this type for information that
+        needs to be transferred across but shouldn't be presented to
+        the user in the UI. Stores a single string value.
+      </td>
+    </tr>
+    <tr>
+      <td>{@link android.content.RestrictionEntry#TYPE_BUNDLE TYPE_BUNDLE}</td>
+      <td><code>"bundle"</code></td>
+      <td>
+        Use this for storing {@link android.os.Bundle bundles} of
+        restrictions. Available in Android 6.0 (API level 23).
+      </td>
+    </tr>
+    <tr>
+      <td>
+        {@link android.content.RestrictionEntry#TYPE_BUNDLE_ARRAY TYPE_BUNDLE_ARRAY}
+      </td>
+      <td><code>"bundle_array"</code></td>
+      <td>
+        Use this for storing arrays of restriction
+        <a href="{@docRoot}reference/android/os/Bundle.html"
+        >bundles</a>. Available in Android 6.0 (API level 23).
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 <h2 id="check-configuration">
   Check Managed Configurations
@@ -292,17 +424,47 @@ enterprise administrator to:</p>
 <pre>
 boolean appCanUseCellular;
 
-if appRestrictions.containsKey("downloadOnCellular") {
+if (appRestrictions.containsKey("downloadOnCellular")) {
     appCanUseCellular = appRestrictions.getBoolean("downloadOnCellular");
 } else {
-    // here, cellularDefault is a boolean set with the restriction's
-    // default value
+    // cellularDefault is a boolean using the restriction's default value
     appCanUseCellular = cellularDefault;
 }
 
 if (!appCanUseCellular) {
     // ...turn off app's cellular-download functionality
     // ...show appropriate notices to user
+}</pre>
+
+<p>
+  To apply multiple <a href="#nested-restrictions">nested restrictions</a>, read
+  the {@link android.content.RestrictionEntry#TYPE_BUNDLE_ARRAY bundle_array}
+  restriction entry as a collection of {@link android.os.Parcelable} objects
+  and cast as a {@link android.os.Bundle}. In this example, each VPN's configuration
+  data is parsed and used to build a list of server connection choices:
+</p>
+
+<pre>
+// VpnConfig is a sample class used store config data, not defined
+List&lt;VpnConfig&gt; vpnConfigs = new ArrayList&lt;&gt;();
+
+Parcelable[] parcelables =
+    appRestrictions.getParcelableArray("vpn_configuration_list");
+
+if (parcelables != null && parcelables.length > 0) {
+    // iterate parcelables and cast as bundle
+    for (int i = 0; i < parcelables.length; i++) {
+        Bundle vpnConfigBundle = (Bundle) parcelables[i];
+        // parse bundle data and store in VpnConfig array
+        vpnConfigs.add(new VpnConfig()
+            .setServer(vpnConfigBundle.getString("vpn_server"))
+            .setUsername(vpnConfigBundle.getString("vpn_username"))
+            .setPassword(vpnConfigBundle.getString("vpn_password")));
+    }
+}
+
+if (!vpnConfigs.isEmpty()) {
+    // ...choose a VPN configuration or prompt user to select from list
 }</pre>
 
 <h2 id="listen-configuration">
