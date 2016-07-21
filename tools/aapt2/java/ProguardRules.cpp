@@ -170,16 +170,10 @@ struct ManifestVisitor : public BaseVisitor {
                     }
                 }
             } else if (node->name == "activity" || node->name == "service" ||
-                    node->name == "receiver" || node->name == "provider" ||
-                    node->name == "instrumentation") {
+                    node->name == "receiver" || node->name == "provider") {
                 getName = true;
-            }
 
-            if (getName) {
-                xml::Attribute* attr = node->findAttribute(xml::kSchemaAndroid, "name");
-                getName = attr != nullptr;
-
-                if (getName && mMainDexOnly) {
+                if (mMainDexOnly) {
                     xml::Attribute* componentProcess = node->findAttribute(xml::kSchemaAndroid,
                                                                            "process");
 
@@ -187,6 +181,13 @@ struct ManifestVisitor : public BaseVisitor {
                             : mDefaultProcess;
                     getName = !process.empty() && process[0] != ':';
                 }
+            } else if (node-> name == "instrumentation") {
+                getName = true;
+            }
+
+            if (getName) {
+                xml::Attribute* attr = node->findAttribute(xml::kSchemaAndroid, "name");
+                getName = attr != nullptr;
 
                 if (getName) {
                     Maybe<std::string> result = util::getFullyQualifiedClassName(mPackage,
