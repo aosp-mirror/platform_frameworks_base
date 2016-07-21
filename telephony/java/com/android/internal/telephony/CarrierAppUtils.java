@@ -17,18 +17,23 @@
 package com.android.internal.telephony;
 
 import android.annotation.Nullable;
+import android.content.ContentResolver;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.RemoteException;
+import android.provider.Settings;
 import android.telephony.TelephonyManager;
+import android.util.ArrayMap;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.SystemConfig;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Utilities for handling carrier applications.
@@ -53,6 +58,11 @@ public final class CarrierAppUtils {
      * in the default state (e.g. not explicitly DISABLED/DISABLED_BY_USER/ENABLED), or we enable if
      * the app is carrier privileged and in either the default state or DISABLED_UNTIL_USED.
      *
+     * In addition, there is a list of carrier-associated applications in
+     * {@link SystemConfig#getDisabledUntilUsedPreinstalledCarrierAssociatedApps}. Each app in this
+     * list is associated with a carrier app. When the given carrier app is enabled/disabled per the
+     * above, the associated applications are enabled/disabled to match.
+     *
      * When enabling a carrier app we also grant it default permissions.
      *
      * This method is idempotent and is safe to be called at any time; it should be called once at
@@ -60,19 +70,24 @@ public final class CarrierAppUtils {
      * privileged apps may have changed.
      */
     public synchronized static void disableCarrierAppsUntilPrivileged(String callingPackage,
-            IPackageManager packageManager, TelephonyManager telephonyManager, int userId) {
+            IPackageManager packageManager, TelephonyManager telephonyManager,
+            ContentResolver contentResolver, int userId) {
         if (DEBUG) {
             Slog.d(TAG, "disableCarrierAppsUntilPrivileged");
         }
+        SystemConfig config = SystemConfig.getInstance();
         String[] systemCarrierAppsDisabledUntilUsed = Resources.getSystem().getStringArray(
                 com.android.internal.R.array.config_disabledUntilUsedPreinstalledCarrierApps);
-        disableCarrierAppsUntilPrivileged(callingPackage, packageManager, telephonyManager, userId,
-                systemCarrierAppsDisabledUntilUsed);
+        ArrayMap<String, List<String>> systemCarrierAssociatedAppsDisabledUntilUsed =
+                config.getDisabledUntilUsedPreinstalledCarrierAssociatedApps();
+        disableCarrierAppsUntilPrivileged(callingPackage, packageManager, telephonyManager,
+                contentResolver, userId, systemCarrierAppsDisabledUntilUsed,
+                systemCarrierAssociatedAppsDisabledUntilUsed);
     }
 
     /**
      * Like {@link #disableCarrierAppsUntilPrivileged(String, IPackageManager, TelephonyManager,
-     * int)}, but assumes that no carrier apps have carrier privileges.
+     * ContentResolver, int)}, but assumes that no carrier apps have carrier privileges.
      *
      * This prevents a potential race condition on first boot - since the app's default state is
      * enabled, we will initially disable it when the telephony stack is first initialized as it has
@@ -82,28 +97,42 @@ public final class CarrierAppUtils {
      * Manager can kill it, and this can lead to crashes as the app is in an unexpected state.
      */
     public synchronized static void disableCarrierAppsUntilPrivileged(String callingPackage,
-            IPackageManager packageManager, int userId) {
+            IPackageManager packageManager, ContentResolver contentResolver, int userId) {
         if (DEBUG) {
             Slog.d(TAG, "disableCarrierAppsUntilPrivileged");
         }
+        SystemConfig config = SystemConfig.getInstance();
         String[] systemCarrierAppsDisabledUntilUsed = Resources.getSystem().getStringArray(
                 com.android.internal.R.array.config_disabledUntilUsedPreinstalledCarrierApps);
+        ArrayMap<String, List<String>> systemCarrierAssociatedAppsDisabledUntilUsed =
+                config.getDisabledUntilUsedPreinstalledCarrierAssociatedApps();
         disableCarrierAppsUntilPrivileged(callingPackage, packageManager,
-                null /* telephonyManager */, userId, systemCarrierAppsDisabledUntilUsed);
+                null /* telephonyManager */, contentResolver, userId,
+                systemCarrierAppsDisabledUntilUsed, systemCarrierAssociatedAppsDisabledUntilUsed);
     }
 
     // Must be public b/c framework unit tests can't access package-private methods.
     @VisibleForTesting
     public static void disableCarrierAppsUntilPrivileged(String callingPackage,
-            IPackageManager packageManager, @Nullable TelephonyManager telephonyManager, int userId,
-            String[] systemCarrierAppsDisabledUntilUsed) {
+            IPackageManager packageManager, @Nullable TelephonyManager telephonyManager,
+            ContentResolver contentResolver, int userId,
+            String[] systemCarrierAppsDisabledUntilUsed,
+            ArrayMap<String, List<String>> systemCarrierAssociatedAppsDisabledUntilUsed) {
         List<ApplicationInfo> candidates = getDefaultCarrierAppCandidatesHelper(packageManager,
                 userId, systemCarrierAppsDisabledUntilUsed);
         if (candidates == null || candidates.isEmpty()) {
             return;
         }
 
+        Map<String, List<ApplicationInfo>> associatedApps = getDefaultCarrierAssociatedAppsHelper(
+                packageManager,
+                userId,
+                systemCarrierAssociatedAppsDisabledUntilUsed);
+
         List<String> enabledCarrierPackages = new ArrayList<>();
+
+        boolean hasRunOnce = Settings.Secure.getIntForUser(
+                contentResolver, Settings.Secure.CARRIER_APPS_HANDLED, 0, userId) == 1;
 
         try {
             for (ApplicationInfo ai : candidates) {
@@ -112,33 +141,92 @@ public final class CarrierAppUtils {
                         telephonyManager.checkCarrierPrivilegesForPackageAnyPhone(packageName) ==
                                 TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS;
 
-                // Only update enabled state for the app on /system. Once it has been updated we
-                // shouldn't touch it.
-                if (!ai.isUpdatedSystemApp()) {
-                    if (hasPrivileges
-                            && (ai.enabledSetting == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
+                if (hasPrivileges) {
+                    // Only update enabled state for the app on /system. Once it has been
+                    // updated we shouldn't touch it.
+                    if (!ai.isUpdatedSystemApp()
+                            && (ai.enabledSetting ==
+                            PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
                             || ai.enabledSetting ==
                             PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED)) {
                         Slog.i(TAG, "Update state(" + packageName + "): ENABLED for user "
                                 + userId);
-                        packageManager.setApplicationEnabledSetting(packageName,
+                        packageManager.setApplicationEnabledSetting(
+                                packageName,
                                 PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-                                PackageManager.DONT_KILL_APP, userId, callingPackage);
-                    } else if (!hasPrivileges
+                                PackageManager.DONT_KILL_APP,
+                                userId,
+                                callingPackage);
+                    }
+
+                    // Also enable any associated apps for this carrier app.
+                    List<ApplicationInfo> associatedAppList = associatedApps.get(packageName);
+                    if (associatedAppList != null) {
+                        for (ApplicationInfo associatedApp : associatedAppList) {
+                            if (associatedApp.enabledSetting ==
+                                    PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
+                                    || associatedApp.enabledSetting ==
+                                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED) {
+                                Slog.i(TAG, "Update associated state(" + associatedApp.packageName
+                                        + "): ENABLED for user " + userId);
+                                packageManager.setApplicationEnabledSetting(
+                                        associatedApp.packageName,
+                                        PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                                        PackageManager.DONT_KILL_APP,
+                                        userId,
+                                        callingPackage);
+                            }
+                        }
+                    }
+
+                    // Always re-grant default permissions to carrier apps w/ privileges.
+                    enabledCarrierPackages.add(ai.packageName);
+                } else {  // No carrier privileges
+                    // Only update enabled state for the app on /system. Once it has been
+                    // updated we shouldn't touch it.
+                    if (!ai.isUpdatedSystemApp()
                             && ai.enabledSetting ==
                             PackageManager.COMPONENT_ENABLED_STATE_DEFAULT) {
                         Slog.i(TAG, "Update state(" + packageName
                                 + "): DISABLED_UNTIL_USED for user " + userId);
-                        packageManager.setApplicationEnabledSetting(packageName,
-                                PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED, 0,
-                                userId, callingPackage);
+                        packageManager.setApplicationEnabledSetting(
+                                packageName,
+                                PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED,
+                                0,
+                                userId,
+                                callingPackage);
+                    }
+
+                    // Also disable any associated apps for this carrier app if this is the first
+                    // run. We avoid doing this a second time because it is brittle to rely on the
+                    // distinction between "default" and "enabled".
+                    if (!hasRunOnce) {
+                        List<ApplicationInfo> associatedAppList = associatedApps.get(packageName);
+                        if (associatedAppList != null) {
+                            for (ApplicationInfo associatedApp : associatedAppList) {
+                                if (associatedApp.enabledSetting
+                                        == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT) {
+                                    Slog.i(TAG,
+                                            "Update associated state(" + associatedApp.packageName
+                                                    + "): DISABLED_UNTIL_USED for user " + userId);
+                                    packageManager.setApplicationEnabledSetting(
+                                            associatedApp.packageName,
+                                            PackageManager
+                                                    .COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED,
+                                            0,
+                                            userId,
+                                            callingPackage);
+                                }
+                            }
+                        }
                     }
                 }
+            }
 
-                // Always re-grant default permissions to carrier apps w/ privileges.
-                if (hasPrivileges) {
-                    enabledCarrierPackages.add(ai.packageName);
-                }
+            // Mark the execution so we do not disable apps again.
+            if (!hasRunOnce) {
+                Settings.Secure.putIntForUser(
+                        contentResolver, Settings.Secure.CARRIER_APPS_HANDLED, 1, userId);
             }
 
             if (!enabledCarrierPackages.isEmpty()) {
@@ -190,8 +278,8 @@ public final class CarrierAppUtils {
      *
      * These are the apps subject to the hiding/showing logic in
      * {@link CarrierAppUtils#disableCarrierAppsUntilPrivileged(String, IPackageManager,
-     * TelephonyManager, int)}, as well as the apps which should have default permissions granted,
-     * when a matching SIM is inserted.
+     * TelephonyManager, ContentResolver, int)}, as well as the apps which should have default
+     * permissions granted, when a matching SIM is inserted.
      *
      * Whether or not the app is actually considered a default app depends on whether the app has
      * carrier privileges as determined by the SIMs in the device.
@@ -205,30 +293,68 @@ public final class CarrierAppUtils {
     }
 
     private static List<ApplicationInfo> getDefaultCarrierAppCandidatesHelper(
-            IPackageManager packageManager, int userId,
+            IPackageManager packageManager,
+            int userId,
             String[] systemCarrierAppsDisabledUntilUsed) {
         if (systemCarrierAppsDisabledUntilUsed == null
                 || systemCarrierAppsDisabledUntilUsed.length == 0) {
             return null;
         }
-        List<ApplicationInfo> apps = null;
-        try {
-            apps = new ArrayList<>(systemCarrierAppsDisabledUntilUsed.length);
-            for (String packageName : systemCarrierAppsDisabledUntilUsed) {
-                ApplicationInfo ai = packageManager.getApplicationInfo(packageName,
-                        PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS, userId);
-                if (ai == null) {
-                    // No app found for packageName
-                    continue;
-                }
-                if (!ai.isSystemApp()) {
-                    continue;
-                }
+        List<ApplicationInfo> apps = new ArrayList<>(systemCarrierAppsDisabledUntilUsed.length);
+        for (int i = 0; i < systemCarrierAppsDisabledUntilUsed.length; i++) {
+            String packageName = systemCarrierAppsDisabledUntilUsed[i];
+            ApplicationInfo ai =
+                    getApplicationInfoIfSystemApp(packageManager, userId, packageName);
+            if (ai != null) {
                 apps.add(ai);
+            }
+        }
+        return apps;
+    }
+
+    private static Map<String, List<ApplicationInfo>> getDefaultCarrierAssociatedAppsHelper(
+            IPackageManager packageManager,
+            int userId,
+            ArrayMap<String, List<String>> systemCarrierAssociatedAppsDisabledUntilUsed) {
+        int size = systemCarrierAssociatedAppsDisabledUntilUsed.size();
+        Map<String, List<ApplicationInfo>> associatedApps = new ArrayMap<>(size);
+        for (int i = 0; i < size; i++) {
+            String carrierAppPackage = systemCarrierAssociatedAppsDisabledUntilUsed.keyAt(i);
+            List<String> associatedAppPackages =
+                    systemCarrierAssociatedAppsDisabledUntilUsed.valueAt(i);
+            for (int j = 0; j < associatedAppPackages.size(); j++) {
+                ApplicationInfo ai =
+                        getApplicationInfoIfSystemApp(
+                                packageManager, userId, associatedAppPackages.get(j));
+                // Only update enabled state for the app on /system. Once it has been updated we
+                // shouldn't touch it.
+                if (ai != null && !ai.isUpdatedSystemApp()) {
+                    List<ApplicationInfo> appList = associatedApps.get(carrierAppPackage);
+                    if (appList == null) {
+                        appList = new ArrayList<>();
+                        associatedApps.put(carrierAppPackage, appList);
+                    }
+                    appList.add(ai);
+                }
+            }
+        }
+        return associatedApps;
+    }
+
+    @Nullable
+    private static ApplicationInfo getApplicationInfoIfSystemApp(
+            IPackageManager packageManager,
+            int userId,
+            String packageName) {
+        try {
+            ApplicationInfo ai = packageManager.getApplicationInfo(packageName,
+                    PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS, userId);
+            if (ai != null && ai.isSystemApp()) {
+                return ai;
             }
         } catch (RemoteException e) {
             Slog.w(TAG, "Could not reach PackageManager", e);
         }
-        return apps;
+        return null;
     }
 }

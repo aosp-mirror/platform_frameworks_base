@@ -1963,10 +1963,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         PackageManagerService m = new PackageManagerService(context, installer,
                 factoryTest, onlyCore);
         m.enableSystemUserPackages();
-        // Disable any carrier apps. We do this very early in boot to prevent the apps from being
-        // disabled after already being started.
-        CarrierAppUtils.disableCarrierAppsUntilPrivileged(context.getOpPackageName(), m,
-                UserHandle.USER_SYSTEM);
         ServiceManager.addService("package", m);
         return m;
     }
@@ -17874,6 +17870,11 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
     @Override
     public void systemReady() {
         mSystemReady = true;
+
+        // Disable any carrier apps. We do this very early in boot to prevent the apps from being
+        // disabled after already being started.
+        CarrierAppUtils.disableCarrierAppsUntilPrivileged(mContext.getOpPackageName(), this,
+                mContext.getContentResolver(), UserHandle.USER_SYSTEM);
 
         // Read the compatibilty setting when the system is ready.
         boolean compatibilityModeEnabled = android.provider.Settings.Global.getInt(
