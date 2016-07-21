@@ -59,6 +59,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -93,7 +95,12 @@ public class ShortcutManagerTestUtils {
     private ShortcutManagerTestUtils() {
     }
 
-    private static List<String> readAll(ParcelFileDescriptor pfd) {
+    public static List<String> readAll(File file) throws FileNotFoundException {
+        return readAll(ParcelFileDescriptor.open(
+                file.getAbsoluteFile(), ParcelFileDescriptor.MODE_READ_ONLY));
+    }
+
+    public static List<String> readAll(ParcelFileDescriptor pfd) {
         try {
             try {
                 final ArrayList<String> ret = new ArrayList<>();
@@ -114,13 +121,37 @@ public class ShortcutManagerTestUtils {
         }
     }
 
-    private static String concatResult(List<String> result) {
+    public static String concatResult(List<String> result) {
         final StringBuilder sb = new StringBuilder();
         for (String s : result) {
             sb.append(s);
             sb.append("\n");
         }
         return sb.toString();
+    }
+
+    public static boolean resultContains(List<String> result, String expected) {
+        for (String line : result) {
+            if (line.contains(expected)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static List<String> assertSuccess(List<String> result) {
+        if (!resultContains(result, "Success")) {
+            fail("Command failed.  Result was:\n" + concatResult(result));
+        }
+        return result;
+    }
+
+    public static List<String> assertContains(List<String> result, String expected) {
+        if (!resultContains(result, expected)) {
+            fail("Didn't contain expected string=" + expected
+                    + "\nActual:\n" + concatResult(result));
+        }
+        return result;
     }
 
     private static List<String> runCommand(Instrumentation instrumentation, String command) {
@@ -321,24 +352,29 @@ public class ShortcutManagerTestUtils {
         return filter(list, si -> si.getLastChangedTimestamp() >= time);
     }
 
+    @FunctionalInterface
+    public interface ExceptionRunnable {
+        void run() throws Exception;
+    }
+
     public static void assertExpectException(Class<? extends Throwable> expectedExceptionType,
-            String expectedExceptionMessageRegex, Runnable r) {
+            String expectedExceptionMessageRegex, ExceptionRunnable r) {
         assertExpectException("", expectedExceptionType, expectedExceptionMessageRegex, r);
     }
 
     public static void assertCannotUpdateImmutable(Runnable r) {
         assertExpectException(
-                IllegalArgumentException.class, "may not be manipulated via APIs", r);
+                IllegalArgumentException.class, "may not be manipulated via APIs", r::run);
     }
 
     public static void assertDynamicShortcutCountExceeded(Runnable r) {
         assertExpectException(IllegalArgumentException.class,
-                "Max number of dynamic shortcuts exceeded", r);
+                "Max number of dynamic shortcuts exceeded", r::run);
     }
 
     public static void assertExpectException(String message,
             Class<? extends Throwable> expectedExceptionType,
-            String expectedExceptionMessageRegex, Runnable r) {
+            String expectedExceptionMessageRegex, ExceptionRunnable r) {
         try {
             r.run();
         } catch (Throwable e) {

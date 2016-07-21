@@ -16,14 +16,13 @@
 
 package com.android.server.pm;
 
-import android.os.UserHandle;
-import com.android.server.devicepolicy.DpmTestUtils;
-
 import android.os.Bundle;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.test.AndroidTestCase;
-import android.test.MoreAsserts;
 import android.test.suitebuilder.annotation.SmallTest;
+
+import com.android.server.devicepolicy.DpmTestUtils;
 
 /**
  * Tests for {@link com.android.server.pm.UserRestrictionsUtils}.
