@@ -22,6 +22,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.UserHandle;
@@ -142,7 +143,7 @@ public class FalsingManager implements SensorEventListener {
         if (mHumanInteractionClassifier.isEnabled()) {
             registerSensors(CLASSIFIER_SENSORS);
         }
-        if (mDataCollector.isEnabled()) {
+        if (mDataCollector.isEnabledFull()) {
             registerSensors(COLLECTOR_SENSORS);
         }
     }
@@ -399,5 +400,16 @@ public class FalsingManager implements SensorEventListener {
         pw.print("mState="); pw.println(StatusBarState.toShortString(mState));
         pw.print("mScreenOn="); pw.println(mScreenOn ? 1 : 0);
         pw.println();
+    }
+
+    public Uri reportRejectedTouch() {
+        if (mDataCollector.isEnabled()) {
+            return mDataCollector.reportRejectedTouch();
+        }
+        return null;
+    }
+
+    public boolean isReportingEnabled() {
+        return mDataCollector.isReportingEnabled();
     }
 }
