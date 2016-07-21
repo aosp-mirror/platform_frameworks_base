@@ -81,11 +81,11 @@ public:
         loadIdentity();
     }
 
-    Matrix4(const float* v) {
+    explicit Matrix4(const float* v) {
         load(v);
     }
 
-    Matrix4(const SkMatrix& v) {
+    Matrix4(const SkMatrix& v) {  // NOLINT, implicit
         load(v);
     }
 

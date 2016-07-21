@@ -72,7 +72,7 @@ public:
             bottom(height) {
     }
 
-    inline Rect(const SkRect& rect):
+    inline Rect(const SkRect& rect):  // NOLINT, implicit
             left(rect.fLeft),
             top(rect.fTop),
             right(rect.fRight),

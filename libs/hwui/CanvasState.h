@@ -73,7 +73,7 @@ public:
 
 class ANDROID_API CanvasState {
 public:
-    CanvasState(CanvasStateClient& renderer);
+    explicit CanvasState(CanvasStateClient& renderer);
     ~CanvasState();
 
     /**

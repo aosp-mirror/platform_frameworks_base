@@ -54,7 +54,7 @@ struct ProfileData {
 // TODO: Replace DrawProfiler with this
 class JankTracker {
 public:
-    JankTracker(nsecs_t frameIntervalNanos);
+    explicit JankTracker(nsecs_t frameIntervalNanos);
     ~JankTracker();
 
     void addFrame(const FrameInfo& frame);

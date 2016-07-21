@@ -77,7 +77,7 @@ private:
 
     class WorkerThread: public Thread {
     public:
-        WorkerThread(const String8 name): mSignal(Condition::WAKE_UP_ONE), mName(name) { }
+        explicit WorkerThread(const String8 name): mSignal(Condition::WAKE_UP_ONE), mName(name) { }
 
         bool addTask(TaskWrapper task);
         size_t getTaskCount() const;

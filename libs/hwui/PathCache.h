@@ -290,7 +290,7 @@ private:
 
     class PathProcessor: public TaskProcessor<SkBitmap*> {
     public:
-        PathProcessor(Caches& caches);
+        explicit PathProcessor(Caches& caches);
         ~PathProcessor() { }
 
         virtual void onProcess(const sp<Task<SkBitmap*> >& task) override;

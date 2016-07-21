@@ -104,7 +104,7 @@ inline hash_t hash_type(const GradientCacheEntry& entry) {
  */
 class GradientCache: public OnEntryRemoved<GradientCacheEntry, Texture*> {
 public:
-    GradientCache(Extensions& extensions);
+    explicit GradientCache(Extensions& extensions);
     ~GradientCache();
 
     /**
