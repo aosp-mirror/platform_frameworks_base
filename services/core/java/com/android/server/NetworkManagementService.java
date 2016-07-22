@@ -2751,4 +2751,19 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     public void removeInterfaceFromLocalNetwork(String iface) {
         modifyInterfaceInNetwork("remove", "local", iface);
     }
+
+    @Override
+    public int removeRoutesFromLocalNetwork(List<RouteInfo> routes) {
+        int failures = 0;
+
+        for (RouteInfo route : routes) {
+            try {
+                modifyRoute("remove", "local", route);
+            } catch (IllegalStateException e) {
+                failures++;
+            }
+        }
+
+        return failures;
+    }
 }
