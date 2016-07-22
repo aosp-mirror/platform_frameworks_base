@@ -72,7 +72,7 @@ public:
 
 class CanvasState {
 public:
-    CanvasState(CanvasStateClient& renderer);
+    explicit CanvasState(CanvasStateClient& renderer);
     ~CanvasState();
 
     /**

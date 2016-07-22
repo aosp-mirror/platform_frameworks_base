@@ -27,7 +27,7 @@ namespace uirenderer {
 template<typename T>
 class Future: public LightRefBase<Future<T> > {
 public:
-    Future(Condition::WakeUpType type = Condition::WAKE_UP_ONE): mBarrier(type), mResult() { }
+    explicit Future(Condition::WakeUpType type = Condition::WAKE_UP_ONE): mBarrier(type), mResult() { }
     ~Future() { }
 
     /**

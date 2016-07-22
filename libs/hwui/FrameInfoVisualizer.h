@@ -40,7 +40,7 @@ typedef RingBuffer<FrameInfo, 120> FrameInfoSource;
 
 class FrameInfoVisualizer {
 public:
-    FrameInfoVisualizer(FrameInfoSource& source);
+    explicit FrameInfoVisualizer(FrameInfoSource& source);
     ~FrameInfoVisualizer();
 
     bool consumeProperties();
