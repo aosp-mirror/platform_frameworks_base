@@ -2435,6 +2435,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *          1                        PFLAG3_OVERLAPPING_RENDERING_FORCED_VALUE
      *         1                         PFLAG3_HAS_OVERLAPPING_RENDERING_FORCED
      *        1                          PFLAG3_TEMPORARY_DETACH
+     *       1                           PFLAG3_NO_REVEAL_ON_FOCUS
      * |-------|-------|-------|-------|
      */
 
@@ -2675,6 +2676,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #onFinishTemporaryDetach()
      */
     static final int PFLAG3_TEMPORARY_DETACH = 0x2000000;
+
+    /**
+     * Flag indicating that the view does not wish to be revealed within its parent
+     * hierarchy when it gains focus. Expressed in the negative since the historical
+     * default behavior is to reveal on focus; this flag suppresses that behavior.
+     *
+     * @see #setRevealOnFocusHint(boolean)
+     * @see #getRevealOnFocusHint()
+     */
+    private static final int PFLAG3_NO_REVEAL_ON_FOCUS = 0x4000000;
 
     /* End of masks for mPrivateFlags3 */
 
@@ -5938,6 +5949,47 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             onFocusChanged(true, direction, previouslyFocusedRect);
             refreshDrawableState();
         }
+    }
+
+    /**
+     * Sets this view's preference for reveal behavior when it gains focus.
+     *
+     * <p>When set to true, this is a signal to ancestor views in the hierarchy that
+     * this view would prefer to be brought fully into view when it gains focus.
+     * For example, a text field that a user is meant to type into. Other views such
+     * as scrolling containers may prefer to opt-out of this behavior.</p>
+     *
+     * <p>The default value for views is true, though subclasses may change this
+     * based on their preferred behavior.</p>
+     *
+     * @param revealOnFocus true to request reveal on focus in ancestors, false otherwise
+     *
+     * @see #getRevealOnFocusHint()
+     */
+    public final void setRevealOnFocusHint(boolean revealOnFocus) {
+        if (revealOnFocus) {
+            mPrivateFlags3 &= ~PFLAG3_NO_REVEAL_ON_FOCUS;
+        } else {
+            mPrivateFlags3 |= PFLAG3_NO_REVEAL_ON_FOCUS;
+        }
+    }
+
+    /**
+     * Returns this view's preference for reveal behavior when it gains focus.
+     *
+     * <p>When this method returns true for a child view requesting focus, ancestor
+     * views responding to a focus change in {@link ViewParent#requestChildFocus(View, View)}
+     * should make a best effort to make the newly focused child fully visible to the user.
+     * When it returns false, ancestor views should preferably not disrupt scroll positioning or
+     * other properties affecting visibility to the user as part of the focus change.</p>
+     *
+     * @return true if this view would prefer to become fully visible when it gains focus,
+     *         false if it would prefer not to disrupt scroll positioning
+     *
+     * @see #setRevealOnFocusHint(boolean)
+     */
+    public final boolean getRevealOnFocusHint() {
+        return (mPrivateFlags3 & PFLAG3_NO_REVEAL_ON_FOCUS) == 0;
     }
 
     /**
