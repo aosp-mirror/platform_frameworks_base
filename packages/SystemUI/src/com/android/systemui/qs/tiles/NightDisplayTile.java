@@ -74,7 +74,7 @@ public class NightDisplayTile extends QSTile<QSTile.BooleanState>
 
     @Override
     public Intent getLongClickIntent() {
-        return new Intent(Settings.ACTION_DISPLAY_SETTINGS);
+        return new Intent(Settings.ACTION_NIGHT_DISPLAY_SETTINGS);
     }
 
     @Override
