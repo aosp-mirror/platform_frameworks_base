@@ -48,9 +48,11 @@ import com.android.frameworks.servicestests.R;
 import com.android.server.pm.ShortcutService.ConfigConstants;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.util.Locale;
 
 /**
@@ -97,6 +99,12 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                 RuntimeException.class,
                 "action must be set",
                 () -> new ShortcutInfo.Builder(getTestContext(), "id").setIntent(new Intent()));
+
+        assertExpectException(
+                RuntimeException.class,
+                "action must be set",
+                () -> new ShortcutInfo.Builder(getTestContext(), "id")
+                        .setIntents(new Intent[]{new Intent("action"), new Intent()}));
 
         assertExpectException(
                 RuntimeException.class,
@@ -1965,6 +1973,30 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         // System can call it without the permission.
         runWithSystemUid(() -> {
             mService.dump(null, new PrintWriter(new StringWriter()), null);
+        });
+    }
+
+    /**
+     * Make sure the legacy file format that only supported a single intent per shortcut
+     * can still be read.
+     */
+    public void testLoadLegacySavedFile() throws Exception {
+        final File path = mService.getUserFile(USER_0);
+        path.getParentFile().mkdirs();
+        try (Writer w = new FileWriter(path)) {
+            w.write(readTestAsset("shortcut/shortcut_legacy_file.xml"));
+        };
+        initService();
+        mService.handleUnlockUser(USER_0);
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertWith(getCallerShortcuts())
+                    .haveIds("manifest-shortcut-storage")
+                    .forShortcutWithId("manifest-shortcut-storage", si -> {
+                        assertEquals("android.settings.INTERNAL_STORAGE_SETTINGS",
+                                si.getIntent().getAction());
+                        assertEquals(12345, si.getIntent().getIntExtra("key", 0));
+                    });
         });
     }
 }
