@@ -842,12 +842,17 @@ public class ShortcutService extends IShortcutService.Stub {
         getLastResetTimeLocked();
     }
 
+    @VisibleForTesting
+    final File getUserFile(@UserIdInt int userId) {
+        return new File(injectUserDataPath(userId), FILENAME_USER_PACKAGES);
+    }
+
     private void saveUserLocked(@UserIdInt int userId) {
-        final File path = new File(injectUserDataPath(userId), FILENAME_USER_PACKAGES);
+        final File path = getUserFile(userId);
         if (DEBUG) {
             Slog.d(TAG, "Saving to " + path);
         }
-        path.mkdirs();
+        path.getParentFile().mkdirs();
         final AtomicFile file = new AtomicFile(path);
         FileOutputStream os = null;
         try {
@@ -890,7 +895,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
     @Nullable
     private ShortcutUser loadUserLocked(@UserIdInt int userId) {
-        final File path = new File(injectUserDataPath(userId), FILENAME_USER_PACKAGES);
+        final File path = getUserFile(userId);
         if (DEBUG) {
             Slog.d(TAG, "Loading from " + path);
         }
@@ -1466,7 +1471,7 @@ public class ShortcutService extends IShortcutService.Stub {
      * Clean up / validate an incoming shortcut.
      * - Make sure all mandatory fields are set.
      * - Make sure the intent's extras are persistable, and them to set
-     * {@link ShortcutInfo#mIntentPersistableExtras}.  Also clear its extras.
+     * {@link ShortcutInfo#mIntentPersistableExtrases}.  Also clear its extras.
      * - Clear flags.
      *
      * TODO Detailed unit tests

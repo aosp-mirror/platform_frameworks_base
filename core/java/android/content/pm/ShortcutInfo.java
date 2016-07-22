@@ -941,7 +941,8 @@ public final class ShortcutInfo implements Parcelable {
         }
 
         /**
-         * Sets the intent of a shortcut.
+         * Sets the intent of a shortcut.  Alternatively, {@link #setIntents(Intent[])} can be used
+         * to launch an activity with other activities in the back stack.
          *
          * <p>This is a mandatory field when publishing a new shortcut with
          * {@link ShortcutManager#addDynamicShortcuts(List)} or
@@ -965,7 +966,9 @@ public final class ShortcutInfo implements Parcelable {
         }
 
         /**
-         * Sets multiple intents instead of a single intent.
+         * Sets multiple intents instead of a single intent, in order to launch an activity with
+         * other activities in back stack.  Use {@link TaskStackBuilder} to build intents.
+         * See the {@link ShortcutManager} javadoc for details.
          *
          * @see Builder#setIntent(Intent)
          * @see ShortcutInfo#getIntents()
