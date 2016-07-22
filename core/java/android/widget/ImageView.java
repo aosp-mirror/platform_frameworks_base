@@ -545,6 +545,13 @@ public class ImageView extends View {
      * Subsequent calls to {@link #setImageDrawable(Drawable)} will automatically
      * mutate the drawable and apply the specified tint and tint mode using
      * {@link Drawable#setTintList(ColorStateList)}.
+     * <p>
+     * <em>Note:</em> The default tint mode used by this setter is NOT
+     * consistent with the default tint mode used by the
+     * {@link android.R.styleable#ImageView_tint android:tint}
+     * attribute. If the {@code android:tint} attribute is specified, the
+     * default tint mode will be set to {@link PorterDuff.Mode#SRC_ATOP} to
+     * ensure consistency with earlier versions of the platform.
      *
      * @param tint the tint to apply, may be {@code null} to clear tint
      *

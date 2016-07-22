@@ -3792,7 +3792,10 @@ i
         <!-- An optional argument to supply a maximum height for this view.
              See {see android.widget.ImageView#setMaxHeight} for details. -->
         <attr name="maxHeight" format="dimension" />
-        <!-- Set a tinting color for the image. By default, the tint will blend using SRC_ATOP mode. -->
+        <!-- The tinting color for the image. By default, the tint will blend using SRC_ATOP mode.
+             Please note that for compatibility reasons, this is NOT consistent with the default
+             SRC_IN tint mode used by {@link android.widget.ImageView#setImageTintList} and by
+             similar tint attributes on other views. -->
         <attr name="tint" format="color" />
         <!-- If true, the image view will be baseline aligned with based on its
              bottom edge. -->
