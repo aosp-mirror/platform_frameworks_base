@@ -611,6 +611,23 @@ static jint ImageReader_detachImage(JNIEnv* env, jobject thiz, jobject image) {
     return OK;
 }
 
+static void ImageReader_discardFreeBuffers(JNIEnv* env, jobject thiz) {
+    ALOGV("%s:", __FUNCTION__);
+    JNIImageReaderContext* ctx = ImageReader_getContext(env, thiz);
+    if (ctx == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", "ImageReader was already closed");
+        return;
+    }
+
+    BufferItemConsumer* bufferConsumer = ctx->getBufferConsumer();
+    status_t res = bufferConsumer->discardFreeBuffers();
+    if (res != OK) {
+        ALOGE("Buffer discard failed: %s (%d)", strerror(-res), res);
+        jniThrowRuntimeException(env,
+                "nativeDicardFreebuffers failed");
+    }
+}
+
 static jobject ImageReader_getSurface(JNIEnv* env, jobject thiz)
 {
     ALOGV("%s: ", __FUNCTION__);
@@ -773,6 +790,7 @@ static const JNINativeMethod gImageReaderMethods[] = {
     {"nativeImageSetup",       "(Landroid/media/Image;)I",   (void*)ImageReader_imageSetup },
     {"nativeGetSurface",       "()Landroid/view/Surface;",   (void*)ImageReader_getSurface },
     {"nativeDetachImage",      "(Landroid/media/Image;)I",   (void*)ImageReader_detachImage },
+    {"nativeDiscardFreeBuffers", "()V",                      (void*)ImageReader_discardFreeBuffers }
 };
 
 static const JNINativeMethod gImageMethods[] = {
