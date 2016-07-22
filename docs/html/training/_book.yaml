@@ -1392,6 +1392,11 @@ toc:
     path_attributes:
     - name: description
       value: How to create an application that enforces security policies on devices.
+  - title: Supporting Direct Boot
+    path: /training/articles/direct-boot.html
+    path_attributes:
+    - name: description
+      value: How use device encrypted storage during Direct Boot mode.
 
 - title: Best Practices for Permissions & Identifiers
   path: /training/best-permissions-ids.html
