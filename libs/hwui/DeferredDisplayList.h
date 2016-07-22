@@ -77,7 +77,7 @@ public:
 class DeferredDisplayList {
     friend struct DeferStateStruct; // used to give access to allocator
 public:
-    DeferredDisplayList(const Rect& bounds)
+    explicit DeferredDisplayList(const Rect& bounds)
             : mBounds(bounds) {
         clear();
     }
