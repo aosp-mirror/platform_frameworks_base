@@ -34,7 +34,7 @@ class Layer;
  */
 class Texture : public GpuMemoryTracker {
 public:
-    Texture(Caches& caches)
+    explicit Texture(Caches& caches)
         : GpuMemoryTracker(GpuObjectType::Texture)
         , mCaches(caches)
     { }
@@ -171,7 +171,7 @@ private:
 
 class AutoTexture {
 public:
-    AutoTexture(Texture* texture)
+    explicit AutoTexture(Texture* texture)
             : texture(texture) {}
     ~AutoTexture() {
         if (texture && texture->cleanup) {

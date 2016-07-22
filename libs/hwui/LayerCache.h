@@ -105,7 +105,7 @@ private:
             mHeight = Layer::computeIdealHeight(layerHeight);
         }
 
-        LayerEntry(Layer* layer):
+        explicit LayerEntry(Layer* layer):
             mLayer(layer), mWidth(layer->getWidth()), mHeight(layer->getHeight()) {
         }
 
