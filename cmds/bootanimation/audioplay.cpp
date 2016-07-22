@@ -20,6 +20,7 @@
 #include "audioplay.h"
 
 #define CHATTY ALOGD
+#define LOG_TAG "audioplay"
 
 #include <string.h>
 
@@ -114,10 +115,8 @@ bool createEngine() {
     }
     (void)result;
 
-    // create output mix, with environmental reverb specified as a non-required interface
-    const SLInterfaceID ids[1] = {SL_IID_ENVIRONMENTALREVERB};
-    const SLboolean req[1] = {SL_BOOLEAN_FALSE};
-    result = (*engineEngine)->CreateOutputMix(engineEngine, &outputMixObject, 1, ids, req);
+    // create output mix
+    result = (*engineEngine)->CreateOutputMix(engineEngine, &outputMixObject, 0, NULL, NULL);
     if (result != SL_RESULT_SUCCESS) {
         ALOGE("sl engine CreateOutputMix failed with result %d", result);
         return false;
@@ -183,6 +182,14 @@ bool createBufferQueueAudioPlayer(const ChunkFormat* chunkFormat) {
         ALOGE("SetConfiguration failed with result %d", result);
         return false;
     }
+    // use normal performance mode as low latency is not needed. This is not mandatory so
+    // do not bail if we fail
+    SLuint32 performanceMode = SL_ANDROID_PERFORMANCE_NONE;
+    result = (*playerConfig)->SetConfiguration(
+           playerConfig, SL_ANDROID_KEY_PERFORMANCE_MODE, &performanceMode, sizeof(SLuint32));
+    ALOGW_IF(result != SL_RESULT_SUCCESS,
+            "could not set performance mode on player, error %d", result);
+    (void)result;
 
     // realize the player
     result = (*bqPlayerObject)->Realize(bqPlayerObject, SL_BOOLEAN_FALSE);
@@ -264,6 +271,7 @@ bool parseClipBuf(const uint8_t* clipBuf, int clipBufSize, const ChunkFormat** o
                 break;
             case ID_DATA:
                 /* Stop looking for chunks */
+                *oSoundBufSize = chunkHeader->sz;
                 endLoop = true;
                 break;
             default:
@@ -317,7 +325,8 @@ bool playClip(const uint8_t* buf, int size) {
         return false;
     }
 
-    CHATTY("playClip on player %p: buf=%p size=%d", bqPlayerBufferQueue, buf, size);
+    CHATTY("playClip on player %p: buf=%p size=%d nextSize %d",
+           bqPlayerBufferQueue, buf, size, nextSize);
 
     if (nextSize > 0) {
         // here we only enqueue one buffer because it is a long clip,
