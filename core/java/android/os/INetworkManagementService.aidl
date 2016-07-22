@@ -442,6 +442,7 @@ interface INetworkManagementService
 
     void addInterfaceToLocalNetwork(String iface, in List<RouteInfo> routes);
     void removeInterfaceFromLocalNetwork(String iface);
+    int removeRoutesFromLocalNetwork(in List<RouteInfo> routes);
 
     void setAllowOnlyVpnForUids(boolean enable, in UidRange[] uidRanges);
 }
