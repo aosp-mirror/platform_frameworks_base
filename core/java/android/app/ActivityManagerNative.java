@@ -3010,6 +3010,13 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reply.writeNoException();
             return true;
         }
+        case SET_HAS_TOP_UI: {
+            data.enforceInterface(IActivityManager.descriptor);
+            final boolean hasTopUi = data.readInt() != 0;
+            setHasTopUi(hasTopUi);
+            reply.writeNoException();
+            return true;
+        }
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -7066,6 +7073,19 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeInt(tid);
         mRemote.transact(SET_RENDER_THREAD_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+        return;
+    }
+
+    public void setHasTopUi(boolean hasTopUi)
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeInt(hasTopUi ? 1 : 0);
+        mRemote.transact(SET_HAS_TOP_UI, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();
