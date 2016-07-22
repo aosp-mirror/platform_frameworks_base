@@ -35,7 +35,7 @@ class TreeInfo;
 class AnimatorManager {
     PREVENT_COPY_AND_ASSIGN(AnimatorManager);
 public:
-    AnimatorManager(RenderNode& parent);
+    explicit AnimatorManager(RenderNode& parent);
     ~AnimatorManager();
 
     void addAnimator(const sp<BaseRenderNodeAnimator>& animator);

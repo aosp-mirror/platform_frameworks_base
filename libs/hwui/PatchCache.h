@@ -51,7 +51,7 @@ class Caches;
 
 class PatchCache {
 public:
-    PatchCache(RenderState& renderState);
+    explicit PatchCache(RenderState& renderState);
     ~PatchCache();
     void init();
 

@@ -25,7 +25,7 @@ namespace uirenderer {
 class SortedListImpl: public VectorImpl {
 public:
     SortedListImpl(size_t itemSize, uint32_t flags);
-    SortedListImpl(const VectorImpl& rhs);
+    explicit SortedListImpl(const VectorImpl& rhs);
     virtual ~SortedListImpl();
 
     SortedListImpl& operator =(const SortedListImpl& rhs);

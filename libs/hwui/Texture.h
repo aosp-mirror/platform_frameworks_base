@@ -30,7 +30,7 @@ class UvMapper;
  */
 class Texture {
 public:
-    Texture(Caches& caches) : mCaches(caches) { }
+    explicit Texture(Caches& caches) : mCaches(caches) { }
 
     virtual ~Texture() { }
 
@@ -120,7 +120,7 @@ private:
 
 class AutoTexture {
 public:
-    AutoTexture(const Texture* texture): mTexture(texture) { }
+    explicit AutoTexture(const Texture* texture): mTexture(texture) { }
     ~AutoTexture() {
         if (mTexture && mTexture->cleanup) {
             mTexture->deleteTexture();

@@ -83,7 +83,7 @@ public:
         return sInstance != nullptr;
     }
 private:
-    Caches(RenderState& renderState);
+    explicit Caches(RenderState& renderState);
     static Caches* sInstance;
 
 public:

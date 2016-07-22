@@ -36,7 +36,7 @@ public:
 template<typename T>
 class TaskProcessor: public TaskProcessorBase {
 public:
-    TaskProcessor(TaskManager* manager): mManager(manager) { }
+    explicit TaskProcessor(TaskManager* manager): mManager(manager) { }
     virtual ~TaskProcessor() { }
 
     void add(const sp<Task<T> >& task) {
