@@ -3255,6 +3255,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @attr ref android.R.styleable#TextView_textColor
      */
+    @android.view.RemotableViewMethod
     public void setTextColor(ColorStateList colors) {
         if (colors == null) {
             throw new NullPointerException();

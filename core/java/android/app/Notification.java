@@ -39,7 +39,6 @@ import android.media.AudioManager;
 import android.media.session.MediaSession;
 import android.net.Uri;
 import android.os.BadParcelableException;
-import android.os.BaseBundle;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -51,7 +50,9 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.style.AbsoluteSizeSpan;
+import android.text.style.BackgroundColorSpan;
 import android.text.style.CharacterStyle;
+import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.TextAppearanceSpan;
 import android.util.ArraySet;
@@ -73,7 +74,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -3710,8 +3710,6 @@ public class Notification implements Parcelable
                     emphazisedMode ? getEmphasizedActionLayoutResource()
                             : tombstone ? getActionTombstoneLayoutResource()
                                     : getActionLayoutResource());
-            final Icon ai = action.getIcon();
-            button.setTextViewText(R.id.action0, processLegacyText(action.title));
             if (!tombstone) {
                 button.setOnClickPendingIntent(R.id.action0, action.actionIntent);
             }
@@ -3720,19 +3718,140 @@ public class Notification implements Parcelable
                 button.setRemoteInputs(R.id.action0, action.mRemoteInputs);
             }
             if (emphazisedMode) {
-                // change the background color
-                int color = resolveContrastColor();
-                if (oddAction) {
-                    color = NotificationColorUtil.lightenColor(color, 10);
-                }
-                button.setDrawableParameters(R.id.button_holder, true, -1, color,
+                // change the background bgColor
+                int bgColor = mContext.getColor(oddAction ? R.color.notification_action_list
+                        : R.color.notification_action_list_dark);
+                button.setDrawableParameters(R.id.button_holder, true, -1, bgColor,
                         PorterDuff.Mode.SRC_ATOP, -1);
+                CharSequence title = action.title;
+                ColorStateList[] outResultColor = null;
+                if (isLegacy()) {
+                    title = clearColorSpans(title);
+                } else {
+                    outResultColor = new ColorStateList[1];
+                    title = ensureColorSpanContrast(title, bgColor, outResultColor);
+                }
+                button.setTextViewText(R.id.action0, title);
+                if (outResultColor != null && outResultColor[0] != null) {
+                    // We need to set the text color as well since changing a text to uppercase
+                    // clears its spans.
+                    button.setTextColor(R.id.action0, outResultColor[0]);
+                } else if (mN.color != COLOR_DEFAULT) {
+                    button.setTextColor(R.id.action0,resolveContrastColor());
+                }
             } else {
+                button.setTextViewText(R.id.action0, processLegacyText(action.title));
                 if (mN.color != COLOR_DEFAULT) {
                     button.setTextColor(R.id.action0, resolveContrastColor());
                 }
             }
             return button;
+        }
+
+        /**
+         * Clears all color spans of a text
+         * @param charSequence the input text
+         * @return the same text but without color spans
+         */
+        private CharSequence clearColorSpans(CharSequence charSequence) {
+            if (charSequence instanceof Spanned) {
+                Spanned ss = (Spanned) charSequence;
+                Object[] spans = ss.getSpans(0, ss.length(), Object.class);
+                SpannableStringBuilder builder = new SpannableStringBuilder(ss.toString());
+                for (Object span : spans) {
+                    Object resultSpan = span;
+                    if (resultSpan instanceof CharacterStyle) {
+                        resultSpan = ((CharacterStyle) span).getUnderlying();
+                    }
+                    if (resultSpan instanceof TextAppearanceSpan) {
+                        TextAppearanceSpan originalSpan = (TextAppearanceSpan) resultSpan;
+                        if (originalSpan.getTextColor() != null) {
+                            resultSpan = new TextAppearanceSpan(
+                                    originalSpan.getFamily(),
+                                    originalSpan.getTextStyle(),
+                                    originalSpan.getTextSize(),
+                                    null,
+                                    originalSpan.getLinkTextColor());
+                        }
+                    } else if (resultSpan instanceof ForegroundColorSpan
+                            || (resultSpan instanceof BackgroundColorSpan)) {
+                        continue;
+                    } else {
+                        resultSpan = span;
+                    }
+                    builder.setSpan(resultSpan, ss.getSpanStart(span), ss.getSpanEnd(span),
+                            ss.getSpanFlags(span));
+                }
+                return builder;
+            }
+            return charSequence;
+        }
+
+        /**
+         * Ensures contrast on color spans against a background color. also returns the color of the
+         * text if a span was found that spans over the whole text.
+         *
+         * @param charSequence the charSequence on which the spans are
+         * @param background the background color to ensure the contrast against
+         * @param outResultColor an array in which a color will be returned as the first element if
+         *                    there exists a full length color span.
+         * @return the contrasted charSequence
+         */
+        private CharSequence ensureColorSpanContrast(CharSequence charSequence, int background,
+                ColorStateList[] outResultColor) {
+            if (charSequence instanceof Spanned) {
+                Spanned ss = (Spanned) charSequence;
+                Object[] spans = ss.getSpans(0, ss.length(), Object.class);
+                SpannableStringBuilder builder = new SpannableStringBuilder(ss.toString());
+                for (Object span : spans) {
+                    Object resultSpan = span;
+                    int spanStart = ss.getSpanStart(span);
+                    int spanEnd = ss.getSpanEnd(span);
+                    boolean fullLength = (spanEnd - spanStart) == charSequence.length();
+                    if (resultSpan instanceof CharacterStyle) {
+                        resultSpan = ((CharacterStyle) span).getUnderlying();
+                    }
+                    if (resultSpan instanceof TextAppearanceSpan) {
+                        TextAppearanceSpan originalSpan = (TextAppearanceSpan) resultSpan;
+                        ColorStateList textColor = originalSpan.getTextColor();
+                        if (textColor != null) {
+                            int[] colors = textColor.getColors();
+                            int[] newColors = new int[colors.length];
+                            for (int i = 0; i < newColors.length; i++) {
+                                newColors[i] = NotificationColorUtil.ensureLargeTextContrast(
+                                        colors[i], background);
+                            }
+                            textColor = new ColorStateList(textColor.getStates().clone(),
+                                    newColors);
+                            resultSpan = new TextAppearanceSpan(
+                                    originalSpan.getFamily(),
+                                    originalSpan.getTextStyle(),
+                                    originalSpan.getTextSize(),
+                                    textColor,
+                                    originalSpan.getLinkTextColor());
+                            if (fullLength) {
+                                outResultColor[0] = new ColorStateList(
+                                        textColor.getStates().clone(), newColors);
+                            }
+                        }
+                    } else if (resultSpan instanceof ForegroundColorSpan) {
+                        ForegroundColorSpan originalSpan = (ForegroundColorSpan) resultSpan;
+                        int foregroundColor = originalSpan.getForegroundColor();
+                        foregroundColor = NotificationColorUtil.ensureLargeTextContrast(
+                                foregroundColor, background);
+                        resultSpan = new ForegroundColorSpan(foregroundColor);
+                        if (fullLength) {
+                            outResultColor[0] = ColorStateList.valueOf(foregroundColor);
+                        }
+                    } else {
+                        resultSpan = span;
+                    }
+
+                    builder.setSpan(resultSpan, spanStart, spanEnd, ss.getSpanFlags(span));
+                }
+                return builder;
+            }
+            return charSequence;
         }
 
         /**

@@ -2560,6 +2560,7 @@
 
   <java-symbol type="color" name="notification_action_list" />
   <java-symbol type="color" name="notification_material_background_color" />
+  <java-symbol type="color" name="notification_action_list_dark" />
 
   <!-- Resolver target actions -->
   <java-symbol type="array" name="resolver_target_actions_pin" />

@@ -2786,6 +2786,18 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
+     * @hide
+     * Equivalent to calling {@link android.widget.TextView#setTextColor(ColorStateList)}.
+     *
+     * @param viewId The id of the view whose text color should change
+     * @param colors the text colors to set
+     */
+    public void setTextColor(int viewId, @ColorInt ColorStateList colors) {
+        addAction(new ReflectionAction(viewId, "setTextColor", ReflectionAction.COLOR_STATE_LIST,
+                colors));
+    }
+
+    /**
      * Equivalent to calling {@link android.widget.AbsListView#setRemoteViewsAdapter(Intent)}.
      *
      * @param appWidgetId The id of the app widget which contains the specified view. (This
