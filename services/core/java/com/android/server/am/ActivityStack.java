@@ -1249,7 +1249,7 @@ final class ActivityStack {
             r.stopped = true;
             r.state = ActivityState.STOPPED;
 
-            mWindowManager.notifyAppStopped(r.appToken, true);
+            mWindowManager.notifyAppStopped(r.appToken);
 
             if (getVisibleBehindActivity() == r) {
                 mStackSupervisor.requestVisibleBehindLocked(r, false);
@@ -2490,7 +2490,7 @@ final class ActivityStack {
 
                 // Well the app will no longer be stopped.
                 // Clear app token stopped state in window manager if needed.
-                mWindowManager.notifyAppStopped(next.appToken, false);
+                mWindowManager.notifyAppResumed(next.appToken, next.stopped);
 
                 EventLog.writeEvent(EventLogTags.AM_RESUME_ACTIVITY, next.userId,
                         System.identityHashCode(next), next.task.taskId, next.shortComponentName);
