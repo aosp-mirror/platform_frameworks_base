@@ -895,13 +895,15 @@ class ActivityStarter {
             throw new IllegalArgumentException("intents are length different than resolvedTypes");
         }
 
+        final int realCallingPid = Binder.getCallingPid();
+        final int realCallingUid = Binder.getCallingUid();
 
         int callingPid;
         if (callingUid >= 0) {
             callingPid = -1;
         } else if (caller == null) {
-            callingPid = Binder.getCallingPid();
-            callingUid = Binder.getCallingUid();
+            callingPid = realCallingPid;
+            callingUid = realCallingUid;
         } else {
             callingPid = callingUid = -1;
         }
@@ -942,7 +944,8 @@ class ActivityStarter {
                             i == intents.length - 1 ? bOptions : null);
                     int res = startActivityLocked(caller, intent, null /*ephemeralIntent*/,
                             resolvedTypes[i], aInfo, null /*rInfo*/, null, null, resultTo, null, -1,
-                            callingPid, callingUid, callingPackage, callingPid, callingUid, 0,
+                            callingPid, callingUid, callingPackage,
+                            realCallingPid, realCallingUid, 0,
                             options, false, componentSpecified, outActivity, null, null);
                     if (res < 0) {
                         return res;
