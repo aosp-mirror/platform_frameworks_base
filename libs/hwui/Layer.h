@@ -175,19 +175,6 @@ public:
      */
     void onGlContextLost();
 
-    /**
-     * Bounds of the layer.
-     */
-    Rect layer;
-    /**
-     * Texture coordinates of the layer.
-     */
-    Rect texCoords;
-    /**
-     * Clipping rectangle.
-     */
-    Rect clipRect;
-
 private:
     Caches& caches;
 

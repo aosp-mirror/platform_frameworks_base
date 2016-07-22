@@ -32,7 +32,6 @@
 #include <SkXfermode.h>
 
 #include <DeferredLayerUpdater.h>
-#include <LayerRenderer.h>
 #include <SkiaShader.h>
 #include <Rect.h>
 #include <RenderNode.h>

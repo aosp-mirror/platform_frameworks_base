@@ -15,7 +15,6 @@
  */
 #include "DeferredLayerUpdater.h"
 
-#include "LayerRenderer.h"
 #include "renderthread/EglManager.h"
 #include "renderthread/RenderTask.h"
 #include "utils/PaintUtils.h"
@@ -29,8 +28,8 @@ DeferredLayerUpdater::DeferredLayerUpdater(Layer* layer)
         , mNeedsGLContextAttach(false)
         , mUpdateTexImage(false)
         , mLayer(layer) {
-    mWidth = mLayer->layer.getWidth();
-    mHeight = mLayer->layer.getHeight();
+    mWidth = mLayer->getWidth();
+    mHeight = mLayer->getHeight();
     mBlend = mLayer->isBlend();
     mColorFilter = SkSafeRef(mLayer->getColorFilter());
     mAlpha = mLayer->getAlpha();
@@ -107,8 +106,22 @@ void DeferredLayerUpdater::doUpdateTexImage() {
         LOG_ALWAYS_FATAL_IF(renderTarget != GL_TEXTURE_2D && renderTarget != GL_TEXTURE_EXTERNAL_OES,
                 "doUpdateTexImage target %x, 2d %x, EXT %x",
                 renderTarget, GL_TEXTURE_2D, GL_TEXTURE_EXTERNAL_OES);
-        LayerRenderer::updateTextureLayer(mLayer, mWidth, mHeight,
-                !mBlend, forceFilter, renderTarget, transform);
+        updateLayer(forceFilter, renderTarget, transform);
+    }
+}
+
+void DeferredLayerUpdater::updateLayer(bool forceFilter, GLenum renderTarget,
+        const float* textureTransform) {
+    mLayer->setBlend(mBlend);
+    mLayer->setForceFilter(forceFilter);
+    mLayer->setSize(mWidth, mHeight);
+    mLayer->getTexTransform().load(textureTransform);
+
+    if (renderTarget != mLayer->getRenderTarget()) {
+        mLayer->setRenderTarget(renderTarget);
+        mLayer->bindTexture();
+        mLayer->setFilter(GL_NEAREST, false, true);
+        mLayer->setWrap(GL_CLAMP_TO_EDGE, false, true);
     }
 }
 

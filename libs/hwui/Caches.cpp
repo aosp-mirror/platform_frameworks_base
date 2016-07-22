@@ -17,7 +17,7 @@
 #include "Caches.h"
 
 #include "GammaFontRenderer.h"
-#include "LayerRenderer.h"
+#include "Layer.h"
 #include "Properties.h"
 #include "renderstate/RenderState.h"
 #include "ShadowTessellator.h"

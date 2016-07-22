@@ -92,6 +92,8 @@ public:
 
     void detachSurfaceTexture();
 
+    void updateLayer(bool forceFilter, GLenum renderTarget, const float* textureTransform);
+
 private:
     // Generic properties
     int mWidth;

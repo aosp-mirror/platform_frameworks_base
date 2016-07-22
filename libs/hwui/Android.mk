@@ -70,7 +70,6 @@ hwui_src_files := \
     JankTracker.cpp \
     Layer.cpp \
     LayerBuilder.cpp \
-    LayerRenderer.cpp \
     LayerUpdateQueue.cpp \
     Matrix.cpp \
     OpDumper.cpp \
@@ -249,6 +248,7 @@ LOCAL_SRC_FILES += \
     tests/unit/CanvasStateTests.cpp \
     tests/unit/ClipAreaTests.cpp \
     tests/unit/DamageAccumulatorTests.cpp \
+    tests/unit/DeferredLayerUpdaterTests.cpp \
     tests/unit/DeviceInfoTests.cpp \
     tests/unit/FatVectorTests.cpp \
     tests/unit/FontRendererTests.cpp \
