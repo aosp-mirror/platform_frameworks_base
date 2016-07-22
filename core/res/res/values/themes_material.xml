@@ -370,7 +370,7 @@ please see themes_device_defaults.xml.
         <item name="timePickerStyle">@style/Widget.Material.TimePicker</item>
 
         <!-- TimePicker dialog theme -->
-        <item name="timePickerDialogTheme">?attr/dialogTheme</item>
+        <item name="timePickerDialogTheme">@style/ThemeOverlay.Material.Dialog.TimePicker</item>
 
         <!-- DatePicker style -->
         <item name="datePickerStyle">@style/Widget.Material.DatePicker</item>
@@ -733,7 +733,7 @@ please see themes_device_defaults.xml.
         <item name="timePickerStyle">@style/Widget.Material.Light.TimePicker</item>
 
         <!-- TimePicker dialog theme -->
-        <item name="timePickerDialogTheme">?attr/dialogTheme</item>
+        <item name="timePickerDialogTheme">@style/ThemeOverlay.Material.Dialog.TimePicker</item>
 
         <!-- DatePicker style -->
         <item name="datePickerStyle">@style/Widget.Material.Light.DatePicker</item>
@@ -898,6 +898,11 @@ please see themes_device_defaults.xml.
     <style name="ThemeOverlay.Material.Dialog" parent="ThemeOverlay.Material.BaseDialog">
         <item name="colorBackgroundCacheHint">@null</item>
         <item name="colorBackground">?attr/colorBackgroundFloating</item>
+    </style>
+
+    <!-- Theme overlay that overrides window properties to display as a time picker dialog. -->
+    <style name="ThemeOverlay.Material.Dialog.TimePicker">
+        <item name="alertDialogStyle">@style/TimePickerDialog.Material</item>
     </style>
 
     <!-- Theme overlay that overrides window properties to display as a date picker dialog. -->
