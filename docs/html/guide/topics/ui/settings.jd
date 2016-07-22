@@ -943,8 +943,8 @@ uses.</p>
 
 <p>The Android framework includes a variety of {@link android.preference.Preference} subclasses that
 allow you to build a UI for several different types of settings.
-However, you might discover a setting you need for which there’s no built-in solution, such as a
-number picker or date picker. In such a case, you’ll need to create a custom preference by extending
+However, you might discover a setting you need for which there's no built-in solution, such as a
+number picker or date picker. In such a case, you'll need to create a custom preference by extending
 the {@link android.preference.Preference} class or one of the other subclasses.</p>
 
 <p>When you extend the {@link android.preference.Preference} class, there are a few important
