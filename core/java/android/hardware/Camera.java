@@ -39,6 +39,7 @@ import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.renderscript.Allocation;
 import android.renderscript.Element;
 import android.renderscript.RSIllegalArgumentException;
@@ -292,7 +293,35 @@ public class Camera {
      * @return total number of accessible camera devices, or 0 if there are no
      *   cameras or an error was encountered enumerating them.
      */
-    public native static int getNumberOfCameras();
+    public static int getNumberOfCameras() {
+        boolean exposeAuxCamera = false;
+        String packageName = ActivityThread.currentOpPackageName();
+        /* Force to expose only two cameras
+         * if the package name does not falls in this bucket
+         */
+        String packageList = SystemProperties.get("vendor.camera.aux.packagelist");
+        if (packageList.length() > 0) {
+            TextUtils.StringSplitter splitter = new TextUtils.SimpleStringSplitter(',');
+            splitter.setString(packageList);
+            for (String str : splitter) {
+                if (packageName.equals(str)) {
+                    exposeAuxCamera = true;
+                    break;
+                }
+            }
+        }
+        int numberOfCameras = _getNumberOfCameras();
+        if (exposeAuxCamera == false && (numberOfCameras > 2)) {
+            numberOfCameras = 2;
+        }
+        return numberOfCameras;
+    }
+
+    /**
+     * Returns the number of physical cameras available on this device.
+     */
+    /** @hide */
+    public native static int _getNumberOfCameras();
 
     /**
      * Returns the information about a particular camera.
@@ -303,6 +332,9 @@ public class Camera {
      *    low-level failure).
      */
     public static void getCameraInfo(int cameraId, CameraInfo cameraInfo) {
+        if(cameraId >= getNumberOfCameras()){
+            throw new RuntimeException("Unknown camera ID");
+        }
         _getCameraInfo(cameraId, cameraInfo);
         IBinder b = ServiceManager.getService(Context.AUDIO_SERVICE);
         IAudioService audioService = IAudioService.Stub.asInterface(b);
@@ -575,6 +607,9 @@ public class Camera {
 
     /** used by Camera#open, Camera#open(int) */
     Camera(int cameraId) {
+        if(cameraId >= getNumberOfCameras()){
+             throw new RuntimeException("Unknown camera ID");
+        }
         int err = cameraInitNormal(cameraId);
         if (checkInitErrors(err)) {
             if (err == -EACCES) {
