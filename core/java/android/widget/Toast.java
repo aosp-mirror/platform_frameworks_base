@@ -357,8 +357,8 @@ public class Toast {
 
         WindowManager mWM;
 
-        static final long SHORT_DURATION_TIMEOUT = 5000;
-        static final long LONG_DURATION_TIMEOUT = 1000;
+        static final long SHORT_DURATION_TIMEOUT = 4000;
+        static final long LONG_DURATION_TIMEOUT = 7000;
 
         TN() {
             // XXX This should be changed to use a Dialog, with a Theme.Toast
