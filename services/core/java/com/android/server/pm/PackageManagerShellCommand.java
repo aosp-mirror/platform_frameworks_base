@@ -1249,7 +1249,7 @@ class PackageManagerShellCommand extends ShellCommand {
                     PackageInstaller.STATUS_FAILURE);
             if (status == PackageInstaller.STATUS_SUCCESS) {
                 if (logSuccess) {
-                    System.out.println("Success");
+                    pw.println("Success");
                 }
             } else {
                 pw.println("Failure ["
