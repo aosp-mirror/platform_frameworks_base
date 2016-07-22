@@ -6,9 +6,34 @@ page.metaDescription=This page provides details about the Support Library packag
 <p>This page provides details about the Support Library package releases.</p>
 
 <div class="toggle-content opened">
-  <p id="rev24-1-0">
+  <p id="rev24-1-1">
     <a href="#" onclick="return toggleContent(this)"><img src=
     "{@docRoot}assets/images/styles/disclosure_up.png" class=
+    "toggle-content-img" alt="">Android Support Library, revision 24.1.1</a>
+    <em>(July 2016)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <p>Fixed issues:</p>
+
+    <ul>
+      <li>Fixes an issue in the 24.1.0 release which affected resource IDs
+      shared between support libraries. This issue caused apps that depended on
+      support libraries with resources (such as design and appcompat) to
+      encounter issues caused by resource ID mismatches.
+      </li>
+    </ul>
+
+  </div>
+</div>
+
+<!-- end of collapsible section: 24.1.1 -->
+
+<div class="toggle-content closed">
+  <p id="rev24-1-0">
+    <a href="#" onclick="return toggleContent(this)"><img src=
+    "{@docRoot}assets/images/styles/disclosure_down.png" class=
     "toggle-content-img" alt="">Android Support Library, revision 24.1.0</a>
     <em>(July 2016)</em>
   </p>
