@@ -4476,7 +4476,25 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void notifyAppStopped(IBinder token, boolean stopped) {
+    public void notifyAppResumed(IBinder token, boolean wasStopped) {
+        if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
+                "notifyAppResumed()")) {
+            throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
+        }
+
+        synchronized(mWindowMap) {
+            final AppWindowToken wtoken;
+            wtoken = findAppWindowToken(token);
+            if (wtoken == null) {
+                Slog.w(TAG_WM, "Attempted to notify resumed of non-existing app token: " + token);
+                return;
+            }
+            wtoken.notifyAppResumed(wasStopped);
+        }
+    }
+
+    @Override
+    public void notifyAppStopped(IBinder token) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "notifyAppStopped()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
@@ -4486,10 +4504,10 @@ public class WindowManagerService extends IWindowManager.Stub
             final AppWindowToken wtoken;
             wtoken = findAppWindowToken(token);
             if (wtoken == null) {
-                Slog.w(TAG_WM, "Attempted to set visibility of non-existing app token: " + token);
+                Slog.w(TAG_WM, "Attempted to notify stopped of non-existing app token: " + token);
                 return;
             }
-            wtoken.notifyAppStopped(stopped);
+            wtoken.notifyAppStopped();
         }
     }
 
