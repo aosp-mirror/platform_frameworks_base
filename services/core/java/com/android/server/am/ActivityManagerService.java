@@ -63,6 +63,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import android.Manifest;
+import android.Manifest.permission;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.Activity;
@@ -6280,6 +6281,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             enqueueUidChangeLocked(uidRec, -1, UidRecord.CHANGE_ACTIVE);
         }
         proc.uidRecord = uidRec;
+
+        // Reset render thread tid if it was already set, so new process can set it again.
+        proc.renderThreadTid = 0;
         uidRec.numProcs++;
         mProcessNames.put(proc.processName, proc.uid, proc);
         if (proc.isolated) {
@@ -12669,6 +12673,42 @@ public final class ActivityManagerService extends ActivityManagerNative
                 throw new IllegalArgumentException();
             }
             return r.task.getTopActivity() == r;
+        }
+    }
+
+    @Override
+    public void setHasTopUi(boolean hasTopUi) throws RemoteException {
+        if (checkCallingPermission(permission.INTERNAL_SYSTEM_WINDOW) != PERMISSION_GRANTED) {
+            String msg = "Permission Denial: setHasTopUi() from pid="
+                    + Binder.getCallingPid()
+                    + ", uid=" + Binder.getCallingUid()
+                    + " requires " + permission.INTERNAL_SYSTEM_WINDOW;
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
+        final int pid = Binder.getCallingPid();
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (this) {
+                boolean changed = false;
+                ProcessRecord pr;
+                synchronized (mPidsSelfLocked) {
+                    pr = mPidsSelfLocked.get(pid);
+                    if (pr == null) {
+                        Slog.w(TAG, "setHasTopUi called on unknown pid: " + pid);
+                        return;
+                    }
+                    if (pr.hasTopUi != hasTopUi) {
+                        pr.hasTopUi = hasTopUi;
+                        changed = true;
+                    }
+                }
+                if (changed) {
+                    updateOomAdjLocked(pr);
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
         }
     }
 
@@ -19148,7 +19188,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             // facilitate this, here we need to determine whether or not it
             // is currently showing UI.
             app.systemNoUi = true;
-            if (app == TOP_APP) {
+            if (app == TOP_APP || app.hasTopUi) {
                 app.systemNoUi = false;
                 app.curSchedGroup = ProcessList.SCHED_GROUP_TOP_APP;
                 app.adjType = "pers-top-activity";
@@ -19177,7 +19217,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         int procState;
         boolean foregroundActivities = false;
         BroadcastQueue queue;
-        if (app == TOP_APP) {
+        if (app == TOP_APP || app.hasTopUi) {
             // The last app on the list is the foreground app.
             adj = ProcessList.FOREGROUND_APP_ADJ;
             schedGroup = ProcessList.SCHED_GROUP_TOP_APP;

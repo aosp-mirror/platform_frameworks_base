@@ -661,6 +661,14 @@ public interface IActivityManager extends IInterface {
     public void setVrThread(int tid) throws RemoteException;
     public void setRenderThread(int tid) throws RemoteException;
 
+    /**
+     * Let's activity manager know whether the calling process is currently showing "top-level" UI
+     * that is not an activity, i.e. windows on the screen the user is currently interacting with.
+     *
+     * @param hasTopUi Whether the calling process has "top-level" UI.
+     */
+    public void setHasTopUi(boolean hasTopUi) throws RemoteException;
+
     /*
      * Private non-Binder interfaces
      */
@@ -1051,4 +1059,5 @@ public interface IActivityManager extends IInterface {
     // Start of N MR1 transactions
     int SET_VR_THREAD_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 377;
     int SET_RENDER_THREAD_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 378;
+    int SET_HAS_TOP_UI = IBinder.FIRST_CALL_TRANSACTION + 379;
 }
