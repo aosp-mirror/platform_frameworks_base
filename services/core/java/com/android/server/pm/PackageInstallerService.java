@@ -870,13 +870,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
                 IntentSender statusReceiver, int userId) {
         final int callingUid = Binder.getCallingUid();
         mPm.enforceCrossUserPermission(callingUid, userId, true, true, "uninstall");
-        boolean allowSilentUninstall = true;
         if ((callingUid != Process.SHELL_UID) && (callingUid != Process.ROOT_UID)) {
             mAppOps.checkPackage(callingUid, callerPackageName);
-            final String installerPackageName = mPm.getInstallerPackageName(packageName);
-            allowSilentUninstall = mPm.isOrphaned(packageName) ||
-                    (installerPackageName != null
-                            && installerPackageName.equals(callerPackageName));
         }
 
         // Check whether the caller is device owner, in which case we do it silently.
@@ -887,8 +882,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
 
         final PackageDeleteObserverAdapter adapter = new PackageDeleteObserverAdapter(mContext,
                 statusReceiver, packageName, isDeviceOwner, userId);
-        if (allowSilentUninstall && mContext.checkCallingOrSelfPermission(
-                android.Manifest.permission.DELETE_PACKAGES) == PackageManager.PERMISSION_GRANTED) {
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DELETE_PACKAGES)
+                    == PackageManager.PERMISSION_GRANTED) {
             // Sweet, call straight through!
             mPm.deletePackage(packageName, adapter.getBinder(), userId, flags);
         } else if (isDeviceOwner) {

@@ -8371,6 +8371,10 @@ public class PackageManagerService extends IPackageManager.Stub {
             pkg.applicationInfo.flags |= ApplicationInfo.FLAG_FACTORY_TEST;
         }
 
+        if (isSystemApp(pkg)) {
+            pkgSetting.isOrphaned = true;
+        }
+
         ArrayList<PackageParser.Package> clientLibPkgs = null;
 
         if ((scanFlags & SCAN_CHECK_ONLY) != 0) {
@@ -15315,6 +15319,19 @@ public class PackageManagerService extends IPackageManager.Stub {
         Preconditions.checkNotNull(packageName);
         Preconditions.checkNotNull(observer);
         final int uid = Binder.getCallingUid();
+        if (uid != Process.SHELL_UID && uid != Process.ROOT_UID && uid != Process.SYSTEM_UID
+                && uid != getPackageUid(mRequiredInstallerPackage, 0, UserHandle.getUserId(uid))
+                && !isOrphaned(packageName)
+                && !isCallerSameAsInstaller(uid, packageName)) {
+            try {
+                final Intent intent = new Intent(Intent.ACTION_UNINSTALL_PACKAGE);
+                intent.setData(Uri.fromParts("package", packageName, null));
+                intent.putExtra(PackageInstaller.EXTRA_CALLBACK, observer.asBinder());
+                observer.onUserActionRequired(intent);
+            } catch (RemoteException re) {
+            }
+            return;
+        }
         final boolean deleteAllUsers = (deleteFlags & PackageManager.DELETE_ALL_USERS) != 0;
         final int[] users = deleteAllUsers ? sUserManager.getUserIds() : new int[]{ userId };
         if (UserHandle.getUserId(uid) != userId || (deleteAllUsers && users.length > 1)) {
@@ -15381,6 +15398,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                 } //end catch
             } //end run
         });
+    }
+
+    private boolean isCallerSameAsInstaller(int callingUid, String pkgName) {
+        final int installerPkgUid = getPackageUid(getInstallerPackageName(pkgName),
+                0 /* flags */, UserHandle.getUserId(callingUid));
+        return installerPkgUid == callingUid;
     }
 
     private int[] getBlockUninstallForUsers(String packageName, int[] userIds) {
