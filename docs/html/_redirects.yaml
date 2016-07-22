@@ -1214,3 +1214,5 @@ redirects:
   to: /training/tv/tif/content-recording.html
 - from: /preview/features/direct-boot.html
   to: /training/articles/direct-boot.html
+- from: /preview/features/scoped-folder-access.html
+  to: /training/articles/scoped-directory-access.html
