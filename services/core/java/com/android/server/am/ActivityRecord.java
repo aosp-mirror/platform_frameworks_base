@@ -447,17 +447,10 @@ final class ActivityRecord {
             return;
         }
         try {
-            // Make sure fontScale is always equal to global. For fullscreen apps, config is
-            // the shared EMPTY config, which has default fontScale of 1.0. We don't want it
-            // to be applied as an override config.
-            Configuration overrideConfig = new Configuration(config);
-            overrideConfig.fontScale = service.mConfiguration.fontScale;
-
             if (DEBUG_CONFIGURATION) Slog.v(TAG, "Sending new config to " + this + " " +
-                    "reportToActivity=" + reportToActivity + " and config: " + overrideConfig);
+                    "reportToActivity=" + reportToActivity + " and config: " + config);
 
-            app.thread.scheduleActivityConfigurationChanged(
-                    appToken, overrideConfig, reportToActivity);
+            app.thread.scheduleActivityConfigurationChanged(appToken, config, reportToActivity);
         } catch (RemoteException e) {
             // If process died, whatever.
         }

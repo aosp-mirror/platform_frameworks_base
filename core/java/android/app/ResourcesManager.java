@@ -679,7 +679,7 @@ public class ResourcesManager {
                 if (overrideConfig != null) {
                     activityResources.overrideConfig.setTo(overrideConfig);
                 } else {
-                    activityResources.overrideConfig.setToDefaults();
+                    activityResources.overrideConfig.unset();
                 }
 
                 if (DEBUG) {

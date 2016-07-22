@@ -142,6 +142,7 @@ public class ResourcesImpl {
         mAssets = assets;
         mMetrics.setToDefaults();
         mDisplayAdjustments = displayAdjustments;
+        mConfiguration.setToDefaults();
         updateConfiguration(config, metrics, displayAdjustments.getCompatibilityInfo());
         mAssets.ensureStringBlocks();
     }
@@ -383,7 +384,10 @@ public class ResourcesImpl {
                     mMetrics.density =
                             mConfiguration.densityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;
                 }
-                mMetrics.scaledDensity = mMetrics.density * mConfiguration.fontScale;
+
+                // Protect against an unset fontScale.
+                mMetrics.scaledDensity = mMetrics.density *
+                        (mConfiguration.fontScale != 0 ? mConfiguration.fontScale : 1.0f);
 
                 final int width, height;
                 if (mMetrics.widthPixels >= mMetrics.heightPixels) {
