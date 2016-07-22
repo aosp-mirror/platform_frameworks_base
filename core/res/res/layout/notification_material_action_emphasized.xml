@@ -26,9 +26,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
-        android:textColor="#ffffffff"
+        android:textColor="@color/notification_default_color"
         android:singleLine="true"
         android:ellipsize="end"
-        android:background="@drawable/notification_material_action_background_emphasized"
+        android:background="@drawable/notification_material_action_background"
         />
 </FrameLayout>
