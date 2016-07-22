@@ -2085,7 +2085,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 129;
+            private static final int SETTINGS_VERSION = 130;
 
             private final int mUserId;
 
@@ -2374,6 +2374,32 @@ public class SettingsProvider extends ContentProvider {
                     }
 
                     currentVersion = 129;
+                }
+
+                if (currentVersion == 129) {
+                    // default longpress timeout changed from 500 to 400. If unchanged from the old
+                    // default, update to the new default.
+                    final SettingsState systemSecureSettings =
+                            getSecureSettingsLocked(userId);
+                    final String oldValue = systemSecureSettings.getSettingLocked(
+                            Settings.Secure.LONG_PRESS_TIMEOUT).getValue();
+                    if (TextUtils.equals("500", oldValue)) {
+                        systemSecureSettings.insertSettingLocked(
+                                Settings.Secure.LONG_PRESS_TIMEOUT,
+                                String.valueOf(getContext().getResources().getInteger(
+                                        R.integer.def_long_press_timeout_millis)),
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+                    currentVersion = 130;
+                }
+
+                if (currentVersion != newVersion) {
+                    Slog.w("SettingsProvider", "warning: upgrading settings database to version "
+                            + newVersion + " left it at "
+                            + currentVersion + " instead; this is probably a bug", new Throwable());
+                    if (DEBUG) {
+                        throw new RuntimeException("db upgrade error");
+                    }
                 }
 
                 // vXXX: Add new settings above this point.
