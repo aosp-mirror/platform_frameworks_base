@@ -1122,7 +1122,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         mPrivateLayout.setUserExpanding(userLocked);
         if (mIsSummaryWithChildren) {
             mChildrenContainer.setUserLocked(userLocked);
-            if (userLocked || (!userLocked && !isGroupExpanded())) {
+            if (userLocked || !isGroupExpanded()) {
                 updateBackgroundForGroupState();
             }
         }
