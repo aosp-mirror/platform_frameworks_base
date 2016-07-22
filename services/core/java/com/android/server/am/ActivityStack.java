@@ -2122,6 +2122,7 @@ final class ActivityStack {
         // TODO: move mResumedActivity to stack supervisor,
         // there should only be 1 global copy of resumed activity.
         mResumedActivity = r;
+        r.state = ActivityState.RESUMED;
         mService.setResumedActivityUncheckLocked(r, reason);
         r.task.touchActiveTime();
         mRecentTasks.addLocked(r.task);
@@ -2468,13 +2469,12 @@ final class ActivityStack {
                     // Do over!
                     mStackSupervisor.scheduleResumeTopActivities();
                 }
-                if (mStackSupervisor.reportResumedActivityLocked(next)) {
-                    mNoAnimActivities.clear();
-                    if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
-                    return true;
+                if (!next.visible || next.stopped) {
+                    mWindowManager.setAppVisibility(next.appToken, true);
                 }
+                completeResumeLocked(next);
                 if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
-                return false;
+                return true;
             }
 
             try {
@@ -4754,19 +4754,8 @@ final class ActivityStack {
             if (DEBUG_STATES) {
                 Slog.d(TAG_STATES, "Resumed after relaunch " + r);
             }
-            r.state = ActivityState.RESUMED;
-            // Relaunch-resume could happen either when the app is already in the front,
-            // or while it's being brought to front. In the latter case, it's marked RESUMED
-            // but not yet visible (or stopped). We need to complete the resume here as the
-            // code in resumeTopActivityInnerLocked to complete the resume might be skipped.
-            if (!r.visible || r.stopped) {
-                mWindowManager.setAppVisibility(r.appToken, true);
-                setResumedActivityLocked(r, "relaunchActivityLocked");
-                completeResumeLocked(r);
-            } else {
-                r.results = null;
-                r.newIntents = null;
-            }
+            r.results = null;
+            r.newIntents = null;
             mService.showUnsupportedZoomDialogIfNeededLocked(r);
             mService.showAskCompatModeDialogLocked(r);
         } else {
