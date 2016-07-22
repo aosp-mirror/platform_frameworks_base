@@ -40,6 +40,7 @@ class DragAndDropPermissionsHandler extends IDragAndDropPermissions.Stub
 
     private IBinder mActivityToken = null;
     private IBinder mPermissionOwnerToken = null;
+    private IBinder mTransientToken = null;
 
     DragAndDropPermissionsHandler(ClipData clipData, int sourceUid, String targetPackage, int mode,
                                   int sourceUserId, int targetUserId) {
@@ -80,12 +81,13 @@ class DragAndDropPermissionsHandler extends IDragAndDropPermissions.Stub
     }
 
     @Override
-    public void takeTransient(IBinder permissionOwnerToken) throws RemoteException {
+    public void takeTransient(IBinder transientToken) throws RemoteException {
         if (mActivityToken != null || mPermissionOwnerToken != null) {
             return;
         }
-        mPermissionOwnerToken = permissionOwnerToken;
-        mPermissionOwnerToken.linkToDeath(this, 0);
+        mPermissionOwnerToken = ActivityManagerNative.getDefault().newUriPermissionOwner("drop");
+        mTransientToken = transientToken;
+        mTransientToken.linkToDeath(this, 0);
 
         doTake(mPermissionOwnerToken);
     }
@@ -109,8 +111,9 @@ class DragAndDropPermissionsHandler extends IDragAndDropPermissions.Stub
             }
         } else {
             permissionOwner = mPermissionOwnerToken;
-            mPermissionOwnerToken.unlinkToDeath(this, 0);
             mPermissionOwnerToken = null;
+            mTransientToken.unlinkToDeath(this, 0);
+            mTransientToken = null;
         }
 
         for (int i = 0; i < mUris.size(); ++i) {
