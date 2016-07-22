@@ -2271,7 +2271,7 @@ public class Editor {
         }
 
         mCorrectionHighlighter.highlight(info);
-        mUndoInputFilter.onCommitCorrection();
+        mUndoInputFilter.freezeLastEdit();
     }
 
     void onScrollChanged() {
@@ -2404,6 +2404,7 @@ public class Editor {
         }
 
         mTextView.beginBatchEdit();
+        mUndoInputFilter.freezeLastEdit();
         try {
             final int offset = mTextView.getOffsetForPosition(event.getX(), event.getY());
             Object localState = event.getLocalState();
@@ -2453,6 +2454,7 @@ public class Editor {
             }
         } finally {
             mTextView.endBatchEdit();
+            mUndoInputFilter.freezeLastEdit();
         }
     }
 
@@ -5769,7 +5771,7 @@ public class Editor {
             return null;
         }
 
-        void onCommitCorrection() {
+        void freezeLastEdit() {
             mEditor.mUndoManager.beginUpdate("Edit text");
             EditOperation lastEdit = getLastEdit();
             if (lastEdit != null) {
@@ -5830,7 +5832,6 @@ public class Editor {
                 // Add this as the first edit.
                 if (DEBUG_UNDO) Log.d(TAG, "filter: adding first op " + edit);
                 um.addOperation(edit, UndoManager.MERGE_MODE_NONE);
-                mPreviousOperationWasInSameBatchEdit = mIsUserEdit;
             } else if (mergeMode == MERGE_EDIT_MODE_FORCE_MERGE) {
                 // Forced merges take priority because they could be the result of a non-user-edit
                 // change and this case should not create a new undo operation.
@@ -5842,7 +5843,6 @@ public class Editor {
                 if (DEBUG_UNDO) Log.d(TAG, "non-user edit, new op " + edit);
                 um.commitState(mEditor.mUndoOwner);
                 um.addOperation(edit, UndoManager.MERGE_MODE_NONE);
-                mPreviousOperationWasInSameBatchEdit = mIsUserEdit;
             } else if (mergeMode == MERGE_EDIT_MODE_NORMAL && lastEdit.mergeWith(edit)) {
                 // Merge succeeded, nothing else to do.
                 if (DEBUG_UNDO) Log.d(TAG, "filter: merge succeeded, created " + lastEdit);
@@ -5851,8 +5851,8 @@ public class Editor {
                 if (DEBUG_UNDO) Log.d(TAG, "filter: merge failed, adding " + edit);
                 um.commitState(mEditor.mUndoOwner);
                 um.addOperation(edit, UndoManager.MERGE_MODE_NONE);
-                mPreviousOperationWasInSameBatchEdit = mIsUserEdit;
             }
+            mPreviousOperationWasInSameBatchEdit = mIsUserEdit;
             um.endUpdate();
         }
 
