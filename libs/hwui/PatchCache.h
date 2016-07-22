@@ -51,7 +51,7 @@ class RenderState;
 
 class PatchCache {
 public:
-    PatchCache(RenderState& renderState);
+    explicit PatchCache(RenderState& renderState);
     ~PatchCache();
 
     const Patch* get(const AssetAtlas::Entry* entry,
