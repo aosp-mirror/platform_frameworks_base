@@ -18,6 +18,7 @@ package android.content.pm;
 import android.annotation.NonNull;
 import android.annotation.TestApi;
 import android.annotation.UserIdInt;
+import android.app.Activity;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
@@ -30,7 +31,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.util.List;
 
 /**
- * ShortcutManager manages "launcher shortcuts" (or simply "shortcuts").  Shortcuts provide user
+ * ShortcutManager manages "launcher shortcuts" (or simply "shortcuts").  Shortcuts provide users
  * with quick
  * ways to access activities other than the main activity from the launcher to users.  For example,
  * an email application may publish the "compose new email" action which will directly open the
@@ -183,6 +184,7 @@ import java.util.List;
  *       android:action=&quot;android.intent.action.VIEW&quot;
  *       android:targetPackage=&quot;com.example.myapplication&quot;
  *       android:targetClass=&quot;com.example.myapplication.ComposeActivity&quot; /&gt;
+ *     &lt;!-- more intents can go here; see below --&gt;
  *     &lt;categories android:name=&quot;android.shortcut.conversation&quot; /&gt;
  *   &lt;/shortcut&gt;
  *   &lt;!-- more shortcut can go here --&gt;
@@ -209,8 +211,36 @@ import java.util.List;
  *
  *   <li>{@code intent} Intent to launch.  {@code android:action} is mandatory.
  *   See <a href="{@docRoot}guide/topics/ui/settings.html#Intents">Using intents</a> for the
- *   other supported tags.
+ *   other supported tags.  Multiple intents can be provided for a single shortcut, so that
+ *   an activity will be launched with other activities in the back stack.
+ *   See {@link android.app.TaskStackBuilder} for details.
  * </ul>
+ *
+ * <h3>Shortcut Intents</h3>
+ * Dynamic shortcuts can be published with any {@link Intent#addFlags Intent flags}.  Typically,
+ * {@link Intent#FLAG_ACTIVITY_CLEAR_TASK} is specified possibly with other flags; otherwise,
+ * if the application is already running, the application is simply brought to the foreground
+ * and the target activity may not show up.
+ *
+ * <p>{@link ShortcutInfo.Builder#setIntents(Intent[])} can be used (instead of
+ * {@link ShortcutInfo.Builder#setIntent(Intent)}) with
+ * {@link android.app.TaskStackBuilder} in order to launch an activity with other activities
+ * in the back stack, so that when the user presses the back key, a "parent" activity will be shown
+ * instead of the user being navigated back to the launcher.
+ *
+ * <p>Manifest shortcuts can have multiple intents too to achieve the same effect.  In order to
+ * specify multiple {@link Intent}s to a shortcut, simply list multiple &lt;intent&gt;s within
+ * a single &lt;shortcut&gt;.  The last intent is what the user will see when a shortcut is
+ * launched.
+ *
+ * <p>Manifest shortcuts <b>cannot</b> have custom intent flags.  The first intent of a manifest
+ * shortcut will always have {@link Intent#FLAG_ACTIVITY_NEW_TASK} and
+ * {@link Intent#FLAG_ACTIVITY_CLEAR_TASK} set.  This means, when the application is already
+ * running, all the existing activities will be destroyed when a manifest shortcut is launched.
+ * If this behavior is not desirable, one can use a "trampoline" activity (an activity
+ * that starts another activity in {@link Activity#onCreate} and then calls
+ * {@link Activity#finish()}) with {@code android:taskAffinity=""} in AndroidManifest.xml and point
+ * at this activity in a manifest shortcut's intent.
  *
  * <h3>Updating Shortcuts v.s. Re-publishing New One with Different ID</h3>
  * In order to avoid users' confusion, {@link #updateShortcuts(List)} should not be used to update
@@ -266,6 +296,8 @@ import java.util.List;
  *   <li>When the system locale changes.
  *   <li>When the user performs "inline reply" on a notification.
  * </ul>
+ *
+ * <p>When rate-limiting is active, {@link #isRateLimitingActive()} returns {@code true}.
  *
  * <h4>Resetting rate-limiting for testing</h4>
  *
