@@ -137,11 +137,13 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     private float mNormalBackgroundVisibilityAmount;
     private ValueAnimator mFadeInFromDarkAnimator;
+    private float mDimmedBackgroundFadeInAmount = -1;
     private ValueAnimator.AnimatorUpdateListener mBackgroundVisibilityUpdater
             = new ValueAnimator.AnimatorUpdateListener() {
         @Override
         public void onAnimationUpdate(ValueAnimator animation) {
             setNormalBackgroundVisibilityAmount(mBackgroundNormal.getAlpha());
+            mDimmedBackgroundFadeInAmount = mBackgroundDimmed.getAlpha();
         }
     };
     private AnimatorListenerAdapter mFadeInEndListener = new AnimatorListenerAdapter() {
@@ -149,6 +151,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         public void onAnimationEnd(Animator animation) {
             super.onAnimationEnd(animation);
             mFadeInFromDarkAnimator = null;
+            mDimmedBackgroundFadeInAmount = -1;
             updateBackground();
         }
     };
@@ -597,7 +600,10 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     }
 
     protected void updateBackgroundAlpha(float transformationAmount) {
-        mBgAlpha = isChildInGroup() && mDimmed ? transformationAmount : 1f;
+        mBgAlpha =  isChildInGroup() && mDimmed ? transformationAmount : 1f;
+        if (mDimmedBackgroundFadeInAmount != -1) {
+            mBgAlpha *= mDimmedBackgroundFadeInAmount;
+        }
         mBackgroundDimmed.setAlpha(mBgAlpha);
     }
 
