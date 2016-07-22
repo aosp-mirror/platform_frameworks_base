@@ -333,6 +333,9 @@ public class UserRestrictionsUtils {
         // set, and in that case even if the restriction is lifted, changing it to ON would be
         // wrong.  So just don't do anything in such a case.  If the user hopes to enable location
         // later, they can do it on the Settings UI.
+        // WARNING: Remember that Settings.Global and Settings.Secure are changeable via adb.
+        // To prevent this from happening for a given user restriction, you have to add a check to
+        // SettingsProvider.isGlobalOrSecureSettingRestrictedForUser.
 
         final ContentResolver cr = context.getContentResolver();
         final long id = Binder.clearCallingIdentity();
