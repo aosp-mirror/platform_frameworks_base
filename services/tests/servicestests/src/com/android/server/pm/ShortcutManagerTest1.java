@@ -2613,10 +2613,12 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     "s1",
                     "Title 1",
                     makeComponent(ShortcutActivity.class),
-            /* icon =*/ null,
-                    makeIntent(Intent.ACTION_ASSIST, ShortcutActivity2.class,
-                            "key1", "val1", "nest", makeBundle("key", 123)),
-            /* rank */ 10);
+                    /* icon =*/ null,
+                    new Intent[] {makeIntent(Intent.ACTION_ASSIST, ShortcutActivity2.class,
+                            "key1", "val1", "nest", makeBundle("key", 123))
+                            .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK),
+                    new Intent("act2").setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)},
+                    /* rank */ 10);
 
             final ShortcutInfo s1_2 = makeShortcut(
                     "s2",
@@ -2658,10 +2660,19 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         });
 
         runWithCaller(LAUNCHER_1, USER_0, () -> {
-            assertEquals(
-                    ShortcutActivity2.class.getName(),
-                    launchShortcutAndGetIntent(CALLING_PACKAGE_1, "s1", USER_0)
-                            .getComponent().getClassName());
+            final Intent[] intents = launchShortcutAndGetIntents(CALLING_PACKAGE_1, "s1", USER_0);
+            assertEquals(ShortcutActivity2.class.getName(),
+                    intents[0].getComponent().getClassName());
+            assertEquals(Intent.ACTION_ASSIST,
+                    intents[0].getAction());
+            assertEquals(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK,
+                    intents[0].getFlags());
+
+            assertEquals("act2",
+                    intents[1].getAction());
+            assertEquals(Intent.FLAG_ACTIVITY_NO_ANIMATION,
+                    intents[1].getFlags());
+
             assertEquals(
                     ShortcutActivity3.class.getName(),
                     launchShortcutAndGetIntent(CALLING_PACKAGE_1, "s2", USER_0)
@@ -2682,10 +2693,18 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
         runWithCaller(LAUNCHER_1, USER_0, () -> {
             // Not the default launcher, but pinned shortcuts are still lauchable.
-            assertEquals(
-                    ShortcutActivity2.class.getName(),
-                    launchShortcutAndGetIntent(CALLING_PACKAGE_1, "s1", USER_0)
-                            .getComponent().getClassName());
+            final Intent[] intents = launchShortcutAndGetIntents(CALLING_PACKAGE_1, "s1", USER_0);
+            assertEquals(ShortcutActivity2.class.getName(),
+                    intents[0].getComponent().getClassName());
+            assertEquals(Intent.ACTION_ASSIST,
+                    intents[0].getAction());
+            assertEquals(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK,
+                    intents[0].getFlags());
+
+            assertEquals("act2",
+                    intents[1].getAction());
+            assertEquals(Intent.FLAG_ACTIVITY_NO_ANIMATION,
+                    intents[1].getFlags());
             assertEquals(
                     ShortcutActivity3.class.getName(),
                     launchShortcutAndGetIntent(CALLING_PACKAGE_1, "s2", USER_0)
