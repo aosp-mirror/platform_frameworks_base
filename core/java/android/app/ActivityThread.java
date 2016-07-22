@@ -4632,11 +4632,12 @@ public final class ActivityThread {
         if ((activity == null) || (activity.mCurrentConfig == null)) {
             shouldChangeConfig = true;
         } else {
-            // If the new config is the same as the config this Activity
-            // is already running with then don't bother calling
-            // onConfigurationChanged
+            // If the new config is the same as the config this Activity is already
+            // running with and the override config also didn't change, then don't
+            // bother calling onConfigurationChanged.
             int diff = activity.mCurrentConfig.diff(newConfig);
-            if (diff != 0) {
+            if (diff != 0 || !mResourcesManager.isSameResourcesOverrideConfig(activityToken,
+                    amOverrideConfig)) {
                 // Always send the task-level config changes. For system-level configuration, if
                 // this activity doesn't handle any of the config changes, then don't bother
                 // calling onConfigurationChanged as we're going to destroy it.
