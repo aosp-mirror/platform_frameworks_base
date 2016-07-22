@@ -147,6 +147,7 @@ public class ResourcesManagerTest extends TestCase {
         mResourcesManager.applyConfigurationToResourcesLocked(newConfig, null);
 
         final Configuration expectedConfig = new Configuration();
+        expectedConfig.setToDefaults();
         expectedConfig.setLocales(LocaleList.getAdjustedDefault());
         expectedConfig.densityDpi = mDisplayMetrics.densityDpi;
         expectedConfig.orientation = Configuration.ORIENTATION_LANDSCAPE;
@@ -229,6 +230,7 @@ public class ResourcesManagerTest extends TestCase {
         assertNotSame(resources1.getImpl(), resources2.getImpl());
 
         final Configuration expectedConfig1 = new Configuration();
+        expectedConfig1.setToDefaults();
         expectedConfig1.setLocales(LocaleList.getAdjustedDefault());
         expectedConfig1.densityDpi = 280;
         assertEquals(expectedConfig1, resources1.getConfiguration());
@@ -236,6 +238,7 @@ public class ResourcesManagerTest extends TestCase {
         // resources2 should be based on the Activity's override config, so the density should
         // be the same as resources1.
         final Configuration expectedConfig2 = new Configuration();
+        expectedConfig2.setToDefaults();
         expectedConfig2.setLocales(LocaleList.getAdjustedDefault());
         expectedConfig2.densityDpi = 280;
         expectedConfig2.screenLayout |= Configuration.SCREENLAYOUT_ROUND_YES;
