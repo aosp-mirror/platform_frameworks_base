@@ -2050,6 +2050,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     public PackageManagerService(Context context, Installer installer,
             boolean factoryTest, boolean onlyCore) {
+        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "create package manager");
         EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_START,
                 SystemClock.uptimeMillis());
 
@@ -2102,10 +2103,12 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         getDefaultDisplayMetrics(context, mMetrics);
 
+        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "get system config");
         SystemConfig systemConfig = SystemConfig.getInstance();
         mGlobalGids = systemConfig.getGlobalGids();
         mSystemPermissions = systemConfig.getSystemPermissions();
         mAvailableFeatures = systemConfig.getAvailableFeatures();
+        Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 
         mProtectedPackages = new ProtectedPackages(mContext);
 
@@ -2151,7 +2154,9 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             mFoundPolicyFile = SELinuxMMAC.readInstallPolicy();
 
+            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "read user settings");
             mFirstBoot = !mSettings.readLPw(sUserManager.getUsers(false));
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 
             if (mFirstBoot) {
                 requestCopyPreoptedFiles();
@@ -2195,6 +2200,7 @@ public class PackageManagerService extends IPackageManager.Stub {
              * Ensure all external libraries have had dexopt run on them.
              */
             if (mSharedLibraries.size() > 0) {
+                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
                 // NOTE: For now, we're compiling these system "shared libraries"
                 // (and framework jars) into all available architectures. It's possible
                 // to compile them only when we come across an app that uses them (there's
@@ -2228,6 +2234,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         }
                     }
                 }
+                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             }
 
             File frameworkDir = new File(Environment.getRootDirectory(), "framework");
@@ -2582,7 +2589,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             ver.databaseVersion = Settings.CURRENT_DATABASE_VERSION;
 
             // can downgrade to reader
+            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "write settings");
             mSettings.writeLPr();
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 
             // Perform dexopt on all apps that mark themselves as coreApps. We do this pretty
             // early on (before the package manager declares itself as early) because other
@@ -2678,7 +2687,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         // Now after opening every single application zip, make sure they
         // are all flushed.  Not really needed, but keeps things nice and
         // tidy.
+        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "GC");
         Runtime.getRuntime().gc();
+        Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 
         // The initial scanning above does many calls into installd while
         // holding the mPackages lock, but we're mostly interested in yelling
@@ -2687,6 +2698,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         // Expose private service for system components to use.
         LocalServices.addService(PackageManagerInternal.class, new PackageManagerInternalImpl());
+        Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
     }
 
     @Override
@@ -6527,7 +6539,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private void scanDirTracedLI(File dir, final int parseFlags, int scanFlags, long currentTime) {
-        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "scanDir");
+        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "scanDir [" + dir.getAbsolutePath() + "]");
         try {
             scanDirLI(dir, parseFlags, scanFlags, currentTime);
         } finally {
@@ -6645,9 +6657,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         try {
+            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "collectCertificates");
             PackageParser.collectCertificates(pkg, policyFlags);
         } catch (PackageParserException e) {
             throw PackageManagerException.from(e);
+        } finally {
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
     }
 
@@ -6657,7 +6672,7 @@ public class PackageManagerService extends IPackageManager.Stub {
      */
     private PackageParser.Package scanPackageTracedLI(File scanFile, final int parseFlags,
             int scanFlags, long currentTime, UserHandle user) throws PackageManagerException {
-        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "scanPackage");
+        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "scanPackage [" + scanFile.toString() + "]");
         try {
             return scanPackageLI(scanFile, parseFlags, scanFlags, currentTime, user);
         } finally {
@@ -8284,7 +8299,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         final String cpuAbiOverride = deriveAbiOverride(pkg.cpuAbiOverride, pkgSetting);
 
         if ((scanFlags & SCAN_NEW_INSTALL) == 0) {
-            derivePackageAbi(pkg, scanFile, cpuAbiOverride, true /* extract libs */);
+            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "derivePackageAbi");
+            derivePackageAbi(pkg, scanFile, cpuAbiOverride, true /*extractLibs*/);
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 
             // Some system apps still use directory structure for native libraries
             // in which case we might end up not detecting abi solely based on apk
@@ -8979,12 +8996,15 @@ public class PackageManagerService extends IPackageManager.Stub {
                 int abi64 = PackageManager.NO_NATIVE_LIBRARIES;
                 if (Build.SUPPORTED_32_BIT_ABIS.length > 0) {
                     if (extractLibs) {
+                        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "copyNativeBinaries");
                         abi32 = NativeLibraryHelper.copyNativeBinariesForSupportedAbi(handle,
                                 nativeLibraryRoot, Build.SUPPORTED_32_BIT_ABIS,
                                 useIsaSpecificSubdirs);
                     } else {
+                        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "findSupportedAbi");
                         abi32 = NativeLibraryHelper.findSupportedAbi(handle, Build.SUPPORTED_32_BIT_ABIS);
                     }
+                    Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
                 }
 
                 maybeThrowExceptionForMultiArchCopy(
@@ -8992,12 +9012,15 @@ public class PackageManagerService extends IPackageManager.Stub {
 
                 if (Build.SUPPORTED_64_BIT_ABIS.length > 0) {
                     if (extractLibs) {
+                        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "copyNativeBinaries");
                         abi64 = NativeLibraryHelper.copyNativeBinariesForSupportedAbi(handle,
                                 nativeLibraryRoot, Build.SUPPORTED_64_BIT_ABIS,
                                 useIsaSpecificSubdirs);
                     } else {
+                        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "findSupportedAbi");
                         abi64 = NativeLibraryHelper.findSupportedAbi(handle, Build.SUPPORTED_64_BIT_ABIS);
                     }
+                    Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
                 }
 
                 maybeThrowExceptionForMultiArchCopy(
@@ -9038,11 +9061,14 @@ public class PackageManagerService extends IPackageManager.Stub {
 
                 final int copyRet;
                 if (extractLibs) {
+                    Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "copyNativeBinaries");
                     copyRet = NativeLibraryHelper.copyNativeBinariesForSupportedAbi(handle,
                             nativeLibraryRoot, abiList, useIsaSpecificSubdirs);
                 } else {
+                    Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "findSupportedAbi");
                     copyRet = NativeLibraryHelper.findSupportedAbi(handle, abiList);
                 }
+                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 
                 if (copyRet < 0 && copyRet != PackageManager.NO_NATIVE_LIBRARIES) {
                     throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
@@ -9765,6 +9791,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
+        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "grantPermissions");
         // Now update the permissions for all packages, in particular
         // replace the granted permissions of the system packages.
         if ((flags&UPDATE_PERMISSIONS_ALL) != 0) {
@@ -9786,6 +9813,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     && Objects.equals(replaceVolumeUuid, volumeUuid);
             grantPermissionsLPw(pkgInfo, replace, changingPkg);
         }
+        Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
     }
 
     private void grantPermissionsLPw(PackageParser.Package pkg, boolean replace,
@@ -9805,8 +9833,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (ps == null) {
             return;
         }
-
-        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "grantPermissions");
 
         PermissionsState permissionsState = ps.getPermissionsState();
         PermissionsState origPermissions = permissionsState;
@@ -10087,8 +10113,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         for (int userId : changedRuntimePermissionUserIds) {
             mSettings.writeRuntimePermissionsForUserLPr(userId, runtimePermissionsRevoked);
         }
-
-        Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
     }
 
     private boolean isNewPlatformPermissionForPackage(String perm, PackageParser.Package pkg) {

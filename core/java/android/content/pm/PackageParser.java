@@ -702,8 +702,10 @@ public class PackageParser {
 
     private static PackageLite parseMonolithicPackageLite(File packageFile, int flags)
             throws PackageParserException {
+        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "parseApkLite");
         final ApkLite baseApk = parseApkLite(packageFile, flags);
         final String packagePath = packageFile.getAbsolutePath();
+        Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         return new PackageLite(packagePath, baseApk, null, null, null);
     }
 
@@ -718,6 +720,7 @@ public class PackageParser {
         String packageName = null;
         int versionCode = 0;
 
+        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "parseApkLite");
         final ArrayMap<String, ApkLite> apks = new ArrayMap<>();
         for (File file : files) {
             if (isApkFile(file)) {
@@ -749,6 +752,7 @@ public class PackageParser {
                 }
             }
         }
+        Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 
         final ApkLite baseApk = apks.remove(null);
         if (baseApk == null) {
