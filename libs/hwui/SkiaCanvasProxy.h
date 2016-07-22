@@ -39,7 +39,7 @@ namespace uirenderer {
  */
 class ANDROID_API SkiaCanvasProxy : public SkCanvas {
 public:
-    SkiaCanvasProxy(Canvas* canvas, bool filterHwuiCalls = false);
+    explicit SkiaCanvasProxy(Canvas* canvas, bool filterHwuiCalls = false);
     virtual ~SkiaCanvasProxy() {}
 
 protected:

@@ -111,7 +111,7 @@ inline hash_t hash_type(const ShadowText& entry) {
  * Alpha texture used to represent a shadow.
  */
 struct ShadowTexture: public Texture {
-    ShadowTexture(Caches& caches): Texture(caches) {
+    explicit ShadowTexture(Caches& caches): Texture(caches) {
     }
 
     float left;
@@ -121,7 +121,7 @@ struct ShadowTexture: public Texture {
 class TextDropShadowCache: public OnEntryRemoved<ShadowText, ShadowTexture*> {
 public:
     TextDropShadowCache();
-    TextDropShadowCache(uint32_t maxByteSize);
+    explicit TextDropShadowCache(uint32_t maxByteSize);
     ~TextDropShadowCache();
 
     /**

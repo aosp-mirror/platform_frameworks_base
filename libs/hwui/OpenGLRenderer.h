@@ -116,7 +116,7 @@ enum ModelViewMode {
  */
 class OpenGLRenderer : public CanvasStateClient {
 public:
-    OpenGLRenderer(RenderState& renderState);
+    explicit OpenGLRenderer(RenderState& renderState);
     virtual ~OpenGLRenderer();
 
     void initProperties();
