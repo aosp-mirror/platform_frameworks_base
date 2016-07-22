@@ -18,7 +18,6 @@ package com.android.server.pm;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.list;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 
@@ -36,51 +35,6 @@ import java.util.List;
  */
 @SmallTest
 public class ShortcutManagerTest6 extends BaseShortcutManagerTest {
-
-    private static final String PACKAGE_SYSTEM_LAUNCHER = "com.android.systemlauncher";
-    private static final String PACKAGE_SYSTEM_LAUNCHER_NAME = "systemlauncher_name";
-    private static final int PACKAGE_SYSTEM_LAUNCHER_PRIORITY = 0;
-
-    private static final String PACKAGE_FALLBACK_LAUNCHER = "com.android.settings";
-    private static final String PACKAGE_FALLBACK_LAUNCHER_NAME = "fallback";
-    private static final int PACKAGE_FALLBACK_LAUNCHER_PRIORITY = -999;
-
-    private void prepareGetHomeActivitiesAsUser(ComponentName preferred,
-            List<ResolveInfo> candidates, int userId) {
-        doAnswer(inv -> {
-            ((List) inv.getArguments()[0]).addAll(candidates);
-            return preferred;
-        }).when(mMockPackageManagerInternal).getHomeActivitiesAsUser(any(List.class), eq(userId));
-    }
-
-    private static ComponentName cn(String packageName, String name) {
-        return new ComponentName(packageName, name);
-    }
-
-    private static ResolveInfo ri(String packageName, String name, boolean isSystem, int priority) {
-        final ResolveInfo ri = new ResolveInfo();
-        ri.activityInfo = new ActivityInfo();
-        ri.activityInfo.applicationInfo = new ApplicationInfo();
-
-        ri.activityInfo.packageName = packageName;
-        ri.activityInfo.name = name;
-        if (isSystem) {
-            ri.activityInfo.applicationInfo.flags |= ApplicationInfo.FLAG_SYSTEM;
-        }
-        ri.priority = priority;
-        return ri;
-    }
-
-    private static ResolveInfo getSystemLauncher() {
-        return ri(PACKAGE_SYSTEM_LAUNCHER, PACKAGE_SYSTEM_LAUNCHER_NAME, true,
-                PACKAGE_SYSTEM_LAUNCHER_PRIORITY);
-    }
-
-    private static ResolveInfo getFallbackLauncher() {
-        return ri(PACKAGE_FALLBACK_LAUNCHER, PACKAGE_FALLBACK_LAUNCHER_NAME, true,
-                PACKAGE_FALLBACK_LAUNCHER_PRIORITY);
-    }
-
     public void testHasShortcutHostPermissionInner_systemLauncherOnly() {
         // Preferred isn't set, use the system launcher.
         prepareGetHomeActivitiesAsUser(
