@@ -12302,6 +12302,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             public void run() {
                 for (int i = 0; i < mRunningInstalls.size(); i++) {
                     final PostInstallData data = mRunningInstalls.valueAt(i);
+                    if (data.res.returnCode != PackageManager.INSTALL_SUCCEEDED) {
+                        continue;
+                    }
                     if (pkgName.equals(data.res.pkg.applicationInfo.packageName)) {
                         // right package; but is it for the right user?
                         for (int uIndex = 0; uIndex < data.res.newUsers.length; uIndex++) {
