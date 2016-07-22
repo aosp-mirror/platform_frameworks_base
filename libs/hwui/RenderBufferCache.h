@@ -82,7 +82,7 @@ private:
             mBuffer(nullptr), mFormat(format), mWidth(width), mHeight(height) {
         }
 
-        RenderBufferEntry(RenderBuffer* buffer):
+        explicit RenderBufferEntry(RenderBuffer* buffer):
             mBuffer(buffer), mFormat(buffer->getFormat()),
             mWidth(buffer->getWidth()), mHeight(buffer->getHeight()) {
         }
