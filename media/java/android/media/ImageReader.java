@@ -520,6 +520,31 @@ public class ImageReader implements AutoCloseable {
         }
     }
 
+    /**
+     * Discard any free buffers owned by this ImageReader.
+     *
+     * <p>
+     * Generally, the ImageReader caches buffers for reuse once they have been
+     * allocated, for best performance. However, sometimes it may be important to
+     * release all the cached, unused buffers to save on memory.
+     * </p>
+     * <p>
+     * Calling this method will discard all free cached buffers. This does not include any buffers
+     * associated with Images acquired from the ImageReader, any filled buffers waiting to be
+     * acquired, and any buffers currently in use by the source rendering buffers into the
+     * ImageReader's Surface.
+     * <p>
+     * The ImageReader continues to be usable after this call, but may need to reallocate buffers
+     * when more buffers are needed for rendering.
+     * </p>
+     * @hide
+     */
+    public void discardFreeBuffers() {
+        synchronized (mCloseLock) {
+            nativeDiscardFreeBuffers();
+        }
+    }
+
     @Override
     protected void finalize() throws Throwable {
         try {
@@ -872,6 +897,7 @@ public class ImageReader implements AutoCloseable {
     private synchronized native void nativeReleaseImage(Image i);
     private synchronized native Surface nativeGetSurface();
     private synchronized native int nativeDetachImage(Image i);
+    private synchronized native void nativeDiscardFreeBuffers();
 
     /**
      * @return A return code {@code ACQUIRE_*}
