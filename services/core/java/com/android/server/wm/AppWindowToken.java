@@ -336,20 +336,40 @@ class AppWindowToken extends WindowToken {
         }
     }
 
-    // Here we destroy surfaces which have been marked as eligible by the animator, taking care
-    // to ensure the client has finished with them. If the client could still be using them
-    // we will skip destruction and try again when the client has stopped.
     void destroySurfaces() {
+        destroySurfaces(false /*cleanupOnResume*/);
+    }
+
+    /**
+     * Destroy surfaces which have been marked as eligible by the animator, taking care to ensure
+     * the client has finished with them.
+     *
+     * @param cleanupOnResume whether this is done when app is resumed without fully stopped. If
+     * set to true, destroy only surfaces of removed windows, and clear relevant flags of the
+     * others so that they are ready to be reused. If set to false (common case), destroy all
+     * surfaces that's eligible, if the app is already stopped.
+     */
+
+    private void destroySurfaces(boolean cleanupOnResume) {
         final ArrayList<WindowState> allWindows = (ArrayList<WindowState>) allAppWindows.clone();
         final DisplayContentList displayList = new DisplayContentList();
         for (int i = allWindows.size() - 1; i >= 0; i--) {
             final WindowState win = allWindows.get(i);
 
-            if (!(mAppStopped || win.mWindowRemovalAllowed)) {
+            if (!(mAppStopped || win.mWindowRemovalAllowed || cleanupOnResume)) {
                 continue;
             }
 
             win.mWinAnimator.destroyPreservedSurfaceLocked();
+
+            if (cleanupOnResume) {
+                // If the window has an unfinished exit animation, consider that animation
+                // done and mark the window destroying so that it goes through the cleanup.
+                if (win.mAnimatingExit) {
+                    win.mDestroying = true;
+                    win.mAnimatingExit = false;
+                }
+            }
 
             if (!win.mDestroying) {
                 continue;
@@ -360,7 +380,9 @@ class AppWindowToken extends WindowToken {
                     + " win.mWindowRemovalAllowed=" + win.mWindowRemovalAllowed
                     + " win.mRemoveOnExit=" + win.mRemoveOnExit);
 
-            win.destroyOrSaveSurface();
+            if (!cleanupOnResume || win.mRemoveOnExit) {
+                win.destroyOrSaveSurface();
+            }
             if (win.mRemoveOnExit) {
                 win.remove();
             }
@@ -378,18 +400,27 @@ class AppWindowToken extends WindowToken {
     }
 
     /**
-     * If the application has stopped it is okay to destroy any surfaces which were keeping alive
-     * in case they were still being used.
+     * Notify that the app is now resumed, and it was not stopped before, perform a clean
+     * up of the surfaces
      */
-    void notifyAppStopped(boolean stopped) {
-        if (DEBUG_ADD_REMOVE) Slog.v(TAG, "notifyAppStopped: stopped=" + stopped + " " + this);
-        mAppStopped = stopped;
-
-        if (stopped) {
-            destroySurfaces();
-            // Remove any starting window that was added for this app if they are still around.
-            mTask.mService.scheduleRemoveStartingWindowLocked(this);
+    void notifyAppResumed(boolean wasStopped) {
+        if (DEBUG_ADD_REMOVE) Slog.v(TAG, "notifyAppResumed: wasStopped=" + wasStopped + " " + this);
+        mAppStopped = false;
+        if (!wasStopped) {
+            destroySurfaces(true /*cleanupOnResume*/);
         }
+    }
+
+    /**
+     * Notify that the app has stopped, and it is okay to destroy any surfaces which were
+     * keeping alive in case they were still being used.
+     */
+    void notifyAppStopped() {
+        if (DEBUG_ADD_REMOVE) Slog.v(TAG, "notifyAppStopped: " + this);
+        mAppStopped = true;
+        destroySurfaces();
+        // Remove any starting window that was added for this app if they are still around.
+        mTask.mService.scheduleRemoveStartingWindowLocked(this);
     }
 
     /**
