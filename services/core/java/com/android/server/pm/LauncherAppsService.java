@@ -459,7 +459,7 @@ public class LauncherAppsService extends SystemService {
             }
             // Note the target activity doesn't have to be exported.
 
-            intents[0].setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intents[0].addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             intents[0].setSourceBounds(sourceBounds);
 
             return startShortcutIntentsAsPublisher(
