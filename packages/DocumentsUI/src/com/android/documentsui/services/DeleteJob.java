@@ -120,6 +120,10 @@ final class DeleteJob extends Job {
 
                 ++mDocsProcessed;
             }
+
+            // If mDocProcessed is different than the count claimed by UrisSupplier, add the number
+            // to failedFileCount.
+            failedFileCount += (this.srcs.getItemCount() - mDocsProcessed);
             Metrics.logFileOperation(service, operationType, srcs, null);
         } catch(IOException e) {
             Log.e(TAG, "Failed to get list of docs or parent source.", e);

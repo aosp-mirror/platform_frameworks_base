@@ -273,6 +273,8 @@ class CopyJob extends Job {
         try {
             final ContentResolver resolver = appContext.getContentResolver();
             final Iterable<Uri> uris = srcs.getUris(appContext);
+
+            int docProcessed = 0;
             for (Uri uri : uris) {
                 DocumentInfo doc = DocumentInfo.fromUri(resolver, uri);
                 if (canCopy(doc, stack.root)) {
@@ -280,11 +282,16 @@ class CopyJob extends Job {
                 } else {
                     onFileFailed(doc);
                 }
+                ++docProcessed;
 
                 if (isCanceled()) {
                     return;
                 }
             }
+
+            // If docProcessed is different than the count claimed by UrisSupplier, add the number
+            // to failedFileCount.
+            failedFileCount += (srcs.getItemCount() - docProcessed);
         } catch(IOException e) {
             failedFileCount += srcs.getItemCount();
             throw new ResourceException("Failed to open the list of docs to copy.", e);
