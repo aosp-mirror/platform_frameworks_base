@@ -176,6 +176,18 @@ public class ThumbnailCacheTest {
         assertSame(SMALL_BITMAP, result.getThumbnail());
     }
 
+    @Test
+    public void testRemoveUri() {
+        mCache.putThumbnail(URI_0, MID_SIZE, MIDSIZE_BITMAP, LAST_MODIFIED);
+        mCache.putThumbnail(URI_0, SMALL_SIZE, SMALL_BITMAP, LAST_MODIFIED);
+        mCache.putThumbnail(URI_1, MID_SIZE, MIDSIZE_BITMAP, LAST_MODIFIED);
+
+        mCache.removeUri(URI_0);
+
+        assertMiss(mCache.getThumbnail(URI_0, MID_SIZE));
+        assertHitExact(mCache.getThumbnail(URI_1, MID_SIZE));
+    }
+
     private static void assertMiss(Result result) {
         assertEquals(Result.CACHE_MISS, result.getStatus());
         assertFalse(result.isExactHit());

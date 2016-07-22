@@ -42,6 +42,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Parcelable;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
@@ -92,6 +93,7 @@ import com.android.documentsui.Shared;
 import com.android.documentsui.Snackbars;
 import com.android.documentsui.State;
 import com.android.documentsui.State.ViewMode;
+import com.android.documentsui.ThumbnailCache;
 import com.android.documentsui.clipping.DocumentClipper;
 import com.android.documentsui.clipping.UrisSupplier;
 import com.android.documentsui.dirlist.MultiSelectManager.Selection;
@@ -139,6 +141,9 @@ public class DirectoryFragment extends Fragment
 
     private static final String TAG = "DirectoryFragment";
     private static final int LOADER_ID = 42;
+
+    private static final int CACHE_EVICT_LIMIT = 100;
+    private static final int REFRESH_SPINNER_DISMISS_DELAY = 500;
 
     private Model mModel;
     private MultiSelectManager mSelectionMgr;
@@ -1610,6 +1615,17 @@ public class DirectoryFragment extends Fragment
 
     @Override
     public void onRefresh() {
+        // Remove thumbnail cache. We do this not because we're worried about stale thumbnails as it
+        // should be covered by last modified value we store in thumbnail cache, but rather to give
+        // the user a greater sense that contents are being reloaded.
+        ThumbnailCache cache = DocumentsApplication.getThumbnailCache(getContext());
+        String[] ids = mModel.getModelIds();
+        int numOfEvicts = Math.min(ids.length, CACHE_EVICT_LIMIT);
+        for (int i = 0; i < numOfEvicts; ++i) {
+            cache.removeUri(mModel.getItemUri(ids[i]));
+        }
+
+        // Trigger loading
         getLoaderManager().restartLoader(LOADER_ID, null, this);
     }
 
@@ -1679,7 +1695,11 @@ public class DirectoryFragment extends Fragment
 
         mTuner.onModelLoaded(mModel, mType, mSearchMode);
 
-        mRefreshLayout.setRefreshing(false);
+        if (mRefreshLayout.isRefreshing()) {
+            new Handler().postDelayed(
+                    () -> mRefreshLayout.setRefreshing(false),
+                    REFRESH_SPINNER_DISMISS_DELAY);
+        }
     }
 
     @Override

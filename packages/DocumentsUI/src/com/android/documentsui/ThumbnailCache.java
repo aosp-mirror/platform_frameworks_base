@@ -111,6 +111,13 @@ public class ThumbnailCache {
         return Result.obtainMiss();
     }
 
+    /**
+     * Puts a thumbnail for the given uri and size in to the cache.
+     * @param uri the uri of the thumbnail
+     * @param size the size of the thumbnail
+     * @param thumbnail the thumbnail to put in cache
+     * @param lastModified last modified value of the thumbnail to track its validity
+     */
     public void putThumbnail(Uri uri, Point size, Bitmap thumbnail, long lastModified) {
         Pair<Uri, Point> cacheKey = Pair.create(uri, size);
 
@@ -130,14 +137,33 @@ public class ThumbnailCache {
         }
     }
 
+    /**
+     * Removes all thumbnail cache associated to the given uri.
+     * @param uri the uri which thumbnail cache to remove
+     */
+    public void removeUri(Uri uri) {
+        TreeMap<Point, Pair<Uri, Point>> sizeMap;
+        synchronized (mSizeIndex) {
+            sizeMap = mSizeIndex.get(uri);
+        }
+
+        if (sizeMap != null) {
+            // Create an array to hold all values to avoid ConcurrentModificationException because
+            // removeKey() will be called by LruCache but we can't modify the map while we're
+            // iterating over the collection of values.
+            for (Pair<Uri, Point> index : sizeMap.values().toArray(new Pair[0])) {
+                mCache.remove(index);
+            }
+        }
+    }
+
     private void removeKey(Uri uri, Point size) {
         TreeMap<Point, Pair<Uri, Point>> sizeMap;
         synchronized (mSizeIndex) {
             sizeMap = mSizeIndex.get(uri);
         }
 
-        // LruCache tells us to remove a key, which should exist, so sizeMap can't be null.
-        assert (sizeMap != null);
+        assert(sizeMap != null);
         synchronized (sizeMap) {
             sizeMap.remove(size);
         }
