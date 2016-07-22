@@ -289,7 +289,7 @@ bool XmlFlattener::flatten(IAaptContext* context, xml::Node* node) {
     xmlHeaderWriter.startChunk<ResXMLTree_header>(RES_XML_TYPE);
 
     // Flatten the StringPool.
-    StringPool::flattenUtf16(mBuffer, visitor.mPool);
+    StringPool::flattenUtf8(mBuffer, visitor.mPool);
 
     {
         // Write the array of resource IDs, indexed by StringPool order.
