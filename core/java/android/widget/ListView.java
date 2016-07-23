@@ -112,8 +112,8 @@ public class ListView extends AbsListView {
         public boolean isSelectable;
     }
 
-    private ArrayList<FixedViewInfo> mHeaderViewInfos = Lists.newArrayList();
-    private ArrayList<FixedViewInfo> mFooterViewInfos = Lists.newArrayList();
+    ArrayList<FixedViewInfo> mHeaderViewInfos = Lists.newArrayList();
+    ArrayList<FixedViewInfo> mFooterViewInfos = Lists.newArrayList();
 
     Drawable mDivider;
     int mDividerHeight;
@@ -279,7 +279,7 @@ public class ListView extends AbsListView {
         // Wrap the adapter if it wasn't already wrapped.
         if (mAdapter != null) {
             if (!(mAdapter instanceof HeaderViewListAdapter)) {
-                mAdapter = new HeaderViewListAdapter(mHeaderViewInfos, mFooterViewInfos, mAdapter);
+                wrapHeaderListAdapterInternal();
             }
 
             // In the case of re-adding a header view, or adding one later on,
@@ -373,7 +373,7 @@ public class ListView extends AbsListView {
         // Wrap the adapter if it wasn't already wrapped.
         if (mAdapter != null) {
             if (!(mAdapter instanceof HeaderViewListAdapter)) {
-                mAdapter = new HeaderViewListAdapter(mHeaderViewInfos, mFooterViewInfos, mAdapter);
+                wrapHeaderListAdapterInternal();
             }
 
             // In the case of re-adding a footer view, or adding one later on,
@@ -476,7 +476,7 @@ public class ListView extends AbsListView {
         mRecycler.clear();
 
         if (mHeaderViewInfos.size() > 0|| mFooterViewInfos.size() > 0) {
-            mAdapter = new HeaderViewListAdapter(mHeaderViewInfos, mFooterViewInfos, adapter);
+            mAdapter = wrapHeaderListAdapterInternal(mHeaderViewInfos, mFooterViewInfos, adapter);
         } else {
             mAdapter = adapter;
         }
@@ -2228,7 +2228,7 @@ public class ListView extends AbsListView {
      * after the header views.
      */
     public void setSelectionAfterHeaderView() {
-        final int count = mHeaderViewInfos.size();
+        final int count = getHeaderViewsCount();
         if (count > 0) {
             mNextSelectedPosition = 0;
             return;
@@ -3356,7 +3356,7 @@ public class ListView extends AbsListView {
             bounds.right = mRight - mLeft - mPaddingRight;
 
             final int count = getChildCount();
-            final int headerCount = mHeaderViewInfos.size();
+            final int headerCount = getHeaderViewsCount();
             final int itemCount = mItemCount;
             final int footerLimit = (itemCount - mFooterViewInfos.size());
             final boolean headerDividers = mHeaderDividersEnabled;
@@ -3940,7 +3940,7 @@ public class ListView extends AbsListView {
         if (drawDividers) {
             final boolean fillForMissingDividers = isOpaque() && !super.isOpaque();
             final int itemCount = mItemCount;
-            final int headerCount = mHeaderViewInfos.size();
+            final int headerCount = getHeaderViewsCount();
             final int footerLimit = (itemCount - mFooterViewInfos.size());
             final boolean isHeader = (itemIndex < headerCount);
             final boolean isFooter = (itemIndex >= footerLimit);
@@ -4051,5 +4051,25 @@ public class ListView extends AbsListView {
         super.encodeProperties(encoder);
 
         encoder.addProperty("recycleOnMeasure", recycleOnMeasure());
+    }
+
+    /** @hide */
+    protected HeaderViewListAdapter wrapHeaderListAdapterInternal(
+            ArrayList<ListView.FixedViewInfo> headerViewInfos,
+            ArrayList<ListView.FixedViewInfo> footerViewInfos,
+            ListAdapter adapter) {
+        return new HeaderViewListAdapter(headerViewInfos, footerViewInfos, adapter);
+    }
+
+    /** @hide */
+    protected void wrapHeaderListAdapterInternal() {
+        mAdapter = wrapHeaderListAdapterInternal(mHeaderViewInfos, mFooterViewInfos, mAdapter);
+    }
+
+    /** @hide */
+    protected void dispatchDataSetObserverOnChangedInternal() {
+        if (mDataSetObserver != null) {
+            mDataSetObserver.onChanged();
+        }
     }
 }
