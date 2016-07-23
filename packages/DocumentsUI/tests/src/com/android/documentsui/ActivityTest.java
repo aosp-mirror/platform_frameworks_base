@@ -113,14 +113,22 @@ public abstract class ActivityTest<T extends Activity> extends ActivityInstrumen
         mClient = mResolver.acquireUnstableContentProviderClient(getTestingProviderAuthority());
         mDocsHelper = new DocumentsProviderHelper(getTestingProviderAuthority(), mClient);
 
+        device.setOrientationNatural();
         setupTestingRoots();
 
         launchActivity();
         resetStorage();
+
+        // Since at the launch of activity, ROOT_0 and ROOT_1 have no files, drawer will
+        // automatically open for phone devices. Espresso register click() as (x, y) MotionEvents,
+        // so if a drawer is on top of a file we want to select, it will actually click the drawer.
+        // Thus to start a clean state, we always try to close first.
+        bots.roots.closeDrawer();
     }
 
     @Override
     public void tearDown() throws Exception {
+        device.unfreezeRotation();
         mClient.release();
         super.tearDown();
     }
