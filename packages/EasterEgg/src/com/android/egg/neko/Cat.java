@@ -24,6 +24,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
 
+import java.io.ByteArrayOutputStream;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -208,7 +209,7 @@ public class Cat extends Drawable {
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         return new Notification.Builder(context)
                 .setSmallIcon(Icon.createWithResource(context, R.drawable.stat_icon))
-                .setLargeIcon(createLargeIcon(context))
+                .setLargeIcon(createNotificationLargeIcon(context))
                 .setColor(getBodyColor())
                 .setPriority(Notification.PRIORITY_LOW)
                 .setContentTitle(context.getString(R.string.notification_title))
@@ -258,11 +259,24 @@ public class Cat extends Drawable {
         return result;
     }
 
-    public Icon createLargeIcon(Context context) {
-        final Resources res = context.getResources();
-        final int w = res.getDimensionPixelSize(android.R.dimen.notification_large_icon_width);
-        final int h = res.getDimensionPixelSize(android.R.dimen.notification_large_icon_height);
+    public static Icon recompressIcon(Icon bitmapIcon) {
+        if (bitmapIcon.getType() != Icon.TYPE_BITMAP) return bitmapIcon;
+        final Bitmap bits = bitmapIcon.getBitmap();
+        final ByteArrayOutputStream ostream = new ByteArrayOutputStream(
+                bits.getWidth() * bits.getHeight() * 2); // guess 50% compression
+        final boolean ok = bits.compress(Bitmap.CompressFormat.PNG, 100, ostream);
+        if (!ok) return null;
+        return Icon.createWithData(ostream.toByteArray(), 0, ostream.size());
+    }
 
+    public Icon createNotificationLargeIcon(Context context) {
+        final Resources res = context.getResources();
+        final int w = 2*res.getDimensionPixelSize(android.R.dimen.notification_large_icon_width);
+        final int h = 2*res.getDimensionPixelSize(android.R.dimen.notification_large_icon_height);
+        return recompressIcon(createIcon(context, w, h));
+    }
+
+    public Icon createIcon(Context context, int w, int h) {
         Bitmap result = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         final Canvas canvas = new Canvas(result);
         final Paint pt = new Paint();
