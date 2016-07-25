@@ -324,9 +324,9 @@ void SkiaCanvasProxy::onDrawPosText(const void* text, size_t byteLength, const S
     // by Minikin then it had already computed these bounds.  Unfortunately,
     // there is no way to capture those bounds as part of the Skia drawPosText
     // API so we need to do that computation again here.
-    SkRect bounds;
+    SkRect bounds = SkRect::MakeEmpty();
     for (int i = 0; i < glyphs.count; i++) {
-        SkRect glyphBounds;
+        SkRect glyphBounds = SkRect::MakeEmpty();
         glyphs.paint.measureText(&glyphs.glyphIDs[i], sizeof(uint16_t), &glyphBounds);
         glyphBounds.offset(pos[i].fX, pos[i].fY);
         bounds.join(glyphBounds);
