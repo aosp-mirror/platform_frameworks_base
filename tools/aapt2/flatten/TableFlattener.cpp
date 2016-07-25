@@ -244,7 +244,7 @@ public:
         StringPool::flattenUtf16(pkgWriter.getBuffer(), mTypePool);
 
         pkgHeader->keyStrings = util::hostToDevice32(pkgWriter.size());
-        StringPool::flattenUtf16(pkgWriter.getBuffer(), mKeyPool);
+        StringPool::flattenUtf8(pkgWriter.getBuffer(), mKeyPool);
 
         // Append the types.
         buffer->appendBuffer(std::move(typeBuffer));
