@@ -974,7 +974,7 @@
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Edit"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Share with"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Share with %1$s"</string>
-    <string name="whichSendApplicationLabel" msgid="4579076294675975354">"Shared"</string>
+    <string name="whichSendApplicationLabel" msgid="4579076294675975354">"Share"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"Send using"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"Send using %1$s"</string>
     <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"Send"</string>
