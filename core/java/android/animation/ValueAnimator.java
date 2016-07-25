@@ -982,6 +982,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         mStarted = true;
         mPaused = false;
         mRunning = false;
+        mAnimationEndRequested = false;
         // Resets mLastFrameTime when start() is called, so that if the animation was running,
         // calling start() would put the animation in the
         // started-but-not-yet-reached-the-first-frame phase.
