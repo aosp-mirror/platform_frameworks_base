@@ -26,7 +26,6 @@ helpoutsWidget=true
 <ul>
   <li><a href="{@docRoot}tools/device.html">Using Hardware Devices</a></li>
   <li><a href="{@docRoot}tools/devices/managing-avds.html">Managing AVDs with AVD Manager</a></li>
-  <li><a href="{@docRoot}tools/projects/index.html">Managing Projects</a></li>
 </ul>
 
 
@@ -34,27 +33,20 @@ helpoutsWidget=true
 </div>
 
 
-<p>If you followed the <a href="creating-project.html">previous lesson</a> to create an
-Android project, it includes a default set of "Hello World" source files that allow you to
-immediately run the app.</p>
-
-<p>How you run your app depends on two things: whether you have a real device running Android and
-whether you're using Android Studio. This lesson shows you how to install and run your app on a
-real device and on the Android emulator, and in both cases with either Android Studio or the command
-line tools.</p>
+<p>In the <a href="creating-project.html">previous lesson</a>, you created an
+  Android project. The project contains a default app that displays
+  "Hello World". In this lesson, you will run the app on a device or emulator.</p>
 
 <h2 id="RealDevice">Run on a Real Device</h2>
 
-<p>If you have a device running Android, here's how to install and run your app.</p>
-
-<h3>Set up your device</h3>
+<p>Set up your device as follows:</p>
 
 <ol>
-  <li>Plug in your device to your development machine with a USB cable.
+  <li>Connect your device to your development machine with a USB cable.
     If you're developing on Windows, you might need to install the appropriate USB driver for your
-    device. For help installing drivers, see the <a href="{@docRoot}tools/extras/oem-usb.html">OEM
+    device. For help installing drivers, see the <a href="{@docRoot}studio/run/oem-usb.html">OEM
     USB Drivers</a> document.</li>
-  <li>Enable <strong>USB debugging</strong> on your device. On Android 4.0 and newer, go to
+  <li>Enable <strong>USB debugging</strong> on your device by going to
     <strong>Settings > Developer options</strong>.
         <p class="note"><strong>Note:</strong> On Android 4.2 and newer, <strong>Developer
         options</strong> is hidden by default. To make it available, go
@@ -63,73 +55,61 @@ line tools.</p>
   </li>
 </ol>
 
-<h3>Run the app from Android Studio</h3>
+<p>Run the app from Android Studio as follows:</p>
+
 <ol>
-  <li>Select one of your project's files and click
-<strong>Run</strong> <img
-src="{@docRoot}images/tools/as-run.png" style="vertical-align:baseline;margin:0; max-height:1em" />
-from the toolbar.</li>
-  <li>In the <strong>Choose Device</strong> window that appears, select the
-  <strong>Choose a running device</strong> radio button, select your device, and click <strong>OK
-  </strong>.</li>
+  <li>In Android Studio, select your project and click
+    <strong>Run</strong> <img src="{@docRoot}images/tools/as-run.png"
+    style="vertical-align:baseline;margin:0; max-height:1em" />
+    from the toolbar.</li>
+  <li>In the <strong>Select Deployment Target</strong> window,
+    select your device, and click <strong>OK</strong>.</li>
 </ol>
 <p>Android Studio installs the app on your connected device and starts it.</p>
 
 
 <h2 id="Emulator">Run on the Emulator</h2>
 
-<p>Whether you're using Android Studio or the command line, to run your app on the emulator you need
-to first create an <a href="{@docRoot}tools/devices/index.html">Android Virtual Device</a> (AVD). An
-AVD is a device configuration for the Android emulator that allows you to model a specific
-device.</p>
+<p>Before you run your app on an emulator, you need to create an
+  <a href="{@docRoot}tools/devices/index.html">Android Virtual Device</a> (AVD)
+  definition. An AVD definition defines the characteristics of an Android phone,
+  tablet, Android Wear, or Android TV device that you want to simulate in the
+  Android Emulator.</p>
 
-
-<h3>Create an AVD</h3>
+<p>Create an AVD Definition as follows:</p>
 <ol>
-  <li>Launch the Android Virtual Device Manager:
-    <ul>
-      <li>In Android Studio, select <strong>Tools &gt; Android &gt; AVD Manager</strong>, or click
-  the AVD Manager icon <img src="{@docRoot}images/tools/avd-manager-studio.png"
-  style="vertical-align:bottom;margin:0;height:19px"> in the toolbar. The
-  <em>AVD Manager</em> screen appears.</li>
-      <li>Or, from the command line, change directories to
-      <code>sdk/</code> and execute:
-        <pre class="no-pretty-print">tools/android avd</pre>
-        <p class="note"><strong>Note:</strong> The AVD Manager that appears
-        when launched from the command line is different from the version in
-        Android Studio, so the following instructions may not all apply.</p>
-        </li>
-    </ul>
-
-  </li>
+  <li>Launch the Android Virtual Device Manager by selecting
+    <strong>Tools &gt; Android &gt; AVD Manager</strong>, or by clicking
+    the AVD Manager icon <img src="{@docRoot}images/tools/avd-manager-studio.png"
+    style="vertical-align:bottom;margin:0;height:19px"> in the toolbar.</li>
   <li>On the AVD Manager main screen, click <strong>Create Virtual Device</strong>.</li>
-  <li>In the Select Hardware window, select a device configuration, such as Nexus 6,
-  then click <strong>Next</strong>.
+  <li>In the Select Hardware page, select a phone device, such as Nexus 6,
+    then click <strong>Next</strong>.
   </li>
-  <li>Select the desired system version for the AVD and click <strong>Next</strong>.
+  <li>In the Select Image page, choose the desired system image for the AVD and
+    click <strong>Next</strong>.
   </li>
-  <li>Verify the configuration settings, then click <strong>Finish</strong>.
+  <li>Verify the configuration settings (for your first AVD, leave all the
+    settings as they are), and then click <strong>Finish</strong>.
   </li>
 </ol>
 
 <p>For more information about using AVDs, see
-<a href="{@docRoot}tools/devices/managing-avds.html">Managing AVDs with AVD Manager</a>.</p>
+<a href="{@docRoot}studio/run/managing-avds.html">Create and Manage Virtual Devices</a>.</p>
 
-<h3>Run the app from Android Studio</h3>
+<p>Run the app from Android Studio as follows:</p>
 <ol>
-  <li>In <strong>Android Studio</strong>, select your project and click <strong>Run</strong>
-    <img src="{@docRoot}images/tools/as-run.png" style="vertical-align:baseline;margin:0; max-height:1em" /> from the toolbar.</li>
-  <li>In the <strong>Choose Device</strong> window, click the <strong>Launch emulator</strong> radio
-    button.</li>
-  <li>From the <strong>Android virtual device</strong> pull-down menu, select the emulator
-    you created, and click <strong>OK</strong>.</li>
+  <li>In <strong>Android Studio</strong>, select your project and click
+    <strong>Run</strong> <img src="{@docRoot}images/tools/as-run.png"
+    style="vertical-align:baseline;margin:0; max-height:1em" />
+    from the toolbar.</li>
+  <li>In the <strong>Select Deployment Target</strong> window,
+    select your emulator and click <strong>OK</strong>.</li>
 </ol>
-<p>It can take a few minutes for the emulator to load itself. You may have to unlock the screen.
+<p>It can take a few minutes for the emulator to start. You may have to unlock the screen.
 When you do, <em>My First App</em> appears on the emulator screen.</p>
 
 
 <p>That's how you build and run your Android app on the emulator!
 To start developing, continue to the <a href="building-ui.html">next
 lesson</a>.</p>
-
-
