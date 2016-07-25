@@ -217,7 +217,7 @@ is in use.</li>
 
 <ul>
 <li>Adds the new method {@link
-android.speech.tts.TextToSpeech.Engine#getFeatures(java.util.Locale)
+android.speech.tts.TextToSpeech#getFeatures(java.util.Locale)
 getFeatures()}for querying and enabling network TTS support.
 <li>Adds a new listener class, {@link
 android.speech.tts.UtteranceProgressListener}, that engines can register to

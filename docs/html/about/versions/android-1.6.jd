@@ -289,7 +289,7 @@ determining the density of the current device screen.</li>
 
     <ul>
       <li>New <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
-      &lt;supports-screens>}</a> element lets you specify the device screen sizes that your
+      <supports-screens>}</a> element lets you specify the device screen sizes that your
       application is designed and tested to support, where "size" is a combination
       of resolution and density. If your application is run on a device whose screen
       size is not specified in the <code>&lt;supports-screen&gt;</code> element, the system
@@ -324,7 +324,7 @@ determining the density of the current device screen.</li>
     </p>
     </li>
 
-      <li>New <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature>}</a>
+      <li>New <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code <uses-feature>}</a>
         element lets an application specify hardware (or other)
         features that it requires to function normally. When an application
         specifies such features, the system allows the application to be installed only
@@ -338,7 +338,7 @@ determining the density of the current device screen.</li>
         </ul>
       </li>
       <li>New attributes for the
-      <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code &lt;uses-sdk>}</a> element:
+      <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code <uses-sdk>}</a> element:
         <ul>
           <li><code>targetSdkVersion</code>: Indicates the API Level that the application is targeting.
           It is able to run on older versions (down to minSdkVersion), but was explicitly tested to

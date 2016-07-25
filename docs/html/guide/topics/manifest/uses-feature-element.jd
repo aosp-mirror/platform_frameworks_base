@@ -1149,12 +1149,12 @@ densities: '160'
 
     <p>
       As a best practice, you should still declare your requirement for this
-      orientation using a {@code &lt;uses-feature&gt;} element. If you declare
+      orientation using a {@code <uses-feature>} element. If you declare
       an orientation for your activity using <a href=
       "{@docRoot}guide/topics/manifest/activity-element.html#screen">{@code
       android:screenOrientation}</a>, but don't actually require it, you can
       disable the requirement by declaring the orientation with a {@code
-      &lt;uses-feature&gt;} element and include {@code
+      <uses-feature>} element and include {@code
       android:required="false"}.
     </p>
 

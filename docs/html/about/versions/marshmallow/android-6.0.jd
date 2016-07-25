@@ -129,8 +129,8 @@ in your app.
 <pre class="no-prettyprint">
 adb -e emu finger touch &lt;finger_id&gt;
 </pre>
-<p>On Windows, you may have to run {@code telnet 127.0.0.1 &lt;emulator-id&gt;} followed by
-  {@code finger touch &lt;finger_id&gt;}.
+<p>On Windows, you may have to run {@code telnet 127.0.0.1 <emulator-id>} followed by
+  {@code finger touch <finger_id>}.
 </p>
 </li>
 </ol>
@@ -204,7 +204,7 @@ intent filter using the
 
 <p>For each activity that you want to expose to
 {@link android.service.chooser.ChooserTargetService}, add a
-{@code &lt;meta-data&gt;} element with the name
+{@code <meta-data>} element with the name
 {@code "android.service.chooser.chooser_target_service"} in your app manifest.
 </p>
 
