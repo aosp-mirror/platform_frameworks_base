@@ -5,6 +5,7 @@ import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
+        BatteryStatsDurationTimerTest.class,
         BatteryStatsSamplingTimerTest.class,
         BatteryStatsServTest.class,
         BatteryStatsTimeBaseTest.class,
