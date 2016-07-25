@@ -18,12 +18,15 @@ package com.android.internal.app;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.text.TextUtils;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.AbsListView;
 
 import com.android.internal.app.AlertController;
 import com.android.internal.R;
@@ -52,30 +55,38 @@ public class MicroAlertController extends AlertController {
             contentPanel.removeView(mMessageView);
 
             if (mListView != null) {
-                // has ListView, swap ScrollView with ListView
+                // has ListView, swap scrollView with ListView
 
-                // move topPanel into header of ListView
+                // move topPanel into top of scrollParent
                 View topPanel = mScrollView.findViewById(R.id.topPanel);
                 ((ViewGroup) topPanel.getParent()).removeView(topPanel);
-                topPanel.setLayoutParams(
-                        new AbsListView.LayoutParams(topPanel.getLayoutParams()));
-                mListView.addHeaderView(topPanel, null, false);
+                FrameLayout.LayoutParams topParams =
+                        new FrameLayout.LayoutParams(topPanel.getLayoutParams());
+                topParams.gravity = Gravity.TOP;
+                topPanel.setLayoutParams(topParams);
 
-                // move buttonPanel into footer of ListView
+                // move buttonPanel into bottom of scrollParent
                 View buttonPanel = mScrollView.findViewById(R.id.buttonPanel);
                 ((ViewGroup) buttonPanel.getParent()).removeView(buttonPanel);
-                buttonPanel.setLayoutParams(
-                        new AbsListView.LayoutParams(buttonPanel.getLayoutParams()));
-                mListView.addFooterView(buttonPanel, null, false);
+                FrameLayout.LayoutParams buttonParams =
+                        new FrameLayout.LayoutParams(buttonPanel.getLayoutParams());
+                buttonParams.gravity = Gravity.BOTTOM;
+                buttonPanel.setLayoutParams(buttonParams);
 
-                // swap ScrollView w/ ListView
+                // remove scrollview
                 final ViewGroup scrollParent = (ViewGroup) mScrollView.getParent();
                 final int childIndex = scrollParent.indexOfChild(mScrollView);
                 scrollParent.removeViewAt(childIndex);
-                scrollParent.addView(mListView, childIndex,
+
+                // add list view
+                scrollParent.addView(mListView,
                         new ViewGroup.LayoutParams(
                                 ViewGroup.LayoutParams.MATCH_PARENT,
                                 ViewGroup.LayoutParams.MATCH_PARENT));
+
+                // add top and button panel
+                scrollParent.addView(topPanel);
+                scrollParent.addView(buttonPanel);
             } else {
                 // no content, just hide everything
                 contentPanel.setVisibility(View.GONE);
