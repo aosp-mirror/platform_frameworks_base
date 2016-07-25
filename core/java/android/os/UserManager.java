@@ -580,6 +580,16 @@ public class UserManager {
     public static final String DISALLOW_CAMERA = "no_camera";
 
     /**
+     * Specifies if a user is not allowed to unmute the device's master volume.
+     *
+     * @see DevicePolicyManager#setMasterVolumeMuted(ComponentName, boolean)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     * @hide
+     */
+    public static final String DISALLLOW_UNMUTE_DEVICE = "disallow_unmute_device";
+
+    /**
      * Specifies if a user is not allowed to use cellular data when roaming. This can only be set by
      * device owners. The default value is <code>false</code>.
      *
