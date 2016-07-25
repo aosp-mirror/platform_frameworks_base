@@ -21,7 +21,7 @@
     <string name="bugreport_finished_title" msgid="4429132808670114081">"Fejrapporten <xliff:g id="ID">#%d</xliff:g> blev gemt"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Tilføjelse af oplysninger til fejlrapporten"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Vent et øjeblik…"</string>
-    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Stryg til venstre for at dele din fejlrapport"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Fejlrapporten vises på telefonen om et øjeblik"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Tryk for at dele din fejlrapport"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Tryk for at dele din fejlrapport uden et skærmbillede, eller vent på, at skærmbilledet fuldføres"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Tryk for at dele din fejlrapport uden et skærmbillede, eller vent på, at skærmbilledet fuldføres"</string>

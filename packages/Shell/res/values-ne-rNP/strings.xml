@@ -21,7 +21,7 @@
     <string name="bugreport_finished_title" msgid="4429132808670114081">"बग रिपोर्ट <xliff:g id="ID">#%d</xliff:g>लाई कैद गरियो"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"बग रिपोर्टमा विवरणहरू थप्दै"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"कृपया प्रतीक्षा गर्नुहोला..."</string>
-    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"तपाईँको बग रिपोर्ट साझेदारी गर्न बायाँ स्वाइप गर्नुहोस्"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"उक्त बग सम्बन्धी रिपोर्ट चाँडै नै यस फोनमा देखा पर्नेछ"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"तपाईंको बग रिपोर्टलाई साझेदारी गर्न ट्याप गर्नुहोस्"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"तपाईँको बग रिपोर्टलाई स्क्रिनसट बिना साझेदारी गर्नका लागि ट्याप गर्नुहोस् वा स्क्रिनसट लिने प्रक्रिया पूरा हुन प्रतीक्षा गर्नुहोस्"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"तपाईँको बग रिपोर्टलाई स्क्रिनसट बिना साझेदारी गर्नका लागि ट्याप गर्नुहोस् वा स्क्रिनसट लिने प्रक्रिया पूरा हुन प्रतीक्षा गर्नुहोस्"</string>
