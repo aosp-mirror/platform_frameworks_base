@@ -80,7 +80,7 @@ name with the {@code ‘test’} keyword, or use any classes in the {@code junit
 {@code junit.extensions} package.</p>
 
 <p>To create a basic JUnit 4 test class, create a Java class that contains one or more test methods.
-A test method begins with the {@code &#64;Test} annotation and contains the code to exercise
+A test method begins with the {@code @Test} annotation and contains the code to exercise
 and verify a single functionality in the component that you want to test.</p>
 
 <p>The following example shows how you might implement a local unit test class. The test method
@@ -136,11 +136,11 @@ Include the Mockito library dependency in your {@code build.gradle} file, as des
 <a href="#setup">Set Up Your Testing Environment</a>.
 </li>
 <li>At the beginning of your unit test class definition, add the
-{@code &#64;RunWith(MockitoJUnitRunner.class)} annotation. This annotation tells the Mockito test
+{@code @RunWith(MockitoJUnitRunner.class)} annotation. This annotation tells the Mockito test
 runner to validate that your usage of the framework is correct and simplifies the initialization of
 your mock objects.
 </li>
-<li>To create a mock object for an Android dependency, add the {@code &#64;Mock} annotation before
+<li>To create a mock object for an Android dependency, add the {@code @Mock} annotation before
 the field declaration.</li>
 <li>To stub the behavior of the dependency, you can specify a condition and return
 value when the condition is met by using the {@code when()} and {@code thenReturn()} methods.

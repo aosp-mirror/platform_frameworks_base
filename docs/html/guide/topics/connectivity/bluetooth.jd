@@ -1056,7 +1056,7 @@ such as an Android phone or tablet.</td>
 object. <p>Similar to regular headset and A2DP profile devices, you must call
 {@link android.bluetooth.BluetoothAdapter#getProfileProxy getProfileProxy()}
 with a {@link android.bluetooth.BluetoothProfile.ServiceListener} and the {@link
-android.bluetooth.BluetoothProfile.ServiceListener#HEALTH} profile type to
+android.bluetooth.BluetoothProfile#HEALTH} profile type to
 establish a connection with the profile proxy object.</p> </li>
 
   <li>Create a {@link android.bluetooth.BluetoothHealthCallback} and register an
