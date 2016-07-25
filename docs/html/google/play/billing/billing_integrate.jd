@@ -90,7 +90,7 @@ method calls.</p>
 <li>Select <strong>Google Play Billing Library</strong>.</li>
 <li>Click <strong>Install packages</strong> to complete the download.</li>
 </ol>
-<p>The {@code IInAppBillingService.aidl} file will be installed to {@code &lt;sdk&gt;/extras/google/play_billing/}.</p>
+<p>The {@code IInAppBillingService.aidl} file will be installed to {@code <sdk>/extras/google/play_billing/}.</p>
 
 <p>To add the AIDL to your project:</p>
 
@@ -116,7 +116,7 @@ method calls.</p>
           <strong>OK</strong>.</li>
 
           <li>Using your operating system file explorer, navigate to
-          {@code &lt;sdk&gt;/extras/google/play_billing/}, copy the
+          {@code <sdk>/extras/google/play_billing/}, copy the
           {@code IInAppBillingService.aidl} file, and paste it into the
           {@code com.android.vending.billing} package in your project.
           </li>
