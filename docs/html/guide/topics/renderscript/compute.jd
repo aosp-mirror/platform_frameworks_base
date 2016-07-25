@@ -294,7 +294,7 @@ such as Gaussian blur, convolution, and image blending. For more information, se
 </ul></li>
 
 <li><strong>Populate Allocations with data.</strong> Except for Allocations created with {@link
-android.renderscript#createFromBitmap}, an Allocation will be populated with empty data when it is
+android.renderscript.Allocation#createFromBitmap}, an Allocation will be populated with empty data when it is
 first created. To populate an Allocation, use one of the <code>copy</code> methods in {@link
 android.renderscript.Allocation}.</li>
 
