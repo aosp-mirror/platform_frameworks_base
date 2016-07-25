@@ -175,6 +175,10 @@
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"ಇಂಟರ್‌ಫೇಸ್‌ನಲ್ಲಿ ಲಭ್ಯವಿರುವ ಡೇಟಾ ಟ್ರಾಫಿಕ್ ಆಧಾರದ ಮೇಲೆ Wi‑Fi ರೋಮ್ ಸ್ಕ್ಯಾನ್‌ಗಳನ್ನು ಅನುಮತಿಸಿ/ನಿರಾಕರಿಸಿ"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"ಲಾಗರ್ ಬಫರ್ ಗಾತ್ರಗಳು"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"ಪ್ರತಿ ಲಾಗ್ ಬಫರ್‌ಗೆ ಲಾಗರ್ ಗಾತ್ರಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"ಶಾಶ್ವತವಾಗಿರುವ ಸಂಗ್ರಹಣೆ ಲಾಗರ್ ಅನ್ನು ತೆರವುಗೊಳಿಸುವುದೇ?"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"ನಾವು ನಿರಂತರವಾಗಿ ಲಾಗರ್ ಮೂಲಕ ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡದಿರುವಾಗ, ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಸಂಗ್ರಹವಾಗಿರುವಂತಹ ಲಾಗರ್ ಡೇಟಾವನ್ನು ಅಳಿಸುವುದು ನಮಗೆ ಅಗತ್ಯವಿರುತ್ತದೆ."</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"ಲಾಗರ್ ಡೇಟಾವನ್ನು ಸಾಧನದಲ್ಲಿ ನಿರಂತರವಾಗಿ ಸಂಗ್ರಹಿಸಿ"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"ಸಾಧನದಲ್ಲಿ ನಿರಂತರವಾಗಿ ಸಂಗ್ರಹಿಸಲು ಲಾಗ್ ಬಫರ್‌ಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"USB ಕಾನ್ಫಿಗರೇಶನ್ ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"USB ಕಾನ್ಫಿಗರೇಶನ್ ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"ಅಣಕು ಸ್ಥಾನಗಳನ್ನು ಅನುಮತಿಸು"</string>

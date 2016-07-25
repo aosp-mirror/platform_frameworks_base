@@ -80,6 +80,18 @@
     <item msgid="3606047780792894151">"লগ বাফার প্রতি ৪M"</item>
     <item msgid="5431354956856655120">"লগ বাফার প্রতি ১৬M"</item>
   </string-array>
+  <string-array name="select_logpersist_titles">
+    <item msgid="1744840221860799971">"বন্ধ আছে"</item>
+    <item msgid="3054662377365844197">"সমস্ত"</item>
+    <item msgid="688870735111627832">"সমস্ত কিন্তু রেডিও"</item>
+    <item msgid="2850427388488887328">"শুধুমাত্র কার্নেল"</item>
+  </string-array>
+  <string-array name="select_logpersist_summaries">
+    <item msgid="2216470072500521830">"বন্ধ আছে"</item>
+    <item msgid="172978079776521897">"সমস্ত লগ বাফার"</item>
+    <item msgid="3873873912383879240">"সমস্ত কিন্তু রেডিও লগ বাফারগুলি"</item>
+    <item msgid="8489661142527693381">"শুধুমাত্র কার্নেল লগ বাফার"</item>
+  </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"অ্যানিমেশন বন্ধ করুন"</item>
     <item msgid="6624864048416710414">"অ্যানিমেশন স্কেল .৫x"</item>

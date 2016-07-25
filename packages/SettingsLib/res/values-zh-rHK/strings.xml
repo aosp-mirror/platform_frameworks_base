@@ -175,6 +175,10 @@
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"根據介面中目前的數據流量允許/禁止 WiFi 漫遊掃瞄"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"記錄器緩衝區空間"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"選取每個記錄緩衝區的記錄器空間"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"要清除記錄器的持久儲存空間嗎？"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"當我們不再使用持久記錄器進行監察，便需要清除您裝置上的記錄器資料。"</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"在裝置持久儲存記錄器資料"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"選擇記錄緩衝區，以便將資料持久儲存在裝置中"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"選取 USB 設定"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"選取 USB 設定"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"允許模擬位置"</string>

@@ -80,6 +80,18 @@
     <item msgid="3606047780792894151">"4 MB po međumemoriji evidencije"</item>
     <item msgid="5431354956856655120">"16 MB po međumemoriji evidencije"</item>
   </string-array>
+  <string-array name="select_logpersist_titles">
+    <item msgid="1744840221860799971">"Isključeno"</item>
+    <item msgid="3054662377365844197">"Sve"</item>
+    <item msgid="688870735111627832">"Sve sem radija"</item>
+    <item msgid="2850427388488887328">"samo jezgro"</item>
+  </string-array>
+  <string-array name="select_logpersist_summaries">
+    <item msgid="2216470072500521830">"Isključeno"</item>
+    <item msgid="172978079776521897">"Sve međumemorije evidencija"</item>
+    <item msgid="3873873912383879240">"Sve osim međumemorija evidencija za radio"</item>
+    <item msgid="8489661142527693381">"samo međumemorija evidencije jezgra"</item>
+  </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"Animacija je isključena"</item>
     <item msgid="6624864048416710414">"Razmera animacije 0,5x"</item>

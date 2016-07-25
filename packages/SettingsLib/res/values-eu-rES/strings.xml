@@ -175,6 +175,10 @@
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Onartu edo debekatu ibiltaritzan Wi-Fi sareak bilatzea, interfazeko datu-trafikoaren arabera"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Erregistroen buffer-tamainak"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Hautatu erregistroen buffer-tamainak"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Erregistro iraunkorraren biltegia garbitu nahi duzu?"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Erregistro iraunkor hau kontrolatzeari uzten diogunean gailuan dituzun erregistroko datuak ezabatu beharko ditugu."</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"Utzi datuak gailuan gordeta"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"Hautatu gailuan gordeta utzi nahi dituzun erregistroen bufferrak"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"Hautatu USB konfigurazioa"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"Hautatu USB konfigurazioa"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"Onartu kokapen faltsuak"</string>
