@@ -40,6 +40,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Interpolator;
 import android.graphics.LinearGradient;
@@ -3990,6 +3991,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     String mStartActivityRequestWho;
+
+    @Nullable
+    private RoundScrollbarRenderer mRoundScrollbarRenderer;
 
     /**
      * Simple constructor to use when creating a view from code.
@@ -14800,6 +14804,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     protected final void onDrawScrollBars(Canvas canvas) {
         // scrollbars are drawn only when the animation is running
         final ScrollabilityCache cache = mScrollCache;
+
         if (cache != null) {
 
             int state = cache.state;
@@ -14840,13 +14845,23 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             final boolean drawVerticalScrollBar = isVerticalScrollBarEnabled()
                     && !isVerticalScrollBarHidden();
 
-            if (drawVerticalScrollBar || drawHorizontalScrollBar) {
+            // Fork out the scroll bar drawing for round wearable devices.
+            if (mRoundScrollbarRenderer != null) {
+                if (drawVerticalScrollBar) {
+                    mRoundScrollbarRenderer.drawRoundScrollbars(
+                            canvas, (float) cache.scrollBar.getAlpha() / 255f);
+                    if (invalidate) {
+                        invalidate();
+                    }
+                }
+                // Do not draw horizontal scroll bars for round wearable devices.
+            } else if (drawVerticalScrollBar || drawHorizontalScrollBar) {
                 final ScrollBarDrawable scrollBar = cache.scrollBar;
 
                 if (drawHorizontalScrollBar) {
                     scrollBar.setParameters(computeHorizontalScrollRange(),
-                                            computeHorizontalScrollOffset(),
-                                            computeHorizontalScrollExtent(), false);
+                            computeHorizontalScrollOffset(),
+                            computeHorizontalScrollExtent(), false);
                     final Rect bounds = cache.mScrollBarBounds;
                     getHorizontalScrollBarBounds(bounds);
                     onDrawHorizontalScrollBar(canvas, scrollBar, bounds.left, bounds.top,
@@ -14858,8 +14873,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
                 if (drawVerticalScrollBar) {
                     scrollBar.setParameters(computeVerticalScrollRange(),
-                                            computeVerticalScrollOffset(),
-                                            computeVerticalScrollExtent(), true);
+                            computeVerticalScrollOffset(),
+                            computeVerticalScrollExtent(), true);
                     final Rect bounds = cache.mScrollBarBounds;
                     getVerticalScrollBarBounds(bounds);
                     onDrawVerticalScrollBar(canvas, scrollBar, bounds.left, bounds.top,
@@ -17570,6 +17585,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         if (changed || (mPrivateFlags & PFLAG_LAYOUT_REQUIRED) == PFLAG_LAYOUT_REQUIRED) {
             onLayout(changed, l, t, r, b);
+
+            if (shouldDrawRoundScrollbar()) {
+                if(mRoundScrollbarRenderer == null) {
+                    mRoundScrollbarRenderer = new RoundScrollbarRenderer(this);
+                }
+            } else {
+                mRoundScrollbarRenderer = null;
+            }
+
             mPrivateFlags &= ~PFLAG_LAYOUT_REQUIRED;
 
             ListenerInfo li = mListenerInfo;
@@ -22950,7 +22974,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final int[] mInvalidateChildLocation = new int[2];
 
         /**
-         * Global to the view hierarchy used as a temporary for dealng with
+         * Global to the view hierarchy used as a temporary for dealing with
          * computing absolute on-screen location.
          */
         final int[] mTmpLocation = new int[2];
@@ -23787,5 +23811,31 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 contentDescription == null ? "" : contentDescription.toString());
         stream.addProperty("accessibility:labelFor", getLabelFor());
         stream.addProperty("accessibility:importantForAccessibility", getImportantForAccessibility());
+    }
+
+    /**
+     * Determine if this view is rendered on a round wearable device and is the main view
+     * on the screen.
+     */
+    private boolean shouldDrawRoundScrollbar() {
+        if (!mResources.getConfiguration().isScreenRound()) {
+            return false;
+        }
+
+        final View rootView = getRootView();
+        final WindowInsets insets = getRootWindowInsets();
+
+        int height = getHeight();
+        int width = getWidth();
+        int displayHeight = rootView.getHeight();
+        int displayWidth = rootView.getWidth();
+
+        if (height != displayHeight || width != displayWidth) {
+            return false;
+        }
+
+        getLocationOnScreen(mAttachInfo.mTmpLocation);
+        return mAttachInfo.mTmpLocation[0] == insets.getStableInsetLeft()
+                && mAttachInfo.mTmpLocation[1] == insets.getStableInsetTop();
     }
 }
