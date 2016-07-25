@@ -2680,4 +2680,7 @@
 
   <!-- Default first user restrictions -->
   <java-symbol type="array" name="config_defaultFirstUserRestrictions" />
+
+  <java-symbol type="bool" name="config_permissionReviewRequired" />
+
 </resources>

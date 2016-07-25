@@ -618,7 +618,7 @@ public final class BroadcastQueue {
         // the broadcast and if the calling app is in the foreground and the broadcast is
         // explicit we launch the review UI passing it a pending intent to send the skipped
         // broadcast.
-        if (Build.PERMISSIONS_REVIEW_REQUIRED) {
+        if (mService.mPermissionReviewRequired || Build.PERMISSIONS_REVIEW_REQUIRED) {
             if (!requestStartTargetPermissionsReviewIfNeededLocked(r, filter.packageName,
                     filter.owningUserId)) {
                 r.delivery[index] = BroadcastRecord.DELIVERY_SKIPPED;
@@ -1124,7 +1124,8 @@ public final class BroadcastQueue {
             // the broadcast and if the calling app is in the foreground and the broadcast is
             // explicit we launch the review UI passing it a pending intent to send the skipped
             // broadcast.
-            if (Build.PERMISSIONS_REVIEW_REQUIRED && !skip) {
+            if ((mService.mPermissionReviewRequired
+                    || Build.PERMISSIONS_REVIEW_REQUIRED) && !skip) {
                 if (!requestStartTargetPermissionsReviewIfNeededLocked(r,
                         info.activityInfo.packageName, UserHandle.getUserId(
                                 info.activityInfo.applicationInfo.uid))) {
