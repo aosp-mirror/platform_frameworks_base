@@ -436,6 +436,9 @@ final class ProcessRecord {
                 pw.print(prefix); pw.print("  - "); pw.println(receivers.valueAt(i));
             }
         }
+        if (hasTopUi) {
+            pw.print(prefix); pw.print("hasTopUi="); pw.print(hasTopUi);
+        }
     }
 
     ProcessRecord(BatteryStatsImpl _batteryStats, ApplicationInfo _info,
