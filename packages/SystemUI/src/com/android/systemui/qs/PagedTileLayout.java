@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
 import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel.QSTileLayout;
 import com.android.systemui.qs.QSPanel.TileRecord;
@@ -207,6 +208,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
             }
             if (DEBUG) Log.d(TAG, "Size: " + mNumPages);
             mPageIndicator.setNumPages(mNumPages);
+            mDecorGroup.setVisibility(mNumPages > 1 ? View.VISIBLE : View.GONE);
             setAdapter(mAdapter);
             mAdapter.notifyDataSetChanged();
             setCurrentItem(0, false);
@@ -238,7 +240,8 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
                 maxHeight = height;
             }
         }
-        setMeasuredDimension(getMeasuredWidth(), maxHeight + mDecorGroup.getMeasuredHeight());
+        setMeasuredDimension(getMeasuredWidth(), maxHeight
+                + (mDecorGroup.getVisibility() != View.GONE ? mDecorGroup.getMeasuredHeight() : 0));
     }
 
     private final Runnable mDistribute = new Runnable() {
