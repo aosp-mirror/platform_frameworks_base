@@ -175,6 +175,10 @@
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"ఇంటర్‌ఫేస్‌లో ఉండే డేటా ట్రాఫిక్ పరిమాణం ఆధారంగా Wi‑Fi సంచార స్కాన్‌లను అనుమతించు/నిరాకరించు"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"లాగర్ బఫర్ పరిమాణాలు"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"లాగ్ బఫర్‌కి లాగర్ పరిమా. ఎంచుకోండి"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"లాగర్ నిరంతర నిల్వలోని డేటాను తీసివేయాలా?"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"మేము నిరంతర లాగర్‌తో ఇక పర్యవేక్షించనప్పుడు, మీ పరికరంలోని లాగర్ డేటాను మేము తొలగించాల్సి ఉంటుంది."</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"పరికరంలో లాగర్ డేటా నిరంతరం నిల్వ చేయి"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"పరికరంలో నిరంతరం నిల్వ చేయాల్సిన లాగ్ బఫర్‌లను ఎంచుకోండి"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"USB కాన్ఫిగరేషన్‌ని ఎంచుకోండి"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"USB కాన్ఫిగరేషన్‌ని ఎంచుకోండి"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"అనుకృత స్థానాలను అనుమతించు"</string>

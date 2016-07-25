@@ -175,6 +175,10 @@
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Lejo/Ndalo skanimet për Wi‑Fi në roaming, bazuar në sasinë e trafikut të të dhënave të pranishme në ndërfaqe"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Madhësitë e regjistruesit"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Përzgjidh madhësitë e regjistruesit"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Do të pastrosh hapësirën ruajtëse të vazhdueshme të regjistruesit?"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Kur nuk monitorojmë më me regjistruesin e vazhdueshëm, kërkohet që t\'i spastrojmë të dhënat e regjistruesit që qëndrojnë në pajisjen tënde."</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"Ruaj të dhënat e regjistruesit vazhdimisht në pajisje"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"Zgjidh memoriet e regjistrit për të ruajtur vazhdimisht në pajisje"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"Konfigurimi i USB-së"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"Konfigurimi i USB-së"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"Lejo vendndodhje të simuluara"</string>

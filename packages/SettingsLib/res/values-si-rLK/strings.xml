@@ -175,6 +175,10 @@
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"අතුරු මුහුණතෙහි ඇති දත්ත තදබදය අනුව Wi‑Fi රෝම් පරිලෝකන වෙත ඉඩ දෙන්න/නොදෙන්න"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"ලෝගයේ අන්තරාවක ප්‍රමාණය"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"ලොග අන්තරාවකට ලෝගයේ ප්‍රමාණය තෝරන්න"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"ලොගකරු නොනවතින ගබඩාව හිස් කරන්නද?"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"අප තවදුරටත් නොනවතින ලොගකරුවකු සමගින් නිරීක්ෂණය නොකරන විට, අපට ඔබේ උපාංගය මත නේවාසික ලොගකරු දත්ත මැකීමට අවශ්‍ය වේ."</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"උපාංගයේ දිගටම ලොග දත්ත ගබඩා කි."</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"උපාංගය මත නොනැවතී ගබඩා කිරීමට ලොග අන්තරාචය තෝරන්න"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"USB වින්‍යාස දත්ත තෝරන්න"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"USB වින්‍යාස දත්ත තෝරන්න"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"ව්‍යාජ ස්ථානයන්ට අවසර දෙන්න"</string>

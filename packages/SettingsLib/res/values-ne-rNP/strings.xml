@@ -175,6 +175,10 @@
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Wi-Fi घुम्ने स्क्यान इन्टरफेसमा रहेको डेटा यातायातको मात्रामा आधारित अनुमति दिनुहोस्/नदिनुहोस्"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"लगर बफर आकारहरू"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"लग बफर प्रति लगर आकार चयन गर्नुहोस्"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"लगरको निरन्तर भण्डारणलाई खाली गर्ने हो?"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"हामी अब निरन्तर लगर मार्फत अनुगमन गरिरहेका छैनौँ, त्यसैले हामीले तपाईँको यन्त्रमा रहेको लगर सम्बन्धी डेटा मेटाउन आवश्यक छ।"</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"लगर सम्बन्धी डेटालाई निरन्तर यन्त्रमा भण्डारण गर्नुहोस्"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"यन्त्रमा निरन्तर भण्डारण गरिने लग सम्बन्धी बफरहरूलाई चयन गर्नुहोस्"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"USB विन्यास चयन गर्नुहोस्"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"USB विन्यास चयन गर्नुहोस्"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"नक्कली स्थानहरूलाई अनुमति दिनुहोस्"</string>

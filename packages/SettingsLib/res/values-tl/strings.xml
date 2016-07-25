@@ -175,6 +175,10 @@
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Payagan/Huwag payagan ang Mga Pag-scan sa Roaming ng Wi‑Fi batay sa dami ng trapiko ng data na mayroon sa interface"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Mga laki ng buffer ng Logger"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Pumili ng mga laki ng Logger bawat log buffer"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"I-clear ang tuluy-tuloy na storage ng logger?"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Kapag hindi na namin sinusubaybayan ang tuluy-tuloy na logger, kailangan naming burahin ang data ng logger na nanatili sa iyong device."</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"Tuluy-tuloy na iimbak ang data ng logger sa device"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"Pumili ng mga buffer ng log upang tuluy-tuloy na iimbak sa device"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"Pumili ng USB Configuration"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"Pumili ng USB Configuration"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"Payagan ang mga kunwaring lokasyon"</string>

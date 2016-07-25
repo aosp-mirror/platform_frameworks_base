@@ -175,6 +175,10 @@
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Salli/estä Wi-Fi-verkkovierailuskannaus liittymässä esiintyvän dataliikenteen perusteella."</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Lokipuskurien koot"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Valitse puskurikohtaiset lokikoot"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Tyhjennetäänkö lokityökalun pysyvä tallennustila?"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Kun lopetamme valvonnan laitteella pysyvästi olevalla lokityökalulla, meidän täytyy poistaa kaikki laitteellesi tallennetut lokityökalun tiedot."</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"Säilytä lokityökalun tietoja laitteella"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"Valitse lokipuskurit, joita säilytetään pysyvästi laitteella"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"Valitse USB-määritykset"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"Valitse USB-määritykset"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"Salli sijaintien imitointi"</string>

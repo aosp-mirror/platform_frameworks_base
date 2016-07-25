@@ -80,6 +80,18 @@
     <item msgid="3606047780792894151">"4 MB na vyrov. pamäť denníka"</item>
     <item msgid="5431354956856655120">"16 MB na vyrov. pamäť denníka"</item>
   </string-array>
+  <string-array name="select_logpersist_titles">
+    <item msgid="1744840221860799971">"Vypnuté"</item>
+    <item msgid="3054662377365844197">"Všetko"</item>
+    <item msgid="688870735111627832">"Okrem rádia"</item>
+    <item msgid="2850427388488887328">"iba jadro"</item>
+  </string-array>
+  <string-array name="select_logpersist_summaries">
+    <item msgid="2216470072500521830">"Vypnuté"</item>
+    <item msgid="172978079776521897">"Všetky vyrovnávacie pamäte denníka"</item>
+    <item msgid="3873873912383879240">"Všetky vyrovnávacie pamäte denníka (okrem rádia)"</item>
+    <item msgid="8489661142527693381">"iba vyrovnávacia pamäť denníka jadra"</item>
+  </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"Animácia je vypnutá"</item>
     <item msgid="6624864048416710414">"Mierka animácie 0,5x"</item>

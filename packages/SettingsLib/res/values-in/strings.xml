@@ -175,6 +175,10 @@
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Izinkan/Larang Pemindaian Roaming Wi-Fi berdasarkan jumlah lalu lintas data yang ada di antarmuka"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Ukuran penyangga pencatat log"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Ukuran Pencatat Log per penyangga log"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Hapus penyimpanan tetap pencatat log?"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Jika kami tidak memantau lagi dengan pencatat log tetap, kami diwajibkan menghapus data pencatat log yang ada di perangkat Anda."</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"Terus simpan data pencatat log di perangkat"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"Pilih penyangga log untuk terus menyimpan di perangkat"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"Pilih Konfigurasi USB"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"Pilih Konfigurasi USB"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"Mengizinkan lokasi palsu"</string>

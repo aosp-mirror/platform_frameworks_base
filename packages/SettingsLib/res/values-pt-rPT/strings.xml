@@ -175,6 +175,10 @@
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Permitir/impedir a deteção de Wi-Fi em roaming com base na quantidade de tráfego de dados presente na interface"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Tamanhos da memória intermédia do registo"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Selec. tam. reg. p/ mem. int. reg."</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Pretende limpar o armazenamento persistente do registo?"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Quando deixamos de monitorizar com o registo persistente, é necessário apagar os dados de registo que se encontram no seu dispositivo."</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"Arm. dados de registo persist. no disp."</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"Selecionar buffers de registo para armazenamento persistente no dispositivo"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"Selecionar configuração USB"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"Selecionar configuração USB"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"Permitir locais fictícios"</string>

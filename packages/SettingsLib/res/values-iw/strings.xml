@@ -175,6 +175,10 @@
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"‏התר/מנע סריקות נדידה של Wi-Fi בהתבסס על נפח תנועת הנתונים הקיימת בממשק"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"גדלי מאגר של יוצר יומן"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"בחר גדלים של יוצר יומן לכל מאגר יומן"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"האם למחוק את אחסון המתעד המתמיד?"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"כשאנחנו כבר לא מבצעים מעקב באמצעות המתעד המתמיד, אנחנו נדרשים למחוק את נתוני המתעד המקומי במכשיר."</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"אחסון נתוני מתעד מתמיד במכשיר"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"בחר מאגר נתונים זמני ליומן לשם אחסון מתמיד במכשיר"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"‏בחר תצורת USB"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"‏בחר תצורת USB"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"אפשר מיקומים מדומים"</string>

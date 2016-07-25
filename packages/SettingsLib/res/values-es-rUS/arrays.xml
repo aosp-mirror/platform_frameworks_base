@@ -80,6 +80,18 @@
     <item msgid="3606047780792894151">"4 M/búfer registro"</item>
     <item msgid="5431354956856655120">"16 M/búfer registro"</item>
   </string-array>
+  <string-array name="select_logpersist_titles">
+    <item msgid="1744840221860799971">"Desactivado"</item>
+    <item msgid="3054662377365844197">"Todo"</item>
+    <item msgid="688870735111627832">"Excepto radio"</item>
+    <item msgid="2850427388488887328">"solo kernel"</item>
+  </string-array>
+  <string-array name="select_logpersist_summaries">
+    <item msgid="2216470072500521830">"Desactivado"</item>
+    <item msgid="172978079776521897">"Todos los búferes de registro"</item>
+    <item msgid="3873873912383879240">"Todos los búferes de registro, excepto radio"</item>
+    <item msgid="8489661142527693381">"solo búfer de registro de kernel"</item>
+  </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"Animación desactivada"</item>
     <item msgid="6624864048416710414">"Escala de animación 0.5x"</item>

@@ -175,6 +175,10 @@
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"वाय-फाय रोम स्‍कॅनला इंटरफेसवर उपस्‍थित असलेल्‍या रहदारी डेटाच्या प्रमाणावर आधारित अनुमती द्या/अनुमती देऊ नका"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"लॉगर बफर आकार"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"प्रति लॉग बफर लॉगर आकार निवडा"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"लॉगरवर सतत असणारा संचय साफ करायचा?"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"सातत्याच्या लॉगरसह आम्ही परीक्षण करीत नसतो तेव्हा, आम्हाला आपल्या डिव्हाइसवर असणारा लॉगर डेटा मिटविणे आवश्यक असते."</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"डिव्हाइसवर सातत्याने लॉगर डेटा संचयित करा"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"डिव्हाइसवर सातत्याने संचयित करण्यासाठी लॉग बफर निवडा"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"USB कॉन्‍फिगरेशन निवडा"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"USB कॉन्‍फिगरेशन निवडा"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"बनावट स्थानांना अनुमती द्या"</string>
