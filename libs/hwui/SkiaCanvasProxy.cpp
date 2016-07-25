@@ -23,6 +23,7 @@
 #include <SkPixelRef.h>
 #include <SkRect.h>
 #include <SkRRect.h>
+#include <SkRSXform.h>
 #include <SkSurface.h>
 
 #include <memory>
@@ -348,10 +349,25 @@ void SkiaCanvasProxy::onDrawPosTextH(const void* text, size_t byteLength, const 
 
 void SkiaCanvasProxy::onDrawTextOnPath(const void* text, size_t byteLength, const SkPath& path,
         const SkMatrix* matrix, const SkPaint& origPaint) {
-    // convert to glyphIDs if necessary
-    GlyphIDConverter glyphs(text, byteLength, origPaint);
-    mCanvas->drawGlyphsOnPath(glyphs.glyphIDs, glyphs.count, path, 0, 0, glyphs.paint);
+    SkDEBUGFAIL("SkiaCanvasProxy::onDrawTextOnPath is not supported");
 }
+
+void SkiaCanvasProxy::onDrawTextRSXform(const void* text, size_t byteLength,
+        const SkRSXform xform[], const SkRect* cullRect, const SkPaint& paint) {
+    GlyphIDConverter glyphs(text, byteLength, paint); // Just get count
+    SkMatrix localM, currM, origM;
+    mCanvas->getMatrix(&currM);
+    origM = currM;
+    for (int i = 0; i < glyphs.count; i++) {
+        localM.setRSXform(*xform++);
+        currM.setConcat(origM, localM);
+        mCanvas->setMatrix(currM);
+        this->onDrawText((char*)text + (byteLength / glyphs.count * i),
+                         byteLength / glyphs.count, 0, 0, paint);
+    }
+    mCanvas->setMatrix(origM);
+}
+
 
 void SkiaCanvasProxy::onDrawTextBlob(const SkTextBlob* blob, SkScalar x, SkScalar y,
         const SkPaint& paint) {

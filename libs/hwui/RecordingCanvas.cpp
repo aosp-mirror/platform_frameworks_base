@@ -20,6 +20,7 @@
 #include "RecordedOp.h"
 #include "RenderNode.h"
 #include "VectorDrawable.h"
+#include "hwui/MinikinUtils.h"
 
 namespace android {
 namespace uirenderer {
@@ -541,14 +542,20 @@ void RecordingCanvas::drawGlyphs(const uint16_t* glyphs, const float* positions,
     drawTextDecorations(x, y, totalAdvance, paint);
 }
 
-void RecordingCanvas::drawGlyphsOnPath(const uint16_t* glyphs, int glyphCount, const SkPath& path,
-            float hOffset, float vOffset, const SkPaint& paint) {
-    if (!glyphs || glyphCount <= 0 || PaintUtils::paintWillNotDrawText(paint)) return;
-    glyphs = refBuffer<glyph_t>(glyphs, glyphCount);
-    addOp(alloc().create_trivial<TextOnPathOp>(
-            *(mState.currentSnapshot()->transform),
-            getRecordedClip(),
-            refPaint(&paint), glyphs, glyphCount, refPath(&path), hOffset, vOffset));
+void RecordingCanvas::drawLayoutOnPath(const minikin::Layout& layout, float hOffset, float vOffset,
+        const SkPaint& paint, const SkPath& path, size_t start, size_t end) {
+    uint16_t glyphs[1];
+    for (size_t i = start; i < end; i++) {
+        glyphs[0] = layout.getGlyphId(i);
+        float x = hOffset + layout.getX(i);
+        float y = vOffset + layout.getY(i);
+        if (PaintUtils::paintWillNotDrawText(paint)) return;
+        const uint16_t* tempGlyphs = refBuffer<glyph_t>(glyphs, 1);
+        addOp(alloc().create_trivial<TextOnPathOp>(
+                *(mState.currentSnapshot()->transform),
+                getRecordedClip(),
+                refPaint(&paint), tempGlyphs, 1, refPath(&path), x, y));
+    }
 }
 
 void RecordingCanvas::drawBitmap(const SkBitmap* bitmap, const SkPaint* paint) {

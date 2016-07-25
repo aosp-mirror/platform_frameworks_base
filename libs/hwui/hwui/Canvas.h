@@ -26,6 +26,10 @@
 #include <SkCanvas.h>
 #include <SkMatrix.h>
 
+namespace minikin {
+    class Layout;
+}
+
 namespace android {
 
 namespace uirenderer {
@@ -242,10 +246,8 @@ protected:
             const SkPaint& paint, float x, float y,
             float boundsLeft, float boundsTop, float boundsRight, float boundsBottom,
             float totalAdvance) = 0;
-    /** drawTextOnPath: count is of glyphs */
-    virtual void drawGlyphsOnPath(const uint16_t* glyphs, int count, const SkPath& path,
-            float hOffset, float vOffset, const SkPaint& paint) = 0;
-
+    virtual void drawLayoutOnPath(const minikin::Layout& layout, float hOffset, float vOffset,
+            const SkPaint& paint, const SkPath& path, size_t start, size_t end) = 0;
     friend class DrawTextFunctor;
     friend class DrawTextOnPathFunctor;
     friend class uirenderer::SkiaCanvasProxy;
