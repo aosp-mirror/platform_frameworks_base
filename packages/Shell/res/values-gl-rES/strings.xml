@@ -21,7 +21,7 @@
     <string name="bugreport_finished_title" msgid="4429132808670114081">"Rexistrouse o informe de erros <xliff:g id="ID">#%d</xliff:g>"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Engadindo detalles ao informe de erro"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Agarda..."</string>
-    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Pasa o dedo á esquerda para compartir o teu informe de erros"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"O informe de erros aparecerá no teléfono en breve"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Toca para compartir o teu informe de erros"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Toca para compartir o informe de erros sen captura de pantalla ou agarda a que finalice a captura"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Toca para compartir o informe de erros sen captura de pantalla ou agarda a que finalice a captura"</string>

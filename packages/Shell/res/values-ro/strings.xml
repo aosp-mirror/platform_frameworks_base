@@ -21,7 +21,7 @@
     <string name="bugreport_finished_title" msgid="4429132808670114081">"Raportul de eroare <xliff:g id="ID">#%d</xliff:g> a fost creat"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Se adaugă detaliile la raportul de eroare"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Așteptați…"</string>
-    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Glisați la stânga pentru a trimite raportul de erori"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Raportul de eroare va apărea curând pe telefon"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Atingeți pentru a trimite raportul de eroare"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Atingeți ca să trimiteți raportul de eroare fără captură de ecran sau așteptați finalizarea acesteia"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Atingeți ca să trimiteți raportul de eroare fără captură de ecran sau așteptați finalizarea acesteia"</string>

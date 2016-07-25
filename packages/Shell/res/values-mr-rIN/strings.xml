@@ -21,7 +21,7 @@
     <string name="bugreport_finished_title" msgid="4429132808670114081">"दोष अहवाल <xliff:g id="ID">#%d</xliff:g> कॅप्चर केला"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"दोष अहवालामध्‍ये तपशील जोडत आहे"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"कृपया प्रतीक्षा करा..."</string>
-    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"आपला दोष अहवाल सामायिक करण्यासाठी डावीकडे स्वाइप करा"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"फोनवर दोष अहवाल लवकरच दिसेल"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"आपला दोष अहवाल सामायिक करण्यासाठी टॅप करा"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"स्क्रीनशॉट शिवाय आपला दोष अहवाल सामायिक करण्यासाठी टॅप करा किंवा समाप्त करण्यासाठी स्क्रीनशॉटची प्रतीक्षा करा"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"स्क्रीनशॉट शिवाय आपला दोष अहवाल सामायिक करण्यासाठी टॅप करा किंवा समाप्त करण्यासाठी स्क्रीनशॉटची प्रतीक्षा करा"</string>

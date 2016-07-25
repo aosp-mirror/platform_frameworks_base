@@ -21,7 +21,7 @@
     <string name="bugreport_finished_title" msgid="4429132808670114081">"பிழை அறிக்கை <xliff:g id="ID">#%d</xliff:g> எடுக்கப்பட்டது"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"பிழை அறிக்கையில் விவரங்களைச் சேர்க்கிறது"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"காத்திருக்கவும்…"</string>
-    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"பிழை அறிக்கையைப் பகிர இடது புறமாகத் தேய்க்கவும்"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"பிழை அறிக்கை சிறிது நேரத்தில் மொபைலில் தோன்றும்"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"பிழை அறிக்கையைப் பகிர, தட்டவும்"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"ஸ்கிரீன்ஷாட் இல்லாமல் பிழை அறிக்கையைப் பகிர, தட்டவும் அல்லது ஸ்கிரீன்ஷாட் முடியும்வரை காத்திருக்கவும்"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"ஸ்கிரீன்ஷாட் இல்லாமல் பிழை அறிக்கையைப் பகிர, தட்டவும் அல்லது ஸ்கிரீன்ஷாட் முடியும்வரை காத்திருக்கவும்"</string>
