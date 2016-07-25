@@ -1496,8 +1496,8 @@ public class Paint {
     /**
      * Returns the font feature settings. The format is the same as the CSS
      * font-feature-settings attribute:
-     * <a href="http://dev.w3.org/csswg/css-fonts/#propdef-font-feature-settings">
-     *     http://dev.w3.org/csswg/css-fonts/#propdef-font-feature-settings</a>
+     * <a href="https://www.w3.org/TR/css-fonts-3/#font-feature-settings-prop">
+     *     https://www.w3.org/TR/css-fonts-3/#font-feature-settings-prop</a>
      *
      * @return the paint's currently set font feature settings. Default is null.
      *
@@ -1511,8 +1511,8 @@ public class Paint {
      * Set font feature settings.
      *
      * The format is the same as the CSS font-feature-settings attribute:
-     * <a href="http://dev.w3.org/csswg/css-fonts/#propdef-font-feature-settings">
-     *     http://dev.w3.org/csswg/css-fonts/#propdef-font-feature-settings</a>
+     * <a href="https://www.w3.org/TR/css-fonts-3/#font-feature-settings-prop">
+     *     https://www.w3.org/TR/css-fonts-3/#font-feature-settings-prop</a>
      *
      * @see #getFontFeatureSettings()
      *
