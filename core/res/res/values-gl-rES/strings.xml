@@ -1537,8 +1537,8 @@
     <string name="immersive_cling_description" msgid="3482371193207536040">"Para saír, pasa o dedo cara abaixo desde arriba."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"De acordo"</string>
     <string name="done_label" msgid="2093726099505892398">"Feito"</string>
-    <string name="hour_picker_description" msgid="6698199186859736512">"Control de desprazamento circular das horas"</string>
-    <string name="minute_picker_description" msgid="8606010966873791190">"Control de desprazamento circular dos minutos"</string>
+    <string name="hour_picker_description" msgid="6698199186859736512">"Control desprazable circular das horas"</string>
+    <string name="minute_picker_description" msgid="8606010966873791190">"Control desprazable circular dos minutos"</string>
     <string name="select_hours" msgid="6043079511766008245">"Seleccionar horas"</string>
     <string name="select_minutes" msgid="3974345615920336087">"Seleccionar minutos"</string>
     <string name="select_day" msgid="7774759604701773332">"Seleccionar mes e día"</string>
