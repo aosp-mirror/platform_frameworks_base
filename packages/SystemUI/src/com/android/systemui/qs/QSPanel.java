@@ -23,7 +23,6 @@ import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -503,6 +502,10 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
             }
         }
         return null;
+    }
+
+    public QSFooter getFooter() {
+        return mFooter;
     }
 
     private class H extends Handler {
