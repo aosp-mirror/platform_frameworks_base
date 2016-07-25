@@ -19,9 +19,7 @@ helpoutsWidget=true
 <ol>
   <li><a href="#RespondToButton">Respond to the Send Button</a></li>
   <li><a href="#BuildIntent">Build an Intent</a></li>
-  <!-- <li><a href="#StartActivity">Start the Second Activity</a></li> -->
   <li><a href="#CreateActivity">Create the Second Activity</a></li>
-  <li><a href="#ReceiveIntent">Receive the Intent</a></li>
   <li><a href="#DisplayMessage">Display the Message</a></li>
 </ol>
 
@@ -33,55 +31,53 @@ helpoutsWidget=true
 
 <p>After completing the <a href="building-ui.html">previous lesson</a>, you have an app that
 shows an activity (a single screen) with a text field and a button. In this lesson, you’ll add some
-code to <code>MyActivity</code> that
+code to <code>MainActivity</code> that
 starts a new activity when the user clicks the Send button.</p>
 
 
 <h2 id="RespondToButton">Respond to the Send Button</h2>
 
 <ol>
-<li>In Android Studio, from the <code>res/layout</code> directory, edit the <code>content_my.xml</code>
-file.</li>
-<li>Add the <a
-href="{@docRoot}reference/android/view/View.html#attr_android:onClick">{@code android:onClick}</a>
-attribute to the {@link android.widget.Button &lt;Button&gt;} element.
+  <li>In the file <code>res/layout/activity_main.xml</code>, add the
+    <a href="{@docRoot}reference/android/view/View.html#attr_android:onClick">{@code android:onClick}</a>
+    attribute to the {@link android.widget.Button &lt;Button&gt;} element as
+    shown below:
+    <pre>&lt;Button
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/button_send"
+      <b>android:onClick="sendMessage"</b> />
+    </pre>
+    <p>This attribute tells the system to call the <code>sendMessage()</code>
+      method in your activity whenever a user clicks on the button.</p>
+  </li>
 
-<p class="code-caption">res/layout/content_my.xml</p>
-<pre>
-&lt;Button
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="@string/button_send"
-    android:onClick="sendMessage" />
-</pre>
+  <li>In the file <code>java/com.example.myfirstapp/MainActivity.java</code>,
+    add the <code>sendMessage()</code> method stub as shown below:
 
-<p>The <a
-href="{@docRoot}reference/android/view/View.html#attr_android:onClick">{@code
-android:onClick}</a> attribute’s value, <code>"sendMessage"</code>, is the name of a method in your
-activity that the system calls when the user clicks the button.</p>
-</li>
-<li>In the <code>java/com.mycompany.myfirstapp</code> directory, open the <code>MyActivity.java</code> file.</li>
-<li>Within the <code>MyActivity</code> class, add the {@code sendMessage()} method stub shown
-below.
+    <pre>public class MainActivity extends AppCompatActivity {
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+    }
 
-<p class="code-caption">java/com.mycompany.myfirstapp/MyActivity.java</p>
-<pre>
-/** Called when the user clicks the Send button */
-public void sendMessage(View view) {
-    // Do something in response to button
-}
-</pre>
+    <b>/** Called when the user clicks the Send button */
+    public void sendMessage(View view) {
+        // Do something in response to button
+    }</b>
+}</pre>
 
-<p>In order for the system to match this method to the method name given to <a
-href="{@docRoot}reference/android/view/View.html#attr_android:onClick">{@code android:onClick}</a>,
-the signature must be exactly as shown. Specifically, the method must:</p>
+    <p>In order for the system to match this method to the method name given to <a
+      href="{@docRoot}reference/android/view/View.html#attr_android:onClick">{@code android:onClick}</a>,
+      the signature must be exactly as shown. Specifically, the method must:</p>
 
-<ul>
-<li>Be public</li>
-<li>Have a void return value</li>
-<li>Have a {@link android.view.View} as the only parameter (this will be the {@link
-android.view.View} that was clicked)</li>
-</ul>
+    <ul>
+    <li>Be public</li>
+    <li>Have a void return value</li>
+    <li>Have a {@link android.view.View} as the only parameter (this will be the {@link
+    android.view.View} that was clicked)</li>
+    </ul>
 
 </li>
 </ol>
@@ -90,422 +86,147 @@ android.view.View} that was clicked)</li>
 another activity.</p>
 
 <h2 id="BuildIntent">Build an Intent</h2>
+<p>An {@link android.content.Intent} is an object that provides runtime binding
+  between separate components (such as two activities). The
+  {@link android.content.Intent} represents an app’s "intent to do something."
+  You can use intents for a wide variety of tasks, but in this lesson, your intent
+  starts another activity.</p>
 
-<ol>
-<li>In <code>MyActivity.java</code>, inside the {@code sendMessage()} method, create an
-{@link android.content.Intent} to start an activity called {@code DisplayMessageActivity} with the
-following code:
+<p>In <code>MainActivity.java</code>, add the code shown below to
+  <code>sendMessage()</code>:</p>
 
-<p class="code-caption">java/com.mycompany.myfirstapp/MyActivity.java</p>
-<pre>
-public void sendMessage(View view) {
-  Intent intent = new Intent(this, DisplayMessageActivity.class);
-}
-</pre>
-
-<div class="sidebox-wrapper">
-<div class="sidebox">
-<h3>Intents</h3>
-<p>An {@link android.content.Intent} is an object that provides runtime binding between separate
-components (such as two activities). The {@link android.content.Intent} represents an
-app’s "intent to do something." You can use intents for a wide
-variety of tasks, but most often they’re used to start another activity. For more information, see
-<a href="{@docRoot}guide/components/intents-filters.html ">Intents and Intent Filters</a>.</p>
-</div>
-</div>
-
-<p class="note"><strong>Note:</strong> The reference to {@code DisplayMessageActivity}
-will raise an error if you’re using an IDE such as Android Studio because the class doesn’t exist yet.
-Ignore the error for now; you’ll create the class soon.</p>
-
-<p>The constructor used here takes two parameters:</p>
-<ul>
-  <li>A {@link
-android.content.Context} as its first parameter ({@code this} is used because the {@link
-android.app.Activity} class is a subclass of {@link android.content.Context})
-  <li>The {@link java.lang.Class} of the app component to which the system should deliver
-the {@link android.content.Intent} (in this case, the activity that should be started)
-</ul>
-
-<p>Android Studio indicates that you must import the {@link android.content.Intent} class.</p>
-
-</li>
-<li>At the top of the file, import the {@link android.content.Intent} class:
-<p class="code-caption">java/com.mycompany.myfirstapp/MyActivity.java</p>
-<pre>
-import android.content.Intent;
-</pre>
-<p class="note"><strong>Tip:</strong> In Android Studio, press Alt + Enter (option + return on Mac)
-  to import missing classes.</p>
-</li>
-
-<!-- I didn't think this was necessary
-<div class="sidebox-wrapper">
-<div class="sidebox">
-  <h3>Sending an intent to other apps</h3>
-  <p>The intent created in this lesson is what's considered an <em>explicit intent</em>, because the
-{@link android.content.Intent}
-specifies the exact app component to which the intent should be given. However, intents
-can also be <em>implicit</em>, in which case the {@link android.content.Intent} does not specify
-the desired component, but allows any app installed on the device to respond to the intent
-as long as it satisfies the meta-data specifications for the action that's specified in various
-{@link android.content.Intent} parameters. For more information, see the class about <a
-href="{@docRoot}training/basics/intents/index.html">Interacting with Other Apps</a>.</p>
-</div>
-</div>
--->
-
-<li>Inside the {@code sendMessage()} method,
-use {@link android.app.Activity#findViewById findViewById()} to get the
-{@link android.widget.EditText} element.
-<p class="code-caption">java/com.mycompany.myfirstapp/MyActivity.java</p>
-<pre>
-public void sendMessage(View view) {
-  Intent intent = new Intent(this, DisplayMessageActivity.class);
-  EditText editText = (EditText) findViewById(R.id.edit_message);
-}
-</pre>
-</li>
-
-<li>At the top of the file, import the {@link android.widget.EditText} class.
-  <p>In Android Studio, press Alt + Enter (option + return on Mac) to import missing classes.</p>
-</li>
-
-<li>Assign the text to a local <code>message</code> variable, and use the
-{@link android.content.Intent#putExtra putExtra()} method to add its text value to the intent.
-<p class="code-caption">java/com.mycompany.myfirstapp/MyActivity.java</p>
-<pre>
-public void sendMessage(View view) {
-  Intent intent = new Intent(this, DisplayMessageActivity.class);
-  EditText editText = (EditText) findViewById(R.id.edit_message);
-  String message = editText.getText().toString();
-  intent.putExtra(EXTRA_MESSAGE, message);
-}
-</pre>
-
-<p>An {@link android.content.Intent} can carry data types as key-value
-pairs called <em>extras</em>. The {@link android.content.Intent#putExtra putExtra()} method takes the
-key name in the first parameter and the value in the second parameter.</p>
-
-</li>
-<li>At the top of the {@code MyActivity} class, add the {@code EXTRA_MESSAGE} definition as
-follows:
-<p class="code-caption">java/com.mycompany.myfirstapp/MyActivity.java</p>
-<pre>
-public class MyActivity extends AppCompatActivity {
-    public final static String EXTRA_MESSAGE = "com.mycompany.myfirstapp.MESSAGE";
-    ...
-}
-</pre>
-
-<p>For the next activity to query the extra data, you should define the key
-for your intent's extra using a public constant. It's generally a good practice to define keys for
-intent extras using your app's package name as a prefix. This ensures the keys are unique, in case
-your app interacts with other apps.</p>
-
-</li>
-
-<!-- <h2 id="StartActivity">Start the Second Activity</h2> -->
-
-<li>In the {@code sendMessage()} method, to finish the intent, call the
-{@link android.app.Activity#startActivity startActivity()} method, passing it the
-{@link android.content.Intent} object created in step 1.
-
-</ol>
-
-<p>With this new code, the complete {@code sendMessage()} method that's invoked by the Send
-button now looks like this:</p>
-<p class="code-caption">java/com.mycompany.myfirstapp/MyActivity.java</p>
-<pre>
-/** Called when the user clicks the Send button */
-public void sendMessage(View view) {
-    Intent intent = new Intent(this, DisplayMessageActivity.class);
-    EditText editText = (EditText) findViewById(R.id.edit_message);
-    String message = editText.getText().toString();
-    intent.putExtra(EXTRA_MESSAGE, message);
-    startActivity(intent);
-}
-</pre>
-
-<p>The system receives this call and starts an instance of the {@link android.app.Activity}
-specified by the {@link android.content.Intent}. Now you need to create the
-{@code DisplayMessageActivity} class in order for this to work.</p>
-
-</li>
-</ol>
-
-
-<h2 id="CreateActivity">Create the Second Activity</h2>
-
-<p>All subclasses of {@link android.app.Activity} must implement the
-{@link android.app.Activity#onCreate onCreate()} method. This method is where the activity receives
-the intent with the message, then renders the message. Also, the
-{@link android.app.Activity#onCreate onCreate()} method must define the activity
-layout with the {@link android.app.Activity#setContentView setContentView()} method. This is where
-the activity performs the initial setup of the activity components.</p>
-
-<h3>Create a new activity using Android Studio</h3>
-
-<p>Android Studio includes a stub for the
-{@link android.app.Activity#onCreate onCreate()} method when you create a new activity. The
-<em>New Android Activity</em> window appears.</p>
-
-<ol>
-  <li>In Android Studio, in the <code>java</code> directory, select the package,
-    <strong>com.mycompany.myfirstapp</strong>, right-click, and select
-    <strong>New > Activity > Blank Activity</strong>.</li>
-  <li>In the <strong>Choose options</strong> window, fill in the activity details:
-    <ul>
-      <li><strong>Activity Name</strong>: DisplayMessageActivity</li>
-      <li><strong>Layout Name</strong>: activity_display_message</li>
-      <li><strong>Title</strong>: My Message</li>
-      <li><strong>Hierarchical Parent</strong>: com.mycompany.myfirstapp.MyActivity</li>
-      <li><strong>Package name</strong>: com.mycompany.myfirstapp</li>
-    </ul>
-    <p>Click <strong>Finish</strong>.</p>
-  </li>
-
-<li>Open the {@code DisplayMessageActivity.java} file.
-
-<p>The class already includes an implementation of the required
-{@link android.app.Activity#onCreate onCreate()} method. You update the implementation of this
-method later.</p>
-
-<!-- Android Studio does not create a Fragment placeholder
-<p>Also, the file includes a <code>PlaceholderFragment</code> class that extends
-{@link android.app.Fragment}. This activity does not implement fragments, but you might use this
-later in the training. Fragments decompose application functionality and UI into reusable modules.
-For more information on fragments, see the
-<a href="{@docRoot}guide/components/fragments.html">Fragments API Guide</a> and follow the training,
-<a href="{@docRoot}training/basics/fragments/index.html">Building A Dynamic UI with Fragments</a>.
-</p>
--->
-</li>
-</ol>
-
-<!-- Not needed for Android Studio
-<p class="note"><strong>Note:</strong> Your activity may look different if you did not use
-the latest version of the ADT plugin. Make sure you install the latest version of the
-<a href="{@docRoot}tools/sdk/eclipse-adt.html">ADT plugin</a> to complete this tutorial.</p>
--->
-
-<p>If you're developing with Android Studio, you can run the app now, but not much happens.
-Clicking the Send button starts the second activity, but it uses
-a default "Hello world" layout provided by the template. You'll soon update the
-activity to instead display a custom text view.</p>
-
-
-<h3>Create the activity without Android Studio</h3>
-
-<p>If you're using a different IDE or the command line tools, do the following:</p>
-
-<ol>
-<li>Create a new file named {@code DisplayMessageActivity.java} in the project's <code>src/</code>
-directory, next to the original {@code MyActivity.java} file.</li>
-<li>Add the following code to the file:
-
-<pre>
-public class DisplayMessageActivity extends AppCompatActivity {
-
+<pre>public class MainActivity extends AppCompatActivity {
+    <b>public final static String EXTRA_MESSAGE = "com.example.myfirstapp.MESSAGE";</b>
     &#64;Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_display_message);
-
-        if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                .add(R.id.container, new PlaceholderFragment()).commit();
-        }
+        setContentView(R.layout.activity_main);
     }
 
-    &#64;Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle app bar item clicks here. The app bar
-        // automatically handles clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
+    /** Called when the user clicks the Send button */
+    public void sendMessage(View view) {
+        <b>Intent intent = new Intent(this, DisplayMessageActivity.class);
+        EditText editText = (EditText) findViewById(R.id.edit_message);
+        String message = editText.getText().toString();
+        intent.putExtra(EXTRA_MESSAGE, message);
+        startActivity(intent);</b>
     }
+}</pre>
 
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends Fragment {
+<p class="note"><strong>Note: </strong>Android Studio will display
+  <code>Cannot resolve symbol</code> errors because the code references classes
+  like {@link android.content.Intent} and {@link android.widget.EditText}
+  that have not been imported. To import these classes, you can either 1)
+  use Android Studio's "import class" functionality by pressing Alt + Enter
+  (Option + Return on Mac) or 2) manually add import statements at the top of
+  the file.</p>
 
-        public PlaceholderFragment() { }
+<p>There’s a lot going on in <code>sendMessage()</code>, so let’s explain
+  what's going on.</p>
 
-        &#64;Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                  Bundle savedInstanceState) {
-              View rootView = inflater.inflate(R.layout.fragment_display_message,
-                      container, false);
-              return rootView;
-        }
-    }
-}
-</pre>
+<p>The {@link android.content.Intent} constructor takes two parameters:</p>
+<ul>
+  <li>A {@link android.content.Context} as its first parameter ({@code this}
+    is used because the {@link android.app.Activity} class is a subclass of
+    {@link android.content.Context})
+  <li>The {@link java.lang.Class} of the app component to which the system
+    should deliver the {@link android.content.Intent} (in this case, the
+    activity that should be started).
+    <p class="note"><strong>Note:</strong> The reference to
+      <code>DisplayMessageActivity</code> will raise an error in Android Studio
+      because the class doesn’t exist yet. Ignore the error for now; you’ll
+      create the class soon.</p>
+</ul>
 
-<p class="note"><strong>Note:</strong> If you are using an IDE other than Android Studio, your project
-does not contain the {@code activity_display_message} layout that's requested by
-{@link android.app.Activity#setContentView setContentView()}. That's OK because
-you will update this method later and won't be using that layout.</p>
+<p>The {@link android.content.Intent#putExtra(String, String) putExtra()}
+  method adds the <code>EditText</code>'s value to the intent. An <code>Intent</code>
+  can carry data types as key-value pairs called <em>extras</em>. Your key is a
+  public constant <code>EXTRA_MESSAGE</code> because the next
+  activity uses the key to retrive the text value. It's a good practice to
+  define keys for intent extras using your app's package name as a prefix. This
+  ensures the keys are unique, in case your app interacts with other apps.</p>
 
-</li>
+<p>The {@link android.app.Activity#startActivity(Intent) startActivity()}
+  method starts an instance of the <code>DisplayMessageActivity</code> specified
+  by the {@link android.content.Intent}. Now you need to create the class.</p>
 
-<li>To your {@code strings.xml} file, add the new activity's title as follows:
-<pre>
-&lt;resources>
-    ...
-    &lt;string name="title_activity_display_message">My Message&lt;/string>
-&lt;/resources>
-</pre>
-</li>
-
-<li>In your manifest file, <code>AndroidManifest.xml</code>, within the <code>Application</code>
-element, add the
-<a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code <activity>}</a> element
-for your {@code DisplayMessageActivity} class, as follows:
-
-<pre>
-&lt;application ... >
-    ...
-    &lt;activity
-        android:name="com.mycompany.myfirstapp.DisplayMessageActivity"
-        android:label="@string/title_activity_display_message"
-        android:parentActivityName="com.mycompany.myfirstapp.MyActivity" >
-        &lt;meta-data
-            android:name="android.support.PARENT_ACTIVITY"
-            android:value="com.mycompany.myfirstapp.MyActivity" />
-    &lt;/activity>
-&lt;/application>
-</pre>
-
-</li>
-</ol>
-
-<p>The <a href="{@docRoot}guide/topics/manifest/activity-element.html#parent">{@code
-android:parentActivityName}</a> attribute declares the name of this activity's parent activity
-within the app's logical hierarchy. The system uses this value
-to implement default navigation behaviors, such as <a
-href="{@docRoot}design/patterns/navigation.html">Up navigation</a> on
-Android 4.1 (API level 16) and higher. You can provide the same navigation behaviors for
-older versions of Android by using the
-<a href="{@docRoot}tools/support-library/index.html">Support Library</a> and adding
-the <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code
-<meta-data>}</a> element as shown here.</p>
-
-<p class="note"><strong>Note:</strong> Your Android SDK should already include
-the latest Android Support Library, which you installed during the
-<a href="{@docRoot}studio/intro/update.html">Adding SDK Packages</a> step.
-When using the templates in Android Studio, the Support Library is automatically added to your app project
-(you can see the library's JAR file listed under <em>Android Dependencies</em>). If you're not using
-Android Studio, you need to manually add the library to your project&mdash;follow the guide for <a
-href="{@docRoot}tools/support-library/setup.html">setting up the Support Library</a>
-then return here.</p>
-
-<p>If you're using a different IDE than Android Studio, don't worry that the app won't yet compile.
-You'll soon update the activity to display a custom text view.</p>
-
-
-<h2 id="ReceiveIntent">Receive the Intent</h2>
-
-<p>Every {@link android.app.Activity} is invoked by an {@link android.content.Intent}, regardless of
-how the user navigated there. You can get the {@link android.content.Intent} that started your
-activity by calling {@link android.app.Activity#getIntent()} and retrieve the data contained
-within the intent.</p>
+<h2 id="CreateActivity">Create the Second Activity</h2>
 
 <ol>
-<li>In the <code>java/com.mycompany.myfirstapp</code> directory, edit the
-  {@code DisplayMessageActivity.java} file.</li>
-<li>Get the intent and assign it to a local variable.
-<pre>
-Intent intent = getIntent();
-</pre>
-</li>
-<li>At the top of the file, import the {@link android.content.Intent} class.
-  <p>In Android Studio, press Alt + Enter (option + return on Mac) to import missing classes.</p>
-</li>
-<li>Extract the message delivered by {@code MyActivity} with the
-{@link android.content.Intent#getStringExtra getStringExtra()} method.
-<pre>
-String message = intent.getStringExtra(MyActivity.EXTRA_MESSAGE);
-</pre>
-</li>
+  <li>In the <b>Project</b> window, right-click the <b>app</b> folder and select
+    <strong>New > Activity > Empty Activity</strong>.</li>
+  <li>In the <strong>Configure Activity</strong> window, enter
+    "DisplayMessageActivity" for <strong>Activity Name</strong> and click
+    <strong>Finish</strong>
+  </li>
 </ol>
+
+<p>Android Studio automatically does three things:</p>
+<ul>
+  <li>Creates the class <code>DisplayMessageActivity.java</code> with an
+   implementation of the required {@link android.app.Activity#onCreate(Bundle) onCreate()}
+    method.</li>
+  <li>Creates the corresponding layout file <code>activity_display_message.xml</code>
+    </li>
+  <li>Adds the required
+    <a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a>
+    element in <code>AndroidManifest.xml</code>.
+</ul>
+
+<p>If you run the app and click the Send button on the first activity, the
+  second activity starts but is empty. This is because the second activity uses
+  the default empty layout provided by the template.</p>
 
 <h2 id="DisplayMessage">Display the Message</h2>
+<p>Now you will modify the second activity to display the message that was passed
+by the first activity.</p>
 
 <ol>
-<li>In the res/layout directory, edit the {@code content_display_message.xml} file.</li>
-<li>Add an {@code android:id} attribute to the {@code RelativeLayout}.
-You need this attribute to reference the object from your app code.</li>
-
-<pre>
-&lt; RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-...
-android:id="@+id/content"&gt;
-&lt;/RelativeLayout&gt;
-</pre>
-<li>Switch back to editing {@code DisplayMessageActivity.java}.</li>
-
-
-<li>In the {@link android.app.Activity#onCreate onCreate()} method, create a {@link android.widget.TextView} object.
-<pre>
-TextView textView = new TextView(this);
-</pre>
-</li>
-<li>Set the text size and message with {@link android.widget.TextView#setText setText()}.
-<pre>
-textView.setTextSize(40);
-textView.setText(message);
-</pre>
-</li>
-<li>Add the {@link android.widget.TextView} to the {@link android.widget.RelativeLayout}
-identified by {@code R.id.content}.
-<pre>
-RelativeLayout layout = (RelativeLayout) findViewById(R.id.content);
-layout.addView(textView);
-</pre>
-</li>
-<li>At the top of the file, import the {@link android.widget.TextView} class.
-  <p>In Android Studio, press Alt + Enter (option + return on Mac) to import missing classes.</p>
-</li>
-</ol>
-
-<p>The complete {@link android.app.Activity#onCreate onCreate()} method for {@code
-DisplayMessageActivity} now looks like this:</p>
-
-<pre>
-&#64;Override
+  <li>In {@code DisplayMessageActivity.java}, add the following code to the
+    <code>onCreate()</code> method:
+    <pre>&#64;Override
 protected void onCreate(Bundle savedInstanceState) {
    super.onCreate(savedInstanceState);
    setContentView(R.layout.activity_display_message);
-   Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-   setSupportActionBar(toolbar);
-
-   FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-   fab.setOnClickListener(new View.OnClickListener() {
-       &#64;Override
-       public void onClick(View view) {
-           Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                   .setAction("Action", null)
-                   .show();
-       }
-   });
-   getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
    Intent intent = getIntent();
-   String message = intent.getStringExtra(MyActivity.EXTRA_MESSAGE);
+   String message = intent.getStringExtra(MainActivity.EXTRA_MESSAGE);
    TextView textView = new TextView(this);
    textView.setTextSize(40);
    textView.setText(message);
 
-   RelativeLayout layout = (RelativeLayout) findViewById(R.id.content);
+   ViewGroup layout = (ViewGroup) findViewById(R.id.activity_display_message);
    layout.addView(textView);
-</pre>
+}</pre>
+  </li>
+  <li>Press Alt + Enter (option + return on Mac) to import missing classes.</li>
+</ol>
+
+<p>There’s a lot going on here, so let’s explain:</p>
+
+<ol>
+  <li>The call {@link android.app.Activity#getIntent()} grabs the intent
+    that started the activity. Every {@link android.app.Activity} is invoked by an
+    {@link android.content.Intent}, regardless of how the user navigated there.
+    The call {@link android.content.Intent#getStringExtra(String) getStringExtra()}
+    retrieves the data from the first activity.</li>
+  <li>You programmatically create a {@link android.widget.TextView} and set
+    its size and message.
+  </li>
+  <li>You add the <code>TextView</code> to the layout identified by
+    {@code R.id.activity_display_message}. You cast the layout to
+    {@link android.view.ViewGroup} because it is the superclass of all layouts and
+    contains the {@link android.view.ViewGroup#addView(View) addView()}
+    method.</li>
+</ol>
+
+<p class="note"><strong>Note: </strong>The XML layout generated by previous
+  versions of Android Studio might not include the <code>android:id</code>
+  attribute. The call <code>findViewById()</code> will fail if the layout
+  does not have the <code>android:id</code> attribute. If this is the case,
+  open <code>activity_display_message.xml</code> and add the attribute
+  <code>android:id="@+id/activity_display_message"</code> to the layout element.
+</p>
 
 <p>You can now run the app. When it opens, type a message in the text field, and click
 <strong>Send</strong>. The second activity replaces the first one on the screen, showing
@@ -514,7 +235,3 @@ the message you entered in the first activity.</p>
 <p>That's it, you've built your first Android app!</p>
 
 <p>To learn more, follow the link below to the next class.</p>
-
-
-
-
