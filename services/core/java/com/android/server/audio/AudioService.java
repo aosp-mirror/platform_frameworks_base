@@ -1130,8 +1130,11 @@ public class AudioService extends IAudioService.Stub {
         final int currentUser = getCurrentUserId();
 
         // Check the current user restriction.
-        boolean masterMute = mUserManagerInternal.getUserRestriction(
-                    currentUser, UserManager.DISALLOW_ADJUST_VOLUME);
+        boolean masterMute =
+                mUserManagerInternal.getUserRestriction(currentUser,
+                        UserManager.DISALLLOW_UNMUTE_DEVICE)
+                        || mUserManagerInternal.getUserRestriction(currentUser,
+                        UserManager.DISALLOW_ADJUST_VOLUME);
         if (mUseFixedVolume) {
             masterMute = false;
             AudioSystem.setMasterVolume(1.0f);
@@ -5380,9 +5383,11 @@ public class AudioService extends IAudioService.Stub {
             // Update speaker mute state.
             {
                 final boolean wasRestricted =
-                        prevRestrictions.getBoolean(UserManager.DISALLOW_ADJUST_VOLUME);
+                        prevRestrictions.getBoolean(UserManager.DISALLOW_ADJUST_VOLUME)
+                                || prevRestrictions.getBoolean(UserManager.DISALLLOW_UNMUTE_DEVICE);
                 final boolean isRestricted =
-                        newRestrictions.getBoolean(UserManager.DISALLOW_ADJUST_VOLUME);
+                        newRestrictions.getBoolean(UserManager.DISALLOW_ADJUST_VOLUME)
+                                || newRestrictions.getBoolean(UserManager.DISALLLOW_UNMUTE_DEVICE);
                 if (wasRestricted != isRestricted) {
                     setMasterMuteInternalNoCallerCheck(isRestricted, /* flags =*/ 0, userId);
                 }

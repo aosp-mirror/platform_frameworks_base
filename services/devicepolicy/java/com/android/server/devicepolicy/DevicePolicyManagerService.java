@@ -7930,17 +7930,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Preconditions.checkNotNull(who, "ComponentName is null");
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-            int userId = UserHandle.getCallingUserId();
-            long identity = mInjector.binderClearCallingIdentity();
-            try {
-                IAudioService iAudioService = IAudioService.Stub.asInterface(
-                        ServiceManager.getService(Context.AUDIO_SERVICE));
-                iAudioService.setMasterMute(on, 0, mContext.getPackageName(), userId);
-            } catch (RemoteException re) {
-                Slog.e(LOG_TAG, "Failed to setMasterMute", re);
-            } finally {
-                mInjector.binderRestoreCallingIdentity(identity);
-            }
+            setUserRestriction(who, UserManager.DISALLLOW_UNMUTE_DEVICE, on);
         }
     }
 
