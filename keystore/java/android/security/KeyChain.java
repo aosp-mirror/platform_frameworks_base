@@ -192,7 +192,7 @@ public final class KeyChain {
      * <li>when permission to access a private key is changed.
      * </ul>
      *
-     * @deprecated Use {@link #ACTION_KEYCHAIN_CHANGED}, {@link #ACTION_STORAGE_CHANGED} or
+     * @deprecated Use {@link #ACTION_KEYCHAIN_CHANGED}, {@link #ACTION_TRUST_STORE_CHANGED} or
      * {@link #ACTION_KEY_ACCESS_CHANGED}. Apps that target a version higher than
      * {@link Build.VERSION_CODES#N_MR1} will not receive this broadcast.
      */
