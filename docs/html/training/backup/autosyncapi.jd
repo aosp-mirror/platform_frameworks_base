@@ -257,7 +257,7 @@ defines a subclass of {@link android.app.backup.BackupAgent} and sets
 <a href="{@docRoot}guide/topics/manifest/application-element.html">app manifest</a>. If your app
 used this legacy approach, you can transition to full-data backups by adding the
 {@code android:fullBackupOnly="true"} attribute to the
-<a href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application/&gt;}</a>
+<a href="{@docRoot}guide/topics/manifest/application-element.html">{@code <application/>}</a>
 element in the manifest. When running on a device with Android 5.1
 (API level 22) or lower, your app ignores this value in the manifest, and continues performing
 backups in the previous manner.</p>
@@ -349,7 +349,7 @@ $ adb shell bmgr restore &lt;PACKAGE&gt;
 <pre>$ adb shell bmgr wipe &lt;TRANSPORT&gt; &lt;PACKAGE&gt;</pre>
 
 <p>
-  You must prepend <code>com.google.android.gms</code> to the {@code &lt;TRANSPORT&gt;} value.
+  You must prepend <code>com.google.android.gms</code> to the {@code <TRANSPORT>} value.
   To get the list of <a href="{@docRoot}google/backup/index.html">transports</a>, execute the
   following command:
 </p>

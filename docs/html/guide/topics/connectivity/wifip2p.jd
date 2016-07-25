@@ -117,7 +117,7 @@ a photo sharing application.</p>
 	</tr>
 
 	<tr>
-	  <td>{@link android.net.wifi.p2p.WifiP2pManager.PeerListListener#discoverPeers discoverPeers()}</td>
+	  <td>{@link android.net.wifi.p2p.WifiP2pManager#discoverPeers discoverPeers()}</td>
 	  <td>Initiates peer discovery </td>
 	</tr>
 
@@ -147,7 +147,7 @@ a photo sharing application.</p>
     android.net.wifi.p2p.WifiP2pManager#cancelConnect cancelConnect()}, {@link
     android.net.wifi.p2p.WifiP2pManager#createGroup createGroup()}, {@link
     android.net.wifi.p2p.WifiP2pManager#removeGroup removeGroup()}, and {@link
-    android.net.wifi.p2p.WifiP2pManager.PeerListListener#discoverPeers discoverPeers()}</td>
+    android.net.wifi.p2p.WifiP2pManager#discoverPeers discoverPeers()}</td>
     </tr>
 
     <tr>
@@ -190,8 +190,8 @@ a photo sharing application.</p>
       <tr>
         <td>{@link android.net.wifi.p2p.WifiP2pManager#WIFI_P2P_PEERS_CHANGED_ACTION}</td>
         <td>Broadcast when you call {@link
-    android.net.wifi.p2p.WifiP2pManager.PeerListListener#discoverPeers discoverPeers()}. You
-    usually want to call {@link android.net.wifi.p2p.WifiP2pManager.PeerListListener#requestPeers
+    android.net.wifi.p2p.WifiP2pManager#discoverPeers discoverPeers()}. You
+    usually want to call {@link android.net.wifi.p2p.WifiP2pManager#requestPeers
     requestPeers()} to get an updated list of peers if you handle this intent in your
     application.</td>
       </tr>
