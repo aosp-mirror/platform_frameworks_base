@@ -409,7 +409,7 @@ public final class KeyChain {
         if (alias == null) {
             throw new NullPointerException("alias == null");
         }
-        KeyChainConnection keyChainConnection = bind(context);
+        KeyChainConnection keyChainConnection = bind(context.getApplicationContext());
         try {
             final IKeyChainService keyChainService = keyChainConnection.getService();
             final String keyId = keyChainService.requestPrivateKey(alias);
@@ -453,7 +453,7 @@ public final class KeyChain {
         if (alias == null) {
             throw new NullPointerException("alias == null");
         }
-        KeyChainConnection keyChainConnection = bind(context);
+        KeyChainConnection keyChainConnection = bind(context.getApplicationContext());
         try {
             IKeyChainService keyChainService = keyChainConnection.getService();
 
