@@ -7901,6 +7901,13 @@ i
         <attr name="divider" />
     </declare-styleable>
 
+    <!-- Base attributes available to PreferenceScreen. -->
+    <declare-styleable name="PreferenceScreen">
+        <!-- The layout for the PreferenceScreen. This should rarely need to be changed. -->
+        <attr name="screenLayout" format="reference" />
+        <attr name="divider" />
+    </declare-styleable>
+
     <!-- Base attributes available to PreferenceActivity. -->
     <declare-styleable name="PreferenceActivity">
         <!-- The layout for the Preference Activity. This should rarely need to be changed. -->
