@@ -1206,3 +1206,5 @@ redirects:
 
 - from: /preview/features/key-attestation.html
   to: /training/articles/security-key-attestation.html
+- from: /preview/features/security-config.html
+  to: /training/articles/security-config.html
