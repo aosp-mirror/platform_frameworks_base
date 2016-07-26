@@ -1087,9 +1087,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         @Override
-        public void onChange(boolean selfChange, Uri uri) {
+        public void onChange(boolean selfChange, Uri uri, @UserIdInt int userId) {
             if (mFontScaleUri.equals(uri)) {
-                updateFontScaleIfNeeded();
+                updateFontScaleIfNeeded(userId);
             }
         }
     }
@@ -18722,23 +18722,28 @@ public final class ActivityManagerService extends ActivityManagerNative
         int userId = UserHandle.getCallingUserId();
 
         synchronized(this) {
-            final long origId = Binder.clearCallingIdentity();
+            updatePersistentConfigurationLocked(values, userId);
+        }
+    }
+
+    private void updatePersistentConfigurationLocked(Configuration values, @UserIdInt int userId) {
+        final long origId = Binder.clearCallingIdentity();
+        try {
             updateConfigurationLocked(values, null, false, true, userId, false /* deferResume */);
+        } finally {
             Binder.restoreCallingIdentity(origId);
         }
     }
 
-    private void updateFontScaleIfNeeded() {
-        final int currentUserId;
-        synchronized(this) {
-            currentUserId = mUserController.getCurrentUserIdLocked();
-        }
+    private void updateFontScaleIfNeeded(@UserIdInt int userId) {
         final float scaleFactor = Settings.System.getFloatForUser(mContext.getContentResolver(),
-                FONT_SCALE, 1.0f, currentUserId);
+                FONT_SCALE, 1.0f, userId);
         if (mConfiguration.fontScale != scaleFactor) {
             final Configuration configuration = mWindowManager.computeNewConfiguration();
             configuration.fontScale = scaleFactor;
-            updatePersistentConfiguration(configuration);
+            synchronized (this) {
+                updatePersistentConfigurationLocked(configuration, userId);
+            }
         }
     }
 
