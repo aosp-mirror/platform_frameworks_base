@@ -1657,6 +1657,12 @@ public final class BridgeContext extends Context {
         // pass
     }
 
+    @Override
+    public void sendBroadcastAsUser(Intent intent, UserHandle user,
+            String receiverPermission, Bundle options) {
+        // pass
+    }
+
     public void sendBroadcastAsUser(Intent intent, UserHandle user,
             String receiverPermission, int appOp) {
         // pass
