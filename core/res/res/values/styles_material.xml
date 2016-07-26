@@ -81,7 +81,12 @@ please see styles_device_defaults.xml.
         <item name="layout">@layout/preference_widget_seekbar_material</item>
     </style>
 
-    <style name="Preference.Material.PreferenceScreen"/>
+    <style name="Preference.Material.BasePreferenceScreen">
+        <item name="screenLayout">@layout/preference_list_fragment_material</item>
+        <item name="divider">?attr/listDivider</item>
+    </style>
+
+    <style name="Preference.Material.PreferenceScreen" parent="Preference.Material.BasePreferenceScreen"/>
 
     <style name="Preference.Material.DialogPreference">
         <item name="positiveButtonText">@string/ok</item>
