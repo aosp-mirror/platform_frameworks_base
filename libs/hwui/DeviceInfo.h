@@ -16,7 +16,6 @@
 #ifndef DEVICEINFO_H
 #define DEVICEINFO_H
 
-#include "Extensions.h"
 #include "utils/Macros.h"
 
 namespace android {
@@ -34,8 +33,6 @@ public:
     // with HWUI_NULL_GPU
     static void initialize();
 
-    const Extensions& extensions() const { return mExtensions; }
-
     int maxTextureSize() const { return mMaxTextureSize; }
 
 private:
@@ -44,7 +41,6 @@ private:
 
     void load();
 
-    Extensions mExtensions;
     int mMaxTextureSize;
 };
 
