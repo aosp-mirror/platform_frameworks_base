@@ -1373,6 +1373,11 @@ toc:
     path_attributes:
     - name: description
       value: How to use the SafetyNet service to analyze a device where your app is running and get information about its compatibility with your app.
+  - title: Verifying Hardware-backed Key Pairs with Key Attestation
+    path: /training/articles/security-key-attestation.html
+    path_attributes:
+    - name: description
+      value: How to retrieve and verify the properties of a device's hardware-backed key pair.
   - title: Enhancing Security with Device Management Policies
     path: /work/device-management-policy.html
     path_attributes:
