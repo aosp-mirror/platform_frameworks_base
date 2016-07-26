@@ -334,13 +334,6 @@ def check_emoji_defaults(default_emoji):
     # Noto does not have monochrome glyphs for Unicode 7.0 wingdings and
     # webdings yet.
     missing_text_chars -= _chars_by_age['7.0']
-    # TODO: Remove these after b/26113320 is fixed
-    missing_text_chars -= {
-        0x263A, # WHITE SMILING FACE
-        0x270C, # VICTORY HAND
-        0x2744, # SNOWFLAKE
-        0x2764, # HEAVY BLACK HEART
-    }
     assert missing_text_chars == set(), (
         'Text style version of some emoji characters are missing: ' + repr(missing_text_chars))
 
@@ -467,6 +460,22 @@ EQUIVALENT_FLAGS = {
 
 COMBINING_KEYCAP = 0x20E3
 
+# Characters that Android defaults to emoji style, different from the recommendations in UTR #51
+ANDROID_DEFAULT_EMOJI = frozenset({
+    0x2600, # BLACK SUN WITH RAYS
+    0x2601, # CLOUD
+    0x260E, # BLACK TELEPHONE
+    0x261D, # WHITE UP POINTING INDEX
+    0x263A, # WHITE SMILING FACE
+    0x2660, # BLACK SPADE SUIT
+    0x2663, # BLACK CLUB SUIT
+    0x2665, # BLACK HEART SUIT
+    0x2666, # BLACK DIAMOND SUIT
+    0x270C, # VICTORY HAND
+    0x2744, # SNOWFLAKE
+    0x2764, # HEAVY BLACK HEART
+})
+
 LEGACY_ANDROID_EMOJI = {
     0xFE4E5: flag_sequence('JP'),
     0xFE4E6: flag_sequence('US'),
@@ -549,6 +558,7 @@ def compute_expected_emoji():
         set(LEGACY_ANDROID_EMOJI.keys()))
     default_emoji = (
         _emoji_properties['Emoji_Presentation'] |
+        ANDROID_DEFAULT_EMOJI |
         all_sequences |
         set(LEGACY_ANDROID_EMOJI.keys()))
 
