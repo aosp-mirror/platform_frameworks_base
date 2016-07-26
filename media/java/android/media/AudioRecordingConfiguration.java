@@ -57,12 +57,12 @@ public final class AudioRecordingConfiguration implements Parcelable {
     /**
      * @hide
      */
-    public AudioRecordingConfiguration(int session, int source, AudioFormat devFormat,
-            AudioFormat clientFormat, int patchHandle) {
+    public AudioRecordingConfiguration(int session, int source, AudioFormat clientFormat,
+            AudioFormat devFormat, int patchHandle) {
         mSessionId = session;
         mClientSource = source;
-        mDeviceFormat = devFormat;
         mClientFormat = clientFormat;
+        mDeviceFormat = devFormat;
         mPatchHandle = patchHandle;
     }
 
