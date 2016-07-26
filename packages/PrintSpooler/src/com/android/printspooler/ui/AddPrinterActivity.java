@@ -737,9 +737,11 @@ public class AddPrinterActivity extends ListActivity implements AdapterView.OnIt
         public void updateInstalledServices(List<PrintServiceInfo> services) {
             mInstalledServices.clear();
 
-            final int numServices = services.size();
-            for (int i = 0; i < numServices; i++) {
-                mInstalledServices.add(services.get(i).getComponentName().getPackageName());
+            if (services != null) {
+                final int numServices = services.size();
+                for (int i = 0; i < numServices; i++) {
+                    mInstalledServices.add(services.get(i).getComponentName().getPackageName());
+                }
             }
 
             filterRecommendations();
