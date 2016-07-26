@@ -141,7 +141,12 @@ public class SearchManagerService extends ISearchManager.Stub {
     }
 
     private void onUnlockUser(int userId) {
-        getSearchables(userId, true);
+        try {
+            getSearchables(userId, true);
+        } catch (IllegalStateException ignored) {
+            // We're just trying to warm a cache, so we don't mind if the user
+            // was stopped or destroyed before we got here.
+        }
     }
 
     private void onCleanupUser(int userId) {
