@@ -252,6 +252,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                             if (DEBUG) {
                                 Slog.v(TAG, "Wallpaper written; generating crop");
                             }
+                            SELinux.restorecon(changedFile);
                             if (moved) {
                                 // This is a restore, so generate the crop using any just-restored new
                                 // crop guidelines, making sure to preserve our local dimension hints.
@@ -259,7 +260,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                                 if (DEBUG) {
                                     Slog.v(TAG, "moved-to, therefore restore; reloading metadata");
                                 }
-                                SELinux.restorecon(changedFile);
                                 loadSettingsLocked(wallpaper.userId, true);
                             }
                             generateCrop(wallpaper);
@@ -353,8 +353,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                         (cropHint.bottom > options.outHeight ? options.outHeight - cropHint.bottom : 0));
 
                 // Don't bother cropping if what we're left with is identity
-                needCrop = (options.outHeight >= cropHint.height()
-                        && options.outWidth >= cropHint.width());
+                needCrop = (options.outHeight > cropHint.height()
+                        && options.outWidth > cropHint.width());
             }
 
             // scale if the crop height winds up not matching the recommended metrics
