@@ -14770,6 +14770,37 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     private void getVerticalScrollBarBounds(Rect bounds) {
+        if (mRoundScrollbarRenderer == null) {
+            getStraightVerticalScrollBarBounds(bounds);
+        } else {
+            getRoundVerticalScrollBarBounds(bounds);
+        }
+    }
+
+    private void getRoundVerticalScrollBarBounds(Rect bounds) {
+        final int inside = (mViewFlags & SCROLLBARS_OUTSIDE_MASK) == 0 ? ~0 : 0;
+        int verticalScrollbarPosition = mVerticalScrollbarPosition;
+        if (verticalScrollbarPosition == SCROLLBAR_POSITION_DEFAULT) {
+            verticalScrollbarPosition = isLayoutRtl() ?
+                    SCROLLBAR_POSITION_LEFT : SCROLLBAR_POSITION_RIGHT;
+        }
+        final int width = mRight - mLeft;
+        final int height = mBottom - mTop;
+        switch (verticalScrollbarPosition) {
+            default:
+            case SCROLLBAR_POSITION_RIGHT:
+                bounds.left = mScrollX - (mUserPaddingRight & inside);
+                break;
+            case SCROLLBAR_POSITION_LEFT:
+                bounds.left = mScrollX + (mUserPaddingLeft & inside);
+                break;
+        }
+        bounds.top = mScrollY + (mPaddingTop & inside);
+        bounds.right = bounds.left + width;
+        bounds.bottom = mScrollY + height - (mUserPaddingBottom & inside);
+    }
+
+    private void getStraightVerticalScrollBarBounds(Rect bounds) {
         final int inside = (mViewFlags & SCROLLBARS_OUTSIDE_MASK) == 0 ? ~0 : 0;
         final int size = getVerticalScrollbarWidth();
         int verticalScrollbarPosition = mVerticalScrollbarPosition;
@@ -14848,8 +14879,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // Fork out the scroll bar drawing for round wearable devices.
             if (mRoundScrollbarRenderer != null) {
                 if (drawVerticalScrollBar) {
+                    final Rect bounds = cache.mScrollBarBounds;
+                    getVerticalScrollBarBounds(bounds);
                     mRoundScrollbarRenderer.drawRoundScrollbars(
-                            canvas, (float) cache.scrollBar.getAlpha() / 255f);
+                            canvas, (float) cache.scrollBar.getAlpha() / 255f, bounds);
                     if (invalidate) {
                         invalidate();
                     }

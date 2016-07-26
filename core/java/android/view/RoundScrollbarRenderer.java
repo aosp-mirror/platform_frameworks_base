@@ -20,6 +20,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.graphics.Rect;
 
 /**
  * Helper class for drawing round scroll bars on round Wear devices.
@@ -53,7 +54,7 @@ class RoundScrollbarRenderer {
         mParent = parent;
     }
 
-    public void drawRoundScrollbars(Canvas canvas, float alpha) {
+    public void drawRoundScrollbars(Canvas canvas, float alpha, Rect bounds) {
         if (alpha == 0) {
             return;
         }
@@ -83,10 +84,11 @@ class RoundScrollbarRenderer {
 
         // Draw the track and the scroll bar.
         mRect.set(
-                0 + thumbWidth / 2,
-                0 + thumbWidth / 2,
-                mParent.getWidth() - thumbWidth / 2,
-                mParent.getHeight() - thumbWidth / 2);
+                bounds.left - thumbWidth / 2,
+                bounds.top,
+                bounds.right - thumbWidth / 2,
+                bounds.bottom);
+
         canvas.drawArc(mRect, -SCROLLBAR_ANGLE_RANGE / 2, SCROLLBAR_ANGLE_RANGE, false,
                 mTrackPaint);
         canvas.drawArc(mRect, startAngle, sweepAngle, false, mThumbPaint);
