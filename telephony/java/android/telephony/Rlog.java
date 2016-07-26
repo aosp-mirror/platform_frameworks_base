@@ -85,5 +85,13 @@ public final class Rlog {
         return Log.isLoggable(tag, level);
     }
 
+    /**
+     * Redact personally identifiable information for production users.
+     * If log tag is loggable in verbose mode, return the original string, otherwise return XXX.
+     */
+    public static String pii(String tag, Object pii) {
+        return (isLoggable(tag, Log.VERBOSE) ? String.valueOf(pii) : "XXX");
+    }
+
 }
 
