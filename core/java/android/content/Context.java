@@ -2028,6 +2028,27 @@ public abstract class Context {
     public abstract void sendBroadcastAsUser(@RequiresPermission Intent intent,
             UserHandle user, @Nullable String receiverPermission);
 
+    /**
+     * Version of {@link #sendBroadcast(Intent, String, Bundle)} that allows you to specify the
+     * user the broadcast will be sent to.  This is not available to applications
+     * that are not pre-installed on the system image.  Using it requires holding
+     * the INTERACT_ACROSS_USERS permission.
+     *
+     * @param intent The Intent to broadcast; all receivers matching this
+     *               Intent will receive the broadcast.
+     * @param user UserHandle to send the intent to.
+     * @param receiverPermission (optional) String naming a permission that
+     *               a receiver must hold in order to receive your broadcast.
+     *               If null, no permission is required.
+     * @param options (optional) Additional sending options, generated from a
+     * {@link android.app.BroadcastOptions}.
+     *
+     * @see #sendBroadcast(Intent, String, Bundle)
+     * @hide
+     */
+    @SystemApi
+    public abstract void sendBroadcastAsUser(@RequiresPermission Intent intent,
+            UserHandle user, @Nullable String receiverPermission, @Nullable Bundle options);
 
     /**
      * Version of {@link #sendBroadcast(Intent, String)} that allows you to specify the
