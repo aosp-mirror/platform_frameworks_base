@@ -57,7 +57,7 @@ PIP bằng cách bấm giữ nút <b>Home</b> trên điều khiển từ xa. N�
 khác bắt đầu phát trên màn hình chính, cửa sổ PIP sẽ tự động
 được đóng. Người dùng cũng có thể đóng cửa sổ PIP thông qua nút Recents.</p>
 
-<img src="{@docRoot}preview/images/pip-active.png" />
+<img src="{@docRoot}images/android-7.0/pip-active.png" />
 <p class="img-caption"><strong>Hình 1.</strong> Một video Ảnh trong ảnh
 được hiển thị ở góc màn hình khi người dùng duyệt nội dung
 trên màn hình chính.</p>
@@ -114,7 +114,7 @@ public void onActionClicked(Action action) {
 <p>Thêm một nút PIP vào thanh điều khiển media của bạn sẽ cho phép người dùng dễ dàng chuyển
 sang chế độ PIP khi điều khiển phát lại video.</p>
 
-<img src="{@docRoot}preview/images/pip-button.png" />
+<img src="{@docRoot}images/android-7.0/pip-button.png" />
 <p class="img-caption"><strong>Hình 1.</strong> Một nút Ảnh trong ảnh
 trên thanh điều khiển media.</p>
 
