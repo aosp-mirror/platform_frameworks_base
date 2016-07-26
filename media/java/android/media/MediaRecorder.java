@@ -746,6 +746,27 @@ public class MediaRecorder
     }
 
     /**
+     * Sets the video encoding profile for recording. Call this method before prepare().
+     * Prepare() may perform additional checks on the parameter to make sure whether the
+     * specified profile and level are applicable, and sometimes the passed profile or
+     * level will be discarded due to codec capablity or to ensure the video recording
+     * can proceed smoothly based on the capabilities of the platform.
+     * @hide
+     * @param profile declared in {@link MediaCodecInfo.CodecProfileLevel}.
+     * @param level declared in {@link MediaCodecInfo.CodecProfileLevel}.
+     */
+    public void setVideoEncodingProfileLevel(int profile, int level) {
+        if (profile <= 0)  {
+            throw new IllegalArgumentException("Video encoding profile is not positive");
+        }
+        if (level <= 0)  {
+            throw new IllegalArgumentException("Video encoding level is not positive");
+        }
+        setParameter("video-param-encoder-profile=" + profile);
+        setParameter("video-param-encoder-level=" + level);
+    }
+
+    /**
      * Currently not implemented. It does nothing.
      * @deprecated Time lapse mode video recording using camera still image capture
      * is not desirable, and will not be supported.
