@@ -1363,6 +1363,11 @@ toc:
     path_attributes:
     - name: description
       value: How to ensure that your app is secure when performing network transactions.
+  - title: Network Security Configuration
+    path: /training/articles/security-config.html
+    path_attributes:
+    - name: description
+      value: Customize the behavior of your app's secure network connections safely.
   - title: Updating Your Security Provider to Protect Against SSL Exploits
     path: /training/articles/security-gms-provider.html
     path_attributes:
