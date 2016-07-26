@@ -165,15 +165,15 @@ public class LauncherApps {
         }
 
         /**
-         * Indicates that one or more shortcuts of any kinds (dynamic, pinned, or manifest)
+         * Indicates that one or more shortcuts of any kind (dynamic, pinned, or manifest)
          * have been added, updated or removed.
          *
          * <p>Only the applications that are allowed to access the shortcut information,
          * as defined in {@link #hasShortcutHostPermission()}, will receive it.
          *
          * @param packageName The name of the package that has the shortcuts.
-         * @param shortcuts all shortcuts from the package (dynamic, manifest and/or pinned) will
-         *    be passed. Only "key" information will be provided, as defined in
+         * @param shortcuts All shortcuts from the package (dynamic, manifest and/or pinned).
+         *    Only "key" information will be provided, as defined in
          *    {@link ShortcutInfo#hasKeyFieldsOnly()}.
          * @param user The UserHandle of the profile that generated the change.
          *
@@ -224,16 +224,19 @@ public class LauncherApps {
         public static final int FLAG_GET_ALL_KINDS = FLAG_MATCH_ALL_KINDS;
 
         /**
-         * Requests "key" fields only.  See {@link ShortcutInfo#hasKeyFieldsOnly()} for which
-         * fields are available.  This allows quicker access to shortcut information in order to
-         * determine in-memory cache in the caller needs to be updated.
+         * Requests "key" fields only.  See {@link ShortcutInfo#hasKeyFieldsOnly()}'s javadoc to
+         * see which fields fields "key".
+         * This allows quicker access to shortcut information in order to
+         * determine whether the caller's in-memory cache needs to be updated.
          *
-         * <p>Typically, launcher applications cache all or most shortcuts' information
-         * in memory in order to show shortcuts without a delay.  When they want to update their
-         * cache (e.g. when their process restart), they can fetch all shortcuts' information with
-         * with this flag, then check {@link ShortcutInfo#getLastChangedTimestamp()} for each
-         * shortcut and issue a second call to fetch the non-key information of only updated
-         * shortcuts.
+         * <p>Typically, launcher applications cache all or most shortcut information
+         * in memory in order to show shortcuts without a delay.
+         *
+         * When a given launcher application wants to update its cache, such as when its process
+         * restarts, it can fetch shortcut information with this flag.
+         * The application can then check {@link ShortcutInfo#getLastChangedTimestamp()} for each
+         * shortcut, fetching a shortcut's non-key information only if that shortcut has been
+         * updated.
          *
          * @see ShortcutManager
          */
@@ -268,8 +271,9 @@ public class LauncherApps {
         }
 
         /**
-         * If non-zero, returns only shortcuts that have been added or updated since the timestamp.
-         * Units are as per {@link System#currentTimeMillis()}.
+         * If non-zero, returns only shortcuts that have been added or updated
+         * since the given timestamp, expressed in milliseconds since the Epoch&mdash;see
+         * {@link System#currentTimeMillis()}.
          */
         public ShortcutQuery setChangedSince(long changedSince) {
             mChangedSince = changedSince;
@@ -304,13 +308,15 @@ public class LauncherApps {
         }
 
         /**
-         * Set query options.  At least one of the {@code MATCH} flags should be set.  (Otherwise
-         * no shortcuts will be returned.)
+         * Set query options.  At least one of the {@code MATCH} flags should be set.  Otherwise,
+         * no shortcuts will be returned.
          *
-         * @see {@link #FLAG_MATCH_DYNAMIC}
-         * @see {@link #FLAG_MATCH_PINNED}
-         * @see {@link #FLAG_MATCH_MANIFEST}
-         * @see {@link #FLAG_GET_KEY_FIELDS_ONLY}
+         * <ul>
+         *     <li>{@link #FLAG_MATCH_DYNAMIC}
+         *     <li>{@link #FLAG_MATCH_PINNED}
+         *     <li>{@link #FLAG_MATCH_MANIFEST}
+         *     <li>{@link #FLAG_GET_KEY_FIELDS_ONLY}
+         * </ul>
          */
         public ShortcutQuery setQueryFlags(@QueryFlags int queryFlags) {
             mQueryFlags = queryFlags;
@@ -483,8 +489,8 @@ public class LauncherApps {
      * the user is trying a new launcher application.  The user may decide to change the default
      * launcher back to the calling application again, so even if a launcher application loses
      * this permission, it does <b>not</b> have to purge pinned shortcut information.
-     * Also in this situation, pinned shortcuts can still be started, even though the caller
-     * no longer has the shortcut host permission.
+     * If the calling launcher application contains pinned shortcuts, they will still work,
+     * even though the caller no longer has the shortcut host permission.
      *
      * @see ShortcutManager
      */
@@ -542,8 +548,8 @@ public class LauncherApps {
      * <p>This API is <b>NOT</b> cumulative; this will replace all pinned shortcuts for the package.
      * However, different launchers may have different set of pinned shortcuts.
      *
-     * <p>Callers must be allowed to access the shortcut information, as defined in {@link
-     * #hasShortcutHostPermission()}.
+     * <p>The calling launcher application must be allowed to access the shortcut information,
+     * as defined in {@link #hasShortcutHostPermission()}.
      *
      * @param packageName The target package name.
      * @param shortcutIds The IDs of the shortcut to be pinned.
@@ -613,8 +619,8 @@ public class LauncherApps {
     /**
      * Returns the icon for this shortcut, without any badging for the profile.
      *
-     * <p>Callers must be allowed to access the shortcut information, as defined in {@link
-     * #hasShortcutHostPermission()}.
+     * <p>The calling launcher application must be allowed to access the shortcut information,
+     * as defined in {@link #hasShortcutHostPermission()}.
      *
      * @param density The preferred density of the icon, zero for default density. Use
      * density DPI values from {@link DisplayMetrics}.
@@ -661,14 +667,14 @@ public class LauncherApps {
     /**
      * Returns the shortcut icon with badging appropriate for the profile.
      *
-     * <p>Callers must be allowed to access the shortcut information, as defined in {@link
-     * #hasShortcutHostPermission()}.
+     * <p>The calling launcher application must be allowed to access the shortcut information,
+     * as defined in {@link #hasShortcutHostPermission()}.
      *
      * @param density Optional density for the icon, or 0 to use the default density. Use
      * @return A badged icon for the shortcut.
      *
      * @see ShortcutManager
-     * @see #getShortcutBadgedIconDrawable(ShortcutInfo, int)
+     * @see #getShortcutIconDrawable(ShortcutInfo, int)
      * @see DisplayMetrics
      */
     public Drawable getShortcutBadgedIconDrawable(ShortcutInfo shortcut, int density) {
@@ -681,8 +687,8 @@ public class LauncherApps {
     /**
      * Starts a shortcut.
      *
-     * <p>Callers must be allowed to access the shortcut information, as defined in {@link
-     * #hasShortcutHostPermission()}.
+     * <p>The calling launcher application must be allowed to access the shortcut information,
+     * as defined in {@link #hasShortcutHostPermission()}.
      *
      * @param packageName The target shortcut package name.
      * @param shortcutId The target shortcut ID.
@@ -703,8 +709,8 @@ public class LauncherApps {
     /**
      * Launches a shortcut.
      *
-     * <p>Callers must be allowed to access the shortcut information, as defined in {@link
-     * #hasShortcutHostPermission()}.
+     * <p>The calling launcher application must be allowed to access the shortcut information,
+     * as defined in {@link #hasShortcutHostPermission()}.
      *
      * @param shortcut The target shortcut.
      * @param sourceBounds The Rect containing the source bounds of the clicked icon.

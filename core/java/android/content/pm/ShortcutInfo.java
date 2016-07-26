@@ -770,17 +770,21 @@ public final class ShortcutInfo implements Parcelable {
          * Sets the target activity.  A shortcut will be shown along with this activity's icon
          * on the launcher.
          *
-         * <p>This is a mandatory field when publishing a new shortcut with
-         * {@link ShortcutManager#addDynamicShortcuts(List)} or
-         * {@link ShortcutManager#setDynamicShortcuts(List)}.
-         *
+         * When selecting a target activity, keep the following in mind:
          * <ul>
-         * <li>Only "main" activities (ones with an intent filter for
-         * {@link Intent#ACTION_MAIN} and {@link Intent#CATEGORY_LAUNCHER}) can be target
+         * <li>All dynamic shortcuts must have a target activity.  When a shortcut with no target
+         * activity is published using
+         * {@link ShortcutManager#addDynamicShortcuts(List)} or
+         * {@link ShortcutManager#setDynamicShortcuts(List)},
+         * the first main activity defined in the application's <code>AndroidManifest.xml</code>
+         * file is used.
+         *
+         * <li>Only "main" activities&mdash;ones that define the {@link Intent#ACTION_MAIN}
+         * and {@link Intent#CATEGORY_LAUNCHER} intent filters&mdash;can be target
          * activities.
          *
-         * <li>By default, the first main activity defined in the application manifest will be
-         * the target.
+         * <li>By default, the first main activity defined in the application manifest is
+         * the target activity.
          *
          * <li>A target activity must belong to the publisher application.
          * </ul>
@@ -806,8 +810,8 @@ public final class ShortcutInfo implements Parcelable {
          * and will be ignored.
          *
          * <p>Only icons created with {@link Icon#createWithBitmap(Bitmap)} and
-         * {@link Icon#createWithResource} are supported.  Other types such as URI based icons
-         * are not supported.
+         * {@link Icon#createWithResource} are supported.
+         * Other types, such as URI-based icons, are not supported.
          *
          * @see LauncherApps#getShortcutIconDrawable(ShortcutInfo, int)
          * @see LauncherApps#getShortcutBadgedIconDrawable(ShortcutInfo, int)
@@ -836,9 +840,9 @@ public final class ShortcutInfo implements Parcelable {
          * {@link ShortcutManager#addDynamicShortcuts(List)} or
          * {@link ShortcutManager#setDynamicShortcuts(List)}.
          *
-         * <p>This field is intended for a concise description of a shortcut.
+         * <p>This field is intended to be a concise description of a shortcut.
          *
-         * <p>The recommended max length is 10 characters.
+         * <p>The recommended maximum length is 10 characters.
          *
          * @see ShortcutInfo#getShortLabel()
          */
@@ -866,7 +870,7 @@ public final class ShortcutInfo implements Parcelable {
          * <p>This field is intended to be more descriptive than the shortcut title.  The launcher
          * shows this instead of the short title when it has enough space.
          *
-         * <p>The recommend max length is 25 characters.
+         * <p>The recommend maximum length is 25 characters.
          *
          * @see ShortcutInfo#getLongLabel()
          */
@@ -913,7 +917,8 @@ public final class ShortcutInfo implements Parcelable {
         }
 
         /**
-         * Sets the message that should be shown when a shortcut is launched when disabled.
+         * Sets the message that should be shown when the user attempts to start a shortcut that
+         * is disabled.
          *
          * @see ShortcutInfo#getDisabledMessage()
          */
@@ -948,14 +953,12 @@ public final class ShortcutInfo implements Parcelable {
          * {@link ShortcutManager#addDynamicShortcuts(List)} or
          * {@link ShortcutManager#setDynamicShortcuts(List)}.
          *
-         * <p>A shortcut can launch any intent that the publisher application has a permission to
-         * launch -- for example, a shortcut can launch an unexported activity within the publisher
-         * application.
+         * <p>A shortcut can launch any intent that the publisher application has permission to
+         * launch.  For example, a shortcut can launch an unexported activity within the publisher
+         * application.  A shortcut intent doesn't have to point at the target activity.
          *
-         * <p>A shortcut intent doesn't have to point at the target activity.
-         *
-         * <p>{@code intent} can contain extras, but only values of the primitive types are
-         * supported so the system can persist them.
+         * <p>The given {@code intent} can contain extras, but these extras must contain values
+         * of primitive types in order for the system to persist these values.
          *
          * @see ShortcutInfo#getIntent()
          * @see #setIntents(Intent[])
@@ -1003,10 +1006,10 @@ public final class ShortcutInfo implements Parcelable {
         }
 
         /**
-         * Extras that application can set to any purposes.
+         * Extras that application can set for any purpose.
          *
-         * <p>Applications can store any meta-data of
-         * shortcuts in extras, and retrieve later from {@link ShortcutInfo#getExtras()}.
+         * <p>Applications can store arbitrary shortcut metadata in extras and retrieve the
+         * metadata later using {@link ShortcutInfo#getExtras()}.
          */
         @NonNull
         public Builder setExtras(@NonNull PersistableBundle extras) {
@@ -1026,9 +1029,9 @@ public final class ShortcutInfo implements Parcelable {
     /**
      * Returns the ID of a shortcut.
      *
-     * <p>Shortcut IDs are unique within each publisher application, and must be stable across
-     * devices to that shortcuts will still be valid when restored.  See {@link ShortcutManager}
-     * for details.
+     * <p>Shortcut IDs are unique within each publisher application and must be stable across
+     * devices so that shortcuts will still be valid when restored on a different device.
+     * See {@link ShortcutManager} for details.
      */
     @NonNull
     public String getId() {
@@ -1046,8 +1049,9 @@ public final class ShortcutInfo implements Parcelable {
     /**
      * Return the target activity.
      *
-     * <p>This has nothing to do with the activity that this shortcut will launch.  Launcher
-     * applications should show a shortcut along with the launcher icon for this activity.
+     * <p>This has nothing to do with the activity that this shortcut will launch.
+     * Launcher applications should show the launcher icon for the returned activity alongside
+     * this shortcut.
      *
      * @see Builder#setActivity
      */
@@ -1128,7 +1132,8 @@ public final class ShortcutInfo implements Parcelable {
     }
 
     /**
-     * Return the message that should be shown when a shortcut in disabled state is launched.
+     * Return the message that should be shown when the user attempts to start a shortcut
+     * that is disabled.
      *
      * @see Builder#setDisabledMessage(CharSequence)
      */
@@ -1143,7 +1148,7 @@ public final class ShortcutInfo implements Parcelable {
     }
 
     /**
-     * Return the categories.
+     * Return the shortcut's categories.
      *
      * @see Builder#setCategories(Set)
      */
@@ -1153,7 +1158,8 @@ public final class ShortcutInfo implements Parcelable {
     }
 
     /**
-     * Return the intent. If setIntents() was used, then return the last intent in the array.
+     * Returns the intent that is executed when the user selects this shortcut.
+     * If setIntents() was used, then return the last intent in the array.
      *
      * <p>Launcher applications <b>cannot</b> see the intent.  If a {@link ShortcutInfo} is
      * obtained via {@link LauncherApps}, then this method will always return null.
@@ -1283,7 +1289,7 @@ public final class ShortcutInfo implements Parcelable {
     }
 
     /**
-     * {@link UserHandle} on which the publisher created a shortcut.
+     * {@link UserHandle} on which the publisher created this shortcut.
      */
     public UserHandle getUserHandle() {
         return UserHandle.of(mUserId);
@@ -1333,7 +1339,7 @@ public final class ShortcutInfo implements Parcelable {
     }
 
     /**
-     * Return whether a shortcut is published AndroidManifest.xml or not.  If {@code true},
+     * Return whether a shortcut is published from AndroidManifest.xml or not.  If {@code true},
      * it's also {@link #isImmutable()}.
      *
      * <p>When an app is upgraded and a shortcut is no longer published from AndroidManifest.xml,
@@ -1441,11 +1447,11 @@ public final class ShortcutInfo implements Parcelable {
      *     <li>{@link #getUserHandle()}
      * </ul>
      *
-     * <p>{@link ShortcutInfo}s passed to
-     * {@link LauncherApps.Callback#onShortcutsChanged(String, List, UserHandle)}
-     * as well as returned by {@link LauncherApps#getShortcuts(ShortcutQuery, UserHandle)} with
-     * the {@link ShortcutQuery#FLAG_GET_KEY_FIELDS_ONLY} option will only have key information
-     * for performance reasons.
+     * <p>For performance reasons, shortcuts passed to
+     * {@link LauncherApps.Callback#onShortcutsChanged(String, List, UserHandle)} as well as those
+     * returned from {@link LauncherApps#getShortcuts(ShortcutQuery, UserHandle)}
+     * while using the {@link ShortcutQuery#FLAG_GET_KEY_FIELDS_ONLY} option contain only key
+     * information.
      */
     public boolean hasKeyFieldsOnly() {
         return hasFlags(FLAG_KEY_FIELDS_ONLY);
