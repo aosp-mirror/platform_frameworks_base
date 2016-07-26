@@ -301,6 +301,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /** Amount of time (in milliseconds) to wait for windows drawn before powering on. */
     static final int WAITING_FOR_DRAWN_TIMEOUT = 1000;
 
+    /** Amount of time (in milliseconds) a toast window can be shown. */
+    public static final int TOAST_WINDOW_TIMEOUT = 3500; // 3.5 seconds
+
     /**
      * Lock protecting internal state.  Must not call out into window
      * manager with lock held.  (This lock will be acquired in places
@@ -2228,6 +2231,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     attrs.flags &= ~WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
                     attrs.privateFlags &= ~WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
                 }
+                break;
+
+            case TYPE_TOAST:
+                // While apps should use the dedicated toast APIs to add such windows
+                // it possible legacy apps to add the window directly. Therefore, we
+                // make windows added directly by the app behave as a toast as much
+                // as possible in terms of timeout and animation.
+                if (attrs.hideTimeoutMilliseconds < 0
+                        || attrs.hideTimeoutMilliseconds > TOAST_WINDOW_TIMEOUT) {
+                    attrs.hideTimeoutMilliseconds = TOAST_WINDOW_TIMEOUT;
+                }
+                attrs.windowAnimations = com.android.internal.R.style.Animation_Toast;
                 break;
         }
 
