@@ -434,6 +434,12 @@ import java.util.List;
  * <h3>Launcher API</h3>
  *
  * The {@link LauncherApps} class provides APIs for launcher applications to access shortcuts.
+ *
+ *
+ * <h3>Direct Boot and Shortcuts</h3>
+ *
+ * All shortcut information is stored in credential encrypted storage, so no shortcuts can be
+ * accessed when the user is locked.
  */
 public class ShortcutManager {
     private static final String TAG = "ShortcutManager";
@@ -469,6 +475,8 @@ public class ShortcutManager {
      *
      * @throws IllegalArgumentException if {@link #getMaxShortcutCountPerActivity()} is exceeded,
      * or when trying to update immutable shortcuts.
+     *
+     * @throws IllegalStateException when the user is locked.
      */
     public boolean setDynamicShortcuts(@NonNull List<ShortcutInfo> shortcutInfoList) {
         try {
@@ -481,6 +489,8 @@ public class ShortcutManager {
 
     /**
      * Return all dynamic shortcuts from the caller application.
+     *
+     * @throws IllegalStateException when the user is locked.
      */
     @NonNull
     public List<ShortcutInfo> getDynamicShortcuts() {
@@ -494,6 +504,8 @@ public class ShortcutManager {
 
     /**
      * Return all manifest shortcuts from the caller application.
+     *
+     * @throws IllegalStateException when the user is locked.
      */
     @NonNull
     public List<ShortcutInfo> getManifestShortcuts() {
@@ -515,6 +527,8 @@ public class ShortcutManager {
      *
      * @throws IllegalArgumentException if {@link #getMaxShortcutCountPerActivity()} is exceeded,
      * or when trying to update immutable shortcuts.
+     *
+     * @throws IllegalStateException when the user is locked.
      */
     public boolean addDynamicShortcuts(@NonNull List<ShortcutInfo> shortcutInfoList) {
         try {
@@ -527,6 +541,8 @@ public class ShortcutManager {
 
     /**
      * Delete dynamic shortcuts by ID.
+     *
+     * @throws IllegalStateException when the user is locked.
      */
     public void removeDynamicShortcuts(@NonNull List<String> shortcutIds) {
         try {
@@ -539,6 +555,8 @@ public class ShortcutManager {
 
     /**
      * Delete all dynamic shortcuts from the caller application.
+     *
+     * @throws IllegalStateException when the user is locked.
      */
     public void removeAllDynamicShortcuts() {
         try {
@@ -550,6 +568,8 @@ public class ShortcutManager {
 
     /**
      * Return all pinned shortcuts from the caller application.
+     *
+     * @throws IllegalStateException when the user is locked.
      */
     @NonNull
     public List<ShortcutInfo> getPinnedShortcuts() {
@@ -570,6 +590,8 @@ public class ShortcutManager {
      * @return {@code true} if the call has succeeded. {@code false} if the call is rate-limited.
      *
      * @throws IllegalArgumentException If trying to update immutable shortcuts.
+     *
+     * @throws IllegalStateException when the user is locked.
      */
     public boolean updateShortcuts(List<ShortcutInfo> shortcutInfoList) {
         try {
@@ -585,6 +607,8 @@ public class ShortcutManager {
      * class.
      *
      * @throws IllegalArgumentException If trying to disable immutable shortcuts.
+     *
+     * @throws IllegalStateException when the user is locked.
      */
     public void disableShortcuts(@NonNull List<String> shortcutIds) {
         try {
@@ -622,6 +646,8 @@ public class ShortcutManager {
      * For more details, see the Javadoc for the {@link ShortcutManager} class.
      *
      * @throws IllegalArgumentException If trying to disable immutable shortcuts.
+     *
+     * @throws IllegalStateException when the user is locked.
      */
     public void disableShortcuts(@NonNull List<String> shortcutIds, CharSequence disabledMessage) {
         try {
@@ -638,6 +664,8 @@ public class ShortcutManager {
      * already enabled, this method does nothing.
      *
      * @throws IllegalArgumentException If trying to enable immutable shortcuts.
+     *
+     * @throws IllegalStateException when the user is locked.
      */
     public void enableShortcuts(@NonNull List<String> shortcutIds) {
         try {
@@ -704,6 +732,8 @@ public class ShortcutManager {
      * Return {@code true} when rate-limiting is active for the caller application.
      *
      * <p>See the class level javadoc for details.
+     *
+     * @throws IllegalStateException when the user is locked.
      */
     public boolean isRateLimitingActive() {
         try {
@@ -747,6 +777,8 @@ public class ShortcutManager {
      * <p>The information is accessible via {@link UsageStatsManager#queryEvents}
      * Typically, launcher applications use this information to build a prediction model
      * so that they can promote the shortcuts that are likely to be used at the moment.
+     *
+     * @throws IllegalStateException when the user is locked.
      */
     public void reportShortcutUsed(String shortcutId) {
         try {
