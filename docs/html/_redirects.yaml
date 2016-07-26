@@ -1201,3 +1201,8 @@ redirects:
   to: /studio/intro/index.html?utm_medium=android-studio
 - from: /r/studio-ui/menu-start.html
   to: /training/index.html?utm_medium=android-studio
+
+# N Preview redirects
+
+- from: /preview/features/key-attestation.html
+  to: /training/articles/security-key-attestation.html
