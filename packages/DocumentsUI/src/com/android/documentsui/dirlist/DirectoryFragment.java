@@ -664,10 +664,10 @@ public class DirectoryFragment extends Fragment
                     return true;
 
                 case R.id.menu_copy_to:
-                    transferDocuments(selection, FileOperationService.OPERATION_COPY);
                     // TODO: Only finish selection mode if copy-to is not canceled.
                     // Need to plum down into handling the way we do with deleteDocuments.
                     mode.finish();
+                    transferDocuments(selection, FileOperationService.OPERATION_COPY);
                     return true;
 
                 case R.id.menu_move_to:
