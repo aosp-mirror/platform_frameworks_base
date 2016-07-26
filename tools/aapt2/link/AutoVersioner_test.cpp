@@ -51,20 +51,20 @@ TEST(AutoVersionerTest, GenerateVersionedResourceWhenHigherVersionExists) {
 TEST(AutoVersionerTest, VersionStylesForTable) {
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
             .setPackageId("app", 0x7f)
-            .addValue("@app:style/Foo", test::parseConfigOrDie("v4"), ResourceId(0x7f020000),
+            .addValue("app:style/Foo", test::parseConfigOrDie("v4"), ResourceId(0x7f020000),
                       test::StyleBuilder()
-                            .addItem("@android:attr/onClick", ResourceId(0x0101026f),
+                            .addItem("android:attr/onClick", ResourceId(0x0101026f),
                                      util::make_unique<Id>())
-                            .addItem("@android:attr/paddingStart", ResourceId(0x010103b3),
+                            .addItem("android:attr/paddingStart", ResourceId(0x010103b3),
                                      util::make_unique<Id>())
-                            .addItem("@android:attr/requiresSmallestWidthDp",
+                            .addItem("android:attr/requiresSmallestWidthDp",
                                      ResourceId(0x01010364), util::make_unique<Id>())
-                            .addItem("@android:attr/colorAccent", ResourceId(0x01010435),
+                            .addItem("android:attr/colorAccent", ResourceId(0x01010435),
                                      util::make_unique<Id>())
                             .build())
-            .addValue("@app:style/Foo", test::parseConfigOrDie("v21"), ResourceId(0x7f020000),
+            .addValue("app:style/Foo", test::parseConfigOrDie("v21"), ResourceId(0x7f020000),
                       test::StyleBuilder()
-                            .addItem("@android:attr/paddingEnd", ResourceId(0x010103b4),
+                            .addItem("android:attr/paddingEnd", ResourceId(0x010103b4),
                                      util::make_unique<Id>())
                             .build())
             .build();
@@ -77,46 +77,46 @@ TEST(AutoVersionerTest, VersionStylesForTable) {
     AutoVersioner versioner;
     ASSERT_TRUE(versioner.consume(context.get(), table.get()));
 
-    Style* style = test::getValueForConfig<Style>(table.get(), "@app:style/Foo",
+    Style* style = test::getValueForConfig<Style>(table.get(), "app:style/Foo",
                                                   test::parseConfigOrDie("v4"));
     ASSERT_NE(style, nullptr);
     ASSERT_EQ(style->entries.size(), 1u);
     AAPT_ASSERT_TRUE(style->entries.front().key.name);
     EXPECT_EQ(style->entries.front().key.name.value(),
-              test::parseNameOrDie("@android:attr/onClick"));
+              test::parseNameOrDie("android:attr/onClick"));
 
-    style = test::getValueForConfig<Style>(table.get(), "@app:style/Foo",
+    style = test::getValueForConfig<Style>(table.get(), "app:style/Foo",
                                            test::parseConfigOrDie("v13"));
     ASSERT_NE(style, nullptr);
     ASSERT_EQ(style->entries.size(), 2u);
     AAPT_ASSERT_TRUE(style->entries[0].key.name);
     EXPECT_EQ(style->entries[0].key.name.value(),
-              test::parseNameOrDie("@android:attr/onClick"));
+              test::parseNameOrDie("android:attr/onClick"));
     AAPT_ASSERT_TRUE(style->entries[1].key.name);
     EXPECT_EQ(style->entries[1].key.name.value(),
-                  test::parseNameOrDie("@android:attr/requiresSmallestWidthDp"));
+                  test::parseNameOrDie("android:attr/requiresSmallestWidthDp"));
 
-    style = test::getValueForConfig<Style>(table.get(), "@app:style/Foo",
+    style = test::getValueForConfig<Style>(table.get(), "app:style/Foo",
                                            test::parseConfigOrDie("v17"));
     ASSERT_NE(style, nullptr);
     ASSERT_EQ(style->entries.size(), 3u);
     AAPT_ASSERT_TRUE(style->entries[0].key.name);
     EXPECT_EQ(style->entries[0].key.name.value(),
-                  test::parseNameOrDie("@android:attr/onClick"));
+                  test::parseNameOrDie("android:attr/onClick"));
     AAPT_ASSERT_TRUE(style->entries[1].key.name);
     EXPECT_EQ(style->entries[1].key.name.value(),
-                  test::parseNameOrDie("@android:attr/requiresSmallestWidthDp"));
+                  test::parseNameOrDie("android:attr/requiresSmallestWidthDp"));
     AAPT_ASSERT_TRUE(style->entries[2].key.name);
     EXPECT_EQ(style->entries[2].key.name.value(),
-                  test::parseNameOrDie("@android:attr/paddingStart"));
+                  test::parseNameOrDie("android:attr/paddingStart"));
 
-    style = test::getValueForConfig<Style>(table.get(), "@app:style/Foo",
+    style = test::getValueForConfig<Style>(table.get(), "app:style/Foo",
                                            test::parseConfigOrDie("v21"));
     ASSERT_NE(style, nullptr);
     ASSERT_EQ(style->entries.size(), 1u);
     AAPT_ASSERT_TRUE(style->entries.front().key.name);
     EXPECT_EQ(style->entries.front().key.name.value(),
-              test::parseNameOrDie("@android:attr/paddingEnd"));
+              test::parseNameOrDie("android:attr/paddingEnd"));
 }
 
 } // namespace aapt

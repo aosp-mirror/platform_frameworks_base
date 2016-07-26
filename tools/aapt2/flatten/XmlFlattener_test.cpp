@@ -31,12 +31,12 @@ public:
                 .setCompilationPackage("com.app.test")
                 .setNameManglerPolicy(NameManglerPolicy{ "com.app.test" })
                 .addSymbolSource(test::StaticSymbolSourceBuilder()
-                        .addSymbol("@android:attr/id", ResourceId(0x010100d0),
+                        .addSymbol("android:attr/id", ResourceId(0x010100d0),
                                    test::AttributeBuilder().build())
-                        .addSymbol("@com.app.test:id/id", ResourceId(0x7f020000))
-                        .addSymbol("@android:attr/paddingStart", ResourceId(0x010103b3),
+                        .addSymbol("com.app.test:id/id", ResourceId(0x7f020000))
+                        .addSymbol("android:attr/paddingStart", ResourceId(0x010103b3),
                                    test::AttributeBuilder().build())
-                        .addSymbol("@android:attr/colorAccent", ResourceId(0x01010435),
+                        .addSymbol("android:attr/colorAccent", ResourceId(0x01010435),
                                    test::AttributeBuilder().build())
                         .build())
                 .build();

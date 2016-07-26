@@ -68,7 +68,7 @@ TEST_F(ResourceParserTest, ParseQuotedString) {
     std::string input = "<string name=\"foo\">   \"  hey there \" </string>";
     ASSERT_TRUE(testParse(input));
 
-    String* str = test::getValue<String>(&mTable, "@string/foo");
+    String* str = test::getValue<String>(&mTable, "string/foo");
     ASSERT_NE(nullptr, str);
     EXPECT_EQ(std::string("  hey there "), *str->value);
 }
@@ -77,7 +77,7 @@ TEST_F(ResourceParserTest, ParseEscapedString) {
     std::string input = "<string name=\"foo\">\\?123</string>";
     ASSERT_TRUE(testParse(input));
 
-    String* str = test::getValue<String>(&mTable, "@string/foo");
+    String* str = test::getValue<String>(&mTable, "string/foo");
     ASSERT_NE(nullptr, str);
     EXPECT_EQ(std::string("?123"), *str->value);
 }
@@ -96,7 +96,7 @@ TEST_F(ResourceParserTest, IgnoreXliffTags) {
                         "  There are <xliff:g id=\"count\">%1$d</xliff:g> apples</string>";
     ASSERT_TRUE(testParse(input));
 
-    String* str = test::getValue<String>(&mTable, "@string/foo");
+    String* str = test::getValue<String>(&mTable, "string/foo");
     ASSERT_NE(nullptr, str);
     EXPECT_EQ(StringPiece("There are %1$d apples"), StringPiece(*str->value));
 }
@@ -109,7 +109,7 @@ TEST_F(ResourceParserTest, ParseNull) {
     // a non-existing value, and this causes problems in styles when trying to resolve
     // an attribute. Null values must be encoded as android::Res_value::TYPE_REFERENCE
     // with a data value of 0.
-    BinaryPrimitive* integer = test::getValue<BinaryPrimitive>(&mTable, "@integer/foo");
+    BinaryPrimitive* integer = test::getValue<BinaryPrimitive>(&mTable, "integer/foo");
     ASSERT_NE(nullptr, integer);
     EXPECT_EQ(uint16_t(android::Res_value::TYPE_REFERENCE), integer->value.dataType);
     EXPECT_EQ(0u, integer->value.data);
@@ -119,7 +119,7 @@ TEST_F(ResourceParserTest, ParseEmpty) {
     std::string input = "<integer name=\"foo\">@empty</integer>";
     ASSERT_TRUE(testParse(input));
 
-    BinaryPrimitive* integer = test::getValue<BinaryPrimitive>(&mTable, "@integer/foo");
+    BinaryPrimitive* integer = test::getValue<BinaryPrimitive>(&mTable, "integer/foo");
     ASSERT_NE(nullptr, integer);
     EXPECT_EQ(uint16_t(android::Res_value::TYPE_NULL), integer->value.dataType);
     EXPECT_EQ(uint32_t(android::Res_value::DATA_NULL_EMPTY), integer->value.data);
@@ -130,11 +130,11 @@ TEST_F(ResourceParserTest, ParseAttr) {
                         "<attr name=\"bar\"/>";
     ASSERT_TRUE(testParse(input));
 
-    Attribute* attr = test::getValue<Attribute>(&mTable, "@attr/foo");
+    Attribute* attr = test::getValue<Attribute>(&mTable, "attr/foo");
     ASSERT_NE(nullptr, attr);
     EXPECT_EQ(uint32_t(android::ResTable_map::TYPE_STRING), attr->typeMask);
 
-    attr = test::getValue<Attribute>(&mTable, "@attr/bar");
+    attr = test::getValue<Attribute>(&mTable, "attr/bar");
     ASSERT_NE(nullptr, attr);
     EXPECT_EQ(uint32_t(android::ResTable_map::TYPE_ANY), attr->typeMask);
 }
@@ -150,20 +150,20 @@ TEST_F(ResourceParserTest, ParseAttrAndDeclareStyleableUnderConfigButRecordAsNoC
         </declare-styleable>)EOF";
     ASSERT_TRUE(testParse(input, watchConfig));
 
-    EXPECT_EQ(nullptr, test::getValueForConfig<Attribute>(&mTable, "@attr/foo", watchConfig));
-    EXPECT_EQ(nullptr, test::getValueForConfig<Attribute>(&mTable, "@attr/baz", watchConfig));
-    EXPECT_EQ(nullptr, test::getValueForConfig<Styleable>(&mTable, "@styleable/bar", watchConfig));
+    EXPECT_EQ(nullptr, test::getValueForConfig<Attribute>(&mTable, "attr/foo", watchConfig));
+    EXPECT_EQ(nullptr, test::getValueForConfig<Attribute>(&mTable, "attr/baz", watchConfig));
+    EXPECT_EQ(nullptr, test::getValueForConfig<Styleable>(&mTable, "styleable/bar", watchConfig));
 
-    EXPECT_NE(nullptr, test::getValue<Attribute>(&mTable, "@attr/foo"));
-    EXPECT_NE(nullptr, test::getValue<Attribute>(&mTable, "@attr/baz"));
-    EXPECT_NE(nullptr, test::getValue<Styleable>(&mTable, "@styleable/bar"));
+    EXPECT_NE(nullptr, test::getValue<Attribute>(&mTable, "attr/foo"));
+    EXPECT_NE(nullptr, test::getValue<Attribute>(&mTable, "attr/baz"));
+    EXPECT_NE(nullptr, test::getValue<Styleable>(&mTable, "styleable/bar"));
 }
 
 TEST_F(ResourceParserTest, ParseAttrWithMinMax) {
     std::string input = "<attr name=\"foo\" min=\"10\" max=\"23\" format=\"integer\"/>";
     ASSERT_TRUE(testParse(input));
 
-    Attribute* attr = test::getValue<Attribute>(&mTable, "@attr/foo");
+    Attribute* attr = test::getValue<Attribute>(&mTable, "attr/foo");
     ASSERT_NE(nullptr, attr);
     EXPECT_EQ(uint32_t(android::ResTable_map::TYPE_INTEGER), attr->typeMask);
     EXPECT_EQ(10, attr->minInt);
@@ -182,7 +182,7 @@ TEST_F(ResourceParserTest, ParseUseAndDeclOfAttr) {
                         "<attr name=\"foo\" format=\"string\"/>";
     ASSERT_TRUE(testParse(input));
 
-    Attribute* attr = test::getValue<Attribute>(&mTable, "@attr/foo");
+    Attribute* attr = test::getValue<Attribute>(&mTable, "attr/foo");
     ASSERT_NE(nullptr, attr);
     EXPECT_EQ(uint32_t(android::ResTable_map::TYPE_STRING), attr->typeMask);
 }
@@ -196,7 +196,7 @@ TEST_F(ResourceParserTest, ParseDoubleUseOfAttr) {
                         "</declare-styleable>";
     ASSERT_TRUE(testParse(input));
 
-    Attribute* attr = test::getValue<Attribute>(&mTable, "@attr/foo");
+    Attribute* attr = test::getValue<Attribute>(&mTable, "attr/foo");
     ASSERT_NE(nullptr, attr);
     EXPECT_EQ(uint32_t(android::ResTable_map::TYPE_BOOLEAN), attr->typeMask);
 }
@@ -209,7 +209,7 @@ TEST_F(ResourceParserTest, ParseEnumAttr) {
                         "</attr>";
     ASSERT_TRUE(testParse(input));
 
-    Attribute* enumAttr = test::getValue<Attribute>(&mTable, "@attr/foo");
+    Attribute* enumAttr = test::getValue<Attribute>(&mTable, "attr/foo");
     ASSERT_NE(enumAttr, nullptr);
     EXPECT_EQ(enumAttr->typeMask, android::ResTable_map::TYPE_ENUM);
     ASSERT_EQ(enumAttr->symbols.size(), 3u);
@@ -235,7 +235,7 @@ TEST_F(ResourceParserTest, ParseFlagAttr) {
                         "</attr>";
     ASSERT_TRUE(testParse(input));
 
-    Attribute* flagAttr = test::getValue<Attribute>(&mTable, "@attr/foo");
+    Attribute* flagAttr = test::getValue<Attribute>(&mTable, "attr/foo");
     ASSERT_NE(nullptr, flagAttr);
     EXPECT_EQ(flagAttr->typeMask, android::ResTable_map::TYPE_FLAGS);
     ASSERT_EQ(flagAttr->symbols.size(), 3u);
@@ -275,32 +275,32 @@ TEST_F(ResourceParserTest, ParseStyle) {
                         "</style>";
     ASSERT_TRUE(testParse(input));
 
-    Style* style = test::getValue<Style>(&mTable, "@style/foo");
+    Style* style = test::getValue<Style>(&mTable, "style/foo");
     ASSERT_NE(nullptr, style);
     AAPT_ASSERT_TRUE(style->parent);
     AAPT_ASSERT_TRUE(style->parent.value().name);
-    EXPECT_EQ(test::parseNameOrDie("@style/fu"), style->parent.value().name.value());
+    EXPECT_EQ(test::parseNameOrDie("style/fu"), style->parent.value().name.value());
     ASSERT_EQ(3u, style->entries.size());
 
     AAPT_ASSERT_TRUE(style->entries[0].key.name);
-    EXPECT_EQ(test::parseNameOrDie("@attr/bar"), style->entries[0].key.name.value());
+    EXPECT_EQ(test::parseNameOrDie("attr/bar"), style->entries[0].key.name.value());
 
     AAPT_ASSERT_TRUE(style->entries[1].key.name);
-    EXPECT_EQ(test::parseNameOrDie("@attr/bat"), style->entries[1].key.name.value());
+    EXPECT_EQ(test::parseNameOrDie("attr/bat"), style->entries[1].key.name.value());
 
     AAPT_ASSERT_TRUE(style->entries[2].key.name);
-    EXPECT_EQ(test::parseNameOrDie("@attr/baz"), style->entries[2].key.name.value());
+    EXPECT_EQ(test::parseNameOrDie("attr/baz"), style->entries[2].key.name.value());
 }
 
 TEST_F(ResourceParserTest, ParseStyleWithShorthandParent) {
     std::string input = "<style name=\"foo\" parent=\"com.app:Theme\"/>";
     ASSERT_TRUE(testParse(input));
 
-    Style* style = test::getValue<Style>(&mTable, "@style/foo");
+    Style* style = test::getValue<Style>(&mTable, "style/foo");
     ASSERT_NE(nullptr, style);
     AAPT_ASSERT_TRUE(style->parent);
     AAPT_ASSERT_TRUE(style->parent.value().name);
-    EXPECT_EQ(test::parseNameOrDie("@com.app:style/Theme"), style->parent.value().name.value());
+    EXPECT_EQ(test::parseNameOrDie("com.app:style/Theme"), style->parent.value().name.value());
 }
 
 TEST_F(ResourceParserTest, ParseStyleWithPackageAliasedParent) {
@@ -308,11 +308,11 @@ TEST_F(ResourceParserTest, ParseStyleWithPackageAliasedParent) {
                         "       name=\"foo\" parent=\"app:Theme\"/>";
     ASSERT_TRUE(testParse(input));
 
-    Style* style = test::getValue<Style>(&mTable, "@style/foo");
+    Style* style = test::getValue<Style>(&mTable, "style/foo");
     ASSERT_NE(nullptr, style);
     AAPT_ASSERT_TRUE(style->parent);
     AAPT_ASSERT_TRUE(style->parent.value().name);
-    EXPECT_EQ(test::parseNameOrDie("@android:style/Theme"), style->parent.value().name.value());
+    EXPECT_EQ(test::parseNameOrDie("android:style/Theme"), style->parent.value().name.value());
 }
 
 TEST_F(ResourceParserTest, ParseStyleWithPackageAliasedItems) {
@@ -322,21 +322,21 @@ TEST_F(ResourceParserTest, ParseStyleWithPackageAliasedItems) {
             "</style>";
     ASSERT_TRUE(testParse(input));
 
-    Style* style = test::getValue<Style>(&mTable, "@style/foo");
+    Style* style = test::getValue<Style>(&mTable, "style/foo");
     ASSERT_NE(nullptr, style);
     ASSERT_EQ(1u, style->entries.size());
-    EXPECT_EQ(test::parseNameOrDie("@android:attr/bar"), style->entries[0].key.name.value());
+    EXPECT_EQ(test::parseNameOrDie("android:attr/bar"), style->entries[0].key.name.value());
 }
 
 TEST_F(ResourceParserTest, ParseStyleWithInferredParent) {
     std::string input = "<style name=\"foo.bar\"/>";
     ASSERT_TRUE(testParse(input));
 
-    Style* style = test::getValue<Style>(&mTable, "@style/foo.bar");
+    Style* style = test::getValue<Style>(&mTable, "style/foo.bar");
     ASSERT_NE(nullptr, style);
     AAPT_ASSERT_TRUE(style->parent);
     AAPT_ASSERT_TRUE(style->parent.value().name);
-    EXPECT_EQ(style->parent.value().name.value(), test::parseNameOrDie("@style/foo"));
+    EXPECT_EQ(style->parent.value().name.value(), test::parseNameOrDie("style/foo"));
     EXPECT_TRUE(style->parentInferred);
 }
 
@@ -344,7 +344,7 @@ TEST_F(ResourceParserTest, ParseStyleWithInferredParentOverridenByEmptyParentAtt
     std::string input = "<style name=\"foo.bar\" parent=\"\"/>";
     ASSERT_TRUE(testParse(input));
 
-    Style* style = test::getValue<Style>(&mTable, "@style/foo.bar");
+    Style* style = test::getValue<Style>(&mTable, "style/foo.bar");
     ASSERT_NE(nullptr, style);
     AAPT_EXPECT_FALSE(style->parent);
     EXPECT_FALSE(style->parentInferred);
@@ -354,7 +354,7 @@ TEST_F(ResourceParserTest, ParseStyleWithPrivateParentReference) {
     std::string input = R"EOF(<style name="foo" parent="*android:style/bar" />)EOF";
     ASSERT_TRUE(testParse(input));
 
-    Style* style = test::getValue<Style>(&mTable, "@style/foo");
+    Style* style = test::getValue<Style>(&mTable, "style/foo");
     ASSERT_NE(nullptr, style);
     AAPT_ASSERT_TRUE(style->parent);
     EXPECT_TRUE(style->parent.value().privateReference);
@@ -364,7 +364,7 @@ TEST_F(ResourceParserTest, ParseAutoGeneratedIdReference) {
     std::string input = "<string name=\"foo\">@+id/bar</string>";
     ASSERT_TRUE(testParse(input));
 
-    Id* id = test::getValue<Id>(&mTable, "@id/bar");
+    Id* id = test::getValue<Id>(&mTable, "id/bar");
     ASSERT_NE(id, nullptr);
 }
 
@@ -379,31 +379,31 @@ TEST_F(ResourceParserTest, ParseAttributesDeclareStyleable) {
     ASSERT_TRUE(testParse(input));
 
     Maybe<ResourceTable::SearchResult> result =
-            mTable.findResource(test::parseNameOrDie("@styleable/foo"));
+            mTable.findResource(test::parseNameOrDie("styleable/foo"));
     AAPT_ASSERT_TRUE(result);
     EXPECT_EQ(SymbolState::kPublic, result.value().entry->symbolStatus.state);
 
-    Attribute* attr = test::getValue<Attribute>(&mTable, "@attr/bar");
+    Attribute* attr = test::getValue<Attribute>(&mTable, "attr/bar");
     ASSERT_NE(attr, nullptr);
     EXPECT_TRUE(attr->isWeak());
 
-    attr = test::getValue<Attribute>(&mTable, "@attr/bat");
+    attr = test::getValue<Attribute>(&mTable, "attr/bat");
     ASSERT_NE(attr, nullptr);
     EXPECT_TRUE(attr->isWeak());
 
-    attr = test::getValue<Attribute>(&mTable, "@attr/baz");
+    attr = test::getValue<Attribute>(&mTable, "attr/baz");
     ASSERT_NE(attr, nullptr);
     EXPECT_TRUE(attr->isWeak());
     EXPECT_EQ(1u, attr->symbols.size());
 
-    EXPECT_NE(nullptr, test::getValue<Id>(&mTable, "@id/foo"));
+    EXPECT_NE(nullptr, test::getValue<Id>(&mTable, "id/foo"));
 
-    Styleable* styleable = test::getValue<Styleable>(&mTable, "@styleable/foo");
+    Styleable* styleable = test::getValue<Styleable>(&mTable, "styleable/foo");
     ASSERT_NE(styleable, nullptr);
     ASSERT_EQ(3u, styleable->entries.size());
 
-    EXPECT_EQ(test::parseNameOrDie("@attr/bar"), styleable->entries[0].name.value());
-    EXPECT_EQ(test::parseNameOrDie("@attr/bat"), styleable->entries[1].name.value());
+    EXPECT_EQ(test::parseNameOrDie("attr/bar"), styleable->entries[0].name.value());
+    EXPECT_EQ(test::parseNameOrDie("attr/bat"), styleable->entries[1].name.value());
 }
 
 TEST_F(ResourceParserTest, ParsePrivateAttributesDeclareStyleable) {
@@ -412,7 +412,7 @@ TEST_F(ResourceParserTest, ParsePrivateAttributesDeclareStyleable) {
                         "  <attr name=\"privAndroid:bat\" />\n"
                         "</declare-styleable>";
     ASSERT_TRUE(testParse(input));
-    Styleable* styleable = test::getValue<Styleable>(&mTable, "@styleable/foo");
+    Styleable* styleable = test::getValue<Styleable>(&mTable, "styleable/foo");
     ASSERT_NE(nullptr, styleable);
     ASSERT_EQ(2u, styleable->entries.size());
 
@@ -433,7 +433,7 @@ TEST_F(ResourceParserTest, ParseArray) {
                         "</array>";
     ASSERT_TRUE(testParse(input));
 
-    Array* array = test::getValue<Array>(&mTable, "@array/foo");
+    Array* array = test::getValue<Array>(&mTable, "array/foo");
     ASSERT_NE(array, nullptr);
     ASSERT_EQ(3u, array->items.size());
 
@@ -447,7 +447,7 @@ TEST_F(ResourceParserTest, ParseStringArray) {
                         "  <item>\"Werk\"</item>\n"
                         "</string-array>\n";
     ASSERT_TRUE(testParse(input));
-    EXPECT_NE(nullptr, test::getValue<Array>(&mTable, "@array/foo"));
+    EXPECT_NE(nullptr, test::getValue<Array>(&mTable, "array/foo"));
 }
 
 TEST_F(ResourceParserTest, ParsePlural) {
@@ -463,7 +463,7 @@ TEST_F(ResourceParserTest, ParseCommentsWithResource) {
                         "<string name=\"foo\">Hi</string>";
     ASSERT_TRUE(testParse(input));
 
-    String* value = test::getValue<String>(&mTable, "@string/foo");
+    String* value = test::getValue<String>(&mTable, "string/foo");
     ASSERT_NE(nullptr, value);
     EXPECT_EQ(value->getComment(), "This is a comment");
 }
@@ -475,7 +475,7 @@ TEST_F(ResourceParserTest, DoNotCombineMultipleComments) {
 
     ASSERT_TRUE(testParse(input));
 
-    String* value = test::getValue<String>(&mTable, "@string/foo");
+    String* value = test::getValue<String>(&mTable, "string/foo");
     ASSERT_NE(nullptr, value);
     EXPECT_EQ(value->getComment(), "Two");
 }
@@ -489,7 +489,7 @@ TEST_F(ResourceParserTest, IgnoreCommentBeforeEndTag) {
 
     ASSERT_TRUE(testParse(input));
 
-    String* value = test::getValue<String>(&mTable, "@string/foo");
+    String* value = test::getValue<String>(&mTable, "string/foo");
     ASSERT_NE(nullptr, value);
     EXPECT_EQ(value->getComment(), "One");
 }
@@ -509,13 +509,13 @@ TEST_F(ResourceParserTest, ParseNestedComments) {
         </attr>)EOF";
     ASSERT_TRUE(testParse(input));
 
-    Styleable* styleable = test::getValue<Styleable>(&mTable, "@styleable/foo");
+    Styleable* styleable = test::getValue<Styleable>(&mTable, "styleable/foo");
     ASSERT_NE(nullptr, styleable);
     ASSERT_EQ(1u, styleable->entries.size());
 
     EXPECT_EQ(StringPiece("The name of the bar"), styleable->entries.front().getComment());
 
-    Attribute* attr = test::getValue<Attribute>(&mTable, "@attr/foo");
+    Attribute* attr = test::getValue<Attribute>(&mTable, "attr/foo");
     ASSERT_NE(nullptr, attr);
     ASSERT_EQ(1u, attr->symbols.size());
 
@@ -530,7 +530,7 @@ TEST_F(ResourceParserTest, ParsePublicIdAsDefinition) {
     std::string input = "<public type=\"id\" name=\"foo\"/>";
     ASSERT_TRUE(testParse(input));
 
-    Id* id = test::getValue<Id>(&mTable, "@id/foo");
+    Id* id = test::getValue<Id>(&mTable, "id/foo");
     ASSERT_NE(nullptr, id);
 }
 
@@ -545,22 +545,22 @@ TEST_F(ResourceParserTest, KeepAllProducts) {
     )EOF";
     ASSERT_TRUE(testParse(input));
 
-    EXPECT_NE(nullptr, test::getValueForConfigAndProduct<String>(&mTable, "@string/foo",
+    EXPECT_NE(nullptr, test::getValueForConfigAndProduct<String>(&mTable, "string/foo",
                                                                  ConfigDescription::defaultConfig(),
                                                                  "phone"));
-    EXPECT_NE(nullptr, test::getValueForConfigAndProduct<String>(&mTable, "@string/foo",
+    EXPECT_NE(nullptr, test::getValueForConfigAndProduct<String>(&mTable, "string/foo",
                                                                  ConfigDescription::defaultConfig(),
                                                                  "no-sdcard"));
-    EXPECT_NE(nullptr, test::getValueForConfigAndProduct<String>(&mTable, "@string/bar",
+    EXPECT_NE(nullptr, test::getValueForConfigAndProduct<String>(&mTable, "string/bar",
                                                                  ConfigDescription::defaultConfig(),
                                                                  ""));
-    EXPECT_NE(nullptr, test::getValueForConfigAndProduct<String>(&mTable, "@string/baz",
+    EXPECT_NE(nullptr, test::getValueForConfigAndProduct<String>(&mTable, "string/baz",
                                                                  ConfigDescription::defaultConfig(),
                                                                  ""));
-    EXPECT_NE(nullptr, test::getValueForConfigAndProduct<String>(&mTable, "@string/bit",
+    EXPECT_NE(nullptr, test::getValueForConfigAndProduct<String>(&mTable, "string/bit",
                                                                  ConfigDescription::defaultConfig(),
                                                                  "phablet"));
-    EXPECT_NE(nullptr, test::getValueForConfigAndProduct<String>(&mTable, "@string/bot",
+    EXPECT_NE(nullptr, test::getValueForConfigAndProduct<String>(&mTable, "string/bot",
                                                                  ConfigDescription::defaultConfig(),
                                                                  "default"));
 }
@@ -574,7 +574,7 @@ TEST_F(ResourceParserTest, AutoIncrementIdsInPublicGroup) {
     ASSERT_TRUE(testParse(input));
 
     Maybe<ResourceTable::SearchResult> result = mTable.findResource(
-            test::parseNameOrDie("@attr/foo"));
+            test::parseNameOrDie("attr/foo"));
     AAPT_ASSERT_TRUE(result);
 
     AAPT_ASSERT_TRUE(result.value().package->id);
@@ -585,7 +585,7 @@ TEST_F(ResourceParserTest, AutoIncrementIdsInPublicGroup) {
                         result.value().entry->id.value());
     EXPECT_EQ(ResourceId(0x01010040), actualId);
 
-    result = mTable.findResource(test::parseNameOrDie("@attr/bar"));
+    result = mTable.findResource(test::parseNameOrDie("attr/bar"));
     AAPT_ASSERT_TRUE(result);
 
     AAPT_ASSERT_TRUE(result.value().package->id);
@@ -610,7 +610,7 @@ TEST_F(ResourceParserTest, AddResourcesElementShouldAddEntryWithUndefinedSymbol)
     ASSERT_TRUE(testParse(input));
 
     Maybe<ResourceTable::SearchResult> result = mTable.findResource(
-            test::parseNameOrDie("@string/bar"));
+            test::parseNameOrDie("string/bar"));
     AAPT_ASSERT_TRUE(result);
     const ResourceEntry* entry = result.value().entry;
     ASSERT_NE(nullptr, entry);
@@ -621,7 +621,7 @@ TEST_F(ResourceParserTest, ParseItemElementWithFormat) {
     std::string input = R"EOF(<item name="foo" type="integer" format="float">0.3</item>)EOF";
     ASSERT_TRUE(testParse(input));
 
-    BinaryPrimitive* val = test::getValue<BinaryPrimitive>(&mTable, "@integer/foo");
+    BinaryPrimitive* val = test::getValue<BinaryPrimitive>(&mTable, "integer/foo");
     ASSERT_NE(nullptr, val);
 
     EXPECT_EQ(uint32_t(android::Res_value::TYPE_FLOAT), val->value.dataType);

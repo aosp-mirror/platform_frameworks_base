@@ -23,12 +23,12 @@ TEST(PrivateAttributeMoverTest, MovePrivateAttributes) {
     std::unique_ptr<IAaptContext> context = test::ContextBuilder().build();
 
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
-            .addSimple("@android:attr/publicA")
-            .addSimple("@android:attr/privateA")
-            .addSimple("@android:attr/publicB")
-            .addSimple("@android:attr/privateB")
-            .setSymbolState("@android:attr/publicA", ResourceId(0x01010000), SymbolState::kPublic)
-            .setSymbolState("@android:attr/publicB", ResourceId(0x01010000), SymbolState::kPublic)
+            .addSimple("android:attr/publicA")
+            .addSimple("android:attr/privateA")
+            .addSimple("android:attr/publicB")
+            .addSimple("android:attr/privateB")
+            .setSymbolState("android:attr/publicA", ResourceId(0x01010000), SymbolState::kPublic)
+            .setSymbolState("android:attr/publicB", ResourceId(0x01010000), SymbolState::kPublic)
             .build();
 
     PrivateAttributeMover mover;
@@ -54,8 +54,8 @@ TEST(PrivateAttributeMoverTest, LeavePrivateAttributesWhenNoPublicAttributesDefi
     std::unique_ptr<IAaptContext> context = test::ContextBuilder().build();
 
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
-            .addSimple("@android:attr/privateA")
-            .addSimple("@android:attr/privateB")
+            .addSimple("android:attr/privateA")
+            .addSimple("android:attr/privateB")
             .build();
 
     PrivateAttributeMover mover;
