@@ -973,6 +973,7 @@ public class VolumeDialog implements TunerService.Tunable {
                 mDialog.dismiss();
                 mZenFooter.cleanup();
                 initDialog();
+                mDensity = density;
             }
             updateWindowWidthH();
             mSpTexts.update();
