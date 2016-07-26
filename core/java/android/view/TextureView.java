@@ -355,17 +355,6 @@ public class TextureView extends View {
         }
     }
 
-    /**
-     * @hide
-     */
-    @Override
-    protected void destroyHardwareResources() {
-        super.destroyHardwareResources();
-        destroySurface();
-        invalidateParentCaches();
-        invalidate(true);
-    }
-
     HardwareLayer getHardwareLayer() {
         if (mLayer == null) {
             if (mAttachInfo == null || mAttachInfo.mThreadedRenderer == null) {
