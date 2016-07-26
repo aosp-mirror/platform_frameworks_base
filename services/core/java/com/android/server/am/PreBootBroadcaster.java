@@ -21,6 +21,7 @@ import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import android.app.AppOpsManager;
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.IIntentReceiver;
@@ -50,6 +51,7 @@ public abstract class PreBootBroadcaster extends IIntentReceiver.Stub {
     private final ActivityManagerService mService;
     private final int mUserId;
     private final ProgressReporter mProgress;
+    private final boolean mQuiet;
 
     private final Intent mIntent;
     private final List<ResolveInfo> mTargets;
@@ -61,16 +63,13 @@ public abstract class PreBootBroadcaster extends IIntentReceiver.Stub {
         mService = service;
         mUserId = userId;
         mProgress = progress;
+        mQuiet = quiet;
 
         mIntent = new Intent(Intent.ACTION_PRE_BOOT_COMPLETED);
         mIntent.addFlags(Intent.FLAG_RECEIVER_BOOT_UPGRADE | Intent.FLAG_DEBUG_TRIAGED_MISSING);
 
         mTargets = mService.mContext.getPackageManager().queryBroadcastReceiversAsUser(mIntent,
                 MATCH_SYSTEM_ONLY, UserHandle.of(userId));
-
-        if (!quiet) {
-            mHandler.obtainMessage(MSG_SHOW).sendToTarget();
-        }
     }
 
     public void sendNext() {
@@ -85,6 +84,10 @@ public abstract class PreBootBroadcaster extends IIntentReceiver.Stub {
             mHandler.obtainMessage(MSG_HIDE).sendToTarget();
             onFinished();
             return;
+        }
+
+        if (!mQuiet) {
+            mHandler.obtainMessage(MSG_SHOW, mTargets.size(), mIndex).sendToTarget();
         }
 
         final ResolveInfo ri = mTargets.get(mIndex++);
@@ -121,13 +124,26 @@ public abstract class PreBootBroadcaster extends IIntentReceiver.Stub {
             final Context context = mService.mContext;
             final NotificationManager notifManager = context
                     .getSystemService(NotificationManager.class);
+            final int max = msg.arg1;
+            final int index = msg.arg2;
 
             switch (msg.what) {
                 case MSG_SHOW:
                     final CharSequence title = context
-                            .getText(R.string.android_upgrading_notification_title);
-                    final CharSequence message = context
-                            .getText(R.string.android_upgrading_notification_body);
+                            .getText(R.string.android_upgrading_title);
+
+                    final Intent intent = new Intent();
+                    intent.setClassName("com.android.settings",
+                            "com.android.settings.HelpTrampoline");
+                    intent.putExtra(Intent.EXTRA_TEXT, "help_url_upgrading");
+
+                    final PendingIntent contentIntent;
+                    if (context.getPackageManager().resolveActivity(intent, 0) != null) {
+                        contentIntent = PendingIntent.getActivity(context, 0, intent, 0);
+                    } else {
+                        contentIntent = null;
+                    }
+
                     final Notification notif = new Notification.Builder(mService.mContext)
                             .setSmallIcon(R.drawable.stat_sys_adb)
                             .setWhen(0)
@@ -138,8 +154,9 @@ public abstract class PreBootBroadcaster extends IIntentReceiver.Stub {
                             .setColor(context.getColor(
                                     com.android.internal.R.color.system_notification_accent_color))
                             .setContentTitle(title)
-                            .setContentText(message)
+                            .setContentIntent(contentIntent)
                             .setVisibility(Notification.VISIBILITY_PUBLIC)
+                            .setProgress(max, index, false)
                             .build();
                     notifManager.notifyAsUser(TAG, 0, notif, UserHandle.of(mUserId));
                     break;
