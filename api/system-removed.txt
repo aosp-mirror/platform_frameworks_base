@@ -425,12 +425,3 @@ package android.widget {
 
 }
 
-package com.android.internal {
-
-  public static final class R.styleable {
-    field public static final int AndroidManifestLayout_minimalHeight = 6; // 0x6
-    field public static final int AndroidManifestLayout_minimalWidth = 5; // 0x5
-  }
-
-}
-
