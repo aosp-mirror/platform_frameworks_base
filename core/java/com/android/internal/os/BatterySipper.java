@@ -88,7 +88,8 @@ public class BatterySipper implements Comparable<BatterySipper> {
         USER,
         UNACCOUNTED,
         OVERCOUNTED,
-        CAMERA
+        CAMERA,
+        MEMORY
     }
 
     public BatterySipper(DrainType drainType, Uid uid, double value) {

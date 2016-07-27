@@ -30,6 +30,7 @@ import android.content.pm.ApplicationInfo;
 import android.telephony.SignalStrength;
 import android.text.format.DateFormat;
 import android.util.ArrayMap;
+import android.util.LongSparseArray;
 import android.util.MutableBoolean;
 import android.util.Pair;
 import android.util.Printer;
@@ -2450,6 +2451,8 @@ public abstract class BatteryStats implements Parcelable {
 
     public abstract Map<String, ? extends Timer> getKernelWakelockStats();
 
+    public abstract LongSparseArray<? extends Timer> getKernelMemoryStats();
+
     public abstract void writeToParcelWithoutUids(Parcel out, int flags);
 
     private final static void formatTimeRaw(StringBuilder out, long seconds) {
@@ -4114,6 +4117,17 @@ public abstract class BatteryStats implements Parcelable {
                 }
                 pw.println();
             }
+        }
+
+        final LongSparseArray<? extends Timer> mMemoryStats = getKernelMemoryStats();
+        pw.println("Memory Stats");
+        for (int i = 0; i < mMemoryStats.size(); i++) {
+            sb.setLength(0);
+            sb.append("Bandwidth ");
+            sb.append(mMemoryStats.keyAt(i));
+            sb.append(" Time ");
+            sb.append(mMemoryStats.valueAt(i).getTotalTimeLocked(rawRealtime, which));
+            pw.println(sb.toString());
         }
 
         for (int iu=0; iu<NU; iu++) {
