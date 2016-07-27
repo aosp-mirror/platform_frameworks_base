@@ -49,7 +49,6 @@ import android.util.Pair;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.os.SomeArgs;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.FgThread;
 
@@ -321,7 +320,6 @@ public class UsbDeviceManager {
         private boolean mConnected;
         private boolean mHostConnected;
         private boolean mSourcePower;
-        private boolean mSinkPower;
         private boolean mConfigured;
         private boolean mUsbDataUnlocked;
         private String mCurrentFunctions;
@@ -403,19 +401,7 @@ public class UsbDeviceManager {
         public void updateHostState(UsbPort port, UsbPortStatus status) {
             boolean hostConnected = status.getCurrentDataRole() == UsbPort.DATA_ROLE_HOST;
             boolean sourcePower = status.getCurrentPowerRole() == UsbPort.POWER_ROLE_SOURCE;
-            boolean sinkPower = status.getCurrentPowerRole() == UsbPort.POWER_ROLE_SINK;
-
-            if (DEBUG) {
-                Slog.i(TAG, "updateHostState " + port + ": dataRole=" + status.getCurrentDataRole() +
-                        ", powerRole=" + status.getCurrentPowerRole());
-            }
-
-            SomeArgs args = SomeArgs.obtain();
-            args.argi1 = hostConnected ? 1 :0;
-            args.argi2 = sourcePower ? 1 :0;
-            args.argi3 = sinkPower ? 1 :0;
-
-            obtainMessage(MSG_UPDATE_HOST_STATE, args).sendToTarget();
+            obtainMessage(MSG_UPDATE_HOST_STATE, hostConnected ? 1 :0, sourcePower ? 1 :0).sendToTarget();
         }
 
         private boolean waitForState(String state) {
@@ -732,11 +718,8 @@ public class UsbDeviceManager {
                     }
                     break;
                 case MSG_UPDATE_HOST_STATE:
-                    SomeArgs args = (SomeArgs) msg.obj;
-                    mHostConnected = (args.argi1 == 1);
-                    mSourcePower = (args.argi2 == 1);
-                    mSinkPower = (args.argi3 == 1);
-                    args.recycle();
+                    mHostConnected = (msg.arg1 == 1);
+                    mSourcePower = (msg.arg2 == 1);
                     updateUsbNotification();
                     if (mBootCompleted) {
                         updateUsbStateBroadcastIfNeeded();
@@ -826,8 +809,6 @@ public class UsbDeviceManager {
                 }
             } else if (mSourcePower) {
                 id = com.android.internal.R.string.usb_supplying_notification_title;
-            } else if (mSinkPower) {
-                id = com.android.internal.R.string.usb_charging_notification_title;
             }
             if (id != mUsbNotificationId) {
                 // clear notification if title needs changing
