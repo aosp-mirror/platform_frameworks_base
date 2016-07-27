@@ -474,6 +474,7 @@ final class DefaultPermissionGrantPolicy {
             if (emailPackage != null
                     && doesPackageSupportRuntimePermissions(emailPackage)) {
                 grantRuntimePermissionsLPw(emailPackage, CONTACTS_PERMISSIONS, userId);
+                grantRuntimePermissionsLPw(emailPackage, CALENDAR_PERMISSIONS, userId);
             }
 
             // Browser
