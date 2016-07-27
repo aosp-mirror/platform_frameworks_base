@@ -554,6 +554,15 @@ def compute_expected_emoji():
     return all_emoji, default_emoji, equivalent_emoji
 
 
+def check_vertical_metrics():
+    for record in _fallback_chain:
+        if record.name in ['sans-serif', 'sans-serif-condensed']:
+            font = open_font(record.font)
+            assert (font['head'].yMax == 2163 and font['head'].yMin == -555 and
+                    font['hhea'].ascent == 1900 and font['hhea'].descent == -500), (
+                   'Vertical metrics of %s do not match expected Roboto metrics.' % (record.font,))
+
+
 def main():
     global _fonts_dir
     target_out = sys.argv[1]
@@ -561,6 +570,8 @@ def main():
 
     fonts_xml_path = path.join(target_out, 'etc', 'fonts.xml')
     parse_fonts_xml(fonts_xml_path)
+
+    check_vertical_metrics()
 
     hyphens_dir = path.join(target_out, 'usr', 'hyphen-data')
     check_hyphens(hyphens_dir)
