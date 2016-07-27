@@ -59,8 +59,8 @@ TEST(ValueVisitorTest, VisitsReference) {
 
 TEST(ValueVisitorTest, VisitsReferencesInStyle) {
     std::unique_ptr<Style> style = test::StyleBuilder()
-            .setParent("@android:style/foo")
-            .addItem("@android:attr/one", test::buildReference("@android:id/foo"))
+            .setParent("android:style/foo")
+            .addItem("android:attr/one", test::buildReference("android:id/foo"))
             .build();
 
     StyleVisitor visitor;
@@ -73,11 +73,11 @@ TEST(ValueVisitorTest, VisitsReferencesInStyle) {
 }
 
 TEST(ValueVisitorTest, ValueCast) {
-    std::unique_ptr<Reference> ref = test::buildReference("@android:color/white");
+    std::unique_ptr<Reference> ref = test::buildReference("android:color/white");
     EXPECT_NE(valueCast<Reference>(ref.get()), nullptr);
 
     std::unique_ptr<Style> style = test::StyleBuilder()
-            .addItem("@android:attr/foo", test::buildReference("@android:color/black"))
+            .addItem("android:attr/foo", test::buildReference("android:color/black"))
             .build();
     EXPECT_NE(valueCast<Style>(style.get()), nullptr);
     EXPECT_EQ(valueCast<Reference>(style.get()), nullptr);

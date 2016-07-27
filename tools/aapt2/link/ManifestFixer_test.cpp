@@ -31,21 +31,21 @@ struct ManifestFixerTest : public ::testing::Test {
                 .setPackageId(0x01)
                 .setNameManglerPolicy(NameManglerPolicy{ "android" })
                 .addSymbolSource(test::StaticSymbolSourceBuilder()
-                        .addSymbol("@android:attr/package", ResourceId(0x01010000),
+                        .addSymbol("android:attr/package", ResourceId(0x01010000),
                                    test::AttributeBuilder()
                                         .setTypeMask(android::ResTable_map::TYPE_STRING)
                                         .build())
-                        .addSymbol("@android:attr/minSdkVersion", ResourceId(0x01010001),
+                        .addSymbol("android:attr/minSdkVersion", ResourceId(0x01010001),
                                    test::AttributeBuilder()
                                         .setTypeMask(android::ResTable_map::TYPE_STRING |
                                                      android::ResTable_map::TYPE_INTEGER)
                                         .build())
-                        .addSymbol("@android:attr/targetSdkVersion", ResourceId(0x01010002),
+                        .addSymbol("android:attr/targetSdkVersion", ResourceId(0x01010002),
                                    test::AttributeBuilder()
                                         .setTypeMask(android::ResTable_map::TYPE_STRING |
                                                      android::ResTable_map::TYPE_INTEGER)
                                         .build())
-                        .addSymbol("@android:string/str", ResourceId(0x01060000))
+                        .addSymbol("android:string/str", ResourceId(0x01060000))
                         .build())
                 .build();
     }

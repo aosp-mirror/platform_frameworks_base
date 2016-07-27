@@ -64,7 +64,7 @@ inline IDiagnostics* getDiagnostics() {
 
 inline ResourceName parseNameOrDie(const StringPiece& str) {
     ResourceNameRef ref;
-    bool result = ResourceUtils::tryParseReference(str, &ref);
+    bool result = ResourceUtils::parseResourceName(str, &ref);
     assert(result && "invalid resource name");
     return ref.toResourceName();
 }

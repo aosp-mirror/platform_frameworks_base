@@ -71,15 +71,16 @@ TEST(PseudolocaleGeneratorTest, PseudolocalizeStyledString) {
 
 TEST(PseudolocaleGeneratorTest, PseudolocalizeOnlyDefaultConfigs) {
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
-            .addString("@android:string/one", "one")
-            .addString("@android:string/two", ResourceId{}, test::parseConfigOrDie("en"), "two")
-            .addString("@android:string/three", "three")
-            .addString("@android:string/three", ResourceId{}, test::parseConfigOrDie("en-rXA"),
+            .addString("android:string/one", "one")
+            .addString("android:string/two", ResourceId{}, test::parseConfigOrDie("en"), "two")
+            .addString("android:string/three", "three")
+            .addString("android:string/three", ResourceId{}, test::parseConfigOrDie("en-rXA"),
                        "three")
-            .addString("@android:string/four", "four")
+            .addString("android:string/four", "four")
             .build();
 
-    String* val = test::getValue<String>(table.get(), "@android:string/four");
+    String* val = test::getValue<String>(table.get(), "android:string/four");
+    ASSERT_NE(nullptr, val);
     val->setTranslateable(false);
 
     std::unique_ptr<IAaptContext> context = test::ContextBuilder().build();
@@ -87,31 +88,31 @@ TEST(PseudolocaleGeneratorTest, PseudolocalizeOnlyDefaultConfigs) {
     ASSERT_TRUE(generator.consume(context.get(), table.get()));
 
     // Normal pseudolocalization should take place.
-    ASSERT_NE(nullptr, test::getValueForConfig<String>(table.get(), "@android:string/one",
+    ASSERT_NE(nullptr, test::getValueForConfig<String>(table.get(), "android:string/one",
                                                        test::parseConfigOrDie("en-rXA")));
-    ASSERT_NE(nullptr, test::getValueForConfig<String>(table.get(), "@android:string/one",
+    ASSERT_NE(nullptr, test::getValueForConfig<String>(table.get(), "android:string/one",
                                                        test::parseConfigOrDie("ar-rXB")));
 
     // No default config for android:string/two, so no pseudlocales should exist.
-    ASSERT_EQ(nullptr, test::getValueForConfig<String>(table.get(), "@android:string/two",
+    ASSERT_EQ(nullptr, test::getValueForConfig<String>(table.get(), "android:string/two",
                                                        test::parseConfigOrDie("en-rXA")));
-    ASSERT_EQ(nullptr, test::getValueForConfig<String>(table.get(), "@android:string/two",
+    ASSERT_EQ(nullptr, test::getValueForConfig<String>(table.get(), "android:string/two",
                                                        test::parseConfigOrDie("ar-rXB")));
 
 
     // Check that we didn't override manual pseudolocalization.
-    val = test::getValueForConfig<String>(table.get(), "@android:string/three",
+    val = test::getValueForConfig<String>(table.get(), "android:string/three",
                                           test::parseConfigOrDie("en-rXA"));
     ASSERT_NE(nullptr, val);
     EXPECT_EQ(std::string("three"), *val->value);
 
-    ASSERT_NE(nullptr, test::getValueForConfig<String>(table.get(), "@android:string/three",
+    ASSERT_NE(nullptr, test::getValueForConfig<String>(table.get(), "android:string/three",
                                                        test::parseConfigOrDie("ar-rXB")));
 
     // Check that four's translateable marker was honored.
-    ASSERT_EQ(nullptr, test::getValueForConfig<String>(table.get(), "@android:string/four",
+    ASSERT_EQ(nullptr, test::getValueForConfig<String>(table.get(), "android:string/four",
                                                        test::parseConfigOrDie("en-rXA")));
-    ASSERT_EQ(nullptr, test::getValueForConfig<String>(table.get(), "@android:string/four",
+    ASSERT_EQ(nullptr, test::getValueForConfig<String>(table.get(), "android:string/four",
                                                        test::parseConfigOrDie("ar-rXB")));
 
 }

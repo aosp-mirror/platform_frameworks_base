@@ -27,40 +27,40 @@ public:
                 .setNameManglerPolicy(
                         NameManglerPolicy{ "com.app.test", { "com.android.support" } })
                 .addSymbolSource(test::StaticSymbolSourceBuilder()
-                        .addPublicSymbol("@android:attr/layout_width", ResourceId(0x01010000),
+                        .addPublicSymbol("android:attr/layout_width", ResourceId(0x01010000),
                                    test::AttributeBuilder()
                                         .setTypeMask(android::ResTable_map::TYPE_ENUM |
                                                      android::ResTable_map::TYPE_DIMENSION)
                                         .addItem("match_parent", 0xffffffff)
                                         .build())
-                        .addPublicSymbol("@android:attr/background", ResourceId(0x01010001),
+                        .addPublicSymbol("android:attr/background", ResourceId(0x01010001),
                                    test::AttributeBuilder()
                                         .setTypeMask(android::ResTable_map::TYPE_COLOR).build())
-                        .addPublicSymbol("@android:attr/attr", ResourceId(0x01010002),
+                        .addPublicSymbol("android:attr/attr", ResourceId(0x01010002),
                                    test::AttributeBuilder().build())
-                        .addPublicSymbol("@android:attr/text", ResourceId(0x01010003),
+                        .addPublicSymbol("android:attr/text", ResourceId(0x01010003),
                                    test::AttributeBuilder()
                                         .setTypeMask(android::ResTable_map::TYPE_STRING)
                                         .build())
 
                          // Add one real symbol that was introduces in v21
-                        .addPublicSymbol("@android:attr/colorAccent", ResourceId(0x01010435),
+                        .addPublicSymbol("android:attr/colorAccent", ResourceId(0x01010435),
                                    test::AttributeBuilder().build())
 
                         // Private symbol.
-                        .addSymbol("@android:color/hidden", ResourceId(0x01020001))
+                        .addSymbol("android:color/hidden", ResourceId(0x01020001))
 
-                        .addPublicSymbol("@android:id/id", ResourceId(0x01030000))
-                        .addSymbol("@com.app.test:id/id", ResourceId(0x7f030000))
-                        .addSymbol("@com.app.test:color/green", ResourceId(0x7f020000))
-                        .addSymbol("@com.app.test:color/red", ResourceId(0x7f020001))
-                        .addSymbol("@com.app.test:attr/colorAccent", ResourceId(0x7f010000),
+                        .addPublicSymbol("android:id/id", ResourceId(0x01030000))
+                        .addSymbol("com.app.test:id/id", ResourceId(0x7f030000))
+                        .addSymbol("com.app.test:color/green", ResourceId(0x7f020000))
+                        .addSymbol("com.app.test:color/red", ResourceId(0x7f020001))
+                        .addSymbol("com.app.test:attr/colorAccent", ResourceId(0x7f010000),
                                    test::AttributeBuilder()
                                        .setTypeMask(android::ResTable_map::TYPE_COLOR).build())
-                        .addPublicSymbol("@com.app.test:attr/com.android.support$colorAccent",
+                        .addPublicSymbol("com.app.test:attr/com.android.support$colorAccent",
                                    ResourceId(0x7f010001), test::AttributeBuilder()
                                        .setTypeMask(android::ResTable_map::TYPE_COLOR).build())
-                        .addPublicSymbol("@com.app.test:attr/attr", ResourceId(0x7f010002),
+                        .addPublicSymbol("com.app.test:attr/attr", ResourceId(0x7f010002),
                                    test::AttributeBuilder().build())
                         .build())
                 .build();
@@ -101,7 +101,7 @@ TEST_F(XmlReferenceLinkerTest, LinkBasicAttributes) {
     Reference* ref = valueCast<Reference>(xmlAttr->compiledValue.get());
     ASSERT_NE(ref, nullptr);
     AAPT_ASSERT_TRUE(ref->name);
-    EXPECT_EQ(ref->name.value(), test::parseNameOrDie("@color/green")); // Make sure the name
+    EXPECT_EQ(ref->name.value(), test::parseNameOrDie("color/green")); // Make sure the name
                                                                         // didn't change.
     AAPT_ASSERT_TRUE(ref->id);
     EXPECT_EQ(ref->id.value(), ResourceId(0x7f020000));

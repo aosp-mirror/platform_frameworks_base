@@ -24,14 +24,14 @@ namespace aapt {
 TEST(ReferenceLinkerTest, LinkSimpleReferences) {
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
             .setPackageId("com.app.test", 0x7f)
-            .addReference("@com.app.test:string/foo", ResourceId(0x7f020000),
-                          "@com.app.test:string/bar")
+            .addReference("com.app.test:string/foo", ResourceId(0x7f020000),
+                          "com.app.test:string/bar")
 
             // Test use of local reference (w/o package name).
-            .addReference("@com.app.test:string/bar", ResourceId(0x7f020001), "@string/baz")
+            .addReference("com.app.test:string/bar", ResourceId(0x7f020001), "string/baz")
 
-            .addReference("@com.app.test:string/baz", ResourceId(0x7f020002),
-                          "@android:string/ok")
+            .addReference("com.app.test:string/baz", ResourceId(0x7f020002),
+                          "android:string/ok")
             .build();
 
     std::unique_ptr<IAaptContext> context = test::ContextBuilder()
@@ -40,24 +40,24 @@ TEST(ReferenceLinkerTest, LinkSimpleReferences) {
             .setNameManglerPolicy(NameManglerPolicy{ "com.app.test" })
             .addSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
             .addSymbolSource(test::StaticSymbolSourceBuilder()
-                                     .addPublicSymbol("@android:string/ok", ResourceId(0x01040034))
+                                     .addPublicSymbol("android:string/ok", ResourceId(0x01040034))
                                      .build())
             .build();
 
     ReferenceLinker linker;
     ASSERT_TRUE(linker.consume(context.get(), table.get()));
 
-    Reference* ref = test::getValue<Reference>(table.get(), "@com.app.test:string/foo");
+    Reference* ref = test::getValue<Reference>(table.get(), "com.app.test:string/foo");
     ASSERT_NE(ref, nullptr);
     AAPT_ASSERT_TRUE(ref->id);
     EXPECT_EQ(ref->id.value(), ResourceId(0x7f020001));
 
-    ref = test::getValue<Reference>(table.get(), "@com.app.test:string/bar");
+    ref = test::getValue<Reference>(table.get(), "com.app.test:string/bar");
     ASSERT_NE(ref, nullptr);
     AAPT_ASSERT_TRUE(ref->id);
     EXPECT_EQ(ref->id.value(), ResourceId(0x7f020002));
 
-    ref = test::getValue<Reference>(table.get(), "@com.app.test:string/baz");
+    ref = test::getValue<Reference>(table.get(), "com.app.test:string/baz");
     ASSERT_NE(ref, nullptr);
     AAPT_ASSERT_TRUE(ref->id);
     EXPECT_EQ(ref->id.value(), ResourceId(0x01040034));
@@ -66,17 +66,17 @@ TEST(ReferenceLinkerTest, LinkSimpleReferences) {
 TEST(ReferenceLinkerTest, LinkStyleAttributes) {
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
             .setPackageId("com.app.test", 0x7f)
-            .addValue("@com.app.test:style/Theme", test::StyleBuilder()
-                    .setParent("@android:style/Theme.Material")
-                    .addItem("@android:attr/foo", ResourceUtils::tryParseColor("#ff00ff"))
-                    .addItem("@android:attr/bar", {} /* placeholder */)
+            .addValue("com.app.test:style/Theme", test::StyleBuilder()
+                    .setParent("android:style/Theme.Material")
+                    .addItem("android:attr/foo", ResourceUtils::tryParseColor("#ff00ff"))
+                    .addItem("android:attr/bar", {} /* placeholder */)
                     .build())
             .build();
 
     {
         // We need to fill in the value for the attribute android:attr/bar after we build the
         // table, because we need access to the string pool.
-        Style* style = test::getValue<Style>(table.get(), "@com.app.test:style/Theme");
+        Style* style = test::getValue<Style>(table.get(), "com.app.test:style/Theme");
         ASSERT_NE(style, nullptr);
         style->entries.back().value = util::make_unique<RawString>(
                 table->stringPool.makeRef("one|two"));
@@ -87,13 +87,13 @@ TEST(ReferenceLinkerTest, LinkStyleAttributes) {
             .setPackageId(0x7f)
             .setNameManglerPolicy(NameManglerPolicy{ "com.app.test" })
             .addSymbolSource(test::StaticSymbolSourceBuilder()
-                                     .addPublicSymbol("@android:style/Theme.Material",
+                                     .addPublicSymbol("android:style/Theme.Material",
                                                       ResourceId(0x01060000))
-                                     .addPublicSymbol("@android:attr/foo", ResourceId(0x01010001),
+                                     .addPublicSymbol("android:attr/foo", ResourceId(0x01010001),
                                                       test::AttributeBuilder()
                                                               .setTypeMask(ResTable_map::TYPE_COLOR)
                                                               .build())
-                                     .addPublicSymbol("@android:attr/bar", ResourceId(0x01010002),
+                                     .addPublicSymbol("android:attr/bar", ResourceId(0x01010002),
                                                       test::AttributeBuilder()
                                                               .setTypeMask(ResTable_map::TYPE_FLAGS)
                                                               .addItem("one", 0x01)
@@ -105,7 +105,7 @@ TEST(ReferenceLinkerTest, LinkStyleAttributes) {
     ReferenceLinker linker;
     ASSERT_TRUE(linker.consume(context.get(), table.get()));
 
-    Style* style = test::getValue<Style>(table.get(), "@com.app.test:style/Theme");
+    Style* style = test::getValue<Style>(table.get(), "com.app.test:style/Theme");
     ASSERT_NE(style, nullptr);
     AAPT_ASSERT_TRUE(style->parent);
     AAPT_ASSERT_TRUE(style->parent.value().id);
@@ -128,7 +128,7 @@ TEST(ReferenceLinkerTest, LinkMangledReferencesAndAttributes) {
             .setPackageId(0x7f)
             .setNameManglerPolicy(NameManglerPolicy{ "com.app.test", { "com.android.support" } })
             .addSymbolSource(test::StaticSymbolSourceBuilder()
-                                     .addPublicSymbol("@com.app.test:attr/com.android.support$foo",
+                                     .addPublicSymbol("com.app.test:attr/com.android.support$foo",
                                                       ResourceId(0x7f010000),
                                                       test::AttributeBuilder()
                                                               .setTypeMask(ResTable_map::TYPE_COLOR)
@@ -138,8 +138,8 @@ TEST(ReferenceLinkerTest, LinkMangledReferencesAndAttributes) {
 
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
             .setPackageId("com.app.test", 0x7f)
-            .addValue("@com.app.test:style/Theme", ResourceId(0x7f020000),
-                      test::StyleBuilder().addItem("@com.android.support:attr/foo",
+            .addValue("com.app.test:style/Theme", ResourceId(0x7f020000),
+                      test::StyleBuilder().addItem("com.android.support:attr/foo",
                                                    ResourceUtils::tryParseColor("#ff0000"))
                                           .build())
             .build();
@@ -147,7 +147,7 @@ TEST(ReferenceLinkerTest, LinkMangledReferencesAndAttributes) {
     ReferenceLinker linker;
     ASSERT_TRUE(linker.consume(context.get(), table.get()));
 
-    Style* style = test::getValue<Style>(table.get(), "@com.app.test:style/Theme");
+    Style* style = test::getValue<Style>(table.get(), "com.app.test:style/Theme");
     ASSERT_NE(style, nullptr);
     ASSERT_EQ(1u, style->entries.size());
     AAPT_ASSERT_TRUE(style->entries.front().key.id);
@@ -157,8 +157,8 @@ TEST(ReferenceLinkerTest, LinkMangledReferencesAndAttributes) {
 TEST(ReferenceLinkerTest, FailToLinkPrivateSymbols) {
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
             .setPackageId("com.app.test", 0x7f)
-            .addReference("@com.app.test:string/foo", ResourceId(0x7f020000),
-                          "@android:string/hidden")
+            .addReference("com.app.test:string/foo", ResourceId(0x7f020000),
+                          "android:string/hidden")
             .build();
 
     std::unique_ptr<IAaptContext> context = test::ContextBuilder()
@@ -167,7 +167,7 @@ TEST(ReferenceLinkerTest, FailToLinkPrivateSymbols) {
             .setNameManglerPolicy(NameManglerPolicy{ "com.app.test" })
             .addSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
             .addSymbolSource(test::StaticSymbolSourceBuilder()
-                                     .addSymbol("@android:string/hidden", ResourceId(0x01040034))
+                                     .addSymbol("android:string/hidden", ResourceId(0x01040034))
                                      .build())
             .build();
 
@@ -178,8 +178,8 @@ TEST(ReferenceLinkerTest, FailToLinkPrivateSymbols) {
 TEST(ReferenceLinkerTest, FailToLinkPrivateMangledSymbols) {
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
             .setPackageId("com.app.test", 0x7f)
-            .addReference("@com.app.test:string/foo", ResourceId(0x7f020000),
-                          "@com.app.lib:string/hidden")
+            .addReference("com.app.test:string/foo", ResourceId(0x7f020000),
+                          "com.app.lib:string/hidden")
             .build();
 
     std::unique_ptr<IAaptContext> context = test::ContextBuilder()
@@ -188,7 +188,7 @@ TEST(ReferenceLinkerTest, FailToLinkPrivateMangledSymbols) {
             .setNameManglerPolicy(NameManglerPolicy{ "com.app.test", { "com.app.lib" } })
             .addSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
             .addSymbolSource(test::StaticSymbolSourceBuilder()
-                                     .addSymbol("@com.app.test:string/com.app.lib$hidden",
+                                     .addSymbol("com.app.test:string/com.app.lib$hidden",
                                                 ResourceId(0x7f040034))
                                      .build())
 
@@ -201,8 +201,8 @@ TEST(ReferenceLinkerTest, FailToLinkPrivateMangledSymbols) {
 TEST(ReferenceLinkerTest, FailToLinkPrivateStyleAttributes) {
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
             .setPackageId("com.app.test", 0x7f)
-            .addValue("@com.app.test:style/Theme", test::StyleBuilder()
-                    .addItem("@android:attr/hidden", ResourceUtils::tryParseColor("#ff00ff"))
+            .addValue("com.app.test:style/Theme", test::StyleBuilder()
+                    .addItem("android:attr/hidden", ResourceUtils::tryParseColor("#ff00ff"))
                     .build())
             .build();
 
@@ -212,7 +212,7 @@ TEST(ReferenceLinkerTest, FailToLinkPrivateStyleAttributes) {
             .setNameManglerPolicy(NameManglerPolicy{ "com.app.test" })
             .addSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
             .addSymbolSource(test::StaticSymbolSourceBuilder()
-                                     .addSymbol("@android:attr/hidden", ResourceId(0x01010001),
+                                     .addSymbol("android:attr/hidden", ResourceId(0x01010001),
                                                 test::AttributeBuilder()
                                                         .setTypeMask(
                                                                 android::ResTable_map::TYPE_COLOR)

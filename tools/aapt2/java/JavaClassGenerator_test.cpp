@@ -26,7 +26,7 @@ namespace aapt {
 TEST(JavaClassGeneratorTest, FailWhenEntryIsJavaKeyword) {
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
             .setPackageId("android", 0x01)
-            .addSimple("@android:id/class", ResourceId(0x01020000))
+            .addSimple("android:id/class", ResourceId(0x01020000))
             .build();
 
     std::unique_ptr<IAaptContext> context = test::ContextBuilder()
@@ -42,12 +42,12 @@ TEST(JavaClassGeneratorTest, FailWhenEntryIsJavaKeyword) {
 TEST(JavaClassGeneratorTest, TransformInvalidJavaIdentifierCharacter) {
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
             .setPackageId("android", 0x01)
-            .addSimple("@android:id/hey-man", ResourceId(0x01020000))
-            .addValue("@android:attr/cool.attr", ResourceId(0x01010000),
+            .addSimple("android:id/hey-man", ResourceId(0x01020000))
+            .addValue("android:attr/cool.attr", ResourceId(0x01010000),
                       test::AttributeBuilder(false).build())
-            .addValue("@android:styleable/hey.dude", ResourceId(0x01030000),
+            .addValue("android:styleable/hey.dude", ResourceId(0x01030000),
                       test::StyleableBuilder()
-                              .addItem("@android:attr/cool.attr", ResourceId(0x01010000))
+                              .addItem("android:attr/cool.attr", ResourceId(0x01010000))
                               .build())
             .build();
 
@@ -75,8 +75,8 @@ TEST(JavaClassGeneratorTest, TransformInvalidJavaIdentifierCharacter) {
 TEST(JavaClassGeneratorTest, CorrectPackageNameIsUsed) {
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
             .setPackageId("android", 0x01)
-            .addSimple("@android:id/one", ResourceId(0x01020000))
-            .addSimple("@android:id/com.foo$two", ResourceId(0x01020001))
+            .addSimple("android:id/one", ResourceId(0x01020000))
+            .addSimple("android:id/com.foo$two", ResourceId(0x01020001))
             .build();
 
     std::unique_ptr<IAaptContext> context = test::ContextBuilder()
@@ -97,8 +97,8 @@ TEST(JavaClassGeneratorTest, CorrectPackageNameIsUsed) {
 TEST(JavaClassGeneratorTest, AttrPrivateIsWrittenAsAttr) {
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
             .setPackageId("android", 0x01)
-            .addSimple("@android:attr/two", ResourceId(0x01010001))
-            .addSimple("@android:^attr-private/one", ResourceId(0x01010000))
+            .addSimple("android:attr/two", ResourceId(0x01010001))
+            .addSimple("android:^attr-private/one", ResourceId(0x01010000))
             .build();
 
     std::unique_ptr<IAaptContext> context = test::ContextBuilder()
@@ -118,11 +118,11 @@ TEST(JavaClassGeneratorTest, OnlyWritePublicResources) {
     StdErrDiagnostics diag;
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
             .setPackageId("android", 0x01)
-            .addSimple("@android:id/one", ResourceId(0x01020000))
-            .addSimple("@android:id/two", ResourceId(0x01020001))
-            .addSimple("@android:id/three", ResourceId(0x01020002))
-            .setSymbolState("@android:id/one", ResourceId(0x01020000), SymbolState::kPublic)
-            .setSymbolState("@android:id/two", ResourceId(0x01020001), SymbolState::kPrivate)
+            .addSimple("android:id/one", ResourceId(0x01020000))
+            .addSimple("android:id/two", ResourceId(0x01020001))
+            .addSimple("android:id/three", ResourceId(0x01020002))
+            .setSymbolState("android:id/one", ResourceId(0x01020000), SymbolState::kPublic)
+            .setSymbolState("android:id/two", ResourceId(0x01020001), SymbolState::kPrivate)
             .build();
 
     std::unique_ptr<IAaptContext> context = test::ContextBuilder()
@@ -200,14 +200,14 @@ TEST(JavaClassGeneratorTest, EmitOtherPackagesAttributesInStyleable) {
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
                 .setPackageId("android", 0x01)
                 .setPackageId("com.lib", 0x02)
-                .addValue("@android:attr/bar", ResourceId(0x01010000),
+                .addValue("android:attr/bar", ResourceId(0x01010000),
                           test::AttributeBuilder(false).build())
-                .addValue("@com.lib:attr/bar", ResourceId(0x02010000),
+                .addValue("com.lib:attr/bar", ResourceId(0x02010000),
                            test::AttributeBuilder(false).build())
-                .addValue("@android:styleable/foo", ResourceId(0x01030000),
+                .addValue("android:styleable/foo", ResourceId(0x01030000),
                           test::StyleableBuilder()
-                                  .addItem("@android:attr/bar", ResourceId(0x01010000))
-                                  .addItem("@com.lib:attr/bar", ResourceId(0x02010000))
+                                  .addItem("android:attr/bar", ResourceId(0x01010000))
+                                  .addItem("com.lib:attr/bar", ResourceId(0x02010000))
                                   .build())
                 .build();
 
@@ -228,9 +228,9 @@ TEST(JavaClassGeneratorTest, EmitOtherPackagesAttributesInStyleable) {
 TEST(JavaClassGeneratorTest, CommentsForSimpleResourcesArePresent) {
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
             .setPackageId("android", 0x01)
-            .addSimple("@android:id/foo", ResourceId(0x01010000))
+            .addSimple("android:id/foo", ResourceId(0x01010000))
             .build();
-    test::getValue<Id>(table.get(), "@android:id/foo")
+    test::getValue<Id>(table.get(), "android:id/foo")
             ->setComment(std::string("This is a comment\n@deprecated"));
 
     std::unique_ptr<IAaptContext> context = test::ContextBuilder()
@@ -262,13 +262,13 @@ TEST(JavaClassGeneratorTest, CommentsForStyleablesAndNestedAttributesArePresent)
     attr.setComment(StringPiece("This is an attribute"));
 
     Styleable styleable;
-    styleable.entries.push_back(Reference(test::parseNameOrDie("@android:attr/one")));
+    styleable.entries.push_back(Reference(test::parseNameOrDie("android:attr/one")));
     styleable.setComment(StringPiece("This is a styleable"));
 
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
             .setPackageId("android", 0x01)
-            .addValue("@android:attr/one", util::make_unique<Attribute>(attr))
-            .addValue("@android:styleable/Container",
+            .addValue("android:attr/one", util::make_unique<Attribute>(attr))
+            .addValue("android:styleable/Container",
                       std::unique_ptr<Styleable>(styleable.clone(nullptr)))
             .build();
 
@@ -283,19 +283,19 @@ TEST(JavaClassGeneratorTest, CommentsForStyleablesAndNestedAttributesArePresent)
     ASSERT_TRUE(generator.generate("android", &out));
     std::string actual = out.str();
 
-    EXPECT_NE(std::string::npos, actual.find("@attr name android:one"));
-    EXPECT_NE(std::string::npos, actual.find("@attr description"));
+    EXPECT_NE(std::string::npos, actual.find("attr name android:one"));
+    EXPECT_NE(std::string::npos, actual.find("attr description"));
     EXPECT_NE(std::string::npos, actual.find(attr.getComment().data()));
     EXPECT_NE(std::string::npos, actual.find(styleable.getComment().data()));
 }
 
 TEST(JavaClassGeneratorTest, CommentsForRemovedAttributesAreNotPresentInClass) {
     Attribute attr(false);
-    attr.setComment(StringPiece("@removed"));
+    attr.setComment(StringPiece("removed"));
 
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
             .setPackageId("android", 0x01)
-            .addValue("@android:attr/one", util::make_unique<Attribute>(attr))
+            .addValue("android:attr/one", util::make_unique<Attribute>(attr))
             .build();
 
     std::unique_ptr<IAaptContext> context = test::ContextBuilder()
@@ -314,9 +314,9 @@ TEST(JavaClassGeneratorTest, CommentsForRemovedAttributesAreNotPresentInClass) {
 
     // We should find @removed only in the attribute javadoc and not anywhere else (i.e. the class
     // javadoc).
-    const size_t pos = actual.find("@removed");
+    const size_t pos = actual.find("removed");
     EXPECT_NE(std::string::npos, pos);
-    EXPECT_EQ(std::string::npos, actual.find("@removed", pos + 1));
+    EXPECT_EQ(std::string::npos, actual.find("removed", pos + 1));
 }
 
 } // namespace aapt

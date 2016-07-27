@@ -132,65 +132,65 @@ private:
 TEST_F(TableFlattenerTest, FlattenFullyLinkedTable) {
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
             .setPackageId("com.app.test", 0x7f)
-            .addSimple("@com.app.test:id/one", ResourceId(0x7f020000))
-            .addSimple("@com.app.test:id/two", ResourceId(0x7f020001))
-            .addValue("@com.app.test:id/three", ResourceId(0x7f020002),
-                      test::buildReference("@com.app.test:id/one", ResourceId(0x7f020000)))
-            .addValue("@com.app.test:integer/one", ResourceId(0x7f030000),
+            .addSimple("com.app.test:id/one", ResourceId(0x7f020000))
+            .addSimple("com.app.test:id/two", ResourceId(0x7f020001))
+            .addValue("com.app.test:id/three", ResourceId(0x7f020002),
+                      test::buildReference("com.app.test:id/one", ResourceId(0x7f020000)))
+            .addValue("com.app.test:integer/one", ResourceId(0x7f030000),
                       util::make_unique<BinaryPrimitive>(uint8_t(Res_value::TYPE_INT_DEC), 1u))
-            .addValue("@com.app.test:integer/one", test::parseConfigOrDie("v1"),
+            .addValue("com.app.test:integer/one", test::parseConfigOrDie("v1"),
                       ResourceId(0x7f030000),
                       util::make_unique<BinaryPrimitive>(uint8_t(Res_value::TYPE_INT_DEC), 2u))
-            .addString("@com.app.test:string/test", ResourceId(0x7f040000), "foo")
-            .addString("@com.app.test:layout/bar", ResourceId(0x7f050000), "res/layout/bar.xml")
+            .addString("com.app.test:string/test", ResourceId(0x7f040000), "foo")
+            .addString("com.app.test:layout/bar", ResourceId(0x7f050000), "res/layout/bar.xml")
             .build();
 
     ResTable resTable;
     ASSERT_TRUE(flatten(table.get(), &resTable));
 
-    EXPECT_TRUE(exists(&resTable, "@com.app.test:id/one", ResourceId(0x7f020000), {},
+    EXPECT_TRUE(exists(&resTable, "com.app.test:id/one", ResourceId(0x7f020000), {},
                        Res_value::TYPE_INT_BOOLEAN, 0u, 0u));
 
-    EXPECT_TRUE(exists(&resTable, "@com.app.test:id/two", ResourceId(0x7f020001), {},
+    EXPECT_TRUE(exists(&resTable, "com.app.test:id/two", ResourceId(0x7f020001), {},
                        Res_value::TYPE_INT_BOOLEAN, 0u, 0u));
 
-    EXPECT_TRUE(exists(&resTable, "@com.app.test:id/three", ResourceId(0x7f020002), {},
+    EXPECT_TRUE(exists(&resTable, "com.app.test:id/three", ResourceId(0x7f020002), {},
                        Res_value::TYPE_REFERENCE, 0x7f020000u, 0u));
 
-    EXPECT_TRUE(exists(&resTable, "@com.app.test:integer/one", ResourceId(0x7f030000),
+    EXPECT_TRUE(exists(&resTable, "com.app.test:integer/one", ResourceId(0x7f030000),
                        {}, Res_value::TYPE_INT_DEC, 1u,
                        ResTable_config::CONFIG_VERSION));
 
-    EXPECT_TRUE(exists(&resTable, "@com.app.test:integer/one", ResourceId(0x7f030000),
+    EXPECT_TRUE(exists(&resTable, "com.app.test:integer/one", ResourceId(0x7f030000),
                        test::parseConfigOrDie("v1"), Res_value::TYPE_INT_DEC, 2u,
                        ResTable_config::CONFIG_VERSION));
 
     std::u16string fooStr = u"foo";
     ssize_t idx = resTable.getTableStringBlock(0)->indexOfString(fooStr.data(), fooStr.size());
     ASSERT_GE(idx, 0);
-    EXPECT_TRUE(exists(&resTable, "@com.app.test:string/test", ResourceId(0x7f040000),
+    EXPECT_TRUE(exists(&resTable, "com.app.test:string/test", ResourceId(0x7f040000),
                        {}, Res_value::TYPE_STRING, (uint32_t) idx, 0u));
 
     std::u16string barPath = u"res/layout/bar.xml";
     idx = resTable.getTableStringBlock(0)->indexOfString(barPath.data(), barPath.size());
     ASSERT_GE(idx, 0);
-    EXPECT_TRUE(exists(&resTable, "@com.app.test:layout/bar", ResourceId(0x7f050000), {},
+    EXPECT_TRUE(exists(&resTable, "com.app.test:layout/bar", ResourceId(0x7f050000), {},
                        Res_value::TYPE_STRING, (uint32_t) idx, 0u));
 }
 
 TEST_F(TableFlattenerTest, FlattenEntriesWithGapsInIds) {
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
             .setPackageId("com.app.test", 0x7f)
-            .addSimple("@com.app.test:id/one", ResourceId(0x7f020001))
-            .addSimple("@com.app.test:id/three", ResourceId(0x7f020003))
+            .addSimple("com.app.test:id/one", ResourceId(0x7f020001))
+            .addSimple("com.app.test:id/three", ResourceId(0x7f020003))
             .build();
 
     ResTable resTable;
     ASSERT_TRUE(flatten(table.get(), &resTable));
 
-    EXPECT_TRUE(exists(&resTable, "@com.app.test:id/one", ResourceId(0x7f020001), {},
+    EXPECT_TRUE(exists(&resTable, "com.app.test:id/one", ResourceId(0x7f020001), {},
                        Res_value::TYPE_INT_BOOLEAN, 0u, 0u));
-    EXPECT_TRUE(exists(&resTable, "@com.app.test:id/three", ResourceId(0x7f020003), {},
+    EXPECT_TRUE(exists(&resTable, "com.app.test:id/three", ResourceId(0x7f020003), {},
                        Res_value::TYPE_INT_BOOLEAN, 0u, 0u));
 }
 
@@ -201,14 +201,14 @@ TEST_F(TableFlattenerTest, FlattenMinMaxAttributes) {
     attr.maxInt = 23;
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
             .setPackageId("android", 0x01)
-            .addValue("@android:attr/foo", ResourceId(0x01010000),
+            .addValue("android:attr/foo", ResourceId(0x01010000),
                       util::make_unique<Attribute>(attr))
             .build();
 
     ResourceTable result;
     ASSERT_TRUE(flatten(table.get(), &result));
 
-    Attribute* actualAttr = test::getValue<Attribute>(&result, "@android:attr/foo");
+    Attribute* actualAttr = test::getValue<Attribute>(&result, "android:attr/foo");
     ASSERT_NE(nullptr, actualAttr);
     EXPECT_EQ(attr.isWeak(), actualAttr->isWeak());
     EXPECT_EQ(attr.typeMask, actualAttr->typeMask);
