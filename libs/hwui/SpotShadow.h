@@ -54,7 +54,6 @@ private:
     static void quicksortX(Vector2* points, int low, int high);
 
     static bool testPointInsidePolygon(const Vector2 testPoint, const Vector2* poly, int len);
-    static void makeClockwise(Vector2* polygon, int len);
     static void reverse(Vector2* polygon, int len);
 
     static void generateTriangleStrip(bool isCasterOpaque, float shadowStrengthScale,
