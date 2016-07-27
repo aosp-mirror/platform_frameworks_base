@@ -21,6 +21,18 @@
 
 namespace aapt {
 
+// DO NOT UPDATE, this is more of a marketing version.
+static const char* sMajorVersion = "2";
+
+// Update minor version whenever a feature or flag is added.
+static const char* sMinorVersion = "0";
+
+int printVersion() {
+    std::cerr << "Android Asset Packaging Tool (aapt) "
+            << sMajorVersion << "." << sMinorVersion << std::endl;
+    return 0;
+}
+
 extern int compile(const std::vector<StringPiece>& args);
 extern int link(const std::vector<StringPiece>& args);
 extern int dump(const std::vector<StringPiece>& args);
@@ -47,12 +59,14 @@ int main(int argc, char** argv) {
             return aapt::dump(args);
         } else if (command == "diff") {
             return aapt::diff(args);
+        } else if (command == "version") {
+            return aapt::printVersion();
         }
         std::cerr << "unknown command '" << command << "'\n";
     } else {
         std::cerr << "no command specified\n";
     }
 
-    std::cerr << "\nusage: aapt2 [compile|link|dump|diff] ..." << std::endl;
+    std::cerr << "\nusage: aapt2 [compile|link|dump|diff|version] ..." << std::endl;
     return 1;
 }
