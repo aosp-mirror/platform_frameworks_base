@@ -6185,7 +6185,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return;
                 }
                 mPendingPanicGestureUptime = SystemClock.uptimeMillis();
-                mNavigationBarController.showTransient();
+                if (!isNavBarEmpty(mLastSystemUiFlags)) {
+                    mNavigationBarController.showTransient();
+                }
             }
         }
     };
@@ -6197,7 +6199,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 return;
             }
             boolean sb = mStatusBarController.checkShowTransientBarLw();
-            boolean nb = mNavigationBarController.checkShowTransientBarLw();
+            boolean nb = mNavigationBarController.checkShowTransientBarLw()
+                    && !isNavBarEmpty(mLastSystemUiFlags);
             if (sb || nb) {
                 // Don't show status bar when swiping on already visible navigation bar
                 if (!nb && swipeTarget == mNavigationBar) {
@@ -7550,7 +7553,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // we're no longer on the Keyguard and the screen is ready. We can now request the bars.
             mPendingPanicGestureUptime = 0;
             mStatusBarController.showTransient();
-            mNavigationBarController.showTransient();
+            if (!isNavBarEmpty(vis)) {
+                mNavigationBarController.showTransient();
+            }
         }
 
         final boolean denyTransientStatus = mStatusBarController.isTransientShowRequested()
