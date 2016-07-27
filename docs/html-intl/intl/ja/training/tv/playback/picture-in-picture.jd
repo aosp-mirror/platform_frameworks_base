@@ -59,7 +59,7 @@ PIP ウィンドウでは、アプリの使用中にマルチタスクを実行�
 
 最近使ったアプリから PIP ウィンドウを閉じることもできます。</p>
 
-<img src="{@docRoot}preview/images/pip-active.png" />
+<img src="{@docRoot}images/android-7.0/pip-active.png" />
 <p class="img-caption"><strong>図 1.</strong> ユーザーがメイン画面でコンテンツを閲覧中に画面の隅に表示されるピクチャ イン ピクチャの動画
 
 </p>
@@ -116,7 +116,7 @@ public void onActionClicked(Action action) {
 <p>メディア コントロール バーに PIP ボタンを追加すると、ユーザーが動画の再生を操作中に、簡単に PIP モードに切り替えることができます。
 </p>
 
-<img src="{@docRoot}preview/images/pip-button.png" />
+<img src="{@docRoot}images/android-7.0/pip-button.png" />
 <p class="img-caption"><strong>図 1.</strong> メディア コントロール バー上の [Picture-in-picture] ボタン
 </p>
 

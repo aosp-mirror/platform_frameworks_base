@@ -59,7 +59,7 @@ presionando el botón <b>Home</b> en el control remoto. Si se comienza a reprodu
 otro video en la pantalla principal, la ventana de PIP se cierra
 automáticamente. Los usuarios también pueden cerrar la ventana de PIP desde Recents.</p>
 
-<img src="{@docRoot}preview/images/pip-active.png" />
+<img src="{@docRoot}images/android-7.0/pip-active.png" />
 <p class="img-caption"><strong>Imagen 1.</strong> Un video picture-in-picture
 visible en una esquina de la pantalla mientras el usuario explora contenido
 en la pantalla principal.</p>
@@ -116,7 +116,7 @@ public void onActionClicked(Action action) {
 <p>Agregar un botón PIP a la barra de control de medios le permite al usuario cambiar
 fácilmente al modo PIP y seguir controlando la reproducción de video.</p>
 
-<img src="{@docRoot}preview/images/pip-button.png" />
+<img src="{@docRoot}images/android-7.0/pip-button.png" />
 <p class="img-caption"><strong>Imagen 1.</strong> Un botón
 PIP en una barra de control de medios.</p>
 
