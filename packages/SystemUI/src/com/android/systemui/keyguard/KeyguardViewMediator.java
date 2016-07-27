@@ -191,6 +191,12 @@ public class KeyguardViewMediator extends SystemUI {
      */
     private static final String KEYGUARD_ANALYTICS_SETTING = "keyguard_analytics";
 
+    /**
+     * Boolean option for doKeyguardLocked/doKeyguardTimeout which, when set to true, forces the
+     * keyguard to show even if it is disabled for the current user.
+     */
+    public static final String OPTION_FORCE_SHOW = "force_show";
+
     /** The stream type that the lock sounds are tied to. */
     private int mUiSoundsStreamType;
 
@@ -1240,8 +1246,9 @@ public class KeyguardViewMediator extends SystemUI {
                 return;
             }
 
+            boolean forceShow = options != null && options.getBoolean(OPTION_FORCE_SHOW, false);
             if (mLockPatternUtils.isLockScreenDisabled(KeyguardUpdateMonitor.getCurrentUser())
-                    && !lockedOrMissing) {
+                    && !lockedOrMissing && !forceShow) {
                 if (DEBUG) Log.d(TAG, "doKeyguard: not showing because lockscreen is off");
                 return;
             }
@@ -1361,8 +1368,12 @@ public class KeyguardViewMediator extends SystemUI {
     }
 
     public boolean isSecure() {
-        return mLockPatternUtils.isSecure(KeyguardUpdateMonitor.getCurrentUser())
-            || KeyguardUpdateMonitor.getInstance(mContext).isSimPinSecure();
+        return isSecure(KeyguardUpdateMonitor.getCurrentUser());
+    }
+
+    public boolean isSecure(int userId) {
+        return mLockPatternUtils.isSecure(userId)
+                || KeyguardUpdateMonitor.getInstance(mContext).isSimPinSecure();
     }
 
     public void setSwitchingUser(boolean switching) {

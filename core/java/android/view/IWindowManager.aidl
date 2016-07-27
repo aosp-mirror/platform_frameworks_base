@@ -210,6 +210,16 @@ interface IWindowManager
     void dismissKeyguard();
     void keyguardGoingAway(int flags);
 
+    /**
+     * Called to tell WindowManager whether the keyguard is animating in. While this property
+     * is true, WindowManager won't assume that the keyguard is opaque (eg. WindowAnimator won't
+     * force-hide windows just because keyguard is visible and WallpaperController won't occlude
+     * app windows with the system wallpaper.
+     *
+     * <p>Requires CONTROL_KEYGUARD permission</p>
+     */
+    void setKeyguardAnimatingIn(boolean animating);
+
     // Requires INTERACT_ACROSS_USERS_FULL permission
     void setSwitchingUser(boolean switching);
 

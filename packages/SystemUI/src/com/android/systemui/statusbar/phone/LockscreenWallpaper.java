@@ -129,7 +129,9 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
 
     public void setCurrentUser(int user) {
         if (user != mCurrentUserId) {
-            mCached = false;
+            if (mSelectedUser == null || user != mSelectedUser.getIdentifier()) {
+                mCached = false;
+            }
             mCurrentUserId = user;
         }
     }

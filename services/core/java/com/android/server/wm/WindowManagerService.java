@@ -4508,6 +4508,23 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
+    public void setKeyguardAnimatingIn(boolean animating) {
+        if (!checkCallingPermission(Manifest.permission.CONTROL_KEYGUARD,
+                "keyguardAnimatingIn()")) {
+            throw new SecurityException("Requires CONTROL_KEYGUARD permission");
+        }
+        synchronized (mWindowMap) {
+            mAnimator.mKeyguardAnimatingIn = animating;
+        }
+    }
+
+    public boolean isKeyguardAnimatingIn() {
+        synchronized (mWindowMap) {
+            return mAnimator.mKeyguardAnimatingIn;
+        }
+    }
+
+    @Override
     public void setSwitchingUser(boolean switching) {
         if (!checkCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL,
                 "setSwitchingUser()")) {

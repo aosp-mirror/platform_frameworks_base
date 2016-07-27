@@ -50,6 +50,7 @@ import android.widget.BaseAdapter;
 
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.internal.util.UserIcons;
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.RestrictedLockUtils;
 import com.android.systemui.GuestResumeSessionReceiver;
 import com.android.systemui.R;
@@ -86,13 +87,13 @@ public class UserSwitcherController {
 
     private static final String PERMISSION_SELF = "com.android.systemui.permission.SELF";
 
-    private final Context mContext;
-    private final UserManager mUserManager;
+    protected final Context mContext;
+    protected final UserManager mUserManager;
     private final ArrayList<WeakReference<BaseUserAdapter>> mAdapters = new ArrayList<>();
     private final GuestResumeSessionReceiver mGuestResumeSessionReceiver
             = new GuestResumeSessionReceiver();
     private final KeyguardMonitor mKeyguardMonitor;
-    private final Handler mHandler;
+    protected final Handler mHandler;
     private final ActivityStarter mActivityStarter;
 
     private ArrayList<UserRecord> mUsers = new ArrayList<>();
@@ -363,11 +364,21 @@ public class UserSwitcherController {
             id = record.info.id;
         }
 
-        if (ActivityManager.getCurrentUser() == id) {
+        int currUserId = ActivityManager.getCurrentUser();
+        if (currUserId == id) {
             if (record.isGuest) {
                 showExitGuestDialog(id);
             }
             return;
+        }
+
+        if (UserManager.isGuestUserEphemeral()) {
+            // If switching from guest, we want to bring up the guest exit dialog instead of switching
+            UserInfo currUserInfo = mUserManager.getUserInfo(currUserId);
+            if (currUserInfo != null && currUserInfo.isGuest()) {
+                showExitGuestDialog(currUserId, record.resolveId());
+                return;
+            }
         }
 
         switchToUserId(id);
@@ -398,7 +409,7 @@ public class UserSwitcherController {
         return count;
     }
 
-    private void switchToUserId(int id) {
+    protected void switchToUserId(int id) {
         try {
             pauseRefreshUsers();
             ActivityManagerNative.getDefault().switchUser(id);
@@ -408,10 +419,21 @@ public class UserSwitcherController {
     }
 
     private void showExitGuestDialog(int id) {
+        int newId = UserHandle.USER_SYSTEM;
+        if (mResumeUserOnGuestLogout && mLastNonGuestUser != UserHandle.USER_SYSTEM) {
+            UserInfo info = mUserManager.getUserInfo(mLastNonGuestUser);
+            if (info != null && info.isEnabled() && info.supportsSwitchToByUser()) {
+                newId = info.id;
+            }
+        }
+        showExitGuestDialog(id, newId);
+    }
+
+    protected void showExitGuestDialog(int id, int targetId) {
         if (mExitGuestDialog != null && mExitGuestDialog.isShowing()) {
             mExitGuestDialog.cancel();
         }
-        mExitGuestDialog = new ExitGuestDialog(mContext, id);
+        mExitGuestDialog = new ExitGuestDialog(mContext, id, targetId);
         mExitGuestDialog.show();
     }
 
@@ -423,15 +445,8 @@ public class UserSwitcherController {
         mAddUserDialog.show();
     }
 
-    private void exitGuest(int id) {
-        int newId = UserHandle.USER_SYSTEM;
-        if (mResumeUserOnGuestLogout && mLastNonGuestUser != UserHandle.USER_SYSTEM) {
-            UserInfo info = mUserManager.getUserInfo(mLastNonGuestUser);
-            if (info != null && info.isEnabled() && info.supportsSwitchToByUser()) {
-                newId = info.id;
-            }
-        }
-        switchToUserId(newId);
+    protected void exitGuest(int id, int targetId) {
+        switchToUserId(targetId);
         mUserManager.removeUser(id);
     }
 
@@ -830,8 +845,9 @@ public class UserSwitcherController {
             DialogInterface.OnClickListener {
 
         private final int mGuestId;
+        private final int mTargetId;
 
-        public ExitGuestDialog(Context context, int guestId) {
+        public ExitGuestDialog(Context context, int guestId, int targetId) {
             super(context);
             setTitle(R.string.guest_exit_guest_dialog_title);
             setMessage(context.getString(R.string.guest_exit_guest_dialog_message));
@@ -841,6 +857,7 @@ public class UserSwitcherController {
                     context.getString(R.string.guest_exit_guest_dialog_remove), this);
             setCanceledOnTouchOutside(false);
             mGuestId = guestId;
+            mTargetId = targetId;
         }
 
         @Override
@@ -849,7 +866,7 @@ public class UserSwitcherController {
                 cancel();
             } else {
                 dismiss();
-                exitGuest(mGuestId);
+                exitGuest(mGuestId, mTargetId);
             }
         }
     }

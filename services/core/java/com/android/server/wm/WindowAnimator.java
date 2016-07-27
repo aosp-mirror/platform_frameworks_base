@@ -104,6 +104,7 @@ public class WindowAnimator {
 
     boolean mKeyguardGoingAway;
     int mKeyguardGoingAwayFlags;
+    boolean mKeyguardAnimatingIn;
 
     /** Use one animation for all entering activities after keyguard is dismissed. */
     Animation mPostKeyguardExitAnimation;
@@ -241,7 +242,8 @@ public class WindowAnimator {
 
         // Only hide windows if the keyguard is active and not animating away.
         boolean keyguardOn = mPolicy.isKeyguardShowingOrOccluded()
-                && mForceHiding != KEYGUARD_ANIMATING_OUT;
+                && mForceHiding != KEYGUARD_ANIMATING_OUT
+                && !mKeyguardAnimatingIn;
         boolean hideDockDivider = win.mAttrs.type == TYPE_DOCK_DIVIDER
                 && win.getDisplayContent().getDockedStackLocked() == null;
         return keyguardOn && !allowWhenLocked && (win.getDisplayId() == Display.DEFAULT_DISPLAY)

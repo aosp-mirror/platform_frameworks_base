@@ -749,6 +749,15 @@ public class UserManager {
     }
 
     /**
+     * @return Whether guest user is always ephemeral
+     * @hide
+     */
+    public static boolean isGuestUserEphemeral() {
+        return Resources.getSystem()
+                .getBoolean(com.android.internal.R.bool.config_guestUserEphemeral);
+    }
+
+    /**
      * Returns whether switching users is currently allowed.
      * <p>For instance switching users is not allowed if the current user is in a phone call,
      * or system user hasn't been unlocked yet
@@ -868,6 +877,16 @@ public class UserManager {
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Checks if a user is a guest user.
+     * @return whether user is a guest user.
+     * @hide
+     */
+    public boolean isGuestUser(int id) {
+        UserInfo user = getUserInfo(id);
+        return user != null && user.isGuest();
     }
 
     /**
