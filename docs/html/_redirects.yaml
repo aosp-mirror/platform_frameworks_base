@@ -1,6 +1,11 @@
 # For information about this file's format, see
 # https://developers.google.com/internal/publishing/redirects
 redirects:
+
+# Redirects from (removed) N Preview documentation
+- from: /preview/features/afw.html
+  to: https://developers.google.com/android/work/overview
+
 - from: /about/versions/index.html
   to: /about/index.html
 - from: /about/versions/api-levels.html
