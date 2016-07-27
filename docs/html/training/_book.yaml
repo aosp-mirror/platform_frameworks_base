@@ -726,6 +726,8 @@ toc:
       path: /training/tv/tif/channel.html
     - title: Managing User Interaction
       path: /training/tv/tif/ui.html
+    - title: Supporting Content Recording
+      path: /training/tv/tif/content-recording.html
   - title: TV Apps Checklist
     path: /training/tv/publishing/checklist.html
     path_attributes:
