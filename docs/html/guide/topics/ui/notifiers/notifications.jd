@@ -886,35 +886,38 @@ method.</p>
 
 <h3 id="controllingMedia">Controlling Media Playback on the Lock Screen</h3>
 
-<p>In Android 5.0 (API level 21) the lock screen no longer displays media controls
-based on the {@link android.media.RemoteControlClient}, which is now deprecated. Instead, use the
-{@link android.app.Notification.MediaStyle} template with the
-{@link android.app.Notification.Builder#addAction(android.app.Notification.Action) addAction()}
-method, which converts actions into clickable icons.</p>
+<p>
+  In Android 5.0 (API level 21) the lock screen no longer displays media
+  controls based on the {@link android.media.RemoteControlClient}, which is
+  now deprecated. Instead, use the {@link
+  android.support.v7.app.NotificationCompat.MediaStyle} template with the
+  {@link
+  android.support.v4.app.NotificationCompat.Builder#addAction(android.support.v4.app.NotificationCompat.Action)
+  addAction()} method, which converts actions into clickable icons.
+</p>
 
-<p class="note"><strong>Note:</strong> The template and the
-{@link android.app.Notification.Builder#addAction(android.app.Notification.Action) addAction()}
-method are not included in the support library, so these features run in Android 5.0 and higher
-only.</p>
-
-<p>To display media playback controls on the lock screen in Android 5.0, set the visibility
-to {@link android.support.v4.app.NotificationCompat#VISIBILITY_PUBLIC}, as described above. Then add
-the actions and set the {@link android.app.Notification.MediaStyle} template, as described in the
-following sample code:</p>
+<p>
+  To display media playback controls on the lock screen in Android 5.0, set
+  the visibility to {@link
+  android.support.v4.app.NotificationCompat#VISIBILITY_PUBLIC}, as described
+  above. Then add the actions and set the {@link
+  android.support.v7.app.NotificationCompat.MediaStyle} template, as described
+  in the following sample code:
+</p>
 
 <pre>
-Notification notification = new Notification.Builder(context)
+Notification notification = new NotificationCompat.Builder(context)
     // Show controls on lock screen even when user hides sensitive content.
-    .setVisibility(Notification.VISIBILITY_PUBLIC)
+    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
     .setSmallIcon(R.drawable.ic_stat_player)
     // Add media control buttons that invoke intents in your media service
     .addAction(R.drawable.ic_prev, "Previous", prevPendingIntent) // #0
     .addAction(R.drawable.ic_pause, "Pause", pausePendingIntent)  // #1
     .addAction(R.drawable.ic_next, "Next", nextPendingIntent)     // #2
     // Apply the media style template
-    .setStyle(new Notification.MediaStyle()
-    .setShowActionsInCompactView(1 /* #1: pause button */)
-    .setMediaSession(mMediaSession.getSessionToken())
+    .setStyle(new NotificationCompat.MediaStyle()
+        .setShowActionsInCompactView(1 /* #1: pause button */)
+        .setMediaSession(mMediaSession.getSessionToken()))
     .setContentTitle("Wonderful music")
     .setContentText("My Awesome Band")
     .setLargeIcon(albumArtBitmap)
