@@ -1208,3 +1208,5 @@ redirects:
   to: /training/articles/security-key-attestation.html
 - from: /preview/features/security-config.html
   to: /training/articles/security-config.html
+- from: /preview/features/picture-in-picture.html
+  to: /training/tv/playback/picture-in-picture.html
