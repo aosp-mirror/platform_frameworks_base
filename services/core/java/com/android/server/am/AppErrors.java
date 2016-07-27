@@ -627,12 +627,20 @@ class AppErrors {
             }
         }
 
+        boolean procIsBoundForeground =
+                (app.curProcState == ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE);
         // Bump up the crash count of any services currently running in the proc.
         for (int i=app.services.size()-1; i>=0; i--) {
             // Any services running in the application need to be placed
             // back in the pending list.
             ServiceRecord sr = app.services.valueAt(i);
             sr.crashCount++;
+
+            // Allow restarting for started or bound foreground services that are crashing the
+            // first time. This includes wallpapers.
+            if (sr.crashCount <= 1 && (sr.isForeground || procIsBoundForeground)) {
+                data.isRestartableForService = true;
+            }
         }
 
         // If the crashing process is what we consider to be the "home process" and it has been
