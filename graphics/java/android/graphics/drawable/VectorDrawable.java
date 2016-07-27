@@ -27,9 +27,9 @@ import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Insets;
 import android.graphics.PixelFormat;
+import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
-import android.graphics.PorterDuff.Mode;
 import android.graphics.Shader;
 import android.util.ArrayMap;
 import android.util.AttributeSet;
@@ -140,12 +140,16 @@ import dalvik.system.VMRuntime;
  * in the SVG's path data. This is defined in the viewport space.</dd>
  * <dt><code>android:fillColor</code></dt>
  * <dd>Specifies the color used to fill the path. May be a color or, for SDK 24+, a color state list
- * or a gradient color. If this property is animated, any value set by the animation will
- * override the original value. No path fill is drawn if this property is not specified.</dd>
+ * or a gradient color (See {@link android.R.styleable#GradientColor}
+ * and {@link android.R.styleable#GradientColorItem}).
+ * If this property is animated, any value set by the animation will override the original value.
+ * No path fill is drawn if this property is not specified.</dd>
  * <dt><code>android:strokeColor</code></dt>
  * <dd>Specifies the color used to draw the path outline. May be a color or, for SDK 24+, a color
- * state list or a gradient color. If this property is animated, any value set by the animation will
- * override the original value. No path outline is drawn if this property is not specified.</dd>
+ * state list or a gradient color (See {@link android.R.styleable#GradientColor}
+ * and {@link android.R.styleable#GradientColorItem}).
+ * If this property is animated, any value set by the animation will override the original value.
+ * No path outline is drawn if this property is not specified.</dd>
  * <dt><code>android:strokeWidth</code></dt>
  * <dd>The width a path stroke.</dd>
  * <dt><code>android:strokeAlpha</code></dt>
@@ -166,8 +170,9 @@ import dalvik.system.VMRuntime;
  * <dt><code>android:strokeMiterLimit</code></dt>
  * <dd>Sets the Miter limit for a stroked path.</dd>
  * <dt><code>android:fillType</code></dt>
- * <dd>Sets the fillType for a path. It is the same as SVG's "fill-rule" properties.
- * For more details, see https://www.w3.org/TR/SVG/painting.html#FillRuleProperty</dd>
+ * <dd>Sets the fillType for a path. The types can be either "evenOdd" or "nonZero". They behave the
+ * same as SVG's "fill-rule" properties. For more details, see
+ * <a href="https://www.w3.org/TR/SVG/painting.html#FillRuleProperty">FillRuleProperty</a></dd>
  * </dl></dd>
  * </dl>
  *
@@ -201,7 +206,26 @@ import dalvik.system.VMRuntime;
  *             android:pathData=&quot;M300,70 l 0,-70 70,70 0,0 -70,70z&quot; /&gt;
  *     &lt;/group&gt;
  * &lt;/vector&gt;
- * </pre></li>
+ * </pre>
+ * </li>
+ * <li>And here is an example of linear gradient color, which is supported in SDK 24+.
+ * See more details in {@link android.R.styleable#GradientColor} and
+ * {@link android.R.styleable#GradientColorItem}.
+ * <pre>
+ * &lt;gradient xmlns:android="http://schemas.android.com/apk/res/android"
+ *     android:angle="90"
+ *     android:startColor="?android:attr/colorPrimary"
+ *     android:endColor="?android:attr/colorControlActivated"
+ *     android:centerColor="#f00"
+ *     android:startX="0"
+ *     android:startY="0"
+ *     android:endX="100"
+ *     android:endY="100"
+ *     android:type="linear"&gt;
+ * &lt;/gradient&gt;
+ * </pre>
+ * </li>
+ *
  */
 
 public class VectorDrawable extends Drawable {

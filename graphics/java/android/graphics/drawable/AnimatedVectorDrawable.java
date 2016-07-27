@@ -144,6 +144,55 @@ import java.util.ArrayList;
  *         android:valueType=&quot;pathType&quot;/&gt;
  * &lt;/set&gt;
  * </pre></li>
+ * <p>
+ * Since AAPT tool is now supporting a new format which can bundle several related XML files into
+ * one, we can merge the previous example into one XML file, like this:
+ * </p>
+ * <pre>
+ * &lt;animated-vector xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot; &gt;
+ *     &lt;aapt:attr name="android:drawable"&gt;
+ *         &lt;vector
+ *             android:height=&quot;64dp&quot;
+ *             android:width=&quot;64dp&quot;
+ *             android:viewportHeight=&quot;600&quot;
+ *             android:viewportWidth=&quot;600&quot; &gt;
+ *             &lt;group
+ *                 android:name=&quot;rotationGroup&quot;
+ *                 android:pivotX=&quot;300.0&quot;
+ *                 android:pivotY=&quot;300.0&quot;
+ *                 android:rotation=&quot;45.0&quot; &gt;
+ *                 &lt;path
+ *                     android:name=&quot;v&quot;
+ *                     android:fillColor=&quot;#000000&quot;
+ *                     android:pathData=&quot;M300,70 l 0,-70 70,70 0,0 -70,70z&quot; /&gt;
+ *             &lt;/group&gt;
+ *         &lt;/vector&gt;
+ *     &lt;/aapt:attr&gt;
+ *
+ *     &lt;target android:name=&quot;rotationGroup&quot;&gt; *
+ *         &lt;aapt:attr name="android:animation"&gt;
+ *             &lt;objectAnimator
+ *             android:duration=&quot;6000&quot;
+ *             android:propertyName=&quot;rotation&quot;
+ *             android:valueFrom=&quot;0&quot;
+ *             android:valueTo=&quot;360&quot; /&gt;
+ *         &lt;/aapt:attr&gt;
+ *     &lt;/target&gt;
+ *
+ *     &lt;target android:name=&quot;v&quot; &gt;
+ *         &lt;aapt:attr name="android:animation"&gt;
+ *             &lt;set&gt;
+ *                 &lt;objectAnimator
+ *                     android:duration=&quot;3000&quot;
+ *                     android:propertyName=&quot;pathData&quot;
+ *                     android:valueFrom=&quot;M300,70 l 0,-70 70,70 0,0   -70,70z&quot;
+ *                     android:valueTo=&quot;M300,70 l 0,-70 70,0  0,140 -70,0 z&quot;
+ *                     android:valueType=&quot;pathType&quot;/&gt;
+ *             &lt;/set&gt;
+ *         &lt;/aapt:attr&gt;
+ *      &lt;/target&gt;
+ * &lt;/animated-vector&gt;
+ * </pre>
  *
  * @attr ref android.R.styleable#AnimatedVectorDrawable_drawable
  * @attr ref android.R.styleable#AnimatedVectorDrawableTarget_name
