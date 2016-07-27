@@ -81,6 +81,27 @@ TEST(RecordingCanvas, emptyClipRect) {
     ASSERT_EQ(0u, dl->getOps().size()) << "Must be zero ops. Rect should be rejected.";
 }
 
+TEST(RecordingCanvas, emptyPaintRejection) {
+    auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
+        SkPaint emptyPaint;
+        emptyPaint.setColor(Color::Transparent);
+
+        float points[] = {0, 0, 200, 200};
+        canvas.drawPoints(points, 4, emptyPaint);
+        canvas.drawLines(points, 4, emptyPaint);
+        canvas.drawRect(0, 0, 200, 200, emptyPaint);
+        canvas.drawRegion(SkRegion(SkIRect::MakeWH(200, 200)), emptyPaint);
+        canvas.drawRoundRect(0, 0, 200, 200, 10, 10, emptyPaint);
+        canvas.drawCircle(100, 100, 100, emptyPaint);
+        canvas.drawOval(0, 0, 200, 200, emptyPaint);
+        canvas.drawArc(0, 0, 200, 200, 0, 360, true, emptyPaint);
+        SkPath path;
+        path.addRect(0, 0, 200, 200);
+        canvas.drawPath(path, emptyPaint);
+    });
+    EXPECT_EQ(0u, dl->getOps().size()) << "Op should be rejected";
+}
+
 TEST(RecordingCanvas, drawArc) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         canvas.drawArc(0, 0, 200, 200, 0, 180, true, SkPaint());
