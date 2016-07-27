@@ -23,7 +23,6 @@ public class GraphicsTests {
         TestSuite suite = new TestSuite(GraphicsTests.class.getName());
 
         suite.addTestSuite(BitmapTest.class);
-        suite.addTestSuite(TypefaceTest.class);
         return suite;
     }
 }

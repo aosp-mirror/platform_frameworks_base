@@ -558,9 +558,13 @@ def check_vertical_metrics():
     for record in _fallback_chain:
         if record.name in ['sans-serif', 'sans-serif-condensed']:
             font = open_font(record.font)
-            assert (font['head'].yMax == 2163 and font['head'].yMin == -555 and
-                    font['hhea'].ascent == 1900 and font['hhea'].descent == -500), (
-                   'Vertical metrics of %s do not match expected Roboto metrics.' % (record.font,))
+            assert font['head'].yMax == 2163 and font['head'].yMin == -555, (
+                'yMax and yMin of %s do not match expected values.' % (record.font,))
+
+        if record.name in ['sans-serif', 'sans-serif-condensed', 'serif', 'monospace']:
+            font = open_font(record.font)
+            assert font['hhea'].ascent == 1900 and font['hhea'].descent == -500, (
+                'ascent and descent of %s do not match expected values.' % (record.font,))
 
 
 def main():
