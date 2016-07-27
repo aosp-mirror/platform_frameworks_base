@@ -851,6 +851,8 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
     }
 
     public void testShortcutInfoSaveAndLoad() throws InterruptedException {
+        mRunningUsers.put(USER_10, true);
+
         setCaller(CALLING_PACKAGE_1, USER_10);
 
         final Icon bmp32x32 = Icon.createWithBitmap(BitmapFactory.decodeResource(
@@ -930,6 +932,8 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
     }
 
     public void testShortcutInfoSaveAndLoad_resId() throws InterruptedException {
+        mRunningUsers.put(USER_10, true);
+
         setCaller(CALLING_PACKAGE_1, USER_10);
 
         final Icon res32x32 = Icon.createWithResource(mClientContext, R.drawable.black_32x32);
@@ -1794,6 +1798,8 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
     }
 
     public void testReportShortcutUsed() {
+        mRunningUsers.put(USER_10, true);
+
         runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
             reset(mMockUsageStatsManagerInternal);
 
