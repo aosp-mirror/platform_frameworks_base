@@ -6230,6 +6230,20 @@ public final class Settings {
         public static final int VR_DISPLAY_MODE_OFF = 1;
 
         /**
+         * Whether CarrierAppUtils#disableCarrierAppsUntilPrivileged has been executed at least
+         * once.
+         *
+         * <p>This is used to ensure that we only take one pass which will disable apps that are not
+         * privileged (if any). From then on, we only want to enable apps (when a matching SIM is
+         * inserted), to avoid disabling an app that the user might actively be using.
+         *
+         * <p>Will be set to 1 once executed.
+         *
+         * @hide
+         */
+        public static final String CARRIER_APPS_HANDLED = "carrier_apps_handled";
+
+        /**
          * Whether parent user can access remote contact in managed profile.
          *
          * @hide
