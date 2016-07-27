@@ -749,6 +749,7 @@ public class ApplicationsState {
         static final int MSG_LOAD_ICONS = 3;
         static final int MSG_LOAD_SIZES = 4;
         static final int MSG_LOAD_LAUNCHER = 5;
+        static final int MSG_LOAD_HOME_APP = 6;
 
         boolean mRunning;
 
@@ -817,13 +818,33 @@ public class ApplicationsState {
                         if (!mMainHandler.hasMessages(MainHandler.MSG_LOAD_ENTRIES_COMPLETE)) {
                             mMainHandler.sendEmptyMessage(MainHandler.MSG_LOAD_ENTRIES_COMPLETE);
                         }
-                        sendEmptyMessage(MSG_LOAD_LAUNCHER);
+                        sendEmptyMessage(MSG_LOAD_HOME_APP);
                     }
                 } break;
+                case MSG_LOAD_HOME_APP: {
+                    final List<ResolveInfo> homeActivities = new ArrayList<>();
+                    mPm.getHomeActivities(homeActivities);
+                    synchronized (mEntriesMap) {
+                        final int entryCount = mEntriesMap.size();
+                        for (int i = 0; i < entryCount; i++) {
+                            if (DEBUG_LOCKING) Log.v(TAG, "MSG_LOAD_HOME_APP acquired lock");
+                            final HashMap<String, AppEntry> userEntries = mEntriesMap.valueAt(i);
+                            for (ResolveInfo activity : homeActivities) {
+                                String packageName = activity.activityInfo.packageName;
+                                AppEntry entry = userEntries.get(packageName);
+                                if (entry != null) {
+                                    entry.isHomeApp = true;
+                                }
+                            }
+                            if (DEBUG_LOCKING) Log.v(TAG, "MSG_LOAD_HOME_APP releasing lock");
+                        }
+                    }
+                    sendEmptyMessage(MSG_LOAD_LAUNCHER);
+                }
+                break;
                 case MSG_LOAD_LAUNCHER: {
                     Intent launchIntent = new Intent(Intent.ACTION_MAIN, null)
                             .addCategory(Intent.CATEGORY_LAUNCHER);
-
                     for (int i = 0; i < mEntriesMap.size(); i++) {
                         int userId = mEntriesMap.keyAt(i);
                         // If we do not specify MATCH_DIRECT_BOOT_AWARE or
@@ -1119,6 +1140,11 @@ public class ApplicationsState {
          */
         public boolean hasLauncherEntry;
 
+        /**
+         * Whether or not it's a Home app.
+         */
+        public boolean isHomeApp;
+
         public String getNormalizedLabel() {
             if (normalizedLabel != null) {
                 return normalizedLabel;
@@ -1309,6 +1335,8 @@ public class ApplicationsState {
             } else if ((entry.info.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
                 return true;
             } else if (entry.hasLauncherEntry) {
+                return true;
+            } else if ((entry.info.flags & ApplicationInfo.FLAG_SYSTEM) != 0 && entry.isHomeApp) {
                 return true;
             }
             return false;
