@@ -39,7 +39,7 @@ const FrameBuilder::LightGeometry sLightGeometry = { {100, 100, 100}, 50};
 const BakedOpRenderer::LightInfo sLightInfo = { 128, 128 };
 
 static sp<RenderNode> createTestNode() {
-    auto node = TestUtils::createNode(0, 0, 200, 200,
+    auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200,
             [](RenderProperties& props, RecordingCanvas& canvas) {
         SkBitmap bitmap = TestUtils::createSkBitmap(10, 10);
         SkPaint paint;
@@ -98,8 +98,8 @@ static sp<RenderNode> getSyncedSceneNode(const char* sceneName) {
     TestScene::Options opts;
     std::unique_ptr<TestScene> scene(TestScene::testMap()[sceneName].createScene(opts));
 
-    sp<RenderNode> rootNode = TestUtils::createNode(0, 0, gDisplay.w, gDisplay.h,
-                [&scene](RenderProperties& props, TestCanvas& canvas) {
+    sp<RenderNode> rootNode = TestUtils::createNode<RecordingCanvas>(0, 0, gDisplay.w, gDisplay.h,
+                [&scene](RenderProperties& props, RecordingCanvas& canvas) {
             scene->createContent(gDisplay.w, gDisplay.h, canvas);
     });
 

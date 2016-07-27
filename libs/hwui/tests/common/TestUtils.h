@@ -33,8 +33,6 @@
 namespace android {
 namespace uirenderer {
 
-typedef RecordingCanvas TestCanvas;
-
 #define EXPECT_MATRIX_APPROX_EQ(a, b) \
     EXPECT_TRUE(TestUtils::matricesAreApproxEqual(a, b))
 
@@ -146,7 +144,7 @@ public:
     }
 
     static sp<RenderNode> createNode(int left, int top, int right, int bottom,
-            std::function<void(RenderProperties& props, TestCanvas& canvas)> setup) {
+            std::function<void(RenderProperties& props, Canvas& canvas)> setup) {
 #if HWUI_NULL_GPU
         // if RenderNodes are being sync'd/used, device info will be needed, since
         // DeviceInfo::maxTextureSize() affects layer property
@@ -157,7 +155,29 @@ public:
         RenderProperties& props = node->mutateStagingProperties();
         props.setLeftTopRightBottom(left, top, right, bottom);
         if (setup) {
-            TestCanvas canvas(props.getWidth(), props.getHeight());
+            std::unique_ptr<Canvas> canvas(Canvas::create_recording_canvas(props.getWidth(),
+                    props.getHeight()));
+            setup(props, *canvas.get());
+            node->setStagingDisplayList(canvas->finishRecording(), nullptr);
+        }
+        node->setPropertyFieldsDirty(0xFFFFFFFF);
+        return node;
+    }
+
+    template<class RecordingCanvasType>
+    static sp<RenderNode> createNode(int left, int top, int right, int bottom,
+            std::function<void(RenderProperties& props, RecordingCanvasType& canvas)> setup) {
+#if HWUI_NULL_GPU
+        // if RenderNodes are being sync'd/used, device info will be needed, since
+        // DeviceInfo::maxTextureSize() affects layer property
+        DeviceInfo::initialize();
+#endif
+
+        sp<RenderNode> node = new RenderNode();
+        RenderProperties& props = node->mutateStagingProperties();
+        props.setLeftTopRightBottom(left, top, right, bottom);
+        if (setup) {
+            RecordingCanvasType canvas(props.getWidth(), props.getHeight());
             setup(props, canvas);
             node->setStagingDisplayList(canvas.finishRecording(), nullptr);
         }
@@ -166,11 +186,11 @@ public:
     }
 
     static void recordNode(RenderNode& node,
-            std::function<void(TestCanvas&)> contentCallback) {
-       TestCanvas canvas(node.stagingProperties().getWidth(),
-               node.stagingProperties().getHeight());
-       contentCallback(canvas);
-       node.setStagingDisplayList(canvas.finishRecording(), nullptr);
+            std::function<void(Canvas&)> contentCallback) {
+       std::unique_ptr<Canvas> canvas(Canvas::create_recording_canvas(
+            node.stagingProperties().getWidth(), node.stagingProperties().getHeight()));
+       contentCallback(*canvas.get());
+       node.setStagingDisplayList(canvas->finishRecording(), nullptr);
     }
 
     /**

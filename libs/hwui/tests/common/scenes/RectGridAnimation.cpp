@@ -29,12 +29,12 @@ static TestScene::Registrar _RectGrid(TestScene::Info{
 class RectGridAnimation : public TestScene {
 public:
     sp<RenderNode> card;
-    void createContent(int width, int height, TestCanvas& canvas) override {
+    void createContent(int width, int height, Canvas& canvas) override {
         canvas.drawColor(0xFFFFFFFF, SkXfermode::kSrcOver_Mode);
         canvas.insertReorderBarrier(true);
 
         card = TestUtils::createNode(50, 50, 250, 250,
-                [](RenderProperties& props, TestCanvas& canvas) {
+                [](RenderProperties& props, Canvas& canvas) {
             canvas.drawColor(0xFFFF00FF, SkXfermode::kSrcOver_Mode);
 
             SkRegion region;

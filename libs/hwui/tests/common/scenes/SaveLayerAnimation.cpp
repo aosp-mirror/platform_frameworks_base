@@ -28,11 +28,11 @@ static TestScene::Registrar _SaveLayer(TestScene::Info{
 class SaveLayerAnimation : public TestScene {
 public:
     sp<RenderNode> card;
-    void createContent(int width, int height, TestCanvas& canvas) override {
+    void createContent(int width, int height, Canvas& canvas) override {
         canvas.drawColor(Color::White, SkXfermode::kSrcOver_Mode); // background
 
         card = TestUtils::createNode(0, 0, 400, 800,
-                [](RenderProperties& props, TestCanvas& canvas) {
+                [](RenderProperties& props, Canvas& canvas) {
             // nested clipped saveLayers
             canvas.saveLayerAlpha(0, 0, 400, 400, 200, SaveFlags::ClipToLayer);
             canvas.drawColor(Color::Green_700, SkXfermode::kSrcOver_Mode);

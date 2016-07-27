@@ -41,9 +41,9 @@ public:
     sp<CanvasPropertyPrimitive> mCircleRadius = new CanvasPropertyPrimitive(0);
 
     sp<RenderNode> content;
-    void createContent(int width, int height, TestCanvas& canvas) override {
+    void createContent(int width, int height, Canvas& canvas) override {
         content = TestUtils::createNode(0, 0, width, height,
-                [this, width, height](RenderProperties& props, TestCanvas& canvas) {
+                [this, width, height](RenderProperties& props, Canvas& canvas) {
             mPaint->value.setAntiAlias(true);
             mPaint->value.setColor(Color::Blue_500);
 

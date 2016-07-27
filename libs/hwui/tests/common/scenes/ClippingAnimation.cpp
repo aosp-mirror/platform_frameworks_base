@@ -28,10 +28,10 @@ static TestScene::Registrar _RectGrid(TestScene::Info{
 class ClippingAnimation : public TestScene {
 public:
     sp<RenderNode> card;
-    void createContent(int width, int height, TestCanvas& canvas) override {
+    void createContent(int width, int height, Canvas& canvas) override {
         canvas.drawColor(Color::White, SkXfermode::kSrcOver_Mode);
         card = TestUtils::createNode(0, 0, 200, 400,
-                [](RenderProperties& props, TestCanvas& canvas) {
+                [](RenderProperties& props, Canvas& canvas) {
             canvas.save(SaveFlags::MatrixClip);
             {
                 canvas.clipRect(0, 0, 200, 200, SkRegion::kIntersect_Op);

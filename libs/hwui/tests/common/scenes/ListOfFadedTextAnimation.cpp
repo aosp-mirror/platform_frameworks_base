@@ -29,7 +29,7 @@ static TestScene::Registrar _ListOfFadedTextAnimation(TestScene::Info{
 });
 
 class ListOfFadedTextAnimation : public TestListViewSceneBase {
-    void createListItem(RenderProperties& props, TestCanvas& canvas, int id,
+    void createListItem(RenderProperties& props, Canvas& canvas, int id,
             int itemWidth, int itemHeight)  override {
         canvas.drawColor(Color::White, SkXfermode::kSrcOver_Mode);
         int length = dp(100);

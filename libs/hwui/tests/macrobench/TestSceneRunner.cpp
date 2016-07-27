@@ -126,7 +126,7 @@ void run(const TestScene::Info& info, const TestScene::Options& opts,
     sp<Surface> surface = testContext.surface();
 
     sp<RenderNode> rootNode = TestUtils::createNode(0, 0, width, height,
-            [&scene, width, height](RenderProperties& props, TestCanvas& canvas) {
+            [&scene, width, height](RenderProperties& props, Canvas& canvas) {
         props.setClipToBounds(false);
         scene->createContent(width, height, canvas);
     });

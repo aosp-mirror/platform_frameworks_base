@@ -39,11 +39,11 @@ public:
 
 TEST(RenderNode, hasParents) {
     auto child = TestUtils::createNode(0, 0, 200, 400,
-            [](RenderProperties& props, TestCanvas& canvas) {
+            [](RenderProperties& props, Canvas& canvas) {
         canvas.drawColor(Color::Red_500, SkXfermode::kSrcOver_Mode);
     });
     auto parent = TestUtils::createNode(0, 0, 200, 400,
-            [&child](RenderProperties& props, TestCanvas& canvas) {
+            [&child](RenderProperties& props, Canvas& canvas) {
         canvas.drawRenderNode(child.get());
     });
 
@@ -52,7 +52,7 @@ TEST(RenderNode, hasParents) {
     EXPECT_TRUE(child->hasParents()) << "Child node has no parent";
     EXPECT_FALSE(parent->hasParents()) << "Root node shouldn't have any parents";
 
-    TestUtils::recordNode(*parent, [](TestCanvas& canvas) {
+    TestUtils::recordNode(*parent, [](Canvas& canvas) {
         canvas.drawColor(Color::Amber_500, SkXfermode::kSrcOver_Mode);
     });
 
@@ -81,14 +81,14 @@ TEST(RenderNode, releasedCallback) {
     Functor noopFunctor;
 
     auto node = TestUtils::createNode(0, 0, 200, 400,
-            [&](RenderProperties& props, TestCanvas& canvas) {
+            [&](RenderProperties& props, Canvas& canvas) {
         refcnt++;
         canvas.callDrawGLFunction(&noopFunctor, listener.get());
     });
     TestUtils::syncHierarchyPropertiesAndDisplayList(node);
     EXPECT_EQ(1, refcnt);
 
-    TestUtils::recordNode(*node, [&](TestCanvas& canvas) {
+    TestUtils::recordNode(*node, [&](Canvas& canvas) {
         refcnt++;
         canvas.callDrawGLFunction(&noopFunctor, listener.get());
     });
@@ -97,7 +97,7 @@ TEST(RenderNode, releasedCallback) {
     TestUtils::syncHierarchyPropertiesAndDisplayList(node);
     EXPECT_EQ(1, refcnt);
 
-    TestUtils::recordNode(*node, [](TestCanvas& canvas) {});
+    TestUtils::recordNode(*node, [](Canvas& canvas) {});
     EXPECT_EQ(1, refcnt);
     TestUtils::syncHierarchyPropertiesAndDisplayList(node);
     EXPECT_EQ(0, refcnt);
@@ -114,7 +114,7 @@ RENDERTHREAD_TEST(RenderNode, prepareTree_nullableDisplayList) {
 
     {
         auto nonNullDLNode = TestUtils::createNode(0, 0, 200, 400,
-                [](RenderProperties& props, TestCanvas& canvas) {
+                [](RenderProperties& props, Canvas& canvas) {
             canvas.drawColor(Color::Red_500, SkXfermode::kSrcOver_Mode);
         });
         TestUtils::syncHierarchyPropertiesAndDisplayList(nonNullDLNode);
