@@ -19,8 +19,9 @@
 
 #include "ConfigDescription.h"
 #include "Source.h"
-
 #include "util/StringPiece.h"
+
+#include <utils/JenkinsHash.h>
 
 #include <iomanip>
 #include <limits>
@@ -352,5 +353,19 @@ inline bool operator==(const SourcedResourceName& lhs, const SourcedResourceName
 }
 
 } // namespace aapt
+
+namespace std {
+
+template <> struct hash<aapt::ResourceName> {
+    size_t operator()(const aapt::ResourceName& name) const {
+        android::hash_t h = 0;
+        h = android::JenkinsHashMix(h, hash<string>()(name.package));
+        h = android::JenkinsHashMix(h, static_cast<uint32_t>(name.type));
+        h = android::JenkinsHashMix(h, hash<string>()(name.entry));
+        return static_cast<size_t>(h);
+    }
+};
+
+} // namespace std
 
 #endif // AAPT_RESOURCE_H

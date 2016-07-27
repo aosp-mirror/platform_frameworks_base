@@ -44,10 +44,12 @@
 #include "util/StringPiece.h"
 #include "xml/XmlDom.h"
 
+#include <android-base/file.h>
 #include <google/protobuf/io/coded_stream.h>
 
 #include <fstream>
 #include <sys/stat.h>
+#include <unordered_map>
 #include <vector>
 
 namespace aapt {
@@ -76,6 +78,8 @@ struct LinkOptions {
     ManifestFixerOptions manifestFixerOptions;
     std::unordered_set<std::string> products;
     TableSplitterOptions tableSplitterOptions;
+    std::unordered_map<ResourceName, ResourceId> stableIdMap;
+    Maybe<std::string> resourceIdMapPath;
 };
 
 class LinkContext : public IAaptContext {
@@ -515,6 +519,77 @@ bool ResourceFileFlattener::flatten(ResourceTable* table, IArchiveWriter* archiv
         }
     }
     return !error;
+}
+
+static bool writeStableIdMapToPath(IDiagnostics* diag,
+                                   const std::unordered_map<ResourceName, ResourceId>& idMap,
+                                   const std::string idMapPath) {
+    std::ofstream fout(idMapPath, std::ofstream::binary);
+    if (!fout) {
+        diag->error(DiagMessage(idMapPath) << strerror(errno));
+        return false;
+    }
+
+    for (const auto& entry : idMap) {
+        const ResourceName& name = entry.first;
+        const ResourceId& id = entry.second;
+        fout << name << " = " << id << "\n";
+    }
+
+    if (!fout) {
+        diag->error(DiagMessage(idMapPath) << "failed writing to file: " << strerror(errno));
+        return false;
+    }
+
+    return true;
+}
+
+static bool loadStableIdMap(IDiagnostics* diag, const std::string& path,
+                            std::unordered_map<ResourceName, ResourceId>* outIdMap) {
+    std::string content;
+    if (!android::base::ReadFileToString(path, &content)) {
+        diag->error(DiagMessage(path) << "failed reading stable ID file");
+        return false;
+    }
+
+    outIdMap->clear();
+    size_t lineNo = 0;
+    for (StringPiece line : util::tokenize(content, '\n')) {
+        lineNo++;
+        line = util::trimWhitespace(line);
+        if (line.empty()) {
+            continue;
+        }
+
+        auto iter = std::find(line.begin(), line.end(), '=');
+        if (iter == line.end()) {
+            diag->error(DiagMessage(Source(path, lineNo)) << "missing '='");
+            return false;
+        }
+
+        ResourceNameRef name;
+        StringPiece resNameStr = util::trimWhitespace(
+                line.substr(0, std::distance(line.begin(), iter)));
+        if (!ResourceUtils::parseResourceName(resNameStr, &name)) {
+            diag->error(DiagMessage(Source(path, lineNo))
+                        << "invalid resource name '" << resNameStr << "'");
+            return false;
+        }
+
+        const size_t resIdStartIdx = std::distance(line.begin(), iter) + 1;
+        const size_t resIdStrLen = line.size() - resIdStartIdx;
+        StringPiece resIdStr = util::trimWhitespace(line.substr(resIdStartIdx, resIdStrLen));
+
+        Maybe<ResourceId> maybeId = ResourceUtils::tryParseResourceId(resIdStr);
+        if (!maybeId) {
+            diag->error(DiagMessage(Source(path, lineNo)) << "invalid resource ID '"
+                        << resIdStr << "'");
+            return false;
+        }
+
+        (*outIdMap)[name.toResourceName()] = maybeId.value();
+    }
+    return true;
 }
 
 class LinkCommand {
@@ -1176,10 +1251,31 @@ public:
 
         if (!mOptions.staticLib) {
             // Assign IDs if we are building a regular app.
-            IdAssigner idAssigner;
+            IdAssigner idAssigner(&mOptions.stableIdMap);
             if (!idAssigner.consume(mContext, &mFinalTable)) {
                 mContext->getDiagnostics()->error(DiagMessage() << "failed assigning IDs");
                 return 1;
+            }
+
+            // Now grab each ID and emit it as a file.
+            if (mOptions.resourceIdMapPath) {
+                for (auto& package : mFinalTable.packages) {
+                    for (auto& type : package->types) {
+                        for (auto& entry : type->entries) {
+                            ResourceName name(package->name, type->type, entry->name);
+                            // The IDs are guaranteed to exist.
+                            mOptions.stableIdMap[std::move(name)] = ResourceId(package->id.value(),
+                                                                               type->id.value(),
+                                                                               entry->id.value());
+                        }
+                    }
+                }
+
+                if (!writeStableIdMapToPath(mContext->getDiagnostics(),
+                                            mOptions.stableIdMap,
+                                            mOptions.resourceIdMapPath.value())) {
+                    return 1;
+                }
             }
         } else {
             // Static libs are merged with other apps, and ID collisions are bad, so verify that
@@ -1437,6 +1533,7 @@ int link(const std::vector<StringPiece>& args) {
     bool legacyXFlag = false;
     bool requireLocalization = false;
     bool verbose = false;
+    Maybe<std::string> stableIdFilePath;
     Flags flags = Flags()
             .requiredFlag("-o", "Output path", &options.outputPath)
             .requiredFlag("--manifest", "Path to the Android manifest to build",
@@ -1493,6 +1590,11 @@ int link(const std::vector<StringPiece>& args) {
             .optionalSwitch("--non-final-ids", "Generates R.java without the final modifier.\n"
                             "This is implied when --static-lib is specified.",
                             &options.generateNonFinalIds)
+            .optionalFlag("--stable-ids", "File containing a list of name to ID mapping.",
+                          &stableIdFilePath)
+            .optionalFlag("--emit-ids", "Emit a file at the given path with a list of name to ID\n"
+                          "mappings, suitable for use with --stable-ids.",
+                          &options.resourceIdMapPath)
             .optionalFlag("--private-symbols", "Package name to use when generating R.java for "
                           "private symbols.\n"
                           "If not specified, public and private symbols will use the application's "
@@ -1617,6 +1719,13 @@ int link(const std::vector<StringPiece>& args) {
             return 1;
         }
         options.tableSplitterOptions.preferredDensity = preferredDensityConfig.density;
+    }
+
+    if (!options.staticLib && stableIdFilePath) {
+        if (!loadStableIdMap(context.getDiagnostics(), stableIdFilePath.value(),
+                             &options.stableIdMap)) {
+            return 1;
+        }
     }
 
     // Turn off auto versioning for static-libs.

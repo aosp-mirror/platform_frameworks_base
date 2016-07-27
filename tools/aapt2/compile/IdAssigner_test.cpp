@@ -15,11 +15,7 @@
  */
 
 #include "compile/IdAssigner.h"
-
-#include "test/Context.h"
-#include "test/Builders.h"
-
-#include <gtest/gtest.h>
+#include "test/Test.h"
 
 namespace aapt {
 
@@ -42,9 +38,14 @@ TEST(IdAssignerTest, AssignIds) {
 
 TEST(IdAssignerTest, AssignIdsWithReservedIds) {
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
+            .addSimple("@android:id/foo", ResourceId(0x01010000))
+            .addSimple("@android:dimen/two")
+            .addSimple("@android:integer/three")
+            .addSimple("@android:string/five")
+            .addSimple("@android:attr/fun", ResourceId(0x01040000))
             .addSimple("@android:attr/foo", ResourceId(0x01040006))
             .addSimple("@android:attr/bar")
-            .addSimple("@android:id/foo")
+            .addSimple("@android:attr/baz")
             .addSimple("@app:id/biz")
             .setPackageId("android", 0x01)
             .setPackageId("app", 0x7f)
@@ -55,6 +56,34 @@ TEST(IdAssignerTest, AssignIdsWithReservedIds) {
 
     ASSERT_TRUE(assigner.consume(context.get(), table.get()));
     ASSERT_TRUE(verifyIds(table.get()));
+
+    Maybe<ResourceTable::SearchResult> maybeResult;
+
+    // Expect to fill in the gaps between 0x0101XXXX and 0x0104XXXX.
+
+    maybeResult = table->findResource(test::parseNameOrDie("@android:dimen/two"));
+    AAPT_ASSERT_TRUE(maybeResult);
+    EXPECT_EQ(make_value<uint8_t>(2), maybeResult.value().type->id);
+
+    maybeResult = table->findResource(test::parseNameOrDie("@android:integer/three"));
+    AAPT_ASSERT_TRUE(maybeResult);
+    EXPECT_EQ(make_value<uint8_t>(3), maybeResult.value().type->id);
+
+    // Expect to bypass the reserved 0x0104XXXX IDs and use the next 0x0105XXXX IDs.
+
+    maybeResult = table->findResource(test::parseNameOrDie("@android:string/five"));
+    AAPT_ASSERT_TRUE(maybeResult);
+    EXPECT_EQ(make_value<uint8_t>(5), maybeResult.value().type->id);
+
+    // Expect to fill in the gaps between 0x01040000 and 0x01040006.
+
+    maybeResult = table->findResource(test::parseNameOrDie("@android:attr/bar"));
+    AAPT_ASSERT_TRUE(maybeResult);
+    EXPECT_EQ(make_value<uint16_t>(1), maybeResult.value().entry->id);
+
+    maybeResult = table->findResource(test::parseNameOrDie("@android:attr/baz"));
+    AAPT_ASSERT_TRUE(maybeResult);
+    EXPECT_EQ(make_value<uint16_t>(2), maybeResult.value().entry->id);
 }
 
 TEST(IdAssignerTest, FailWhenNonUniqueIdsAssigned) {
@@ -69,6 +98,29 @@ TEST(IdAssignerTest, FailWhenNonUniqueIdsAssigned) {
     IdAssigner assigner;
 
     ASSERT_FALSE(assigner.consume(context.get(), table.get()));
+}
+
+TEST(IdAssignerTest, AssignIdsWithIdMap) {
+    std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
+            .addSimple("@android:attr/foo")
+            .addSimple("@android:attr/bar")
+            .setPackageId("android", 0x01)
+            .build();
+
+    std::unique_ptr<IAaptContext> context = test::ContextBuilder().build();
+    std::unordered_map<ResourceName, ResourceId> idMap = {
+            { test::parseNameOrDie("@android:attr/foo"), ResourceId(0x01010002) } };
+    IdAssigner assigner(&idMap);
+    ASSERT_TRUE(assigner.consume(context.get(), table.get()));
+    ASSERT_TRUE(verifyIds(table.get()));
+    Maybe<ResourceTable::SearchResult> result = table->findResource(
+            test::parseNameOrDie("@android:attr/foo"));
+    AAPT_ASSERT_TRUE(result);
+
+    const ResourceTable::SearchResult& searchResult = result.value();
+    EXPECT_EQ(make_value<uint8_t>(0x01), searchResult.package->id);
+    EXPECT_EQ(make_value<uint8_t>(0x01), searchResult.type->id);
+    EXPECT_EQ(make_value<uint16_t>(0x0002), searchResult.entry->id);
 }
 
 ::testing::AssertionResult verifyIds(ResourceTable* table) {

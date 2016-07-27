@@ -436,6 +436,22 @@ bool tryParseBool(const StringPiece& str, bool* outValue) {
     return false;
 }
 
+Maybe<ResourceId> tryParseResourceId(const StringPiece& str) {
+    StringPiece trimmedStr(util::trimWhitespace(str));
+
+    std::u16string str16 = util::utf8ToUtf16(trimmedStr);
+    android::Res_value value;
+    if (android::ResTable::stringToInt(str16.data(), str16.size(), &value)) {
+        if (value.dataType == android::Res_value::TYPE_INT_HEX) {
+            ResourceId id(value.data);
+            if (id.isValid()) {
+                return id;
+            }
+        }
+    }
+    return {};
+}
+
 Maybe<int> tryParseSdkVersion(const StringPiece& str) {
     StringPiece trimmedStr(util::trimWhitespace(str));
 
