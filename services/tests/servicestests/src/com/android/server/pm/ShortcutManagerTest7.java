@@ -151,9 +151,13 @@ public class ShortcutManagerTest7 extends BaseShortcutManagerTest {
 
         mInjectedCallingUid = Process.SHELL_UID;
 
+        mRunningUsers.put(USER_10, false);
+
         assertTrue(resultContains(
                 callShellCommand("reset-throttling", "--user", "10"),
                 "User 10 is not running or locked"));
+
+        mRunningUsers.put(USER_10, true);
 
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
             assertTrue(mManager.getRemainingCallCount() < 3);

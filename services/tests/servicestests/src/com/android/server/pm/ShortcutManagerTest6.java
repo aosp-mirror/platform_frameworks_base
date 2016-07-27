@@ -183,6 +183,8 @@ public class ShortcutManagerTest6 extends BaseShortcutManagerTest {
     }
 
     public void testHasShortcutHostPermissionInner_multiUser() {
+        mRunningUsers.put(USER_10, true);
+
         prepareGetHomeActivitiesAsUser(
                 /* preferred */ null,
                 list(getSystemLauncher(), getFallbackLauncher()),
@@ -220,6 +222,8 @@ public class ShortcutManagerTest6 extends BaseShortcutManagerTest {
     }
 
     public void testHasShortcutHostPermissionInner_clearCache() {
+        mRunningUsers.put(USER_10, true);
+
         prepareGetHomeActivitiesAsUser(
                 /* preferred */ null,
                 list(getSystemLauncher(), getFallbackLauncher()),
@@ -242,11 +246,17 @@ public class ShortcutManagerTest6 extends BaseShortcutManagerTest {
         assertEquals(cn(CALLING_PACKAGE_2, "name"),
                 mService.getUserShortcutsLocked(USER_10).getCachedLauncher());
 
+        // Test it on a non-running user.
         // Send ACTION_PREFERRED_ACTIVITY_CHANGED on user 10.
         // But the user is not running, so will be ignored.
+        mRunningUsers.put(USER_10, false);
+
         mService.mPackageMonitor.onReceive(mServiceContext,
                 new Intent(Intent.ACTION_PREFERRED_ACTIVITY_CHANGED).putExtra(
                         Intent.EXTRA_USER_HANDLE, USER_10));
+
+        // Need to run the user again to access the internal status.
+        mRunningUsers.put(USER_10, true);
 
         assertEquals(cn(PACKAGE_SYSTEM_LAUNCHER, PACKAGE_SYSTEM_LAUNCHER_NAME),
                 mService.getUserShortcutsLocked(USER_0).getCachedLauncher());
