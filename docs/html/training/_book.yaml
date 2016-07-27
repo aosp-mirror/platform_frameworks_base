@@ -1397,6 +1397,11 @@ toc:
     path_attributes:
     - name: description
       value: How use device encrypted storage during Direct Boot mode.
+  - title: Using Scoped Directory Access
+    path: /training/articles/scoped-directory-access.html
+    path_attributes:
+    - name: description
+      value: How to use scoped directory access to request access to external storage directories.
 
 - title: Best Practices for Permissions & Identifiers
   path: /training/best-permissions-ids.html
