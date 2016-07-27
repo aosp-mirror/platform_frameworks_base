@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
+import android.os.Trace;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -85,6 +86,7 @@ public class UnlockMethodCache {
     }
 
     private void update(boolean updateAlways) {
+        Trace.beginSection("UnlockMethodCache#update");
         int user = KeyguardUpdateMonitor.getCurrentUser();
         boolean secure = mLockPatternUtils.isSecure(user);
         boolean canSkipBouncer = !secure ||  mKeyguardUpdateMonitor.getUserCanSkipBouncer(user);
@@ -102,6 +104,7 @@ public class UnlockMethodCache {
             mFaceUnlockRunning = faceUnlockRunning;
             notifyListeners();
         }
+        Trace.endSection();
     }
 
     private void notifyListeners() {
@@ -133,10 +136,13 @@ public class UnlockMethodCache {
 
         @Override
         public void onFingerprintAuthenticated(int userId) {
+            Trace.beginSection("KeyguardUpdateMonitorCallback#onFingerprintAuthenticated");
             if (!mKeyguardUpdateMonitor.isUnlockingWithFingerprintAllowed()) {
+                Trace.endSection();
                 return;
             }
             update(false /* updateAlways */);
+            Trace.endSection();
         }
 
         @Override

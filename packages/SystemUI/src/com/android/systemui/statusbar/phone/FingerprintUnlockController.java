@@ -20,6 +20,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.util.Log;
 
 import com.android.keyguard.KeyguardConstants;
@@ -140,11 +141,14 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
 
     @Override
     public void onFingerprintAcquired() {
+        Trace.beginSection("FingerprintUnlockController#onFingerprintAcquired");
         releaseFingerprintWakeLock();
         if (!mUpdateMonitor.isDeviceInteractive()) {
             mWakeLock = mPowerManager.newWakeLock(
                     PowerManager.PARTIAL_WAKE_LOCK, FINGERPRINT_WAKE_LOCK_NAME);
+            Trace.beginSection("acquiring wake-and-unlock");
             mWakeLock.acquire();
+            Trace.endSection();
             if (DEBUG_FP_WAKELOCK) {
                 Log.i(TAG, "fingerprint acquired, grabbing fp wakelock");
             }
@@ -159,12 +163,15 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
                 mStatusBarWindowManager.setForceDozeBrightness(true);
             }
         }
+        Trace.endSection();
     }
 
     @Override
     public void onFingerprintAuthenticated(int userId) {
+        Trace.beginSection("FingerprintUnlockController#onFingerprintAuthenticated");
         if (mUpdateMonitor.isGoingToSleep()) {
             mPendingAuthenticatedUserId = userId;
+            Trace.endSection();
             return;
         }
         boolean wasDeviceInteractive = mUpdateMonitor.isDeviceInteractive();
@@ -175,25 +182,34 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
             }
             mPowerManager.wakeUp(SystemClock.uptimeMillis(), "android.policy:FINGERPRINT");
         }
+        Trace.beginSection("release wake-and-unlock");
         releaseFingerprintWakeLock();
+        Trace.endSection();
         switch (mMode) {
             case MODE_DISMISS_BOUNCER:
+                Trace.beginSection("MODE_DISMISS");
                 mStatusBarKeyguardViewManager.notifyKeyguardAuthenticated(
                         false /* strongAuth */);
+                Trace.endSection();
                 break;
             case MODE_UNLOCK:
             case MODE_SHOW_BOUNCER:
+                Trace.beginSection("MODE_UNLOCK or MODE_SHOW_BOUNCER");
                 if (!wasDeviceInteractive) {
                     mStatusBarKeyguardViewManager.notifyDeviceWakeUpRequested();
                 }
                 mStatusBarKeyguardViewManager.animateCollapsePanels(
                         FINGERPRINT_COLLAPSE_SPEEDUP_FACTOR);
+                Trace.endSection();
                 break;
             case MODE_WAKE_AND_UNLOCK_PULSING:
+                Trace.beginSection("MODE_WAKE_AND_UNLOCK_PULSING");
                 mPhoneStatusBar.updateMediaMetaData(false /* metaDataChanged */, 
                         true /* allowEnterAnimation */);
                 // Fall through.
+                Trace.endSection();
             case MODE_WAKE_AND_UNLOCK:
+                Trace.beginSection("MODE_WAKE_AND_UNLOCK");
                 mStatusBarWindowManager.setStatusBarFocusable(false);
                 mDozeScrimController.abortPulsing();
                 mKeyguardViewMediator.onWakeAndUnlocking();
@@ -201,6 +217,7 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
                 if (mPhoneStatusBar.getNavigationBarView() != null) {
                     mPhoneStatusBar.getNavigationBarView().setWakeAndUnlocking(true);
                 }
+                Trace.endSection();
                 break;
             case MODE_ONLY_WAKE:
             case MODE_NONE:
@@ -210,6 +227,7 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
             mStatusBarWindowManager.setForceDozeBrightness(false);
         }
         mPhoneStatusBar.notifyFpAuthModeChanged();
+        Trace.endSection();
     }
 
     @Override
@@ -219,6 +237,7 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
 
     @Override
     public void onFinishedGoingToSleep(int why) {
+        Trace.beginSection("FingerprintUnlockController#onFinishedGoingToSleep");
         if (mPendingAuthenticatedUserId != -1) {
 
             // Post this to make sure it's executed after the device is fully locked.
@@ -230,6 +249,7 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
             });
         }
         mPendingAuthenticatedUserId = -1;
+        Trace.endSection();
     }
 
     public int getMode() {
