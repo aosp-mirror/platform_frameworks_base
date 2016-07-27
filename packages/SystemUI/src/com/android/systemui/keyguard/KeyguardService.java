@@ -178,6 +178,12 @@ public class KeyguardService extends Service {
         }
 
         @Override // Binder interface
+        public void setSwitchingUser(boolean switching) {
+            checkPermission();
+            mKeyguardViewMediator.setSwitchingUser(switching);
+        }
+
+        @Override // Binder interface
         public void setCurrentUser(int userId) {
             checkPermission();
             mKeyguardViewMediator.setCurrentUser(userId);

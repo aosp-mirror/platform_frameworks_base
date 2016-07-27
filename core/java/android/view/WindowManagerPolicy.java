@@ -1347,6 +1347,15 @@ public interface WindowManagerPolicy {
     public void setCurrentUserLw(int newUserId);
 
     /**
+     * For a given user-switch operation, this will be called once with switching=true before the
+     * user-switch and once with switching=false afterwards (or if the user-switch was cancelled).
+     * This gives the policy a chance to alter its behavior for the duration of a user-switch.
+     *
+     * @param switching true if a user-switch is in progress
+     */
+    void setSwitchingUser(boolean switching);
+
+    /**
      * Print the WindowManagerPolicy's state into the given stream.
      *
      * @param prefix Text to print at the front of each line.

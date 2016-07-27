@@ -197,7 +197,6 @@ public class KeyguardViewMediator extends SystemUI {
     private AlarmManager mAlarmManager;
     private AudioManager mAudioManager;
     private StatusBarManager mStatusBarManager;
-    private boolean mSwitchingUser;
 
     private boolean mSystemReady;
     private boolean mBootCompleted;
@@ -349,7 +348,6 @@ public class KeyguardViewMediator extends SystemUI {
             // We need to force a reset of the views, since lockNow (called by
             // ActivityManagerService) will not reconstruct the keyguard if it is already showing.
             synchronized (KeyguardViewMediator.this) {
-                mSwitchingUser = true;
                 resetKeyguardDonePendingLocked();
                 resetStateLocked();
                 adjustStatusBarLocked();
@@ -358,7 +356,6 @@ public class KeyguardViewMediator extends SystemUI {
 
         @Override
         public void onUserSwitchComplete(int userId) {
-            mSwitchingUser = false;
             if (userId != UserHandle.USER_SYSTEM) {
                 UserInfo info = UserManager.get(mContext).getUserInfo(userId);
                 if (info != null && (info.isGuest() || info.isDemo())) {
@@ -1366,6 +1363,10 @@ public class KeyguardViewMediator extends SystemUI {
     public boolean isSecure() {
         return mLockPatternUtils.isSecure(KeyguardUpdateMonitor.getCurrentUser())
             || KeyguardUpdateMonitor.getInstance(mContext).isSimPinSecure();
+    }
+
+    public void setSwitchingUser(boolean switching) {
+        KeyguardUpdateMonitor.getInstance(mContext).setSwitchingUser(switching);
     }
 
     /**

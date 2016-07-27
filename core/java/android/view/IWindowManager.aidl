@@ -210,6 +210,9 @@ interface IWindowManager
     void dismissKeyguard();
     void keyguardGoingAway(int flags);
 
+    // Requires INTERACT_ACROSS_USERS_FULL permission
+    void setSwitchingUser(boolean switching);
+
     void closeSystemDialogs(String reason);
 
     // These can only be called with the SET_ANIMATON_SCALE permission.

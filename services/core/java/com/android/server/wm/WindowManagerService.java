@@ -581,6 +581,7 @@ public class WindowManagerService extends IWindowManager.Stub
     int mLastDisplayFreezeDuration = 0;
     Object mLastFinishedFreezeSource = null;
     boolean mWaitingForConfig = false;
+    boolean mSwitchingUser = false;
 
     final static int WINDOWS_FREEZING_SCREENS_NONE = 0;
     final static int WINDOWS_FREEZING_SCREENS_ACTIVE = 1;
@@ -4503,6 +4504,18 @@ public class WindowManagerService extends IWindowManager.Stub
                 mPolicy.notifyActivityDrawnForKeyguardLw();
                 mKeyguardWaitingForActivityDrawn = false;
             }
+        }
+    }
+
+    @Override
+    public void setSwitchingUser(boolean switching) {
+        if (!checkCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                "setSwitchingUser()")) {
+            throw new SecurityException("Requires INTERACT_ACROSS_USERS_FULL permission");
+        }
+        mPolicy.setSwitchingUser(switching);
+        synchronized (mWindowMap) {
+            mSwitchingUser = switching;
         }
     }
 
