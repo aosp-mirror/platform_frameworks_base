@@ -321,6 +321,8 @@ redirects:
   to: https://www.google.com/design/spec/layout/principles.html
 - from: /design/patterns/navigation-drawer.html
   to: https://www.google.com/design/spec/patterns/navigation-drawer.html
+- from: /design/patterns/notifications.html
+  to: https://material.google.com/patterns/notifications.html
 - from: /design/patterns/selection.html
   to: https://www.google.com/design/spec/patterns/selection.html
 - from: /design/patterns/settings.html

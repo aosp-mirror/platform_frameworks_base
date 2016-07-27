@@ -18,7 +18,7 @@ page.image=/distribute/images/gp-wear-quality.png
       Core App Quality</a></li>
     <li><a href="{@docRoot}distribute/essentials/optimizing-your-app.html">
       Optimize Your App</a></li>
-    <li><a href="{@docRoot}design/patterns/notifications.html">
+    <li><a href="https://material.google.com/patterns/notifications.html">
       Notifications</a></li>
   </ol>
 </div>

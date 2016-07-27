@@ -27,7 +27,7 @@ startpage=true
         </a>
     </li>
     <li>
-        <a href="{@docRoot}design/patterns/notifications.html">Notifications</a> Design Guide
+        <a href="https://material.google.com/patterns/notifications.html">Notifications</a> Design Guide
     </li>
 </ul>
 
@@ -50,7 +50,7 @@ class="button">Download the sample</a>
 </p>
 
 <p>
-    The <a href="{@docRoot}design/patterns/notifications.html">Notifications design guide</a> shows
+    The <a href="https://material.google.com/patterns/notifications.html">Notifications design guide</a> shows
     you how to design effective notifications and when to use them. This class shows you how to
     implement the most common notification designs.
 </p>

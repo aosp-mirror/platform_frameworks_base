@@ -74,7 +74,7 @@ page.timestamp=1468270114
 
 <p>
   Find out more about best practices for <a href=
-  "{@docRoot}design/patterns/notifications.html">Notifications</a> and <a href=
+  "https://material.google.com/patterns/notifications.html">Notifications</a> and <a href=
   "{@docRoot}training/building-content-sharing.html">Building Apps with Content
   Sharing</a>.
 </p>
