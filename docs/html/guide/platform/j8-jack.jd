@@ -1,41 +1,63 @@
-page.title=Java 8 Language Features
+page.title=Use Java 8 Language Features
 page.keywords="android N", "Java 8", "Jack"
 @jd:body
 
 <div id="qv-wrapper">
   <div id="qv">
+    <h2 id="Contents">
+      In this document:
+    </h2>
+
     <ol>
       <li>
-        <a href="#supported-features">Supported Java 8 Language Features and APIs</a>
+        <a href="#supported-features">Supported Java 8 Language Features and
+        APIs</a>
       </li>
+
       <li>
-        <a href="#configuration">Enabling Java 8 Features and the Jack Toolchain</a>
+        <a href="#configuration">Enable Java 8 Features and the Jack
+        Toolchain</a>
+        <ul>
+          <li>
+            <a href="#configure-gradle">Configure Gradle</a>
+          </li>
+
+          <li>
+            <a href="#known-issues">Known issues</a>
+          </li>
+        </ul>
       </li>
     </ol>
   </div>
 </div>
 
-<p>Android N introduces support for Java 8 language features
-  that you can use when developing apps that target Android N.
-  This page describes the new language features supported in the Android N
-  Preview, how to properly set up your project to use them, and any known
-  issues you may encounter.
+<p>
+  Android supports all Java 7 language features and a subset of Java 8 language
+  features that vary by platform version. This page describes the new language
+  features you can use, how to properly configure your project to use them, and
+  any known issues you may encounter.
 </p>
 
-<p>To start using these features, you need to download and set up Android
-Studio 2.1 and the Android N Preview SDK, which includes the required
-Jack toolchain and updated Android Plugin for Gradle. If you haven't yet
-installed the Android N Preview SDK, see <a href=
-"{@docRoot}preview/setup-sdk.html">Set Up to Develop for Android N</a>.</p>
-
-
-
 <p class="note">
-  <strong>Note:</strong> Using the new Java 8 language features is not a
-  requirement for developing apps that target the Android N platform. If you
-  don't want to write code with Java 8 language features, you can keep your
-  project's source and target compatibility values set to Java 7, but you still
-  must compile with JDK 8 to build against the Android N platform.
+  <strong>Note:</strong> When developing apps for Android, using Java 8
+  language features is optional. You can keep your project's source and target
+  compatibility values set to Java 7, but you still need to compile using JDK
+  8.
+</p>
+
+<p>
+  Support for Java 8 language features requires a new compiler called <a href=
+  "https://source.android.com/source/jack.html">Jack</a>. Jack is supported
+  only on Android Studio 2.1 and higher. So if you want to use Java 8 language
+  features, you need to use Android Studio 2.1 to build your app.
+</p>
+
+<p>
+  If you already have Android Studio installed, make sure you update to the
+  latest version by clicking <strong>Help &gt; Check for Update</strong> (on
+  Mac, <strong>Android Studio &gt; Check for Updates</strong>). If you don't
+  already have the IDE installed on your workstation, <a href=
+  "{@docRoot}studio/">download Android Studio here</a>.
 </p>
 
 <h2 id="supported-features">
@@ -43,9 +65,9 @@ installed the Android N Preview SDK, see <a href=
 </h2>
 
 <p>
-  Android does not currently support all Java 8 language features. However, the
-  following features are now available when developing apps targeting the
-  Android N Preview:
+  Android does not support all Java 8 language features. However, the
+  following features are available when developing apps targeting
+  Android 7.0 (API level 24):
 </p>
 
 <ul>
@@ -94,7 +116,7 @@ installed the Android N Preview SDK, see <a href=
 </p>
 
 <p>
-  Additionally, the following Java 8 language feature APIs are now available:
+  Additionally, the following Java 8 language APIs are also available:
 </p>
 
 <ul>
@@ -144,37 +166,36 @@ installed the Android N Preview SDK, see <a href=
 </ul>
 
 <h2 id="configuration">
-  Enabling Java 8 Features and the Jack Toolchain
+  Enable Java 8 Features and the Jack Toolchain
 </h2>
 
 <p>
   In order to use the new Java 8 language features, you need to also use the
-  new <a class="external-link" href=
-  "https://source.android.com/source/jack.html">Jack toolchain</a>. This new
-  Android toolchain compiles Java language source into Android-readable dex
-  bytecode, has its own {@code .jack} library format, and provides most toolchain
-  features as part of a single tool: repackaging, shrinking, obfuscation and
-  multidex.
+  <a href="https://source.android.com/source/jack.html">Jack toolchain</a>.
+  This new Android toolchain compiles Java language sources into
+  Android-readable DEX bytecode, has its own {@code .jack} library format, and
+  provides most toolchain features as part of a single tool: repackaging,
+  shrinking, obfuscation and multidex.
 </p>
 
 <p>Here is a comparison of the two toolchains used to build Android DEX files:</p>
 <ul>
   <li>Legacy javac toolchain:<br>
-  <b>javac</b> ({@code .java} --&gt; {@code .class}) --&gt; <b>dx</b> ({@code
-  .class} --&gt; {@code .dex})
+  <b>javac</b> ({@code .java} → {@code .class}) → <b>dx</b> ({@code
+  .class} → {@code .dex})
   </li>
 
   <li>New Jack toolchain:<br>
-  <b>Jack</b> ({@code .java} --&gt; {@code .jack} --&gt; {@code .dex})
+  <b>Jack</b> ({@code .java} → {@code .jack} → {@code .dex})
   </li>
 </ul>
 
-<h3>
-  Configuring Gradle
+<h3 id="configure-gradle">
+  Configure Gradle
 </h3>
 
 <p>
-  To enable the Java 8 language features and Jack for your project, enter the
+  To enable Java 8 language features and Jack for your project, enter the
   following in your module-level {@code build.gradle} file:
 </p>
 
@@ -195,7 +216,7 @@ android {
 </pre>
 
 <h3 id="known-issues">
-  Known Issues
+  Known issues
 </h3>
 
 <p>
@@ -217,5 +238,5 @@ examples of these tools are:</p>
   </li>
 </ul>
 
-<p>If you find other problems while using Jack, <a href=
+<p>If you find other issues while using Jack, <a href=
 "http://tools.android.com/filing-bugs">please file a bug</a>.</p>
