@@ -49,6 +49,8 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.LogWriter;
+import android.util.LongSparseArray;
+import android.util.LongSparseLongArray;
 import android.util.MutableInt;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
@@ -99,6 +101,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final boolean DEBUG = false;
     public static final boolean DEBUG_ENERGY = false;
     private static final boolean DEBUG_ENERGY_CPU = DEBUG_ENERGY;
+    private static final boolean DEBUG_MEMORY = false;
     private static final boolean DEBUG_HISTORY = false;
     private static final boolean USE_OLD_HISTORY = false;   // for debugging.
 
@@ -143,6 +146,13 @@ public class BatteryStatsImpl extends BatteryStats {
 
     private final KernelUidCpuTimeReader mKernelUidCpuTimeReader = new KernelUidCpuTimeReader();
     private KernelCpuSpeedReader[] mKernelCpuSpeedReaders;
+
+    private final KernelMemoryBandwidthStats mKernelMemoryBandwidthStats
+            = new KernelMemoryBandwidthStats();
+    private final LongSparseArray<SamplingTimer> mKernelMemoryStats = new LongSparseArray<>();
+    public LongSparseArray<SamplingTimer> getKernelMemoryStats() {
+        return mKernelMemoryStats;
+    }
 
     public interface BatteryCallback {
         public void batteryNeedsCpuUpdate();
@@ -2080,6 +2090,15 @@ public class BatteryStatsImpl extends BatteryStats {
             mKernelWakelockStats.put(name, kwlt);
         }
         return kwlt;
+    }
+
+    public SamplingTimer getKernelMemoryTimerLocked(long bucket) {
+        SamplingTimer kmt = mKernelMemoryStats.get(bucket);
+        if (kmt == null) {
+            kmt = new SamplingTimer(mClocks, mOnBatteryTimeBase);
+            mKernelMemoryStats.put(bucket, kmt);
+        }
+        return kmt;
     }
 
     private int writeHistoryTag(HistoryTag tag) {
@@ -7698,7 +7717,6 @@ public class BatteryStatsImpl extends BatteryStats {
                 NUM_BT_TX_LEVELS);
         mModemActivity = new ControllerActivityCounterImpl(mOnBatteryTimeBase,
                 ModemActivityInfo.TX_POWER_LEVELS);
-
         mMobileRadioActiveTimer = new StopwatchTimer(mClocks, null, -400, null, mOnBatteryTimeBase);
         mMobileRadioActivePerAppTimer = new StopwatchTimer(mClocks, null, -401, null,
                 mOnBatteryTimeBase);
@@ -8393,6 +8411,13 @@ public class BatteryStatsImpl extends BatteryStats {
                 mOnBatteryScreenOffTimeBase.remove(timer);
             }
             mKernelWakelockStats.clear();
+        }
+
+        if (mKernelMemoryStats.size() > 0) {
+            for (int i = 0; i < mKernelMemoryStats.size(); i++) {
+                mOnBatteryTimeBase.remove(mKernelMemoryStats.valueAt(i));
+            }
+            mKernelMemoryStats.clear();
         }
 
         if (mWakeupReasonStats.size() > 0) {
@@ -9091,6 +9116,33 @@ public class BatteryStatsImpl extends BatteryStats {
     // Used in updateCpuTimeLocked().
     long mTempTotalCpuUserTimeUs;
     long mTempTotalCpuSystemTimeUs;
+
+    /**
+     * Reads the newest memory stats from the kernel.
+     */
+    public void updateKernelMemoryBandwidthLocked() {
+        mKernelMemoryBandwidthStats.updateStats();
+        LongSparseLongArray bandwidthEntries = mKernelMemoryBandwidthStats.getBandwidthEntries();
+        final int bandwidthEntryCount = bandwidthEntries.size();
+        int index;
+        for (int i = 0; i < bandwidthEntryCount; i++) {
+            SamplingTimer timer;
+            if ((index = mKernelMemoryStats.indexOfKey(bandwidthEntries.keyAt(i))) >= 0) {
+                timer = mKernelMemoryStats.valueAt(index);
+            } else {
+                timer = new SamplingTimer(mClocks, mOnBatteryTimeBase);
+                mKernelMemoryStats.put(bandwidthEntries.keyAt(i), timer);
+            }
+            timer.update(bandwidthEntries.valueAt(i), 1);
+            if (DEBUG_MEMORY) {
+                Slog.d(TAG, String.format("Added entry %d and updated timer to: "
+                        + "mUnpluggedReportedTotalTime %d size %d", bandwidthEntries.keyAt(i),
+                        mKernelMemoryStats.get(
+                                bandwidthEntries.keyAt(i)).mUnpluggedReportedTotalTime,
+                        mKernelMemoryStats.size()));
+            }
+        }
+    }
 
     /**
      * Read and distribute CPU usage across apps. If their are partial wakelocks being held
@@ -10372,6 +10424,14 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         }
 
+        int NMS = in.readInt();
+        for (int ims = 0; ims < NMS; ims++) {
+            if (in.readInt() != 0) {
+                long kmstName = in.readLong();
+                getKernelMemoryTimerLocked(kmstName).readSummaryFromParcelLocked(in);
+            }
+        }
+
         final int NU = in.readInt();
         if (NU > 10000) {
             throw new ParcelFormatException("File corrupt: too many uids " + NU);
@@ -10722,6 +10782,18 @@ public class BatteryStatsImpl extends BatteryStats {
                 out.writeInt(1);
                 out.writeString(ent.getKey());
                 timer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
+            } else {
+                out.writeInt(0);
+            }
+        }
+
+        out.writeInt(mKernelMemoryStats.size());
+        for (int i = 0; i < mKernelMemoryStats.size(); i++) {
+            Timer kmt = mKernelMemoryStats.valueAt(i);
+            if (kmt != null) {
+                out.writeInt(1);
+                out.writeLong(mKernelMemoryStats.keyAt(i));
+                kmt.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
             } else {
                 out.writeInt(0);
             }
@@ -11129,6 +11201,16 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         }
 
+        mKernelMemoryStats.clear();
+        int nmt = in.readInt();
+        for (int imt = 0; imt < nmt; imt++) {
+            if (in.readInt() != 0) {
+                Long bucket = in.readLong();
+                SamplingTimer kmt = new SamplingTimer(mClocks, mOnBatteryTimeBase, in);
+                mKernelMemoryStats.put(bucket, kmt);
+            }
+        }
+
         mPartialTimers.clear();
         mFullTimers.clear();
         mWindowTimers.clear();
@@ -11285,6 +11367,18 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         } else {
             out.writeInt(0);
+        }
+
+        out.writeInt(mKernelMemoryStats.size());
+        for (int i = 0; i < mKernelMemoryStats.size(); i++) {
+            SamplingTimer kmt = mKernelMemoryStats.valueAt(i);
+            if (kmt != null) {
+                out.writeInt(1);
+                out.writeLong(mKernelMemoryStats.keyAt(i));
+                kmt.writeToParcel(out, uSecRealtime);
+            } else {
+                out.writeInt(0);
+            }
         }
 
         if (inclUids) {
