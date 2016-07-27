@@ -46,7 +46,7 @@ public:
     bool swapBuffers(const Frame& frame, bool drew, const SkRect& screenDirty,
             FrameInfo* currentFrameInfo, bool* requireSwap) override;
     bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap) override;
-    Layer* createTextureLayer() override;
+    DeferredLayerUpdater* createTextureLayer() override;
     bool setSurface(Surface* window, SwapBehavior swapBehavior) override;
     void onStop() override;
     bool isSurfaceReady() override;

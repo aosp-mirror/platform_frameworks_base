@@ -104,9 +104,10 @@ TEST(RenderNode, releasedCallback) {
 }
 
 RENDERTHREAD_TEST(RenderNode, prepareTree_nullableDisplayList) {
+    auto rootNode = TestUtils::createNode(0, 0, 200, 400, nullptr);
     ContextFactory contextFactory;
     std::unique_ptr<CanvasContext> canvasContext(CanvasContext::create(
-            renderThread, false, nullptr, &contextFactory));
+            renderThread, false, rootNode.get(), &contextFactory));
     TreeInfo info(TreeInfo::MODE_RT_ONLY, *canvasContext.get());
     DamageAccumulator damageAccumulator;
     info.damageAccumulator = &damageAccumulator;

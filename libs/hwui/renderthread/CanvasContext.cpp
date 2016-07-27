@@ -21,7 +21,6 @@
 #include "Caches.h"
 #include "DeferredLayerUpdater.h"
 #include "EglManager.h"
-#include "LayerRenderer.h"
 #include "LayerUpdateQueue.h"
 #include "Properties.h"
 #include "Readback.h"
@@ -504,7 +503,7 @@ void CanvasContext::trimMemory(RenderThread& thread, int level) {
     }
 }
 
-Layer* CanvasContext::createTextureLayer() {
+DeferredLayerUpdater* CanvasContext::createTextureLayer() {
     return mRenderPipeline->createTextureLayer();
 }
 

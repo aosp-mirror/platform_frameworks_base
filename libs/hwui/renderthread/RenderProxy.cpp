@@ -18,7 +18,6 @@
 
 #include "DeferredLayerUpdater.h"
 #include "DisplayList.h"
-#include "LayerRenderer.h"
 #include "Readback.h"
 #include "Rect.h"
 #include "renderthread/CanvasContext.h"
@@ -266,9 +265,7 @@ void RenderProxy::invokeFunctor(Functor* functor, bool waitForCompletion) {
 }
 
 CREATE_BRIDGE1(createTextureLayer, CanvasContext* context) {
-    Layer* layer = args->context->createTextureLayer();
-    if (!layer) return nullptr;
-    return new DeferredLayerUpdater(layer);
+    return args->context->createTextureLayer();
 }
 
 DeferredLayerUpdater* RenderProxy::createTextureLayer() {

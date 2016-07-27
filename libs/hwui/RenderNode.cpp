@@ -19,7 +19,6 @@
 #include "BakedOpRenderer.h"
 #include "DamageAccumulator.h"
 #include "Debug.h"
-#include "LayerRenderer.h"
 #include "OpDumper.h"
 #include "RecordedOp.h"
 #include "TreeInfo.h"

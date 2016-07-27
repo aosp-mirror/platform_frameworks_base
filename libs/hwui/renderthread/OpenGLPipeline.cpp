@@ -18,7 +18,6 @@
 
 #include "DeferredLayerUpdater.h"
 #include "EglManager.h"
-#include "LayerRenderer.h"
 #include "renderstate/RenderState.h"
 #include "Readback.h"
 
@@ -120,9 +119,13 @@ bool OpenGLPipeline::copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap
             == CopyResult::Success;
 }
 
-Layer* OpenGLPipeline::createTextureLayer() {
+DeferredLayerUpdater* OpenGLPipeline::createTextureLayer() {
     mEglManager.initialize();
-    return LayerRenderer::createTextureLayer(mRenderThread.renderState());
+    Layer* layer = new Layer(mRenderThread.renderState(), 0, 0);
+    Caches::getInstance().textureState().activateTexture(0);
+    layer->generateTexture();
+
+    return new DeferredLayerUpdater(layer);
 }
 
 void OpenGLPipeline::onStop() {

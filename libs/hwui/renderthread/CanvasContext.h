@@ -100,7 +100,7 @@ public:
 
     static void invokeFunctor(RenderThread& thread, Functor* functor);
 
-    Layer* createTextureLayer();
+    DeferredLayerUpdater* createTextureLayer();
 
     ANDROID_API static void setTextureAtlas(RenderThread& thread,
             const sp<GraphicBuffer>& buffer, int64_t* map, size_t mapSize);

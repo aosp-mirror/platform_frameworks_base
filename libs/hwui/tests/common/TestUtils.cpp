@@ -18,9 +18,9 @@
 
 #include "hwui/Paint.h"
 #include "DeferredLayerUpdater.h"
-#include "LayerRenderer.h"
 
 #include <renderthread/EglManager.h>
+#include <renderthread/OpenGLPipeline.h>
 #include <utils/Unicode.h>
 
 namespace android {
@@ -46,20 +46,14 @@ SkColor TestUtils::interpolateColor(float fraction, SkColor start, SkColor end) 
 sp<DeferredLayerUpdater> TestUtils::createTextureLayerUpdater(
         renderthread::RenderThread& renderThread, uint32_t width, uint32_t height,
         const SkMatrix& transform) {
-    Layer* layer = LayerRenderer::createTextureLayer(renderThread.renderState());
-    layer->getTransform().load(transform);
-
-    sp<DeferredLayerUpdater> layerUpdater = new DeferredLayerUpdater(layer);
+    renderthread::OpenGLPipeline pipeline(renderThread);
+    sp<DeferredLayerUpdater> layerUpdater = pipeline.createTextureLayer();
+    layerUpdater->backingLayer()->getTransform().load(transform);
     layerUpdater->setSize(width, height);
     layerUpdater->setTransform(&transform);
 
     // updateLayer so it's ready to draw
-    bool isOpaque = true;
-    bool forceFilter = true;
-    GLenum renderTarget = GL_TEXTURE_EXTERNAL_OES;
-    LayerRenderer::updateTextureLayer(layer, width, height, isOpaque, forceFilter,
-    renderTarget, Matrix4::identity().data);
-
+    layerUpdater->updateLayer(true, GL_TEXTURE_EXTERNAL_OES, Matrix4::identity().data);
     return layerUpdater;
 }
 
@@ -114,17 +108,12 @@ void TestUtils::drawUtf8ToCanvas(Canvas* canvas, const char* text,
 void TestUtils::TestTask::run() {
     // RenderState only valid once RenderThread is running, so queried here
     renderthread::RenderThread& renderThread = renderthread::RenderThread::getInstance();
-    bool hasEglContext = renderThread.eglManager().hasEglContext();
-    RenderState& renderState = renderThread.renderState();
-    if (!hasEglContext) {
-        renderState.onGLContextCreated();
-    }
+    renderThread.eglManager().initialize();
 
     rtCallback(renderThread);
-    if (!hasEglContext) {
-        renderState.flush(Caches::FlushMode::Full);
-        renderState.onGLContextDestroyed();
-    }
+
+    renderThread.renderState().flush(Caches::FlushMode::Full);
+    renderThread.eglManager().destroy();
 }
 
 std::unique_ptr<uint16_t[]> TestUtils::asciiToUtf16(const char* str) {
