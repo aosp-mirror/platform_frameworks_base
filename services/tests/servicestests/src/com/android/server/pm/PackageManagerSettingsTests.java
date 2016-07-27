@@ -21,18 +21,28 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+
 import android.annotation.NonNull;
 import android.content.Context;
 import android.content.pm.PackageParser;
 import android.content.pm.UserInfo;
 import android.os.UserHandle;
-import android.test.AndroidTestCase;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.runner.AndroidJUnit4;
+import android.test.suitebuilder.annotation.SmallTest;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.LongSparseArray;
 
 import com.android.internal.os.AtomicFile;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.lang.reflect.Constructor;
 import java.io.File;
@@ -42,13 +52,120 @@ import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PackageManagerSettingsTests extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+public class PackageManagerSettingsTests {
     private static final String PACKAGE_NAME_2 = "com.google.app2";
     private static final String PACKAGE_NAME_3 = "com.android.app3";
     private static final String PACKAGE_NAME_1 = "com.google.app1";
-    private static final boolean localLOGV = true;
     public static final String TAG = "PackageManagerSettingsTests";
     protected final String PREFIX = "android.content.pm";
+
+    /** make sure our initialized KeySetManagerService metadata matches packages.xml */
+    @Test
+    public void testReadKeySetSettings()
+            throws ReflectiveOperationException, IllegalAccessException {
+        /* write out files and read */
+        writeOldFiles();
+        createUserManagerServiceRef();
+        Settings settings =
+                new Settings(InstrumentationRegistry.getContext().getFilesDir(), new Object());
+        assertThat(settings.readLPw(createFakeUsers()), is(true));
+        verifyKeySetMetaData(settings);
+    }
+
+    /** read in data, write it out, and read it back in.  Verify same. */
+    @Test
+    public void testWriteKeySetSettings()
+            throws ReflectiveOperationException, IllegalAccessException {
+        // write out files and read
+        writeOldFiles();
+        createUserManagerServiceRef();
+        Settings settings =
+                new Settings(InstrumentationRegistry.getContext().getFilesDir(), new Object());
+        assertThat(settings.readLPw(createFakeUsers()), is(true));
+
+        // write out, read back in and verify the same
+        settings.writeLPr();
+        assertThat(settings.readLPw(createFakeUsers()), is(true));
+        verifyKeySetMetaData(settings);
+    }
+
+    @Test
+    public void testSettingsReadOld() {
+        // Write the package files and make sure they're parsed properly the first time
+        writeOldFiles();
+        Settings settings =
+                new Settings(InstrumentationRegistry.getContext().getFilesDir(), new Object());
+        assertThat(settings.readLPw(createFakeUsers()), is(true));
+        assertThat(settings.peekPackageLPr(PACKAGE_NAME_3), is(notNullValue()));
+        assertThat(settings.peekPackageLPr(PACKAGE_NAME_1), is(notNullValue()));
+
+        PackageSetting ps = settings.peekPackageLPr(PACKAGE_NAME_1);
+        assertThat(ps.getEnabled(0), is(COMPONENT_ENABLED_STATE_DEFAULT));
+        assertThat(ps.getNotLaunched(0), is(true));
+
+        ps = settings.peekPackageLPr(PACKAGE_NAME_2);
+        assertThat(ps.getStopped(0), is(false));
+        assertThat(ps.getEnabled(0), is(COMPONENT_ENABLED_STATE_DISABLED_USER));
+        assertThat(ps.getEnabled(1), is(COMPONENT_ENABLED_STATE_DEFAULT));
+    }
+
+    @Test
+    public void testNewPackageRestrictionsFile() throws ReflectiveOperationException {
+        // Write the package files and make sure they're parsed properly the first time
+        writeOldFiles();
+        createUserManagerServiceRef();
+        Settings settings =
+                new Settings(InstrumentationRegistry.getContext().getFilesDir(), new Object());
+        assertThat(settings.readLPw(createFakeUsers()), is(true));
+        settings.writeLPr();
+
+        // Create Settings again to make it read from the new files
+        settings = new Settings(InstrumentationRegistry.getContext().getFilesDir(), new Object());
+        assertThat(settings.readLPw(createFakeUsers()), is(true));
+
+        PackageSetting ps = settings.peekPackageLPr(PACKAGE_NAME_2);
+        assertThat(ps.getEnabled(0), is(COMPONENT_ENABLED_STATE_DISABLED_USER));
+        assertThat(ps.getEnabled(1), is(COMPONENT_ENABLED_STATE_DEFAULT));
+    }
+
+    @Test
+    public void testEnableDisable() {
+        // Write the package files and make sure they're parsed properly the first time
+        writeOldFiles();
+        Settings settings =
+                new Settings(InstrumentationRegistry.getContext().getFilesDir(), new Object());
+        assertThat(settings.readLPw(createFakeUsers()), is(true));
+
+        // Enable/Disable a package
+        PackageSetting ps = settings.peekPackageLPr(PACKAGE_NAME_1);
+        ps.setEnabled(COMPONENT_ENABLED_STATE_DISABLED, 0, null);
+        ps.setEnabled(COMPONENT_ENABLED_STATE_ENABLED, 1, null);
+        assertThat(ps.getEnabled(0), is(COMPONENT_ENABLED_STATE_DISABLED));
+        assertThat(ps.getEnabled(1), is(COMPONENT_ENABLED_STATE_ENABLED));
+
+        // Enable/Disable a component
+        ArraySet<String> components = new ArraySet<String>();
+        String component1 = PACKAGE_NAME_1 + "/.Component1";
+        components.add(component1);
+        ps.setDisabledComponents(components, 0);
+        ArraySet<String> componentsDisabled = ps.getDisabledComponents(0);
+        assertThat(componentsDisabled.size(), is(1));
+        assertThat(componentsDisabled.toArray()[0], is(component1));
+        boolean hasEnabled =
+                ps.getEnabledComponents(0) != null && ps.getEnabledComponents(1).size() > 0;
+        assertThat(hasEnabled, is(false));
+
+        // User 1 should not have any disabled components
+        boolean hasDisabled =
+                ps.getDisabledComponents(1) != null && ps.getDisabledComponents(1).size() > 0;
+        assertThat(hasDisabled, is(false));
+        ps.setEnabledComponents(components, 1);
+        assertThat(ps.getEnabledComponents(1).size(), is(1));
+        hasEnabled = ps.getEnabledComponents(0) != null && ps.getEnabledComponents(0).size() > 0;
+        assertThat(hasEnabled, is(false));
+    }
 
     private @NonNull List<UserInfo> createFakeUsers() {
         ArrayList<UserInfo> users = new ArrayList<>();
@@ -69,7 +186,7 @@ public class PackageManagerSettingsTests extends AndroidTestCase {
     }
 
     private void writePackagesXml() {
-        writeFile(new File(getContext().getFilesDir(), "system/packages.xml"),
+        writeFile(new File(InstrumentationRegistry.getContext().getFilesDir(), "system/packages.xml"),
                 ("<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
                 + "<packages>"
                 + "<last-platform-version internal=\"15\" external=\"0\" fingerprint=\"foo\" />"
@@ -139,7 +256,7 @@ public class PackageManagerSettingsTests extends AndroidTestCase {
     }
 
     private void writeStoppedPackagesXml() {
-        writeFile(new File(getContext().getFilesDir(), "system/packages-stopped.xml"),
+        writeFile(new File(InstrumentationRegistry.getContext().getFilesDir(), "system/packages-stopped.xml"),
                 ( "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
                 + "<stopped-packages>"
                 + "<pkg name=\"com.google.app1\" nl=\"1\" />"
@@ -149,7 +266,7 @@ public class PackageManagerSettingsTests extends AndroidTestCase {
     }
 
     private void writePackagesList() {
-        writeFile(new File(getContext().getFilesDir(), "system/packages.list"),
+        writeFile(new File(InstrumentationRegistry.getContext().getFilesDir(), "system/packages.list"),
                 ( "com.google.app1 11000 0 /data/data/com.google.app1 seinfo1"
                 + "com.google.app2 11001 0 /data/data/com.google.app2 seinfo2"
                 + "com.android.app3 11030 0 /data/data/com.android.app3 seinfo3")
@@ -157,7 +274,7 @@ public class PackageManagerSettingsTests extends AndroidTestCase {
     }
 
     private void deleteSystemFolder() {
-        File systemFolder = new File(getContext().getFilesDir(), "system");
+        File systemFolder = new File(InstrumentationRegistry.getContext().getFilesDir(), "system");
         deleteFolder(systemFolder);
     }
 
@@ -179,18 +296,27 @@ public class PackageManagerSettingsTests extends AndroidTestCase {
     }
 
     private void createUserManagerServiceRef() throws ReflectiveOperationException {
-        Constructor<UserManagerService> umsc =
-                UserManagerService.class.getDeclaredConstructor(
-                        Context.class,
-                        PackageManagerService.class,
-                        Object.class,
-                        Object.class,
-                        File.class,
-                        File.class);
-        umsc.setAccessible(true);
-        UserManagerService ums = umsc.newInstance(getContext(), null,
-                new Object(), new Object(), getContext().getFilesDir(),
-                new File(getContext().getFilesDir(), "user"));
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(new Runnable() {
+            @Override
+            public void run() {
+                Constructor<UserManagerService> umsc;
+                try {
+                    umsc = UserManagerService.class.getDeclaredConstructor(
+                            Context.class,
+                            PackageManagerService.class,
+                            Object.class,
+                            File.class);
+                    umsc.setAccessible(true);
+                    UserManagerService ums = umsc.newInstance(InstrumentationRegistry.getContext(),
+                            null /*PackageManagerService*/, new Object() /*packagesLock*/,
+                            new File(InstrumentationRegistry.getContext().getFilesDir(), "user"));
+                } catch (SecurityException
+                        | ReflectiveOperationException
+                        | IllegalArgumentException e) {
+                    fail("Could not create user manager service; msg=" + e.getMessage());
+                }
+            }
+        });
     }
 
     private void verifyKeySetMetaData(Settings settings)
@@ -199,151 +325,52 @@ public class PackageManagerSettingsTests extends AndroidTestCase {
         KeySetManagerService ksms = settings.mKeySetManagerService;
 
         /* verify keyset and public key ref counts */
-        assertEquals(2, KeySetUtils.getKeySetRefCount(ksms, 1));
-        assertEquals(1, KeySetUtils.getKeySetRefCount(ksms, 2));
-        assertEquals(1, KeySetUtils.getKeySetRefCount(ksms, 3));
-        assertEquals(1, KeySetUtils.getKeySetRefCount(ksms, 4));
-        assertEquals(2, KeySetUtils.getPubKeyRefCount(ksms, 1));
-        assertEquals(2, KeySetUtils.getPubKeyRefCount(ksms, 2));
-        assertEquals(1, KeySetUtils.getPubKeyRefCount(ksms, 3));
+        assertThat(KeySetUtils.getKeySetRefCount(ksms, 1), is(2));
+        assertThat(KeySetUtils.getKeySetRefCount(ksms, 2), is(1));
+        assertThat(KeySetUtils.getKeySetRefCount(ksms, 3), is(1));
+        assertThat(KeySetUtils.getKeySetRefCount(ksms, 4), is(1));
+        assertThat(KeySetUtils.getPubKeyRefCount(ksms, 1), is(2));
+        assertThat(KeySetUtils.getPubKeyRefCount(ksms, 2), is(2));
+        assertThat(KeySetUtils.getPubKeyRefCount(ksms, 3), is(1));
 
         /* verify public keys properly read */
         PublicKey keyA = PackageParser.parsePublicKey(KeySetStrings.ctsKeySetPublicKeyA);
         PublicKey keyB = PackageParser.parsePublicKey(KeySetStrings.ctsKeySetPublicKeyB);
         PublicKey keyC = PackageParser.parsePublicKey(KeySetStrings.ctsKeySetPublicKeyC);
-        assertEquals(keyA, KeySetUtils.getPubKey(ksms, 1));
-        assertEquals(keyB, KeySetUtils.getPubKey(ksms, 2));
-        assertEquals(keyC, KeySetUtils.getPubKey(ksms, 3));
+        assertThat(KeySetUtils.getPubKey(ksms, 1), is(keyA));
+        assertThat(KeySetUtils.getPubKey(ksms, 2), is(keyB));
+        assertThat(KeySetUtils.getPubKey(ksms, 3), is(keyC));
 
         /* verify mapping is correct (ks -> pub keys) */
         LongSparseArray<ArraySet<Long>> ksMapping = KeySetUtils.getKeySetMapping(ksms);
         ArraySet<Long> mapping = ksMapping.get(1);
-        assertEquals(1, mapping.size());
-        assertTrue(mapping.contains(new Long(1)));
+        assertThat(mapping.size(), is(1));
+        assertThat(mapping.contains(new Long(1)), is(true));
         mapping = ksMapping.get(2);
-        assertEquals(1, mapping.size());
-        assertTrue(mapping.contains(new Long(2)));
+        assertThat(mapping.size(), is(1));
+        assertThat(mapping.contains(new Long(2)), is(true));
         mapping = ksMapping.get(3);
-        assertEquals(1, mapping.size());
-        assertTrue(mapping.contains(new Long(3)));
+        assertThat(mapping.size(), is(1));
+        assertThat(mapping.contains(new Long(3)), is(true));
         mapping = ksMapping.get(4);
-        assertEquals(2, mapping.size());
-        assertTrue(mapping.contains(new Long(1)));
-        assertTrue(mapping.contains(new Long(2)));
+        assertThat(mapping.size(), is(2));
+        assertThat(mapping.contains(new Long(1)), is(true));
+        assertThat(mapping.contains(new Long(2)), is(true));
 
         /* verify lastIssuedIds are consistent */
-        assertEquals(new Long(3), KeySetUtils.getLastIssuedKeyId(ksms));
-        assertEquals(new Long(4), KeySetUtils.getLastIssuedKeySetId(ksms));
+        assertThat(KeySetUtils.getLastIssuedKeyId(ksms), is(3L));
+        assertThat(KeySetUtils.getLastIssuedKeySetId(ksms), is(4L));
 
-        /* verify packages have been given the appropriat information */
+        /* verify packages have been given the appropriate information */
         PackageSetting ps = packages.get("com.google.app1");
-        assertEquals(1, ps.keySetData.getProperSigningKeySet());
+        assertThat(ps.keySetData.getProperSigningKeySet(), is(1L));
         ps = packages.get("com.google.app2");
-        assertEquals(1, ps.keySetData.getProperSigningKeySet());
-        assertEquals(new Long(4), ps.keySetData.getAliases().get("AB"));
+        assertThat(ps.keySetData.getProperSigningKeySet(), is(1L));
+        assertThat(ps.keySetData.getAliases().get("AB"), is(4L));
         ps = packages.get("com.android.app3");
-        assertEquals(2, ps.keySetData.getProperSigningKeySet());
-        assertEquals(new Long(3), ps.keySetData.getAliases().get("C"));
-        assertEquals(1, ps.keySetData.getUpgradeKeySets().length);
-        assertEquals(3, ps.keySetData.getUpgradeKeySets()[0]);
-    }
-
-    /* make sure our initialized keysetmanagerservice metadata matches packages.xml */
-    public void testReadKeySetSettings()
-            throws ReflectiveOperationException, IllegalAccessException {
-
-        /* write out files and read */
-        writeOldFiles();
-        createUserManagerServiceRef();
-        Settings settings = new Settings(getContext().getFilesDir(), new Object());
-        assertEquals(true, settings.readLPw(createFakeUsers()));
-        verifyKeySetMetaData(settings);
-    }
-
-    /* read in data, write it out, and read it back in.  Verify same. */
-    public void testWriteKeySetSettings()
-            throws ReflectiveOperationException, IllegalAccessException {
-
-        /* write out files and read */
-        writeOldFiles();
-        createUserManagerServiceRef();
-        Settings settings = new Settings(getContext().getFilesDir(), new Object());
-        assertEquals(true, settings.readLPw(createFakeUsers()));
-
-        /* write out, read back in and verify the same */
-        settings.writeLPr();
-        assertEquals(true, settings.readLPw(createFakeUsers()));
-        verifyKeySetMetaData(settings);
-    }
-
-    public void testSettingsReadOld() {
-        // Write the package files and make sure they're parsed properly the first time
-        writeOldFiles();
-        Settings settings = new Settings(getContext().getFilesDir(), new Object());
-        assertEquals(true, settings.readLPw(createFakeUsers()));
-        assertNotNull(settings.peekPackageLPr(PACKAGE_NAME_3));
-        assertNotNull(settings.peekPackageLPr(PACKAGE_NAME_1));
-
-        PackageSetting ps = settings.peekPackageLPr(PACKAGE_NAME_1);
-        assertEquals(COMPONENT_ENABLED_STATE_DEFAULT, ps.getEnabled(0));
-        assertEquals(true, ps.getNotLaunched(0));
-
-        ps = settings.peekPackageLPr(PACKAGE_NAME_2);
-        assertEquals(false, ps.getStopped(0));
-        assertEquals(COMPONENT_ENABLED_STATE_DISABLED_USER, ps.getEnabled(0));
-        assertEquals(COMPONENT_ENABLED_STATE_DEFAULT, ps.getEnabled(1));
-    }
-
-    public void testNewPackageRestrictionsFile() throws ReflectiveOperationException {
-
-        // Write the package files and make sure they're parsed properly the first time
-        writeOldFiles();
-        createUserManagerServiceRef();
-        Settings settings = new Settings(getContext().getFilesDir(), new Object());
-        assertEquals(true, settings.readLPw(createFakeUsers()));
-        settings.writeLPr();
-
-        // Create Settings again to make it read from the new files
-        settings = new Settings(getContext().getFilesDir(), new Object());
-        assertEquals(true, settings.readLPw(createFakeUsers()));
-
-        PackageSetting ps = settings.peekPackageLPr(PACKAGE_NAME_2);
-        assertEquals(COMPONENT_ENABLED_STATE_DISABLED_USER, ps.getEnabled(0));
-        assertEquals(COMPONENT_ENABLED_STATE_DEFAULT, ps.getEnabled(1));
-    }
-
-    public void testEnableDisable() {
-        // Write the package files and make sure they're parsed properly the first time
-        writeOldFiles();
-        Settings settings = new Settings(getContext().getFilesDir(), new Object());
-        assertEquals(true, settings.readLPw(createFakeUsers()));
-
-        // Enable/Disable a package
-        PackageSetting ps = settings.peekPackageLPr(PACKAGE_NAME_1);
-        ps.setEnabled(COMPONENT_ENABLED_STATE_DISABLED, 0, null);
-        ps.setEnabled(COMPONENT_ENABLED_STATE_ENABLED, 1, null);
-        assertEquals(COMPONENT_ENABLED_STATE_DISABLED, ps.getEnabled(0));
-        assertEquals(COMPONENT_ENABLED_STATE_ENABLED, ps.getEnabled(1));
-
-        // Enable/Disable a component
-        ArraySet<String> components = new ArraySet<String>();
-        String component1 = PACKAGE_NAME_1 + "/.Component1";
-        components.add(component1);
-        ps.setDisabledComponents(components, 0);
-        ArraySet<String> componentsDisabled = ps.getDisabledComponents(0);
-        assertEquals(1, componentsDisabled.size());
-        assertEquals(component1, componentsDisabled.toArray()[0]);
-        boolean hasEnabled =
-                ps.getEnabledComponents(0) != null && ps.getEnabledComponents(1).size() > 0;
-        assertEquals(false, hasEnabled);
-
-        // User 1 should not have any disabled components
-        boolean hasDisabled =
-                ps.getDisabledComponents(1) != null && ps.getDisabledComponents(1).size() > 0;
-        assertEquals(false, hasDisabled);
-        ps.setEnabledComponents(components, 1);
-        assertEquals(1, ps.getEnabledComponents(1).size());
-        hasEnabled = ps.getEnabledComponents(0) != null && ps.getEnabledComponents(0).size() > 0;
-        assertEquals(false, hasEnabled);
+        assertThat(ps.keySetData.getProperSigningKeySet(), is(2L));
+        assertThat(ps.keySetData.getAliases().get("C"), is(3L));
+        assertThat(ps.keySetData.getUpgradeKeySets().length, is(1));
+        assertThat(ps.keySetData.getUpgradeKeySets()[0], is(3L));
     }
 }
