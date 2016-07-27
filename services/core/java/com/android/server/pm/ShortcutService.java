@@ -1037,6 +1037,24 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
+    private boolean isUserUnlocked(@UserIdInt int userId) {
+        final long token = injectClearCallingIdentity();
+        try {
+            // Weird: when SystemService.onUnlockUser() is called, the user state is still
+            // unlocking, as opposed to unlocked.  So we need to accept the "unlocking" state too.
+            // We know when the user is unlocking, the CE storage is already unlocked.
+            return mUserManager.isUserUnlockingOrUnlocked(userId);
+        } finally {
+            injectRestoreCallingIdentity(token);
+        }
+    }
+
+    void throwIfUserLocked(@UserIdInt int userId) {
+        if (!isUserUnlocked(userId)) {
+            throw new IllegalStateException("User " + userId + " is locked or not running");
+        }
+    }
+
     @GuardedBy("mLock")
     @NonNull
     private boolean isUserLoadedLocked(@UserIdInt int userId) {
@@ -1047,6 +1065,11 @@ public class ShortcutService extends IShortcutService.Stub {
     @GuardedBy("mLock")
     @NonNull
     ShortcutUser getUserShortcutsLocked(@UserIdInt int userId) {
+        if (!isUserUnlocked(userId)) {
+            wtf("User still locked");
+            return new ShortcutUser(this, userId);
+        }
+
         ShortcutUser userPackages = mUsers.get(userId);
         if (userPackages == null) {
             userPackages = loadUserLocked(userId);
@@ -1535,6 +1558,7 @@ public class ShortcutService extends IShortcutService.Stub {
     public boolean setDynamicShortcuts(String packageName, ParceledListSlice shortcutInfoList,
             @UserIdInt int userId) {
         verifyCaller(packageName, userId);
+        throwIfUserLocked(userId);
 
         final List<ShortcutInfo> newShortcuts = (List<ShortcutInfo>) shortcutInfoList.getList();
         final int size = newShortcuts.size();
@@ -1585,6 +1609,7 @@ public class ShortcutService extends IShortcutService.Stub {
     public boolean updateShortcuts(String packageName, ParceledListSlice shortcutInfoList,
             @UserIdInt int userId) {
         verifyCaller(packageName, userId);
+        throwIfUserLocked(userId);
 
         final List<ShortcutInfo> newShortcuts = (List<ShortcutInfo>) shortcutInfoList.getList();
         final int size = newShortcuts.size();
@@ -1664,6 +1689,7 @@ public class ShortcutService extends IShortcutService.Stub {
     public boolean addDynamicShortcuts(String packageName, ParceledListSlice shortcutInfoList,
             @UserIdInt int userId) {
         verifyCaller(packageName, userId);
+        throwIfUserLocked(userId);
 
         final List<ShortcutInfo> newShortcuts = (List<ShortcutInfo>) shortcutInfoList.getList();
         final int size = newShortcuts.size();
@@ -1715,6 +1741,7 @@ public class ShortcutService extends IShortcutService.Stub {
             CharSequence disabledMessage, int disabledMessageResId, @UserIdInt int userId) {
         verifyCaller(packageName, userId);
         Preconditions.checkNotNull(shortcutIds, "shortcutIds must be provided");
+        throwIfUserLocked(userId);
 
         synchronized (mLock) {
             final ShortcutPackage ps = getPackageShortcutsLocked(packageName, userId);
@@ -1743,6 +1770,7 @@ public class ShortcutService extends IShortcutService.Stub {
     public void enableShortcuts(String packageName, List shortcutIds, @UserIdInt int userId) {
         verifyCaller(packageName, userId);
         Preconditions.checkNotNull(shortcutIds, "shortcutIds must be provided");
+        throwIfUserLocked(userId);
 
         synchronized (mLock) {
             final ShortcutPackage ps = getPackageShortcutsLocked(packageName, userId);
@@ -1764,6 +1792,7 @@ public class ShortcutService extends IShortcutService.Stub {
             @UserIdInt int userId) {
         verifyCaller(packageName, userId);
         Preconditions.checkNotNull(shortcutIds, "shortcutIds must be provided");
+        throwIfUserLocked(userId);
 
         synchronized (mLock) {
             final ShortcutPackage ps = getPackageShortcutsLocked(packageName, userId);
@@ -1787,6 +1816,7 @@ public class ShortcutService extends IShortcutService.Stub {
     @Override
     public void removeAllDynamicShortcuts(String packageName, @UserIdInt int userId) {
         verifyCaller(packageName, userId);
+        throwIfUserLocked(userId);
 
         synchronized (mLock) {
             final ShortcutPackage ps = getPackageShortcutsLocked(packageName, userId);
@@ -1802,6 +1832,8 @@ public class ShortcutService extends IShortcutService.Stub {
     public ParceledListSlice<ShortcutInfo> getDynamicShortcuts(String packageName,
             @UserIdInt int userId) {
         verifyCaller(packageName, userId);
+        throwIfUserLocked(userId);
+
         synchronized (mLock) {
             return getShortcutsWithQueryLocked(
                     packageName, userId, ShortcutInfo.CLONE_REMOVE_FOR_CREATOR,
@@ -1813,6 +1845,8 @@ public class ShortcutService extends IShortcutService.Stub {
     public ParceledListSlice<ShortcutInfo> getManifestShortcuts(String packageName,
             @UserIdInt int userId) {
         verifyCaller(packageName, userId);
+        throwIfUserLocked(userId);
+
         synchronized (mLock) {
             return getShortcutsWithQueryLocked(
                     packageName, userId, ShortcutInfo.CLONE_REMOVE_FOR_CREATOR,
@@ -1824,6 +1858,8 @@ public class ShortcutService extends IShortcutService.Stub {
     public ParceledListSlice<ShortcutInfo> getPinnedShortcuts(String packageName,
             @UserIdInt int userId) {
         verifyCaller(packageName, userId);
+        throwIfUserLocked(userId);
+
         synchronized (mLock) {
             return getShortcutsWithQueryLocked(
                     packageName, userId, ShortcutInfo.CLONE_REMOVE_FOR_CREATOR,
@@ -1854,6 +1890,7 @@ public class ShortcutService extends IShortcutService.Stub {
     @Override
     public int getRemainingCallCount(String packageName, @UserIdInt int userId) {
         verifyCaller(packageName, userId);
+        throwIfUserLocked(userId);
 
         synchronized (mLock) {
             final ShortcutPackage ps = getPackageShortcutsLocked(packageName, userId);
@@ -1865,6 +1902,7 @@ public class ShortcutService extends IShortcutService.Stub {
     @Override
     public long getRateLimitResetTime(String packageName, @UserIdInt int userId) {
         verifyCaller(packageName, userId);
+        throwIfUserLocked(userId);
 
         synchronized (mLock) {
             return getNextResetTimeLocked();
@@ -1883,6 +1921,7 @@ public class ShortcutService extends IShortcutService.Stub {
     @Override
     public void reportShortcutUsed(String packageName, String shortcutId, int userId) {
         verifyCaller(packageName, userId);
+        throwIfUserLocked(userId);
 
         Preconditions.checkNotNull(shortcutId);
 
@@ -1951,6 +1990,10 @@ public class ShortcutService extends IShortcutService.Stub {
             Slog.d(TAG, "onApplicationActive: package=" + packageName + "  userid=" + userId);
         }
         enforceResetThrottlingPermission();
+        if (!isUserUnlocked(userId)) {
+            // This is called by system UI, so no need to throw.  Just ignore.
+            return;
+        }
         resetPackageThrottling(packageName, userId);
     }
 
@@ -1968,6 +2011,8 @@ public class ShortcutService extends IShortcutService.Stub {
     // even when hasShortcutPermission() is overridden.
     @VisibleForTesting
     boolean hasShortcutHostPermissionInner(@NonNull String callingPackage, int userId) {
+        throwIfUserLocked(userId);
+
         synchronized (mLock) {
             final ShortcutUser user = getUserShortcutsLocked(userId);
 
@@ -2125,6 +2170,10 @@ public class ShortcutService extends IShortcutService.Stub {
                 @Nullable ComponentName componentName,
                 int queryFlags, int userId) {
             final ArrayList<ShortcutInfo> ret = new ArrayList<>();
+            if (!isUserUnlocked(userId) || !isUserUnlocked(launcherUserId)) {
+                return ret;
+            }
+
             final boolean cloneKeyFieldOnly =
                     ((queryFlags & ShortcutQuery.FLAG_GET_KEY_FIELDS_ONLY) != 0);
             final int cloneFlag = cloneKeyFieldOnly ? ShortcutInfo.CLONE_REMOVE_NON_KEY_INFO
@@ -2202,6 +2251,10 @@ public class ShortcutService extends IShortcutService.Stub {
             Preconditions.checkStringNotEmpty(packageName, "packageName");
             Preconditions.checkStringNotEmpty(shortcutId, "shortcutId");
 
+            if (!isUserUnlocked(userId) || !isUserUnlocked(launcherUserId)) {
+                return false;
+            }
+
             synchronized (mLock) {
                 getLauncherShortcutsLocked(callingPackage, userId, launcherUserId)
                         .attemptToRestoreIfNeededAndSave();
@@ -2217,6 +2270,10 @@ public class ShortcutService extends IShortcutService.Stub {
                 @NonNull String packageName, @NonNull String shortcutId, int userId) {
             Preconditions.checkStringNotEmpty(packageName, "packageName");
             Preconditions.checkStringNotEmpty(shortcutId, "shortcutId");
+
+            if (!isUserUnlocked(userId) || !isUserUnlocked(launcherUserId)) {
+                return null;
+            }
 
             final ShortcutPackage p = getUserShortcutsLocked(userId)
                     .getPackageShortcutsIfExists(packageName);
@@ -2239,6 +2296,10 @@ public class ShortcutService extends IShortcutService.Stub {
             Preconditions.checkStringNotEmpty(packageName, "packageName");
             Preconditions.checkNotNull(shortcutIds, "shortcutIds");
 
+            if (!isUserUnlocked(userId) || !isUserUnlocked(launcherUserId)) {
+                return;
+            }
+
             synchronized (mLock) {
                 final ShortcutLauncher launcher =
                         getLauncherShortcutsLocked(callingPackage, userId, launcherUserId);
@@ -2258,6 +2319,10 @@ public class ShortcutService extends IShortcutService.Stub {
             // Calling permission must be checked by LauncherAppsImpl.
             Preconditions.checkStringNotEmpty(packageName, "packageName can't be empty");
             Preconditions.checkStringNotEmpty(shortcutId, "shortcutId can't be empty");
+
+            if (!isUserUnlocked(userId) || !isUserUnlocked(launcherUserId)) {
+                return null;
+            }
 
             synchronized (mLock) {
                 getLauncherShortcutsLocked(callingPackage, userId, launcherUserId)
@@ -2289,6 +2354,10 @@ public class ShortcutService extends IShortcutService.Stub {
             Preconditions.checkNotNull(packageName, "packageName");
             Preconditions.checkNotNull(shortcutId, "shortcutId");
 
+            if (!isUserUnlocked(userId) || !isUserUnlocked(launcherUserId)) {
+                return 0;
+            }
+
             synchronized (mLock) {
                 getLauncherShortcutsLocked(callingPackage, userId, launcherUserId)
                         .attemptToRestoreIfNeededAndSave();
@@ -2312,6 +2381,10 @@ public class ShortcutService extends IShortcutService.Stub {
             Preconditions.checkNotNull(callingPackage, "callingPackage");
             Preconditions.checkNotNull(packageName, "packageName");
             Preconditions.checkNotNull(shortcutId, "shortcutId");
+
+            if (!isUserUnlocked(userId) || !isUserUnlocked(launcherUserId)) {
+                return null;
+            }
 
             synchronized (mLock) {
                 getLauncherShortcutsLocked(callingPackage, userId, launcherUserId)
@@ -2345,6 +2418,9 @@ public class ShortcutService extends IShortcutService.Stub {
         @Override
         public boolean hasShortcutHostPermission(int launcherUserId,
                 @NonNull String callingPackage) {
+            if (!isUserUnlocked(launcherUserId)) {
+                return false;
+            }
             return ShortcutService.this.hasShortcutHostPermission(callingPackage, launcherUserId);
         }
     }
@@ -2395,7 +2471,7 @@ public class ShortcutService extends IShortcutService.Stub {
             final long token = injectClearCallingIdentity();
             try {
 
-                if (!mUserManager.isUserUnlocked(userId)) {
+                if (!isUserUnlocked(userId)) {
                     if (DEBUG) {
                         Slog.d(TAG, "Ignoring package broadcast " + action
                                 + " for locked/stopped user " + userId);
@@ -3208,7 +3284,7 @@ public class ShortcutService extends IShortcutService.Stub {
                     case "--user":
                         if (takeUser) {
                             mUserId = UserHandle.parseUserArg(getNextArgRequired());
-                            if (!mUserManager.isUserUnlocked(mUserId)) {
+                            if (!isUserUnlocked(mUserId)) {
                                 throw new CommandException(
                                         "User " + mUserId + " is not running or locked");
                             }
