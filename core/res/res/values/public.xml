@@ -2742,4 +2742,25 @@
     <public type="attr" name="showMetadataInPreview" id="0x0101052f" />
     <public type="attr" name="colorSecondary" id="0x01010530" />
 
+  <!-- ===============================================================
+       Resources added in version O of the platform
+
+       NOTE: add <public> elements within a <public-group> like so:
+
+       <public-group type="attr" first-id="0x01010531">
+           <public name="exampleAttr1" />
+           <public name="exampleAttr2" />
+       </public-group>
+       =============================================================== -->
+    <eat-comment />
+
+    <public-group type="attr" first-id="0x01010531">
+    </public-group>
+
+    <public-group type="style" first-id="0x010302e0">
+    </public-group>
+
+    <public-group type="id" first-id="0x01020041">
+    </public-group>
+
 </resources>
