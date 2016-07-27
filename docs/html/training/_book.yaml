@@ -436,7 +436,7 @@ toc:
       path: /training/efficient-downloads/redundant_redundant.html
     - title: Modifying Patterns Based on the Connectivity Type
       path: /training/efficient-downloads/connectivity_patterns.html
-  - title: Syncing to the Cloud
+  - title: Backing up App Data to the Cloud
     path: /training/backup/index.html
     path_attributes:
     - name: description
