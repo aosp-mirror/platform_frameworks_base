@@ -57,8 +57,8 @@ startActivityForResult(intent, request_code);
 <p>Система пытается предоставить доступ к внешнему каталогу и, при необходимости,
 запрашивает подтверждение доступа у пользователя с помощью упрощенного пользовательского интерфейса:</p>
 
-<img src="{@docRoot}preview/images/scoped-folder-access-framed.png" srcset="{@docRoot}preview/images/scoped-folder-access-framed.png 1x,
-{@docRoot}preview/images/scoped-folder-access-framed_2x.png 2x" />
+<img src="{@docRoot}images/android-7.0/scoped-directory-access-framed.png" srcset="{@docRoot}images/android-7.0/scoped-directory-access-framed.png 1x,
+{@docRoot}images/android-7.0/scoped-directory-access-framed_2x.png 2x" />
 <p class="img-caption"><strong>Рисунок 1.</strong> Приложение запрашивает
 доступ к каталогу Pictures.</p>
 

@@ -71,8 +71,8 @@ startActivityForResult(intent, request_code);
 <p>El sistema intenta otorgar acceso al directorio externo y, si
 es necesario, confirma el acceso con el usuario usando una IU simplificada:</p>
 
-<img src="{@docRoot}preview/images/scoped-folder-access-framed.png" srcset="{@docRoot}preview/images/scoped-folder-access-framed.png 1x,
-{@docRoot}preview/images/scoped-folder-access-framed_2x.png 2x" />
+<img src="{@docRoot}images/android-7.0/scoped-directory-access-framed.png" srcset="{@docRoot}images/android-7.0/scoped-directory-access-framed.png 1x,
+{@docRoot}images/android-7.0/scoped-directory-access-framed_2x.png 2x" />
 <p class="img-caption"><strong>Imagen 1.</strong> Una aplicación solicitando
 acceso al directorio Pictures.</p>
 
@@ -138,8 +138,8 @@ acceso inmediatamente. Hacer esto provocaría una mala experiencia
 de usuario. Si el usuario deniega una solicitud y la aplicación solicita acceso
  nuevamente, aparece la casilla de verificación <b>Don't ask again</b> en la IU:</p>
 
-<img src="{@docRoot}preview/images/scoped-folder-access-dont-ask.png" srcset="{@docRoot}preview/images/scoped-folder-access-dont-ask.png 1x,
-{@docRoot}preview/images/scoped-folder-access-dont-ask_2x.png 2x" />
+<img src="{@docRoot}images/android-7.0/scoped-directory-access-dont-ask.png" srcset="{@docRoot}images/android-7.0/scoped-directory-access-dont-ask.png 1x,
+{@docRoot}images/android-7.0/scoped-directory-access-dont-ask_2x.png 2x" />
 <p class="img-caption"><strong>Figura 1.</strong> Una aplicación que presenta una
 segunda solicitud para obtener acceso a medios extraíbles.</p>
 
