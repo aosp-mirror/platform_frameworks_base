@@ -289,7 +289,7 @@ public final class DisplayInfo implements Parcelable {
                 && modeId == other.modeId
                 && defaultModeId == other.defaultModeId
                 && colorMode == other.colorMode
-                && Objects.equal(supportedColorModes, other.supportedColorModes)
+                && Arrays.equals(supportedColorModes, other.supportedColorModes)
                 && Objects.equal(hdrCapabilities, other.hdrCapabilities)
                 && logicalDensityDpi == other.logicalDensityDpi
                 && physicalXDpi == other.physicalXDpi

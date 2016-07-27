@@ -1227,6 +1227,33 @@ public final class Display {
             return mMinLuminance;
         }
 
+        @Override
+        public boolean equals(Object other) {
+            if (this == other) {
+                return true;
+            }
+
+            if (!(other instanceof HdrCapabilities)) {
+                return false;
+            }
+            HdrCapabilities that = (HdrCapabilities) other;
+
+            return Arrays.equals(mSupportedHdrTypes, that.mSupportedHdrTypes)
+                && mMaxLuminance == that.mMaxLuminance
+                && mMaxAverageLuminance == that.mMaxAverageLuminance
+                && mMinLuminance == that.mMinLuminance;
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 23;
+            hash = hash * 17 + Arrays.hashCode(mSupportedHdrTypes);
+            hash = hash * 17 + Float.floatToIntBits(mMaxLuminance);
+            hash = hash * 17 + Float.floatToIntBits(mMaxAverageLuminance);
+            hash = hash * 17 + Float.floatToIntBits(mMinLuminance);
+            return hash;
+        }
+
         public static final Creator<HdrCapabilities> CREATOR = new Creator<HdrCapabilities>() {
             @Override
             public HdrCapabilities createFromParcel(Parcel source) {
