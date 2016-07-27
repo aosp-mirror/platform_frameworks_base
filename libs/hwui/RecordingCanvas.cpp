@@ -268,7 +268,7 @@ static Rect calcBoundsOfPoints(const float* points, int floatCount) {
 
 // Geometry
 void RecordingCanvas::drawPoints(const float* points, int floatCount, const SkPaint& paint) {
-    if (floatCount < 2) return;
+    if (CC_UNLIKELY(floatCount < 2 || PaintUtils::paintWillNotDraw(paint))) return;
     floatCount &= ~0x1; // round down to nearest two
 
     addOp(alloc().create_trivial<PointsOp>(
@@ -279,7 +279,7 @@ void RecordingCanvas::drawPoints(const float* points, int floatCount, const SkPa
 }
 
 void RecordingCanvas::drawLines(const float* points, int floatCount, const SkPaint& paint) {
-    if (floatCount < 4) return;
+    if (CC_UNLIKELY(floatCount < 4 || PaintUtils::paintWillNotDraw(paint))) return;
     floatCount &= ~0x3; // round down to nearest four
 
     addOp(alloc().create_trivial<LinesOp>(
@@ -290,6 +290,8 @@ void RecordingCanvas::drawLines(const float* points, int floatCount, const SkPai
 }
 
 void RecordingCanvas::drawRect(float left, float top, float right, float bottom, const SkPaint& paint) {
+    if (CC_UNLIKELY(PaintUtils::paintWillNotDraw(paint))) return;
+
     addOp(alloc().create_trivial<RectOp>(
             Rect(left, top, right, bottom),
             *(mState.currentSnapshot()->transform),
@@ -331,6 +333,8 @@ void RecordingCanvas::drawSimpleRects(const float* rects, int vertexCount, const
 }
 
 void RecordingCanvas::drawRegion(const SkRegion& region, const SkPaint& paint) {
+    if (CC_UNLIKELY(PaintUtils::paintWillNotDraw(paint))) return;
+
     if (paint.getStyle() == SkPaint::kFill_Style
             && (!paint.isAntiAlias() || mState.currentTransform()->isSimple())) {
         int count = 0;
@@ -355,8 +359,11 @@ void RecordingCanvas::drawRegion(const SkRegion& region, const SkPaint& paint) {
         }
     }
 }
+
 void RecordingCanvas::drawRoundRect(float left, float top, float right, float bottom,
             float rx, float ry, const SkPaint& paint) {
+    if (CC_UNLIKELY(PaintUtils::paintWillNotDraw(paint))) return;
+
     if (CC_LIKELY(MathUtils::isPositive(rx) || MathUtils::isPositive(ry))) {
         addOp(alloc().create_trivial<RoundRectOp>(
                 Rect(left, top, right, bottom),
@@ -391,7 +398,8 @@ void RecordingCanvas::drawRoundRect(
 
 void RecordingCanvas::drawCircle(float x, float y, float radius, const SkPaint& paint) {
     // TODO: move to Canvas.h
-    if (radius <= 0) return;
+    if (CC_UNLIKELY(radius <= 0 || PaintUtils::paintWillNotDraw(paint))) return;
+
     drawOval(x - radius, y - radius, x + radius, y + radius, paint);
 }
 
@@ -411,6 +419,8 @@ void RecordingCanvas::drawCircle(
 }
 
 void RecordingCanvas::drawOval(float left, float top, float right, float bottom, const SkPaint& paint) {
+    if (CC_UNLIKELY(PaintUtils::paintWillNotDraw(paint))) return;
+
     addOp(alloc().create_trivial<OvalOp>(
             Rect(left, top, right, bottom),
             *(mState.currentSnapshot()->transform),
@@ -420,6 +430,8 @@ void RecordingCanvas::drawOval(float left, float top, float right, float bottom,
 
 void RecordingCanvas::drawArc(float left, float top, float right, float bottom,
         float startAngle, float sweepAngle, bool useCenter, const SkPaint& paint) {
+    if (CC_UNLIKELY(PaintUtils::paintWillNotDraw(paint))) return;
+
     if (fabs(sweepAngle) >= 360.0f) {
         drawOval(left, top, right, bottom, paint);
     } else {
@@ -433,6 +445,8 @@ void RecordingCanvas::drawArc(float left, float top, float right, float bottom,
 }
 
 void RecordingCanvas::drawPath(const SkPath& path, const SkPaint& paint) {
+    if (CC_UNLIKELY(PaintUtils::paintWillNotDraw(paint))) return;
+
     addOp(alloc().create_trivial<PathOp>(
             Rect(path.getBounds()),
             *(mState.currentSnapshot()->transform),
