@@ -6312,6 +6312,15 @@ public final class Settings {
                 "downloads_backup_charging_only";
 
         /**
+         * How many days of information for the automatic storage manager to retain on the device
+         * for downloads.
+         *
+         * @hide
+         */
+        public static final String AUTOMATIC_STORAGE_MANAGER_DOWNLOADS_DAYS_TO_RETAIN =
+                "automatic_storage_manager_downloads_days_to_retain";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
