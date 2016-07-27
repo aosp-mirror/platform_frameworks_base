@@ -5508,6 +5508,9 @@ public final class ViewRootImpl implements ViewParent,
                 mCurrentDragView = null;    // Start the current-recipient tracking
                 mDragDescription = event.mClipDescription;
             } else {
+                if (what == DragEvent.ACTION_DRAG_ENDED) {
+                    mDragDescription = null;
+                }
                 event.mClipDescription = mDragDescription;
             }
 
@@ -5555,7 +5558,6 @@ public final class ViewRootImpl implements ViewParent,
 
                 // Report the drop result when we're done
                 if (what == DragEvent.ACTION_DROP) {
-                    mDragDescription = null;
                     try {
                         Log.i(mTag, "Reporting drop result: " + result);
                         mWindowSession.reportDropResult(mWindow, result);
