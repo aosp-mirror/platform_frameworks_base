@@ -852,6 +852,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         boolean showAtLeast3G = false;
         boolean alwaysShowCdmaRssi = false;
         boolean show4gForLte = false;
+        boolean hideLtePlus = false;
         boolean hspaDataDistinguishable;
 
         static Config readConfig(Context context) {
@@ -864,6 +865,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             config.show4gForLte = res.getBoolean(R.bool.config_show4GForLTE);
             config.hspaDataDistinguishable =
                     res.getBoolean(R.bool.config_hspa_data_distinguishable);
+            config.hideLtePlus = res.getBoolean(R.bool.config_hideLtePlus);
             return config;
         }
     }
