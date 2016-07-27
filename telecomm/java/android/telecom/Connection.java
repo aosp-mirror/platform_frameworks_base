@@ -514,67 +514,87 @@ public abstract class Connection extends Conferenceable {
      * @return A human readable string representation.
      */
     public static String capabilitiesToString(int capabilities) {
+        return capabilitiesToStringInternal(capabilities, true /* isLong */);
+    }
+
+    /**
+     * Renders a set of capability bits ({@code CAPABILITY_*}) as a *short* human readable
+     * string.
+     *
+     * @param capabilities A capability bit field.
+     * @return A human readable string representation.
+     * @hide
+     */
+    public static String capabilitiesToStringShort(int capabilities) {
+        return capabilitiesToStringInternal(capabilities, false /* isLong */);
+    }
+
+    private static String capabilitiesToStringInternal(int capabilities, boolean isLong) {
         StringBuilder builder = new StringBuilder();
-        builder.append("[Capabilities:");
+        builder.append("[");
+        if (isLong) {
+            builder.append("Capabilities:");
+        }
+
         if (can(capabilities, CAPABILITY_HOLD)) {
-            builder.append(" CAPABILITY_HOLD");
+            builder.append(isLong ? " CAPABILITY_HOLD" : " hld");
         }
         if (can(capabilities, CAPABILITY_SUPPORT_HOLD)) {
-            builder.append(" CAPABILITY_SUPPORT_HOLD");
+            builder.append(isLong ? " CAPABILITY_SUPPORT_HOLD" : " sup_hld");
         }
         if (can(capabilities, CAPABILITY_MERGE_CONFERENCE)) {
-            builder.append(" CAPABILITY_MERGE_CONFERENCE");
+            builder.append(isLong ? " CAPABILITY_MERGE_CONFERENCE" : " mrg_cnf");
         }
         if (can(capabilities, CAPABILITY_SWAP_CONFERENCE)) {
-            builder.append(" CAPABILITY_SWAP_CONFERENCE");
+            builder.append(isLong ? " CAPABILITY_SWAP_CONFERENCE" : " swp_cnf");
         }
         if (can(capabilities, CAPABILITY_RESPOND_VIA_TEXT)) {
-            builder.append(" CAPABILITY_RESPOND_VIA_TEXT");
+            builder.append(isLong ? " CAPABILITY_RESPOND_VIA_TEXT" : " txt");
         }
         if (can(capabilities, CAPABILITY_MUTE)) {
-            builder.append(" CAPABILITY_MUTE");
+            builder.append(isLong ? " CAPABILITY_MUTE" : " mut");
         }
         if (can(capabilities, CAPABILITY_MANAGE_CONFERENCE)) {
-            builder.append(" CAPABILITY_MANAGE_CONFERENCE");
+            builder.append(isLong ? " CAPABILITY_MANAGE_CONFERENCE" : " mng_cnf");
         }
         if (can(capabilities, CAPABILITY_SUPPORTS_VT_LOCAL_RX)) {
-            builder.append(" CAPABILITY_SUPPORTS_VT_LOCAL_RX");
+            builder.append(isLong ? " CAPABILITY_SUPPORTS_VT_LOCAL_RX" : " VTlrx");
         }
         if (can(capabilities, CAPABILITY_SUPPORTS_VT_LOCAL_TX)) {
-            builder.append(" CAPABILITY_SUPPORTS_VT_LOCAL_TX");
+            builder.append(isLong ? " CAPABILITY_SUPPORTS_VT_LOCAL_TX" : " VTltx");
         }
         if (can(capabilities, CAPABILITY_SUPPORTS_VT_LOCAL_BIDIRECTIONAL)) {
-            builder.append(" CAPABILITY_SUPPORTS_VT_LOCAL_BIDIRECTIONAL");
+            builder.append(isLong ? " CAPABILITY_SUPPORTS_VT_LOCAL_BIDIRECTIONAL" : " VTlbi");
         }
         if (can(capabilities, CAPABILITY_SUPPORTS_VT_REMOTE_RX)) {
-            builder.append(" CAPABILITY_SUPPORTS_VT_REMOTE_RX");
+            builder.append(isLong ? " CAPABILITY_SUPPORTS_VT_REMOTE_RX" : " VTrrx");
         }
         if (can(capabilities, CAPABILITY_SUPPORTS_VT_REMOTE_TX)) {
-            builder.append(" CAPABILITY_SUPPORTS_VT_REMOTE_TX");
+            builder.append(isLong ? " CAPABILITY_SUPPORTS_VT_REMOTE_TX" : " VTrtx");
         }
         if (can(capabilities, CAPABILITY_SUPPORTS_VT_REMOTE_BIDIRECTIONAL)) {
-            builder.append(" CAPABILITY_SUPPORTS_VT_REMOTE_BIDIRECTIONAL");
+            builder.append(isLong ? " CAPABILITY_SUPPORTS_VT_REMOTE_BIDIRECTIONAL" : " VTrbi");
         }
         if (can(capabilities, CAPABILITY_CANNOT_DOWNGRADE_VIDEO_TO_AUDIO)) {
-            builder.append(" CAPABILITY_CANNOT_DOWNGRADE_VIDEO_TO_AUDIO");
+            builder.append(isLong ? " CAPABILITY_CANNOT_DOWNGRADE_VIDEO_TO_AUDIO" : " !v2a");
         }
         if (can(capabilities, CAPABILITY_SPEED_UP_MT_AUDIO)) {
-            builder.append(" CAPABILITY_SPEED_UP_MT_AUDIO");
+            builder.append(isLong ? " CAPABILITY_SPEED_UP_MT_AUDIO" : " spd_aud");
         }
         if (can(capabilities, CAPABILITY_CAN_UPGRADE_TO_VIDEO)) {
-            builder.append(" CAPABILITY_CAN_UPGRADE_TO_VIDEO");
+            builder.append(isLong ? " CAPABILITY_CAN_UPGRADE_TO_VIDEO" : " a2v");
         }
         if (can(capabilities, CAPABILITY_CAN_PAUSE_VIDEO)) {
-            builder.append(" CAPABILITY_CAN_PAUSE_VIDEO");
+            builder.append(isLong ? " CAPABILITY_CAN_PAUSE_VIDEO" : " paus_VT");
         }
         if (can(capabilities, CAPABILITY_CONFERENCE_HAS_NO_CHILDREN)) {
-            builder.append(" CAPABILITY_SINGLE_PARTY_CONFERENCE");
+            builder.append(isLong ? " CAPABILITY_SINGLE_PARTY_CONFERENCE" : " 1p_cnf");
         }
         if (can(capabilities, CAPABILITY_CAN_SEND_RESPONSE_VIA_CONNECTION)) {
-            builder.append(" CAPABILITY_CAN_SEND_RESPONSE_VIA_CONNECTION");
+            builder.append(isLong ? " CAPABILITY_CAN_SEND_RESPONSE_VIA_CONNECTION" : " rsp_by_con");
         }
         if (can(capabilities, CAPABILITY_CAN_PULL_CALL)) {
-            builder.append(" CAPABILITY_CAN_PULL_CALL");
+            builder.append(isLong ? " CAPABILITY_CAN_PULL_CALL" : " pull");
         }
 
         builder.append("]");
@@ -588,31 +608,49 @@ public abstract class Connection extends Conferenceable {
      * @return A human readable string representation.
      */
     public static String propertiesToString(int properties) {
+        return propertiesToStringInternal(properties, true /* isLong */);
+    }
+
+    /**
+     * Renders a set of property bits ({@code PROPERTY_*}) as a *short* human readable string.
+     *
+     * @param properties A property bit field.
+     * @return A human readable string representation.
+     * @hide
+     */
+    public static String propertiesToStringShort(int properties) {
+        return propertiesToStringInternal(properties, false /* isLong */);
+    }
+
+    private static String propertiesToStringInternal(int properties, boolean isLong) {
         StringBuilder builder = new StringBuilder();
-        builder.append("[Properties:");
+        builder.append("[");
+        if (isLong) {
+            builder.append("Properties:");
+        }
 
         if (can(properties, PROPERTY_SHOW_CALLBACK_NUMBER)) {
-            builder.append(" PROPERTY_SHOW_CALLBACK_NUMBER");
+            builder.append(isLong ? " PROPERTY_SHOW_CALLBACK_NUMBER" : " clbk");
         }
 
         if (can(properties, PROPERTY_HIGH_DEF_AUDIO)) {
-            builder.append(" PROPERTY_HIGH_DEF_AUDIO");
+            builder.append(isLong ? " PROPERTY_HIGH_DEF_AUDIO" : " HD");
         }
 
         if (can(properties, PROPERTY_WIFI)) {
-            builder.append(" PROPERTY_WIFI");
+            builder.append(isLong ? " PROPERTY_WIFI" : " wifi");
         }
 
         if (can(properties, PROPERTY_GENERIC_CONFERENCE)) {
-            builder.append(" PROPERTY_GENERIC_CONFERENCE");
+            builder.append(isLong ? " PROPERTY_GENERIC_CONFERENCE" : " gen_conf");
         }
 
         if (can(properties, PROPERTY_IS_EXTERNAL_CALL)) {
-            builder.append(" PROPERTY_IS_EXTERNAL_CALL");
+            builder.append(isLong ? " PROPERTY_IS_EXTERNAL_CALL" : " xtrnl");
         }
 
         if (can(properties, PROPERTY_HAS_CDMA_VOICE_PRIVACY)) {
-            builder.append(" PROPERTY_HAS_CDMA_VOICE_PRIVACY");
+            builder.append(isLong ? " PROPERTY_HAS_CDMA_VOICE_PRIVACY" : " priv");
         }
 
         builder.append("]");
