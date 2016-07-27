@@ -1212,3 +1212,5 @@ redirects:
   to: /training/tv/playback/picture-in-picture.html
 - from: /preview/features/tv-recording-api.html
   to: /training/tv/tif/content-recording.html
+- from: /preview/features/direct-boot.html
+  to: /training/articles/direct-boot.html
