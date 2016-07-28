@@ -1,0 +1,610 @@
+page.title=Perubahan Perilaku
+page.keywords=pratinjau,sdk,kompatibilitas
+meta.tags="preview", "compatibility"
+page.tags="preview", "developer preview"
+page.image=images/cards/card-n-changes_2x.png
+@jd:body
+
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>Dalam dokumen ini</h2>
+
+<ol>
+  <li><a href="#perf">Peningkatan Kinerja</a>
+    <ol>
+      <li><a href="#doze">Istirahatkan</a></li>
+      <li><a href="#bg-opt">Optimalisasi Latar Belakang</a></li>
+    </ol>
+  </li>
+  <li><a href="#perm">Perubahan Izin</a>
+  </li>
+  <li><a href="#sharing-files">Berbagi File Antar Aplikasi</a></li>
+  <li><a href="#accessibility">Peningkatan Aksesibilitas</a>
+    <ol>
+      <li><a href="#screen-zoom">Perbesaran Layar</a></li>
+      <li><a href="#vision-settings">Vision Settings di Setup Wizard</a></li>
+    </ol>
+  </li>
+  <li><a href="#ndk">Penautan Aplikasi NDK ke Pustaka Platform</a></li>
+  <li><a href="#afw">Android for Work</a></li>
+  <li><a href="#annotations">Retensi Anotasi</a></li>
+  <li><a href="#other">Poin Penting Lainnya</a></li>
+</ol>
+
+<h2>Lihat Juga</h2>
+<ol>
+  <li><a href="{@docRoot}preview/api-overview.html">
+    Ringkasan Android N API</a></li>
+</ol>
+
+</div>
+</div>
+
+
+<p>
+  Bersama fitur dan kemampuan baru, Android N
+  menyertakan berbagai macam perubahan sistem dan perubahan perilaku API. Dokumen ini
+  menyoroti beberapa perubahan utama yang harus dipahami dan diperhitungkan
+  dalam aplikasi Anda.
+</p>
+
+<p>
+  Jika Anda sebelumnya telah mempublikasikan aplikasi untuk Android, ketahuilah bahwa aplikasi Anda
+  mungkin dipengaruhi oleh perubahan dalam platform.
+</p>
+
+
+<h2 id="perf">Baterai dan Memori</h2>
+
+<p>
+Android N menyertakan perubahan perilaku sistem yang bertujuan untuk meningkatkan daya tahan baterai
+perangkat dan mengurangi penggunaan RAM. Perubahan ini bisa memengaruhi akses aplikasi Anda ke
+sumber daya sistem, termasuk cara aplikasi Anda berinteraksi dengan aplikasi lain melalui
+intent implisit tertentu.
+</p>
+
+<h3 id="doze">Istirahatkan</h3>
+
+<p>
+  Diperkenalkan dalam Android 6.0 (API level 23), Istirahatkan meningkatkan daya tahan baterai dengan
+  menangguhkan aktivitas CPU dan jaringan bila pengguna tidak mencabut perangkat,
+  tidak bergerak, dan layar dinonaktifkan. Android N lebih
+  menyempurnakan Istirahatkan dengan menerapkan subset CPU dan pembatasan jaringan
+  bila perangkat dicabut dan layar dinonaktifkan, namun tidak harus
+  diam, misalnya, bila handset dibawa bepergian di saku pengguna.
+</p>
+
+
+<img src="{@docRoot}images/android-7.0/doze-diagram-1.png" alt="" height="251px" id="figure1" />
+<p class="img-caption">
+  <strong>Gambar 1.</strong> Ilustrasi tentang cara Istirahatkan menerapkan pembatasan
+  aktivitas sistem level pertama untuk meningkatkan daya tahan baterai.
+</p>
+
+<p>
+  Bila perangkat sedang menggunakan daya baterai, dan layar telah nonaktif selama jangka waktu
+  tertentu, perangkat akan memasuki Istirahatkan dan menerapkan subset pembatasan pertama: Perangkat
+  akan menutup akses jaringan aplikasi, serta menangguhkan pekerjaan dan sinkronisasi. Jika perangkat sedang
+  diam selama jangka waktu tertentu setelah memasuki Istirahatkan, sistem akan menerapkan
+  pembatasan Istirahatkan selebihnya terhadap alarm {@link android.os.PowerManager.WakeLock},
+  {@link android.app.AlarmManager}, GPS, dan pemindaian Wi-Fi. Tidak peduli
+  apakah sebagian atau semua pembatasan Istirahatkan diterapkan, sistem akan membangunkan
+  perangkat selama jeda pemeliharaan singkat, dan selama itu aplikasi diizinkan
+  mengakses jaringan dan bisa mengeksekusi semua pekerjaan/sinkronisasi yang telah ditangguhkan.
+</p>
+
+
+<img src="{@docRoot}images/android-7.0/doze-diagram-2.png" alt="" id="figure2" />
+<p class="img-caption">
+  <strong>Gambar 2.</strong> Ilustrasi tentang cara Istirahatkan menerapkan pembatasan
+  aktivitas sistem level kedua setelah perangkat diam selama jangka waktu tertentu.
+</p>
+
+<p>
+  Perhatikan, mengaktifkan layar atau mencolokkan steker perangkat akan mengeluarkan dari Istirahatkan
+  dan membuang pembatasan pemrosesan ini. Perilaku tambahan ini tidak
+  memengaruhi rekomendasi dan praktik terbaik dalam menyesuaikan aplikasi Anda dengan versi
+  Istirahatkan sebelumnya yang diperkenalkan dalam Android 6.0 (API level 23), seperti yang dibahas di
+  <a href="{@docRoot}training/monitoring-device-state/doze-standby.html">
+  Mengoptimalkan untuk Istirahatkan dan Aplikasi Siaga</a>. Anda tetap harus
+   mengikuti rekomendasi itu, seperti menggunakan Google Cloud Messaging (GCM) untuk
+  mengirim dan menerima pesan, serta mulai merencanakan pembaruan
+  untuk mengakomodasi perilaku Istirahatkan tambahan.
+</p>
+
+
+<h3 id="bg-opt">Project Svelte: Optimalisasi Latar Belakang</h3>
+
+<p>
+  Android N membuang tiga siaran implisit untuk membantu mengoptimalkan
+  penggunaan memori dan konsumsi daya. Perubahan ini penting karena siaran
+  implisit sering memulai aplikasi yang telah didaftarkan untuk mendengarkannya di
+  latar belakang. Membuang siaran ini bisa sangat menguntungkan
+  kinerja perangkat dan pengalaman pengguna.
+</p>
+
+<p>
+  Perangkat seluler seringkali mengalami perubahan konektivitas, seperti saat berpindah
+  antara Wi-Fi dan data seluler. Saat ini, aplikasi bisa memantau perubahan dalam
+  konektivitas dengan mendaftarkan suatu penerima untuk siaran implisit {@link
+  android.net.ConnectivityManager#CONNECTIVITY_ACTION} dalam manifes
+  mereka. Karena banyak aplikasi yang didaftarkan untuk menerima siaran ini, switch  jaringan tunggal
+  bisa menyebabkan semuanya aktif dan memproses siaran tersebut
+  secara bersamaan.
+</p>
+
+<p>
+  Demikian pula, dalam Android versi sebelumnya, aplikasi bisa mendaftar untuk menerima siaran implisit {@link
+  android.hardware.Camera#ACTION_NEW_PICTURE} dan {@link
+  android.hardware.Camera#ACTION_NEW_VIDEO} dari aplikasi lain, seperti
+  Kamera. Bila pengguna mengambil gambar dengan aplikasi Kamera, semua aplikasi ini akan aktif
+  untuk memproses siaran.
+</p>
+
+<p>
+  Untuk meminimalkan masalah ini, Android N menerapkan optimalisasi
+  berikut:
+</p>
+
+<ul>
+  <li>Aplikasi yang menargetkan Android N tidak menerima siaran {@link
+  android.net.ConnectivityManager#CONNECTIVITY_ACTION}, sekalipun
+  memiliki entri manifes untuk meminta pemberitahuan mengenai kejadian ini. Aplikasi
+  yang berjalan tetap bisa mendengarkan {@code CONNECTIVITY_CHANGE} pada thread utama
+  jika mereka meminta pemberitahuan dengan {@link android.content.BroadcastReceiver}.
+  </li>
+
+  <li>Aplikasi tidak bisa mengirim atau menerima siaran {@link
+  android.hardware.Camera#ACTION_NEW_PICTURE} atau {@link
+  android.hardware.Camera#ACTION_NEW_VIDEO}. Optimalisasi ini
+  memengaruhi semua aplikasi, bukan hanya aplikasi yang menargetkan Android N.
+  </li>
+</ul>
+
+<p>Jika aplikasi Anda menggunakan intent ini, Anda harus membuang dependensi padanya
+  secepat mungkin agar Anda bisa menargetkan perangkat Android N dengan benar.
+  Kerangka kerja Android menyediakan beberapa solusi untuk mengurangi kebutuhan akan
+  siaran implisit ini. Misalnya, {@link
+  android.app.job.JobScheduler} API menyediakan mekanisme yang tangguh untuk menjadwalkan
+  operasi jaringan bila kondisi yang ditetapkan, seperti koneksi ke jaringan
+  berbiaya tetap, terpenuhi. Anda juga dapat menggunakan {@link
+  android.app.job.JobScheduler} untuk bereaksi terhadap perubahan pada penyedia materi.
+</p>
+
+<p>
+  Untuk informasi selengkapnya tentang optimalisasi latar belakang di N dan cara menyesuaikan aplikasi Anda,
+  lihat <a href="{@docRoot}preview/features/background-optimization.html">Optimalisasi
+  Latar Belakang</a>.
+</p>
+
+<h2 id="perm">Perubahan Izin</h2>
+
+<p>
+  Android N menyertakan perubahan pada izin yang bisa memengaruhi aplikasi Anda.
+</p>
+
+<h3 id="permfilesys">Perubahan izin sistem file</h3>
+
+<p>
+  Guna meningkatkan keamanan file privat, direktori privat
+  aplikasi yang menargetkan Android N atau yang lebih tinggi memiliki akses terbatas (<code>0700</code>).
+  Pengaturan ini mencegah kebocoran metadata dari file privat, seperti ukuran
+  atau eksistensi. Perubahan izin ini memiliki beberapa efek samping:
+</p>
+
+<ul>
+  <li>
+    Izin file privat tidak boleh dianggap remeh oleh pemilik,
+    dan usaha untuk melakukannya menggunakan
+    {@link android.content.Context#MODE_WORLD_READABLE} dan/atau
+    {@link android.content.Context#MODE_WORLD_WRITEABLE}, akan memicu sebuah
+    {@link java.lang.SecurityException}.
+    <p class="note">
+      <strong>Catatan:</strong> Seperti sebelumnya, pembatasan ini tidak sepenuhnya diterapkan.
+      Aplikasi mungkin masih memodifikasi izin ke direktori privat mereka menggunakan
+      API asal atau {@link java.io.File File} API. Akan tetapi, kami sangat
+      tidak menyarankan Anda meremehkan izin direktori privat.
+    </p>
+  </li>
+  <li>
+    Meneruskan URI <code>file://</code> di luar domain paket dapat meninggalkan
+    penerima dengan jalur yang tidak bisa di akses. Karena itu, upaya untuk meneruskan URI
+    <code>file://</code> akan memicu
+    <code>FileUriExposedException</code>. Cara yang disarankan adalah
+    materi file privat menggunakan {@link
+    android.support.v4.content.FileProvider}.
+  </li>
+  <li>
+    {@link android.app.DownloadManager} tidak bisa lagi berbagi
+    file yang tersimpan secara privat berdasarkan nama file. Aplikasi lawas dapat mengakibatkan
+    jalur yang tidak dapat diakses saat mengakses {@link
+    android.app.DownloadManager#COLUMN_LOCAL_FILENAME}. Aplikasi yang menargetkan
+    Android N atau yang lebih tinggi akan memicu {@link java.lang.SecurityException} saat
+    berupaya mengakses
+    {@link android.app.DownloadManager#COLUMN_LOCAL_FILENAME}.
+    Aplikasi lawas yang menyetel lokasi unduhan ke lokasi publik dengan
+    menggunakan
+    {@link
+    android.app.DownloadManager.Request#setDestinationInExternalFilesDir
+    DownloadManager.Request.setDestinationInExternalFilesDir()} atau
+    {@link
+    android.app.DownloadManager.Request#setDestinationInExternalPublicDir
+    DownloadManager.Request.setDestinationInExternalPublicDir()}
+    tetap bisa mengakses jalur tersebut di
+    {@link android.app.DownloadManager#COLUMN_LOCAL_FILENAME}, akan tetapi,
+     metode ini sangat tidak disarankan. Cara yang disarankan untuk mengakses file
+    yang diekspos oleh {@link android.app.DownloadManager} adalah menggunakan
+    {@link android.content.ContentResolver#openFileDescriptor
+    ContentResolver.openFileDescriptor()}.
+  </li>
+</ul>
+
+<h2 id="sharing-files">Berbagi File Antar Aplikasi</h2>
+
+<p>
+Untuk aplikasi yang menargetkan Android N, kerangka kerja Android menerapkan
+kebijakan {@link android.os.StrictMode} API yang melarang mengekspos URI {@code file://}
+di luar aplikasi Anda. Jika sebuah intent berisi URI file meninggalkan aplikasi Anda, aplikasi tersebut akan gagal
+dengan pengecualian {@code FileUriExposedException}.
+</p>
+
+<p>
+Untuk berbagi file antar aplikasi, Anda harus mengirim URI {@code content://}
+dan memberikan izin akses sementara pada URI. Cara termudah untuk memberikan izin ini adalah dengan
+menggunakan kelas {@link android.support.v4.content.FileProvider}. Untuk informasi selengkapnya
+mengenai izin dan berbagi file,
+lihat <a href="{@docRoot}training/secure-file-sharing/index.html">Berbagi File</a>.
+</p>
+
+<h2 id="accessibility">Peningkatan Aksesibilitas</h2>
+
+<p>
+  Android N menyertakan perubahan yang bertujuan meningkatkan kegunaan
+  platform untuk pengguna dengan penglihatan yang rendah atau lemah. Perubahan ini umumnya tidak
+  memerlukan perubahan kode dalam aplikasi Anda, akan tetapi Anda harus memeriksa
+  fitur ini dan mengujinya dengan aplikasi untuk menilai kemungkinan dampaknya terhadap pengalaman
+  pengguna.
+</p>
+
+
+<h3 id="screen-zoom">Perbesaran Layar</h3>
+
+<p>
+  Android N memungkinkan pengguna menyetel <strong>Display size</strong> yang akan memperbesar
+  atau memperkecil semua elemen pada layar, sehingga meningkatkan aksesibilitas perangkat
+  bagi pengguna yang kurang melihat. Pengguna tidak bisa memperbesar layar melewati lebar layar
+  minimum <a href="http://developer.android.com/guide/topics/resources/providing-resources.html">
+  sw320dp</a>, yang merupakan lebar Nexus 4, yakni ponsel ukuran sedang pada umumnya.
+</p>
+
+<div class="cols">
+
+<div class="col-6">
+  <img src="{@docRoot}images/android-7.0/screen-zoom-1.png" alt="" height="XXX" id="figure1" />
+</div>
+<div class="col-6">
+  <img src="{@docRoot}images/android-7.0/screen-zoom-2.png" alt="" height="XXX" id="figure1" />
+</div>
+
+</div> <!-- end cols -->
+<p class="img-caption">
+  <strong>Gambar 3.</strong> Layar di sebelah kanan menampilkan efek
+ penambahan Display size perangkat yang menjalankan citra sistem Android N.
+</p>
+
+
+<p>
+  Bila kepadatan perangkat berubah, sistem akan memberi tahu aplikasi yang sedang berjalan dengan
+  cara berikut:
+</p>
+
+<ul>
+  <li>Jika aplikasi menargetkan API level 23 atau yang lebih rendah, sistem secara otomatis akan mematikan
+  semua proses latar belakang. Artinya, jika pengguna beralih dari
+  aplikasi tersebut untuk membuka layar <em>Settings</em> dan mengubah
+  setelan <strong>Display size</strong>, maka sistem akan mematikan aplikasi tersebut dengan cara yang
+  sama dengan saat memori tinggal sedikit. Jika aplikasi memiliki beberapa proses
+  latar depan, sistem akan memberi tahu proses tersebut mengenai perubahan konfigurasi seperti
+ dijelaskan dalam <a href="{@docRoot}guide/topics/resources/runtime-changes.html">Menangani Perubahan
+  Waktu Proses</a>, seolah-olah orientasi perangkat telah berubah.
+  </li>
+
+  <li>Jika sebuah aplikasi menargetkan Android N, semua prosesnya
+  (latar depan dan latar belakang) akan diberi tahu mengenai perubahan konfigurasi seperti
+  dijelaskan dalam <a href="{@docRoot}guide/topics/resources/runtime-changes.html">Menangani Perubahan
+  Waktu Proses</a>.
+  </li>
+</ul>
+
+<p>
+  Sebagian besar aplikasi tidak perlu melakukan perubahan untuk mendukung fitur ini, asalkan
+  aplikasi tersebut mengikuti praktik terbaik Android. Hal-hal tertentu yang harus diperiksa:
+</p>
+
+<ul>
+  <li>Uji aplikasi Anda pada perangkat dengan lebar layar <code><a href=
+  "{@docRoot}guide/topics/resources/providing-resources.html">sw320dp</a></code>
+  dan pastikan aplikasi berjalan dengan semestinya.
+  </li>
+
+  <li>Bila konfigurasi perangkat berubah, perbarui informasi cache
+  yang bergantung pada kepadatan, seperti bitmap di cache atau sumber daya yang dimuat dari
+  jaringan. Periksa perubahan konfigurasi bila aplikasi melanjutkan dari status dihentikan
+  sementara.
+    <p class="note">
+      <strong>Catatan:</strong> Catatan: Jika Anda meng-cache data yang bergantung pada konfigurasi, ada
+      baiknya untuk menyertakan metadata yang relevan seperti ukuran layar
+      atau kepadatan piksel yang sesuai untuk data tersebut. Menyimpan metadata ini memungkinkan Anda untuk
+      memutuskan apakah Anda perlu segarkan data cache setelah perubahan
+      konfigurasi.
+    </p>
+  </li>
+
+  <li>Hindari menetapkan dimensi dengan satuan px, karena satuan ini tidak diskalakan dengan
+  kepadatan layar. Sebagai gantinya, tetapkan dimensi dengan satuan <a href="{@docRoot}guide/practices/screens_support.html">piksel yang tidak bergantung kepadatan
+  </a> (<code>dp</code>).
+  </li>
+</ul>
+
+<h3 id="vision-settings">Vision Settings di Setup Wizard</h3>
+
+<p>
+  Android N menyertakan Vision Settings di layar Sambutan, di mana pengguna bisa
+  menyiapkan setelan aksesibilitas berikut pada perangkat baru:
+  <strong>Magnification gesture</strong>, <strong>Font size</strong>,
+  <strong>Display size</strong> dan <strong>TalkBack</strong>. Perubahan ini
+  meningkatkan visibilitas bug terkait dengan setelan layar yang berbeda. Untuk
+  mengurangi dampak fitur ini, Anda harus menguji aplikasi dengan setelan ini
+  diaktifkan. Anda bisa menemukannya pada <strong>Settings &gt;
+  Accessibility</strong>.
+</p>
+
+<h2 id="ndk">Penautan Aplikasi NDK ke Pustaka Platform</h2>
+
+<p>
+  Android N menyertakan perubahan ruang nama untuk mencegah pemuatan API non-publik.
+  Jika menggunakan NDK, Anda hanya boleh menggunakan API publik dari platform
+  Android. Menggunakan API non-publik dalam rilis Android resmi berikutnya
+  bisa menyebabkan aplikasi mogok.
+</p>
+
+<p>
+  Untuk memberi tahu Anda agar menggunakan API non-publik, aplikasi yang berjalan pada perangkat
+  Android N akan menghasilkan kesalahan dalam keluaran logcat bila aplikasi memanggil API non-publik.
+  Kesalahan ini juga ditampilkan di layar perangkat berupa pesan untuk membantu
+  meningkatkan kepedulian terhadap situasi ini. Anda harus memeriksa kode aplikasi untuk
+  membuang penggunaan API platform non-publik dan secara saksama menguji aplikasi Anda menggunakan
+  perangkat pratinjau atau emulator.
+</p>
+
+<p>
+  Jika aplikasi Anda bergantung pada pustaka platform, lihat dokumentasi NDK untuk
+  perbaikan tipikal guna menggantikan API privat umum dengan padanan API publik.
+  Anda mungkin juga menautkan ke pustaka platform tanpa menyadarinya,
+  terutama jika aplikasi Anda menggunakan pustaka yang merupakan bagian dari platform ini (seperti
+  <code>libpng</code>), namun bukan bagian dari NDK. Dalam hal itu, pastikan
+  APK Anda berisi semua file .so yang ingin ditautkan.
+</p>
+
+<p class="caution">
+  <strong>Perhatian:</strong> Beberapa pustaka pihak ketiga mungkin menautkan ke API
+  non-publik. Jika menggunakan pustaka ini, aplikasi Anda bisa mogok saat dijalankan
+  pada rilis resmi Android berikutnya.
+</p>
+
+<p>
+  Aplikasi tidak boleh bergantung pada atau menggunakan pustaka bawaan yang tidak disertakan dalam
+  NDK, karena bisa mengalami perubahan, atau dipindahkan dari satu rilis Android ke
+  rilis lainnya. Peralihan dari OpenSSL ke BoringSSL merupakan satu contoh dari perubahan semacam ini.
+  Selain itu, perangkat yang berbeda bisa menawarkan tingkat kompatibilitas yang berbeda, karena
+   tidak ada persyaratan kompatibilitas untuk pustaka platform yang tidak disertakan
+  dalam NDK. Jika Anda harus mengakses pustaka non-NDK pada perangkat yang lebih lama, jadikan
+  pemuatan bergantung pada level Android API.
+</p>
+
+<p>
+  Untuk membantu Anda mendiagnosis tipe masalah ini ada beberapa contoh kesalahan Java dan NDK
+  yang mungkin Anda temui saat berusaha membangun aplikasi dengan Android N:
+</p>
+
+<p>Contoh kesalahan Java:</p>
+<pre class="no-pretty-print">
+java.lang.UnsatisfiedLinkError: dlopen failed: library "/system/lib/libcutils.so"
+    is not accessible for the namespace "classloader-namespace"
+</pre>
+
+<p>Contoh kesalahan NDK:</p>
+<pre class="no-pretty-print">
+dlopen failed: cannot locate symbol "__system_property_get" referenced by ...
+</pre>
+
+
+<p>
+  Inilah beberapa perbaikan tipikal untuk aplikasi yang mengalami tipe kesalahan ini:
+</p>
+
+<ul>
+  <li>Penggunaan getJavaVM dan getJNIEnv dari libandroid_runtime.so bisa diganti
+  dengan fungsi JNI standar:
+<pre class="no-pretty-print">
+AndroidRuntime::getJavaVM -&gt; GetJavaVM from &lt;jni.h&gt;
+AndroidRuntime::getJNIEnv -&gt; JavaVM::GetEnv or
+JavaVM::AttachCurrentThread from &lt;jni.h&gt;.
+</pre>
+  </li>
+
+  <li>Penggunaan simbol {@code property_get} dari {@code libcutils.so} bisa
+    diganti dengan {@code alternative __system_property_get} publik.
+   Caranya, gunakan {@code __system_property_get} dengan menyertakan yang berikut:
+<pre>
+#include &lt;sys/system_properties.h&gt;
+</pre>
+  </li>
+
+  <li>Penggunaan simbol {@code SSL_ctrl} dari {@code libcrypto.so} harus
+    diganti dengan aplikasi versi lokal. Misalnya, Anda harus menautkan
+  {@code libcyrpto.a} secara statis dalam file {@code .so} atau menyertakan
+  {@code libcrypto.so} Anda sendiri secara dinamis dari BoringSSL atau OpenSSL dalam aplikasi Anda.
+  </li>
+</ul>
+
+<h2 id="afw">Android for Work</h2>
+<p>
+  Android N berisi perubahan untuk aplikasi yang menargetkan Android for Work, termasuk
+  perubahan pada pemasangan sertifikat, penyetelan ulang sandi, manajemen pengguna
+  tambahan, dan akses ke identifier perangkat. Jika Anda membangun aplikasi untuk
+  lingkungan Android for Work, Anda harus meninjau perubahan ini dan memodifikasi
+  aplikasi sebagaimana mestinya.
+</p>
+
+<ul>
+  <li>Anda harus pasang pemasang sertifikat yang didelegasikan sebelum DPC bisa
+  menyetelnya. Untuk aplikasi profil dan aplikasi pemilik perangkat yang menargetkan N SDK, Anda harus
+  pasang pemasang sertifikat yang didelegasikan sebelum pengontrol kebijakan
+  perangkat (DPC) memanggil
+  <code>DevicePolicyManager.setCertInstallerPackage()</code>. Jika pemasang
+  belum dipasang, sistem akan melontarkan
+  <code>IllegalArgumentException</code>.
+  </li>
+
+  <li>Pembatasan sandi penyetelan ulang untuk admin perangkat sekarang diterapkan ke pemilik
+  profil. Admin perangkat tidak bisa lagi menggunakan
+  {@code DevicePolicyManager.resetPassword()} untuk menghapus sandi atau mengubah
+  sandi yang sudah disetel. Admin perangkat tetap bisa menyetel sandi, namun hanya
+  bila perangkat belum memiliki sandi, PIN, atau pola.
+  </li>
+
+  <li>Pemilik perangkat dan profil bisa mengelola akun meskipun pembatasan
+  telah disetel. Pemilik perangkat dan pemilik profil bisa memanggil Account Management API
+  sekalipun pembatasan pengguna <code>DISALLOW_MODIFY_ACCOUNTS</code> diberlakukan.
+  </li>
+
+  <li>Pemilik perangkat bisa mengelola pengguna tambahan lebih mudah. Bila perangkat
+  berjalan dalam mode pemilik perangkat, maka pembatasan <code>DISALLOW_ADD_USER</code>
+  secara otomatis akan ditetapkan. Ini mencegah pengguna membuat pengguna tambahan yang
+  tidak terkelola. Selain itu, <code>CreateUser()</code> dan
+  <code>createAndInitializeUser()</code> metode tidak digunakan lagi; metode
+  <code>DevicePolicyManager.createAndManageUser()</code> telah menggantikannya.
+  </li>
+
+  <li>Pemilik perangkat bisa mengakses identifier perangkat. Pemilik perangkat bisa mengakses
+  alamat MAC Wi-Fi dari perangkat, menggunakan
+  <code>DevicePolicyManagewr.getWifiMacAddress()</code>. Jika Wi-Fi belum pernah
+  diaktifkan pada perangkat tersebut, metode ini akan mengembalikan nilai {@code null}.
+  </li>
+
+  <li>Setelan Mode Kerja mengontrol akses ke aplikasi kerja. Bila mode kerja tidak aktif, peluncur sistem
+  akan menunjukkan aplikasi kerja tidak tersedia dengan membuat warnanya jadi abu-abu. Mengaktifkan kembali
+ mode kerja akan memulihkan perilaku normal.
+</ul>
+
+<p>
+  Untuk informasi selengkapnya tentang perubahan Android for Work di Android N, lihat
+  <a href="{@docRoot}preview/features/afw.html">Pembaruan Android for Work</a>.
+</p>
+
+<h2 id="annotations">Retensi Anotasi</h2>
+
+<p>
+Android N memperbaiki bug dengan visibilitas anotasi diabaikan.
+Masalah ini mengaktifkan waktu proses untuk mengakses anotasi yang seharusnya tidak bisa
+dilakukan. Anotasi ini termasuk:
+</p>
+
+<ul>
+   <li>{@code VISIBILITY_BUILD}: Dimaksudkan agar hanya bisa terlihat pada waktu pembuatan.</li>
+   <li>{@code VISIBILITY_SYSTEM}: Dimaksud agar bisa terlihat pada waktu proses, namun hanya pada
+ sistem yang mendasarinya.</li>
+</ul>
+
+<p>
+Jika aplikasi Anda mengandalkan perilaku ini, tambahkan kebijakan retensi untuk anotasi yang harus
+tersedia di waktu proses. Caranya dengan menggunakan {@code @Retention(RetentionPolicy.RUNTIME)}.
+</p>
+
+<h2 id="other">Poin Penting Lainnya</h2>
+
+<ul>
+<li>Bila aplikasi berjalan pada Android N, namun menargetkan level API yang lebih rendah,
+dan pengguna mengubah ukuran tampilan, proses aplikasi akan dimatikan. Aplikasi
+harus dapat menangani skenario ini dengan lancar. Jika tidak, maka akan mogok
+bila pengguna memulihkannya dari Recents.
+
+<p>
+Anda harus menguji aplikasi untuk memastikan
+perilaku ini tidak terjadi.
+Anda bisa melakukannya dengan menyebabkan suatu mogok yang identik
+saat mematikan aplikasi secara manual melalui DDMS.
+</p>
+
+<p>
+Aplikasi yang menargetkan N dan yang di atasnya tidak secara otomatis dimatikan saat perubahan kepadatan;
+akan tetapi, aplikasi tersebut mungkin tetap merespons perubahan konfigurasi dengan buruk.
+</p>
+</li>
+
+<li>
+Aplikasi pada Android N harus mampu menangani perubahan konfigurasi dengan lancar,
+dan tidak boleh mengalami mogok pada start selanjutnya. Anda bisa memverifikasi perilaku aplikasi
+dengan mengubah ukuran font (<strong>Setting</strong> &gt;
+<strong>Display</strong> &gt; <strong>Font size</strong>), kemudian memulihkan
+aplikasi dari Recents.
+</li>
+
+<li>
+Dikarenakan adanya bug di versi Android sebelumnya, sistem tidak menandai penulisan
+  ke soket TCP di thread utama sebagai pelanggaran mode-ketat. Android N memperbaiki bug ini.
+Aplikasi yang menunjukkan perilaku ini kini melontarkan sebuah {@code android.os.NetworkOnMainThreadException}.
+Secara umum, melakukan operasi jaringan di thread utama tidak baik karena operasi ini
+biasanya memiliki latensi tinggi yang menyebabkan ANR dan jank.
+</li>
+
+<li>
+Kelompok metode {@code Debug.startMethodTracing()} kini default ke
+keluaran penyimpanan di direktori paket tertentu di penyimpanan bersama,
+sebagai ganti di level teratas
+kartu SD.  Berarti aplikasi tidak perlu lagi meminta izin {@code WRITE_EXTERNAL_STORAGE} untuk menggunakan API ini.
+</li>
+
+<li>
+Banyak platform API yang kini mulai memeriksa beban besar yang dikirim
+ke seluruh transaksi {@link android.os.Binder}, dan sistem
+kini melontarkan kembali {@code TransactionTooLargeExceptions}
+sebagai {@code RuntimeExceptions}, sebagai ganti logging secara diam-diam atau menyembunyikannya.  Satu contoh
+umum adalah menyimpan terlalu banyak data di
+{@link android.app.Activity#onSaveInstanceState Activity.onSaveInstanceState()},
+yang menyebabkan {@code ActivityThread.StopInfo} melontarkan
+{@code RuntimeException} bila aplikasi Anda menargetkan Android N.
+</li>
+
+<li>
+Jika sebuah aplikasi mengeposkan tugas {@link java.lang.Runnable} ke{@link android.view.View}, dan
+{@link android.view.View}
+tidak terpasang ke jendela, sistem
+akan mengantrekan tugas {@link java.lang.Runnable} dengan {@link android.view.View};
+tugas {@link java.lang.Runnable} tidak akan dieksekusi hingga
+{@link android.view.View} terpasang
+ke jendela. Perilaku ini mengatasi bug berikut:
+<ul>
+   <li>Jika sebuah aplikasi mengeposkan ke {@link android.view.View} dari thread selain thread UI jendela yang dimaksud,
+    maka {@link java.lang.Runnable} mungkin akan menjalankan thread yang salah.
+   </li>
+   <li>Jika tugas {@link java.lang.Runnable} diposkan dari thread selain
+   looper-thread, aplikasi bisa mengekspos tugas {@link java.lang.Runnable}.</li>
+</ul>
+</li>
+
+<li>
+Jika sebuah aplikasi di Android N dengan
+izin{@link android.Manifest.permission#DELETE_PACKAGES DELETE_PACKAGES}
+mencoba menghapus sebuah paket, namun sebuah aplikasi berbeda telah memasang paket itu,
+sistem akan memerlukan konfirmasi pengguna. Dalam skenario ini, aplikasi harus mengharapkan
+{@link android.content.pm.PackageInstaller#STATUS_PENDING_USER_ACTION STATUS_PENDING_USER_ACTION}
+sebagai status kembalian bila memanggil
+{@link android.content.pm.PackageInstaller#uninstall PackageInstaller.uninstall()}.
+</li>
+
+</ul>
+
