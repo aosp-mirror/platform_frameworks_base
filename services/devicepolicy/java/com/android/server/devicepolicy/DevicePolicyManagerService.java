@@ -4558,14 +4558,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    private void wipeDataLocked(boolean wipeExtRequested, String reason) {
+    private void wipeDataLocked(boolean wipeExtRequested, String reason, boolean force) {
         if (wipeExtRequested) {
             StorageManager sm = (StorageManager) mContext.getSystemService(
                     Context.STORAGE_SERVICE);
             sm.wipeAdoptableDisks();
         }
         try {
-            RecoverySystem.rebootWipeUserData(mContext, reason);
+            RecoverySystem.rebootWipeUserData(mContext, false /* shutdown */, reason, force);
         } catch (IOException | SecurityException e) {
             Slog.w(LOG_TAG, "Failed requesting data wipe", e);
         }
@@ -4600,17 +4600,35 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     }
                 }
                 boolean wipeExtRequested = (flags & WIPE_EXTERNAL_STORAGE) != 0;
+                // If the admin is the only one who has set the restriction: force wipe, even if
+                // {@link UserManager.DISALLOW_FACTORY_RESET} is set. Reason is that the admin
+                // could remove this user restriction anyway.
+                boolean force = (userHandle == UserHandle.USER_SYSTEM)
+                        && isAdminOnlyOneWhoSetRestriction(admin,
+                                UserManager.DISALLOW_FACTORY_RESET, UserHandle.USER_SYSTEM);
                 wipeDeviceOrUserLocked(wipeExtRequested, userHandle,
-                        "DevicePolicyManager.wipeData() from " + source);
+                        "DevicePolicyManager.wipeData() from " + source, force);
             } finally {
                 mInjector.binderRestoreCallingIdentity(ident);
             }
         }
     }
 
-    private void wipeDeviceOrUserLocked(boolean wipeExtRequested, final int userHandle, String reason) {
+    private boolean isAdminOnlyOneWhoSetRestriction(ActiveAdmin admin, String userRestriction,
+            int userId) {
+        int source = mUserManager.getUserRestrictionSource(userRestriction, UserHandle.of(userId));
+        if (isDeviceOwner(admin.info.getComponent(), userId)) {
+            return source == UserManager.RESTRICTION_SOURCE_DEVICE_OWNER;
+        } else if (isProfileOwner(admin.info.getComponent(), userId)) {
+            return source == UserManager.RESTRICTION_SOURCE_PROFILE_OWNER;
+        }
+        return false;
+    }
+
+    private void wipeDeviceOrUserLocked(boolean wipeExtRequested, final int userHandle,
+            String reason, boolean force) {
         if (userHandle == UserHandle.USER_SYSTEM) {
-            wipeDataLocked(wipeExtRequested, reason);
+            wipeDataLocked(wipeExtRequested, reason, force);
         } else {
             mHandler.post(new Runnable() {
                 @Override
@@ -4786,7 +4804,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (wipeData) {
                 // Call without holding lock.
                 wipeDeviceOrUserLocked(false, identifier,
-                        "reportFailedPasswordAttempt()");
+                        "reportFailedPasswordAttempt()", false);
             }
         } finally {
             mInjector.binderRestoreCallingIdentity(ident);
