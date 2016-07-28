@@ -1189,6 +1189,8 @@ class WindowSurfacePlacer {
         final AppWindowToken topOpeningApp = handleOpeningApps(transit,
                 animLp, voiceInteraction, topClosingLayer);
 
+        mService.mAppTransition.setLastAppTransition(transit, topOpeningApp, topClosingApp);
+
         final AppWindowAnimator openingAppAnimator = (topOpeningApp == null) ?  null :
                 topOpeningApp.mAppAnimator;
         final AppWindowAnimator closingAppAnimator = (topClosingApp == null) ? null :
