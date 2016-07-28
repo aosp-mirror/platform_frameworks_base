@@ -294,6 +294,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
         // TODO Check max number
 
+        mRunningUsers.put(USER_10, true);
+
         runWithCaller(CALLING_PACKAGE_2, USER_10, () -> {
             assertTrue(mManager.setDynamicShortcuts(list(makeShortcut("s1"))));
         });
@@ -340,6 +342,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
         // TODO Check fields.
 
+        mRunningUsers.put(USER_10, true);
+
         runWithCaller(CALLING_PACKAGE_2, USER_10, () -> {
             assertTrue(mManager.addDynamicShortcuts(list(makeShortcut("s1"))));
         });
@@ -347,6 +351,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
     public void testPublishWithNoActivity() {
         // If activity is not explicitly set, use the default one.
+
+        mRunningUsers.put(USER_10, true);
 
         runWithCaller(CALLING_PACKAGE_2, USER_10, () -> {
             // s1 and s3 has no activities.
@@ -450,6 +456,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
     }
 
     public void testPublishWithNoActivity_noMainActivityInPackage() {
+        mRunningUsers.put(USER_10, true);
+
         runWithCaller(CALLING_PACKAGE_2, USER_10, () -> {
             final ShortcutInfo si1 = new ShortcutInfo.Builder(mClientContext, "si1")
                     .setShortLabel("label1")
@@ -722,6 +730,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         });
 
         // For USER-10, let's try without updating the times.
+        mRunningUsers.put(USER_10, true);
+
         runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
             mManager.setDynamicShortcuts(list(
                     makeShortcutWithIcon("10s1", bmp32x32),
@@ -1070,6 +1080,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         // TODO Check with other fields too.
 
         // TODO Check bitmap removal too.
+
+        mRunningUsers.put(USER_11, true);
 
         runWithCaller(CALLING_PACKAGE_2, USER_11, () -> {
             mManager.updateShortcuts(list());
@@ -2048,6 +2060,9 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             assertTrue(mManager.setDynamicShortcuts(list(
                     makeShortcut("s1"), makeShortcut("s2"), makeShortcut("s3"))));
         });
+
+        mRunningUsers.put(USER_10, true);
+
         runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
             assertTrue(mManager.setDynamicShortcuts(list(
                     makeShortcut("s1"), makeShortcut("s2"), makeShortcut("s3"),
@@ -2769,6 +2784,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 .areAllWithKeyFieldsOnly()
                 .areAllDynamic();
 
+        mRunningUsers.put(USER_10, true);
+
         // Different user, callback shouldn't be called.
         assertForLauncherCallback(mLauncherApps, () -> {
             runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
@@ -2980,27 +2997,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertCallbackReceived(cP0_1, HANDLE_USER_0, CALLING_PACKAGE_3,
                 "s1", "s2", "s3", "s4", "s5", "s6");
 
-        // Work profile, but not running, so don't send notifications.
-
-        resetAll(all);
-        runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
-            mManager.removeDynamicShortcuts(list());
-        });
-        waitOnMainThread();
-
-        assertCallbackNotReceived(c0_1);
-        assertCallbackNotReceived(c0_2);
-        assertCallbackNotReceived(c0_3);
-        assertCallbackNotReceived(c0_4);
-        assertCallbackNotReceived(cP0_1);
-        assertCallbackNotReceived(c10_1);
-        assertCallbackNotReceived(c10_2);
-        assertCallbackNotReceived(c11_1);
-
-        // Work profile, now running.
-        mRunningUsers.clear();
-        mRunningUsers.put(USER_P0, true);
-
+        // Work profile.
         resetAll(all);
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
             mManager.removeDynamicShortcuts(list());
@@ -3017,7 +3014,6 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertCallbackReceived(cP0_1, HANDLE_USER_P0, CALLING_PACKAGE_1, "s1", "s2", "s3", "s4");
 
         // Normal secondary user.
-        mRunningUsers.clear();
         mRunningUsers.put(USER_10, true);
 
         resetAll(all);
@@ -3112,6 +3108,9 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             assertEquals(START_TIME + INTERVAL, mManager.getRateLimitResetTime());
             assertEquals(2, mManager.getRemainingCallCount());
         });
+
+        mRunningUsers.put(USER_10, true);
+
         runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
             final Icon icon1 = Icon.createWithResource(getTestContext(), R.drawable.black_64x64);
             final Icon icon2 = Icon.createWithBitmap(BitmapFactory.decodeResource(
@@ -3222,6 +3221,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             mLauncherApps.pinShortcuts(CALLING_PACKAGE_2, list("s0_2"),
                     HANDLE_USER_0);
         });
+
+        mRunningUsers.put(USER_10, true);
 
         runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
             assertTrue(mManager.setDynamicShortcuts(list(
@@ -3558,6 +3559,9 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             assertTrue(mManager.setDynamicShortcuts(list(
                     makeShortcut("s1"), makeShortcut("s2"), makeShortcut("s3"))));
         });
+
+        mRunningUsers.put(USER_10, true);
+
         runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
             assertTrue(mManager.setDynamicShortcuts(list(
                     makeShortcut("s1"), makeShortcut("s2"), makeShortcut("s3"))));
@@ -3876,6 +3880,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         setCaller(CALLING_PACKAGE_3, USER_0);
         assertTrue(mManager.addDynamicShortcuts(list(makeShortcutWithIcon("s1", bmp32x32))));
 
+        mRunningUsers.put(USER_10, true);
+
         setCaller(CALLING_PACKAGE_1, USER_10);
         assertTrue(mManager.addDynamicShortcuts(list(makeShortcutWithIcon("s1", bmp32x32))));
 
@@ -3987,6 +3993,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
         setCaller(CALLING_PACKAGE_3, USER_0);
         assertTrue(mManager.addDynamicShortcuts(list(makeShortcutWithIcon("s1", bmp32x32))));
+
+        mRunningUsers.put(USER_10, true);
 
         setCaller(CALLING_PACKAGE_1, USER_10);
         assertTrue(mManager.addDynamicShortcuts(list(makeShortcutWithIcon("s1", bmp32x32))));
@@ -4113,6 +4121,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             assertTrue(mManager.setDynamicShortcuts(list(
                     makeShortcutWithIcon("s1", res32x32))));
         });
+
+        mRunningUsers.put(USER_10, true);
 
         runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
             assertTrue(mManager.setDynamicShortcuts(list(
@@ -5441,6 +5451,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         });
 
         // Try on another user, with some packages uninstalled.
+        mRunningUsers.put(USER_10, true);
+
         uninstallPackage(USER_10, CALLING_PACKAGE_1);
         uninstallPackage(USER_10, CALLING_PACKAGE_3);
 
@@ -5621,6 +5633,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         uninstallPackage(USER_10, CALLING_PACKAGE_4);
 
         mService.handleUnlockUser(USER_0);
+
+        mRunningUsers.put(USER_10, true);
         mService.handleUnlockUser(USER_10);
 
         // Originally no manifest shortcuts.

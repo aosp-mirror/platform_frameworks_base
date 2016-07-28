@@ -259,7 +259,7 @@ public class ShortcutParser {
                     continue;
                 }
 
-                ShortcutService.warnForInvalidTag(depth, tag);
+                Log.w(TAG, String.format("Invalid tag '%s' found at depth %d", tag, depth));
             }
         } finally {
             if (parser != null) {

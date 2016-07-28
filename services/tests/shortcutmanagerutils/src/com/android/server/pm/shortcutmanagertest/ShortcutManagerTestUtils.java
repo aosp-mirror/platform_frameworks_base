@@ -55,6 +55,8 @@ import junit.framework.Assert;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -86,7 +88,7 @@ import java.util.function.Predicate;
 public class ShortcutManagerTestUtils {
     private static final String TAG = "ShortcutManagerUtils";
 
-    private static final boolean ENABLE_DUMPSYS = false; // DO NOT SUBMIT WITH true
+    private static final boolean ENABLE_DUMPSYS = true; // DO NOT SUBMIT WITH true
 
     private static final int STANDARD_TIMEOUT_SEC = 5;
 
@@ -233,6 +235,29 @@ public class ShortcutManagerTestUtils {
                 + " --user " + userId + " " + packageName);
     }
 
+    public static void anyContains(List<String> result, String expected) {
+        for (String l : result) {
+            if (l.contains(expected)) {
+                return;
+            }
+        }
+        fail("Result didn't contain '" + expected + "': was\n" + result);
+    }
+
+    public static void enableComponent(Instrumentation instrumentation, ComponentName cn,
+            boolean enable) {
+
+        final String word = (enable ? "enable" : "disable");
+        runCommand(instrumentation,
+                "pm " + word + " " + cn.flattenToString()
+                , result ->concatResult(result).contains(word));
+    }
+
+    public static void appOps(Instrumentation instrumentation, String packageName,
+            String op, String mode) {
+        runCommand(instrumentation, "appops set " + packageName + " " + op + " " + mode);
+    }
+
     public static void dumpsysShortcut(Instrumentation instrumentation) {
         if (!ENABLE_DUMPSYS) {
             return;
@@ -241,6 +266,18 @@ public class ShortcutManagerTestUtils {
         for (String s : runCommand(instrumentation, "dumpsys shortcut")) {
             Log.e(TAG, s);
         }
+    }
+
+    public static JSONObject getCheckinDump(Instrumentation instrumentation) throws JSONException {
+        return new JSONObject(concatResult(runCommand(instrumentation, "dumpsys shortcut -c")));
+    }
+
+    public static boolean isLowRamDevice(Instrumentation instrumentation) throws JSONException {
+        return getCheckinDump(instrumentation).getBoolean("lowRam");
+    }
+
+    public static int getIconSize(Instrumentation instrumentation) throws JSONException {
+        return getCheckinDump(instrumentation).getInt("iconSize");
     }
 
     public static Bundle makeBundle(Object... keysAndValues) {
@@ -1013,5 +1050,16 @@ public class ShortcutManagerTestUtils {
         // launcherApps.unregisterCallback(asserter.getMockCallback());
 
         return asserter;
+    }
+
+    public static void retryUntil(BooleanSupplier checker, String message) {
+        final long timeOut = System.currentTimeMillis() + 30 * 1000; // wait for 30 seconds.
+        while (!checker.getAsBoolean()) {
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException ignore) {
+            }
+        }
+        assertTrue(message, checker.getAsBoolean());
     }
 }

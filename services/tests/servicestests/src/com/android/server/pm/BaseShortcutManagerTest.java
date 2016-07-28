@@ -687,19 +687,25 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
         // Set up isUserRunning and isUserUnlocked.
         when(mMockUserManager.isUserRunning(anyInt())).thenAnswer(new AnswerWithSystemCheck<>(
-                        inv -> mRunningUsers.get((Integer) inv.getArguments()[0])));
+                        inv -> b(mRunningUsers.get((Integer) inv.getArguments()[0]))));
 
-        when(mMockUserManager.isUserUnlocked(anyInt())).thenAnswer(new AnswerWithSystemCheck<>(
-                        inv -> {
-                            final int userId = (Integer) inv.getArguments()[0];
-                            return mRunningUsers.get(userId) && mUnlockedUsers.get(userId);
-                        }));
+        when(mMockUserManager.isUserUnlocked(anyInt()))
+                .thenAnswer(new AnswerWithSystemCheck<>(inv -> {
+                    final int userId = (Integer) inv.getArguments()[0];
+                    return b(mRunningUsers.get(userId)) && b(mUnlockedUsers.get(userId));
+                }));
+        // isUserUnlockingOrUnlocked() return the same value as isUserUnlocked().
+        when(mMockUserManager.isUserUnlockingOrUnlocked(anyInt()))
+                .thenAnswer(new AnswerWithSystemCheck<>(inv -> {
+                    final int userId = (Integer) inv.getArguments()[0];
+                    return b(mRunningUsers.get(userId)) && b(mUnlockedUsers.get(userId));
+                }));
 
-        // User 0 is always running
+        // User 0 and P0 are always running
         mRunningUsers.put(USER_0, true);
         mRunningUsers.put(USER_10, false);
         mRunningUsers.put(USER_11, false);
-        mRunningUsers.put(USER_P0, false);
+        mRunningUsers.put(USER_P0, true);
 
         // Unlock all users by default.
         mUnlockedUsers.put(USER_0, true);
@@ -713,6 +719,10 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         // Start the service.
         initService();
         setCaller(CALLING_PACKAGE_1);
+    }
+
+    private static boolean b(Boolean value) {
+        return (value != null && value);
     }
 
     /**
@@ -1726,6 +1736,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     }
 
     protected void prepareCrossProfileDataSet() {
+        mRunningUsers.put(USER_10, true); // this test needs user 10.
+
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
             assertTrue(mManager.setDynamicShortcuts(list(
                     makeShortcut("s1"), makeShortcut("s2"), makeShortcut("s3"),
