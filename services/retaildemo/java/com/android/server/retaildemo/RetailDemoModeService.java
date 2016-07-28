@@ -287,7 +287,7 @@ public class RetailDemoModeService extends SystemService {
         synchronized (mActivityLock) {
             mFirstUserActivityTime = mLastUserActivityTime = SystemClock.uptimeMillis();
         }
-        mPreloadAppsInstaller = new PreloadAppsInstaller();
+        mPreloadAppsInstaller = new PreloadAppsInstaller(context);
     }
 
     private Notification createResetNotification() {
