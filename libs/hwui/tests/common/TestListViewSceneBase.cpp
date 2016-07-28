@@ -25,7 +25,7 @@ namespace android {
 namespace uirenderer {
 namespace test {
 
-void TestListViewSceneBase::createContent(int width, int height, TestCanvas& canvas) {
+void TestListViewSceneBase::createContent(int width, int height, Canvas& canvas) {
     srand(0);
     mItemHeight = dp(60);
     mItemSpacing = dp(16);
@@ -41,7 +41,7 @@ void TestListViewSceneBase::createContent(int width, int height, TestCanvas& can
         mListItems.push_back(node);
     }
     mListView = TestUtils::createNode(0, 0, width, height,
-            [this](RenderProperties& props, TestCanvas& canvas) {
+            [this](RenderProperties& props, Canvas& canvas) {
         for (size_t ci = 0; ci < mListItems.size(); ci++) {
             canvas.drawRenderNode(mListItems[ci].get());
         }
@@ -56,9 +56,8 @@ void TestListViewSceneBase::doFrame(int frameNr) {
     int itemIndexOffset = scrollPx / (mItemSpacing + mItemHeight);
     int pxOffset = -(scrollPx % (mItemSpacing + mItemHeight));
 
-    TestCanvas canvas(
-            mListView->stagingProperties().getWidth(),
-            mListView->stagingProperties().getHeight());
+    std::unique_ptr<Canvas> canvas(Canvas::create_recording_canvas(mListView->stagingProperties().getWidth(),
+            mListView->stagingProperties().getHeight()));
     for (size_t ci = 0; ci < mListItems.size(); ci++) {
         // update item position
         auto listItem = mListItems[(ci + itemIndexOffset) % mListItems.size()];
@@ -68,9 +67,9 @@ void TestListViewSceneBase::doFrame(int frameNr) {
         listItem->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y);
 
         // draw it to parent DisplayList
-        canvas.drawRenderNode(mListItems[ci].get());
+        canvas->drawRenderNode(mListItems[ci].get());
     }
-    mListView->setStagingDisplayList(canvas.finishRecording(), nullptr);
+    mListView->setStagingDisplayList(canvas->finishRecording(), nullptr);
 }
 
 } // namespace test

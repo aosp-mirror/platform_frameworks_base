@@ -29,7 +29,7 @@ static TestScene::Registrar _PartialDamage(TestScene::Info{
 class PartialDamageAnimation : public TestScene {
 public:
     std::vector< sp<RenderNode> > cards;
-    void createContent(int width, int height, TestCanvas& canvas) override {
+    void createContent(int width, int height, Canvas& canvas) override {
         static SkColor COLORS[] = {
                 0xFFF44336,
                 0xFF9C27B0,
@@ -44,7 +44,7 @@ public:
                 SkColor color = COLORS[static_cast<int>((y / dp(116))) % 4];
                 sp<RenderNode> card = TestUtils::createNode(x, y,
                         x + dp(100), y + dp(100),
-                        [color](RenderProperties& props, TestCanvas& canvas) {
+                        [color](RenderProperties& props, Canvas& canvas) {
                     canvas.drawColor(color, SkXfermode::kSrcOver_Mode);
                 });
                 canvas.drawRenderNode(card.get());
@@ -58,7 +58,7 @@ public:
         cards[0]->mutateStagingProperties().setTranslationY(curFrame);
         cards[0]->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y);
 
-        TestUtils::recordNode(*cards[0], [curFrame](TestCanvas& canvas) {
+        TestUtils::recordNode(*cards[0], [curFrame](Canvas& canvas) {
             SkColor color = TestUtils::interpolateColor(
                     curFrame / 150.0f, 0xFFF44336, 0xFFF8BBD0);
             canvas.drawColor(color, SkXfermode::kSrcOver_Mode);

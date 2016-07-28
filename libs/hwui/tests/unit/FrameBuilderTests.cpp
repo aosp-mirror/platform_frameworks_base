@@ -127,7 +127,7 @@ RENDERTHREAD_TEST(FrameBuilder, simple) {
         }
     };
 
-    auto node = TestUtils::createNode(0, 0, 100, 200,
+    auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 200,
             [](RenderProperties& props, RecordingCanvas& canvas) {
         SkBitmap bitmap = TestUtils::createSkBitmap(25, 25);
         canvas.drawRect(0, 0, 100, 200, SkPaint());
@@ -155,7 +155,7 @@ RENDERTHREAD_TEST(FrameBuilder, simpleStroke) {
         }
     };
 
-    auto node = TestUtils::createNode(0, 0, 100, 200,
+    auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 200,
             [](RenderProperties& props, RecordingCanvas& canvas) {
         SkPaint strokedPaint;
         strokedPaint.setStrokeWidth(10);
@@ -171,7 +171,7 @@ RENDERTHREAD_TEST(FrameBuilder, simpleStroke) {
 }
 
 RENDERTHREAD_TEST(FrameBuilder, simpleRejection) {
-    auto node = TestUtils::createNode(0, 0, 200, 200,
+    auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200,
             [](RenderProperties& props, RecordingCanvas& canvas) {
         canvas.save(SaveFlags::MatrixClip);
         canvas.clipRect(200, 200, 400, 400, SkRegion::kIntersect_Op); // intersection should be empty
@@ -198,7 +198,7 @@ RENDERTHREAD_TEST(FrameBuilder, simpleBatching) {
         }
     };
 
-    auto node = TestUtils::createNode(0, 0, 200, 200,
+    auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200,
             [](RenderProperties& props, RecordingCanvas& canvas) {
         SkBitmap bitmap = TestUtils::createSkBitmap(10, 10,
                 kAlpha_8_SkColorType); // Disable merging by using alpha 8 bitmap
@@ -234,7 +234,7 @@ RENDERTHREAD_TEST(FrameBuilder, deferRenderNode_translateClip) {
         }
     };
 
-    auto node = TestUtils::createNode(0, 0, 100, 100,
+    auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100,
             [](RenderProperties& props, RecordingCanvas& canvas) {
         canvas.drawRect(0, 0, 100, 100, SkPaint());
     });
@@ -287,20 +287,20 @@ RENDERTHREAD_TEST(FrameBuilder, deferRenderNodeScene) {
     transparentPaint.setAlpha(128);
 
     // backdrop
-    nodes.push_back(TestUtils::createNode(100, 100, 700, 500, // 600x400
+    nodes.push_back(TestUtils::createNode<RecordingCanvas>(100, 100, 700, 500, // 600x400
             [&transparentPaint](RenderProperties& props, RecordingCanvas& canvas) {
         canvas.drawRect(0, 0, 600, 400, transparentPaint);
     }));
 
     // content
     Rect contentDrawBounds(150, 150, 650, 450); // 500x300
-    nodes.push_back(TestUtils::createNode(0, 0, 800, 600,
+    nodes.push_back(TestUtils::createNode<RecordingCanvas>(0, 0, 800, 600,
             [&transparentPaint](RenderProperties& props, RecordingCanvas& canvas) {
         canvas.drawRect(0, 0, 800, 600, transparentPaint);
     }));
 
     // overlay
-    nodes.push_back(TestUtils::createNode(0, 0, 800, 600,
+    nodes.push_back(TestUtils::createNode<RecordingCanvas>(0, 0, 800, 600,
             [&transparentPaint](RenderProperties& props, RecordingCanvas& canvas) {
         canvas.drawRect(0, 0, 800, 200, transparentPaint);
     }));
@@ -346,7 +346,7 @@ RENDERTHREAD_TEST(FrameBuilder, empty_withFbo0) {
             EXPECT_EQ(1, mIndex++);
         }
     };
-    auto node = TestUtils::createNode(10, 10, 110, 110,
+    auto node = TestUtils::createNode<RecordingCanvas>(10, 10, 110, 110,
             [](RenderProperties& props, RecordingCanvas& canvas) {
         // no drawn content
     });
@@ -371,7 +371,7 @@ RENDERTHREAD_TEST(FrameBuilder, avoidOverdraw_rects) {
                     << "Last rect should occlude others.";
         }
     };
-    auto node = TestUtils::createNode(0, 0, 200, 200,
+    auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200,
             [](RenderProperties& props, RecordingCanvas& canvas) {
         canvas.drawRect(0, 0, 200, 200, SkPaint());
         canvas.drawRect(0, 0, 200, 200, SkPaint());
@@ -413,7 +413,7 @@ RENDERTHREAD_TEST(FrameBuilder, avoidOverdraw_bitmaps) {
         }
     };
 
-    auto node = TestUtils::createNode(0, 0, 50, 50,
+    auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 50, 50,
             [](RenderProperties& props, RecordingCanvas& canvas) {
         canvas.drawRect(0, 0, 50, 50, SkPaint());
         canvas.drawRect(0, 0, 50, 50, SkPaint());
@@ -447,8 +447,8 @@ RENDERTHREAD_TEST(FrameBuilder, clippedMerging) {
                     opList.clipSideFlags);
         }
     };
-    auto node = TestUtils::createNode(0, 0, 100, 100,
-            [](RenderProperties& props, TestCanvas& canvas) {
+    auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
         SkBitmap bitmap = TestUtils::createSkBitmap(20, 20);
 
         // left side clipped (to inset left half)
@@ -489,8 +489,8 @@ RENDERTHREAD_TEST(FrameBuilder, textMerging) {
             EXPECT_EQ(OpClipSideFlags::None, opList.states[1]->computedState.clipSideFlags);
         }
     };
-    auto node = TestUtils::createNode(0, 0, 400, 400,
-            [](RenderProperties& props, TestCanvas& canvas) {
+    auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 400, 400,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
         SkPaint paint;
         paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
         paint.setAntiAlias(true);
@@ -520,7 +520,7 @@ RENDERTHREAD_TEST(FrameBuilder, textStrikethrough) {
             EXPECT_EQ(5u, opList.count);
         }
     };
-    auto node = TestUtils::createNode(0, 0, 200, 2000,
+    auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 2000,
             [](RenderProperties& props, RecordingCanvas& canvas) {
         SkPaint textPaint;
         textPaint.setAntiAlias(true);
@@ -576,8 +576,8 @@ RENDERTHREAD_TEST(FrameBuilder, textStyle) {
             EXPECT_EQ(stroke, outsetFill);
         }
     };
-    auto node = TestUtils::createNode(0, 0, 400, 400,
-            [](RenderProperties& props, TestCanvas& canvas) {
+    auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 400, 400,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
         SkPaint paint;
         paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
         paint.setAntiAlias(true);
@@ -616,7 +616,7 @@ RENDERTHREAD_TEST(FrameBuilder, textureLayer_clipLocalMatrix) {
     auto layerUpdater = TestUtils::createTextureLayerUpdater(renderThread, 100, 100,
             SkMatrix::MakeTrans(5, 5));
 
-    auto node = TestUtils::createNode(0, 0, 200, 200,
+    auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200,
             [&layerUpdater](RenderProperties& props, RecordingCanvas& canvas) {
         canvas.save(SaveFlags::MatrixClip);
         canvas.clipRect(50, 50, 150, 150, SkRegion::kIntersect_Op);
@@ -648,7 +648,7 @@ RENDERTHREAD_TEST(FrameBuilder, textureLayer_combineMatrices) {
     auto layerUpdater = TestUtils::createTextureLayerUpdater(renderThread, 100, 100,
             SkMatrix::MakeTrans(5, 5));
 
-    auto node = TestUtils::createNode(0, 0, 200, 200,
+    auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200,
             [&layerUpdater](RenderProperties& props, RecordingCanvas& canvas) {
         canvas.save(SaveFlags::MatrixClip);
         canvas.translate(30, 40);
@@ -670,7 +670,7 @@ RENDERTHREAD_TEST(FrameBuilder, textureLayer_reject) {
             SkMatrix::MakeTrans(5, 5));
     layerUpdater->backingLayer()->setRenderTarget(GL_NONE); // Should be rejected
 
-    auto node = TestUtils::createNode(0, 0, 200, 200,
+    auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200,
             [&layerUpdater](RenderProperties& props, RecordingCanvas& canvas) {
         canvas.drawLayer(layerUpdater.get());
     });
@@ -693,7 +693,7 @@ RENDERTHREAD_TEST(FrameBuilder, functor_reject) {
     Functor noopFunctor;
 
     // 1 million pixel tall view, scrolled down 80%
-    auto scrolledFunctorView = TestUtils::createNode(0, 0, 400, 1000000,
+    auto scrolledFunctorView = TestUtils::createNode<RecordingCanvas>(0, 0, 400, 1000000,
             [&noopFunctor](RenderProperties& props, RecordingCanvas& canvas) {
         canvas.translate(0, -800000);
         canvas.callDrawGLFunction(&noopFunctor, nullptr);
@@ -718,7 +718,7 @@ RENDERTHREAD_TEST(FrameBuilder, deferColorOp_unbounded) {
         }
     };
 
-    auto unclippedColorView = TestUtils::createNode(0, 0, 10, 10,
+    auto unclippedColorView = TestUtils::createNode<RecordingCanvas>(0, 0, 10, 10,
             [](RenderProperties& props, RecordingCanvas& canvas) {
         props.setClipToBounds(false);
         canvas.drawColor(SK_ColorWHITE, SkXfermode::Mode::kSrcOver_Mode);
@@ -752,14 +752,14 @@ TEST(FrameBuilder, renderNode) {
         }
     };
 
-    auto child = TestUtils::createNode(10, 10, 110, 110,
+    auto child = TestUtils::createNode<RecordingCanvas>(10, 10, 110, 110,
             [](RenderProperties& props, RecordingCanvas& canvas) {
         SkPaint paint;
         paint.setColor(SK_ColorWHITE);
         canvas.drawRect(0, 0, 100, 100, paint);
     });
 
-    auto parent = TestUtils::createNode(0, 0, 200, 200,
+    auto parent = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200,
             [&child](RenderProperties& props, RecordingCanvas& canvas) {
         SkPaint paint;
         paint.setColor(SK_ColorDKGRAY);
@@ -791,7 +791,7 @@ RENDERTHREAD_TEST(FrameBuilder, clipped) {
         }
     };
 
-    auto node = TestUtils::createNode(0, 0, 200, 200,
+    auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200,
             [](RenderProperties& props, RecordingCanvas& canvas) {
         SkBitmap bitmap = TestUtils::createSkBitmap(200, 200);
         canvas.drawBitmap(bitmap, 0, 0, nullptr);
@@ -840,7 +840,7 @@ RENDERTHREAD_TEST(FrameBuilder, saveLayer_simple) {
         }
     };
 
-    auto node = TestUtils::createNode(0, 0, 200, 200,
+    auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200,
             [](RenderProperties& props, RecordingCanvas& canvas) {
         canvas.saveLayerAlpha(10, 10, 190, 190, 128, SaveFlags::ClipToLayer);
         canvas.drawRect(10, 10, 190, 190, SkPaint());
@@ -916,7 +916,7 @@ RENDERTHREAD_TEST(FrameBuilder, saveLayer_nested) {
         }
     };
 
-    auto node = TestUtils::createNode(0, 0, 800, 800,
+    auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 800, 800,
             [](RenderProperties& props, RecordingCanvas& canvas) {
         canvas.saveLayerAlpha(0, 0, 800, 800, 128, SaveFlags::ClipToLayer);
         {
@@ -940,7 +940,7 @@ RENDERTHREAD_TEST(FrameBuilder, saveLayer_nested) {
 }
 
 RENDERTHREAD_TEST(FrameBuilder, saveLayer_contentRejection) {
-        auto node = TestUtils::createNode(0, 0, 200, 200,
+        auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200,
                 [](RenderProperties& props, RecordingCanvas& canvas) {
         canvas.save(SaveFlags::MatrixClip);
         canvas.clipRect(200, 200, 400, 400, SkRegion::kIntersect_Op);
@@ -991,7 +991,7 @@ RENDERTHREAD_TEST(FrameBuilder, saveLayerUnclipped_simple) {
         }
     };
 
-    auto node = TestUtils::createNode(0, 0, 200, 200,
+    auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200,
             [](RenderProperties& props, RecordingCanvas& canvas) {
         canvas.saveLayerAlpha(10, 10, 190, 190, 128, (SaveFlags::Flags)(0));
         canvas.drawRect(0, 0, 200, 200, SkPaint());
@@ -1024,7 +1024,7 @@ RENDERTHREAD_TEST(FrameBuilder, saveLayerUnclipped_round) {
         }
     };
 
-    auto node = TestUtils::createNode(0, 0, 200, 200,
+    auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200,
             [](RenderProperties& props, RecordingCanvas& canvas) {
         canvas.saveLayerAlpha(10.95f, 10.5f, 189.75f, 189.25f, // values should all round out
                 128, (SaveFlags::Flags)(0));
@@ -1076,7 +1076,7 @@ RENDERTHREAD_TEST(FrameBuilder, saveLayerUnclipped_mergedClears) {
         }
     };
 
-    auto node = TestUtils::createNode(0, 0, 200, 200,
+    auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200,
             [](RenderProperties& props, RecordingCanvas& canvas) {
 
         int restoreTo = canvas.save(SaveFlags::MatrixClip);
@@ -1123,7 +1123,7 @@ RENDERTHREAD_TEST(FrameBuilder, saveLayerUnclipped_clearClip) {
         }
     };
 
-    auto node = TestUtils::createNode(0, 0, 200, 200,
+    auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200,
             [](RenderProperties& props, RecordingCanvas& canvas) {
         // save smaller than clip, so we get unclipped behavior
         canvas.saveLayerAlpha(10, 10, 190, 190, 128, (SaveFlags::Flags)(0));
@@ -1142,7 +1142,7 @@ RENDERTHREAD_TEST(FrameBuilder, saveLayerUnclipped_clearClip) {
 }
 
 RENDERTHREAD_TEST(FrameBuilder, saveLayerUnclipped_reject) {
-    auto node = TestUtils::createNode(0, 0, 200, 200,
+    auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200,
             [](RenderProperties& props, RecordingCanvas& canvas) {
         // unclipped savelayer + rect both in area that won't intersect with dirty
         canvas.saveLayerAlpha(100, 100, 200, 200, 128, (SaveFlags::Flags)(0));
@@ -1208,7 +1208,7 @@ RENDERTHREAD_TEST(FrameBuilder, saveLayerUnclipped_complex) {
         }
     };
 
-    auto node = TestUtils::createNode(0, 0, 600, 600, // 500x500 triggers clipping
+    auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 600, 600, // 500x500 triggers clipping
             [](RenderProperties& props, RecordingCanvas& canvas) {
         canvas.saveLayerAlpha(0, 0, 500, 500, 128, (SaveFlags::Flags)0); // unclipped
         canvas.saveLayerAlpha(100, 100, 400, 400, 128, SaveFlags::ClipToLayer); // clipped
@@ -1260,7 +1260,7 @@ RENDERTHREAD_TEST(FrameBuilder, hwLayer_simple) {
         }
     };
 
-    auto node = TestUtils::createNode(10, 10, 110, 110,
+    auto node = TestUtils::createNode<RecordingCanvas>(10, 10, 110, 110,
             [](RenderProperties& props, RecordingCanvas& canvas) {
         props.mutateLayerProperties().setType(LayerType::RenderLayer);
         SkPaint paint;
@@ -1355,7 +1355,7 @@ RENDERTHREAD_TEST(FrameBuilder, hwLayer_complex) {
         }
     };
 
-    auto child = TestUtils::createNode(50, 50, 150, 150,
+    auto child = TestUtils::createNode<RecordingCanvas>(50, 50, 150, 150,
             [](RenderProperties& props, RecordingCanvas& canvas) {
         props.mutateLayerProperties().setType(LayerType::RenderLayer);
         SkPaint paint;
@@ -1366,7 +1366,7 @@ RENDERTHREAD_TEST(FrameBuilder, hwLayer_complex) {
     *(child->getLayerHandle()) = &childLayer;
 
     RenderNode* childPtr = child.get();
-    auto parent = TestUtils::createNode(0, 0, 200, 200,
+    auto parent = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200,
             [childPtr](RenderProperties& props, RecordingCanvas& canvas) {
         props.mutateLayerProperties().setType(LayerType::RenderLayer);
         SkPaint paint;
@@ -1430,7 +1430,7 @@ RENDERTHREAD_TEST(FrameBuilder, buildLayer) {
         }
     };
 
-    auto node = TestUtils::createNode(10, 10, 110, 110,
+    auto node = TestUtils::createNode<RecordingCanvas>(10, 10, 110, 110,
             [](RenderProperties& props, RecordingCanvas& canvas) {
         props.mutateLayerProperties().setType(LayerType::RenderLayer);
         canvas.drawColor(SK_ColorWHITE, SkXfermode::Mode::kSrcOver_Mode);
@@ -1457,14 +1457,14 @@ RENDERTHREAD_TEST(FrameBuilder, buildLayer) {
     *layerHandle = nullptr;
 }
 
-static void drawOrderedRect(RecordingCanvas* canvas, uint8_t expectedDrawOrder) {
+static void drawOrderedRect(Canvas* canvas, uint8_t expectedDrawOrder) {
     SkPaint paint;
     // order put in blue channel, transparent so overlapped content doesn't get rejected
     paint.setColor(SkColorSetARGB(1, 0, 0, expectedDrawOrder));
     canvas->drawRect(0, 0, 100, 100, paint);
 }
-static void drawOrderedNode(RecordingCanvas* canvas, uint8_t expectedDrawOrder, float z) {
-    auto node = TestUtils::createNode(0, 0, 100, 100,
+static void drawOrderedNode(Canvas* canvas, uint8_t expectedDrawOrder, float z) {
+    auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100,
             [expectedDrawOrder](RenderProperties& props, RecordingCanvas& canvas) {
         drawOrderedRect(&canvas, expectedDrawOrder);
     });
@@ -1481,7 +1481,7 @@ RENDERTHREAD_TEST(FrameBuilder, zReorder) {
         }
     };
 
-    auto parent = TestUtils::createNode(0, 0, 100, 100,
+    auto parent = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100,
             [](RenderProperties& props, RecordingCanvas& canvas) {
         drawOrderedNode(&canvas, 0, 10.0f); // in reorder=false at this point, so played inorder
         drawOrderedRect(&canvas, 1);
@@ -1550,7 +1550,7 @@ RENDERTHREAD_TEST(FrameBuilder, projectionReorder) {
      * The parent is scrolled by scrollX/scrollY, but this does not affect the background
      * (which isn't affected by scroll).
      */
-    auto receiverBackground = TestUtils::createNode(0, 0, 100, 100,
+    auto receiverBackground = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100,
             [](RenderProperties& properties, RecordingCanvas& canvas) {
         properties.setProjectionReceiver(true);
         // scroll doesn't apply to background, so undone via translationX/Y
@@ -1562,7 +1562,7 @@ RENDERTHREAD_TEST(FrameBuilder, projectionReorder) {
         paint.setColor(SK_ColorWHITE);
         canvas.drawRect(0, 0, 100, 100, paint);
     });
-    auto projectingRipple = TestUtils::createNode(50, 0, 100, 50,
+    auto projectingRipple = TestUtils::createNode<RecordingCanvas>(50, 0, 100, 50,
             [](RenderProperties& properties, RecordingCanvas& canvas) {
         properties.setProjectBackwards(true);
         properties.setClipToBounds(false);
@@ -1570,14 +1570,14 @@ RENDERTHREAD_TEST(FrameBuilder, projectionReorder) {
         paint.setColor(SK_ColorDKGRAY);
         canvas.drawRect(-10, -10, 60, 60, paint);
     });
-    auto child = TestUtils::createNode(0, 50, 100, 100,
+    auto child = TestUtils::createNode<RecordingCanvas>(0, 50, 100, 100,
             [&projectingRipple](RenderProperties& properties, RecordingCanvas& canvas) {
         SkPaint paint;
         paint.setColor(SK_ColorBLUE);
         canvas.drawRect(0, 0, 100, 50, paint);
         canvas.drawRenderNode(projectingRipple.get());
     });
-    auto parent = TestUtils::createNode(0, 0, 100, 100,
+    auto parent = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100,
             [&receiverBackground, &child](RenderProperties& properties, RecordingCanvas& canvas) {
         // Set a rect outline for the projecting ripple to be masked against.
         properties.mutableOutline().setRoundRect(10, 10, 90, 90, 5, 1.0f);
@@ -1631,7 +1631,7 @@ RENDERTHREAD_TEST(FrameBuilder, projectionHwLayer) {
             ASSERT_EQ(nullptr, state.computedState.localProjectionPathMask);
         }
     };
-    auto receiverBackground = TestUtils::createNode(0, 0, 400, 400,
+    auto receiverBackground = TestUtils::createNode<RecordingCanvas>(0, 0, 400, 400,
             [](RenderProperties& properties, RecordingCanvas& canvas) {
         properties.setProjectionReceiver(true);
         // scroll doesn't apply to background, so undone via translationX/Y
@@ -1641,19 +1641,19 @@ RENDERTHREAD_TEST(FrameBuilder, projectionHwLayer) {
 
         canvas.drawRect(0, 0, 400, 400, SkPaint());
     });
-    auto projectingRipple = TestUtils::createNode(0, 0, 200, 200,
+    auto projectingRipple = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200,
             [](RenderProperties& properties, RecordingCanvas& canvas) {
         properties.setProjectBackwards(true);
         properties.setClipToBounds(false);
         canvas.drawOval(100, 100, 300, 300, SkPaint()); // drawn mostly out of layer bounds
     });
-    auto child = TestUtils::createNode(100, 100, 300, 300,
+    auto child = TestUtils::createNode<RecordingCanvas>(100, 100, 300, 300,
             [&projectingRipple](RenderProperties& properties, RecordingCanvas& canvas) {
         properties.mutateLayerProperties().setType(LayerType::RenderLayer);
         canvas.drawRenderNode(projectingRipple.get());
         canvas.drawArc(0, 0, 200, 200, 0.0f, 280.0f, true, SkPaint());
     });
-    auto parent = TestUtils::createNode(0, 0, 400, 400,
+    auto parent = TestUtils::createNode<RecordingCanvas>(0, 0, 400, 400,
             [&receiverBackground, &child](RenderProperties& properties, RecordingCanvas& canvas) {
         // Set a rect outline for the projecting ripple to be masked against.
         properties.mutableOutline().setRoundRect(10, 10, 390, 390, 0, 1.0f);
@@ -1706,12 +1706,12 @@ RENDERTHREAD_TEST(FrameBuilder, projectionChildScroll) {
             EXPECT_TRUE(state.computedState.transform.isIdentity());
         }
     };
-    auto receiverBackground = TestUtils::createNode(0, 0, 400, 400,
+    auto receiverBackground = TestUtils::createNode<RecordingCanvas>(0, 0, 400, 400,
             [](RenderProperties& properties, RecordingCanvas& canvas) {
         properties.setProjectionReceiver(true);
         canvas.drawRect(0, 0, 400, 400, SkPaint());
     });
-    auto projectingRipple = TestUtils::createNode(0, 0, 200, 200,
+    auto projectingRipple = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200,
             [](RenderProperties& properties, RecordingCanvas& canvas) {
         // scroll doesn't apply to background, so undone via translationX/Y
         // NOTE: translationX/Y only! no other transform properties may be set for a proj receiver!
@@ -1721,7 +1721,7 @@ RENDERTHREAD_TEST(FrameBuilder, projectionChildScroll) {
         properties.setClipToBounds(false);
         canvas.drawOval(0, 0, 200, 200, SkPaint());
     });
-    auto child = TestUtils::createNode(0, 0, 400, 400,
+    auto child = TestUtils::createNode<RecordingCanvas>(0, 0, 400, 400,
             [&projectingRipple](RenderProperties& properties, RecordingCanvas& canvas) {
         // Record time clip will be ignored by projectee
         canvas.clipRect(100, 100, 300, 300, SkRegion::kIntersect_Op);
@@ -1729,7 +1729,7 @@ RENDERTHREAD_TEST(FrameBuilder, projectionChildScroll) {
         canvas.translate(-scrollX, -scrollY); // Apply scroll (note: bg undoes this internally)
         canvas.drawRenderNode(projectingRipple.get());
     });
-    auto parent = TestUtils::createNode(0, 0, 400, 400,
+    auto parent = TestUtils::createNode<RecordingCanvas>(0, 0, 400, 400,
             [&receiverBackground, &child](RenderProperties& properties, RecordingCanvas& canvas) {
         canvas.drawRenderNode(receiverBackground.get());
         canvas.drawRenderNode(child.get());
@@ -1746,7 +1746,7 @@ RENDERTHREAD_TEST(FrameBuilder, projectionChildScroll) {
 
 // creates a 100x100 shadow casting node with provided translationZ
 static sp<RenderNode> createWhiteRectShadowCaster(float translationZ) {
-    return TestUtils::createNode(0, 0, 100, 100,
+    return TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100,
             [translationZ](RenderProperties& properties, RecordingCanvas& canvas) {
         properties.setTranslationZ(translationZ);
         properties.mutableOutline().setRoundRect(0, 0, 100, 100, 0.0f, 1.0f);
@@ -1774,7 +1774,7 @@ RENDERTHREAD_TEST(FrameBuilder, shadow) {
         }
     };
 
-    auto parent = TestUtils::createNode(0, 0, 200, 200,
+    auto parent = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200,
             [](RenderProperties& props, RecordingCanvas& canvas) {
         canvas.insertReorderBarrier(true);
         canvas.drawRenderNode(createWhiteRectShadowCaster(5.0f).get());
@@ -1815,7 +1815,7 @@ RENDERTHREAD_TEST(FrameBuilder, shadowSaveLayer) {
         }
     };
 
-    auto parent = TestUtils::createNode(0, 0, 200, 200,
+    auto parent = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200,
             [](RenderProperties& props, RecordingCanvas& canvas) {
         // save/restore outside of reorderBarrier, so they don't get moved out of place
         canvas.translate(20, 10);
@@ -1858,7 +1858,7 @@ RENDERTHREAD_TEST(FrameBuilder, shadowHwLayer) {
         }
     };
 
-    auto parent = TestUtils::createNode(50, 60, 150, 160,
+    auto parent = TestUtils::createNode<RecordingCanvas>(50, 60, 150, 160,
             [](RenderProperties& props, RecordingCanvas& canvas) {
         props.mutateLayerProperties().setType(LayerType::RenderLayer);
         canvas.insertReorderBarrier(true);
@@ -1905,7 +1905,7 @@ RENDERTHREAD_TEST(FrameBuilder, shadowLayering) {
             EXPECT_TRUE(index == 2 || index == 3);
         }
     };
-    auto parent = TestUtils::createNode(0, 0, 200, 200,
+    auto parent = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200,
             [](RenderProperties& props, RecordingCanvas& canvas) {
         canvas.insertReorderBarrier(true);
         canvas.drawRenderNode(createWhiteRectShadowCaster(5.0f).get());
@@ -1932,7 +1932,7 @@ RENDERTHREAD_TEST(FrameBuilder, shadowClipping) {
             EXPECT_EQ(1, mIndex++);
         }
     };
-    auto parent = TestUtils::createNode(0, 0, 100, 100,
+    auto parent = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100,
             [](RenderProperties& props, RecordingCanvas& canvas) {
         // Apply a clip before the reorder barrier/shadow casting child is drawn.
         // This clip must be applied to the shadow cast by the child.
@@ -1963,7 +1963,7 @@ static void testProperty(std::function<void(RenderProperties&)> propSetupCallbac
         std::function<void(const RectOp&, const BakedOpState&)> mCallback;
     };
 
-    auto node = TestUtils::createNode(0, 0, 100, 100,
+    auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100,
             [propSetupCallback](RenderProperties& props, RecordingCanvas& canvas) {
         propSetupCallback(props);
         SkPaint paint;
@@ -2107,7 +2107,7 @@ void testSaveLayerAlphaClip(SaveLayerAlphaData* outObservedData,
 
     ASSERT_GT(10000, DeviceInfo::get()->maxTextureSize())
             << "Node must be bigger than max texture size to exercise saveLayer codepath";
-    auto node = TestUtils::createNode(0, 0, 10000, 10000,
+    auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 10000, 10000,
             [&propSetupCallback](RenderProperties& properties, RecordingCanvas& canvas) {
         properties.setHasOverlappingRendering(true);
         properties.setAlpha(0.5f); // force saveLayer, since too big for HW layer
@@ -2193,7 +2193,7 @@ RENDERTHREAD_TEST(FrameBuilder, clip_replace) {
                     << "Expect resolved clip to be intersection of viewport clip and clip op";
         }
     };
-    auto node = TestUtils::createNode(20, 20, 30, 30,
+    auto node = TestUtils::createNode<RecordingCanvas>(20, 20, 30, 30,
             [](RenderProperties& props, RecordingCanvas& canvas) {
         canvas.clipRect(0, -20, 10, 30, SkRegion::kReplace_Op);
         canvas.drawColor(SK_ColorWHITE, SkXfermode::Mode::kSrcOver_Mode);

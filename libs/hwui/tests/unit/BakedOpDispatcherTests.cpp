@@ -159,8 +159,8 @@ RENDERTHREAD_TEST(BakedOpDispatcher, offsetFlags) {
 }
 
 RENDERTHREAD_TEST(BakedOpDispatcher, renderTextWithShadow) {
-    auto node = TestUtils::createNode(0, 0, 100, 100,
-            [](RenderProperties& props, TestCanvas& canvas) {
+    auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
 
         android::Paint shadowPaint;
         shadowPaint.setColor(SK_ColorRED);
@@ -196,8 +196,8 @@ RENDERTHREAD_TEST(BakedOpDispatcher, renderTextWithShadow) {
 
 static void validateLayerDraw(renderthread::RenderThread& renderThread,
         std::function<void(const Glop& glop)> validator) {
-    auto node = TestUtils::createNode(0, 0, 100, 100,
-            [](RenderProperties& props, TestCanvas& canvas) {
+    auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 100, 100,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
         props.mutateLayerProperties().setType(LayerType::RenderLayer);
 
         // provide different blend mode, so decoration draws contrast

@@ -25,7 +25,7 @@ namespace test {
 
 class TestListViewSceneBase : public TestScene {
 public:
-    virtual void createListItem(RenderProperties& props, TestCanvas& canvas, int id,
+    virtual void createListItem(RenderProperties& props, Canvas& canvas, int id,
             int itemWidth, int itemHeight) = 0;
 private:
     int mItemHeight;
@@ -35,7 +35,7 @@ private:
     sp<RenderNode> mListView;
     std::vector< sp<RenderNode> > mListItems;
 
-    void createContent(int width, int height, TestCanvas& canvas) override;
+    void createContent(int width, int height, Canvas& canvas) override;
     void doFrame(int frameNr) override;
 };
 

@@ -20,6 +20,7 @@
 #include <utils/Functor.h>
 
 #include "GlFunctorLifecycleListener.h"
+#include "utils/Macros.h"
 #include "utils/NinePatch.h"
 
 #include <SkBitmap.h>
@@ -73,7 +74,7 @@ public:
 
     static Canvas* create_canvas(const SkBitmap& bitmap);
 
-    static Canvas* create_recording_canvas(int width, int height);
+    static WARN_UNUSED_RESULT Canvas* create_recording_canvas(int width, int height);
 
     /**
      *  Create a new Canvas object which delegates to an SkCanvas.

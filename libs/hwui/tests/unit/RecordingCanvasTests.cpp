@@ -547,7 +547,7 @@ TEST(RecordingCanvas, saveLayer_rotateClipped) {
 
 TEST(RecordingCanvas, drawRenderNode_rejection) {
     auto child = TestUtils::createNode(50, 50, 150, 150,
-            [](RenderProperties& props, RecordingCanvas& canvas) {
+            [](RenderProperties& props, Canvas& canvas) {
         SkPaint paint;
         paint.setColor(SK_ColorWHITE);
         canvas.drawRect(0, 0, 100, 100, paint);
@@ -562,7 +562,7 @@ TEST(RecordingCanvas, drawRenderNode_rejection) {
 
 TEST(RecordingCanvas, drawRenderNode_projection) {
     sp<RenderNode> background = TestUtils::createNode(50, 50, 150, 150,
-            [](RenderProperties& props, RecordingCanvas& canvas) {
+            [](RenderProperties& props, Canvas& canvas) {
         SkPaint paint;
         paint.setColor(SK_ColorWHITE);
         canvas.drawRect(0, 0, 100, 100, paint);

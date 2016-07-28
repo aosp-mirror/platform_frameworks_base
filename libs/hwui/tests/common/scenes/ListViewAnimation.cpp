@@ -70,7 +70,7 @@ class ListViewAnimation : public TestListViewSceneBase {
         return bitmap;
     }
 
-    void createListItem(RenderProperties& props, TestCanvas& canvas, int cardId,
+    void createListItem(RenderProperties& props, Canvas& canvas, int cardId,
             int itemWidth, int itemHeight) override {
         static SkBitmap filledBox = createBoxBitmap(true);
         static SkBitmap strokedBox = createBoxBitmap(false);

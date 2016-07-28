@@ -28,7 +28,7 @@ static TestScene::Registrar _Recents(TestScene::Info{
 
 class RecentsAnimation : public TestScene {
 public:
-    void createContent(int width, int height, TestCanvas& renderer) override {
+    void createContent(int width, int height, Canvas& renderer) override {
         static SkColor COLORS[] = {
                 Color::Red_500,
                 Color::Purple_500,
@@ -71,7 +71,7 @@ private:
     sp<RenderNode> createCard(int x, int y, int width, int height,
             const SkBitmap& thumb) {
         return TestUtils::createNode(x, y, x + width, y + height,
-                [&thumb, width, height](RenderProperties& props, TestCanvas& canvas) {
+                [&thumb, width, height](RenderProperties& props, Canvas& canvas) {
             props.setElevation(dp(16));
             props.mutableOutline().setRoundRect(0, 0, width, height, dp(10), 1);
             props.mutableOutline().setShouldClip(true);

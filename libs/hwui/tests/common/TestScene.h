@@ -20,11 +20,12 @@
 #include <unordered_map>
 
 namespace android {
+
+class Canvas;
+
 namespace uirenderer {
 class RenderNode;
 class RecordingCanvas;
-
-typedef RecordingCanvas TestCanvas;
 
 namespace test {
 
@@ -61,7 +62,7 @@ public:
     };
 
     virtual ~TestScene() {}
-    virtual void createContent(int width, int height, TestCanvas& renderer) = 0;
+    virtual void createContent(int width, int height, Canvas& renderer) = 0;
     virtual void doFrame(int frameNr) = 0;
 
     static std::unordered_map<std::string, Info>& testMap();
