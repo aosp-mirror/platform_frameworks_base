@@ -1453,6 +1453,9 @@ final class UserController {
     }
 
     boolean isSameProfileGroup(int callingUserId, int targetUserId) {
+        if (callingUserId == targetUserId) {
+            return true;
+        }
         synchronized (mUserProfileGroupIdsSelfLocked) {
             int callingProfile = mUserProfileGroupIdsSelfLocked.get(callingUserId,
                     UserInfo.NO_PROFILE_GROUP_ID);
