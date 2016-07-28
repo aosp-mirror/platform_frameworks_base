@@ -6999,7 +6999,11 @@ package android.bluetooth {
   public class OobData implements android.os.Parcelable {
     ctor public OobData();
     method public int describeContents();
+    method public byte[] getLeSecureConnectionsConfirmation();
+    method public byte[] getLeSecureConnectionsRandom();
     method public byte[] getSecurityManagerTk();
+    method public void setLeSecureConnectionsConfirmation(byte[]);
+    method public void setLeSecureConnectionsRandom(byte[]);
     method public void setSecurityManagerTk(byte[]);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.bluetooth.OobData> CREATOR;
