@@ -1216,3 +1216,5 @@ redirects:
   to: /training/articles/direct-boot.html
 - from: /preview/features/scoped-folder-access.html
   to: /training/articles/scoped-directory-access.html
+- from: /preview/features/notification-updates.html
+  to: /guide/topics/ui/notifiers/notifications.html
