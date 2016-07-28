@@ -57,7 +57,7 @@ PIP 視窗讓使用者在使用您的應用程式時同時多工處理，協助�
 
 使用者也可以透過 Recents 關閉 PIP 視窗。</p>
 
-<img src="{@docRoot}preview/images/pip-active.png" />
+<img src="{@docRoot}images/android-7.0/pip-active.png" />
 <p class="img-caption"><strong>圖 1.</strong> 當使用者瀏覽主畫面上的內容時，可看到螢幕角落的子母畫面中的影片。
 
 </p>
@@ -114,7 +114,7 @@ public void onActionClicked(Action action) {
 <p>將 PIP 按鈕新增到媒體控制列，可讓您的使用者在控制影片播放時輕鬆地切換到 PIP 模式。
 </p>
 
-<img src="{@docRoot}preview/images/pip-button.png" />
+<img src="{@docRoot}images/android-7.0/pip-button.png" />
 <p class="img-caption"><strong>圖 1.</strong> 媒體控制列上的子母畫面按鈕。
 </p>
 
