@@ -51,6 +51,7 @@ import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkMisc;
 import android.net.NetworkRequest;
 import android.net.RouteInfo;
+import android.net.metrics.IpConnectivityLog;
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -585,8 +586,9 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         public String gen204ProbeRedirectUrl = null;
 
         public WrappedNetworkMonitor(Context context, Handler handler,
-            NetworkAgentInfo networkAgentInfo, NetworkRequest defaultRequest) {
-            super(context, handler, networkAgentInfo, defaultRequest);
+                NetworkAgentInfo networkAgentInfo, NetworkRequest defaultRequest,
+                IpConnectivityLog log) {
+            super(context, handler, networkAgentInfo, defaultRequest, log);
         }
 
         @Override
@@ -599,8 +601,9 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         private WrappedNetworkMonitor mLastCreatedNetworkMonitor;
 
         public WrappedConnectivityService(Context context, INetworkManagementService netManager,
-                INetworkStatsService statsService, INetworkPolicyManager policyManager) {
-            super(context, netManager, statsService, policyManager);
+                INetworkStatsService statsService, INetworkPolicyManager policyManager,
+                IpConnectivityLog log) {
+            super(context, netManager, statsService, policyManager, log);
             mLingerDelayMs = TEST_LINGER_DELAY_MS;
         }
 
@@ -639,8 +642,8 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         @Override
         public NetworkMonitor createNetworkMonitor(Context context, Handler handler,
                 NetworkAgentInfo nai, NetworkRequest defaultRequest) {
-            final WrappedNetworkMonitor monitor = new WrappedNetworkMonitor(context, handler, nai,
-                    defaultRequest);
+            final WrappedNetworkMonitor monitor = new WrappedNetworkMonitor(
+                    context, handler, nai, defaultRequest, mock(IpConnectivityLog.class));
             mLastCreatedNetworkMonitor = monitor;
             return monitor;
         }
@@ -705,7 +708,8 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         mService = new WrappedConnectivityService(mServiceContext,
                 mock(INetworkManagementService.class),
                 mock(INetworkStatsService.class),
-                mock(INetworkPolicyManager.class));
+                mock(INetworkPolicyManager.class),
+                mock(IpConnectivityLog.class));
 
         mService.systemReady();
         mCm = new WrappedConnectivityManager(getContext(), mService);
