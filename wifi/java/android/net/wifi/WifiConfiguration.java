@@ -806,7 +806,7 @@ public class WifiConfiguration implements Parcelable {
          * Quality network selection status String (for debug purpose). Use Quality network
          * selection status value as index to extec the corresponding debug string
          */
-        private static final String[] QUALITY_NETWORK_SELECTION_STATUS = {
+        public static final String[] QUALITY_NETWORK_SELECTION_STATUS = {
                 "NETWORK_SELECTION_ENABLED",
                 "NETWORK_SELECTION_TEMPORARY_DISABLED",
                 "NETWORK_SELECTION_PERMANENTLY_DISABLED"};
@@ -868,7 +868,7 @@ public class WifiConfiguration implements Parcelable {
         /**
          * Quality network selection disable reason String (for debug purpose)
          */
-        private static final String[] QUALITY_NETWORK_SELECTION_DISABLE_REASON = {
+        public static final String[] QUALITY_NETWORK_SELECTION_DISABLE_REASON = {
                 "NETWORK_SELECTION_ENABLE",
                 "NETWORK_SELECTION_DISABLED_BAD_LINK",
                 "NETWORK_SELECTION_DISABLED_ASSOCIATION_REJECTION ",
