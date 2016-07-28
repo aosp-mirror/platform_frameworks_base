@@ -420,6 +420,8 @@ toc:
       path: /training/basics/network-ops/connecting.html
     - title: Managing Network Usage
       path: /training/basics/network-ops/managing.html
+    - title: Optimizing Network Data Usage
+      path: /training/basics/network-ops/data-saver.html
     - title: Parsing XML Data
       path: /training/basics/network-ops/xml.html
   - title: Transferring Data Without Draining the Battery

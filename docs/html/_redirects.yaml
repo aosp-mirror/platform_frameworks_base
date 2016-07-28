@@ -1231,3 +1231,20 @@ redirects:
   to: /guide/topics/resources/multilingual-support.html
 - from: /preview/j8-jack.html
   to: /guide/platform/j8-jack.html
+- from: /about/versions/marshmallow/samples.html
+  to: /about/versions/marshmallow/android-6.0-samples.html
+- from: /preview/behavior-changes.html
+  to: /about/versions/nougat/android-7.0-changes.html
+- from: /preview/samples.html
+  to: /about/versions/nougat/android-7.0-samples.html
+- from: /preview/guide.html
+  to: /about/versions/nougat/android-7.0-testing.html
+- from: /preview/api-overview.html
+  to: /about/versions/nougat/android-7.0.html
+- from: /preview/index.html
+  to: /about/versions/nougat/index.html
+- from: /preview/features/background-optimization.html
+  to: /topic/performance/background-optimization.html
+- from: /preview/features/data-saver.html
+  to: /training/basics/network-ops/data-saver.html
+
