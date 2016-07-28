@@ -90,23 +90,6 @@ toc:
       value: 使用返回和向上导航
     - name: zh-tw-lang
       value: 使用 [返回] 及 [上一層] 導覽
-  - title: Notifications
-    path: /design/patterns/notifications.html
-    path_attributes:
-    - name: es-lang
-      value: Notificaciones
-    - name: ja-lang
-      value: 通知
-    - name: ko-lang
-      value: 알림
-    - name: pt-br-lang
-      value: Notificações
-    - name: ru-lang
-      value: Уведомления
-    - name: zh-cn-lang
-      value: 通知
-    - name: zh-tw-lang
-      value: 通知
   - title: Widgets
     path: /design/patterns/widgets.html
   - title: Swipe Views
