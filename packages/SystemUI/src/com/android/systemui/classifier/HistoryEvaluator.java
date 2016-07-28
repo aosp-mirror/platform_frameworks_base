@@ -16,6 +16,8 @@
 
 package com.android.systemui.classifier;
 
+import android.os.SystemClock;
+
 import java.util.ArrayList;
 
 /**
@@ -31,7 +33,7 @@ public class HistoryEvaluator {
     private long mLastUpdate;
 
     public HistoryEvaluator() {
-        mLastUpdate = System.currentTimeMillis();
+        mLastUpdate = SystemClock.elapsedRealtime();
     }
 
     public void addStroke(float evaluation) {
@@ -69,15 +71,18 @@ public class HistoryEvaluator {
     }
 
     private void decayValue() {
-        long currentTimeMillis = System.currentTimeMillis();
+        long time = SystemClock.elapsedRealtime();
+
+        if (time <= mLastUpdate) {
+            return;
+        }
 
         // All weights are multiplied by HISTORY_FACTOR after each INTERVAL milliseconds.
-        float factor = (float) Math.pow(HISTORY_FACTOR,
-                (float) (currentTimeMillis - mLastUpdate) / INTERVAL);
+        float factor = (float) Math.pow(HISTORY_FACTOR, (time - mLastUpdate) / INTERVAL);
 
         decayValue(mStrokes, factor);
         decayValue(mGestureWeights, factor);
-        mLastUpdate = currentTimeMillis;
+        mLastUpdate = time;
     }
 
     private void decayValue(ArrayList<Data> list, float factor) {
