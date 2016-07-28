@@ -1055,6 +1055,9 @@ public class ShortcutManagerTestUtils {
     public static void retryUntil(BooleanSupplier checker, String message) {
         final long timeOut = System.currentTimeMillis() + 30 * 1000; // wait for 30 seconds.
         while (!checker.getAsBoolean()) {
+            if (System.currentTimeMillis() > timeOut) {
+                break;
+            }
             try {
                 Thread.sleep(200);
             } catch (InterruptedException ignore) {
