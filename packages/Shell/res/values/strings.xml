@@ -76,4 +76,7 @@
 
     <!-- Label of button that save bugreport details.  -->
     <string name="save">Save</string>
+
+    <!-- Title displayed in the activity chooser used to share the bug report [CHAR LIMIT=30]-->
+    <string name="bugreport_intent_chooser_title">Share Bug report</string>
 </resources>

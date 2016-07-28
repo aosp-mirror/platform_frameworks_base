@@ -175,6 +175,8 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         mDescription = sb.toString();
 
         setWarningState(mContext, STATE_HIDE);
+
+        mUiBot.turnScreenOn();
     }
 
     public void testProgress() throws Exception {
