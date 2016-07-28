@@ -6299,6 +6299,12 @@ public final class Settings {
         public static final String SYSTEM_NAVIGATION_KEYS_ENABLED =
                 "system_navigation_keys_enabled";
 
+        /**
+         * Whether preloaded APKs have been installed for the user.
+         * @hide
+         */
+        public static final String DEMO_USER_SETUP_COMPLETE
+                = "demo_user_setup_complete";
 
         /**
          * This are the settings to be backed up.
