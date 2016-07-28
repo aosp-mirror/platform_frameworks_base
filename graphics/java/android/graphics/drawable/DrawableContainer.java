@@ -851,8 +851,8 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
 
         private Drawable prepareDrawable(Drawable child) {
             child.setLayoutDirection(mLayoutDirection);
-            child.setCallback(mOwner);
             child = child.mutate();
+            child.setCallback(mOwner);
             return child;
         }
 
