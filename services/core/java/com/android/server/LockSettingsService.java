@@ -304,7 +304,9 @@ public class LockSettingsService extends ILockSettings.Stub {
             final boolean isSecure = mStorage.hasPassword(user.id) || mStorage.hasPattern(user.id);
             if (isSecure && !mUserManager.isUserUnlockingOrUnlocked(userHandle)) {
                 if (!user.isManagedProfile()) {
-                    showEncryptionNotification(userHandle);
+                    // When the user is locked, we communicate it loud-and-clear
+                    // on the lockscreen; we only show a notification below for
+                    // locked managed profiles.
                 } else {
                     UserInfo parent = mUserManager.getProfileParent(user.id);
                     if (parent != null &&
@@ -335,21 +337,6 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
         unlockIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
         PendingIntent intent = PendingIntent.getActivity(mContext, 0, unlockIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
-
-        showEncryptionNotification(user, title, message, detail, intent);
-    }
-
-    private void showEncryptionNotification(UserHandle user) {
-        Resources r = mContext.getResources();
-        CharSequence title = r.getText(
-                com.android.internal.R.string.user_encrypted_title);
-        CharSequence message = r.getText(
-                com.android.internal.R.string.user_encrypted_message);
-        CharSequence detail = r.getText(
-                com.android.internal.R.string.user_encrypted_detail);
-
-        PendingIntent intent = PendingIntent.getActivity(mContext, 0, ACTION_NULL,
                 PendingIntent.FLAG_UPDATE_CURRENT);
 
         showEncryptionNotification(user, title, message, detail, intent);
