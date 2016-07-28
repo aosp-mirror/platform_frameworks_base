@@ -76,6 +76,14 @@ public final class BridgeInflater extends LayoutInflater {
      * being an AppCompat theme.
      */
     private boolean mLoadAppCompatViews;
+    /**
+     * This set contains the framework views that have an AppCompat version but failed to load.
+     * This might happen because not all widgets are contained in all versions of the support
+     * library.
+     * This will help us to avoid trying to load the AppCompat version multiple times if it
+     * doesn't exist.
+     */
+    private Set<String> mFailedAppCompatViews = new HashSet<>();
     private boolean mIsInMerge = false;
     private ResourceReference mResourceReference;
     private Map<View, String> mOpenDrawerLayouts;
@@ -137,15 +145,18 @@ public final class BridgeInflater extends LayoutInflater {
         View view = null;
 
         try {
-            if (mLoadAppCompatViews && APPCOMPAT_VIEWS.contains(name)) {
+            if (mLoadAppCompatViews
+                    && APPCOMPAT_VIEWS.contains(name)
+                    && !mFailedAppCompatViews.contains(name)) {
                 // We are using an AppCompat theme so try to load the appcompat views
-                view = loadCustomView(APPCOMPAT_WIDGET_PREFIX + name, attrs);
+                view = loadCustomView(APPCOMPAT_WIDGET_PREFIX + name, attrs, true);
 
                 if (view == null) {
-                    mLoadAppCompatViews = false; // Do not try anymore
+                    mFailedAppCompatViews.add(name); // Do not try this one anymore
                 }
-            } else {
+            }
 
+            if (view == null) {
                 // First try to find a class using the default Android prefixes
                 for (String prefix : sClassPrefixList) {
                     try {
@@ -298,7 +309,15 @@ public final class BridgeInflater extends LayoutInflater {
         return null;
     }
 
-    private View loadCustomView(String name, AttributeSet attrs) throws Exception {
+    /**
+     * Instantiates the given view name and returns the instance. If the view doesn't exist, a
+     * MockView or null might be returned.
+     * @param name the custom view name
+     * @param attrs the {@link AttributeSet} to be passed to the view constructor
+     * @param silent if true, errors while loading the view won't be reported and, if the view
+     * doesn't exist, null will be returned.
+     */
+    private View loadCustomView(String name, AttributeSet attrs, boolean silent) throws Exception {
         if (mLayoutlibCallback != null) {
             // first get the classname in case it's not the node name
             if (name.equals("view")) {
@@ -310,8 +329,9 @@ public final class BridgeInflater extends LayoutInflater {
 
             mConstructorArgs[1] = attrs;
 
-            Object customView = mLayoutlibCallback.loadView(name, mConstructorSignature,
-                    mConstructorArgs);
+            Object customView = silent ?
+                    mLayoutlibCallback.loadClass(name, mConstructorSignature, mConstructorArgs)
+                    : mLayoutlibCallback.loadView(name, mConstructorSignature, mConstructorArgs);
 
             if (customView instanceof View) {
                 return (View)customView;
@@ -319,6 +339,10 @@ public final class BridgeInflater extends LayoutInflater {
         }
 
         return null;
+    }
+
+    private View loadCustomView(String name, AttributeSet attrs) throws Exception {
+        return loadCustomView(name, attrs, false);
     }
 
     private void setupViewInContext(View view, AttributeSet attrs) {
