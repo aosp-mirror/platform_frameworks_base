@@ -685,6 +685,7 @@ public:
     TreeProperties* mutateProperties() { return &mProperties; }
 
     // This should always be called from RT.
+    void markDirty() { mCache.dirty = true; }
     bool isDirty() const { return mCache.dirty; }
     bool getPropertyChangeWillBeConsumed() const { return mWillBeConsumed; }
     void setPropertyChangeWillBeConsumed(bool willBeConsumed) { mWillBeConsumed = willBeConsumed; }
