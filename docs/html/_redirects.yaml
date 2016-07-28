@@ -1202,8 +1202,8 @@ redirects:
 - from: /r/studio-ui/menu-start.html
   to: /training/index.html?utm_medium=android-studio
 
-# N Preview redirects
-
+- from: /preview/features/icu4j-framework.html
+  to: /guide/topics/resources/icu4j-framework.html
 - from: /preview/features/key-attestation.html
   to: /training/articles/security-key-attestation.html
 - from: /preview/features/security-config.html
