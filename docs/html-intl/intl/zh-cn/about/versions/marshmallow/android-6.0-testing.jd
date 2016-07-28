@@ -1,0 +1,190 @@
+page.title=测试指南
+page.image=images/cards/card-n-guide_2x.png
+meta.tags="preview", "testing"
+page.tags="preview", "developer preview"
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+    <h2>本文内容</h2>
+      <ol>
+        <li><a href="#runtime-permissions">测试权限</a></li>
+        <li><a href="#doze-standby">测试低电耗模式和应用待机模式</a></li>
+        <li><a href="#ids">自动备份和设备标识符</a></li>
+      </ol>
+  </div>
+</div>
+
+<p>
+  利用 Android N，您有机会确保应用可使用下一平台版本。
+如 <a href="{@docRoot}preview/api-overview.html">API 概览</a>和<a href="{@docRoot}preview/behavior-changes.html">行为变更</a>中所述，该 Preview 包括大量 API 和可能影响应用的行为变更。
+
+使用 Preview 测试应用时，您应重点关注一些特定的系统变更，确保用户拥有愉悦的体验。
+
+
+</p>
+
+<p>
+  本指南介绍可使用您的应用测试 Preview 的哪些功能以及如何测试。您应确定优先测试以下特定 Preview 功能，因为它们可能会对应用行为产生较大影响。
+
+
+</p>
+
+<ul>
+  <li><a href="#runtime-permissions">权限</a>
+  </li>
+  <li><a href="#doze-standby">低电耗模式和应用待机模式</a>
+  </li>
+  <li><a href="#ids">自动备份和设备标识符</a></li>
+</ul>
+
+<p>
+  如需了解有关如何使用 Preview 系统映像设置设备或虚拟设备以进行测试的详细信息，请参阅<a href="{@docRoot}preview/setup-sdk.html">设置 Android N SDK</a>。
+
+
+</p>
+
+
+<h2 id="runtime-permissions">测试权限</h2>
+
+<p>
+  新<a href="{@docRoot}preview/features/runtime-permissions.html">权限</a>模型改变了用户向您的应用分配权限的方式。
+您的应用必须在运行时要求用户提供各项权限，而不是在安装过程中要求授予所有权限。
+
+对于用户而言，此行为有助于他们更精细地控制每个应用的 Activity，并更深入地了解应用为何请求提供特定权限的上下文信息。
+用户可以随时向应用授予某项权限或撤销其某项权限。
+预览版的这种功能最有可能会对应用行为产生影响，而且可能会阻止某些应用功能运行或只能在降级状态中运行。
+
+
+</p>
+
+<p class="caution">
+  这一变更会影响在新平台上运行的所有应用，即便这些应用并非面向新平台版本开发亦是如此。
+该平台为旧版应用提供有限的兼容性行为，但您现在应当开始计划将应用迁移到新权限模型，以便在官方平台启动时发布更新的应用版本。
+
+
+</p>
+
+
+<h3 id="permission-test-tips">测试提示</h3>
+
+<p>
+  使用以下测试提示有助于您计划并通过新权限行为执行应用测试。
+
+</p>
+
+<ul>
+  <li>识别应用的当前权限和相关的代码路径</li>
+  <li>跨受权限保护的服务和数据测试用户流程</li>
+  <li>使用授予/撤销权限的各种组合进行测试</li>
+  <li>使用 {@code adb} 工具从命令行管理权限：
+    <ul>
+      <li>按组列出权限和状态：
+        <pre>adb shell pm list permissions -d -g</pre>
+      </li>
+      <li>使用以下语法授予或撤销一项或多项权限：<br>
+        <pre>adb shell pm [grant|revoke] &lt;permission.name&gt; ...</pre>
+      </li>
+    </ul>
+  </li>
+  <li>针对使用权限的服务对应用进行分析</li>
+</ul>
+
+<h3 id="permission-test-strategy">测试策略</h3>
+
+<p>
+  权限更改会影响应用的结构和设计，以及您为用户提供的用户体验和流程。
+您应评估应用的当前权限使用情况并开始计划要提供的新流程。
+平台的正式版本提供兼容性行为，但您应计划更新应用，而不是依赖于这些行为。
+
+
+</p>
+
+<p>
+  确定应用实际需要和使用的权限，然后找出各种使用受权限保护的服务的代码路径。
+您可通过结合使用新平台测试和代码分析完成此操作。
+在测试中，您应通过将应用的 {@code targetSdkVersion} 更改为预览版，重点关注选择运行时权限。
+如需了解详细信息，请参阅<a href="{@docRoot}preview/setup-sdk.html#">设置 Android N SDK</a>。
+
+
+</p>
+
+<p>
+  使用已撤销和已添加权限的各种组合进行测试，突出显示依赖于权限的用户流程。
+如果依赖关系不明显或不符合逻辑，则您应考虑重构或划分该流程，以消除依赖关系或阐明需要权限的原因。
+
+
+</p>
+
+<p>
+  如需了解有关运行时权限行为、测试和最佳做法的详细信息，请参阅<a href="{@docRoot}preview/features/runtime-permissions.html">权限</a>开发者预览版页面。
+
+
+</p>
+
+
+<h2 id="doze-standby">测试低电耗模式和应用待机模式</h2>
+
+<p>
+  当设备处于空闲状态或应用未聚焦时，低电耗模式和应用待机模式的节能功能将限制应用可执行的后台处理工作量。
+系统可对应用实施的限制包括：限制或禁止访问网络、暂停后台任务、暂停通知、忽略唤醒请求和闹铃。
+
+要确保应用在完成这些节能优化后正常运行，您应通过模拟这些低功耗状态对应用进行测试。
+
+
+</p>
+
+<h4 id="doze">在低电耗模式下测试您的应用</h4>
+
+<p>要在低电耗模式下测试您的应用，请执行以下操作：</p>
+
+<ol>
+<li>使用 Android N 系统映像配置硬件设备或虚拟设备</li>
+<li>将设备连接到开发计算机并安装应用</li>
+<li>运行应用并使其保持活动状态</li>
+<li>通过运行以下命令，模拟进入低电耗模式的设备：
+
+<pre>
+$ adb shell dumpsys battery unplug
+$ adb shell dumpsys deviceidle step
+$ adb shell dumpsys deviceidle -h
+</pre>
+
+  </li>
+  <li>观察重新激活设备时的应用行为。确保应用在设备退出低电耗模式时正常恢复
+</li>
+</ol>
+
+
+<h4 id="standby">在应用待机模式下测试您的应用</h4>
+
+<p>要在应用待机模式下测试您的应用，请执行以下操作：</p>
+
+<ol>
+  <li>使用 Android N 系统映像配置硬件设备或虚拟设备</li>
+  <li>将设备连接到开发计算机并安装应用</li>
+  <li>运行应用并使其保持活动状态</li>
+  <li>通过运行以下命令，模拟进入待机模式的应用：
+
+<pre>
+$ adb shell am broadcast -a android.os.action.DISCHARGING
+$ adb shell am set-idle &lt;packageName&gt; true
+</pre>
+
+  </li>
+  <li>使用以下命令模拟如何唤醒应用：
+    <pre>$ adb shell am set-idle &lt;packageName&gt; false</pre>
+  </li>
+  <li>观察唤醒后的应用行为。确保应用从待机模式中正常恢复。
+特别地，您应检查应用的通知和后台作业是否按预期继续运行
+</li>
+</ol>
+
+<h2 id="ids">自动备份应用和设备特定的标识符</h2>
+
+<p>如果应用坚持在内部存储中使用任何设备特定的标识符，如 Google 云消息传递注册 ID，请确保遵循最佳做法将存储位置从自动备份中排除，如<a href="{@docRoot}preview/backup/index.html">自动备份应用</a>中所述。
+
+
+
+ </p>
