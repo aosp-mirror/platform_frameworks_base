@@ -44,6 +44,7 @@ import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
 import android.os.Binder;
+import android.os.Build;
 import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.IBinder;
@@ -86,9 +87,8 @@ import java.util.List;
  * instance of a {@link android.service.trust.TrustAgentService}.
  */
 public class TrustManagerService extends SystemService {
-
-    private static final boolean DEBUG = false;
     private static final String TAG = "TrustManagerService";
+    static final boolean DEBUG = Build.IS_DEBUGGABLE && Log.isLoggable(TAG, Log.VERBOSE);
 
     private static final Intent TRUST_AGENT_INTENT =
             new Intent(TrustAgentService.SERVICE_INTERFACE);
@@ -255,11 +255,33 @@ public class TrustManagerService extends SystemService {
         for (UserInfo userInfo : userInfos) {
             if (userInfo == null || userInfo.partial || !userInfo.isEnabled()
                     || userInfo.guestToRemove) continue;
-            if (!userInfo.supportsSwitchToByUser()) continue;
-            if (!StorageManager.isUserKeyUnlocked(userInfo.id)) continue;
-            if (!mActivityManager.isUserRunning(userInfo.id)) continue;
-            if (!lockPatternUtils.isSecure(userInfo.id)) continue;
-            if (!mStrongAuthTracker.canAgentsRunForUser(userInfo.id)) continue;
+            if (!userInfo.supportsSwitchToByUser()) {
+                if (DEBUG) Slog.d(TAG, "refreshAgentList: skipping user " + userInfo.id
+                        + ": switchToByUser=false");
+                continue;
+            }
+            if (!StorageManager.isUserKeyUnlocked(userInfo.id)) {
+                if (DEBUG) Slog.d(TAG, "refreshAgentList: skipping user " + userInfo.id
+                        + ": FDE still locked");
+                continue;
+            }
+            if (!mActivityManager.isUserRunning(userInfo.id)) {
+                if (DEBUG) Slog.d(TAG, "refreshAgentList: skipping user " + userInfo.id
+                        + ": user not started");
+                continue;
+            }
+            if (!lockPatternUtils.isSecure(userInfo.id)) {
+                if (DEBUG) Slog.d(TAG, "refreshAgentList: skipping user " + userInfo.id
+                        + ": no secure credential");
+                continue;
+            }
+            if (!mStrongAuthTracker.canAgentsRunForUser(userInfo.id)) {
+                if (DEBUG) Slog.d(TAG, "refreshAgentList: skipping user " + userInfo.id
+                        + ": prevented by StrongAuthTracker = 0x"
+                        + Integer.toHexString(mStrongAuthTracker.getStrongAuthForUser(
+                        userInfo.id)));
+                continue;
+            }
             DevicePolicyManager dpm = lockPatternUtils.getDevicePolicyManager();
             int disabledFeatures = dpm.getKeyguardDisabledFeatures(null, userInfo.id);
             final boolean disableTrustAgents =
@@ -267,18 +289,30 @@ public class TrustManagerService extends SystemService {
 
             List<ComponentName> enabledAgents = lockPatternUtils.getEnabledTrustAgents(userInfo.id);
             if (enabledAgents == null) {
+                if (DEBUG) Slog.d(TAG, "refreshAgentList: skipping user " + userInfo.id
+                        + ": no agents enabled by user");
                 continue;
             }
             List<ResolveInfo> resolveInfos = resolveAllowedTrustAgents(pm, userInfo.id);
             for (ResolveInfo resolveInfo : resolveInfos) {
                 ComponentName name = getComponentName(resolveInfo);
 
-                if (!enabledAgents.contains(name)) continue;
+                if (!enabledAgents.contains(name)) {
+                    if (DEBUG) Slog.d(TAG, "refreshAgentList: skipping "
+                            + name.flattenToShortString() + " u"+ userInfo.id
+                            + ": not enabled by user");
+                    continue;
+                }
                 if (disableTrustAgents) {
                     List<PersistableBundle> config =
                             dpm.getTrustAgentConfiguration(null /* admin */, name, userInfo.id);
                     // Disable agent if no features are enabled.
-                    if (config == null || config.isEmpty()) continue;
+                    if (config == null || config.isEmpty()) {
+                        if (DEBUG) Slog.d(TAG, "refreshAgentList: skipping "
+                                + name.flattenToShortString() + " u"+ userInfo.id
+                                + ": not allowed by DPM");
+                        continue;
+                    }
                 }
 
                 AgentInfo agentInfo = new AgentInfo();
