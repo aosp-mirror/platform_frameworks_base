@@ -185,13 +185,17 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     public void onStartedWakingUp() {
+        Trace.beginSection("StatusBarKeyguardViewManager#onStartedWakingUp");
         mDeviceInteractive = true;
         mDeviceWillWakeUp = false;
         mPhoneStatusBar.onStartedWakingUp();
+        Trace.endSection();
     }
 
     public void onScreenTurningOn() {
+        Trace.beginSection("StatusBarKeyguardViewManager#onScreenTurningOn");
         mPhoneStatusBar.onScreenTurningOn();
+        Trace.endSection();
     }
 
     public boolean isScreenTurnedOn() {
@@ -199,6 +203,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     public void onScreenTurnedOn() {
+        Trace.beginSection("StatusBarKeyguardViewManager#onScreenTurnedOn");
         mScreenTurnedOn = true;
         if (mDeferScrimFadeOut) {
             mDeferScrimFadeOut = false;
@@ -207,6 +212,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             updateStates();
         }
         mPhoneStatusBar.onScreenTurnedOn();
+        Trace.endSection();
     }
 
     @Override
