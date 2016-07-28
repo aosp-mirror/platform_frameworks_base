@@ -656,7 +656,7 @@
              description=
              "How to sync and back up app and user data to remote web services in the
               cloud and how to restore the data back to multiple devices."
-            >Syncing to the Cloud</a>
+            >Backing up App Data to the Cloud</a>
         </div>
         <ul>
           <li><a href="<?cs var:toroot ?>training/backup/autosyncapi.html">
