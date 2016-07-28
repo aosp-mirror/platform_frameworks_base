@@ -199,6 +199,8 @@ static bool wasSkipped(FrameInfo* info) {
 }
 
 bool CanvasContext::isSwapChainStuffed() {
+    static const auto SLOW_THRESHOLD = 6_ms;
+
     if (mSwapHistory.size() != mSwapHistory.capacity()) {
         // We want at least 3 frames of history before attempting to
         // guess if the queue is stuffed
@@ -209,8 +211,8 @@ bool CanvasContext::isSwapChainStuffed() {
 
     // Was there a happy queue & dequeue time? If so, don't
     // consider it stuffed
-    if (swapA.dequeueDuration < 3_ms
-            && swapA.queueDuration < 3_ms) {
+    if (swapA.dequeueDuration < SLOW_THRESHOLD
+            && swapA.queueDuration < SLOW_THRESHOLD) {
         return false;
     }
 
@@ -225,8 +227,8 @@ bool CanvasContext::isSwapChainStuffed() {
 
         // Was there a happy queue & dequeue time? If so, don't
         // consider it stuffed
-        if (swapB.dequeueDuration < 3_ms
-                && swapB.queueDuration < 3_ms) {
+        if (swapB.dequeueDuration < SLOW_THRESHOLD
+                && swapB.queueDuration < SLOW_THRESHOLD) {
             return false;
         }
 
