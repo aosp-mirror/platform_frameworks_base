@@ -775,7 +775,12 @@ public class Path {
         }
     }
 
-    final long ni() {
+    final long readOnlyNI() {
+        return mNativePath;
+    }
+
+    final long mutateNI() {
+        isSimplePath = false;
         return mNativePath;
     }
 
