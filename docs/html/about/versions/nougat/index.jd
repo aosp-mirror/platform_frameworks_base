@@ -22,10 +22,9 @@ footer.hide=1
     <div class="cols dac-hero-content" style="padding-bottom:1em;">
 
       <div class="col-7of16 col-push-9of16" style="padding-left:2em">
-        <h1 class="dac-hero-title">Android N Developer Preview</h1>
+        <h1 class="dac-hero-title">Android 7.0 Nougat</h1>
         <p class="dac-hero-description">
-          <strong>Android N final SDK is now available!</strong>
-          Get ready for Android N!
+          <strong>Android 7.0 Nougat brings a new crop of sweet features to your Android device.</strong>
           <strong>Test your apps</strong> on Nexus and other devices. Support new system
           behaviors to <strong>save power and memory</strong>.
           Extend your apps with <strong>multi-window UI</strong>,
@@ -49,9 +48,9 @@ footer.hide=1
     </div>
     <div class="dac-section dac-small">
       <div class="resource-widget resource-flow-layout col-16"
-           data-query="collection:preview/landing/resources"
+           data-query="collection:nougat/landing/resources"
            data-cardSizes="6x2"
-           data-maxResults="6"></div>
+           data-maxResults="3"></div>
     </div>
   </div>
 </section>
@@ -128,7 +127,8 @@ footer.hide=1
     data-cardSizes="6x6"
     data-items-per-page="6"
     data-maxResults="15"
-    data-initial-results="3"></div>
+    data-initial-results="3">
+  </div>
 </div></section>
 
 
