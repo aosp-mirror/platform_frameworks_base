@@ -511,6 +511,13 @@ public class SettingsProvider extends ContentProvider {
 
     @Override
     public ParcelFileDescriptor openFile(Uri uri, String mode) throws FileNotFoundException {
+        final int userId = getUserIdFromUri(uri, UserHandle.getCallingUserId());
+        if (userId != UserHandle.getCallingUserId()) {
+            getContext().enforceCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS,
+                    "Access files from the settings of another user");
+        }
+        uri = ContentProvider.getUriWithoutUserId(uri);
+
         final String cacheName;
         if (Settings.System.RINGTONE_CACHE_URI.equals(uri)) {
             cacheName = Settings.System.RINGTONE_CACHE;
@@ -523,8 +530,7 @@ public class SettingsProvider extends ContentProvider {
                     + "ringtone playback is available through android.media.Ringtone");
         }
 
-        final File cacheFile = new File(
-                getRingtoneCacheDir(UserHandle.getCallingUserId()), cacheName);
+        final File cacheFile = new File(getRingtoneCacheDir(userId), cacheName);
         return ParcelFileDescriptor.open(cacheFile, ParcelFileDescriptor.parseMode(mode));
     }
 
