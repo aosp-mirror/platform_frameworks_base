@@ -4,8 +4,8 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
 
 @jd:body
 
-<div id="qv-wrapper">
-  <div id="qv">
+<div id="tb-wrapper">
+  <div id="tb">
     <h2>此文件內容</h2>
       <ol>
         <li><a href="#overview">總覽</a></li>
@@ -68,8 +68,8 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
   </li>
 </ul>
 
-<img src="{@docRoot}preview/images/mw-splitscreen.png" alt="" width="650" srcset="{@docRoot}preview/images/mw-splitscreen.png 1x,
-    {@docRoot}preview/images/mw-splitscreen_2x.png 2x," id="img-split-screen" />
+<img src="{@docRoot}images/android-7.0/mw-splitscreen.png" alt="" width="650" srcset="{@docRoot}images/android-7.0/mw-splitscreen.png 1x,
+    {@docRoot}images/android-7.0/mw-splitscreen_2x.png 2x," id="img-split-screen" />
 <p class="img-caption">
   <strong>圖 1.</strong> 在分割畫面模式中並排執行的兩個應用程式。
 </p>
