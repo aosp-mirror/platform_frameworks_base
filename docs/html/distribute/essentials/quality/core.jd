@@ -186,7 +186,7 @@ page.image=/distribute/images/core-quality-guidelines.jpg
   <td>
     <p style="margin-bottom:.5em;">
     Notifications follow Android Design <a href=
-    "{@docRoot}design/patterns/notifications.html">guidelines</a>. In
+    "https://material.google.com/patterns/notifications.html">guidelines</a>. In
     particular:
     </p>
 

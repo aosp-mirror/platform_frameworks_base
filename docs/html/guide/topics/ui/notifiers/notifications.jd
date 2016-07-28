@@ -68,7 +68,7 @@ page.title=Notifications
 <h2>See also</h2>
 <ol>
     <li>
-        <a href="{@docRoot}design/patterns/notifications.html">Android Design: Notifications</a>
+        <a href="https://material.google.com/patterns/notifications.html">Material Design: Notifications</a>
     </li>
 </ol>
 </div>
@@ -105,7 +105,7 @@ The class {@link android.app.Notification.Builder Notification.Builder} was adde
 The material design changes introduced in Android 5.0 (API level 21) are of particular
 importance, and you should review the <a href="{@docRoot}training/material/index.html">Material
 Design</a> training for more information. To learn how to design notifications and their interactions,
-read the <a href="{@docRoot}design/patterns/notifications.html">Notifications</a> design guide.</p>
+read the <a href="https://material.google.com/patterns/notifications.html">Notifications</a> design guide.</p>
 
 <h2 id="CreateNotification">Creating a Notification</h2>
 
@@ -192,7 +192,7 @@ notification, you pass the {@link android.app.Notification} object to the system
 </p>
 <p> For information about setting an appropriate priority level, see "Correctly
     set and manage notification priority" in the <a
-    href="{@docRoot}design/patterns/notifications.html">Notifications</a> Design
+    href="https://material.google.com/patterns/notifications.html">Notifications</a> Design
     guide.
 </p>
 <!-- ------------------------------------------------------------------------------------------ -->
@@ -331,7 +331,7 @@ mBuilder.setStyle(inBoxStyle);
     For example, Gmail notifies the user that new emails have arrived by increasing its count of
     unread messages and by adding a summary of each email to the notification. This is called
     "stacking" the notification; it's described in more detail in the
-    <a href="{@docRoot}design/patterns/notifications.html">Notifications</a> Design guide.
+    <a href="https://material.google.com/patterns/notifications.html">Notifications</a> Design guide.
 </p>
 <p class="note">
     <strong>Note:</strong> This Gmail feature requires the "inbox" expanded layout, which is part

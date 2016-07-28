@@ -2655,6 +2655,19 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "lang": "en",
     "group": "",
     "tags": [],
+    "url": "https://material.google.com/patterns/notifications.html",
+    "timestamp": "1469639720",
+    "image": "images/cards/card-notifications_2x.png",
+    "title": "Notifications",
+    "summary": "Notifications inform your app’s users about relevant and timely events in your app.",
+    "keywords": ["notifications", "design"],
+    "type": "design",
+    "category": "material design"
+  },
+  {
+    "lang": "en",
+    "group": "",
+    "tags": [],
     "url": "https://www.google.com/design/spec/usability/",
     "timestamp": null,
     "image": "images/cards/material-usability_2x.png",
@@ -2733,7 +2746,6 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "type": "design",
     "category": "material design"
   },
-
   {
     "lang": "en",
     "group": "",
@@ -4672,7 +4684,7 @@ METADATA['en'].collections = {
       "design/patterns/navigation.html",
       "design/patterns/actionbar.html",
       "design/style/iconography.html",
-      "design/patterns/notifications.html"
+      "https://material.google.com/patterns/notifications.html"
     ]
   },
   "distribute/essentials/corequalityguidelines/functionality": {
@@ -4869,7 +4881,7 @@ METADATA['en'].collections = {
   "distribute/getusers/notifications": {
     "title": "",
     "resources": [
-      "design/patterns/notifications.html",
+      "https://material.google.com/patterns/notifications.html",
       "distribute/engage/gcm.html",
       "https://play.google.com/about/developer-content-policy.html"
     ]
@@ -4985,7 +4997,7 @@ METADATA['en'].collections = {
       "distribute/essentials/optimizing-your-app.html",
       "distribute/tools/launch-checklist.html",
       "distribute/googleplay/developer-console.html",
-      "design/patterns/notifications.html"
+      "https://material.google.com/patterns/notifications.html"
     ]
   },
   "distribute/engage/video/more": {
