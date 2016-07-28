@@ -106,17 +106,17 @@ static jlong android_os_SystemClock_elapsedRealtimeNano(JNIEnv* env,
  */
 static const JNINativeMethod gMethods[] = {
     /* name, signature, funcPtr */
-    { "uptimeMillis",      "()J",
+    { "uptimeMillis",      "!()J",
             (void*) android_os_SystemClock_uptimeMillis },
-    { "elapsedRealtime",      "()J",
+    { "elapsedRealtime",      "!()J",
             (void*) android_os_SystemClock_elapsedRealtime },
-    { "currentThreadTimeMillis",      "()J",
+    { "currentThreadTimeMillis",      "!()J",
             (void*) android_os_SystemClock_currentThreadTimeMillis },
-    { "currentThreadTimeMicro",       "()J",
+    { "currentThreadTimeMicro",       "!()J",
             (void*) android_os_SystemClock_currentThreadTimeMicro },
-    { "currentTimeMicro",             "()J",
+    { "currentTimeMicro",             "!()J",
             (void*) android_os_SystemClock_currentTimeMicro },
-    { "elapsedRealtimeNanos",      "()J",
+    { "elapsedRealtimeNanos",      "!()J",
             (void*) android_os_SystemClock_elapsedRealtimeNano },
 };
 int register_android_os_SystemClock(JNIEnv* env)
