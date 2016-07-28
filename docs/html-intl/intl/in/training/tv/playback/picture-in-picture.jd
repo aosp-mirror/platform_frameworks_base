@@ -59,7 +59,7 @@ PIP, dengan menekan dan menahan tombol <b>Beranda</b> pada remote. Jika video
 lain mulai diputar pada layar utama, jendela PIP secara otomatis
 ditutup. Pengguna juga bisa menutup jendela PIP melalui Recents.</p>
 
-<img src="{@docRoot}preview/images/pip-active.png" />
+<img src="{@docRoot}images/android-7.0/pip-active.png" />
 <p class="img-caption"><strong>Gambar 1.</strong> Video
 Gambar-dalam-gambar terlihat di sudut layar selagi pengguna menjelajahi materi pada layar
 utama.</p>
@@ -116,7 +116,7 @@ public void onActionClicked(Action action) {
 <p>Menambahkan tombol PIP ke baris kontrol media Anda akan memungkinkan pengguna dengan mudah beralih
 ke mode PIP selagi mengontrol pemutaran video.</p>
 
-<img src="{@docRoot}preview/images/pip-button.png" />
+<img src="{@docRoot}images/android-7.0/pip-button.png" />
 <p class="img-caption"><strong>Gambar 1.</strong> Tombol
 gambar-dalam-gambar pada baris kontrol media.</p>
 
