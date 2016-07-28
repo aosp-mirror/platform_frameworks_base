@@ -3362,7 +3362,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private Task createTaskLocked(int taskId, int stackId, int userId, AppWindowToken atoken,
-            Rect bounds, Configuration config) {
+            Rect bounds, Configuration config, boolean isOnTopLauncher) {
         if (DEBUG_STACK) Slog.i(TAG_WM, "createTaskLocked: taskId=" + taskId + " stackId=" + stackId
                 + " atoken=" + atoken + " bounds=" + bounds);
         final TaskStack stack = mStackIdToStack.get(stackId);
@@ -3370,7 +3370,7 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new IllegalArgumentException("addAppToken: invalid stackId=" + stackId);
         }
         EventLog.writeEvent(EventLogTags.WM_TASK_CREATED, taskId, stackId);
-        Task task = new Task(taskId, stack, userId, this, bounds, config);
+        Task task = new Task(taskId, stack, userId, this, bounds, config, isOnTopLauncher);
         mTaskIdToTask.put(taskId, task);
         stack.addTask(task, !atoken.mLaunchTaskBehind /* toTop */, atoken.showForAllUsers);
         return task;
@@ -3381,7 +3381,8 @@ public class WindowManagerService extends IWindowManager.Stub
             int requestedOrientation, boolean fullscreen, boolean showForAllUsers, int userId,
             int configChanges, boolean voiceInteraction, boolean launchTaskBehind,
             Rect taskBounds, Configuration config, int taskResizeMode, boolean alwaysFocusable,
-            boolean homeTask, int targetSdkVersion, int rotationAnimationHint) {
+            boolean homeTask, int targetSdkVersion, int rotationAnimationHint,
+            boolean isOnTopLauncher) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "addAppToken()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
@@ -3423,7 +3424,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
             Task task = mTaskIdToTask.get(taskId);
             if (task == null) {
-                task = createTaskLocked(taskId, stackId, userId, atoken, taskBounds, config);
+                task = createTaskLocked(taskId, stackId, userId, atoken, taskBounds, config,
+                        isOnTopLauncher);
             }
             task.addAppToken(addPos, atoken, taskResizeMode, homeTask);
 
@@ -3437,7 +3439,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void setAppTask(IBinder token, int taskId, int stackId, Rect taskBounds,
-            Configuration config, int taskResizeMode, boolean homeTask) {
+            Configuration config, int taskResizeMode, boolean homeTask, boolean isOnTopLauncher) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "setAppTask()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
@@ -3455,7 +3457,8 @@ public class WindowManagerService extends IWindowManager.Stub
             Task newTask = mTaskIdToTask.get(taskId);
             if (newTask == null) {
                 newTask = createTaskLocked(
-                        taskId, stackId, oldTask.mUserId, atoken, taskBounds, config);
+                        taskId, stackId, oldTask.mUserId, atoken, taskBounds, config,
+                        isOnTopLauncher);
             }
             newTask.addAppToken(Integer.MAX_VALUE /* at top */, atoken, taskResizeMode, homeTask);
         }

@@ -66,6 +66,7 @@ import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS;
+import static android.content.pm.ActivityInfo.FLAG_ON_TOP_LAUNCHER;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_ALWAYS;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_DEFAULT;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED;
@@ -176,6 +177,8 @@ final class TaskRecord {
                             // ActivityManager.LOCK_TASK_LAUNCH_MODE_*
     private boolean mPrivileged;    // The root activity application of this task holds
                                     // privileged permissions.
+    private boolean mIsOnTopLauncher; // Whether this task is an on-top launcher. See
+                                      // android.R.attr#onTopLauncher.
 
     /** Can't be put in lockTask mode. */
     final static int LOCK_TASK_AUTH_DONT_LOCK = 0;
@@ -474,6 +477,7 @@ final class TaskRecord {
             autoRemoveRecents = false;
         }
         mResizeMode = info.resizeMode;
+        mIsOnTopLauncher = (info.flags & FLAG_ON_TOP_LAUNCHER) != 0;
         mLockTaskMode = info.lockTaskLaunchMode;
         mPrivileged = (info.applicationInfo.privateFlags & PRIVATE_FLAG_PRIVILEGED) != 0;
         setLockTaskAuth();
@@ -1022,6 +1026,10 @@ final class TaskRecord {
     boolean isResizeable() {
         return !isHomeTask() && (mService.mForceResizableActivities
                 || ActivityInfo.isResizeableMode(mResizeMode)) && !mTemporarilyUnresizable;
+    }
+
+    boolean isOnTopLauncher() {
+        return isHomeTask() && mIsOnTopLauncher;
     }
 
     boolean inCropWindowsResizeMode() {

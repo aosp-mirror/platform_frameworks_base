@@ -712,6 +712,25 @@ final class ActivityStack {
         }
     }
 
+    /**
+     * @param task If non-null, the task will be moved to the back of the stack.
+     * */
+    void moveToBack(TaskRecord task) {
+        if (!isAttached()) {
+            return;
+        }
+
+        mStacks.remove(this);
+        mStacks.add(0, this);
+
+        if (task != null) {
+            mTaskHistory.remove(task);
+            mTaskHistory.add(0, task);
+            updateTaskMovement(task, false);
+            mWindowManager.moveTaskToBottom(task.taskId);
+        }
+    }
+
     boolean isFocusable() {
         if (StackId.canReceiveKeys(mStackId)) {
             return true;
@@ -1595,6 +1614,28 @@ final class ActivityStack {
         final ActivityStack focusedStack = mStackSupervisor.getFocusedStack();
         final int focusedStackId = focusedStack.mStackId;
 
+        final TaskRecord topFocusedTask = focusedStack.topTask();
+        final boolean isOnTopLauncherFocused = topFocusedTask != null &&
+                topFocusedTask.isOnTopLauncher();
+        if (isOnTopLauncherFocused) {
+            // When an on-top launcher is focused, we should find out whether the freeform stack or
+            // the fullscreen stack appears first underneath and has activities to show, and then
+            // make it visible.
+            boolean behindFullscreenOrFreeForm = false;
+            for (int stackBehindFocusedIndex = mStacks.indexOf(focusedStack) - 1;
+                 stackBehindFocusedIndex >= 0; stackBehindFocusedIndex--) {
+                ActivityStack stack = mStacks.get(stackBehindFocusedIndex);
+                if ((stack.mStackId == FREEFORM_WORKSPACE_STACK_ID
+                        || stack.mStackId == FULLSCREEN_WORKSPACE_STACK_ID)
+                        && stack.topRunningActivityLocked() != null) {
+                    if (stackIndex == stackBehindFocusedIndex) {
+                        return !behindFullscreenOrFreeForm ? STACK_VISIBLE : STACK_INVISIBLE;
+                    }
+                    behindFullscreenOrFreeForm = true;
+                }
+            }
+        }
+
         if (mStackId == FULLSCREEN_WORKSPACE_STACK_ID
                 && hasVisibleBehindActivity() && focusedStackId == HOME_STACK_ID
                 && !focusedStack.topActivity().fullscreen) {
@@ -1784,7 +1825,28 @@ final class ActivityStack {
                 // status of an activity in a previous task affects other.
                 behindFullscreenActivity = stackVisibility == STACK_INVISIBLE;
             } else if (mStackId == HOME_STACK_ID) {
-                if (task.isHomeTask()) {
+                if (task.isOnTopLauncher()) {
+                    if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "On-top launcher: at " + task
+                            + " stackInvisible=" + stackInvisible
+                            + " behindFullscreenActivity=" + behindFullscreenActivity);
+                    // When an on-top launcher is visible, (e.g. it's on the top of the home stack),
+                    // other tasks in the home stack could be visible if and only if:
+                    // - some app is running in the docked stack;
+                    // - no app is running in either the fullscreen stack or the freefrom stack.
+                    final ActivityStack dockedStack = mStackSupervisor.getStack(DOCKED_STACK_ID);
+                    final ActivityStack fullscreenStack = mStackSupervisor.getStack(
+                            FULLSCREEN_WORKSPACE_STACK_ID);
+                    final ActivityStack freeformStack = mStackSupervisor.getStack(
+                            FREEFORM_WORKSPACE_STACK_ID);
+                    final boolean dockedStackEmpty = dockedStack == null ||
+                            dockedStack.topRunningActivityLocked() == null;
+                    final boolean fullscreenStackEmpty = fullscreenStack == null ||
+                            fullscreenStack.topRunningActivityLocked() == null;
+                    final boolean freeformStackEmpty = freeformStack == null ||
+                            freeformStack.topRunningActivityLocked() == null;
+                    behindFullscreenActivity = dockedStackEmpty || !fullscreenStackEmpty ||
+                            !freeformStackEmpty;
+                } else if (task.isHomeTask()) {
                     if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Home task: at " + task
                             + " stackInvisible=" + stackInvisible
                             + " behindFullscreenActivity=" + behindFullscreenActivity);
@@ -2617,7 +2679,15 @@ final class ActivityStack {
         if (isOnHomeDisplay()) {
             ActivityStack lastStack = mStackSupervisor.getLastStack();
             final boolean fromHome = lastStack.isHomeStack();
-            if (!isHomeStack() && (fromHome || topTask() != task)) {
+            final boolean fromOnTopLauncher = lastStack.topTask() != null &&
+                    lastStack.topTask().isOnTopLauncher();
+            if (fromOnTopLauncher) {
+                // Since an on-top launcher will is moved to back when tasks are launched from it,
+                // those tasks should first try to return to a non-home activity.
+                // This also makes sure that non-home activities are visible under a transparent
+                // non-home activity.
+                task.setTaskToReturnTo(APPLICATION_ACTIVITY_TYPE);
+            } else if (!isHomeStack() && (fromHome || topTask() != task)) {
                 // If it's a last task over home - we default to keep its return to type not to
                 // make underlying task focused when this one will be finished.
                 int returnToType = isLastTaskOverHome
@@ -4369,6 +4439,23 @@ final class ActivityStack {
         if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION, "Prepare to back transition: task=" + taskId);
 
         if (mStackId == HOME_STACK_ID && topTask().isHomeTask()) {
+            if (topTask().isOnTopLauncher()) {
+                // An on-top launcher doesn't affect the visibility of activities on other stacks
+                // behind it. So if we're moving an on-top launcher to the back, we want to move the
+                // focus to the next focusable stack and resume an activity there.
+                // Besides, when the docked stack is visible, we should also move the home stack to
+                // the back to avoid the recents pops up on top of a fullscreen or freeform
+                // activity.
+
+                // Move the home stack to back.
+                moveToBack(topTask());
+
+                // Resume an activity in the next focusable stack.
+                adjustFocusToNextFocusableStackLocked(APPLICATION_ACTIVITY_TYPE, "moveTaskToBack");
+                mStackSupervisor.resumeFocusedStackTopActivityLocked();
+                return true;
+            }
+
             // For the case where we are moving the home task back and there is an activity visible
             // behind it on the fullscreen stack, we want to move the focus to the visible behind
             // activity to maintain order with what the user is seeing.
@@ -5209,7 +5296,7 @@ final class ActivityStack {
                 (r.info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0, r.userId, r.info.configChanges,
                 task.voiceSession != null, r.mLaunchTaskBehind, bounds, task.mOverrideConfig,
                 task.mResizeMode, r.isAlwaysFocusable(), task.isHomeTask(),
-                r.appInfo.targetSdkVersion, r.mRotationAnimationHint);
+                r.appInfo.targetSdkVersion, r.mRotationAnimationHint, task.isOnTopLauncher());
         r.taskConfigOverride = task.mOverrideConfig;
     }
 
@@ -5262,7 +5349,7 @@ final class ActivityStack {
     private void setAppTask(ActivityRecord r, TaskRecord task) {
         final Rect bounds = task.updateOverrideConfigurationFromLaunchBounds();
         mWindowManager.setAppTask(r.appToken, task.taskId, mStackId, bounds, task.mOverrideConfig,
-                task.mResizeMode, task.isHomeTask());
+                task.mResizeMode, task.isHomeTask(), task.isOnTopLauncher());
         r.taskConfigOverride = task.mOverrideConfig;
     }
 
