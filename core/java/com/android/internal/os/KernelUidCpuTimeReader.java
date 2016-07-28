@@ -120,7 +120,7 @@ public class KernelUidCpuTimeReader {
                             sb.append(" s=");
                             TimeUtils.formatDuration(systemTimeDeltaUs / 1000, sb);
                             sb.append(" p=").append(powerDeltaMaUs / 1000).append("mAms");
-                            Slog.wtf(TAG, sb.toString());
+                            Slog.e(TAG, sb.toString());
 
                             userTimeDeltaUs = 0;
                             systemTimeDeltaUs = 0;
