@@ -31,6 +31,8 @@ import android.util.Log;
  */
 public class OobData implements Parcelable {
     private byte[] securityManagerTk;
+    private byte[] leSecureConnectionsConfirmation;
+    private byte[] leSecureConnectionsRandom;
 
     public byte[] getSecurityManagerTk() {
         return securityManagerTk;
@@ -45,10 +47,28 @@ public class OobData implements Parcelable {
         this.securityManagerTk = securityManagerTk;
     }
 
+    public byte[] getLeSecureConnectionsConfirmation() {
+        return leSecureConnectionsConfirmation;
+    }
+
+    public void setLeSecureConnectionsConfirmation(byte[] leSecureConnectionsConfirmation) {
+        this.leSecureConnectionsConfirmation = leSecureConnectionsConfirmation;
+    }
+
+    public byte[] getLeSecureConnectionsRandom() {
+        return leSecureConnectionsRandom;
+    }
+
+    public void setLeSecureConnectionsRandom(byte[] leSecureConnectionsRandom) {
+        this.leSecureConnectionsRandom = leSecureConnectionsRandom;
+    }
+
     public OobData() { }
 
     private OobData(Parcel in) {
         securityManagerTk = in.createByteArray();
+        leSecureConnectionsConfirmation = in.createByteArray();
+        leSecureConnectionsRandom = in.createByteArray();
     }
 
     public int describeContents() {
@@ -58,6 +78,8 @@ public class OobData implements Parcelable {
     @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeByteArray(securityManagerTk);
+        out.writeByteArray(leSecureConnectionsConfirmation);
+        out.writeByteArray(leSecureConnectionsRandom);
     }
 
     public static final Parcelable.Creator<OobData> CREATOR
