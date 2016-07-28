@@ -1,0 +1,234 @@
+page.title=データセーバー
+metaDescription= ユーザーが有効にしたデータ使用量の最適化。
+page.keywords="android N", "data usage", "metered network"
+page.image=images/cards/card-nyc_2x.jpg
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+    <h2>
+      このドキュメントの内容
+    </h2>
+
+    <ol>
+      <li>
+        <a href="#status">データセーバー設定の確認</a>
+        <ol>
+          <li>
+            <a href="#request-whitelist">ホワイトリスト パーミッションの要求</a>
+          </li>
+        </ol>
+      </li>
+
+      <li>
+        <a href="#monitor-changes">データセーバー設定の変更の監視</a>
+
+      </li>
+
+      <li>
+        <a href="#testing">Android Debug Bridge コマンドを使用したテスト</a>
+      </li>
+    </ol>
+  </div>
+</div>
+
+<p>
+  スマートフォンのライフサイクル全体では、モバイルデータ通信プランのコストが端末自体のコストを簡単に上回ります。
+N Developer Preview では、ローミング、課金サイクルの終了近く、または短期間のデータパックであるかどうかに関係なく、データの使用を抑えるために端末全体でデータセーバーを有効にできます。
+
+
+</p>
+
+<p>
+  ユーザーが [<strong>Settings</strong>] でデータセーバーを有効にし、端末が従量制課金ネットワークに接続されている場合、システムはバックグラウンドでのデータ使用をブロックし、フォアグラウンドでのデータ使用をなるべく抑えるようにアプリに指示します。
+
+ユーザーは特定のアプリをホワイトリストに登録することにより、データセーバーがオンになっているときでも、バックグラウンドで従量制課金接続を使用できます。
+
+
+</p>
+
+<p>
+  N Developer Preview は {@link android.net.ConnectivityManager} API を拡張することで、<a href="#status">ユーザーのデータセーバー設定を取得</a>する方法と、<a href="#monitor-changes">設定の変更を監視</a>する方法を提供しています。
+
+
+アプリでユーザーがデータセーバーを有効にしているかどうかを確認し、フォアグラウンドおよびバックグラウンドでのデータ使用を抑えるようにすることをお勧めします。
+
+
+</p>
+
+<h2 id="status">
+  データセーバー設定の確認
+</h2>
+
+<p>
+  N Developer Preview では、アプリは {@link
+  android.net.ConnectivityManager} API を使用して、どのようなデータ使用量の制限が適用されているかを確認できます。
+{@code getRestrictBackgroundStatus()} メソッドは以下のいずれかの値を返します。
+
+</p>
+
+<dl>
+  <dt>
+    {@code RESTRICT_BACKGROUND_STATUS_DISABLED}
+  </dt>
+
+  <dd>
+    データセーバーは無効になっています。
+  </dd>
+
+  <dt>
+    {@code RESTRICT_BACKGROUND_STATUS_ENABLED}
+  </dt>
+
+  <dd>
+    ユーザーはこのアプリのデータセーバーを有効にしています。アプリはフォアグラウンドでのデータ使用を抑えるようにし、バックグラウンドでのデータ使用に対する制限を適切に処理する必要があります。
+
+
+  </dd>
+
+  <dt>
+    {@code RESTRICT_BACKGROUND_STATUS_WHITELISTED}
+  </dt>
+
+  <dd>
+    ユーザーはデータセーバーを有効にしていますが、アプリがホワイトリストに登録されています。アプリは、フォアグラウンドおよびバックグラウンドでのデータ使用を引き続き抑えるようにする必要があります。
+
+  </dd>
+</dl>
+
+<p>
+  データセーバーが無効になっている場合や、アプリがホワイトリストに登録されている場合でも、端末が従量制課金ネットワークに接続されている場合は、データ使用量を抑えることをお勧めします。
+
+以下のサンプルコードでは、アプリで使用する必要があるデータ量を確認するために、{@link
+  android.net.ConnectivityManager#isActiveNetworkMetered
+  ConnectivityManager.isActiveNetworkMetered()} と {@code
+  ConnectivityManager.getRestrictBackgroundStatus()} を使用しています。
+
+</p>
+
+<pre>
+ConnectivityManager connMgr = (ConnectivityManager)
+        getSystemService(Context.CONNECTIVITY_SERVICE);
+// Checks if the device is on a metered network
+if (connMgr.isActiveNetworkMetered()) {
+  // Checks user’s Data Saver settings.
+  switch (connMgr.getRestrictBackgroundStatus()) {
+    case RESTRICT_BACKGROUND_STATUS_ENABLED:
+    // Background data usage is blocked for this app. Wherever possible,
+    // the app should also use less data in the foreground.
+
+    case RESTRICT_BACKGROUND_STATUS_WHITELISTED:
+    // The app is whitelisted. Wherever possible,
+    // the app should use less data in the foreground and background.
+
+    case RESTRICT_BACKGROUND_STATUS_DISABLED:
+    // Data Saver is disabled. Since the device is connected to a
+    // metered network, the app should use less data wherever possible.
+  }
+} else {
+  // The device is not on a metered network.
+  // Use data as required to perform syncs, downloads, and updates.
+}
+</pre>
+
+<h3 id="request-whitelist">
+  ホワイトリスト パーミッションの要求
+</h3>
+
+<p>
+  アプリがバックグラウンドでデータを使用する必要がある場合は、アプリのパッケージ名（例: <code>package:MY_APP_ID</code>）の URI を含む <code>Settings.ACTION_IGNORE_BACKGROUND_DATA_RESTRICTIONS_SETTINGS</code> インテントを送信することでホワイトリスト パーミッションをリクエストできます。
+
+
+
+
+</p>
+
+<p>
+  インテントと URI を送信すると、[<strong>Settings</strong>] アプリが起動し、アプリのデータ使用量の設定が表示されます。
+ユーザーはアプリのバックグラウンドデータを有効にするかどうかを決めることができます。
+このインテントを送信する前に、バックグラウンドでのデータ使用を有効にするために [<strong>Settings</strong>] アプリを起動するかどうかを最初にユーザーに尋ねることをお勧めします。
+
+
+
+</p>
+
+<h2 id="monitor-changes">
+  データセーバー設定の変更の監視
+</h2>
+
+<p>
+  アプリでデータセーバー設定の変更を監視するには、{@link
+  android.content.BroadcastReceiver} を作成して {@code
+  ConnectivityManager.ACTION_RESTRICT_BACKGROUND_CHANGED} をリッスンし、レシーバーを動的に {@link android.content.Context#registerReceiver
+  Context.registerReceiver()} に登録します。
+このブロードキャストを受信したアプリは、{@code
+  ConnectivityManager.getRestrictBackgroundStatus()} を呼び出して、<a href="#status">新しいデータセーバー設定がそのパーミッションに影響を及ぼすかどうか</a>を確認する必要があります。
+
+
+</p>
+
+<p class="note">
+  <strong>注:</strong>このブロードキャストは、{@link
+  android.content.Context#registerReceiver Context.registerReceiver()} を使用してブロードキャストに動的に登録するアプリにのみ送信されます。
+マニフェストにこのブロードキャストを受信するために登録するアプリはこれらを受信しません。
+
+
+</p>
+
+<h2 id="testing">
+  Android Debug Bridge コマンドを使用したテスト
+</h2>
+
+<a href="{@docRoot}tools/help/adb.html">Android Debug Bridge（ADB）</a>には、ネットワーク パーミッションの確認と設定に使用できるコマンドがいくつか用意されています。
+
+
+
+<dl>
+  <dt>
+    <code>$ adb shell dumpsys netpolicy</code>
+  </dt>
+
+  <dd>
+    現在のバックグラウンド ネットワーク全体の制限設定、ホワイトリスト内の現在のパッケージ UID、その他の既知のパッケージのネットワーク パーミッションを含むレポートが生成されます。
+
+
+  </dd>
+
+  <dt>
+    <code>$ adb shell cmd netpolicy</code>
+  </dt>
+
+  <dd>
+    ネットワーク ポリシー マネージャ（netpolicy）のコマンドの一覧が表示されます。
+  </dd>
+
+  <dt>
+    <code>$ adb shell cmd netpolicy set restrict-background
+    &lt;boolean&gt;</code>
+  </dt>
+
+  <dd>
+    <code>true</code> または <code>false</code> をそれぞれ渡したときに、データセーバー モードを有効または無効にします。
+
+  </dd>
+
+  <dt>
+    <code>$ adb shell cmd netpolicy add restrict-background-whitelist
+    &lt;UID&gt;</code>
+  </dt>
+
+  <dd>
+    指定されたパッケージ UID をホワイトリストに追加し、バックグラウンドで従量制課金接続を使用できるようにします。
+
+  </dd>
+
+  <dt>
+    <code>$ adb shell cmd netpolicy remove restrict-background-whitelist
+    &lt;UID&gt;</code>
+  </dt>
+
+  <dd>
+    指定されたパッケージ UID をホワイトリストから削除し、データセーバーが有効な場合でもバックグラウンドで従量制課金接続を使用できないようにします。
+
+  </dd>
+</dl>
