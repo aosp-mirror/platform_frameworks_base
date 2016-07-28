@@ -1,0 +1,190 @@
+page.title=Guia de teste
+page.image=images/cards/card-n-guide_2x.png
+meta.tags="preview", "testing"
+page.tags="preview", "developer preview"
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+    <h2>Neste documento</h2>
+      <ol>
+        <li><a href="#runtime-permissions">Teste de permissões</a></li>
+        <li><a href="#doze-standby">Teste de soneca e App em espera</a></li>
+        <li><a href="#ids">Identificadores de dispositivo e backup automático</a></li>
+      </ol>
+  </div>
+</div>
+
+<p>
+  O Android N fornece uma oportunidade de garantir que os aplicativos funcionem
+ na próxima versão da plataforma. Esta prévia inclui uma série de mudanças de comportamento e APIs que podem
+ ter impacto no aplicativo, como descrito em <a href="{@docRoot}preview/api-overview.html">Visão geral da API
+</a> e <a href="{@docRoot}preview/behavior-changes.html">Mudanças de comportamento</a>. No teste
+ do aplicativo com a prévia, há algumas alterações de sistema específicas em que você deve se concentrar
+ para garantir que os usuários tenham uma boa experiência.
+</p>
+
+<p>
+  Este guia descreve quais recursos de prévia testar e como testá-los com o aplicativo. Você deve
+ priorizar o teste destes recursos de prévia específicos devido ao grande impacto potencial no
+ comportamento do aplicativo:
+</p>
+
+<ul>
+  <li><a href="#runtime-permissions">Permissões</a>
+  </li>
+  <li><a href="#doze-standby">Soneca e App em espera</a>
+  </li>
+  <li><a href="#ids">Identificadores de dispositivo e backup automático</a></li>
+</ul>
+
+<p>
+  Para obter mais informações sobre como configurar dispositivos físicos ou virtuais com uma imagem do sistema de prévia
+ para teste, consulte <a href="{@docRoot}preview/setup-sdk.html">Configuração
+do Android N SDK</a>.
+</p>
+
+
+<h2 id="runtime-permissions">Teste de permissões</h2>
+
+<p>
+  O novo modelo de <a href="{@docRoot}preview/features/runtime-permissions.html">permissões</a>
+ altera a maneira que as permissões são alocadas ao aplicativo pelo usuário. Em vez de conceder todas as permissões
+ durante o procedimento de instalação, o aplicativo deve pedir ao usuário permissões individuais
+ em tempo de execução. Para os usuários, este comportamento fornece um controle mais granular sobre as atividades de cada aplicativo, bem
+ como um melhor contexto para entender o porquê do aplicativo estar solicitando uma permissão específica. Os usuários
+ podem conceder ou revogar as permissões concedidas a um aplicativo individualmente a qualquer momento. É provável que este recurso
+ da prévia tenha um impacto no comportamento do aplicativo e pode impedir que alguns
+ dos recursos do aplicativo funcionem, ou funcionem em um estado degradado.
+</p>
+
+<p class="caution">
+  Esta alteração afeta todos os aplicativos em execução na nova plataforma, mesmo aqueles que não são destinados
+ para a versão nova da plataforma. A plataforma fornece um comportamento de compatibilidade limitado para aplicativos legados. No entanto,
+ você deve começar a planejar a migração do aplicativo para o novo modelo de permissões agora, com o objetivo
+ de publicar uma versão atualizada do aplicativo no lançamento oficial da plataforma.
+</p>
+
+
+<h3 id="permission-test-tips">Dicas de teste</h3>
+
+<p>
+  Use as seguintes dicas de teste para ajudar você a planejar e executar os testes do aplicativo com o novo
+ comportamento de permissões.
+</p>
+
+<ul>
+  <li>Identifique as permissões atuais do aplicativo e os caminhos de código relacionados.</li>
+  <li>Teste o fluxo de usuário entre serviços protegidos por permissão e dados.</li>
+  <li>Teste com várias combinações de permissões revogadas/concedidas.</li>
+  <li>Use a ferramenta {@code adb} para gerenciar as permissões da linha de comando:
+    <ul>
+      <li>Liste as permissões e o status por grupos:
+        <pre>adb shell pm list permissions -d -g</pre>
+      </li>
+      <li>Conceda ou revogue uma ou mais permissões usando a seguinte sintaxe:<br>
+        <pre>adb shell pm [grant|revoke] &lt;permission.name&gt; ...</pre>
+      </li>
+    </ul>
+  </li>
+  <li>Analise o aplicativo para encontrar os serviços que usam permissões.</li>
+</ul>
+
+<h3 id="permission-test-strategy">Estratégia de teste</h3>
+
+<p>
+  A mudança de permissões afeta a estrutura e o projeto do aplicativo, bem como
+ a experiência do usuário e os fluxos fornecidos a eles. Você deve avaliar o uso das permissões atuais
+ do aplicativo e começar a planejar novos fluxos que deseja oferecer. O lançamento oficial
+ da plataforma fornece comportamento de compatibilidade, mas deve-se planejar a atualização do aplicativo e
+ não confiar nestes comportamentos.
+</p>
+
+<p>
+  Identifique as permissões que o aplicativo realmente precisa e usa e, em seguida, encontre os vários caminhos
+ de código que usam os serviços protegidos por permissões. É possível fazer isto por meio de uma combinação de
+ testes na nova plataforma e análise de códigos. Nos testes, você deve se concentrar em usar
+ as permissões em tempo de execução alterando {@code targetSdkVersion} do aplicativo para a versão da prévia. Para
+ obter mais informações, consulte <a href="{@docRoot}preview/setup-sdk.html#">Configuração
+do Android N SDK</a>.
+</p>
+
+<p>
+  Teste com várias combinações de permissões revogadas e concedidas para destacar os fluxos de usuário
+que dependem de permissões. Onde uma dependência não for óbvia ou lógica, considere
+refatorar ou compartimentalizar este fluxo para eliminar a dependência ou para esclarecer por que
+a permissão é necessária.
+</p>
+
+<p>
+  Para obter mais informações sobre o comportamento das permissões em tempo de execução, de testes e de melhores práticas, consulte a página
+ <a href="{@docRoot}preview/features/runtime-permissions.html">Permissões</a> do Developer
+ Preview.
+</p>
+
+
+<h2 id="doze-standby">Teste de soneca e App em espera</h2>
+
+<p>
+  Os recursos de economia de energia de App em espera e soneca limitam a quantidade de processamento de segundo plano que o aplicativo
+ pode realizar quando um dispositivo está no estado ocioso ou enquanto não está em foco. As
+ restrições que o sistema pode impor nos aplicativos inclui acesso a rede limitado ou restrito,
+ tarefas de segundo plano suspensas, notificações suspensas, solicitações de soneca ignoradas e despertadores. Para garantir
+ que o aplicativo se comportará adequadamente com essas otimizações de economia de energia, deve-se testá-lo
+ simulando estes estados de baixa energia.
+</p>
+
+<h4 id="doze">Testar o aplicativo com Soneca</h4>
+
+<p>Para testar a Soneca com o aplicativo:</p>
+
+<ol>
+<li>Configure um dispositivo de hardware ou virtual com uma imagem do sistema Android N.</li>
+<li>Conecte o dispositivo à máquina de desenvolvimento e instale o aplicativo.</li>
+<li>Execute o aplicativo e deixe-o ativo.</li>
+<li>Simule o dispositivo acessando o modo Soneca executando os seguintes comandos:
+
+<pre>
+$ adb shell dumpsys battery unplug
+$ adb shell dumpsys deviceidle step
+$ adb shell dumpsys deviceidle -h
+</pre>
+
+  </li>
+  <li>Observe o comportamento do aplicativo quando o dispositivo é reativado. Certifique-se de que
+ ele se recupere corretamente quando o dispositivo sai do modo Soneca.</li>
+</ol>
+
+
+<h4 id="standby">Testar aplicativos com App em espera</h4>
+
+<p>Para testar o modo de espera do aplicativo:</p>
+
+<ol>
+  <li>Configure um dispositivo de hardware ou virtual com uma imagem do sistema Android N.</li>
+  <li>Conecte o dispositivo à máquina de desenvolvimento e instale o aplicativo.</li>
+  <li>Execute o aplicativo e deixe-o ativo.</li>
+  <li>Simule o aplicativo acessando o modo de espera executando os seguintes comandos:
+
+<pre>
+$ adb shell am broadcast -a android.os.action.DISCHARGING
+$ adb shell am set-idle &lt;packageName&gt; true
+</pre>
+
+  </li>
+  <li>Simule o despertar do aplicativo usando o seguinte comando:
+    <pre>$ adb shell am set-idle &lt;packageName&gt; false</pre>
+  </li>
+  <li>Observe o comportamento do aplicativo quando ele é despertado. Certifique-se de que ele se recupere corretamente
+ do modo de espera. Particularmente, deve-se verificar se as notificações e os trabalho de segundo plano
+ do aplicativo continuam a funcionar como o esperado.</li>
+</ol>
+
+<h2 id="ids">Backup automático para aplicativos e identificadores específicos do dispositivo</h2>
+
+<p>Caso o aplicativo esteja persistindo qualquer identificador específico do dispositivo, como o ID de registro do Google
+Cloud Messaging, no armazenamento interno,
+certifique-se de seguir as práticas recomendadas para excluir o local de armazenamento
+do backup automático, como descrito em <a href="{@docRoot}preview/backup/index.html">Backup automático
+para aplicativos</a>. </p>

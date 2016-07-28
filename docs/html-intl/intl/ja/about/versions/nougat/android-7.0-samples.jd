@@ -1,0 +1,85 @@
+page.title=サンプル
+page.tags="preview", "samples", "android"
+page.image=images/cards/card-n-samples_2x.png
+@jd:body
+
+<p>
+  以下は Android N のサンプルコードです。サンプルを Android Studio でダウンロードするには、<b>[File] &gt; [Import Samples]</b> メニュー オプションを選択します。
+
+
+</p>
+
+<p class="note">
+  <strong>注:</strong>以下のダウンロード可能なプロジェクトは、Gradle と Android Studio でご利用いただくために提供しています。
+
+</p>
+
+
+<h3 id="mw">マルチ ウィンドウ Playground</h3>
+<img src="{@docRoot}images/android-7.0/sample-multiwindow.png" style="float: left; padding-right: 0.5em" height="250" width="156" />
+<p>
+  このサンプルでは、自身のアプリでマルチ ウィンドウのユーザー インターフェースを使用する方法をご確認いただけます。
+
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-MultiWindowPlayground">GitHub でサンプルを入手</a>
+
+</p>
+
+<div style="clear: both;"></div>
+<h3 id="an">アクティブ通知</h3>
+<img src="{@docRoot}images/android-7.0/sample-activenotifications.png" style="float: left; padding-right: 0.5em" height="250" width="141" />
+<p>
+  NotificationCompat を使用して通知を送信するシンプルなサービスをご確認いただける既存のサンプルです。
+ユーザーからの未読メッセージは、それぞれ別の通知として送信されます。
+
+</p>
+<p>
+  このサンプルは、Android N 向けの新たな通知機能を利用できるようにアップデートされています。
+
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-ActiveNotifications">GitHub でサンプルを入手</a>
+
+</p>
+
+<div style="clear: both;"></div>
+<h3 id="ms">メッセージ サービス</h3>
+<img src="{@docRoot}images/android-7.0/sample-messagingservice.png" style="float: left; padding-right: 0.5em" height="250" width="150" />
+<p>
+  1 つのアプリで表示している通知の件数を NotificationManager で取得する方法をご確認いただける既存のサンプルです。
+
+
+</p>
+<p>
+  このサンプルは、Android N 向けの新たな通知機能を利用できるようにアップデートされています。
+
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-MessagingService">GitHub でサンプルを入手</a>
+
+</p>
+
+<div style="clear: both;"></div>
+<h3 id="fbe">ダイレクト ブート</h3>
+<img src="{@docRoot}images/android-7.0/sample-directboot.png" style="float: left; padding-right: 0.5em" height="250" width="141" />
+<p>
+  このサンプルでは、端末の暗号化ストレージ内のデータにアクセスしたり、データを保存したりする方法をご確認いただけます。この機能は端末が起動している間は常に有効です。
+
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-DirectBoot">GitHub でサンプルを入手</a>
+
+</p>
+
+<div style="clear: both;"></div>
+<h3 id="sda">特定のディレクトリへのアクセス</h3>
+<img src="{@docRoot}images/android-7.0/sample-scopeddirectoryaccess.png" style="float: left; padding-right: 0.5em" height="250" width="141" />
+<p>
+  このサンプルでは、より少ないパーミッションで、特定のディレクトリに対するデータの読み出しや書き込みを行う方法をご確認いただけます。
+
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-ScopedDirectoryAccess">GitHub でサンプルを入手</a>
+
+</p>

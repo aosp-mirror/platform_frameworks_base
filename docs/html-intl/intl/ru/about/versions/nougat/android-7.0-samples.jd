@@ -1,0 +1,85 @@
+page.title=Примеры
+page.tags="preview", "samples", "android"
+page.image=images/cards/card-n-samples_2x.png
+@jd:body
+
+<p>
+  Следующие примеры кода представлены для Android N. Чтобы
+загрузить примеры в Android Studio, выберите в меню <b>File &gt; Import
+Samples</b>.
+</p>
+
+<p class="note">
+  <strong>Примечание.</strong> Эти загружаемые проекты предназначены для
+использования с Gradle и Android Studio.
+</p>
+
+
+<h3 id="mw">Многооконный режим</h3>
+<img src="{@docRoot}images/android-7.0/sample-multiwindow.png" style="float: left; padding-right: 0.5em" height="250" width="156" />
+<p>
+  В данном примере показаны преимущества многооконного
+интерфейса для вашего приложения.
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-MultiWindowPlayground">
+Загрузить с сайта GitHub</a>
+</p>
+
+<div style="clear: both;"></div>
+<h3 id="an">Активные уведомления</h3>
+<img src="{@docRoot}images/android-7.0/sample-activenotifications.png" style="float: left; padding-right: 0.5em" height="250" width="141" />
+<p>
+  В этом ранее созданном примере показана простая служба, которая отправляет
+уведомления с помощью NotificationCompat. Каждое непрочитанное сообщение от пользователя
+отправляется отдельным уведомлением.
+</p>
+<p>
+  Этот пример был обновлен с использованием новых функций уведомлений,
+доступных в Android N.
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-ActiveNotifications">
+Загрузить с сайта GitHub</a>
+</p>
+
+<div style="clear: both;"></div>
+<h3 id="ms">Служба сообщений</h3>
+<img src="{@docRoot}images/android-7.0/sample-messagingservice.png" style="float: left; padding-right: 0.5em" height="250" width="150" />
+<p>
+  В этом предварительно созданном примере показано, как использовать
+NotificationManager для определения количества уведомлений,
+отображаемого приложением.
+</p>
+<p>
+  Этот пример был обновлен с использованием новых функций уведомлений,
+доступных в Android N.
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-MessagingService">
+Загрузить с сайта GitHub</a>
+</p>
+
+<div style="clear: both;"></div>
+<h3 id="fbe">Режим Direct Boot</h3>
+<img src="{@docRoot}images/android-7.0/sample-directboot.png" style="float: left; padding-right: 0.5em" height="250" width="141" />
+<p>
+  В данном примере показано как сохранять и считывать данные в зашифрованном
+хранилище, которое всегда доступно только на загруженном устройстве.
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-DirectBoot">
+Загрузить с сайта GitHub</a>
+</p>
+
+<div style="clear: both;"></div>
+<h3 id="sda">Доступ к выделенным каталогам</h3>
+<img src="{@docRoot}images/android-7.0/sample-scopeddirectoryaccess.png" style="float: left; padding-right: 0.5em" height="250" width="141" />
+<p>
+  В данном примере показано, как выполнять чтение и запись данных из определенных
+каталогов при уменьшении числа требуемых разрешений.
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-ScopedDirectoryAccess">
+Загрузить с сайта GitHub</a>
+</p>

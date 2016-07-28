@@ -1,0 +1,676 @@
+page.title=Android N cho Nhà phát triển
+meta.tags="preview", "androidn"
+page.tags="preview", "developer preview"
+page.image=images/cards/card-n-apis_2x.png
+@jd:body
+
+
+
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>Các tính năng chính cho nhà phát triển</h2>
+  <ol>
+      <ul style="list-style-type:none;">
+        <li><a href="#multi-window_support">Hỗ trợ đa cửa sổ</a></li>
+        <li><a href="#notification_enhancements">Thông báo</a></li>
+        <li><a href="#jit_aot">Biên dịch JIT/AOT</a></li>
+        <li><a href="#quick_path_to_app_install">Cài đặt ứng dụng nhanh chóng</a></li>
+        <li><a href="#doze_on_the_go">Chế độ Ngủ sâu khi di chuyển</a></li>
+        <li><a href="#background_optimizations">Tối ưu hóa chạy ngầm</a></li>
+        <li><a href="#data_saver">Tiết kiệm dữ liệu</a></li>
+        <li><a href="#tile_api">API cho ô Cài đặt nhanh</a></li>
+        <li><a href="#number-blocking">Chặn số</a></li>
+        <li><a href="#call_screening">Sàng lọc cuộc gọi</a></li>
+        <li><a href="#multi-locale_languages">Bản địa và ngôn ngữ</a></li>
+        <li><a href="#icu4">API ICU4J trong Android</a></li>
+        <li><a href="#gles_32">API OpenGL ES 3.2</a></li>
+        <li><a href="#android_tv_recording">Ghi lại trên Android TV</a></li>
+        <li><a href="#android_for_work">Android cho Công việc</a></li>
+        <li><a href="#accessibility_enhancements">Trợ năng</a></li>
+        <li><a href="#direct_boot">Khởi động Trực tiếp</a></li>
+        <li><a href="#key_attestation">Chứng thực khóa</a></li>
+        <li><a href="#network_security_config">Cấu hình Bảo mật mạng</a></li>
+        <li><a href="#default_trusted_ca">CA an toàn mặc định</a></li>
+        <li><a href="apk_signature_v2">Lược đồ chữ ký số v2 cho tệp APK</a></li>
+        <li><a href="#scoped_directory_access">Truy cập thư mục theo phạm vi</a></li>
+      </ol>
+</div>
+</div>
+
+
+
+<p>Android N vẫn đang trong quá trình phát triển nhưng bây giờ bạn có thể dùng thử
+dưới dạng N Developer Preview. Các phần dưới đây sẽ nêu bật một số
+tính năng mới cho nhà phát triển. </p>
+
+<p>
+  Bạn cần xem <a href="{@docRoot}preview/behavior-changes.html">Các thay đổi Hành vi</a> để biết được
+  những phần thay đổi của nền tảng có thể ảnh hưởng đến ứng dụng của bạn, hãy xem
+  các hướng dẫn cho nhà phát triển để biết thêm về những tính năng chính và tải xuống tài liệu <a href="{@docRoot}preview/setup-sdk.html#docs-dl">Tham khảo API</a> để biết chi tiết về
+  các API mới.
+</p>
+
+<h2 id="multi-window_support">Hỗ trợ đa cửa sổ</h2>
+
+
+<p>Trong Android N, chúng tôi sẽ đưa vào nền tảng một tính năng đa nhiệm mới
+ rất được mong đợi &mdash; hỗ trợ đa cửa sổ. </p>
+
+  <p>Giờ đây người dùng có thể nhanh chóng mở đồng thời hai ứng dụng trên màn hình. </p>
+  <ul>
+  <li>Trên điện thoại và máy tính bảng
+chạy Android N, người dùng có thể chạy hai ứng dụng song song hai bên hoặc
+  trên dưới trong chế độ chia đôi màn hình. Người dùng có thể thay đổi kích thước của ứng dụng bằng cách kéo
+thanh phân chia ở giữa. </li>
+
+<li>Trên thiết bị Android TV, các ứng dụng có thể tự đặt vào <a href="{@docRoot}preview/features/picture-in-picture.html">chế độ
+hình-trong-hình</a>, cho phép ứng dụng tiếp tục hiển thị nội dung khi người dùng duyệt web hoặc
+tương tác với ứng dụng khác. Hãy xem bên dưới để biết thêm thông tin. </li>
+  </ul>
+
+<div class="col-4of10">
+<img src="{@docRoot}images/android-7.0/mw-portrait.png" alt="" style="height:460px;padding-left:1em;" id="img-split-screen" />
+<p class="img-caption">
+  <strong>Hình 1.</strong> Các ứng dụng chạy trong chế độ chia màn hình.
+</p>
+  </div>
+
+<p>Đặc biệt là trên máy tính bảng và các thiết bị màn hình lớn khác, việc hỗ trợ đa cửa sổ
+cho phép bạn mang lại những cách thức mới thu hút người dùng. Thậm chí bạn còn có thể cho phép kéo thả trong
+ứng dụng để người dùng kéo nội dung một cách thuận tiện vào hoặc ra ngoài ứng dụng của bạn &mdash; đây là một cách
+nâng cao trải nghiệm của người dùng rất hiệu quả. </p>
+
+<p>Thêm tính năng hỗ trợ đa màn hình vào ứng dụng của bạn và cấu hình cách thức
+xử lý hiển thị đa cửa sổ là điều rất đơn giản. Ví dụ, bạn có thể chỉ định kích thước
+tối thiểu cho phép của hoạt động, ngăn người dùng thay đổi kích thước của hoạt động nhỏ hơn
+kích thước đó. Bạn cũng có thể vô hiệu hóa hiển thị đa cửa sổ cho ứng dụng của mình, giúp
+  đảm bảo hệ thống sẽ chỉ hiển thị ứng dụng của bạn ở chế độ toàn màn hình.</p>
+
+<p>
+  Để biết thêm thông tin, hãy xem tài liệu cho nhà phát triển <a href="{@docRoot}preview/features/multi-window.html">Hỗ trợ đa cửa sổ</a>
+.
+</p>
+
+<h2 id="notification_enhancements">Cải tiến thông báo</h2>
+
+<p>Chúng tôi đã thiết kế lại thông báo trong Android N để chúng được sử dụng dễ dàng và nhanh
+hơn. Một số các thay đổi bao gồm:</p>
+
+<ul>
+  <li>
+    <strong>Cập nhật Mẫu</strong>: Chúng tôi đã cập nhật các mẫu thông báo để
+  tạo điểm nhấn mới cho ảnh gây ấn tượng và ảnh đại diện. Nhà phát triển sẽ có thể
+   tận dụng các mẫu mới nhưng chỉ cần thực hiện một số chỉnh sửa nhỏ trong mã nguồn của họ.
+  </li>
+
+  <li>
+    <strong>Thông báo gộp</strong>: Hệ thống có thể nhóm các tin nhắn
+  lại với nhau, ví dụ như theo chủ đề tin nhắn và hiển thị thành nhóm. Người dùng có thể
+   thực hiện các thao tác như Hủy hoặc Lưu trữ chúng ngay tại chỗ. Nếu bạn từng
+   triển khai các thông báo cho Android Wear thì bạn đã làm quen với
+   mô hình này.
+  </li>
+
+  <li>
+    <strong>Trả lời trực tiếp</strong>: Đối với những ứng dụng giao tiếp theo thời gian thực,
+   hệ thống Android sẽ hỗ trợ trả lời ngay tại chỗ để người dùng có thể nhanh chóng phản hồi lại
+   một tin nhắn SMS hoặc tin nhắn văn bản trực tiếp bên trong giao diện thông báo đó.
+  </li>
+
+  <li>
+    <strong>Dạng xem tùy chỉnh</strong>: Hai API mới cho phép bạn sử dụng các trang trí
+   hệ thống như tiêu đề và hành động của thông báo khi sử dụng các dạng xem
+   tùy chỉnh trong thông báo.
+  </li>
+</ul>
+
+<div class="col-4of12">
+  <img src="{@docRoot}images/android-7.0/notifications-1.png" alt="" style="padding:.5em;max-width:226px">
+</div>
+
+<div class="col-4of12">
+  <img src="{@docRoot}images/android-7.0/notifications-3.png" alt="" style="padding:.5em;max-width:226px">
+</div>
+
+<div class="col-4of12">
+  <img src="{@docRoot}images/android-7.0/notifications-2.png" alt="" style="padding:.5em;max-width:226px">
+</div>
+
+
+<p class="img-caption">
+  <strong>Hình 2.</strong> Thông báo gộp và trả lời trực tiếp.
+</p>
+
+<p>Hãy xem
+  hướng dẫn về <a href="{@docRoot}preview/features/notification-updates.html">Thông báo</a>
+ để biết cách triển khai các tính năng mới này.</p>
+
+
+
+<h2 id="jit_aot">Biên dịch JIT/AOT theo cấu hình</h2>
+
+<p>Trong Android N, chúng tôi đã bổ sung một trình biên dịch Just in Time (JIT) có mã được cấu hình cho
+ART, cho phép nó nâng cao hiệu năng của các ứng dụng Android tức thì khi
+chạy. Trình biên dịch JIT bổ trợ thêm cho trình biên dịch Ahead of Time (AOT) của ART
+và giúp cải hiện hiệu năng thời gian chạy, tiết kiệm không gian lưu trữ và tăng tốc độ các bản cập nhật của
+ứng dụng và cập nhật của hệ thống.</p>
+
+<p>Biên dịch theo cấu hình cho phép ART quản lý quá trình biên dịch AOT/JIT của từng ứng dụng
+tùy theo sử dụng thực tế cũng như các điều kiện trên thiết bị. Ví
+dụ, ART sẽ duy trì một cấu hình cho các phương thức hay dùng nhất của mỗi ứng dụng và có thể biên dịch trước
+rồi tạo bộ đệm cho các phương thức đó để có hiệu năng cao nhất. Những phần khác của ứng dụng
+sẽ được giữ nguyên không biên dịch cho đến khi chúng thực sự được sử dụng.</p>
+
+<p>Bên cạnh nâng cao hiệu năng cho các phần chính của ứng dụng, quá trình biên dịch
+theo cấu hình còn giúp giảm tổng lượng RAM được sử dụng của ứng dụng, bao gồm cả các
+tệp nhị phân liên quan. Tính năng này đặc biệt quan trọng trên các thiết bị ít bộ nhớ.</p>
+
+<p>ART sẽ quản lý quá trình biên dịch theo cấu hình bằng cách giảm tối thiểu tác động đến
+pin của thiết bị. Nó sẽ tiến hành quá trình biên dịch trước chỉ khi nào thiết bị nhàn rỗi và
+đang sạc, giúp tiết kiệm thời gian và pin bằng cách thực hiện công việc đó trước.</p>
+
+<h2 id="quick_path_to_app_install">Cài đặt ứng dụng nhanh chóng</h2>
+
+<p>Một trong những lợi ích dễ thấy nhất của trình biên dịch JIT của ART là tốc độ cài đặt
+ứng dụng và cập nhật hệ thống. Ngay cả các ứng dụng lớn cần vài phút để
+tối ưu và cài đặt trong Android 6.0 thì giờ đây có thể cài đặt chỉ trong một vài
+giây. Các cập nhật cho hệ thống cũng sẽ nhanh hơn vì không còn bước tối ưu hóa nữa. </p>
+
+<h2 id="doze_on_the_go">Chế độ Ngủ sâu khi di chuyển...</h2>
+
+<p>Chế độ Ngủ sâu đã được giới thiệu trong Android 6.0. Đây là một chế độ của hệ thống giúp tiết kiệm pin bằng cách trì hoãn
+các hoạt động CPU và mạng của ứng dụng khi thiết bị đang nhàn rỗi, ví dụ như khi thiết bị
+đang nằm trên bàn hoặc trong ngăn kéo. </p>
+
+<p>Giờ đây Chế độ Ngủ sâu trong Android N đã được cải tiến thêm và tiết kiệm pin ngay cả khi đang di chuyển.
+Bất kỳ khi nào màn hình đang tắt trong một khoảng thời gian và thiết bị không được cắm sạc thì
+Chế độ Ngủ sâu sẽ áp dụng tập con của các hạn chế CPU và mạng quen thuộc đối với các ứng dụng.
+Điều này có nghĩa là người dùng có thể tiết kiệm pin ngay cả khi đang mang thiết bị trong túi
+của họ.</p>
+
+
+<img src="/preview/images/doze-diagram-1.png" alt="" id="figure1" />
+<p class="img-caption">
+  <strong>Hình 3.</strong> Chế độ Ngủ sâu đang áp dụng
+   các hạn chế để cải thiện thời lượng pin ngay cả khi thiết bị không được đặt một chỗ.
+</p>
+
+
+<p>Sau một khoảng thời gian ngắn khi màn hình tắt và thiết bị chỉ chạy bằng nguồn pin, Chế độ Ngủ sâu
+sẽ hạn chế truy cập mạng và trì hoãn các tác vụ, đồng bộ. Trong các khoảng thời gian
+bảo trì ngắn, các ứng dụng sẽ được phép truy cập mạng và mọi tác vụ/đồng bộ
+bị trì hoãn sẽ được thực thi. Bật màn hình hoặc cắm sạc vào thiết bị sẽ đưa
+thiết bị thoát khỏi Chế độ Ngủ sâu.</p>
+
+<p>Khi để thiết bị nằm một chỗ lần nữa với màn hình được tắt và chạy bằng pin trong một
+khoảng thời gian thì Chế độ Ngủ sâu sẽ áp dụng toàn bộ các hạn chế CPU và mạng đối với {@link
+android.os.PowerManager.WakeLock}, báo thức {@link android.app.AlarmManager} và quét
+GPS/Wi-Fi.</p>
+
+<p>Bạn có thể áp dụng các thực hành tốt nhất tương tự để điều chỉnh ứng dụng của mình cho Chế độ Ngủ sâu cho dù
+thiết bị có đang di chuyển hay đứng yên. Do đó, nếu bạn đã cập nhật ứng dụng để xử lý
+Chế độ Ngủ sâu một cách tinh tế thì bạn hoàn toàn yên tâm. Nếu không, hãy tiến hành <a href="{@docRoot}training/monitoring-device-state/doze-standby.html#assessing_your_app">làm cho
+ ứng dụng thích ứng với Chế độ Ngủ sâu</a> ngay.</p>
+
+<h2 id="background_optimizations">Dự án Svelte: Tối ưu hóa chạy ngầm</h2>
+
+<p>Dự án Svelte là một nỗ lực liên tục nhằm tối giảm sử dụng RAM của hệ thống và các ứng dụng
+trên khắp hệ sinh thái các thiết bị Android. Trong Android N, dự án
+Svelte tập trung vào việc tối ưu hóa cách thức các ứng dụng chạy ngầm. </p>
+
+<p>Xử lý chạy ngầm là một phần quan trọng của hầu hết các ứng dụng. Khi sử dụng đúng cách, nó
+có thể giúp cho trải nghiệm người dùng của bạn trở nên tuyệt vời &mdash; tức thì, nhanh chóng và nhận biết được bối cảnh.
+Khi không sử dụng đúng cách, xử lý chạy ngầm có thể tiêu tốn RAM (và
+pin) một cách không cần thiết cũng như ảnh hưởng đến hiệu năng hệ thống cho các ứng dụng khác. </p>
+
+<p>Kể từ Android 5.0, {@link android.app.job.JobScheduler} đã trở thành
+cách thức được ưu tiên để thực hiện công việc chạy ngầm thích hợp
+cho người dùng. Ứng dụng có thể lên lịch cho các tác vụ trong khi cho phép hệ thống tối ưu hóa dựa trên
+các điều kiện về bộ nhớ, nguồn điện và kết nối. JobScheduler đem lại khả năng kiểm soát và
+sự đơn giản, và chúng tôi muốn mọi ứng dụng đều sử dụng nó. </p>
+
+<p>
+  Một giải pháp hiệu quả khác là <a href="https://developers.google.com/android/reference/com/google/android/gms/gcm/GcmNetworkManager">
+  <code>GCMNetworkManager</code></a>, thuộc một phần của Dịch vụ Google Play, cho phép
+ lên lịch tác vụ tương tự với khả năng tương thích trên các phiên bản Android
+  cũ.
+</p>
+
+<p>Chúng tôi đang tiếp tục kế thừa <code>JobScheduler</code> và
+<code>GCMNetworkManager</code> để đáp ứng nhiều hơn
+các trường hợp sử dụng của bạn &mdash; ví dụ như trong Android N giờ đây bạn đã có thể lên lịch cho công việc
+chạy ngầm dựa vào những thay đổi trong các Trình cung cấp Nội dung. Đồng thời, chúng tôi đang tiến hành
+loại bỏ một số mẫu cũ có thể làm giảm hiệu năng hệ thống,
+đặc biệt trên các thiết bị ít bộ nhớ.</p>
+
+<p>Trong Android N, chúng tôi sẽ loại bỏ ba truyền phát không biểu thị được sử dụng phổ biến &mdash;
+{@link android.net.ConnectivityManager#CONNECTIVITY_ACTION}, {@link
+  android.hardware.Camera#ACTION_NEW_PICTURE} và {@link
+  android.hardware.Camera#ACTION_NEW_VIDEO} &mdash; bởi vì các truyền phát này có thể đánh thức
+các tiến trình chạy ngầm của nhiều ứng dụng cùng lúc và sử dụng quá mức bộ nhớ và pin. Nếu
+ứng dụng của bạn đang nhận các truyền phát này thì hãy tận dụng N Developer Preview để
+  chuyển sang <code>JobScheduler</code> và các API liên quan khác thay thế. </p>
+
+<p>
+  Hãy xem tài liệu <a href="{@docRoot}preview/features/background-optimization.html">Tối ưu hóa
+ Chạy ngầm</a> để biết thêm chi tiết.
+</p>
+
+
+<h2 id="data_saver">Tiết kiệm dữ liệu</h2>
+
+<div class="col-5of12" style="margin-right:1.5em;">
+<img src="{@docRoot}images/android-7.0/datasaver.png" style="border:2px solid #ddd">
+
+<p class="img-caption" style="padding-right:2em;">
+  <strong>Hình 4.</strong> Tính năng Tiết kiệm dữ liệu trong mục Settings.
+</p>
+  </div>
+
+<p>Trong vòng đời của một thiết bị di động thì chi phí gói cước dữ liệu di động về cơ bản
+sẽ cao hơn giá thành của chính thiết bị đó. Đối với nhiều người dùng, dữ liệu di động là một
+tài nguyên đắt đỏ họ muốn sử dụng tiết kiệm. </p>
+
+<p>Android N đã đưa vào chế độ Tiết kiệm dữ liệu, một dịch vụ hệ thống mới giúp giảm
+sử dụng dữ liệu di động, cho dù là chuyển vùng, gần đến kỳ thanh toán cước,
+hoặc trên một gói dữ liệu trả trước khiêm tốn. Tiết kiệm dữ liệu cho người dùng kiểm soát cách thức ứng dụng
+sử dụng dữ liệu di động và cho phép nhà phát triển cung cấp dịch vụ hiệu quả hơn khi Tiết kiệm
+dữ liệu được bật. </p>
+
+<p>Khi người dùng bật Tiết kiệm dữ liệu trong <strong>Settings</strong> và thiết bị đang
+sử dụng một mạng có đo lưu lượng thì hệ thống sẽ chặn việc sử dụng dữ liệu chạy ngầm và truyền tín hiệu cho ứng dụng
+để sử dụng ít dữ liệu hơn ở tiền cảnh bất cứ khi nào có thể &mdash; chẳng hạn như bằng cách giới hạn
+bit rate để truyền phát, giảm chất lượng hình ảnh, trì hoãn tạo trước bộ đệm để tối ưu,
+v.v. Người dùng có thể lập danh sách các ứng dụng cụ thể được phép sử dụng
+dữ liệu có tính lưu lượng được chạy ngầm ngay cả khi Tiết kiệm dữ liệu được bật.</p>
+
+<p>Android N mở rộng lớp {@link android.net.ConnectivityManager} để cung cấp cho các ứng dụng một
+cách thức <a href="{@docRoot}preview/features/data-saver.html#status">truy xuất
+các tùy chọn Tiết kiệm dữ liệu của người dùng</a> và <a href="{@docRoot}preview/features/data-saver.html#monitor-changes">theo dõi
+các thay đổi của tùy chọn</a>. Mọi ứng dụng cần kiểm tra xem người dùng đó đã bật Tiết kiệm
+Dữ liệu hay chưa và cố gắng giới hạn sử dụng dữ liệu chạy ở tiền cảnh và chạy ngầm.</p>
+
+
+<h2 id="tile_api">API cho ô Cài đặt nhanh</h2>
+
+
+<div style="float:right;max-width:320px">
+<img src="{@docRoot}images/android-7.0/quicksettings.png" style="padding-left:1.5em;">
+
+<p class="img-caption" style="padding-left:2em;">
+  <strong>Hình 5.</strong> Các ô Cài đặt nhanh trong vùng hiển thị thông báo.
+</p>
+
+
+  </div><p>Cài đặt nhanh là một cách phổ biến và đơn giản để hiển thị các cài đặt và hành động quan trọng,
+trực tiếp từ khu vực thông báo. Trong Android N, chúng tôi đã mở rộng phạm vi của
+Cài đặt nhanh để khiến nó trở nên hữu ích và thuận tiện hơn nữa. </p>
+
+<p>Chúng tôi đã thêm không gian cho các ô Cài đặt nhanh mà người dùng có thể
+truy cập trên toàn bộ một vùng hiển thị được phân trang bằng cách vuốt sang trái hoặc phải. Chúng tôi cũng
+cho người dùng kiểm soát những ô Cài đặt nhanh nào sẽ xuất hiện và vị trí xuất hiện
+của chúng &mdash; người dùng chỉ cần kéo và thả để thêm hoặc di chuyển các ô. </p>
+
+<p>Đối với nhà phát triển, Android N cũng bổ sung một API mới cho phép định nghĩa các ô
+  Cài đặt nhanh của riêng bạn giúp người dùng dễ dàng truy cập tới các điều khiển và hành động quan trọng trong ứng dụng của bạn.</p>
+
+<p>
+  Các ô Cài đặt nhanh được dành riêng cho các điều khiển hoặc hành động
+   khẩn cấp hoặc thường xuyên được sử dụng, không nên dùng làm lối tắt để
+   khởi chạy một ứng dụng.
+</p>
+
+<p>
+  Một khi đã định nghĩa các ô của mình bạn có thể làm nổi chúng lên trước người dùng để họ có thể thêm
+  các ô này vào Cài đặt nhanh bằng cách chỉ cần kéo và thả.
+</p>
+
+<p>
+  Để biết thêm thông tin về việc tạo một ô ứng dụng, hãy xem
+  <code>android.service.quicksettings.Tile</code> trong tài liệu <a href="{@docRoot}preview/setup-sdk.html#docs-dl">Tham khảo API</a> có thể tải xuống.
+</p>
+
+
+
+<h2 id="number-blocking">Chặn số</h2>
+
+<p>Android N đã hỗ trợ chặn số điện thoại trong nền tảng này và cung cấp một
+ API khuôn khổ cho phép các nhà cung cấp dịch vụ duy trì một danh sách số bị chặn.
+Ứng dụng SMS mặc định, ứng dụng gọi điện mặc định và các ứng dụng của nhà cung cấp có thể đọc và
+ghi vào danh sách số bị chặn. Các ứng dụng khác không thể truy cập vào danh sách này.</p>
+
+<p>Thông qua việc đưa chặn số thành một tính năng tiêu chuẩn của nền tảng, Android sẽ cung cấp
+cách thức thống nhất để các ứng dụng hỗ trợ chặn số trên một loạt các
+thiết bị. Những lợi ích mà ứng dụng có thể tận dụng gồm:</p>
+
+<ul>
+  <li> Số bị chặn cuộc gọi cũng sẽ bị chặn tin nhắn văn bản
+  <li> Số bị chặn có thể được duy trì qua các lần thiết lập lại và qua nhiều thiết bị thông qua tính năng Sao lưu &amp;
+Khôi phục
+  <li> Nhiều ứng dụng có thể sử dụng cùng một danh sách số bị chặn
+</ul>
+
+<p>Ngoài ra, việc tích hợp ứng dụng của nhà mạng thông qua Android cũng đồng nghĩa là các nhà mạng có thể
+đọc danh sách số bị chặn trên thiết bị và thực hiện chặn số từ phía nhà cung cấp dịch vụ
+cho người dùng để ngăn các cuộc gọi và tin nhắn văn bản không mong muốn tiếp cận người dùng
+thông qua bất kỳ phương tiện nào, ví dụ như điểm cuối VOIP hoặc điện thoại chuyển cuộc gọi.</p>
+
+<p>
+  Để biết thêm thông tin, hãy xem <code>android.provider.BlockedNumberContract</code>
+  trong tài liệu <a href="{@docRoot}preview/setup-sdk.html#docs-dl">Tham khảo
+ API</a> có thể tải xuống.
+</p>
+
+<h2 id="call_screening">Sàng lọc cuộc gọi</h2>
+
+<p>
+  Android N cho phép ứng dụng gọi điện mặc định sàng lọc các cuộc gọi đến. Ứng dụng
+  gọi điện thực hiện điều này bằng cách thực thi <code>CallScreeningService</code> mới,
+  cho phép ứng dụng gọi điện thực hiện một số hành động dựa trên
+   {@link android.telecom.Call.Details Call.Details} của cuộc gọi đến như:
+</p>
+
+<ul>
+  <li> Từ chối cuộc gọi đến
+  <li> Không cho phép cuộc gọi lưu trong nhật ký cuộc gọi
+  <li> Không hiển thị thông báo về cuộc gọi cho người dùng
+</ul>
+
+<p>
+  Để biết thêm thông tin, hãy xem <code>android.telecom.CallScreeningService</code>
+  trong tài liệu <a href="{@docRoot}preview/setup-sdk.html#docs-dl">Tham khảo
+ API</a> có thể tải xuống.
+</p>
+
+
+<h2 id="multi-locale_languages">Hỗ trợ đa bản địa, thêm nhiều ngôn ngữ</h2>
+
+
+<p>Android N cho phép người dùng chọn <strong>đa bản địa</strong> trong Settings,
+để hỗ trợ tốt hơn cho các trường hợp song ngữ. Các ứng dụng có thể sử dụng
+một API mới để truy xuất các bản địa được chọn của người dùng và sau đó mang đến
+trải nghiệm người dùng tinh tế hơn cho người dùng đa bản địa &mdash; như hiển thị các kết quả tìm kiếm bằng
+nhiều ngôn ngữ và không yêu cầu dịch các trang web sang ngôn ngữ mà
+người dùng đã biết.</p>
+
+<p>Ngoài hỗ trợ đa bản địa, Android N cũng mở rộng danh sách các ngôn ngữ
+khả dụng đối với người dùng. Nền tảng này cung cấp hơn 25 biến thể cho các ngôn ngữ
+được sử dụng phổ biến như Tiếng Anh, Tây Ban Nha, Pháp và Ả-rập. Nó cũng bổ sung hỗ trợ
+một phần cho hơn 100 ngôn ngữ mới.</p>
+
+<p>Các ứng dụng có thể truy xuất danh sách bộ bản địa theo người dùng bằng cách gọi <code>LocaleList.GetDefault()</code>. Để hỗ trợ số lượng bản địa mở rộng, Android N đang thay đổi cách thức
+phân giải tài nguyên. Hãy đảm bảo bạn kiểm tra và xác minh rằng ứng dụng của mình
+đang hoạt động như mong muốn theo lô-gic phân giải tài nguyên mới này.</p>
+
+<p>Để tìm hiểu về hành vi phân giải tài nguyên mới và các thực hành tốt nhất bạn nên
+thực hiện theo, hãy xem mục <a href="{@docRoot}preview/features/multilingual-support.html">Hỗ trợ đa ngôn ngữ</a>.</p>
+
+<h2 id="icu4">API ICU4J trong Android</h2>
+
+<p>
+  Android N đã cung cấp một tập nhỏ các API <a href="http://site.icu-project.org/">ICU4J</a> trong khuôn khổ Android thuộc
+  gói <code>android.icu</code>. Việc chuyển nhập sang rất dễ dàng và hầu hết chỉ liên quan đến
+  việc đổi từ không gian tên <code>com.java.icu</code> thành
+  <code>android.icu</code>. Nếu bạn đang sử dụng gói ICU4J trong ứng dụng
+  của mình thì việc chuyển đổi sang các API <code>android.icu</code> được cung cấp trong khuôn khổ
+   Android có thể giúp làm giảm đáng kể kích thước của tệp APK.
+</p>
+
+<p>
+  Để tìm hiểu thêm về API ICU4J trên Android, hãy xem <a href="{@docRoot}preview/features/icu4j-framework.html">Hỗ trợ ICU4J</a>.
+</p>
+
+
+
+<h2 id="gles_32">API OpenGL&trade; ES 3.2</h2>
+
+<p>Android N bổ sung các giao diện khuôn khổ và hỗ trợ nền tảng cho OpenGL ES 3.2, bao gồm:</p>
+
+<ul>
+  <li> Mọi phần mở rộng trong <a class="external-link" href="https://www.khronos.org/registry/gles/extensions/ANDROID/ANDROID_extension_pack_es31a.txt">Gói Tiện ích mở rộng Android</a></a> (AEP) ngoại trừ <code>EXT_texture_sRGB_decode</code>
+  <li> Bộ đệm khung hình dấu chấm động cho HDR và tạo bóng trì hoãn.
+  <li> Các lệnh vẽ BaseVertex cho phép chia gói và truyền phát hiệu quả hơn.
+  <li> Kiểm soát truy cập bộ đệm mạnh mẽ để giảm phí tổn quản lý của WebGL.
+</ul>
+
+<p>API khuôn khổ cho OpenGL ES 3.2 trên Android N được cung cấp với lớp
+<code>GLES32</code>. Khi sử dụng OpenGL ES 3.2, hãy đảm bảo khai báo
+yêu cầu trong tệp bản kê khai của bạn bằng thẻ <code>&lt;uses-feature&gt;</code> và
+thuộc tính <code>android:glEsVersion</code>. </p>
+
+<p>Để biết thông tin về sử dụng OpenGL ES, bao gồm cách kiểm tra phiên bản
+ OpenGL ES được hỗ trợ của thiết bị tại thời gian chạy, hãy xem mục <a href="{@docRoot}guide/topics/graphics/opengl.html">Hướng dẫn API OpenGL ES</a>.</p>
+
+
+<h2 id="android_tv_recording">Ghi lại trên Android TV</h2>
+
+<p>Android N bổ sung khả năng ghi và phát lại nội dung từ các dịch vụ
+nguồn vào của Android TV thông qua các API ghi lại. Được xây dựng dựa trên các API
+chuyển dịch thời gian sẵn có, các dịch vụ nguồn vào TV có thể kiểm soát dữ liệu của kênh nào được phép ghi lại, cách thức
+lưu trữ các phiên được ghi lại cũng như quản lý tương tác của người dùng với nội dung ghi lại. </p>
+
+<p>Để biết thêm thông tin, hãy xem <a href="{@docRoot}preview/features/tv-recording-api.html">API ghi lại của Android TV</a>.</p>
+
+
+<h2 id="android_for_work">Android cho Công việc</h2>
+
+<p>Android cho Công việc bổ sung nhiều tính năng mới và các API cho thiết bị chạy Android N.
+Dưới đây là một số điểm nổi bật &mdash; để xem danh sách đầy đủ các cập nhật của Android N
+liên quan đến Android cho Công việc, vui lòng xem Các thay đổi của Android cho Công việc.</p>
+
+<h3 id="work_profile_security_challenge">Thử thách bảo mật cấu hình công việc </h3>
+
+<p>
+  Người sở hữu cấu hình có thể chỉ định một thử thách bảo mật riêng cho các ứng dụng đang chạy trong
+  cấu hình công việc. Thử thách công việc được hiển thị khi người dùng cố gắng mở
+  bất kỳ ứng dụng công việc nào. Hoàn tất thành công thử thách bảo mật sẽ mở khóa
+  cấu hình công việc và giải mã nó nếu cần. Đối với người sở hữu cấu hình,
+  <code>ACTION_SET_NEW_PASSWORD</code> sẽ yêu cầu người dùng đặt một thử thách
+  công việc và <code>ACTION_SET_NEW_PARENT_PROFILE_PASSWORD</code> sẽ yêu cầu
+  người dùng đặt khóa thiết bị.
+</p>
+
+<p>
+  Người sở hữu cấu hình có thể đặt các chính sách mật khẩu riêng biệt cho thử thách công việc
+  (như độ dài mã PIN cần thiết hoặc có thể sử dụng dấu vân tay
+   để mở khóa cấu hình hay không) bằng <code>setPasswordQuality()</code>,
+ <code>setPasswordMinimumLength()</code> và các phương thức liên quan. Người sở hữu
+  cấu hình cũng có thể cài khóa thiết bị bằng thực thể <code>DevicePolicyManager</code>
+ được trả về bởi phương thức <code>getParentProfileInstance()</code> mới.
+  Ngoài ra, người sở hữu cấu hình có thể tùy chỉnh màn hình xác thực thông tin cho
+  thử thách công việc bằng các phương thức <code>setOrganizationColor()</code> và
+   <code>setOrganizationName()</code> mới.
+</p>
+<h3 id="turn_off_work">Tắt công việc </h3>
+
+<p>Trên một thiết bị có cấu hình công việc, người dùng có thể bật hoặc tắt chế độ công việc. Khi chế độ công việc được
+tắt người dùng được quản lý sẽ tạm thời bị tắt, khiến vô hiệu hóa các ứng dụng
+cấu hình công việc, đồng bộ chạy ngầm và các thông báo. Điều này bao gồm cả ứng dụng
+của người sở hữu cấu hình. Khi chế độ công việc bị tắt, hệ thống sẽ hiển thị biểu tượng
+trạng thái liên tục để nhắc người dùng đó rằng họ không thể khởi chạy các ứng dụng công việc. Trình khởi chạy
+sẽ chỉ báo rằng các ứng dụng và widget công việc không khả dụng. </p>
+
+<h3 id="always_on_vpn">VPN luôn bật </h3>
+
+<p>Người sở hữu thiết bị và người sở hữu cấu hình có thể đảm bảo rằng những ứng dụng công việc luôn kết nối
+thông qua một VPN chỉ định. Hệ thống sẽ tự động khởi động VPN đó sau khi
+thiết bị khởi động.</p>
+
+<p>
+  Các phương thức <code>DevicePolicyManager</code> mới gồm
+  <code>setAlwaysOnVpnPackage()</code> và
+  <code>getAlwaysOnVpnPackage()</code>.
+</p>
+
+<p>Do các dịch vụ VPN có thể được gắn kết trực tiếp bởi hệ thống mà không cần tương tác
+của ứng dụng, các máy khách VPN cần xử lý các điểm bắt đầu cho VPN luôn bật. Giống
+trước đây, các dịch vụ được chỉ định tới hệ thống bằng một bộ lọc ý định phù hợp với
+hành động <code>android.net.VpnService</code>. </p>
+
+<p>
+  Người dùng cũng có thể đặt thủ công các máy khách VPN luôn bật có cài đặt các phương thức
+   <code>VPNService</code> trong người dùng chính bằng
+  <strong>Settings&gt;More&gt;Vpn</strong>.
+</p>
+
+<h2 id="accessibility_enhancements">Cải tiến trợ năng</h2>
+
+<p>Android N nay đã hỗ trợ Cài đặt Khả năng nhìn trực tiếp trên màn hình Chào mừng khi thiết lập
+thiết bị mới. Điều này giúp người dùng rất dễ dàng khám phá và cấu hình
+các tính năng trợ năng trên thiết bị của họ, bao gồm cử chỉ phóng đại, cỡ
+phông chữ, kích thước hiển thị và TalkBack. </p>
+
+<p>Với các tính năng trợ năng được bố trí ngày càng dễ thấy hơn, khi được bật
+khả năng người dùng sẽ thử ứng dụng của bạn sẽ cao hơn. Hãy đảm bảo bạn kiểm thử ứng dụng của mình
+trước với các cài đặt này được bật. Bạn có thể bật chúng trong Settings &gt;
+Accessibility.</p>
+
+<p>Ngoài ra, trong Android N, các dịch vụ trợ năng đã có thể trợ giúp người dùng bị các tổn thương
+vận động chạm vào màn hình. API mới cho phép xây dựng các dịch vụ với những
+tính năng như theo dõi chuyển động của khuôn mặt, theo dõi chuyển động của mắt, quét điểm, v.v. nhằm
+đáp ứng nhu cầu những người dùng này.</p>
+
+<p>Để biết thêm thông tin, hãy xem <code>android.accessibilityservice.GestureDescription</code>
+	  trong tài liệu <a href="{@docRoot}preview/setup-sdk.html#docs-dl">Tham khảo API</a> có thể tải xuống.</p>
+
+
+<h2 id="direct_boot">Khởi động Trực tiếp</h2>
+
+<p>Khởi động Trực tiếp cải thiện thời gian khởi động của thiết bị và cho phép các ứng dụng
+đã đăng ký có chức năng hạn chế ngay cả sau khi khởi động lại ngoài dự kiến.
+Ví dụ, nếu một thiết bị được mã hóa khởi động lại khi người dùng đang ngủ thì
+báo thức, tin nhắn và các cuộc gọi đến đã đăng ký có thể tiếp tục thông báo
+cho người dùng như thường lệ. Điều này cũng có nghĩa là các dịch vụ trợ năng cũng sẽ
+   khả dụng ngay sau khi khởi động xong.</p>
+
+<p>Khởi động Trực tiếp sử dụng mã hóa theo tệp trong Android N
+để bật các chính sách mã hóa chi tiết cho cả dữ liệu của hệ thống và ứng dụng.
+Hệ thống sẽ sử dụng một bộ lưu trữ mã hóa thiết bị cho dữ liệu hệ thống được chọn và dữ liệu ứng dụng
+đã đăng ký công khai. Theo mặc định, một bộ lưu trữ mã hóa thông tin xác thực sẽ được sử dụng cho mọi
+   dữ liệu hệ thống, dữ liệu người dùng, ứng dụng và dữ liệu của ứng dụng khác. </p>
+
+<p>Trong quá trình khởi động, hệ thống sẽ khởi động vào chế độ hạn chế và chỉ có quyền truy cập tới
+dữ liệu mã hóa thiết bị mà thôi, và không có quyền truy cập thông thường tới ứng dụng hoặc dữ liệu.
+Nếu bạn có các thành phần muốn chạy trong chế độ này thì bạn có thể đăng ký
+chúng bằng cách đặt cờ trong bản kê khai. Sau khi khởi động, hệ thống sẽ kích hoạt
+các thành phần đã đăng ký bằng cách truyền phát ý định <code>LOCKED_BOOT_COMPLETED</code>
+. Hệ thống sẽ đảm bảo cho dữ liệu mã hóa thiết bị đã đăng ký sẽ khả dụng
+trước khi mở khóa. Mọi dữ liệu khác sẽ không khả dụng cho tới khi Người dùng xác nhận thông tin xác thực trên màn hình khóa
+   của họ để giải mã nó. </p>
+
+Để biết thêm thông tin, hãy xem <a href="{@docRoot}preview/features/direct-boot.html">Khởi động Trực tiếp</a>.</p>
+</p>
+
+
+<h2 id="key_attestation">Chứng thực khóa</h2>
+
+<p>Các bộ lưu trữ khóa dựa trên phần cứng cung cấp một phương thức an toàn hơn rất nhiều để tạo, lưu trữ,
+và sử dụng các khóa mật mã trên thiết bị Android. Chúng bảo vệ các khóa trước
+nhân Linux, trước các lỗ hổng bảo mật tiềm tàng của Android và trước việc trích xuất
+từ các máy bị giành quyền điều khiển và bị can thiệp vào các tệp hệ thống (máy bị root).</p>
+
+<p>Android N đã đưa ra tính năng Chứng thực khóa để sử dụng các bộ lưu trữ khóa dựa trên phần cứng một cách
+ dễ dàng và bảo mật hơn. Các ứng dụng và dịch vụ không thuộc thiết bị có thể sử dụng Chứng thực
+khóa để xác định chắc chắn xem một cặp khóa RSA hoặc EC có
+dựa trên phần cứng hay không, các đặc điểm của cặp khóa đó là gì và
+  các ràng buộc nào được áp dụng cho việc sử dụng và tính hợp lệ của cặp khóa đó. </p>
+
+<p>Các ứng dụng và dịch vụ không thuộc thiết bị có thể yêu cầu thông tin về một cặp khóa
+thông qua chứng chỉ chứng thực X.509. Chứng chỉ này phải được ký bởi một khóa
+chứng thực hợp lệ. Khóa chứng thực là một khóa ký ECDSA, được
+đưa vào bộ lưu trữ khóa dựa trên phần cứng của thiết bị tại nhà máy.
+Do đó, một chứng chỉ chứng thực được ký bởi khóa
+chứng thực hợp lệ sẽ xác nhận sự tồn tại của bộ lưu trữ khóa dựa trên phần cứng, kèm theo
+   chi tiết về các cặp khóa trong bộ lưu trữ khóa đó.</p>
+
+<p>Để chắc chắn thiết bị đang sử dụng ảnh
+Android bảo mật, chính thức từ nhà máy, Chứng thực khóa yêu cầu <a class="external-link" href="https://source.android.com/security/verifiedboot/verified-boot.html#bootloader_requirements">bootloader</a>
+ của thiết bị cung cấp thông tin sau cho <a class="external-link" href="https://source.android.com/security/trusty/index.html">Môi trường Thực thi
+  An toàn (TEE)</a>:</p>
+
+<ul>
+<li>Phiên bản HĐH và cấp vá lỗi được cài đặt trên thiết bị</li>
+<li>Khóa công khai <a href="https://source.android.com/security/verifiedboot/index.html" class="external-link">Khởi động được xác thực</a> và trạng thái khóa</li>
+  </ul>
+
+<p>Để biết thêm thông tin về tính năng bộ lưu trữ khóa dựa trên phần cứng,
+hãy xem hướng dẫn <a href="https://source.android.com/security/keystore/" class="external-link">Bộ lưu trữ khóa dựa trên phần cứng</a>.</p>
+
+<p>Ngoài Chứng thực khóa, Android N cũng giới thiệu
+   các khóa dựa vào vân tay mà không được thu hồi khi đăng ký vân tay.</p>
+
+<h2 id="network_security_config">Cấu hình Bảo mật mạng</h2>
+
+<p>Trong Android N, các ứng dụng có thể tùy biến hành vi của các kết nối
+bảo mật (HTTPS, TLS) của chúng một cách an toàn mà không cần chỉnh sửa mã nhờ sử dụng khai báo
+<em>Cấu hình Bảo mật mạng</em> thay vì sử dụng các API lập trình truyền thống
+dễ xảy ra lỗi (vd: X509TrustManager).</p>
+
+  <p>Các tính năng được hỗ trợ:</p>
+<ul>
+<li><b>Nguồn tin cậy tùy chỉnh.</b> Cho phép một ứng dụng tùy chỉnh
+Nhà cung cấp chứng chỉ (CA) nào sẽ được tin cậy cho các kết nối bảo mật của ứng dụng. Ví
+dụ, tin cậy các chứng chỉ tự ký cụ thể hoặc một bộ giới hạn các CA công khai.
+</li>
+<li><b>Chỉ khống chế khi gỡ lỗi.</b> Cho phép nhà phát triển ứng dụng an toàn gỡ lỗi
+các kết nối bảo mật của ứng dụng mà không tạo thêm rủi ro cho phần cơ sở
+đã cài đặt.
+</li>
+<li><b>Không sử dụng truyền gửi văn bản chưa mã hóa.</b> Cho phép một ứng dụng tự bảo vệ mình khỏi việc
+vô tình sử dụng truyền gửi văn bản chưa mã hóa cleartext.</li>
+<li><b>Ghim chứng chỉ.</b> Một tính năng nâng cao cho phép một ứng dụng
+  giới hạn các khóa máy chủ nào là an toàn đối với các kết nối bảo mật.</li>
+</ul>
+
+<p>Để biết thêm thông tin, hãy xem <a href="{@docRoot}preview/features/security-config.html">Cấu hình Bảo mật
+ mạng</a>.</p>
+
+<h2 id="default_trusted_ca">Nhà cung cấp Chứng chỉ An toàn mặc định</h2>
+
+<p>Theo mặc định, các ứng dụng nhắm mục tiêu Android N chỉ tin cậy các chứng chỉ do hệ thống cấp
+và không còn tin cậy các Nhà cung cấp chứng chỉ (CA) do người dùng thêm vào. Các ứng dụng nhắm mục tiêu Android
+N muốn tin cậy các CA do người dùng thêm vào nên sử dụng
+<a href="{@docRoot}preview/features/security-config.html">Cấu hình Bảo mật mạng</a> để
+chỉ định cách thức tin cậy các CA của người dùng.</p>
+
+<h2 id="apk_signature_v2">Lược đồ chữ ký số v2 cho tệp APK</h2>
+
+<p>Lớp PackageManager nay đã hỗ trợ xác thực ứng dụng bằng Lược đồ chữ ký số v2
+APK. Lược đồ chữ ký số v2 APK là một lược đồ chữ ký số trên toàn bộ tệp
+làm tăng đáng kể tốc độ xác thực và tăng cường sự bảo đảm
+   toàn vẹn bằng cách phát hiện các thay đổi trái phép đối với các tệp APK.</p>
+
+<p>Để bảo đảm tương thích ngược, một tệp APK phải được ký bằng lược đồ
+chữ ký số v1 (Lược đồ chữ ký số JAR) trước khi được ký bằng lược đồ chữ ký số v2.
+Với lược đồ chữ ký số v2, quá trình xác thực sẽ thất bại nếu bạn ký tệp APK bằng một
+  chứng chỉ khác sau khi ký bằng lược đồ v2. </p>
+
+<p>Hỗ trợ cho lược đồ chữ ký số v2 cho tệp AKP sẽ có sau trong N Developer
+Preview.</p>
+
+<h2 id="scoped_directory_access">Truy cập thư mục theo phạm vi</h2>
+
+<p>Trong Android N, ứng dụng có thể sử dụng các API mới để yêu cầu truy cập vào các thư mục <a href="{@docRoot}guide/topics/data/data-storage.html#filesExternal">bộ nhớ lưu trữ
+ngoài</a> riêng, bao gồm các thư mục trên phương tiện có thể tháo ra như thẻ
+SD. Các API mới đã tối giản cách thức ứng dụng của bạn truy cập các thư mục lưu trữ ngoài
+tiêu chuẩn như thư mục <code>Pictures</code>. Các ứng dụng
+như ứng dụng quản lý ảnh có thể sử dụng các API này thay vì sử dụng
+<code>READ_EXTERNAL_STORAGE</code> để cấp quyền truy cập tới mọi thư mục
+lưu trữ, hoặc Khuôn khổ Truy cập Lưu trữ để giúp người dùng di chuyển tới
+thư mục đó.</p>
+
+<p>Ngoài ra, các API mới này cũng đơn giản hóa các bước mà người dùng thực hiện để cấp quyền truy cập
+bộ nhớ lưu trữ ngoài cho ứng dụng của bạn. Khi bạn sử dụng các API mới, hệ thống sẽ sử dụng một UI cấp quyền
+đơn giản cung cấp các thông tin chi tiết rõ ràng về thư mục nào ứng dụng đang
+yêu cầu quyền truy cập.</p>
+
+<p>Để biết thêm thông tin, hãy xem tài liệu cho nhà phát triển
+<a href="{@docRoot}preview/features/scoped-folder-access.html">Truy cập
+Thư mục theo Phạm vi</a>.</p>
+
+
+
+
+
+
