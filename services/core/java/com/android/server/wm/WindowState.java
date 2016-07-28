@@ -2939,4 +2939,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             return -1;
         }
     }
+
+    public boolean isRtl() {
+        return mMergedConfiguration.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
+    }
 }
