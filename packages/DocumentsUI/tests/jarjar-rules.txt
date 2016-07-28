@@ -1,2 +1,0 @@
-rule com.google.common.** docsui.@0
-rule android.support.annotation.** docsui.@0
