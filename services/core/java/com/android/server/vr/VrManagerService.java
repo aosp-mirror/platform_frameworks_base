@@ -218,6 +218,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
                     String packageName = mNotificationAccessPackageToUserId.keyAt(i);
                     revokeNotificationListenerAccess(packageName, grantUserId);
                     revokeNotificationPolicyAccess(packageName);
+                    revokeCoarseLocationPermissionIfNeeded(packageName, grantUserId);
                     mNotificationAccessPackageToUserId.removeAt(i);
                 }
             }
@@ -226,6 +227,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
                 if (!packageNames.contains(pkg)) {
                     revokeNotificationListenerAccess(pkg, currentUserId);
                     revokeNotificationPolicyAccess(pkg);
+                    revokeCoarseLocationPermissionIfNeeded(pkg, currentUserId);
                     mNotificationAccessPackageToUserId.remove(pkg);
                 }
             }
@@ -233,6 +235,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
                 if (!allowed.contains(pkg)) {
                     grantNotificationPolicyAccess(pkg);
                     grantNotificationListenerAccess(pkg, currentUserId);
+                    grantCoarseLocationPermissionIfNeeded(pkg, currentUserId);
                     mNotificationAccessPackageToUserId.put(pkg, currentUserId);
                 }
             }
@@ -654,6 +657,22 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         Settings.Secure.putStringForUser(resolver,
                 Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
                 flatSettings, userId);
+    }
+
+    private void grantCoarseLocationPermissionIfNeeded(String pkg, int userId) {
+        // Don't clobber the user if permission set in current state explicitly
+        if (!isPermissionUserUpdated(Manifest.permission.ACCESS_COARSE_LOCATION, pkg, userId)) {
+            mContext.getPackageManager().grantRuntimePermission(pkg,
+                    Manifest.permission.ACCESS_COARSE_LOCATION, new UserHandle(userId));
+        }
+    }
+
+    private void revokeCoarseLocationPermissionIfNeeded(String pkg, int userId) {
+        // Don't clobber the user if permission set in current state explicitly
+        if (!isPermissionUserUpdated(Manifest.permission.ACCESS_COARSE_LOCATION, pkg, userId)) {
+            mContext.getPackageManager().revokeRuntimePermission(pkg,
+                    Manifest.permission.ACCESS_COARSE_LOCATION, new UserHandle(userId));
+        }
     }
 
     private boolean isPermissionUserUpdated(String permission, String pkg, int userId) {
