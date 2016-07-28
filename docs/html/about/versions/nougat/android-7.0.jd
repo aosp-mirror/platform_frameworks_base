@@ -1,6 +1,6 @@
-page.title=Android N for Developers
-meta.tags="preview", "androidn"
-page.tags="preview", "developer preview"
+page.title=Android 7.0 APIs
+meta.tags="Android 7.0", "android n", "Nougat"
+page.tags="Android 7.0", "Nougat", "android n", "developer preview"
 page.image=images/cards/card-n-apis_2x.png
 @jd:body
 
@@ -51,29 +51,27 @@ page.image=images/cards/card-n-apis_2x.png
 
 
 
-<p>Android N is still in active development, but you can try it
-now as part of the N Developer Preview. The sections below highlight some of
-the new features for developers. </p>
-
 <p>
-  Make sure to check out the <a href=
-  "{@docRoot}preview/behavior-changes.html">Behavior Changes</a> to learn about
-  areas where platform changes may affect your apps, take a look at the
-  developer guides to learn more about key features, and download the <a href=
-  "{@docRoot}preview/setup-sdk.html#docs-dl">API Reference</a> for details on
-  new APIs.
+Android 7.0
+(<a href="{@docRoot}reference/android/os/Build.VERSION_CODES.html#N">N</a>) 
+offers new features for users and app developers. This document provides
+an introduction to the most notable APIs. Make sure, also,
+to check out the <href="{@docRoot}about/versions/nougat/behavior.changes.html">
+Behavior Changes</a> to learn about areas where platform changes
+may affect your apps. In addition, the various developer guides
+can provide more information about key features.
 </p>
 
 <h2 id="multi-window_support">Multi-window Support</h2>
 
 
-<p>In Android N, we're introducing a new and much-requested multitasking feature
-into the platform &mdash; multi-window support. </p>
+<p>In Android 7.0, we're introducing a new and much-requested
+multitasking feature into the platform &mdash; multi-window support. </p>
 
   <p>Users can now pop open two apps on the screen at once. </p>
   <ul>
   <li>On phones and tablets
-running Android N, users can run two apps side-by-side or
+running Android 7.0, users can run two apps side-by-side or
 one-above-the-other in splitscreen mode. Users can resize the apps by dragging
 the divider between them. </li>
 
@@ -84,7 +82,7 @@ interacts with other apps.</li>
   </ul>
 
 <div class="col-4of10">
-<img src="{@docRoot}preview/images/mw-portrait.png" alt="" style="height:460px;padding-left:1em;"
+<img src="{@docRoot}images/android-7.0/mw-portrait.png" alt="" style="height:460px;padding-left:1em;"
     id="img-split-screen" />
 <p class="img-caption">
   <strong>Figure 1.</strong> Apps running in split-screen mode.
@@ -111,8 +109,8 @@ that size. You can also disable multi-window display for your app, which
 
 <h2 id="notification_enhancements">Notification Enhancements</h2>
 
-<p>In Android N we've redesigned notifications to make them easier and faster to
-use. Some of the changes include:</p>
+<p>In Android 7.0 we've redesigned notifications to make them easier and
+faster to use. Some of the changes include:</p>
 
 <ul>
   <li>
@@ -150,17 +148,17 @@ use. Some of the changes include:</p>
 </ul>
 
 <div class="col-4of12">
-  <img src="{@docRoot}preview/images/notifications-1.png" alt=""
+  <img src="{@docRoot}images/android-7.0/notifications-1.png" alt=""
   style="padding:.5em;max-width:226px">
 </div>
 
 <div class="col-4of12">
-  <img src="{@docRoot}preview/images/notifications-3.png" alt=""
+  <img src="{@docRoot}images/android-7.0/notifications-3.png" alt=""
   style="padding:.5em;max-width:226px">
 </div>
 
 <div class="col-4of12">
-  <img src="{@docRoot}preview/images/notifications-2.png" alt=""
+  <img src="{@docRoot}images/android-7.0/notifications-2.png" alt=""
   style="padding:.5em;max-width:226px">
 </div>
 
@@ -177,17 +175,17 @@ use. Some of the changes include:</p>
 
 <h2 id="jit_aot">Profile-guided JIT/AOT Compilation</h2>
 
-<p>In Android N, we've added a Just in Time (JIT) compiler with code profiling to
-ART, which lets it constantly improve the performance of Android apps as they
-run. The JIT compiler complements ART's current Ahead of Time (AOT) compiler
-and helps improve runtime performance, save storage space, and speed up app
-updates and system updates.</p>
+<p>In Android 7.0, we've added a Just in Time (JIT) compiler with code
+profiling to ART, which lets it constantly improve the performance of
+Android apps as they run. The JIT compiler complements ART's current
+Ahead of Time (AOT) compiler and helps improve runtime performance, save
+storage space, and speed up app updates and system updates.</p>
 
-<p>Profile-guided compilation lets ART manage the AOT/JIT compilation for each app
-according to its actual usage, as well as conditions on the device. For
-example, ART maintains a profile of each app's hot methods and can precompile
-and cache those methods for best performance. It leaves other parts of the app
-uncompiled until they are actually used.</p>
+<p>Profile-guided compilation lets ART manage the AOT/JIT compilation for
+each app according to its actual usage, as well as conditions on the device.
+For example, ART maintains a profile of each app's hot methods and can
+precompile and cache those methods for best performance. It leaves other parts
+of the app uncompiled until they are actually used.</p>
 
 <p>Besides improving performance for key parts of the app, profile-guided
 compilation helps reduce an app's overall RAM footprint, including associated
@@ -210,14 +208,14 @@ seconds. System updates are also faster, since there's no more optimizing step. 
 apps' CPU and network activities when the device is idle, such as when it's
 sitting on a table or in a drawer. </p>
 
-<p>Now in Android N, Doze takes a step further and saves battery while on the go.
+<p>Now in Android 7.0, Doze takes a step further and saves battery while on the go.
 Any time the screen is off for a period of time and the device is unplugged,
 Doze applies a subset of the familiar CPU and network restrictions to apps.
 This means users can save battery even when carrying their devices in their
 pockets.</p>
 
 
-<img src="/preview/images/doze-diagram-1.png"
+<img src="/images/android-7.0/doze-diagram-1.png"
   alt="" id="figure1" />
 <p class="img-caption">
   <strong>Figure 3.</strong> Doze now applies
@@ -245,7 +243,7 @@ your app to Doze</a> now.</p>
 <h2 id="background_optimizations">Project Svelte: Background Optimizations</h2>
 
 <p>Project Svelte is an ongoing effort to minimize RAM use by system and apps
-across the range of Android devices in the ecosystem. In Android N, Project
+across the range of Android devices in the ecosystem. In Android 7.0, Project
 Svelte is focused on optimizing the way apps run in the background. </p>
 
 <p>Background processing is an essential part of most apps. When handled right, it
@@ -269,17 +267,17 @@ simplicity, and we want all apps to use it. </p>
 
 <p>We're continuing to extend <code>JobScheduler</code> and
 <code>GCMNetworkManager</code> to meet more of
-your use cases &mdash; for example, in Android N you can now schedule background
+your use cases &mdash; for example, in Android 7.0 you can now schedule background
 work based on changes in Content Providers. At the same time we're starting to
 deprecate some of the older patterns that can reduce system performance,
 especially on low-memory devices.</p>
 
-<p>In Android N we're removing three commonly-used implicit broadcasts &mdash;
+<p>In Android 7.0 we're removing three commonly-used implicit broadcasts &mdash;
  {@link android.net.ConnectivityManager#CONNECTIVITY_ACTION}, {@link
   android.hardware.Camera#ACTION_NEW_PICTURE}, and {@link
   android.hardware.Camera#ACTION_NEW_VIDEO} &mdash; since those can wake the
 background processes of multiple apps at once and strain memory and battery. If
-your app is receiving these, take advantage of the N Developer Preview to
+your app is receiving these, take advantage of the Android 7.0 to
   migrate to <code>JobScheduler</code> and related APIs instead. </p>
 
 <p>
@@ -290,7 +288,7 @@ your app is receiving these, take advantage of the N Developer Preview to
 
 <h2 id="surfaceview">SurfaceView</h2>
 <p>
-Android N brings synchronous movement to the {@link android.view.SurfaceView}
+Android 7.0 brings synchronous movement to the {@link android.view.SurfaceView}
 class, which provides better battery performance
 than {@link android.view.TextureView} in certain cases: When rendering video or
 3D content, apps with scrolling and animated video position use less power with
@@ -311,14 +309,14 @@ no longer produce black bars alongside the view as it moves.
 </p>
 
 <p>
-Starting with Android N, we strongly recommend that you save power by using
+Starting with Android 7.0, we strongly recommend that you save power by using
 {@link android.view.SurfaceView} instead of {@link android.view.TextureView}.
 </p>
 
 <h2 id="data_saver">Data Saver</h2>
 
 <div class="col-5of12" style="margin-right:1.5em;">
-<img src="{@docRoot}preview/images/datasaver.png" style="border:2px solid #ddd">
+<img src="{@docRoot}images/android-7.0/datasaver.png" style="border:2px solid #ddd">
 
 <p class="img-caption" style="padding-right:2em;">
   <strong>Figure 4.</strong> Data Saver in Settings.
@@ -329,7 +327,7 @@ Starting with Android N, we strongly recommend that you save power by using
 exceeds the cost of the device itself. For many users, cellular data is an
 expensive resource that they want to conserve. </p>
 
-<p>Android N introduces Data Saver mode, a new system service that helps reduce
+<p>Android 7.0 introduces Data Saver mode, a new system service that helps reduce
 cellular data use by apps, whether roaming, near the end of the billing cycle,
 or on a small prepaid data pack. Data Saver gives users control over how apps
 use cellular data and lets developers provide more efficient service when Data
@@ -342,7 +340,7 @@ bit rate for streaming, reducing image quality, deferring optimistic precaching,
 and so on. Users can whitelist specific apps to allow background metered data
 usage even when Data Saver is turned on.</p>
 
-<p>Android N extends the {@link android.net.ConnectivityManager} to provide apps a
+<p>Android 7.0 extends the {@link android.net.ConnectivityManager} to provide apps a
 way to <a href="{@docRoot}preview/features/data-saver.html#status">retrieve the
 user's Data Saver preferences</a> and <a
 href="{@docRoot}preview/features/data-saver.html#monitor-changes">monitor
@@ -353,7 +351,7 @@ Saver and make an effort to limit foreground and background data usage.</p>
 <h2 id="vulkan">Vulkan API</h2>
 
 <p>
-  Android N integrates <a href="http://www.khronos.org/vulkan" class=
+  Android 7.0 integrates <a href="http://www.khronos.org/vulkan" class=
   "external-link">Vulkan™</a>, a new 3D rendering API, into the platform. Like
   <a href="https://www.khronos.org/opengles/" class="external-link">OpenGL™
   ES</a>, Vulkan is an open standard for 3D graphics and rendering maintained
@@ -368,7 +366,7 @@ Saver and make an effort to limit foreground and background data usage.</p>
 </p>
 
 <p>
-  Vulkan development tools and libraries are rolled into the Android NDK. They
+  Vulkan development tools and libraries are rolled into the Android 7.0DK. They
   include:
 </p>
 
@@ -401,7 +399,7 @@ Saver and make an effort to limit foreground and background data usage.</p>
 
 
 <div style="float:right;max-width:320px">
-<img src="{@docRoot}preview/images/quicksettings.png" style="padding-left:1.5em;">
+<img src="{@docRoot}images/android-7.0/quicksettings.png" style="padding-left:1.5em;">
 
 <p class="img-caption" style="padding-left:2em;">
   <strong>Figure 5.</strong> Quick Settings tiles in the notification shade.
@@ -409,7 +407,7 @@ Saver and make an effort to limit foreground and background data usage.</p>
 
 
   </div><p>Quick Settings is a popular and simple way to expose key settings and actions,
-directly from the notification shade. In Android N, we've expanded the scope of
+directly from the notification shade. In Android 7.0, we've expanded the scope of
 Quick Settings to make it even more useful and convenient. </p>
 
 <p>We've added more room for additional Quick Settings tiles, which users can
@@ -417,7 +415,7 @@ access across a paginated display area by swiping left or right. We've also
 given users control over what Quick Settings tiles appear and where they are
 displayed &mdash; users can add or move tiles just by dragging and dropping them. </p>
 
-<p>For developers, Android N also adds a new API that lets you define your own
+<p>For developers, Android 7.0 also adds a new API that lets you define your own
   Quick Settings tiles to give users easy access to key controls and actions in your app.</p>
 
 <p>
@@ -441,7 +439,7 @@ displayed &mdash; users can add or move tiles just by dragging and dropping them
 
 <h2 id="number-blocking">Number Blocking</h2>
 
-<p>Android N now supports number blocking in the platform and provides a
+<p>Android 7.0 now supports number blocking in the platform and provides a
 framework API to let service providers maintain a blocked-number list. The
 default SMS app, the default phone app, and carrier apps can read from and
 write to the blocked-number list. The list is not accessible to other apps.</p>
@@ -471,7 +469,7 @@ through any medium, such as a VOIP endpoint or forwarding phones.</p>
 <h2 id="call_screening">Call Screening</h2>
 
 <p>
-  Android N allows the default phone app to screen incoming calls. The phone
+  Android 7.0 allows the default phone app to screen incoming calls. The phone
   app does this by implementing the new <code>CallScreeningService</code>,
   which allows the phone app to perform a number of actions based on an
   incoming call's {@link android.telecom.Call.Details Call.Details}, such as:
@@ -493,20 +491,20 @@ through any medium, such as a VOIP endpoint or forwarding phones.</p>
 <h2 id="multi-locale_languages">Multi-locale Support, More Languages</h2>
 
 
-<p>Android N now lets users select <strong>multiple locales</strong> in Settings,
+<p>Android 7.0 now lets users select <strong>multiple locales</strong> in Settings,
 to better support bilingual use-cases. Apps can use
 a new API to get the user's selected locales and then offer more sophisticated
 user experiences for multi-locale users &mdash; such as showing search results in
 multiple languages and not offering to translate webpages in a language the
 user already knows.</p>
 
-<p>Along with multi-locale support, Android N also expands the range of languages
+<p>Along with multi-locale support, Android 7.0 also expands the range of languages
 available to users. It offers more than 25 variants each for commonly used
 languages such as English, Spanish, French, and Arabic. It also adds partial
 support for more than 100 new languages.</p>
 
 <p>Apps can get the list of locales set by the user by calling
-<code>LocaleList.GetDefault()</code>.  To support the expanded number of locales, Android N is
+<code>LocaleList.GetDefault()</code>.  To support the expanded number of locales, Android 7.0 is
 changing the way that it resolves resources. Make sure that you test and verify that your apps
 working as expected with the new resource resolution logic.</p>
 
@@ -518,7 +516,7 @@ should follow, see <a href="{@docRoot}preview/features/multilingual-support.html
 <h2 id="emoji">New Emojis</h2>
 
 <p>
-  Android N introduces additional emojis and emoji-related features including
+  Android 7.0 introduces additional emojis and emoji-related features including
   skin tone emojis and support for variation
   selectors. If your app supports emojis,
   follow the guidelines below to take advantage of these emoji-related features.
@@ -544,7 +542,7 @@ should follow, see <a href="{@docRoot}preview/features/multilingual-support.html
       Unicode documentation on variations</a>.
   </li>
   <li>
-    <strong>Check that an emoji supports skin tone.</strong> Android N allows users to modify the
+    <strong>Check that an emoji supports skin tone.</strong> Android 7.0 allows users to modify the
     rendered skin tone of emojis to their preference. Keyboard apps should provide visual
     indications for emojis that have multiple skin tones and should allow users to
     select the skin tone that they prefer. To determine which system emojis have
@@ -560,7 +558,7 @@ should follow, see <a href="{@docRoot}preview/features/multilingual-support.html
 <h2 id="icu4">ICU4J APIs in Android</h2>
 
 <p>
-  Android N now offers a subset of <a href=
+  Android 7.0 now offers a subset of <a href=
   "http://site.icu-project.org/">ICU4J</a> APIs in the Android framework under
   the <code>android.icu</code> package. Migration is easy, and mostly entails
   simply changing from the <code>com.java.icu</code> namespace to
@@ -579,7 +577,7 @@ should follow, see <a href="{@docRoot}preview/features/multilingual-support.html
 <h3>Chrome + WebView, Together</h3>
 
 <p>
-  Starting with Chrome version 51 on Android N and above, the Chrome APK on your device
+  Starting with Chrome version 51 on Android 7.0 and above, the Chrome APK on your device
   is used to provide and render Android System WebViews. This approach improves memory
   usage on the device itself and also reduces the bandwidth required to keep
   WebView up to date (as the standalone WebView APK will no longer be updated
@@ -596,7 +594,7 @@ should follow, see <a href="{@docRoot}preview/features/multilingual-support.html
 <h3>Multiprocess</h3>
 
 <p>
-  Starting with Chrome version 51 in Android N, WebView will run web content in a
+  Starting with Chrome version 51 in Android 7.0, WebView will run web content in a
   separate sandboxed process when the developer option "Multiprocess WebView"
   is enabled.
 </p>
@@ -617,7 +615,7 @@ should follow, see <a href="{@docRoot}preview/features/multilingual-support.html
 
 <h3>Javascript run before page load</h3>
 <p>
-  Starting with apps targeting Android N, the Javascript context will be reset
+  Starting with apps targeting Android 7.0, the Javascript context will be reset
   when a new page is loaded. Currently, the context is carried over for the
   first page loaded in a new WebView instance.
 </p>
@@ -630,7 +628,7 @@ should follow, see <a href="{@docRoot}preview/features/multilingual-support.html
 <h3>Geolocation on insecure origins</h3>
 
 <p>
-  Starting with apps targeting Android N, the geolocation API will only be
+  Starting with apps targeting Android 7.0, the geolocation API will only be
   allowed on secure origins (over HTTPS.) This policy is designed to protect
   users’ private information when they’re using an insecure connection.
 </p>
@@ -640,7 +638,7 @@ should follow, see <a href="{@docRoot}preview/features/multilingual-support.html
 <p>
   WebView is updated regularly, so we recommend that you test compatibility
   with your app frequently using WebView’s beta channel. To get started testing
-  pre-release versions of WebView on Android N, download and install either
+  pre-release versions of WebView on Android 7.0, download and install either
   Chrome Dev or Chrome Beta, and select it as the WebView implementation under
   developer options as described above. Please report issues via the <a href=
   "https://bugs.chromium.org/p/chromium/issues/entry?template=Webview%20Bugs">Chromium
@@ -656,7 +654,7 @@ should follow, see <a href="{@docRoot}preview/features/multilingual-support.html
 
 <h2 id="gles_32">OpenGL&trade; ES 3.2 API</h2>
 
-<p>Android N adds framework interfaces and platform support for OpenGL ES 3.2, including:</p>
+<p>Android 7.0 adds framework interfaces and platform support for OpenGL ES 3.2, including:</p>
 
 <ul>
   <li> All extensions from the <a class="external-link"
@@ -667,7 +665,7 @@ Android Extension Pack</a></a> (AEP) except for <code>EXT_texture_sRGB_decode</c
   <li> Robust buffer access control to reduce WebGL overhead.
 </ul>
 
-<p>The framework API for OpenGL ES 3.2 on Android N is provided with the
+<p>The framework API for OpenGL ES 3.2 on Android 7.0 is provided with the
 <code>GLES32</code> class. When using OpenGL ES 3.2, be sure to declare the
 requirement in your manifest file, using the <code>&lt;uses-feature&gt;</code> tag and
 the <code>android:glEsVersion</code> attribute. </p>
@@ -679,7 +677,7 @@ href="{@docRoot}guide/topics/graphics/opengl.html">OpenGL ES API guide</a>.</p>
 
 <h2 id="android_tv_recording">Android TV Recording</h2>
 
-<p>Android N adds the ability to record and playback content from Android TV input
+<p>Android 7.0 adds the ability to record and playback content from Android TV input
 services via new recording APIs.  Building on top of existing time-shifting
 APIs, TV input services can control what channel data can be recorded, how
 recorded sessions are saved, and manage user interaction with recorded content. </p>
@@ -690,7 +688,7 @@ href="{@docRoot}preview/features/tv-recording-api.html">Android TV Recording API
 
 <h2 id="android_for_work">Android for Work</h2>
 
-<p>Android for Work adds many new features and APIs for devices running Android N.
+<p>Android for Work adds many new features and APIs for devices running Android 7.0.
 Some highlights are below &mdash; for a complete list of changes, see
 <a href="{@docRoot}preview/features/afw.html">Android for Work Updates</a>.</p>
 
@@ -763,7 +761,7 @@ action <code>android.net.VpnService</code>. </p>
 
 <h2 id="accessibility_enhancements">Accessibility Enhancements</h2>
 
-<p>Android N now offers Vision Settings directly on the Welcome screen for new
+<p>Android 7.0 now offers Vision Settings directly on the Welcome screen for new
 device setup. This makes it much easier for users to discover and configure
 accessibility features on their devices, including magnification gesture, font
 size, display size, and TalkBack. </p>
@@ -773,7 +771,7 @@ are more likely to try your app with them enabled. Make sure you test your apps
 early with these settings enabled. You can enable them from Settings >
 Accessibility.</p>
 
-<p>Also in Android N, accessibility services can now help users with motor
+<p>Also in Android 7.0, accessibility services can now help users with motor
 impairments to touch the screen. The new API allows building services with
 features such as face-tracking, eye-tracking, point scanning, and so on, to
 meet the needs of those users.</p>
@@ -791,7 +789,7 @@ registered alarms, messages and incoming calls can now continue to notify
 the user as normal. This also means accessibility services can also be
   available immediately after a restart.</p>
 
-<p>Direct boot takes advantage of file based encryption in Android N
+<p>Direct boot takes advantage of file based encryption in Android 7.0
 to enable fine grained encryption policies for both system and app data.
 The system uses a device-encrypted store for select system data and explicitly
 registered app data. By default a credential-encrypted store is used for all
@@ -812,7 +810,7 @@ For more information, see <a href="{@docRoot}preview/features/direct-boot.html">
 <h2 id="key_attestation">Key Attestation</h2>
 
 <p>
-  Android N introduces <em>key attestation</em>, a new security tool that helps
+  Android 7.0 introduces <em>key attestation</em>, a new security tool that helps
   you make sure that the key pairs stored within a device's <a class=
   "external-link" href=
   "https://source.android.com/security/keystore/"><em>hardware-backed
@@ -836,8 +834,8 @@ For more information, see <a href="{@docRoot}preview/features/direct-boot.html">
 </p>
 
 <p class="note">
-  <strong>Note: </strong>Only a small number of devices running Android N
-  support hardware-level key attestation; all other devices running Android N
+  <strong>Note: </strong>Only a small number of devices running Android 7.0
+  support hardware-level key attestation; all other devices running Android 7.0
   use software-level key attestation instead. Before you verify the properties
   of a device's hardware-backed keys in a production-level environment, you
   should make sure that the device supports hardware-level key attestation. To
@@ -857,7 +855,7 @@ For more information, see <a href="{@docRoot}preview/features/direct-boot.html">
 
 <h2 id="network_security_config">Network Security Config</h2>
 
-<p>In Android N, apps can customize the behavior of their secure (HTTPS, TLS)
+<p>In Android 7.0, apps can customize the behavior of their secure (HTTPS, TLS)
 connections safely, without any code modification, by using the declarative
 <em>Network Security Config</em> instead of using the conventional
 error-prone programmatic APIs (e.g. X509TrustManager).</p>
@@ -884,7 +882,7 @@ Config</a>.</p>
 
 <h2 id="default_trusted_ca">Default Trusted Certificate Authority</h2>
 
-<p>By default, apps that target Android N only trust system-provided certificates
+<p>By default, apps that target Android 7.0 only trust system-provided certificates
 and no longer trust user-added Certificate Authorities (CA). Apps targeting Android
 N that wish to trust user-added CAs should use the
 <a href="{@docRoot}preview/features/security-config.html">Network Security Config</a> to
@@ -893,7 +891,7 @@ specify how user CAs should be trusted.</p>
 <h2 id="apk_signature_v2">APK Signature Scheme v2</h2>
 
 <p>
-  Android N introduces APK Signature Scheme v2, a new app-signing scheme that
+  Android 7.0 introduces APK Signature Scheme v2, a new app-signing scheme that
   offers faster app install times and more protection against unauthorized
   alterations to APK files. By default, Android Studio 2.2 and the Android
   Plugin for Gradle 2.2 sign your app using both APK Signature Scheme v2 and
@@ -943,7 +941,7 @@ specify how user CAs should be trusted.</p>
 
 <h2 id="scoped_directory_access">Scoped Directory Access</h2>
 
-<p>In Android N, apps can use new APIs to request access to specific <a
+<p>In Android 7.0, apps can use new APIs to request access to specific <a
 href="{@docRoot}guide/topics/data/data-storage.html#filesExternal">external
 storage</a> directories, including directories on removable media such as SD
 cards. The new APIs greatly simplify how your application accesses standard
@@ -965,7 +963,7 @@ Directory Access</a> developer documentation.</p>
 <h2 id="keyboard_shortcuts_helper">Keyboard Shortcuts Helper</h2>
 
 <p>
-  In Android N, the user can press <strong>Meta + /</strong> to trigger a
+  In Android 7.0, the user can press <strong>Meta + /</strong> to trigger a
   <em>Keyboard Shortcuts</em> screen that displays all shortcuts available both
   from the system and from the app in focus. The system retrieves these
   shortcuts automatically from the app’s menu if the shortcuts exist. You can
@@ -992,7 +990,7 @@ Directory Access</a> developer documentation.</p>
 </h2>
 
 <p>
-  Android N introduces the Custom Pointer API, which lets you customize the
+  Android 7.0 introduces the Custom Pointer API, which lets you customize the
   appearance, visibility, and behavior of the pointer. This capability is
   especially useful when a user is using a mouse or touchpad to interact with
   UI objects. The default pointer uses a standard icon. This API also includes
@@ -1017,7 +1015,7 @@ developers creating high-performance, long-running apps.
 </p>
 
 <p>
-To address these limitations, Android N includes support for
+To address these limitations, Android 7.0 includes support for
 <em>sustained performance mode</em>, enabling OEMs to provide hints about
 device-performance capabilities for long-running apps. App developers
 can use these hints to tune apps for a predictable,
@@ -1025,7 +1023,7 @@ consistent level of device performance over long periods of time.
 </p>
 
 <p>
-App developers can try out this new API in the N Developer Preview on
+App developers can try out this new API in Android 7.0 on
 Nexus 6P devices only. To use this feature,
 set the sustained performance window flag for the window
 you want to run in sustained performance mode. Set this flag using the
@@ -1036,12 +1034,12 @@ disables this mode when the window is no longer in focus.
 <h2 id="vr">VR Support</h2>
 
 <p>
-Android N adds platform support and optimizations for a new VR Mode to let developers
+Android 7.0 adds platform support and optimizations for a new VR Mode to let developers
 build high-quality mobile VR experiences for users. There are a number of performance
 enhancements, including access to an exclusive CPU core for VR apps.
 Within your apps, you can take advantage of intelligent head-tracking,
-and stereo notifications that work for VR. Most importantly, Android N provides for
-very low latency graphics. For complete information about building VR apps for Android N,
+and stereo notifications that work for VR. Most importantly, Android 7.0 provides for
+very low latency graphics. For complete information about building VR apps for Android 7.0,
 see the <a href="https://developers.google.com/vr/android/">Google VR SDK for Android</a>.
 </p>
 
@@ -1049,7 +1047,7 @@ see the <a href="https://developers.google.com/vr/android/">Google VR SDK for An
 <h2 id="print_svc">Print Service Enhancements</h2>
 
 <p>
-  In Android N, print service developers can now surface additional information
+  In Android 7.0, print service developers can now surface additional information
   about individual printers and print jobs.
 </p>
 
@@ -1138,11 +1136,11 @@ The supported metrics are: {@code UNKNOWN_DELAY_DURATION},
 </p>
 
 <p>
-  Android N adds the concept of <em>virtual files</em> to the Storage Access
+  Android 7.0 adds the concept of <em>virtual files</em> to the Storage Access
   Framework. The virtual files feature allows your
   {@link android.provider.DocumentsProvider} to return document URIs that can be
   used with an {@link android.content.Intent#ACTION_VIEW} intent even if they
-  don't have a direct bytecode representation. Android N also allows you to
+  don't have a direct bytecode representation. Android 7.0 also allows you to
   provide alternate formats for user files, virtual or otherwise.
 </p>
 

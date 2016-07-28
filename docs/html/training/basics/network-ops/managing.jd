@@ -6,8 +6,8 @@ trainingnavtop=true
 
 previous.title=Connecting to the Network
 previous.link=connecting.html
-next.title=Parsing XML Data
-next.link=xml.html
+next.title=Optimizing Network Data Usage
+next.link=data-saver.html
 
 @jd:body
 
