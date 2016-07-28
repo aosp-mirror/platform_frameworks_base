@@ -406,6 +406,13 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
     boolean mOrientationChanging;
 
     /**
+     * The orientation during the last visible call to relayout. If our
+     * current orientation is different, the window can't be ready
+     * to be shown.
+     */
+    int mLastVisibleLayoutRotation = -1;
+
+    /**
      * How long we last kept the screen frozen.
      */
     int mLastFreezeDuration;
@@ -2093,6 +2100,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
                 Slog.v(TAG, "Destroying saved surface: " + this);
             }
             mWinAnimator.destroySurfaceLocked();
+            mSurfaceSaved = false;
         }
         mWasVisibleBeforeClientHidden = false;
     }
@@ -2101,7 +2109,18 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         if (!mSurfaceSaved) {
             return;
         }
+
+        // Sometimes we save surfaces due to layout invisible
+        // directly after rotation occurs. However this means
+        // the surface was never laid out in the new orientation.
+        // We can only restore to the last rotation we were
+        // laid out as visible in.
+        if (mLastVisibleLayoutRotation != mService.mRotation) {
+            destroySavedSurface();
+            return;
+        }
         mSurfaceSaved = false;
+
         if (mWinAnimator.mSurfaceController != null) {
             setHasSurface(true);
             mWinAnimator.mDrawState = READY_TO_SHOW;

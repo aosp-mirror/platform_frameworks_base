@@ -3017,6 +3017,9 @@ public class WindowManagerService extends IWindowManager.Stub
         if (oldVisibility == View.GONE) {
             winAnimator.mEnterAnimationPending = true;
         }
+
+        win.mLastVisibleLayoutRotation = mRotation;
+
         winAnimator.mEnteringAnimation = true;
         if ((result & WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME) != 0) {
             win.prepareWindowToDisplayDuringRelayout(outConfig);
