@@ -168,7 +168,11 @@ public class StatusBarWindowManager implements RemoteInputController.Callback {
     }
 
     private void applyFitsSystemWindows(State state) {
-        mStatusBarView.setFitsSystemWindows(!state.isKeyguardShowingAndNotOccluded());
+        boolean fitsSystemWindows = !state.isKeyguardShowingAndNotOccluded();
+        if (mStatusBarView.getFitsSystemWindows() != fitsSystemWindows) {
+            mStatusBarView.setFitsSystemWindows(fitsSystemWindows);
+            mStatusBarView.requestApplyInsets();
+        }
     }
 
     private void applyUserActivityTimeout(State state) {
