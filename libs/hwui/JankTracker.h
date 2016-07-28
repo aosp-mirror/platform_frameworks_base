@@ -21,6 +21,7 @@
 #include "utils/RingBuffer.h"
 
 #include <cutils/compiler.h>
+#include <ui/DisplayInfo.h>
 
 #include <array>
 #include <memory>
@@ -56,7 +57,7 @@ struct ProfileData {
 // TODO: Replace DrawProfiler with this
 class JankTracker {
 public:
-    JankTracker(nsecs_t frameIntervalNanos);
+    JankTracker(const DisplayInfo& displayInfo);
     ~JankTracker();
 
     void addFrame(const FrameInfo& frame);
@@ -79,6 +80,14 @@ private:
 
     std::array<int64_t, NUM_BUCKETS> mThresholds;
     int64_t mFrameInterval;
+    // The amount of time we will erase from the total duration to account
+    // for SF vsync offsets with HWC2 blocking dequeueBuffers.
+    // (Vsync + mDequeueBlockTolerance) is the point at which we expect
+    // SF to have released the buffer normally, so we will forgive up to that
+    // point in time by comparing to (IssueDrawCommandsStart + DequeueDuration)
+    // This is only used if we are in pipelined mode and are using HWC2,
+    // otherwise it's 0.
+    nsecs_t mDequeueTimeForgiveness = 0;
     ProfileData* mData;
     bool mIsMapped = false;
 };

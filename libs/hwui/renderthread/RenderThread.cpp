@@ -190,7 +190,7 @@ void RenderThread::initThreadLocals() {
     initializeDisplayEventReceiver();
     mEglManager = new EglManager(*this);
     mRenderState = new RenderState(*this);
-    mJankTracker = new JankTracker(frameIntervalNanos);
+    mJankTracker = new JankTracker(mDisplayInfo);
 }
 
 int RenderThread::displayEventReceiverCallback(int fd, int events, void* data) {

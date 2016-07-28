@@ -48,6 +48,9 @@ enum class FrameInfoIndex {
     SwapBuffers,
     FrameCompleted,
 
+    DequeueBufferDuration,
+    QueueBufferDuration,
+
     // Must be the last value!
     NumIndexes
 };
