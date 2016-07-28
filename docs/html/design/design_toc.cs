@@ -70,15 +70,6 @@
        zh-tw-lang="使用 [返回] 及 [上一層] 導覽">
        Navigation</a></li>
 
-      <li><a href="<?cs var:toroot ?>design/patterns/notifications.html"
-       es-lang="Notificaciones"
-       ja-lang="通知"
-       ko-lang="알림"
-       pt-br-lang="Notificações"
-       ru-lang="Уведомления"
-       zh-cn-lang="通知"
-       zh-tw-lang="通知">
-       Notifications</a></li>
       <li><a href="<?cs var:toroot ?>design/patterns/widgets.html">Widgets</a></li>
       <li><a href="<?cs var:toroot ?>design/patterns/swipe-views.html">Swipe Views</a></li>
       <li><a href="<?cs var:toroot ?>design/patterns/fullscreen.html">Full Screen</a></li>

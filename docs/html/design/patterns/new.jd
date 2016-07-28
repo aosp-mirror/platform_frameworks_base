@@ -18,7 +18,7 @@ implement material design patterns in your apps.</p>
 
 <h3>Notifications</h3>
 
-<p><a href="{@docRoot}design/patterns/notifications.html">Notifications</a> receive important
+<p><a href="https://material.google.com/patterns/notifications.html">Notifications</a> receive important
 updates in Android 5.0, with material design visual changes, notification availability in the
 lockscreen, priority notifications, and cloud-synced notifications.</p>
 
@@ -124,7 +124,7 @@ lockscreen, priority notifications, and cloud-synced notifications.</p>
 
     <p>The base notification layout has not changed, so app notifications designed for versions
     earlier than Jelly Bean still look and work the same. Check the updated <a
-    href="{@docRoot}design/patterns/notifications.html">Notifications</a> page for
+    href="https://material.google.com/patterns/notifications.html">Notifications</a> page for
     more details.</p>
   </div>
   <div class="col-6">
