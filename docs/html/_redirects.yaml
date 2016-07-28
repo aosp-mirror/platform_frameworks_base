@@ -421,6 +421,8 @@ redirects:
   to: /training/implementing-navigation/lateral.html
 - from: /training/cloudsync/aesync.html
   to: /google/gcm/index.html
+- from: /training/cloudsync/index.html
+  to: /training/backup/index.html
 - from: /training/basics/location/
   to: /training/location/
 - from: /training/monetization/index.html
