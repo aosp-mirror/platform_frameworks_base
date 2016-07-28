@@ -2314,8 +2314,6 @@
          then the system will set the same minimal width on all other activities in the task. It
          will also ignore any other minimal width attributes of non-root activities. -->
         <attr name="minWidth" />
-        <!-- @removed -->
-        <attr name="minimalWidth" format="dimension" />
         <!-- Minimal height of the activity.
 
          <p><strong>NOTE:</strong> A task's root activity value is applied to all additional
@@ -2323,8 +2321,6 @@
          then the system will set the same minimal height on all other activities in the task. It
          will also ignore any other minimal height attributes of non-root activities. -->
         <attr name="minHeight" />
-        <!-- @removed -->
-        <attr name="minimalHeight" format="dimension" />
     </declare-styleable>
 
     <!-- <code>restrict-update</code> tag restricts system apps from being updated unless the
