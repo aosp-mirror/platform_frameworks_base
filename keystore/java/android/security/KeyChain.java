@@ -409,24 +409,26 @@ public final class KeyChain {
         if (alias == null) {
             throw new NullPointerException("alias == null");
         }
-        KeyChainConnection keyChainConnection = bind(context.getApplicationContext());
-        try {
-            final IKeyChainService keyChainService = keyChainConnection.getService();
-            final String keyId = keyChainService.requestPrivateKey(alias);
-            if (keyId == null) {
-                return null;
-            }
-            return AndroidKeyStoreProvider.loadAndroidKeyStorePrivateKeyFromKeystore(
-                    KeyStore.getInstance(), keyId, KeyStore.UID_SELF);
+
+        final String keyId;
+        try (KeyChainConnection keyChainConnection = bind(context.getApplicationContext())) {
+            keyId = keyChainConnection.getService().requestPrivateKey(alias);
         } catch (RemoteException e) {
             throw new KeyChainException(e);
         } catch (RuntimeException e) {
             // only certain RuntimeExceptions can be propagated across the IKeyChainService call
             throw new KeyChainException(e);
-        } catch (UnrecoverableKeyException e) {
-            throw new KeyChainException(e);
-        } finally {
-            keyChainConnection.close();
+        }
+
+        if (keyId == null) {
+            return null;
+        } else {
+            try {
+                return AndroidKeyStoreProvider.loadAndroidKeyStorePrivateKeyFromKeystore(
+                        KeyStore.getInstance(), keyId, KeyStore.UID_SELF);
+            } catch (RuntimeException | UnrecoverableKeyException e) {
+                throw new KeyChainException(e);
+            }
         }
     }
 
@@ -453,16 +455,25 @@ public final class KeyChain {
         if (alias == null) {
             throw new NullPointerException("alias == null");
         }
-        KeyChainConnection keyChainConnection = bind(context.getApplicationContext());
-        try {
-            IKeyChainService keyChainService = keyChainConnection.getService();
 
-            final byte[] certificateBytes = keyChainService.getCertificate(alias);
+        final byte[] certificateBytes;
+        final byte[] certChainBytes;
+        try (KeyChainConnection keyChainConnection = bind(context.getApplicationContext())) {
+            IKeyChainService keyChainService = keyChainConnection.getService();
+            certificateBytes = keyChainService.getCertificate(alias);
             if (certificateBytes == null) {
                 return null;
             }
+            certChainBytes = keyChainService.getCaCertificates(alias);
+        } catch (RemoteException e) {
+            throw new KeyChainException(e);
+        } catch (RuntimeException e) {
+            // only certain RuntimeExceptions can be propagated across the IKeyChainService call
+            throw new KeyChainException(e);
+        }
+
+        try {
             X509Certificate leafCert = toCertificate(certificateBytes);
-            final byte[] certChainBytes = keyChainService.getCaCertificates(alias);
             // If the keypair is installed with a certificate chain by either
             // DevicePolicyManager.installKeyPair or CertInstaller, return that chain.
             if (certChainBytes != null && certChainBytes.length != 0) {
@@ -486,15 +497,8 @@ public final class KeyChain {
                 List<X509Certificate> chain = store.getCertificateChain(leafCert);
                 return chain.toArray(new X509Certificate[chain.size()]);
             }
-        } catch (CertificateException e) {
+        } catch (CertificateException | RuntimeException e) {
             throw new KeyChainException(e);
-        } catch (RemoteException e) {
-            throw new KeyChainException(e);
-        } catch (RuntimeException e) {
-            // only certain RuntimeExceptions can be propagated across the IKeyChainService call
-            throw new KeyChainException(e);
-        } finally {
-            keyChainConnection.close();
         }
     }
 
