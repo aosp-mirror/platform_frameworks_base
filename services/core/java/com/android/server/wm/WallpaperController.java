@@ -246,7 +246,10 @@ class WallpaperController {
 
     boolean updateWallpaperOffset(WindowState wallpaperWin, int dw, int dh, boolean sync) {
         boolean rawChanged = false;
-        float wpx = mLastWallpaperX >= 0 ? mLastWallpaperX : 0.5f;
+        // Set the default wallpaper x-offset to either edge of the screen (depending on RTL), to
+        // match the behavior of most Launchers
+        float defaultWallpaperX = wallpaperWin.isRtl() ? 1f : 0f;
+        float wpx = mLastWallpaperX >= 0 ? mLastWallpaperX : defaultWallpaperX;
         float wpxs = mLastWallpaperXStep >= 0 ? mLastWallpaperXStep : -1.0f;
         int availw = wallpaperWin.mFrame.right - wallpaperWin.mFrame.left - dw;
         int offset = availw > 0 ? -(int)(availw * wpx + .5f) : 0;
