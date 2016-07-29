@@ -110,7 +110,7 @@ public class Region implements Parcelable {
      * (with no antialiasing).
      */
     public boolean setPath(Path path, Region clip) {
-        return nativeSetPath(mNativeRegion, path.ni(), clip.mNativeRegion);
+        return nativeSetPath(mNativeRegion, path.readOnlyNI(), clip.mNativeRegion);
     }
 
     /**
@@ -155,7 +155,7 @@ public class Region implements Parcelable {
      */
     public Path getBoundaryPath() {
         Path path = new Path();
-        nativeGetBoundaryPath(mNativeRegion, path.ni());
+        nativeGetBoundaryPath(mNativeRegion, path.mutateNI());
         return path;
     }
 
@@ -164,7 +164,7 @@ public class Region implements Parcelable {
      * path will also be empty.
      */
     public boolean getBoundaryPath(Path path) {
-        return nativeGetBoundaryPath(mNativeRegion, path.ni());
+        return nativeGetBoundaryPath(mNativeRegion, path.mutateNI());
     }
         
     /**
