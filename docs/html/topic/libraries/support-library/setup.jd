@@ -10,18 +10,12 @@ page.title=Support Library Setup
     <ol>
       <li><a href="#download">Downloading the Support Library</a></li>
       <li><a href="#choosing">Choosing Support Libraries</a></li>
-      <li><a href="#add-library">Adding Support Libraries</a>
-        <ol>
-          <li><a href="#libs-without-res">Adding libraries without resources</a></li>
-          <li><a href="#libs-with-res">Adding libraries with resources</a></li>
-        </ol>
-      </li>
+      <li><a href="#add-library">Adding Support Libraries</a></li>
       <li><a href="#using-apis">Using Support Library APIs</a>
         <ol>
           <li><a href="#manifest">Manifest Declaration Changes</a></li>
         </ol>
       </li>
-      <li><a href="#samples">Code Samples</a></li>
     </ol>
 
     <h2>See also</h2>
@@ -45,8 +39,8 @@ page.title=Support Library Setup
 
 <h2 id="download">Downloading the Support Libraries</h2>
 
-<p>The Android Support Library package is provided as a supplemental download to the Android SDK
-  and is available through the Android
+<p>The Android Support Repository package is provided as a supplemental download
+ to the Android SDK and is available through the Android
   <a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a>. Follow the
   instructions below to obtain the Support Library files.
 </p>
@@ -57,22 +51,18 @@ page.title=Support Library Setup
   <li>Start the Android <a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a>.</li>
   <li>In the SDK Manager window, scroll to the end of the <em>Packages</em> list,
     find the <em>Extras</em> folder and, if necessary, expand to show its contents.</li>
-  <li>Select the <strong>Android Support Library</strong> item.
-    <p class="note">
-      <strong>Note:</strong> If you're developing with Android Studio, select and install the
-      <strong>Android Support Repository</strong> item instead.
-    </p>
-  </li>
+  <li>Select the <strong>Android Support Repository</strong> item.</li>
   <li>Click the <strong>Install packages...</strong> button.</li>
 </ol>
 
 <img src="{@docRoot}images/tools/sdk-manager-support-libs.png" width="525" alt="" />
-<p class="img-caption"><strong>Figure 1.</strong> The Android SDK Manager with the
-Android Support Library selected.</p>
+<p class="img-caption"><strong>Figure 1.</strong> The Android SDK Manager with
+Android Support Repository selected.</p>
 
 <p>After downloading, the tool installs the Support Library files to your existing Android SDK
   directory. The library files are located in the following subdirectory of your SDK:
-  {@code <sdk>/extras/android/support/} directory.</p>
+  <code>&lt;sdk&gt;/extras/android/m2repository/com/android/support/</code>
+  directory.</p>
 
 
 <h2 id="choosing">Choosing Support Libraries</h2>
@@ -89,20 +79,7 @@ Android Support Library selected.</p>
   classpath dependencies within your development environment. You must perform this procedure for
   each Support Library you want to use.</p>
 
-<p>Some Support Libraries contain resources beyond compiled code classes, such as images or XML
-  files. For example, the <a href="{@docRoot}tools/support-library/features.html#v7-appcompat">v7
-  appcompat</a> and <a href="{@docRoot}tools/support-library/features.html#v7-gridlayout">v7
-  gridlayout</a> libraries include resources.</p>
-
-<p>If you are not sure if a library contains resources, check the
-  <a href="{@docRoot}tools/support-library/features.html">Support Library Features</a> page.
-  The following sections describe how to add a Support Library with or without resources to your
-  application project. </p>
-
-
-<h3 id="libs-without-res">Adding libraries without resources</h3>
-
-<p>To add a Support Library without resources to your application project:</p>
+<p>To add a Support Library to your application project:</p>
 
     <ol>
       <li>Make sure you have downloaded the <strong>Android Support Repository</strong>
@@ -113,36 +90,11 @@ Android Support Library selected.</p>
 <pre>
 dependencies {
     ...
-    <b>compile "com.android.support:support-v4:18.0.+"</b>
+    <b>compile "com.android.support:support-v4:24.1.1"</b>
 }
 </pre>
       </li>
     </ol>
-
-
-<h3 id="libs-with-res">Adding libraries with resources</h3>
-
-<p>To add a Support Library with resources (such as
-  <a href="{@docRoot}tools/support-library/features.html#v7-appcompat">v7
-  appcompat</a> for action bar) to your application project:</p>
-
-    <ol>
-      <li>Make sure you have downloaded the <strong>Android Support Repository</strong>
-        using the <a href="#download">SDK Manager</a>.</li>
-      <li>Open the {@code build.gradle} file for your application.</li>
-      <li>Add the support library feature project identifier to the {@code dependencies} section.
-        For example, to include the {@code appcompat} project add
-        {@code compile "com.android.support:appcompat-v7:18.0.+"} to the dependencies section, as
-        shown in the following example:
-<pre>
-dependencies {
-    ...
-    <b>compile "com.android.support:appcompat-v7:18.0.+"</b>
-}
-</pre>
-      </li>
-    </ol>
-
 
 <h2 id="using-apis">Using Support Library APIs</h2>
 
@@ -224,18 +176,3 @@ android {
   <code>"4"</code>). The highest support library level you include in your application determines
   the lowest API version in which it can operate.
 </p>
-
-
-<h2 id="samples">Code Samples</h2>
-
-<p>Each Support Library includes code samples to help you get started using the support
-APIs. The code is included in the download from the SDK Manager and is placed inside the Android
-SDK installation directory, as listed below:</p>
-
-<ul>
-  <li>4v Samples: {@code <sdk>/extras/android/support/samples/Support4Demos/}</li>
-  <li>7v Samples: {@code <sdk>/extras/android/support/samples/Support7Demos/}</li>
-  <li>13v Samples: {@code <sdk>/extras/android/support/samples/Support13Demos/}</li>
-  <li>App Navigation: {@code <sdk>/extras/android/support/samples/SupportAppNavigation/}</li>
-</ul>
-
