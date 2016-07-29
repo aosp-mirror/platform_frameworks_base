@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- Copyright (C) 2016 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,8 +13,13 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<resources>
-    <style name="TextAppearance.Material.AlertDialogMessage" parent="TextAppearance.Material.Body1">
-        <item name="textAlignment">center</item>
-    </style>
+
+<!-- These resources are around just to allow their values to be customized
+     for different hardware and product builds, only for Material theme.  Do not translate.
+
+     NOTE: The naming convention is "config_camelCaseValue".  -->
+
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Gravity that should be used for dialog text styles. Equivalent to: Gravity.START | Gravity.TOP -->
+    <integer name="config_dialogTextGravity">0x00800033</integer>
 </resources>
