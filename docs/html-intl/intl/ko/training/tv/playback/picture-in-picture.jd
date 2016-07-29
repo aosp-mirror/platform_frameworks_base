@@ -59,7 +59,7 @@ PIP 창을 전체 화면으로 전환하거나 PIP를 닫는 PIP 메뉴를 불�
 메인 화면에서 재생되기 시작하면 PIP 창이
 자동으로 닫힙니다. 사용자가 Recents를 통해서 PIP 창을 닫을 수도 있습니다.</p>
 
-<img src="{@docRoot}preview/images/pip-active.png" />
+<img src="{@docRoot}images/android-7.0/pip-active.png" />
 <p class="img-caption"><strong>그림 1.</strong> 사용자가 메인 화면에서 콘텐츠를 탐색하는 동안
 화면 모서리에 표시되는 PIP 동영상.
 </p>
@@ -116,7 +116,7 @@ public void onActionClicked(Action action) {
 <p>미디어 컨트롤 막대에 PIP 버튼을 추가하면
 사용자가 동영상 재생을 제어하면서 PIP 모드로 쉽게 전환할 수 있습니다.</p>
 
-<img src="{@docRoot}preview/images/pip-button.png" />
+<img src="{@docRoot}images/android-7.0/pip-button.png" />
 <p class="img-caption"><strong>그림 1.</strong> 미디어 컨트롤 막대의 PIP
 버튼.</p>
 

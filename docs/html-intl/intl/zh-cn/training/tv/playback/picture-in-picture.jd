@@ -59,7 +59,7 @@ PIP 窗口让用户可以在使用应用的时候进行多任务处理，从而�
 
 用户还可以通过“最近使用记录”关闭 PIP 窗口。</p>
 
-<img src="{@docRoot}preview/images/pip-active.png" />
+<img src="{@docRoot}images/android-7.0/pip-active.png" />
 <p class="img-caption"><strong>图 1.</strong> 用户在主屏幕上浏览内容时屏幕角落窗口播放画中画视频。
 
 </p>
@@ -116,7 +116,7 @@ public void onActionClicked(Action action) {
 <p>在媒体控制栏上添加 PIP 按钮可以方便用户在控制视频播放的同时切换到 PIP 模式。
 </p>
 
-<img src="{@docRoot}preview/images/pip-button.png" />
+<img src="{@docRoot}images/android-7.0/pip-button.png" />
 <p class="img-caption"><strong>图 1.</strong> 媒体控制栏上的画中画按钮。
 </p>
 
