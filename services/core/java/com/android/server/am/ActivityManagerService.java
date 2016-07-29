@@ -12671,6 +12671,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         return;
                     }
                     if (pr.hasTopUi != hasTopUi) {
+                        Slog.i(TAG, "Setting hasTopUi=" + hasTopUi + " for pid=" + pid);
                         pr.hasTopUi = hasTopUi;
                         changed = true;
                     }
@@ -19176,10 +19177,14 @@ public final class ActivityManagerService extends ActivityManagerNative
             // facilitate this, here we need to determine whether or not it
             // is currently showing UI.
             app.systemNoUi = true;
-            if (app == TOP_APP || app.hasTopUi) {
+            if (app == TOP_APP) {
                 app.systemNoUi = false;
                 app.curSchedGroup = ProcessList.SCHED_GROUP_TOP_APP;
                 app.adjType = "pers-top-activity";
+            } else if (app.hasTopUi) {
+                app.systemNoUi = false;
+                app.curSchedGroup = ProcessList.SCHED_GROUP_TOP_APP;
+                app.adjType = "pers-top-ui";
             } else if (activitiesSize > 0) {
                 for (int j = 0; j < activitiesSize; j++) {
                     final ActivityRecord r = app.activities.get(j);
@@ -19205,7 +19210,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         int procState;
         boolean foregroundActivities = false;
         BroadcastQueue queue;
-        if (app == TOP_APP || app.hasTopUi) {
+        if (app == TOP_APP) {
             // The last app on the list is the foreground app.
             adj = ProcessList.FOREGROUND_APP_ADJ;
             schedGroup = ProcessList.SCHED_GROUP_TOP_APP;

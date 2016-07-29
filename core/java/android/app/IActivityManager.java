@@ -662,8 +662,10 @@ public interface IActivityManager extends IInterface {
     public void setRenderThread(int tid) throws RemoteException;
 
     /**
-     * Let's activity manager know whether the calling process is currently showing "top-level" UI
+     * Lets activity manager know whether the calling process is currently showing "top-level" UI
      * that is not an activity, i.e. windows on the screen the user is currently interacting with.
+     *
+     * <p>This flag can only be set for persistent processes.
      *
      * @param hasTopUi Whether the calling process has "top-level" UI.
      */
