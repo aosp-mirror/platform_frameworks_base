@@ -41,7 +41,7 @@ public class PathDashPathEffect extends PathEffect {
      */
     public PathDashPathEffect(Path shape, float advance, float phase,
                               Style style) {
-        native_instance = nativeCreate(shape.ni(), advance, phase,
+        native_instance = nativeCreate(shape.readOnlyNI(), advance, phase,
                                        style.native_style);
     }
     

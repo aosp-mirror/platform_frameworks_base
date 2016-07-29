@@ -1021,7 +1021,7 @@ public class Paint {
      *                 drawn with a hairline (width == 0)
      */
     public boolean getFillPath(Path src, Path dst) {
-        return nGetFillPath(mNativePaint, src.ni(), dst.ni());
+        return nGetFillPath(mNativePaint, src.readOnlyNI(), dst.mutateNI());
     }
 
     /**
@@ -2394,7 +2394,7 @@ public class Paint {
             throw new ArrayIndexOutOfBoundsException();
         }
         nGetTextPath(mNativePaint, mNativeTypeface, mBidiFlags, text, index, count, x, y,
-                path.ni());
+                path.mutateNI());
     }
 
     /**
@@ -2416,7 +2416,7 @@ public class Paint {
             throw new IndexOutOfBoundsException();
         }
         nGetTextPath(mNativePaint, mNativeTypeface, mBidiFlags, text, start, end, x, y,
-                path.ni());
+                path.mutateNI());
     }
 
     /**
