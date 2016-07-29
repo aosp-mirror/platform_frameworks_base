@@ -1071,14 +1071,15 @@ final class AccessibilityController {
                                 Region.Op.REVERSE_DIFFERENCE);
                     }
 
-                    // We figured out what is touchable for the entire screen - done.
-                    if (unaccountedSpace.isEmpty()) {
-                        break;
-                    }
-
                     // If a window is modal it prevents other windows from being touched
                     if ((flags & (WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                             | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL)) == 0) {
+                        // Account for all space in the task, whether the windows in it are
+                        // touchable or not. The modal window blocks all touches from the task's
+                        // area.
+                        unaccountedSpace.op(windowState.getDisplayFrameLw(), unaccountedSpace,
+                                Region.Op.REVERSE_DIFFERENCE);
+
                         if (task != null) {
                             // If the window is associated with a particular task, we can skip the
                             // rest of the windows for that task.
@@ -1089,6 +1090,10 @@ final class AccessibilityController {
                             // globally modal. In this case we can skip all remaining windows.
                             break;
                         }
+                    }
+                    // We figured out what is touchable for the entire screen - done.
+                    if (unaccountedSpace.isEmpty()) {
+                        break;
                     }
                 }
 
