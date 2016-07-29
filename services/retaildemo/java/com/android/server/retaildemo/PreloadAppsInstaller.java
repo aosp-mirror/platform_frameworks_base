@@ -130,6 +130,10 @@ class PreloadAppsInstaller {
                     // Install on user 0 so that the package is cached when demo user is re-created
                     installExistingPackage(basePackageName, UserHandle.USER_SYSTEM, counter);
                 } else if (returnCode == PackageManager.INSTALL_FAILED_ALREADY_EXISTS) {
+                    // This can only happen in first session after a reboot
+                    if (!mApkToPackageMap.containsKey(apkName)) {
+                        mApkToPackageMap.put(apkName, basePackageName);
+                    }
                     installExistingPackage(basePackageName, userId, counter);
                 }
             }
