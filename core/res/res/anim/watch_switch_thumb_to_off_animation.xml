@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?><!-- Copyright (C) 2016 The Android Open Source Project
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2016 The Android Open Source Project
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
      You may obtain a copy of the License at
@@ -17,20 +18,34 @@
         android:interpolator="@android:interpolator/linear"
         android:propertyName="pathData"
         android:valueFrom="M 0.0,-7.0 l 0.0,0.0 c 3.8659932486,0.0 7.0,3.1340067514 7.0,7.0 l 0.0,0.0 c 0.0,3.8659932486 -3.1340067514,7.0 -7.0,7.0 l 0.0,0.0 c -3.8659932486,0.0 -7.0,-3.1340067514 -7.0,-7.0 l 0.0,0.0 c 0.0,-3.8659932486 3.1340067514,-7.0 7.0,-7.0 Z"
+        android:valueTo="M 0.0,-7.0 l 0.0,0.0 c 3.8659932486,0.0 7.0,3.1340067514 7.0,7.0 l 0.0,0.0 c 0.0,3.8659932486 -3.1340067514,7.0 -7.0,7.0 l 0.0,0.0 c -3.8659932486,0.0 -7.0,-3.1340067514 -7.0,-7.0 l 0.0,0.0 c 0.0,-3.8659932486 3.1340067514,-7.0 7.0,-7.0 Z"
+        android:valueType="pathType" />
+    <objectAnimator
+        android:duration="49"
+        android:interpolator="@android:interpolator/linear"
+        android:propertyName="pathData"
+        android:valueFrom="M 0.0,-7.0 l 0.0,0.0 c 3.8659932486,0.0 7.0,3.1340067514 7.0,7.0 l 0.0,0.0 c 0.0,3.8659932486 -3.1340067514,7.0 -7.0,7.0 l 0.0,0.0 c -3.8659932486,0.0 -7.0,-3.1340067514 -7.0,-7.0 l 0.0,0.0 c 0.0,-3.8659932486 3.1340067514,-7.0 7.0,-7.0 Z"
         android:valueTo="M -3.0,-7.0 l 6.0,0.0 c 3.8659932486,0.0 7.0,3.1340067514 7.0,7.0 l 0.0,0.0 c 0.0,3.8659932486 -3.1340067514,7.0 -7.0,7.0 l -6.0,0.0 c -3.8659932486,0.0 -7.0,-3.1340067514 -7.0,-7.0 l 0.0,0.0 c 0.0,-3.8659932486 3.1340067514,-7.0 7.0,-7.0 Z"
         android:valueType="pathType" />
     <objectAnimator
-        android:duration="66"
+        android:duration="83"
         android:interpolator="@android:interpolator/linear"
         android:propertyName="pathData"
         android:valueFrom="M -3.0,-7.0 l 6.0,0.0 c 3.8659932486,0.0 7.0,3.1340067514 7.0,7.0 l 0.0,0.0 c 0.0,3.8659932486 -3.1340067514,7.0 -7.0,7.0 l -6.0,0.0 c -3.8659932486,0.0 -7.0,-3.1340067514 -7.0,-7.0 l 0.0,0.0 c 0.0,-3.8659932486 3.1340067514,-7.0 7.0,-7.0 Z"
         android:valueTo="M -3.0,-7.0 l 6.0,0.0 c 3.8659932486,0.0 7.0,3.1340067514 7.0,7.0 l 0.0,0.0 c 0.0,3.8659932486 -3.1340067514,7.0 -7.0,7.0 l -6.0,0.0 c -3.8659932486,0.0 -7.0,-3.1340067514 -7.0,-7.0 l 0.0,0.0 c 0.0,-3.8659932486 3.1340067514,-7.0 7.0,-7.0 Z"
         android:valueType="pathType" />
     <objectAnimator
-        android:duration="66"
+        android:duration="50"
         android:interpolator="@android:interpolator/linear"
         android:propertyName="pathData"
         android:valueFrom="M -3.0,-7.0 l 6.0,0.0 c 3.8659932486,0.0 7.0,3.1340067514 7.0,7.0 l 0.0,0.0 c 0.0,3.8659932486 -3.1340067514,7.0 -7.0,7.0 l -6.0,0.0 c -3.8659932486,0.0 -7.0,-3.1340067514 -7.0,-7.0 l 0.0,0.0 c 0.0,-3.8659932486 3.1340067514,-7.0 7.0,-7.0 Z"
+        android:valueTo="M 0.0,-7.0 l 0.0,0.0 c 3.8659932486,0.0 7.0,3.1340067514 7.0,7.0 l 0.0,0.0 c 0.0,3.8659932486 -3.1340067514,7.0 -7.0,7.0 l 0.0,0.0 c -3.8659932486,0.0 -7.0,-3.1340067514 -7.0,-7.0 l 0.0,0.0 c 0.0,-3.8659932486 3.1340067514,-7.0 7.0,-7.0 Z"
+        android:valueType="pathType" />
+    <objectAnimator
+        android:duration="33"
+        android:interpolator="@android:interpolator/linear"
+        android:propertyName="pathData"
+        android:valueFrom="M 0.0,-7.0 l 0.0,0.0 c 3.8659932486,0.0 7.0,3.1340067514 7.0,7.0 l 0.0,0.0 c 0.0,3.8659932486 -3.1340067514,7.0 -7.0,7.0 l 0.0,0.0 c -3.8659932486,0.0 -7.0,-3.1340067514 -7.0,-7.0 l 0.0,0.0 c 0.0,-3.8659932486 3.1340067514,-7.0 7.0,-7.0 Z"
         android:valueTo="M 0.0,-7.0 l 0.0,0.0 c 3.8659932486,0.0 7.0,3.1340067514 7.0,7.0 l 0.0,0.0 c 0.0,3.8659932486 -3.1340067514,7.0 -7.0,7.0 l 0.0,0.0 c -3.8659932486,0.0 -7.0,-3.1340067514 -7.0,-7.0 l 0.0,0.0 c 0.0,-3.8659932486 3.1340067514,-7.0 7.0,-7.0 Z"
         android:valueType="pathType" />
 </set>
