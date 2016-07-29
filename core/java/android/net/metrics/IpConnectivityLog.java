@@ -31,7 +31,7 @@ import com.android.internal.annotations.VisibleForTesting;
  */
 public class IpConnectivityLog extends ConnectivityMetricsLogger {
     private static String TAG = "IpConnectivityMetricsLogger";
-    private static final boolean DBG = false;
+    private static final boolean DBG = true;
 
     public IpConnectivityLog() {
         // mService initialized in super constructor.
@@ -52,9 +52,9 @@ public class IpConnectivityLog extends ConnectivityMetricsLogger {
      * @return true if the event was successfully logged.
      */
     public boolean log(long timestamp, Parcelable data) {
-        if (mService == null) {
+        if (!checkLoggerService()) {
             if (DBG) {
-                Log.d(TAG, CONNECTIVITY_METRICS_LOGGER_SERVICE + " service not ready");
+                Log.d(TAG, CONNECTIVITY_METRICS_LOGGER_SERVICE + " service was not ready");
             }
             return false;
         }
