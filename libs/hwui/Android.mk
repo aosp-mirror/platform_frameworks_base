@@ -113,6 +113,10 @@ hwui_cflags := \
     -DATRACE_TAG=ATRACE_TAG_VIEW -DLOG_TAG=\"OpenGLRenderer\" \
     -Wall -Wno-unused-parameter -Wunreachable-code -Werror
 
+ifeq ($(TARGET_USES_HWC2),true)
+    hwui_cflags += -DUSE_HWC2
+endif
+
 # GCC false-positives on this warning, and since we -Werror that's
 # a problem
 hwui_cflags += -Wno-free-nonheap-object

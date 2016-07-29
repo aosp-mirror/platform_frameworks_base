@@ -35,7 +35,13 @@ const std::string FrameInfoNames[] = {
     "IssueDrawCommandsStart",
     "SwapBuffers",
     "FrameCompleted",
+    "DequeueBufferDuration",
+    "QueueBufferDuration",
 };
+
+static_assert((sizeof(FrameInfoNames)/sizeof(FrameInfoNames[0]))
+        == static_cast<int>(FrameInfoIndex::NumIndexes),
+        "size mismatch: FrameInfoNames doesn't match the enum!");
 
 void FrameInfo::importUiThreadInfo(int64_t* info) {
     memcpy(mFrameInfo, info, UI_THREAD_FRAME_INFO_SIZE * sizeof(int64_t));
