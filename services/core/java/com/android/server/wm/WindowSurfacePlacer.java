@@ -1137,6 +1137,12 @@ class WindowSurfacePlacer {
                 if (wtoken == lowerWallpaperAppToken || wtoken == upperWallpaperAppToken) {
                     openingAppHasWallpaper = true;
                 }
+                // Clearing the mAnimatingExit flag before entering animation. It's set to
+                // true if app window is removed, or window relayout to invisible.
+                // This also affects window visibility. We need to clear it *before*
+                // maybeUpdateTransitToWallpaper() as the transition selection depends on
+                // wallpaper target visibility.
+                wtoken.clearAnimatingFlags();
             }
 
             voiceInteraction |= wtoken.voiceInteraction;
@@ -1263,26 +1269,6 @@ class WindowSurfacePlacer {
                 int layer = -1;
                 for (int j = 0; j < wtoken.allAppWindows.size(); j++) {
                     final WindowState win = wtoken.allAppWindows.get(j);
-                    // Clearing the mAnimatingExit flag before entering animation. It will be set to true
-                    // if app window is removed, or window relayout to invisible. We don't want to
-                    // clear it out for windows that get replaced, because the animation depends on
-                    // the flag to remove the replaced window.
-                    //
-                    // We also don't clear the mAnimatingExit flag for windows which have the
-                    // mRemoveOnExit flag. This indicates an explicit remove request has been issued
-                    // by the client. We should let animation proceed and not clear this flag or
-                    // they won't eventually be removed by WindowState#onExitAnimationDone.
-                    if (!win.mWillReplaceWindow && !win.mRemoveOnExit) {
-                        win.mAnimatingExit = false;
-                        // Clear mAnimating flag together with mAnimatingExit. When animation
-                        // changes from exiting to entering, we need to clear this flag until the
-                        // new animation gets applied, so that isAnimationStarting() becomes true
-                        // until then.
-                        // Otherwise applySurfaceChangesTransaction will faill to skip surface
-                        // placement for this window during this period, one or more frame will
-                        // show up with wrong position or scale.
-                        win.mWinAnimator.mAnimating = false;
-                    }
                     if (win.mWinAnimator.mAnimLayer > layer) {
                         layer = win.mWinAnimator.mAnimLayer;
                     }
