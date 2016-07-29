@@ -62,6 +62,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -80,7 +81,6 @@ import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.Patterns;
 import android.util.SparseArray;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.View.OnFocusChangeListener;
@@ -775,7 +775,6 @@ public class BugreportProgressService extends Service {
             }
             msg = mContext.getString(R.string.bugreport_screenshot_taken);
         } else {
-            // TODO: try again using Framework APIs instead of relying on screencap.
             msg = mContext.getString(R.string.bugreport_screenshot_failed);
             Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
         }
@@ -1359,22 +1358,24 @@ public class BugreportProgressService extends Service {
     /**
      * Takes a screenshot and save it to the given location.
      */
-    private static boolean takeScreenshot(Context context, String screenshotFile) {
-        final ProcessBuilder screencap = new ProcessBuilder()
-                .command("/system/bin/screencap", "-p", screenshotFile);
-        Log.d(TAG, "Taking screenshot using " + screencap.command());
-        try {
-            final int exitValue = screencap.start().waitFor();
-            if (exitValue == 0) {
+    private static boolean takeScreenshot(Context context, String path) {
+        final Bitmap bitmap = Screenshooter.takeScreenshot();
+        if (bitmap == null) {
+            return false;
+        }
+        boolean status;
+        try (final FileOutputStream fos = new FileOutputStream(path)) {
+            if (bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)) {
                 ((Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(150);
                 return true;
+            } else {
+                Log.e(TAG, "Failed to save screenshot on " + path);
             }
-            Log.e(TAG, "screencap (" + screencap.command() + ") failed: " + exitValue);
-        } catch (IOException e) {
-            Log.e(TAG, "screencap (" + screencap.command() + ") failed", e);
-        } catch (InterruptedException e) {
-            Log.w(TAG, "Thread interrupted while screencap still running");
-            Thread.currentThread().interrupt();
+        } catch (IOException e ) {
+            Log.e(TAG, "Failed to save screenshot on " + path, e);
+            return false;
+        } finally {
+            bitmap.recycle();
         }
         return false;
     }
