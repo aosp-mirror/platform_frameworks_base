@@ -1220,4 +1220,5 @@ redirects:
   to: /guide/topics/ui/notifiers/notifications.html
 - from: /preview/features/multilingual-support.html
   to: /guide/topics/resources/multilingual-support.html
-
+- from: /preview/j8-jack.html
+  to: /guide/platform/j8-jack.html
