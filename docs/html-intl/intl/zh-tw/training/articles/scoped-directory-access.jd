@@ -57,8 +57,8 @@ startActivityForResult(intent, request_code);
 <p>系統會嘗試授予對外部目錄的存取權，並在需要時使用簡化的 UI 向使用者確認存取權：
 </p>
 
-<img src="{@docRoot}preview/images/scoped-folder-access-framed.png" srcset="{@docRoot}preview/images/scoped-folder-access-framed.png 1x,
-{@docRoot}preview/images/scoped-folder-access-framed_2x.png 2x" />
+<img src="{@docRoot}images/android-7.0/scoped-directory-access-framed.png" srcset="{@docRoot}images/android-7.0/scoped-directory-access-framed.png 1x,
+{@docRoot}images/android-7.0/scoped-directory-access-framed_2x.png 2x" />
 <p class="img-caption"><strong>圖 1.</strong> 應用程式要求對 [圖片] 目錄的存取權。
 </p>
 

@@ -71,8 +71,8 @@ startActivityForResult(intent, request_code);
 <p>Sistem ini mencoba untuk memberikan akses ke direktori eksternal, dan jika
 diperlukan mengonfirmasi akses dengan pengguna menggunakan UI yang disederhanakan:</p>
 
-<img src="{@docRoot}preview/images/scoped-folder-access-framed.png" srcset="{@docRoot}preview/images/scoped-folder-access-framed.png 1x,
-{@docRoot}preview/images/scoped-folder-access-framed_2x.png 2x" />
+<img src="{@docRoot}images/android-7.0/scoped-directory-access-framed.png" srcset="{@docRoot}images/android-7.0/scoped-directory-access-framed.png 1x,
+{@docRoot}images/android-7.0/scoped-directory-access-framed_2x.png 2x" />
 <p class="img-caption"><strong>Gambar 1.</strong> Sebuah aplikasi yang meminta
 akses ke direktori Pictures.</p>
 
@@ -138,8 +138,8 @@ meminta akses lagi. Berulang kali meminta akses akan menghasilkan pengalaman
 pengguna yang buruk. Jika permintaan ditolak oleh pengguna, dan aplikasi meminta akses
 lagi, UI akan menampilkan kotak centang <b>Don't ask again</b>:</p>
 
-<img src="{@docRoot}preview/images/scoped-folder-access-dont-ask.png" srcset="{@docRoot}preview/images/scoped-folder-access-dont-ask.png 1x,
-{@docRoot}preview/images/scoped-folder-access-dont-ask_2x.png 2x" />
+<img src="{@docRoot}images/android-7.0/scoped-directory-access-dont-ask.png" srcset="{@docRoot}images/android-7.0/scoped-directory-access-dont-ask.png 1x,
+{@docRoot}images/android-7.0/scoped-directory-access-dont-ask_2x.png 2x" />
 <p class="img-caption"><strong>Gambar 1.</strong> Sebuah aplikasi membuat
 permintaan kedua untuk mengakses media lepas-pasang.</p>
 
