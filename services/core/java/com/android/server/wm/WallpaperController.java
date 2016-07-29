@@ -587,18 +587,9 @@ class WallpaperController {
                                 "Animating wallpapers: old#" + oldI + "=" + oldW + "; new#"
                                 + wallpaperTargetIndex + "=" + wallpaperTarget);
 
-                        // Set the new target correctly.
-                        if (wallpaperTarget.mAppToken != null
-                                && wallpaperTarget.mAppToken.hiddenRequested) {
-                            if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
-                                    "Old wallpaper still the target.");
-                            mWallpaperTarget = oldW;
-                            wallpaperTarget = oldW;
-                            wallpaperTargetIndex = oldI;
-                        }
-                        // Now set the upper and lower wallpaper targets correctly,
+                        // Set the upper and lower wallpaper targets correctly,
                         // and make sure that we are positioning the wallpaper below the lower.
-                        else if (wallpaperTargetIndex > oldI) {
+                        if (wallpaperTargetIndex > oldI) {
                             // The new target is on top of the old one.
                             if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
                                     "Found target above old target.");
@@ -612,6 +603,16 @@ class WallpaperController {
                                     "Found target below old target.");
                             mUpperWallpaperTarget = oldW;
                             mLowerWallpaperTarget = wallpaperTarget;
+                        }
+
+                        // If the new target is going hidden, set it back to the old target.
+                        if (wallpaperTarget.mAppToken != null
+                                && wallpaperTarget.mAppToken.hiddenRequested) {
+                            if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
+                                    "Old wallpaper still the target.");
+                            mWallpaperTarget = oldW;
+                            wallpaperTarget = oldW;
+                            wallpaperTargetIndex = oldI;
                         }
                     }
                 }
