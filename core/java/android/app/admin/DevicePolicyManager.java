@@ -2219,6 +2219,7 @@ public class DevicePolicyManager {
      * @throws SecurityException if the calling application does not own an active administrator
      *             that uses {@link DeviceAdminInfo#USES_POLICY_RESET_PASSWORD}
      * @throws IllegalStateException if the calling user is locked or has a managed profile.
+     * @throws IllegalArgumentException if the password does not meet system requirements.
      */
     public boolean resetPassword(String password, int flags) {
         throwIfParentInstance("resetPassword");
