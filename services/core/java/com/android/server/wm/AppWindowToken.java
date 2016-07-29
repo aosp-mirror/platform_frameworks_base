@@ -336,6 +336,30 @@ class AppWindowToken extends WindowToken {
         }
     }
 
+    void clearAnimatingFlags() {
+        for (int i = allAppWindows.size() - 1; i >= 0; i--) {
+            final WindowState win = allAppWindows.get(i);
+            // We don't want to clear it out for windows that get replaced, because the
+            // animation depends on the flag to remove the replaced window.
+            //
+            // We also don't clear the mAnimatingExit flag for windows which have the
+            // mRemoveOnExit flag. This indicates an explicit remove request has been issued
+            // by the client. We should let animation proceed and not clear this flag or
+            // they won't eventually be removed by WindowStateAnimator#finishExit.
+            if (!win.mWillReplaceWindow && !win.mRemoveOnExit) {
+                win.mAnimatingExit = false;
+                // Clear mAnimating flag together with mAnimatingExit. When animation
+                // changes from exiting to entering, we need to clear this flag until the
+                // new animation gets applied, so that isAnimationStarting() becomes true
+                // until then.
+                // Otherwise applySurfaceChangesTransaction will faill to skip surface
+                // placement for this window during this period, one or more frame will
+                // show up with wrong position or scale.
+                win.mWinAnimator.mAnimating = false;
+            }
+        }
+    }
+
     void destroySurfaces() {
         destroySurfaces(false /*cleanupOnResume*/);
     }
@@ -361,15 +385,6 @@ class AppWindowToken extends WindowToken {
             }
 
             win.mWinAnimator.destroyPreservedSurfaceLocked();
-
-            if (cleanupOnResume) {
-                // If the window has an unfinished exit animation, consider that animation
-                // done and mark the window destroying so that it goes through the cleanup.
-                if (win.mAnimatingExit) {
-                    win.mDestroying = true;
-                    win.mAnimatingExit = false;
-                }
-            }
 
             if (!win.mDestroying) {
                 continue;
