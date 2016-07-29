@@ -548,7 +548,7 @@ public class UserManagerService extends IUserManager.Stub {
     public List<UserInfo> getProfiles(int userId, boolean enabledOnly) {
         boolean returnFullInfo = true;
         if (userId != UserHandle.getCallingUserId()) {
-            checkManageUsersPermission("getting profiles related to user " + userId);
+            checkManageOrCreateUsersPermission("getting profiles related to user " + userId);
         } else {
             returnFullInfo = hasManageUsersPermission();
         }
