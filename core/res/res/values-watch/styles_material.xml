@@ -61,6 +61,9 @@ please see styles_device_defaults.xml.
         <item name="divider">@empty</item>
     </style>
 
+    <style name="TextAppearance.Material.ListItem" parent="TextAppearance.Material.Body1" />
+    <style name="TextAppearance.Material.ListItemSecondary" parent="TextAppearance.Material.Caption" />
+
     <style name="Widget.Material.TextView" parent="Widget.TextView">
         <item name="breakStrategy">balanced</item>
     </style>
