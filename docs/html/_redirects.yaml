@@ -23,6 +23,8 @@ redirects:
   to: /studio/debug/index.html
 - from: /sdk/compatibility-library.html
   to: /topic/libraries/support-library/index.html
+- from: /billions
+  to: /topic/billions/index.html
 - from: /tools/extras/support-library.html
   to: /topic/libraries/support-library/index.html
 - from: /training/basics/fragments/support-lib.html
