@@ -3636,11 +3636,18 @@ final class ActivityStack {
 
         if (mode == FINISH_IMMEDIATELY
                 || (prevState == ActivityState.PAUSED
-                    && (mode == FINISH_AFTER_PAUSE || mStackId == PINNED_STACK_ID))
+                    && (mode == FINISH_AFTER_PAUSE || mode == FINISH_AFTER_VISIBLE
+                        || mStackId == PINNED_STACK_ID))
                 || prevState == ActivityState.STOPPED
                 || prevState == ActivityState.INITIALIZING) {
             r.makeFinishingLocked();
             boolean activityRemoved = destroyActivityLocked(r, true, "finish-imm");
+
+            if (prevState == ActivityState.PAUSED && mode == FINISH_AFTER_VISIBLE) {
+                // Finishing activity that was in paused state - this can happen if it was in
+                // not currently focused stack. Need to make something visible in its place.
+                mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
+            }
             if (activityRemoved) {
                 mStackSupervisor.resumeFocusedStackTopActivityLocked();
             }
