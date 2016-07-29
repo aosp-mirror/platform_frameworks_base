@@ -479,7 +479,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    private final IpConnectivityLog mMetricsLog = new IpConnectivityLog();
+    private final IpConnectivityLog mMetricsLog;
 
     /**
      * Implements support for the legacy "one network per network type" model.
@@ -677,8 +677,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     public ConnectivityService(Context context, INetworkManagementService netManager,
             INetworkStatsService statsService, INetworkPolicyManager policyManager) {
+        this(context, netManager, statsService, policyManager, new IpConnectivityLog());
+    }
+
+    @VisibleForTesting
+    protected ConnectivityService(Context context, INetworkManagementService netManager,
+            INetworkStatsService statsService, INetworkPolicyManager policyManager,
+            IpConnectivityLog logger) {
         if (DBG) log("ConnectivityService starting up");
 
+        mMetricsLog = logger;
         mDefaultRequest = createInternetRequestForTransport(-1);
         NetworkRequestInfo defaultNRI = new NetworkRequestInfo(null, mDefaultRequest, new Binder());
         mNetworkRequests.put(mDefaultRequest, defaultNRI);
