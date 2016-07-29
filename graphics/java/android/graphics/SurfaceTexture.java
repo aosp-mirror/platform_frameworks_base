@@ -77,6 +77,8 @@ public class SurfaceTexture {
     private long mProducer;
     private long mFrameAvailableListener;
 
+    private boolean mIsSingleBuffered;
+
     /**
      * Callback interface for being notified that a new stream frame is available.
      */
@@ -130,6 +132,7 @@ public class SurfaceTexture {
      */
     public SurfaceTexture(int texName, boolean singleBufferMode) {
         mCreatorLooper = Looper.myLooper();
+        mIsSingleBuffered = singleBufferMode;
         nativeInit(false, texName, singleBufferMode, new WeakReference<SurfaceTexture>(this));
     }
 
@@ -157,6 +160,7 @@ public class SurfaceTexture {
      */
     public SurfaceTexture(boolean singleBufferMode) {
         mCreatorLooper = Looper.myLooper();
+        mIsSingleBuffered = singleBufferMode;
         nativeInit(true, 0, singleBufferMode, new WeakReference<SurfaceTexture>(this));
     }
 
@@ -376,6 +380,14 @@ public class SurfaceTexture {
                 handler.sendEmptyMessage(0);
             }
         }
+    }
+
+    /**
+     * Returns true if the SurfaceTexture is single-buffered
+     * @hide
+     */
+    public boolean isSingleBuffered() {
+        return mIsSingleBuffered;
     }
 
     private native void nativeInit(boolean isDetached, int texName,
