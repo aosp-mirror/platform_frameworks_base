@@ -46,11 +46,12 @@ public class ConnectivityMetricsLogger {
 
     public static final String DATA_KEY_EVENTS_COUNT = "count";
 
-    /** {@hide} */ protected final IConnectivityMetricsLogger mService;
+    /** {@hide} */ protected IConnectivityMetricsLogger mService;
     /** {@hide} */ protected volatile long mServiceUnblockedTimestampMillis;
     private int mNumSkippedEvents;
 
     public ConnectivityMetricsLogger() {
+        // TODO: consider not initializing mService in constructor
         this(IConnectivityMetricsLogger.Stub.asInterface(
                 ServiceManager.getService(CONNECTIVITY_METRICS_LOGGER_SERVICE)));
     }
@@ -59,6 +60,18 @@ public class ConnectivityMetricsLogger {
     @VisibleForTesting
     public ConnectivityMetricsLogger(IConnectivityMetricsLogger service) {
         mService = service;
+    }
+
+    /** {@hide} */
+    protected boolean checkLoggerService() {
+        if (mService != null) {
+            return true;
+        }
+        // Two threads racing here will write the same pointer because getService
+        // is idempotent once MetricsLoggerService is initialized.
+        mService = IConnectivityMetricsLogger.Stub.asInterface(
+                ServiceManager.getService(CONNECTIVITY_METRICS_LOGGER_SERVICE));
+        return mService != null;
     }
 
     /**
