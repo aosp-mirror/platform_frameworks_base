@@ -246,6 +246,20 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
 
         @Override
+        protected boolean isUserUnlockedL(@UserIdInt int userId) {
+            // Note due to a late change, now ShortcutManager doesn't use
+            // UserManager.isUserUnlockingOrUnlocked().  But all unit tests are still using it,
+            // so we convert here.
+
+            final long token = injectClearCallingIdentity();
+            try {
+                return mMockUserManager.isUserUnlockingOrUnlocked(userId);
+            } finally {
+                injectRestoreCallingIdentity(token);
+            }
+        }
+
+        @Override
         int injectDipToPixel(int dip) {
             return dip;
         }
