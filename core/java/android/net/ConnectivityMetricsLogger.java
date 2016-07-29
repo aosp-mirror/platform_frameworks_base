@@ -96,6 +96,12 @@ public class ConnectivityMetricsLogger {
             // Log number of skipped events
             Bundle b = new Bundle();
             b.putInt(DATA_KEY_EVENTS_COUNT, mNumSkippedEvents);
+
+            // Log the skipped event.
+            // TODO: Note that some of the clients push all states events into the server,
+            // If we lose some states logged here, we might mess up the statistics happened at the
+            // backend. One of the options is to introduce a non-skippable flag for important events
+            // that are logged.
             skippedEventsEvent = new ConnectivityMetricsEvent(mServiceUnblockedTimestampMillis,
                     componentTag, TAG_SKIPPED_EVENTS, b);
 
