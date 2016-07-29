@@ -130,7 +130,7 @@ public abstract class PreBootBroadcaster extends IIntentReceiver.Stub {
             switch (msg.what) {
                 case MSG_SHOW:
                     final CharSequence title = context
-                            .getText(R.string.android_upgrading_title);
+                            .getText(R.string.android_upgrading_notification_title);
 
                     final Intent intent = new Intent();
                     intent.setClassName("com.android.settings",
