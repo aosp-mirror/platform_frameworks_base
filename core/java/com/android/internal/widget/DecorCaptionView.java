@@ -236,6 +236,11 @@ public class DecorCaptionView extends ViewGroup implements View.OnTouchListener,
         return mTouchDispatchList;
     }
 
+    @Override
+    public boolean shouldDelayChildPressedState() {
+        return false;
+    }
+
     private boolean passedSlop(int x, int y) {
         return Math.abs(x - mTouchDownX) > mDragSlop || Math.abs(y - mTouchDownY) > mDragSlop;
     }
