@@ -638,7 +638,15 @@ public final class BridgeTypedArray extends TypedArray {
             }
         }
 
-        // not a direct id valid reference? resolve it
+        // not a direct id valid reference. First check if it's an enum (this is a corner case
+        // for attributes that have a reference|enum type), then fallback to resolve
+        // as an ID without prefix.
+        Integer enumValue = resolveEnumAttribute(index);
+        if (enumValue != null) {
+            return enumValue;
+        }
+
+        // Ok, not an enum, resolve as an ID
         Integer idValue;
 
         if (resValue.isFramework()) {
