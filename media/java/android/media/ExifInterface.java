@@ -1330,12 +1330,12 @@ public class ExifInterface {
      * determine whether the image data format is JPEG or not.
      */
     private void loadAttributes() throws IOException {
+        // Initialize mAttributes.
+        for (int i = 0; i < EXIF_TAGS.length; ++i) {
+            mAttributes[i] = new HashMap();
+        }
         try {
             InputStream in = new FileInputStream(mFilename);
-            // Initialize mAttributes.
-            for (int i = 0; i < EXIF_TAGS.length; ++i) {
-                mAttributes[i] = new HashMap();
-            }
             getJpegAttributes(in);
         } catch (IOException e) {
             // Ignore exceptions in order to keep the compatibility with the old versions of
