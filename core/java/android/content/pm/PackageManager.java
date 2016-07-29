@@ -3294,7 +3294,7 @@ public abstract class PackageManager {
      * java.lang.SecurityException} is thrown.
      * <p>
      * <strong>Note: </strong>Using this API requires holding
-     * android.permission.GRANT_REVOKE_PERMISSIONS and if the user id is
+     * android.permission.GRANT_RUNTIME_PERMISSIONS and if the user id is
      * not the current user android.permission.INTERACT_ACROSS_USERS_FULL.
      * </p>
      *
@@ -3303,7 +3303,6 @@ public abstract class PackageManager {
      * @param user The user for which to grant the permission.
      *
      * @see #revokeRuntimePermission(String, String, android.os.UserHandle)
-     * @see android.content.pm.PackageManager.PermissionFlags
      *
      * @hide
      */
@@ -3319,7 +3318,7 @@ public abstract class PackageManager {
      * java.lang.SecurityException} is thrown.
      * <p>
      * <strong>Note: </strong>Using this API requires holding
-     * android.permission.GRANT_REVOKE_PERMISSIONS and if the user id is
+     * android.permission.REVOKE_RUNTIME_PERMISSIONS and if the user id is
      * not the current user android.permission.INTERACT_ACROSS_USERS_FULL.
      * </p>
      *
@@ -3328,7 +3327,6 @@ public abstract class PackageManager {
      * @param user The user for which to revoke the permission.
      *
      * @see #grantRuntimePermission(String, String, android.os.UserHandle)
-     * @see android.content.pm.PackageManager.PermissionFlags
      *
      * @hide
      */
