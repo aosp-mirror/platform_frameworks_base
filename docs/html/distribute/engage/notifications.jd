@@ -10,7 +10,7 @@ page.image=/design/media/notifications_pattern_anatomy.png
 </div>
 
 <p>
-  The <a href="/design/patterns/notifications.html">notification system</a>
+  The <a href="https://material.google.com/patterns/notifications.html">notification system</a>
   allows your app to keep the user informed about events, such as new messages,
   upcoming calendar appointments, shared photos, and much more. They are a
   fundamental feature of Android that consumers check frequently to receive

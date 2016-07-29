@@ -857,8 +857,7 @@ var RESOURCE_COLLECTIONS = {
       "design/index.html",
       "design/patterns/navigation.html",
       "design/patterns/actionbar.html",
-      "design/style/iconography.html",
-      "design/patterns/notifications.html"
+      "design/style/iconography.html"
     ]
   },
   "distribute/essentials/corequalityguidelines/functionality": {
@@ -1076,7 +1075,6 @@ var RESOURCE_COLLECTIONS = {
   "distribute/getusers/notifications": {
     "title": "",
     "resources": [
-      "design/patterns/notifications.html",
       "distribute/engage/gcm.html",
       "https://play.google.com/about/developer-content-policy.html"
     ]
@@ -1181,8 +1179,7 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "distribute/essentials/optimizing-your-app.html",
       "distribute/tools/launch-checklist.html",
-      "distribute/googleplay/developer-console.html",
-      "design/patterns/notifications.html"
+      "distribute/googleplay/developer-console.html"
     ]
   },
   "distribute/engage/video/more": {
