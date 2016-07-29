@@ -14782,26 +14782,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     private void getRoundVerticalScrollBarBounds(Rect bounds) {
-        final int inside = (mViewFlags & SCROLLBARS_OUTSIDE_MASK) == 0 ? ~0 : 0;
-        int verticalScrollbarPosition = mVerticalScrollbarPosition;
-        if (verticalScrollbarPosition == SCROLLBAR_POSITION_DEFAULT) {
-            verticalScrollbarPosition = isLayoutRtl() ?
-                    SCROLLBAR_POSITION_LEFT : SCROLLBAR_POSITION_RIGHT;
-        }
         final int width = mRight - mLeft;
         final int height = mBottom - mTop;
-        switch (verticalScrollbarPosition) {
-            default:
-            case SCROLLBAR_POSITION_RIGHT:
-                bounds.left = mScrollX - (mUserPaddingRight & inside);
-                break;
-            case SCROLLBAR_POSITION_LEFT:
-                bounds.left = mScrollX + (mUserPaddingLeft & inside);
-                break;
-        }
-        bounds.top = mScrollY + (mPaddingTop & inside);
+        // Do not take padding into account as we always want the scrollbars
+        // to hug the screen for round wearable devices.
+        bounds.left = mScrollX;
+        bounds.top = mScrollY;
         bounds.right = bounds.left + width;
-        bounds.bottom = mScrollY + height - (mUserPaddingBottom & inside);
+        bounds.bottom = mScrollY + height;
     }
 
     private void getStraightVerticalScrollBarBounds(Rect bounds) {
