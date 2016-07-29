@@ -107,7 +107,7 @@ class WindowStateAnimator {
     final WindowManagerPolicy mPolicy;
     final Context mContext;
     final boolean mIsWallpaper;
-    final WallpaperController mWallpaperControllerLocked;
+    private final WallpaperController mWallpaperControllerLocked;
 
     // Currently running animation.
     boolean mAnimating;
@@ -1521,7 +1521,7 @@ class WindowStateAnimator {
                     mAnimator.requestRemovalOfReplacedWindows(w);
                     mLastHidden = false;
                     if (mIsWallpaper) {
-                        mWallpaperControllerLocked.dispatchWallpaperVisibility(w, true);
+                        w.dispatchWallpaperVisibility(true);
                     }
                     // This draw means the difference between unique content and mirroring.
                     // Run another pass through performLayout to set mHasContent in the
