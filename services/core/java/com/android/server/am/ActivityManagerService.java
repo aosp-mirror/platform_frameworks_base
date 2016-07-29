@@ -12547,7 +12547,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             synchronized (mPidsSelfLocked) {
                 int pid = Binder.getCallingPid();
                 proc = mPidsSelfLocked.get(pid);
-                if (mUseFifoUiScheduling && proc != null && proc.renderThreadTid == 0 && tid > 0) {
+                if (proc != null && proc.renderThreadTid == 0 && tid > 0) {
                     // ensure the tid belongs to the process
                     if (!Process.isThreadInProcess(pid, tid)) {
                         throw new IllegalArgumentException(
@@ -12560,8 +12560,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                     // promote to FIFO now
                     if (proc.curSchedGroup == ProcessList.SCHED_GROUP_TOP_APP) {
                         if (DEBUG_OOM_ADJ) Slog.d("UI_FIFO", "Promoting " + tid + "out of band");
-                        Process.setThreadScheduler(proc.renderThreadTid,
-                            Process.SCHED_FIFO | Process.SCHED_RESET_ON_FORK, 1);
+                        if (mUseFifoUiScheduling) {
+                            Process.setThreadScheduler(proc.renderThreadTid,
+                                Process.SCHED_FIFO | Process.SCHED_RESET_ON_FORK, 1);
+                        } else {
+                            Process.setThreadPriority(proc.renderThreadTid, -10);
+                        }
                     }
                 } else {
                     if (DEBUG_OOM_ADJ) {
@@ -20272,6 +20276,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                                         Slog.d("UI_FIFO", "Not setting RenderThread TID");
                                     }
                                 }
+                            } else {
+                                // Boost priority for top app UI and render threads
+                                Process.setThreadPriority(app.pid, -10);
+                                if (app.renderThreadTid != 0) {
+                                    Process.setThreadPriority(app.renderThreadTid, -10);
+                                }
                             }
                         }
                     } else if (oldSchedGroup == ProcessList.SCHED_GROUP_TOP_APP &&
@@ -20289,6 +20299,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 Process.setThreadScheduler(app.renderThreadTid,
                                     Process.SCHED_OTHER, 0);
                                 Process.setThreadPriority(app.renderThreadTid, -4);
+                            }
+                        } else {
+                            // Reset priority for top app UI and render threads
+                            Process.setThreadPriority(app.pid, 0);
+                            if (app.renderThreadTid != 0) {
+                                Process.setThreadPriority(app.renderThreadTid, 0);
                             }
                         }
                     }
