@@ -21526,8 +21526,9 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public boolean isUserRunning(int userId, int flags) {
-        if (userId != UserHandle.getCallingUserId() && checkCallingPermission(
-                INTERACT_ACROSS_USERS) != PackageManager.PERMISSION_GRANTED) {
+        if (!mUserController.isSameProfileGroup(userId, UserHandle.getCallingUserId())
+                && checkCallingPermission(INTERACT_ACROSS_USERS)
+                    != PackageManager.PERMISSION_GRANTED) {
             String msg = "Permission Denial: isUserRunning() from pid="
                     + Binder.getCallingPid()
                     + ", uid=" + Binder.getCallingUid()
