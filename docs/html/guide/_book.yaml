@@ -72,6 +72,8 @@ toc:
     section:
     - title: ICU4J Android Framework APIs
       path: /guide/topics/resources/icu4j-framework.html
+    - title: Language and Locale
+      path: /guide/topics/resources/multilingual-support.html
   - title: Resource Types
     path: /guide/topics/resources/available-resources.html
     section:

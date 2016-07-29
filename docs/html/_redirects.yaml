@@ -1218,3 +1218,6 @@ redirects:
   to: /training/articles/scoped-directory-access.html
 - from: /preview/features/notification-updates.html
   to: /guide/topics/ui/notifiers/notifications.html
+- from: /preview/features/multilingual-support.html
+  to: /guide/topics/resources/multilingual-support.html
+
