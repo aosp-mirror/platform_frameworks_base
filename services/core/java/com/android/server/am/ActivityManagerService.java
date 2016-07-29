@@ -3750,9 +3750,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             checkTime(startTime, "startProcess: returned from zygote!");
             Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
-            if (app.isolated) {
-                mBatteryStatsService.addIsolatedUid(app.uid, app.info.uid);
-            }
             mBatteryStatsService.noteProcessStart(app.processName, app.info.uid);
             checkTime(startTime, "startProcess: done updating battery stats");
 
@@ -11418,6 +11415,14 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // the uid of the isolated process is specified by the caller.
                 uid = isolatedUid;
             }
+
+            // Register the isolated UID with this application so BatteryStats knows to
+            // attribute resource usage to the application.
+            //
+            // NOTE: This is done here before addProcessNameLocked, which will tell BatteryStats
+            // about the process state of the isolated UID *before* it is registered with the
+            // owning application.
+            mBatteryStatsService.addIsolatedUid(uid, info.uid);
         }
         final ProcessRecord r = new ProcessRecord(stats, info, proc, uid);
         if (!mBooted && !mBooting
