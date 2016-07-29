@@ -60,6 +60,7 @@ public class KeyguardServiceDelegate {
             secure = true;
             deviceHasKeyguard = true;
             enabled = true;
+            currentUser = UserHandle.USER_NULL;
         }
         boolean showing;
         boolean showingAndNotOccluded;
@@ -158,6 +159,10 @@ public class KeyguardServiceDelegate {
             if (mKeyguardState.systemIsReady) {
                 // If the system is ready, it means keyguard crashed and restarted.
                 mKeyguardService.onSystemReady();
+                if (mKeyguardState.currentUser != UserHandle.USER_NULL) {
+                    // There has been a user switch earlier
+                    mKeyguardService.setCurrentUser(mKeyguardState.currentUser);
+                }
                 // This is used to hide the scrim once keyguard displays.
                 if (mKeyguardState.interactiveState == INTERACTIVE_STATE_AWAKE) {
                     mKeyguardService.onStartedWakingUp();
