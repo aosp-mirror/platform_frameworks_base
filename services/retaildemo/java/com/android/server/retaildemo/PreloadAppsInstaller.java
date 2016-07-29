@@ -18,12 +18,14 @@ package com.android.server.retaildemo;
 
 import android.app.AppGlobals;
 import android.app.PackageInstallObserver;
+import android.content.Context;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
@@ -47,15 +49,17 @@ class PreloadAppsInstaller {
 
     private final IPackageManager mPackageManager;
     private final File preloadsAppsDirectory;
+    private final Context mContext;
 
     private final Map<String, String> mApkToPackageMap;
 
-    PreloadAppsInstaller() {
-        this(AppGlobals.getPackageManager(), Environment.getDataPreloadsAppsDirectory());
+    PreloadAppsInstaller(Context context) {
+        this(context, AppGlobals.getPackageManager(), Environment.getDataPreloadsAppsDirectory());
     }
 
     @VisibleForTesting
-    PreloadAppsInstaller(IPackageManager packageManager, File preloadsAppsDirectory) {
+    PreloadAppsInstaller(Context context, IPackageManager packageManager, File preloadsAppsDirectory) {
+        mContext = context;
         mPackageManager = packageManager;
         mApkToPackageMap = Collections.synchronizedMap(new ArrayMap<>());
         this.preloadsAppsDirectory = preloadsAppsDirectory;
@@ -66,28 +70,34 @@ class PreloadAppsInstaller {
         if (ArrayUtils.isEmpty(files)) {
             return;
         }
+        AppInstallCounter counter = new AppInstallCounter(mContext, userId);
+        int expectedCount = 0;
         for (File file : files) {
             String apkName = file.getName();
             if (apkName.endsWith(PRELOAD_APK_EXT) && file.isFile()) {
                 String packageName = mApkToPackageMap.get(apkName);
                 if (packageName != null) {
                     try {
-                        installExistingPackage(packageName, userId);
+                        expectedCount++;
+                        installExistingPackage(packageName, userId, counter);
                     } catch (Exception e) {
                         Slog.e(TAG, "Failed to install existing package " + packageName, e);
                     }
                 } else {
                     try {
-                        installPackage(file, userId);
+                        installPackage(file, userId, counter);
+                        expectedCount++;
                     } catch (Exception e) {
                         Slog.e(TAG, "Failed to install package from " + file, e);
                     }
                 }
             }
         }
+        counter.setExpectedAppsCount(expectedCount);
     }
 
-    private void installExistingPackage(String packageName, int userId) {
+    private void installExistingPackage(String packageName, int userId,
+            AppInstallCounter counter) {
         if (DEBUG) {
             Log.d(TAG, "installExistingPackage " + packageName + " u" + userId);
         }
@@ -95,10 +105,13 @@ class PreloadAppsInstaller {
             mPackageManager.installExistingPackageAsUser(packageName, userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        } finally {
+            counter.appInstallFinished();
         }
     }
 
-    private void installPackage(File file, final int userId) throws IOException, RemoteException {
+    private void installPackage(File file, final int userId, AppInstallCounter counter)
+            throws IOException, RemoteException {
         final String apkName = file.getName();
         if (DEBUG) {
             Log.d(TAG, "installPackage " + apkName + " u" + userId);
@@ -111,15 +124,45 @@ class PreloadAppsInstaller {
                     Log.d(TAG, "Package " + basePackageName + " installed u" + userId
                             + " returnCode: " + returnCode + " msg: " + msg);
                 }
+                // Don't notify the counter for now, we'll do it in installExistingPackage
                 if (returnCode == PackageManager.INSTALL_SUCCEEDED) {
                     mApkToPackageMap.put(apkName, basePackageName);
                     // Install on user 0 so that the package is cached when demo user is re-created
-                    installExistingPackage(basePackageName, UserHandle.USER_SYSTEM);
+                    installExistingPackage(basePackageName, UserHandle.USER_SYSTEM, counter);
                 } else if (returnCode == PackageManager.INSTALL_FAILED_ALREADY_EXISTS) {
-                    installExistingPackage(basePackageName, userId);
+                    installExistingPackage(basePackageName, userId, counter);
                 }
             }
         }.getBinder(), 0, SYSTEM_SERVER_PACKAGE_NAME, userId);
     }
 
+    private static class AppInstallCounter {
+        private int expectedCount = -1; // -1 means expectedCount not set
+        private int finishedCount;
+        private final Context mContext;
+        private final int userId;
+
+        AppInstallCounter(Context context, int userId) {
+            mContext = context;
+            this.userId = userId;
+        }
+
+        synchronized void appInstallFinished() {
+            this.finishedCount++;
+            checkIfAllFinished();
+        }
+
+        synchronized void setExpectedAppsCount(int expectedCount) {
+            this.expectedCount = expectedCount;
+            checkIfAllFinished();
+        }
+
+        private void checkIfAllFinished() {
+            if (expectedCount == finishedCount) {
+                Log.i(TAG, "All preloads finished installing for user " + userId);
+                Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                        Settings.Secure.DEMO_USER_SETUP_COMPLETE, "1", userId);
+            }
+        }
+    }
 }

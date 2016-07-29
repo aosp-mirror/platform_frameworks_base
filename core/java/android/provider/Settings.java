@@ -6335,6 +6335,13 @@ public final class Settings {
                 "automatic_storage_manager_downloads_days_to_retain";
 
         /**
+         * Whether preloaded APKs have been installed for the user.
+         * @hide
+         */
+        public static final String DEMO_USER_SETUP_COMPLETE
+                = "demo_user_setup_complete";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
