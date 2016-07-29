@@ -224,8 +224,7 @@ public class RetailDemoModeService extends SystemService {
             if (mDeviceDemoModeUri.equals(uri)) {
                 mDeviceInDemoMode = UserManager.isDeviceInDemoMode(getContext());
                 if (mDeviceInDemoMode) {
-                    SystemProperties.set(SYSTEM_PROPERTY_RETAIL_DEMO_ENABLED, "1");
-                    mHandler.sendEmptyMessage(MSG_START_NEW_SESSION);
+                    putDeviceInDemoMode();
                 } else {
                     SystemProperties.set(SYSTEM_PROPERTY_RETAIL_DEMO_ENABLED, "0");
                     if (mWakeLock.isHeld()) {
@@ -287,7 +286,6 @@ public class RetailDemoModeService extends SystemService {
         synchronized (mActivityLock) {
             mFirstUserActivityTime = mLastUserActivityTime = SystemClock.uptimeMillis();
         }
-        mPreloadAppsInstaller = new PreloadAppsInstaller(context);
     }
 
     private Notification createResetNotification() {
@@ -465,6 +463,11 @@ public class RetailDemoModeService extends SystemService {
         return mSystemUserConfiguration;
     }
 
+    private void putDeviceInDemoMode() {
+        SystemProperties.set(SYSTEM_PROPERTY_RETAIL_DEMO_ENABLED, "1");
+        mHandler.sendEmptyMessage(MSG_START_NEW_SESSION);
+    }
+
     @Override
     public void onStart() {
         if (DEBUG) {
@@ -479,26 +482,31 @@ public class RetailDemoModeService extends SystemService {
 
     @Override
     public void onBootPhase(int bootPhase) {
-        if (bootPhase != PHASE_THIRD_PARTY_APPS_CAN_START) {
-            return;
+        switch (bootPhase) {
+            case PHASE_THIRD_PARTY_APPS_CAN_START:
+                mPreloadAppsInstaller = new PreloadAppsInstaller(getContext());
+                mPm = (PowerManager) getContext().getSystemService(Context.POWER_SERVICE);
+                mAmi = LocalServices.getService(ActivityManagerInternal.class);
+                mWakeLock = mPm
+                        .newWakeLock(
+                                PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP,
+                                TAG);
+                mNm = NotificationManager.from(getContext());
+                mCameraManager = (CameraManager) getContext()
+                        .getSystemService(Context.CAMERA_SERVICE);
+                mCameraIdsWithFlash = getCameraIdsWithFlash();
+                SettingsObserver settingsObserver = new SettingsObserver(mHandler);
+                settingsObserver.register();
+                settingsObserver.refreshTimeoutConstants();
+                registerBroadcastReceiver();
+                break;
+            case PHASE_BOOT_COMPLETED:
+                if (UserManager.isDeviceInDemoMode(getContext())) {
+                    mDeviceInDemoMode = true;
+                    putDeviceInDemoMode();
+                }
+                break;
         }
-        mPm = (PowerManager) getContext().getSystemService(Context.POWER_SERVICE);
-        mAmi = LocalServices.getService(ActivityManagerInternal.class);
-        mWakeLock = mPm
-                .newWakeLock(PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, TAG);
-        mNm = NotificationManager.from(getContext());
-        mCameraManager = (CameraManager) getContext().getSystemService(Context.CAMERA_SERVICE);
-        mCameraIdsWithFlash = getCameraIdsWithFlash();
-
-        if (UserManager.isDeviceInDemoMode(getContext())) {
-            mDeviceInDemoMode = true;
-            SystemProperties.set(SYSTEM_PROPERTY_RETAIL_DEMO_ENABLED, "1");
-            mHandler.sendEmptyMessage(MSG_START_NEW_SESSION);
-        }
-        SettingsObserver settingsObserver = new SettingsObserver(mHandler);
-        settingsObserver.register();
-        settingsObserver.refreshTimeoutConstants();
-        registerBroadcastReceiver();
     }
 
     @Override
