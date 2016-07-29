@@ -79,7 +79,7 @@ public class IWindowManagerImpl implements IWindowManager {
     public void addAppToken(int arg0, IApplicationToken arg1, int arg2, int arg3, int arg4,
             boolean arg5, boolean arg6, int arg7, int arg8, boolean arg9, boolean arg10,
             Rect arg11, Configuration arg12, int arg13, boolean arg14, boolean arg15, int arg16,
-            int arg17)
+            int arg17, boolean arg18)
             throws RemoteException {
         // TODO Auto-generated method stub
     }
@@ -326,7 +326,7 @@ public class IWindowManagerImpl implements IWindowManager {
 
     @Override
     public void setAppTask(IBinder arg0, int arg1, int arg2, Rect arg3, Configuration arg4,
-            int arg5, boolean arg6)
+            int arg5, boolean arg6, boolean arg7)
             throws RemoteException {
         // TODO Auto-generated method stub
     }
