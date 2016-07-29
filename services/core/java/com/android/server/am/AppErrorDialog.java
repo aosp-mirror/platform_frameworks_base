@@ -16,28 +16,21 @@
 
 package com.android.server.am;
 
-import android.app.ActivityManagerInternal;
-import android.app.ActivityOptions;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.IPackageDataObserver;
-import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
 import android.text.BidiFormatter;
-import android.util.Slog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.TextView;
-
-import java.util.List;
 
 import static com.android.server.am.ActivityManagerService.IS_USER_BUILD;
 
@@ -47,7 +40,7 @@ final class AppErrorDialog extends BaseErrorDialog implements View.OnClickListen
     private final AppErrorResult mResult;
     private final ProcessRecord mProc;
     private final boolean mRepeating;
-    private final boolean mForeground;
+    private final boolean mIsRestartable;
 
     private CharSequence mName;
 
@@ -74,7 +67,7 @@ final class AppErrorDialog extends BaseErrorDialog implements View.OnClickListen
         mProc = data.proc;
         mResult = data.result;
         mRepeating = data.repeating;
-        mForeground = data.task != null;
+        mIsRestartable = data.task != null || data.isRestartableForService;
         BidiFormatter bidi = BidiFormatter.getInstance();
 
         if ((mProc.pkgList.size() == 1) &&
@@ -118,7 +111,7 @@ final class AppErrorDialog extends BaseErrorDialog implements View.OnClickListen
         LayoutInflater.from(context).inflate(
                 com.android.internal.R.layout.app_error_dialog, frame, true);
 
-        boolean hasRestart = !mRepeating && mForeground;
+        boolean hasRestart = !mRepeating && mIsRestartable;
         final boolean hasReceiver = mProc.errorReportReceiver != null;
 
         final TextView restart = (TextView) findViewById(com.android.internal.R.id.aerr_restart);
@@ -214,5 +207,6 @@ final class AppErrorDialog extends BaseErrorDialog implements View.OnClickListen
         TaskRecord task;
         boolean repeating;
         ProcessRecord proc;
+        boolean isRestartableForService;
     }
 }
