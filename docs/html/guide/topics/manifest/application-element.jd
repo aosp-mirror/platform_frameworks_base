@@ -26,6 +26,7 @@ page.title=&lt;application&gt;
              android:<a href="#proc">process</a>="<i>string</i>"
              android:<a href="#restoreany">restoreAnyVersion</a>=["true" | "false"]
              android:<a href="#requiredAccountType">requiredAccountType</a>="<i>string</i>"
+             android:<a href="#resizeableActivity">resizeableActivity</a>=["true" | "false"]
              android:<a href="#restrictedAccountType">restrictedAccountType</a>="<i>string</i>"
              android:<a href="#supportsrtl">supportsRtl</a>=["true" | "false"]
              android:<a href="#aff">taskAffinity</a>="<i>string</i>"
@@ -357,6 +358,34 @@ your app to access personal information that belongs to the owner user.</p>
 <p>This attribute was added in API level 18.</p>
 </dd>
 
+
+<dt id="resizeableActivity"><code>resizeableActivity</code></dt>
+
+<dd>
+<p>
+  Specifies whether the app supports <a href=
+  "{@docRoot}guide/topics/ui/multi-window.html">multi-window display</a>. You
+  can set this attribute in either the <a href="activity-element">
+  <code>&lt;activity&gt;</code></a> or <code>&lt;application&gt;</code> element.
+</p>
+
+<p>
+  If you set this attribute to true, the user can launch the activity in
+  split-screen and freeform modes. If you set the attribute to false, the
+  activity does not support multi-window mode. If this value is false, and the
+  user attempts to launch the activity in multi-window mode, the activity takes
+  over the full screen.
+</p>
+
+<p>
+  If your app targets API level 24 or higher, but you do not specify a value
+  for this attribute, the attribute's value defaults to true.
+</p>
+
+<p>
+  This attribute was added in API level 24.
+</p>
+</dd>
 
 <dt><a name="restrictedAccountType"></a>{@code android:restrictedAccountType}</dt>
 <dd>Specifies the account type required by this application and indicates that restricted profiles

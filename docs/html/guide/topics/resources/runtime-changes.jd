@@ -17,6 +17,8 @@ page.tags=activity,lifecycle
     <li><a href="accessing-resources.html">Accessing Resources</a></li>
     <li><a href="http://android-developers.blogspot.com/2009/02/faster-screen-orientation-change.html">Faster
         Screen Orientation Change</a></li>
+    <li><a href="{@docRoot}guide/topics/ui/multi-window.html#lifecycle">
+      Multi-Window Lifecycle</a></li>
   </ol>
 </div>
 </div>

@@ -17,6 +17,8 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
       </ol>
     <h2>See Also</h2>
       <ol>
+        <li><a href="{@docRoot}training/tv/playback/picture-in-picture.html">Adding
+          Picture-in-Picture</a></li>
         <li><a class="external-link"
           href="https://github.com/googlesamples/android-MultiWindowPlayground">Multi-Window
           Playground sample app</a></li>
@@ -28,7 +30,7 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
 </div>
 
 <p>
-  Android N adds support for displaying more than one app at the
+  Android 7.0 adds support for displaying more than one app at the
   same time. On handheld devices, two apps can run side-by-side or
   one-above-the-other in <em>split-screen</em> mode. On TV devices, apps can
   use <em>picture-in-picture</em> mode to continue video playback while users
@@ -36,7 +38,7 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
 </p>
 
 <p>
-  If you build your app with the N Preview SDK, you can configure how your app
+  If your app targets Android 7.0 (API level 24) or higher, you can configure how your app
   handles multi-window display. For example, you can specify your activity's
   minimum allowable dimensions. You can also disable multi-window display for
   your app, ensuring that the system only shows your app in full-screen
@@ -46,20 +48,20 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
 <h2 id="overview">Overview</h2>
 
 <p>
-  Android N allows several apps to share the screen at once. For
+  Android 7.0 allows several apps to share the screen at once. For
   example, a user could split the screen, viewing a web page on the left side
   while composing an email on the right side. The user experience depends on
   the device:
 </p>
 
 <ul>
-  <li>Handheld devices running Android N offer split-screen
+  <li>Handheld devices running Android 7.0 offer split-screen
   mode. In this mode, the system fills the screen with two apps, showing them
   either side-by-side or one-above-the-other. The user can drag the dividing
   line separating the two to make one app larger and the other smaller.
   </li>
 
-  <li>On Nexus Player running Android N, apps can put themselves
+  <li>On TV devices, apps can put themselves
   in <a href="picture-in-picture.html">picture-in-picture mode</a>, allowing
   them to continue showing content while the user browses or interacts with
   other apps.
@@ -72,9 +74,9 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
   </li>
 </ul>
 
-<img src="{@docRoot}preview/images/mw-splitscreen.png" alt="" width="650"
-    srcset="{@docRoot}preview/images/mw-splitscreen.png 1x,
-    {@docRoot}preview/images/mw-splitscreen_2x.png 2x,"
+<img src="{@docRoot}images/android-7.0/mw-splitscreen.png" alt="" width="650"
+    srcset="{@docRoot}images/android-7.0/mw-splitscreen.png 1x,
+    {@docRoot}images/android-7.0/mw-splitscreen_2x.png 2x,"
     id="img-split-screen" />
 <p class="img-caption">
   <strong>Figure 1.</strong> Two apps running side-by-side in split-screen mode.
@@ -100,9 +102,7 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
 <p>
   Users can <a href="{@docRoot}guide/topics/ui/drag-drop.html">drag and
   drop</a> data from one activity to another while the activities are sharing
-  the screen. (Previously, users could only drag and drop data within a single
-  activity.)
-</p>
+  the screen.
 
 <h2 id="lifecycle">Multi-Window Lifecycle</h2>
 
@@ -163,7 +163,7 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
 <h2 id="configuring">Configuring Your App for Multi-Window Mode</h2>
 
 <p>
-  If your app targets Android N, you can configure how and
+  If your app targets API level 24 or higher, you can configure how and
   whether your app's activities support multi-window display. You can set
   attributes in your manifest to control both size and layout.
   A root activity's attribute settings apply to all activities
@@ -173,8 +173,8 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
 </p>
 
 <p class="note">
-  <strong>Note:</strong> If you build a multi-orientation app with a version of the
-  SDK lower than Android N, and the user uses the app in
+  <strong>Note:</strong> If you build a multi-orientation app that targets API
+  level 23 or lower, and the user uses the app in
   multi-window mode, the system forcibly resizes the app. The system presents a
   dialog box warning the user that the app may behave unexpectedly. The system
   does <em>not</em> resize fixed-orientation apps; if
@@ -183,10 +183,13 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
 </p>
 
 <h4 id="resizeableActivity">android:resizeableActivity</h4>
+
 <p>
-  Set this attribute in your manifest's <code>&lt;activity&gt;</code> or
-  <code>&lt;application&gt;</code> node to enable or disable multi-window
-  display:
+  Set this attribute in your manifest's <a href=
+  "{@docRoot}guide/topics/manifest/activity-element"><code>&lt;activity&gt;</code></a>
+  or <a href=
+  "{@docRoot}guide/topics/manifest/application-element"><code>&lt;application&gt;</code></a>
+  element to enable or disable multi-window display:
 </p>
 
 <pre>
@@ -202,16 +205,19 @@ android:resizeableActivity=["true" | "false"]
 </p>
 
 <p>
-  If your app targets Android N, but you do not specify a value
+  If your app targets API level 24, but you do not specify a value
   for this attribute, the attribute's value defaults to true.
 </p>
 
 <h4 id="supportsPictureInPicture">android:supportsPictureInPicture</h4>
 
 <p>
-  Set this attribute in your manifest's <code>&lt;activity&gt;</code> node to
-  indicate whether the activity supports picture-in-picture display. This
-  attribute is ignored if <code>android:resizeableActivity</code> is false.
+  Set this attribute in your manifest's <a href=
+  "{@docRoot}guide/topics/manifest/activity-element"><code>&lt;activity&gt;</code></a>
+  node to indicate whether the activity supports <a href=
+  "{@docRoot}training/tv/playback/picture-in-picture.jd">Picture-in-Picture</a>
+  display. This attribute is ignored if <code>android:resizeableActivity</code>
+  is false.
 </p>
 
 <pre>
@@ -221,7 +227,7 @@ android:supportsPictureInPicture=["true" | "false"]
 <h3 id="layout">Layout attributes</h3>
 
 <p>
-  With Android N, the <code>&lt;layout&gt;</code> manifest element
+  With Android 7.0, the <code>&lt;layout&gt;</code> manifest element
   supports several attributes that affect how an activity behaves in
   multi-window mode:
 </p>
@@ -283,8 +289,8 @@ android:supportsPictureInPicture=["true" | "false"]
 <h2 id="running">Running Your App in Multi-Window Mode</h2>
 
 <p>
-  Android N offers new functionality to support apps that can run
-  in multi-window mode.
+  Beginning with Android 7.0, the system offers functionality to support apps
+  that can run in multi-window mode.
 </p>
 
 <h3 id="disabled-features">Disabled features in multi-window mode</h3>
@@ -309,15 +315,13 @@ android:supportsPictureInPicture=["true" | "false"]
 <h3 id="change-notification">Multi-window change notification and querying</h3>
 
 <p>
-  The following new methods have been added to the {@link android.app.Activity}
-  class to support multi-window display. For details on each method, see the
-  <a href="{@docRoot}preview/setup-sdk.html#docs-dl">N Preview SDK
-  Reference</a>.
+  {@link android.app.Activity} offers the following methods to support
+  multi-window display.
 </p>
 
 <dl>
   <dt>
-    <code>Activity.isInMultiWindowMode()</code>
+    {@link android.app.Activity#isInMultiWindowMode isInMultiWindowMode()}
   </dt>
 
   <dd>
@@ -325,12 +329,14 @@ android:supportsPictureInPicture=["true" | "false"]
   </dd>
 
   <dt>
-    <code>Activity.isInPictureInPictureMode()</code>
+    {@link android.app.Activity#isInPictureInPictureMode
+    isInPictureInPictureMode()}
   </dt>
 
   <dd>
-    Call to find out if the activity is in picture-in-picture mode.
-
+    Call to find out if the activity is in <a href=
+    "{@docRoot}training/tv/playback/picture-in-picture.jd">picture-in-picture</a>
+    mode.
     <p class="note">
       <strong>Note:</strong> Picture-in-picture mode is a special case of
       multi-window mode. If <code>myActivity.isInPictureInPictureMode()</code>
@@ -340,7 +346,8 @@ android:supportsPictureInPicture=["true" | "false"]
   </dd>
 
   <dt>
-    <code>Activity.onMultiWindowModeChanged()</code>
+    {@link android.app.Activity#onMultiWindowModeChanged
+    onMultiWindowModeChanged()}
   </dt>
 
   <dd>
@@ -351,7 +358,8 @@ android:supportsPictureInPicture=["true" | "false"]
   </dd>
 
   <dt>
-    <code>Activity.onPictureInPictureModeChanged()</code>
+    {@link android.app.Activity#onPictureInPictureModeChanged
+    onPictureInPictureModeChanged()}
   </dt>
 
   <dd>
@@ -363,17 +371,21 @@ android:supportsPictureInPicture=["true" | "false"]
 </dl>
 
 <p>
-  There are also {@link android.app.Fragment} versions of each of these
-  methods, for example <code>Fragment.isInMultiWindowMode()</code>.
+  The {@link android.app.Fragment} class exposes versions of many of these
+  methods, for example {@link android.app.Fragment#onMultiWindowModeChanged
+  Fragment.onMultiWindowModeChanged()}.
 </p>
 
 <h3 id="entering-pip">Entering picture-in-picture mode</h3>
 
 <p>
-  To put an activity in picture-in-picture mode, call the new method
-  <code>Activity.enterPictureInPictureMode()</code>. This method has no effect if
-  the device does not support picture-in-picture mode. For more information,
-  see the <a href="picture-in-picture.html">Picture-in-Picture</a> documentation.
+  To put an activity in picture-in-picture mode, call {@link
+  android.app.Activity#enterPictureInPictureMode
+  Activity.enterPictureInPictureMode()}. This method has no effect if the
+  device does not support picture-in-picture mode. For more information, see
+  the <a href=
+  "{@docRoot}training/tv/playback/picture-in-picture.jd">Picture-in-Picture</a>
+  documentation.
 </p>
 
 <h3 id="launch">Launch New Activities in Multi-Window Mode</h3>
@@ -381,8 +393,8 @@ android:supportsPictureInPicture=["true" | "false"]
 <p>
   When you launch a new activity, you can hint to the system that the new
   activity should be displayed adjacent to the current one, if possible. To do
-  this, use the flag
-  <code>Intent.FLAG_ACTIVITY_LAUNCH_TO_ADJACENT</code>. Passing
+  this, use the intent flag
+  {@link android.content.Intent#FLAG_ACTIVITY_LAUNCH_ADJACENT}. Passing
   this flag requests the following behavior:
 </p>
 
@@ -400,7 +412,8 @@ android:supportsPictureInPicture=["true" | "false"]
 <p>
   If a device is in freeform mode and you are launching a new activity, you can
   specify the new activity's dimensions and screen location by calling
-  <code>ActivityOptions.setLaunchBounds()</code>. This method has no effect if
+  {@link android.app.ActivityOptions#setLaunchBounds
+  ActivityOptions.setLaunchBounds()}. This method has no effect if
   the device is not in multi-window mode.
 </p>
 
@@ -416,22 +429,15 @@ android:supportsPictureInPicture=["true" | "false"]
 <p>
   Users can <a href="{@docRoot}guide/topics/ui/drag-drop.html">drag and
   drop</a> data from one activity to another while the two activities are
-  sharing the screen. (Previously, users could only drag and drop data within a
-  single activity.) For this reason, you may want to add drag and drop
+  sharing the screen. (Prior to Android 7.0, users could only drag and drop data
+  within a single activity.) For this reason, you may want to add drag and drop
   functionality to your app if your app does not currently support it.
 </p>
 
-<p>
-  The N Preview SDK extends the <a href=
-  "{@docRoot}reference/android/view/package-summary.html"><code>android.view</code></a>
-  package to support cross-app drag and drop. For details on the following
-  classes and methods, see the <a href="{@docRoot}preview/setup-sdk.html#docs-dl">N
-  Preview SDK Reference</a>.
-</p>
 
 <dl>
   <dt>
-    <code>android.view.DropPermissions</code>
+    {@link android.view.DragAndDropPermissions}
   </dt>
 
   <dd>
@@ -440,20 +446,20 @@ android:supportsPictureInPicture=["true" | "false"]
   </dd>
 
   <dt>
-    <code>View.startDragAndDrop()</code>
+    {@link android.view.View#startDragAndDrop View.startDragAndDrop()}
   </dt>
 
   <dd>
-    New alias for {@link android.view.View#startDrag View.startDrag()}. To
-    enable cross-activity drag and drop, pass the new flag
-    <code>View.DRAG_FLAG_GLOBAL</code>. If you need to give URI permissions to
-    the recipient activity, pass the new flags
-    <code>View.DRAG_FLAG_GLOBAL_URI_READ</code> or
-    <code>View.DRAG_FLAG_GLOBAL_URI_WRITE</code>, as appropriate.
+    Alias for {@link android.view.View#startDrag View.startDrag()}. To enable
+    cross-activity drag and drop, pass the flag {@link
+    android.view.View#DRAG_FLAG_GLOBAL}. If you need to give URI permissions to
+    the recipient activity, pass the flags {@link
+    android.view.View#DRAG_FLAG_GLOBAL_URI_READ} or {@link
+    android.view.View#DRAG_FLAG_GLOBAL_URI_WRITE}, as appropriate.
   </dd>
 
   <dt>
-    <code>View.cancelDragAndDrop()</code>
+    {@link android.view.View#cancelDragAndDrop View.cancelDragAndDrop()}
   </dt>
 
   <dd>
@@ -462,7 +468,7 @@ android:supportsPictureInPicture=["true" | "false"]
   </dd>
 
   <dt>
-    <code>View.updateDragShadow()</code>
+    {@link android.view.View#updateDragShadow View.updateDragShadow()}
   </dt>
 
   <dd>
@@ -471,7 +477,8 @@ android:supportsPictureInPicture=["true" | "false"]
   </dd>
 
   <dt>
-    <code>Activity.requestDragAndDropPermissions()</code>
+    {@link android.app.Activity#requestDragAndDropPermissions
+    Activity.requestDragAndDropPermissions()}
   </dt>
 
   <dd>
@@ -483,29 +490,29 @@ android:supportsPictureInPicture=["true" | "false"]
 <h2 id="testing">Testing Your App's Multi-Window Support</h2>
 
 <p>
-  Whether or not you update your app for Android N, you should
+  Whether or not your app targets API level 24 or higher, you should
   verify how it behaves in multi-window mode in case a user tries to launch it
-  in multiwindow mode on a device running Android N.
+  in multi-window mode on a device running Android 7.0 or higher.
 </p>
 
 <h3 id="configuring">Configuring a Test Device</h3>
 
 <p>
-  If you install Android N on a device, split-screen mode is
-  automatically supported.
+  If a device runs Android 7.0 or higher, it automatically supports split-screen
+  mode.
 </p>
 
-<h3 id="test-non-n">If your app was not built with the N Preview SDK</h3>
+<h3 id="test-non-n">If your app targets API level 23 or lower</h3>
 
 <p>
-  If you did not build your app with the N Preview SDK and the user attempts to use
-  the app in multi-window mode, the system forcibly resizes the app unless the app
-  declares a fixed orientation.
+  If your app targets API level 23 or lower and the user attempts to use
+  the app in multi-window mode, the system forcibly resizes the app unless the
+  app declares a fixed orientation.
 </p>
 
 <p>
   If your app does not declare a fixed orientation, you should launch your app
-  on a device running Android N and attempt to put the app in
+  on a device running Android 7.0 or higher and attempt to put the app in
   split-screen mode. Verify that the user experience is
   acceptable when the app is forcibly resized.
 </p>
@@ -519,7 +526,7 @@ android:supportsPictureInPicture=["true" | "false"]
 <h3 id="test-mw">If you support multi-window mode</h3>
 
 <p>
-  If you built your app with the N Preview SDK and have not disabled
+  If your app targets API level 24 or higher and does not disable
   multi-window support, verify the following behavior under both split-screen
   and freeform modes.
 </p>
@@ -593,7 +600,7 @@ android:supportsPictureInPicture=["true" | "false"]
 <p>
   If you disabled multi-window support by setting
   <code>android:resizableActivity="false"</code>, you should launch your app on
-  a device running Android N and attempt to put the app in
+  a device running Android 7.0 or higher and attempt to put the app in
   freeform and split-screen modes. Verify that when you do so, the app remains
   in full-screen mode.
 </p>
