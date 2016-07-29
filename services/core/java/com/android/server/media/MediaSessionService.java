@@ -239,7 +239,8 @@ public class MediaSessionService extends SystemService implements Monitor {
         synchronized (mLock) {
             UserManager manager = (UserManager) getContext().getSystemService(Context.USER_SERVICE);
             int currentUser = ActivityManager.getCurrentUser();
-            int[] userIds = manager.getEnabledProfileIds(currentUser);
+            // Include all profiles even though they aren't yet enabled to handle work profile case.
+            int[] userIds = manager.getProfileIdsWithDisabled(currentUser);
             mCurrentUserIdList.clear();
             if (userIds != null && userIds.length > 0) {
                 for (int userId : userIds) {
@@ -440,6 +441,12 @@ public class MediaSessionService extends SystemService implements Monitor {
     private MediaSessionRecord createSessionLocked(int callerPid, int callerUid, int userId,
             String callerPackageName, ISessionCallback cb, String tag) {
 
+        UserRecord user = mUserRecords.get(userId);
+        if (user == null) {
+            Log.wtf(TAG, "Request from invalid user: " +  userId);
+            throw new RuntimeException("Session request from invalid user.");
+        }
+
         final MediaSessionRecord session = new MediaSessionRecord(callerPid, callerUid, userId,
                 callerPackageName, cb, tag, this, mHandler);
         try {
@@ -450,8 +457,6 @@ public class MediaSessionService extends SystemService implements Monitor {
 
         mAllSessions.add(session);
         mPriorityStack.addSession(session, mCurrentUserIdList.contains(userId));
-
-        UserRecord user = mUserRecords.get(userId);
         user.addSessionLocked(session);
 
         mHandler.post(MessageHandler.MSG_SESSIONS_CHANGED, userId, 0);
