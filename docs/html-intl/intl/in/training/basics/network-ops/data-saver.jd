@@ -1,0 +1,234 @@
+page.title=Data Saver
+metaDescription=Optimalisasi penggunaan data yang diaktifkan pengguna.
+page.keywords="android N", "data usage", "metered network"
+page.image=images/cards/card-nyc_2x.jpg
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+    <h2>
+      Dalam dokumen ini
+    </h2>
+
+    <ol>
+      <li>
+        <a href="#status">Memeriksa Preferensi Data Saver</a>
+        <ol>
+          <li>
+            <a href="#request-whitelist">Meminta izin daftar putih</a>
+          </li>
+        </ol>
+      </li>
+
+      <li>
+        <a href="#monitor-changes">Memantau Perubahan pada Preferensi
+        Data Saver</a>
+      </li>
+
+      <li>
+        <a href="#testing">Menguji dengan Perintah Android Debug Bridge</a>
+      </li>
+    </ol>
+  </div>
+</div>
+
+<p>
+  Selama penggunaan ponsel cerdas, biaya paket data seluler bisa saja
+  melebihi harga perangkat itu sendiri. Di N Developer Preview, pengguna bisa
+  mengaktifkan Data Saver berdasarkan lingkup perangkat untuk menghemat data, baik saat
+  roaming, mendekati akhir siklus penagihan, atau pada paket data prabayar kecil.
+</p>
+
+<p>
+  Bila pengguna mengaktifkan Data Saver di <strong>Settings</strong> dan perangkat
+  berada dalam jaringan berkuota, sistem akan memblokir penggunaan data latar belakang dan memberi tahu
+  aplikasi untuk menghemat penggunaan data latar depan bila memungkinkan. Pengguna bisa
+  memasukkan aplikasi tertentu ke daftar putih untuk memungkinkan penggunaan data berkuota bila Data
+  Saver diaktifkan.
+</p>
+
+<p>
+  N Developer Preview memperluas {@link android.net.ConnectivityManager}
+  API untuk menyediakan cara pada aplikasi untuk <a href="#status">menerima preferensi Data Saver
+  pengguna</a> dan <a href="#monitor-changes">memantau perubahan
+  preferensi</a>. Hal ini dianggap praktik terbaik bagi aplikasi untuk memeriksa apakah
+  pengguna telah mengaktifkan DataSaver dan berusaha membatasi penggunaan data latar depan dan
+  data latar belakang.
+</p>
+
+<h2 id="status">
+  Memeriksa Preferensi Data Saver
+</h2>
+
+<p>
+  Di N Developer Preview, aplikasi bisa menggunakan {@link
+  android.net.ConnectivityManager} API untuk menentukan pembatasan penggunaan data
+  apa yang sedang diterapkan. Metode {@code getRestrictBackgroundStatus()}
+  akan mengembalikan salah satu dari nilai berikut:
+</p>
+
+<dl>
+  <dt>
+    {@code RESTRICT_BACKGROUND_STATUS_DISABLED}
+  </dt>
+
+  <dd>
+    Data Saver dinonaktifkan.
+  </dd>
+
+  <dt>
+    {@code RESTRICT_BACKGROUND_STATUS_ENABLED}
+  </dt>
+
+  <dd>
+    Pengguna telah mengaktifkan Data Saver untuk aplikasi ini. Aplikasi harus berusaha membatasi
+    penggunaan data di latar depan dan dengan halus menangani pembatasan penggunaan
+    data latar belakang.
+  </dd>
+
+  <dt>
+    {@code RESTRICT_BACKGROUND_STATUS_WHITELISTED}
+  </dt>
+
+  <dd>
+    Pengguna telah mengaktifkan Data Saver namun aplikasi telah dimasukkan dalam daftar putih. Aplikasi harus
+    tetap berusaha membatasi penggunaan data latar belakang dan latar depan.
+  </dd>
+</dl>
+
+<p>
+  Hal ini dianggap praktik terbaik untuk membatasi penggunaan data bila perangkat
+  terhubung ke jaringan berkuota, meskipun Data Saver telah dinonaktifkan atau aplikasi
+  telah dimasukkan dalam daftar putih. Kode contoh berikut menggunakan {@link
+  android.net.ConnectivityManager#isActiveNetworkMetered
+  ConnectivityManager.isActiveNetworkMetered()} dan {@code
+  ConnectivityManager.getRestrictBackgroundStatus()} untuk menentukan berapa banyak data
+  yang harus digunakan aplikasi:
+</p>
+
+<pre>
+ConnectivityManager connMgr = (ConnectivityManager)
+        getSystemService(Context.CONNECTIVITY_SERVICE);
+// Checks if the device is on a metered network
+if (connMgr.isActiveNetworkMetered()) {
+  // Checks user’s Data Saver settings.
+  switch (connMgr.getRestrictBackgroundStatus()) {
+    case RESTRICT_BACKGROUND_STATUS_ENABLED:
+    // Background data usage is blocked for this app. Wherever possible,
+    // the app should also use less data in the foreground.
+
+    case RESTRICT_BACKGROUND_STATUS_WHITELISTED:
+    // The app is whitelisted. Wherever possible,
+    // the app should use less data in the foreground and background.
+
+    case RESTRICT_BACKGROUND_STATUS_DISABLED:
+    // Data Saver is disabled. Since the device is connected to a
+    // metered network, the app should use less data wherever possible.
+  }
+} else {
+  // The device is not on a metered network.
+  // Use data as required to perform syncs, downloads, and updates.
+}
+</pre>
+
+<h3 id="request-whitelist">
+  Meminta izin daftar putih
+</h3>
+
+<p>
+  Jika aplikasi Anda perlu menggunakan data di latar belakang, aplikasi bisa meminta izin
+  daftar putih dengan mengirim
+  <code>Settings.ACTION_IGNORE_BACKGROUND_DATA_RESTRICTIONS_SETTINGS</code>
+  yang mengandung URI dari nama paket aplikasi Anda: misalnya,
+  <code>package:MY_APP_ID</code>.
+</p>
+
+<p>
+  Mengirim intent dan URI akan membuka aplikasi <strong>Settings</strong> dan
+  menampilkan setelan penggunaan data untuk aplikasi Anda. Pengguna nanti bisa memutuskan apakah akan
+  mengaktifkan data latar belakang untuk aplikasi Anda. Sebelum Anda mengirim intent ini, sebaiknya
+  tanyakan kepada pengguna terlebih dahulu apakah mereka ingin membuka aplikasi
+  <strong>Settings</strong> untuk keperluan mengaktifkan penggunaan
+  data latar belakang.
+</p>
+
+<h2 id="monitor-changes">
+  Memantau Perubahan pada Preferensi Data Saver
+</h2>
+
+<p>
+  Aplikasi bisa memantau perubahan pada preferensi Data Saver dengan membuat {@link
+  android.content.BroadcastReceiver} untuk memantau {@code
+  ConnectivityManager.ACTION_RESTRICT_BACKGROUND_CHANGED} dan secara dinamis
+  mendaftarkan penerima pada {@link android.content.Context#registerReceiver
+  Context.registerReceiver()}. Bila menerima siaran ini, aplikasi harus
+  <a href="#status">memeriksa apakah preferensi Data Saver baru memengaruhi
+  izinnya</a> dengan memanggil {@code
+  ConnectivityManager.getRestrictBackgroundStatus()}.
+</p>
+
+<p class="note">
+  <strong>Catatan:</strong> Sistem hanya mengirim siaran ini ke aplikasi yang
+  secara dinamis mendaftar padanya dengan {@link
+  android.content.Context#registerReceiver Context.registerReceiver()}. Aplikasi
+  yang mendaftar untuk menerima siaran ini dalam manifes mereka
+  tidak akan menerimanya.
+</p>
+
+<h2 id="testing">
+  Menguji dengan Perintah Android Debug Bridge
+</h2>
+
+<a href="{@docRoot}tools/help/adb.html">Android Debug Bridge (ADB)</a>
+menyediakan beberapa perintah yang bisa Anda gunakan untuk memeriksa dan
+mengonfigurasi izin jaringan:
+
+<dl>
+  <dt>
+    <code>$ adb shell dumpsys netpolicy</code>
+  </dt>
+
+  <dd>
+    Menghasilkan laporan berisi setelan pembatasan jaringan latar belakang
+    global saat ini, UID paket saat ini di daftar putih, dan izin jaringan
+    untuk paket yang diketahui lainnya.
+  </dd>
+
+  <dt>
+    <code>$ adb shell cmd netpolicy</code>
+  </dt>
+
+  <dd>
+    Menampilkan daftar lengkap dari perintah Network Policy Manager (netpolicy).
+  </dd>
+
+  <dt>
+    <code>$ adb shell cmd netpolicy set restrict-background
+    &lt;boolean&gt;</code>
+  </dt>
+
+  <dd>
+    Mengaktifkan atau menonaktifkan mode Data Saver saat meneruskan <code>true</code> atau
+ <code>false</code>, masing-masing.
+  </dd>
+
+  <dt>
+    <code>$ adb shell cmd netpolicy add restrict-background-whitelist
+    &lt;UID&gt;</code>
+  </dt>
+
+  <dd>
+    Menambahkan UID paket tertentu ke daftar putih untuk mengizinkan penggunaan data berkuota
+  di latar belakang.
+  </dd>
+
+  <dt>
+    <code>$ adb shell cmd netpolicy remove restrict-background-whitelist
+    &lt;UID&gt;</code>
+  </dt>
+
+  <dd>
+    Membuang UID paket tertentu dari daftar putih untuk memblokir
+    penggunaan data berkuota di latar belakang saat Data Saver diaktifkan.
+  </dd>
+</dl>

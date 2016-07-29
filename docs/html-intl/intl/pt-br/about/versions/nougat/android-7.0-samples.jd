@@ -1,0 +1,85 @@
+page.title=Exemplos
+page.tags="preview", "samples", "android"
+page.image=images/cards/card-n-samples_2x.png
+@jd:body
+
+<p>
+  Os exemplos de código a seguir são fornecidos para o Android N. Para
+ fazer o download dos exemplos no Android Studio, selecione a opção de menu <b>File &gt; Import
+ Samples</b>.
+</p>
+
+<p class="note">
+  <strong>Observação:</strong> Esses projetos disponíveis para download são projetados
+ para uso com Gradle e Android Studio.
+</p>
+
+
+<h3 id="mw">Interface com várias janelas</h3>
+<img src="{@docRoot}images/android-7.0/sample-multiwindow.png" style="float: left; padding-right: 0.5em" height="250" width="156" />
+<p>
+  Este exemplo demonstra como aproveitar as vantagens de interfaces de usuário com várias janelas
+ com seu aplicativo.
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-MultiWindowPlayground">
+Obter no GitHub</a>
+</p>
+
+<div style="clear: both;"></div>
+<h3 id="an">Notificações ativas</h3>
+<img src="{@docRoot}images/android-7.0/sample-activenotifications.png" style="float: left; padding-right: 0.5em" height="250" width="141" />
+<p>
+  Este é um exemplo pré-existente que mostra um serviço simples que envia
+ notificações usando NotificationCompat. Cada conversa não lida de um usuário
+ é enviada como uma notificação distinta.
+</p>
+<p>
+  Este exemplo foi atualizado para utilizar os novos recursos de notificação
+ disponíveis no Android N.
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-ActiveNotifications">
+Obter no GitHub</a>
+</p>
+
+<div style="clear: both;"></div>
+<h3 id="ms">Serviço de mensagens</h3>
+<img src="{@docRoot}images/android-7.0/sample-messagingservice.png" style="float: left; padding-right: 0.5em" height="250" width="150" />
+<p>
+  Este é um exemplo pré-existente que demonstra como usar o
+ NotificationManager para identificar quantas notificações um aplicativo está mostrando
+ no momento.
+</p>
+<p>
+  Este exemplo foi atualizado para utilizar os novos recursos de notificação
+ disponíveis no Android N.
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-MessagingService">
+Obter no GitHub</a>
+</p>
+
+<div style="clear: both;"></div>
+<h3 id="fbe">Inicialização direta</h3>
+<img src="{@docRoot}images/android-7.0/sample-directboot.png" style="float: left; padding-right: 0.5em" height="250" width="141" />
+<p>
+  Este exemplo demonstra como armazenar e acessar dados no armazenamento criptografado de um dispositivo
+ que está sempre disponível enquanto o dispositivo é inicializado.
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-DirectBoot">
+Obter no GitHub</a>
+</p>
+
+<div style="clear: both;"></div>
+<h3 id="sda">Acesso a diretórios com escopo</h3>
+<img src="{@docRoot}images/android-7.0/sample-scopeddirectoryaccess.png" style="float: left; padding-right: 0.5em" height="250" width="141" />
+<p>
+  Este exemplo demonstra como ler e gravar dados de diretórios
+ específicos exigindo menos permissões.
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-ScopedDirectoryAccess">
+Obter no GitHub</a>
+</p>

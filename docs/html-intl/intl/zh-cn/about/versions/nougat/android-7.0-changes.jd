@@ -1,0 +1,610 @@
+page.title=行为变更
+page.keywords=Preview、SDK、兼容性
+meta.tags="preview", "compatibility"
+page.tags="preview", "developer preview"
+page.image=images/cards/card-n-changes_2x.png
+@jd:body
+
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>本文内容</h2>
+
+<ol>
+  <li><a href="#perf">性能提升</a>
+    <ol>
+      <li><a href="#doze">低电耗模式</a></li>
+      <li><a href="#bg-opt">后台优化</a></li>
+    </ol>
+  </li>
+  <li><a href="#perm">权限更改</a>
+  </li>
+  <li><a href="#sharing-files">应用间共享文件</a></li>
+  <li><a href="#accessibility">无障碍改进</a>
+    <ol>
+      <li><a href="#screen-zoom">屏幕缩放</a></li>
+      <li><a href="#vision-settings">设置向导中的视觉设置</a></li>
+    </ol>
+  </li>
+  <li><a href="#ndk">NDK 应用链接至平台库</a></li>
+  <li><a href="#afw">Android for Work</a></li>
+  <li><a href="#annotations">注解保留</a></li>
+  <li><a href="#other">其他重要说明</a></li>
+</ol>
+
+<h2>另请参阅</h2>
+<ol>
+  <li><a href="{@docRoot}preview/api-overview.html">Android N API 概览</a>
+</li>
+</ol>
+
+</div>
+</div>
+
+
+<p>
+  Android N 除了提供诸多新特性和功能外，还对系统和 API 行为做出了各种变更。
+本文重点介绍您应该了解并在开发应用时加以考虑的一些重要变更。
+
+
+</p>
+
+<p>
+  如果您之前发布过 Android 应用，请注意您的应用可能受到这些平台变更的影响。
+
+</p>
+
+
+<h2 id="perf">电池和内存</h2>
+
+<p>
+Android N 包括旨在延长设备电池寿命和减少 RAM 使用的系统行为变更。
+这些变更可能会影响您的应用访问系统资源，以及您的系统通过特定隐式 Intent 与其他应用互动的方式。
+
+
+</p>
+
+<h3 id="doze">低电耗模式</h3>
+
+<p>
+  Android 6.0（API 级别 23）引入了低电耗模式，当用户设备未插接电源、处于静止状态且屏幕关闭时，该模式会推迟 CPU 和网络活动，从而延长电池寿命。而 Android N 则通过在设备未插接电源且屏幕关闭状态下、但不一定要处于静止状态（例如用户外出时把手持式设备装在口袋里）时应用部分 CPU 和网络限制，进一步增强了低电耗模式。
+
+
+
+
+
+</p>
+
+
+<img src="{@docRoot}images/android-7.0/doze-diagram-1.png" alt="" height="251px" id="figure1" />
+<p class="img-caption">
+  <strong>图 1.</strong> 低电耗模式如何应用第一级系统活动限制以延长电池寿命的图示。
+
+</p>
+
+<p>
+  当设备处于充电状态且屏幕已关闭一定时间后，设备会进入低电耗模式并应用第一部分限制：
+关闭应用网络访问、推迟作业和同步。
+如果进入低电耗模式后设备处于静止状态达到一定时间，系统则会对 {@link android.os.PowerManager.WakeLock}、{@link android.app.AlarmManager} 闹铃、GPS 和 Wi-Fi 扫描应用余下的低电耗模式限制。
+
+
+无论是应用部分还是全部低电耗模式限制，系统都会唤醒设备以提供简短的维护时间窗口，在此窗口期间，应用程序可以访问网络并执行任何被推迟的作业/同步。
+
+
+
+</p>
+
+
+<img src="{@docRoot}images/android-7.0/doze-diagram-2.png" alt="" id="figure2" />
+<p class="img-caption">
+  <strong>图 2.</strong> 低电耗模式如何在设备处于静止状态达到一定时间后应用第二级系统活动限制的图示。
+
+</p>
+
+<p>
+  请注意，激活屏幕或插接设备电源时，系统将退出低电耗模式并取消这些处理限制。
+此项新增的行为不会影响有关使您的应用适应 Android 6.0（API 级别 23）中所推出的旧版本低电耗模式的建议和最佳实践，如<a href="{@docRoot}training/monitoring-device-state/doze-standby.html">低电耗模式和应用待机模式优化</a>中所讨论。
+
+
+
+您仍应遵循这些建议（例如使用 Google Cloud Messaging (GCM) 发送和接收消息）并开始安排更新计划以适应新增的低电耗模式行为。
+
+
+
+</p>
+
+
+<h3 id="bg-opt">Project Svelte：后台优化</h3>
+
+<p>
+  Android N 删除了三项隐式广播，以帮助优化内存使用和电量消耗。
+此项变更很有必要，因为隐式广播会在后台频繁启动已注册侦听这些广播的应用。
+
+删除这些广播可以显著提升设备性能和用户体验。
+
+</p>
+
+<p>
+  移动设备会经历频繁的连接变更，例如在 Wi-Fi 和移动数据之间切换时。
+目前，可以通过在应用清单中注册一个接收器来侦听隐式 {@link  android.net.ConnectivityManager#CONNECTIVITY_ACTION} 广播，让应用能够监控这些变更。
+
+
+由于很多应用会注册接收此广播，因此单次网络切换即会导致所有应用被唤醒并同时处理此广播。
+
+
+</p>
+
+<p>
+  同理，应用可以注册接收来自其他应用（例如相机）的隐式 {@link
+  android.hardware.Camera#ACTION_NEW_PICTURE} 和 {@link
+  android.hardware.Camera#ACTION_NEW_VIDEO} 广播。
+当用户使用相机应用拍摄照片时，这些应用即会被唤醒以处理广播。
+
+</p>
+
+<p>
+  为缓解这些问题，Android N 应用了以下优化措施：
+
+</p>
+
+<ul>
+  <li>面向 Android N 开发的应用不会收到 {@link
+  android.net.ConnectivityManager#CONNECTIVITY_ACTION} 广播，即使它们已有清单条目来请求接受这些事件的通知。
+在前台运行的应用如果使用{@link android.content.BroadcastReceiver} 请求接收通知，则仍可以在主线程中侦听 {@code CONNECTIVITY_CHANGE}。
+
+
+  </li>
+
+  <li>应用无法发送或接收 {@link
+android.hardware.Camera#ACTION_NEW_PICTURE} 或 {@link
+android.hardware.Camera#ACTION_NEW_VIDEO} 广播。此项优化会影响所有应用，而不仅仅是面向 Android N 的应用。
+
+  </li>
+</ul>
+
+<p>如果您的应用使用任何 Intent，您仍需要尽快移除它们的依赖关系，以正确适配 Android N 设备。
+
+  Android 框架提供多个解决方案来缓解对这些隐式广播的需求。
+例如，{@link
+  android.app.job.JobScheduler} API 提供了一个稳健可靠的机制来安排满足指定条件（例如连入无限流量网络）时所执行的网络操作。
+
+您甚至可以使用 {@link
+  android.app.job.JobScheduler} 来适应内容提供程序变化。
+</p>
+
+<p>
+  如需了解有关 Android N 中后台优化以及如何改写应用的详细信息，请参阅<a href="{@docRoot}preview/features/background-optimization.html">后台优化</a>。
+
+
+</p>
+
+<h2 id="perm">权限更改</h2>
+
+<p>
+  Android N 做了一些权限更改，这些更改可能会影响您的应用。
+</p>
+
+<h3 id="permfilesys">系统权限更改</h3>
+
+<p>
+  为了提高私有文件的安全性，面向 Android N 或更高版本的应用私有目录被限制访问　(<code>0700</code>)。
+
+  此设置可防止私有文件的元数据泄漏，如它们的大小或存在。
+此权限更改有多重副作用：
+</p>
+
+<ul>
+  <li>
+    私有文件的文件权限不应再由所有者放宽，为使用 {@link android.content.Context#MODE_WORLD_READABLE} 和/或 {@link android.content.Context#MODE_WORLD_WRITEABLE} 而进行的此类尝试将触发 {@link java.lang.SecurityException}。
+
+
+
+
+    <p class="note">
+      <strong>注：</strong>迄今为止，这种限制尚不能完全执行。
+      应用仍可能使用原生 API 或 {@link java.io.File File} API 来修改它们的私有目录权限。
+但是，我们强烈反对放宽私有目录的权限。
+
+    </p>
+  </li>
+  <li>
+    传递软件包网域外的 <code>file://</code> URI 可能给接收器留下无法访问的路径。
+因此，尝试传递 <code>file://</code> URI 会触发 <code>FileUriExposedException</code>。
+
+分享私有文件内容的推荐方法是使用 {@link
+    android.support.v4.content.FileProvider}。
+
+  </li>
+  <li>
+    {@link android.app.DownloadManager} 不再按文件名分享私人存储的文件。
+旧版应用在访问 {@link
+    android.app.DownloadManager#COLUMN_LOCAL_FILENAME} 时可能出现无法访问的路径。
+面向 Android N 或更高版本的应用在尝试访问 {@link android.app.DownloadManager#COLUMN_LOCAL_FILENAME} 时会触发 {@link java.lang.SecurityException}。
+
+
+
+    通过使用 {@link
+    android.app.DownloadManager.Request#setDestinationInExternalFilesDir
+    DownloadManager.Request.setDestinationInExternalFilesDir()} 或 {@link
+    android.app.DownloadManager.Request#setDestinationInExternalPublicDir
+    DownloadManager.Request.setDestinationInExternalPublicDir()} 将下载位置设置为公共位置的旧版应用仍可以访问 {@link android.app.DownloadManager#COLUMN_LOCAL_FILENAME} 中的路径，但是我们强烈反对使用这种方法。
+
+
+
+
+
+访问由 {@link android.app.DownloadManager} 公开的文件的首选方式是使用 {@link android.content.ContentResolver#openFileDescriptor
+    ContentResolver.openFileDescriptor()}。
+
+
+  </li>
+</ul>
+
+<h2 id="sharing-files">应用间共享文件</h2>
+
+<p>
+对于面向 Android N 的应用，Android 框架执行的 {@link android.os.StrictMode} API 政策禁止向您的应用外公开 {@code file://} URI。
+
+如果一项包含文件 URI 的 Intent 离开您的应用，应用失败，并出现 {@code FileUriExposedException} 异常。
+
+</p>
+
+<p>
+若要在应用间共享文件，您应发送一项 {@code content://} URI，并授予 URI 临时访问权限。
+进行此授权的最简单方式是使用 {@link android.support.v4.content.FileProvider} 类。
+如需有关权限和共享文件的更多信息，请参阅<a href="{@docRoot}training/secure-file-sharing/index.html">共享文件</a>。
+
+
+</p>
+
+<h2 id="accessibility">无障碍改进</h2>
+
+<p>
+  为提高平台对于视力不佳或视力受损用户的可用性，Android N 做出了一些更改。这些更改一般并不要求更改您的应用代码，不过您应仔细检查并使用您的应用测试这些功能，以评估它们对用户体验的潜在影响。
+
+
+
+
+</p>
+
+
+<h3 id="screen-zoom">屏幕缩放</h3>
+
+<p>
+  Android N 支持用户设置<strong>显示尺寸</strong>，以放大或缩小屏幕上的所有元素，从而提升设备对视力不佳用户的可访问性。用户无法将屏幕缩放至低于最小屏幕宽度<a href="http://developer.android.com/guide/topics/resources/providing-resources.html">
+ sw320dp</a>，该宽度是 Nexus 4 的宽度，也是常规中等大小手机的宽度。
+
+
+
+</p>
+
+<div class="cols">
+
+<div class="col-6">
+  <img src="{@docRoot}images/android-7.0/screen-zoom-1.png" alt="" height="XXX" id="figure1" />
+</div>
+<div class="col-6">
+  <img src="{@docRoot}images/android-7.0/screen-zoom-2.png" alt="" height="XXX" id="figure1" />
+</div>
+
+</div> <!-- end cols -->
+<p class="img-caption">
+  <strong>图 3.</strong> 右侧屏幕显示的是一台运行 Android N 系统映像的设备增大显示尺寸后的效果。
+
+</p>
+
+
+<p>
+  当设备密度发生更改时，系统会以如下方式通知正在运行的应用：
+
+</p>
+
+<ul>
+  <li>如果是面向 API 级别 23 或更低版本系统的应用，系统会自动终止其所有后台进程。
+这意味着如果用户切换离开此类应用，转而打开“Settings”屏幕并更改 <strong>Display size</strong> 设置，则系统会像处理内存不足的情况一样终止该应用。
+
+<em></em>
+如果应用具有任何前台进程，则系统会如<a href="{@docRoot}guide/topics/resources/runtime-changes.html">处理运行时变更</a>中所述将配置变更通知给这些进程，就像对待设备屏幕方向变更一样。
+
+
+
+  </li>
+
+  <li>如果是面向 Android N 的应用，则其所有进程（前台和后台）都会收到有关配置变更的通知，如<a href="{@docRoot}guide/topics/resources/runtime-changes.html">处理运行时变更</a>中所述。
+
+
+
+  </li>
+</ul>
+
+<p>
+  大多数应用并不需要进行任何更改即可支持此功能，不过前提是这些应用遵循 Android 最佳实践。具体要检查的事项：
+
+</p>
+
+<ul>
+  <li>在屏幕宽度为 <code><a href=
+  "{@docRoot}guide/topics/resources/providing-resources.html">sw320dp</a></code> 的设备上测试您的应用，并确保其充分运行。
+
+  </li>
+
+  <li>当设备配置发生变更时，更新任何与密度相关的缓存信息，例如缓存位图或从网络加载的资源。当应用从暂停状态恢复运行时，检查配置变更。
+
+
+
+    <p class="note">
+      <strong>注：</strong>如果您要缓存与配置相关的数据，则最好也包括相关元数据，例如该数据对应的屏幕尺寸或像素密度。
+
+保存这些元数据便于您在配置变更后决定是否需要刷新缓存数据。
+
+
+    </p>
+  </li>
+
+  <li>避免用像素单位指定尺寸，因为像素不会随屏幕密度缩放。应改为使用<a href="{@docRoot}guide/practices/screens_support.html">与密度无关像素</a> (<code>dp</code>) 单位指定尺寸。
+
+
+  </li>
+</ul>
+
+<h3 id="vision-settings">设置向导中的视觉设置</h3>
+
+<p>
+  Android N 在“Welcome”屏幕中加入了“Vision Settings”，用户可以在新设备上设置以下无障碍功能设置：
+
+  <strong>Magnification gesture</strong>、<strong>Font size</strong>、<strong>Display size</strong> 和 <strong>TalkBack</strong>。
+此项变更增强了与不同屏幕设置相关的错误的可见性。
+要评估此功能的影响，您应在启用这些设置的状态下测试应用。
+
+您可以在 <strong>Settings &gt; Accessibility</strong> 中找到这些设置。
+
+</p>
+
+<h2 id="ndk">NDK 应用链接至平台库</h2>
+
+<p>
+  Android N 做了一些命名空间更改，以阻止加载非公开 API。
+  如果您使用 NDK，则只能使用 Android 平台提供的公开 API。
+在下一个官方发布的 Android 版本上使用非公开 API 会导致应用崩溃。
+
+</p>
+
+<p>
+  为提醒您使用了非公开 API，在 Android N 设备上运行的应用会在有应用调用非公开 API 时在日志消息输出中生成一个错误。
+
+  此错误还会作为消息显示在设备屏幕上，以帮助增强您对此情况的认识。
+您应检查应用代码以删除使用非公开平台 API，并使用预览版设备或模拟器全面测试应用。
+
+
+</p>
+
+<p>
+  如果您的应用依赖平台库，则请参见 NDK 文档，了解使用公开 API 等效项替换普通私有 API 的典型修复。
+
+  您还可以链接至平台库，而无需实现此应用，如果应用使用的库是平台的一部分（例如 <code>libpng</code>），但不属于 NDK，则更可如此。
+
+此情况下，请确保您的 APK 包含您打算链接到的所有 .so 文件。
+
+</p>
+
+<p class="caution">
+  <strong>注意：</strong>有些第三方库可能会链接至非公开 API。
+如果您的应用使用这些库，那么当您的应用在下一个官方发布的 Android 版本上运行时可能会出现崩溃现象。
+
+</p>
+
+<p>
+  应用不应依赖或使用不属于 NDK 的原生库，因为这些库可能会发生更改或从一个 Android 版本迁移至另一版本。
+
+例如，从 OpenSSL 切换至 BoringSSL 即属于此类更改。
+  此外，不同的设备可能提供不同级别的兼容性，因为不属于 NDK 中的平台库没有兼容性要求。
+
+如果您必须在较旧设备上访问非 NDK 库，则请依据 Android API 级别进行加载。
+
+</p>
+
+<p>
+  为帮助您诊断此类问题，下面列举了一些在您试图使用 Android N 开发应用时可能遇到的 Java 和 NDK 错误：
+
+</p>
+
+<p>Java 错误示例：</p>
+<pre class="no-pretty-print">
+java.lang.UnsatisfiedLinkError: dlopen failed: library "/system/lib/libcutils.so"
+    is not accessible for the namespace "classloader-namespace"
+</pre>
+
+<p>NDK 错误示例：</p>
+<pre class="no-pretty-print">
+dlopen failed: cannot locate symbol "__system_property_get" referenced by ...
+</pre>
+
+
+<p>
+  以下是遇到这类错误的应用的一些典型修复：
+</p>
+
+<ul>
+  <li>可以使用标准 JNI 函数来替代使用 libandroid_runtime.so 中的 getJavaVM 和 getJNIEnv：
+
+<pre class="no-pretty-print">
+AndroidRuntime::getJavaVM -&gt; GetJavaVM from &lt;jni.h&gt;
+AndroidRuntime::getJNIEnv -&gt; JavaVM::GetEnv or
+JavaVM::AttachCurrentThread from &lt;jni.h&gt;.
+</pre>
+  </li>
+
+  <li>可以使用公开 {@code alternative __system_property_get} 来替代使用 {@code libcutils.so} 中的 {@code property_get} 符号。如需这样做，请使用 {@code __system_property_get} 及以下 include 函数：
+
+
+<pre>
+#include &lt;sys/system_properties.h&gt;
+</pre>
+  </li>
+
+  <li>应使用应用本地版本来替代使用 {@code libcrypto.so} 中的 {@code SSL_ctrl} 符号。例如，您应在 {@code .so} 文件中静态链接 {@code libcyrpto.a}，或者在应用中包含您自己的来自 BoringSSL 或 OpenSSL 的动态 {@code libcrypto.so}。
+
+
+
+  </li>
+</ul>
+
+<h2 id="afw">Android for Work</h2>
+<p>
+  Android N 包含一些针对面向 Android for Work 的应用的变更，包括对证书安装、密码重置、二级用户管理、设备标识符访问权限的变更。如果您是要针对 Android for Work 环境开发应用，则应仔细检查这些变更并相应地修改您的应用。
+
+
+
+
+</p>
+
+<ul>
+  <li>您必须先安装授权证书安装程序，然后 DPC 才能对其进行设置。
+对于面向 N SDK 的个人资料和设备所有者应用，您应在设备策略控制器 (DPC) 调用 <code>DevicePolicyManager.setCertInstallerPackage()</code> 之前安装授权证书安装程序。
+
+
+如果尚未安装此安装程序，则系统会引发 <code>IllegalArgumentException</code>。
+
+
+  </li>
+
+  <li>针对设备管理员的重置密码限制现在也适用于个人资料所有者。
+设备管理员无法再使用 {@code DevicePolicyManager.resetPassword()} 来清除或更改已经设置的密码。
+
+设备管理员仍可以设置密码，但只能在设备没有密码、PIN 或图案时这样做。
+
+  </li>
+
+  <li>即使设置了限制，设备所有者和个人资料所有者仍可以管理帐户。而且，即使具有 <code>DISALLOW_MODIFY_ACCOUNTS</code> 用户限制，设备所有者和个人资料所有者仍可调用 Account Management API。
+
+
+  </li>
+
+  <li>设备所有者可以更轻松地管理二级用户。当设备在设备所有者模式下运行时，系统将自动设置 <code>DISALLOW_ADD_USER</code> 限制。
+
+这样可以防止用户创建非托管二级用户。
+此外，<code>CreateUser()</code> 和 <code>createAndInitializeUser()</code> 方法已弃用，取而代之的是 <code>DevicePolicyManager.createAndManageUser()</code> 方法。
+
+
+  </li>
+
+  <li>设备所有者可以访问设备标识符。设备所有者可以使用
+ <code>DevicePolicyManagewr.getWifiMacAddress()</code> 访问设备的 Wi-Fi MAC 地址。
+如果设备上从未启用 Wi-Fi，则此方法将返回一个 {@code null} 值。
+
+  </li>
+
+  <li>工作模式设置控制工作应用访问。当工作模式关闭时，系统启动器通过使工作应用显示为灰色来指示它们不可用。
+启用工作模式会再次恢复正常行为。
+
+</ul>
+
+<p>
+  如需了解有关 Android N 中针对 Android for Work 所做变更的详细信息，请参阅
+ <a href="{@docRoot}preview/features/afw.html">Android for Work 更新</a>。
+</p>
+
+<h2 id="annotations">注解保留</h2>
+
+<p>
+Android N 在注解可见性被忽略时修复错误。这种问题将启用本不应被允许的运行时访问注解。
+
+这些注解包括：
+</p>
+
+<ul>
+   <li>{@code VISIBILITY_BUILD}:仅应编译时可见。</li>
+   <li>{@code VISIBILITY_SYSTEM}:运行时应可见，但仅限基本系统。
+</li>
+</ul>
+
+<p>
+如果您的应用依赖这种行为，请在注解中添加一项运行时必须可用的保留政策。
+您可通过使用 {@code @Retention(RetentionPolicy.RUNTIME)} 来如此做。
+</p>
+
+<h2 id="other">其他重要说明</h2>
+
+<ul>
+<li>如果一个应用在 Android N 上运行，但却是针对更低 API 级别开发的，那么在用户更改显示尺寸时，系统将终止此应用进程。
+应用必须能够正常处理此情景。
+否则，当用户从最近使用记录中恢复运行应用时，应用将会出现崩溃现象。
+
+
+<p>
+您应测试应用以确保不会发生此行为。要进行此测试，您可以通过 DDMS 手动终止应用，以造成相同的崩溃现象。
+
+
+
+</p>
+
+<p>
+在密度发生更改时，系统不会自动终止面向 N 及更高版本的应用；不过，这些应用仍可能对配置变更做出不良响应。
+
+</p>
+</li>
+
+<li>
+Android N 上的应用应能够正常处理配置变更，并且在后续启动时不会出现崩溃现象。您可以通过更改字体大小 (<strong>Setting</strong> &gt;
+<strong>Display</strong> &gt; <strong>Font size</strong>) 并随后从最近使用记录中恢复运行应用，来验证应用行为。
+
+
+
+</li>
+
+<li>
+由于之前的 Android 版本中的一项错误，系统未能将对主线程上的一个 TCP 套接字的写入操作举报为严格模式违反。
+Android N 修复了此错误。呈现出这种行为的应用引发 {@code android.os.NetworkOnMainThreadException}。一般情况下，我们不建议在主线程上执行网络操作，因为这些操作通常都有可能导致 ANR 和卡顿的高尾延迟。
+
+
+
+</li>
+
+<li>
+{@code Debug.startMethodTracing()} 方法族现在默认在您的共享的存储空间上的软件包特定目录中存储输出，而非 SD 卡顶级。
+
+
+这意味着应用不再需要请求 {@code WRITE_EXTERNAL_STORAGE} 使用这些 API 的权限。
+</li>
+
+<li>
+许多平台 API 现在开始检查在 {@link android.os.Binder} 事务间发送的大负载，系统现在会将 {@code TransactionTooLargeExceptions} 再次作为 {@code RuntimeExceptions} 引发，而不再只是默默记录或抑制它们。
+
+
+一个常见例子是在 {@link android.app.Activity#onSaveInstanceState Activity.onSaveInstanceState()} 上存储过多数据，导致 {@code ActivityThread.StopInfo} 在您的应用面向 Android N 时引发 {@code RuntimeException}。
+
+
+
+
+</li>
+
+<li>
+如果应用向 {@link android.view.View} 发布 {@link java.lang.Runnable} 任务，并且 {@link android.view.View} 未附加到窗口，系统会用 {@link android.view.View} 为 {@link java.lang.Runnable} 任务排队；在 {@link android.view.View} 附加到窗口之前，{@link java.lang.Runnable} 任务不会执行。
+
+
+
+
+
+此行为会修复以下错误：
+<ul>
+   <li>如果一项应用是从并非预期窗口 UI 线程的其他线程发布到 {@link android.view.View}，则{@link java.lang.Runnable} 可能会因此运行错误的线程。
+
+   </li>
+   <li>如果 {@link java.lang.Runnable} 任务是从并非环路线程的其他线程发布，则应用可能会曝光 {@link java.lang.Runnable} 任务。
+</li>
+</ul>
+</li>
+
+<li>
+如果 Android N 上一项有 {@link android.Manifest.permission#DELETE_PACKAGES DELETE_PACKAGES} 权限的应用尝试删除一个软件包，但另一项应用已经安装了这个软件包，则系统可能要求用户确认。
+
+
+在这种情况下，应用在调用 {@link android.content.pm.PackageInstaller#uninstall PackageInstaller.uninstall()} 时的返回状态应为 {@link android.content.pm.PackageInstaller#STATUS_PENDING_USER_ACTION STATUS_PENDING_USER_ACTION}。
+
+
+
+</li>
+
+</ul>
+

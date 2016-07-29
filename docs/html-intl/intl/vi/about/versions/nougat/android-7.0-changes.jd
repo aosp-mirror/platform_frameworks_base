@@ -1,0 +1,480 @@
+page.title=Các thay đổi Hành vi
+page.keywords=preview,sdk,compatibility
+meta.tags="preview", "compatibility"
+page.tags="preview", "developer preview"
+page.image=images/cards/card-n-changes_2x.png
+@jd:body
+
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>Trong tài liệu này</h2>
+
+<ol>
+  <li><a href="#perf">Cải thiện Hiệu năng</a>
+    <ol>
+      <li><a href="#doze">Chế độ Ngủ sâu</a></li>
+      <li><a href="#bg-opt">Tối ưu hóa Chạy ngầm</a></li>
+    </ol>
+  </li>
+  <li><a href="#perm">Thay đổi Quyền</a></li>
+  <li><a href="#accessibility">Cải thiện Trợ năng</a>
+    <ol>
+      <li><a href="#screen-zoom">Thu phóng Màn hình</a></li>
+      <li><a href="#vision-settings">Cài đặt Khả năng nhìn trong Trình Thiết lập</a></li>
+    </ol>
+  </li>
+  <li><a href="#ndk">Liên kết Ứng dụng NDK với Thư viện Nền tảng</a></li>
+  <li><a href="#afw">Android cho Công việc</a></li>
+</ol>
+
+<h2>Xem thêm</h2>
+<ol>
+  <li><a href="{@docRoot}preview/api-overview.html">
+    Tổng quan về API Android N</a></li>
+</ol>
+
+</div>
+</div>
+
+
+<p>
+  Với các tính năng và khả năng mới, Android N
+  cũng có một số các thay đổi hành vi của hệ thống và API. Tài liệu
+  này nêu bật một số các thay đổi quan trọng mà bạn cần biết và cân nhắc cho
+   ứng dụng của mình.
+</p>
+
+<p>
+  Nếu bạn đã từng phát hành ứng dụng cho Android, hãy lưu ý rằng các thay đổi
+  trong nền tảng này có thể tác động đến ứng dụng của bạn.
+</p>
+
+
+<h2 id="perf">Cải thiện Hiệu năng</h2>
+
+<p>
+  Android N có chứa các thay đổi hành vi của hệ thống nhằm cải thiện thời lượng
+  pin của thiết bị, sử dụng RAM và hiệu năng ứng dụng. Các thay đổi này có thể tác động đến
+   tính khả dụng của tài nguyên và các thông báo hệ thống đối tới ứng dụng. Bạn
+  nên tìm hiểu các thay đổi này và đánh giá xem ứng dụng cần phải điều chỉnh như thế nào đối với
+  các thay đổi.
+</p>
+
+<h3 id="doze">Chế độ Ngủ sâu</h3>
+
+<p>
+  Được đưa vào Android 6.0 (Mức API 23), Chế độ Ngủ sâu cải thiện thời lượng pin bằng cách
+  trì hoãn các hoạt động của CPU và mạng khi người dùng không cắm sạc,
+   không di chuyển và tắt màn hình thiết bị. Android N
+  thêm các cải tiến cho Chế độ Ngủ sâu bằng cách sử dụng một tập con các hạn chế của CPU và mạng
+  khi thiết bị không được cắm sạc với màn hình bị tắt, nhưng không nhất thiết
+  phải để một chỗ, ví dụ như một thiết bị cầm tay di chuyển trong túi của người dùng.
+</p>
+
+
+<img src="{@docRoot}images/android-7.0/doze-diagram-1.png" alt="" height="251px" id="figure1" />
+<p class="img-caption">
+  <strong>Hình 1.</strong> Minh họa cách thức Chế độ Ngủ sâu áp dụng ở cấp đầu tiên của
+  các hạn chế hoạt động hệ thống nhằm cải thiện thời lượng pin.
+</p>
+
+<p>
+  Khi một thiết bị dùng nguồn điện từ pin và màn hình bị tắt trong một khoảng thời gian
+  nhất định, thiết bị sẽ chuyển vào Chế độ Ngủ sâu và áp dụng tập con đầu tiên của các hạn chế: Nó
+  sẽ ngắt truy cập mạng của ứng dụng và trì hoãn các tác vụ và các đồng bộ. Nếu thiết bị
+  được đặt một chỗ trong một khoảng thời gian nhất định sau khi vào Chế độ Ngủ sâu thì hệ thống sẽ áp dụng
+   các hạn chế còn lại của Chế độ Ngủ sâu thành {@link android.os.PowerManager.WakeLock}, báo thức
+{@link android.app.AlarmManager}, GPS, quét Wi-Fi. Cho dù
+  một số hoặc tất cả các hạn chế của Chế độ Ngủ sâu có được áp dụng hay không thì hệ thống sẽ đánh thức
+  thiết bị trong các khoảng thời gian bảo trì ngắn, trong đó các ứng dụng được phép
+  truy cập mạng và có thể thực thi mọi tác vụ/đồng bộ bị trì hoãn.
+</p>
+
+
+<img src="{@docRoot}images/android-7.0/doze-diagram-2.png" alt="" id="figure2" />
+<p class="img-caption">
+  <strong>Hình 2.</strong> Minh họa cách Chế độ Ngủ sâu áp dụng cấp thứ hai của
+   các hạn chế hoạt động hệ thống sau khi thiết bị được đặt một chỗ trong một khoảng thời gian nhất định.
+</p>
+
+<p>
+  Lưu ý rằng việc bật màn hình hoặc cắm sạc sẽ đưa thiết bị thoát Chế độ Ngủ sâu và
+  loại bỏ các hạn chế xử lý này. Hành vi bổ sung này không
+  ảnh hưởng đến các khuyến nghị và các thực hành tốt nhất khi thích ứng cho ứng dụng của bạn với phiên bản
+  Chế độ Ngủ sâu được đưa vào Android 6.0 (API mức 23) trước đó, như mô tả trong
+  <a href="{@docRoot}training/monitoring-device-state/doze-standby.html">
+  Tối ưu hóa Chế độ Ngủ sâu và Chế độ Chờ của Ứng dụng</a>.  Bạn nên tiếp tục
+  làm theo các khuyến nghị đó, ví dụ như sử dụng Google Cloud Messaging (GCM) để
+  gửi và nhận tin nhắn, và hãy tiến hành áp dụng các bản cập nhật để nhận
+  hành vi Chế độ Ngủ sâu bổ sung.
+</p>
+
+
+<h3 id="bg-opt">Dự án Svelte: Tối ưu hóa Chạy ngầm</h3>
+
+<p>
+  Android N gỡ bỏ ba truyền phát không biểu thị để giúp tối ưu hóa cả
+  việc sử dụng bộ nhớ lẫn tiêu thụ điện năng. Thay đổi này là điều cần thiết bởi các truyền phát
+  không biểu thị thường xuyên khởi động các ứng dụng đã được đăng ký để lắng nghe chúng dưới
+  nền. Gỡ bỏ các truyền phát này có thể đem lại lợi ích lớn đối với hiệu năng
+  của thiết bị và trải nghiệm người dùng.
+</p>
+
+<p>
+  Các thiết bị di động thường xuyên gặp phải những thay đổi về kết nối, chẳng hạn như khi di chuyển
+  giữa Wi-Fi và dữ liệu di động. Hiện tại, các ứng dụng có thể theo dõi những thay đổi về
+  kết nối bằng cách đăng ký một bộ thu truyền phát cho {@link
+  android.net.ConnectivityManager#CONNECTIVITY_ACTION} không biểu thị trong bản kê khai
+  của chúng. Vì nhiều ứng dụng đăng ký để nhận truyền phát này do đó một hoạt động chuyển mạng
+  duy nhất cũng có thể khiến tất cả các ứng dụng thức dậy và xử lý truyền phát đó ngay
+  lập tức.
+</p>
+
+<p>
+  Tương tự, các ứng dụng có thể đăng ký nhận truyền phát {@link
+  android.hardware.Camera#ACTION_NEW_PICTURE} và {@link
+  android.hardware.Camera#ACTION_NEW_VIDEO} không biểu thị từ các ứng dụng khác, ví dụ như
+ứng dụng Camera. Khi một người dùng chụp ảnh với ứng dụng Camera thì những ứng dụng này sẽ thức dậy
+  để xử lý truyền phát đó.
+</p>
+
+<p>
+  Để loại bỏ các vấn đề này, Android N áp dụng các cách tối ưu hóa
+  sau:
+</p>
+
+<ul>
+  <li>Ứng dụng nhắm mục tiêu Android N sẽ không nhận các truyền phát {@link
+  android.net.ConnectivityManager#CONNECTIVITY_ACTION}, ngay cả khi chúng
+  có các mục nhập của trong bản kê khai yêu cầu thông báo về các sự kiện này. Những ứng dụng đang chạy
+  ở tiền cảnh vẫn có thể lắng nghe {@code CONNECTIVITY_CHANGE} qua
+ luồng chính của chúng nếu yêu cầu thông báo bằng {@link
+  android.content.BroadcastReceiver}.
+  </li>
+
+  <li>Ứng dụng không thể gửi hoặc nhận các truyền phát {@link
+  android.hardware.Camera#ACTION_NEW_PICTURE} hoặc {@link
+  android.hardware.Camera#ACTION_NEW_VIDEO}. Cách tối ưu này
+  tác động đến mọi ứng dụng, không chỉ các ứng dụng nhắm mục tiêu Android N.
+  </li>
+</ul>
+
+<p>
+  Các lần phát hành Android sau này có thể loại bỏ thêm các truyền phát không biểu thị, cũng
+   như các dịch vụ chạy ngầm không còn liên kết. Vì lý do này, bạn nên tránh dùng hoặc
+  gỡ bỏ các phụ thuộc trên các bộ thu được khai báo trong bản kê khai đối với các truyền phát không biểu thị,
+  cũng như các dịch vụ chạy ngầm.
+</p>
+
+<p>
+  Khuôn khổ Android cung cấp một số giải pháp để giảm thiểu sự cần thiết đối với
+  các truyền phát không biểu thị hoặc các dịch vụ chạy ngầm này. Ví dụ, API {@link
+  android.app.job.JobScheduler} cung cấp một cơ chế lên lịch hiệu quả
+ cho các hoạt động mạng khi đáp ứng các điều kiện được chỉ định, ví dụ như kết nối tới một
+  mạng không đo lưu lượng. Bạn còn có thể sử dụng {@link
+  android.app.job.JobScheduler} để phản ứng lại các thay đổi đối với trình cung cấp nội dung.
+</p>
+
+<p>
+  Để biết thêm thông tin về thay đổi hành vi này và cách thích ứng ứng dụng của bạn,
+  hãy xem <a href="{@docRoot}preview/features/background-optimization.html">Tối ưu hóa
+ Chạy ngầm</a>.
+</p>
+
+
+<h2 id="perm">Thay đổi Quyền</h2>
+
+<p>
+  Android N có các thay đổi đối với quyền có thể tác động đến ứng dụng của bạn,
+  bao gồm các quyền tài khoản người dùng và một quyền mới cho phép ghi vào
+  bộ nhớ ngoài.  Sau đây là phần tóm tắt các quyền đã thay đổi trong
+ bản xem trước:
+</p>
+
+<ul>
+  <li>{@code GET_ACCOUNTS} (Bị loại bỏ)
+    <p>
+      Quyền GET_ACCOUNTS nay đã bị loại bỏ. Hệ thống sẽ bỏ qua quyền
+  này đối với các ứng dụng nhắm mục tiêu Android N.
+    </p>
+  </li>
+
+</ul>
+
+
+
+<h2 id="accessibility">Cải thiện Trợ năng</h2>
+
+<p>
+  Android N có các thay đổi nhằm nâng cao khả năng sử dụng
+  của nền tảng cho những người dùng có thị lực kém hoặc khiếm thị. Nhìn chung, các thay đổi này sẽ không
+  yêu cầu thay đổi mã nguồn trong ứng dụng của bạn. Tuy nhiên, bạn cần xem lại
+  các tính năng này và kiểm thử chúng với ứng dụng của mình để đánh giá các tác động tiềm tàng đối với trải nghiệm
+ người dùng.
+</p>
+
+
+<h3 id="screen-zoom">Thu phóng Màn hình</h3>
+
+<p>
+  Android N cho phép người dùng đặt <strong>Display size</strong> để phóng to
+  hoặc thu nhỏ tất cả các phần tử trên màn hình, nhờ đó cải thiện trợ năng của thiết bị
+  cho những người dùng có thị lực kém. Người dùng không thể thu phóng màn hình vượt quá chiều rộng màn hình
+  tối thiểu <a href="http://developer.android.com/guide/topics/resources/providing-resources.html">
+  sw320dp</a>. Đây là chiều rộng của Nexus 4, một máy điện thoại phổ biến có kích cỡ trung bình.
+</p>
+
+<div class="cols">
+
+<div class="col-6">
+  <img src="{@docRoot}images/android-7.0/screen-zoom-1.png" alt="" height="XXX" id="figure1" />
+</div>
+<div class="col-6">
+  <img src="{@docRoot}images/android-7.0/screen-zoom-2.png" alt="" height="XXX" id="figure1" />
+</div>
+
+</div> <!-- end cols -->
+<p class="img-caption">
+  <strong>Hình 3.</strong> Màn hình bên phải hiển thị tác động của
+  việc tăng kích cỡ Hiển thị của một thiết bị đang chạy ảnh hệ thống Android N.
+</p>
+
+
+<p>
+  Khi mật độ của thiết bị thay đổi, hệ thống sẽ thông báo cho các ứng dụng đang chạy theo
+  những cách sau:
+</p>
+
+<ul>
+  <li>Nếu một ứng dụng nhắm mục tiêu mức API 23 hoặc thấp hơn thì hệ thống sẽ tự động tắt
+  tất cả các tiến trình chạy ngầm của ứng dụng đó. Điều này có nghĩa là nếu một người dùng rời khỏi
+  ứng dụng đó để mở màn hình <em>Settings</em> và thay đổi
+  <strong>Display size</strong> thì hệ thống sẽ tắt ứng dụng giống
+ như trong trường hợp thiết bị thiếu bộ nhớ. Nếu ứng dụng đó có bất kỳ tiến trình nào
+  chạy ở tiền cảnh thì hệ thống sẽ thông báo cho các tiến trình đó về thay đổi cấu hình như
+  mô tả trong <a href="{@docRoot}guide/topics/resources/runtime-changes.html">Xử lý
+ Thay đổi Thời gian chạy</a>, giống như hướng của thiết bị vừa thay đổi.
+  </li>
+
+  <li>Nếu ứng dụng nhắm mục tiêu Android N thì mọi tiến trình của nó
+   (chạy ở tiền cảnh và chạy ngầm) đều được thông báo về thay đổi cấu hình như
+  mô tả trong <a href="{@docRoot}guide/topics/resources/runtime-changes.html">Xử lý
+ Thay đổi Thời gian chạy</a>.
+  </li>
+</ul>
+
+<p>
+  Hầu hết các ứng dụng không cần thực hiện bất kỳ thay đổi nào để hỗ trợ tính năng này, miễn là
+   các ứng dụng đó tuân theo các thực hành tốt nhất của Android. Những điều cụ thể cần kiểm tra:
+</p>
+
+<ul>
+  <li>Kiểm thử ứng dụng của bạn trên một thiết bị có chiều rộng màn hình <code><a href=
+  "{@docRoot}guide/topics/resources/providing-resources.html">sw320dp</a></code>
+  và đảm bảo nó hoạt động đúng.
+  </li>
+
+  <li>Khi cấu hình của thiết bị thay đổi, hãy cập nhật mọi thông tin được lưu trữ trong bộ đệm
+   phụ thuộc vào mật độ, ví dụ như các ảnh bitmap được lưu đệm hoặc các tài nguyên được tải từ
+  mạng. Hãy kiểm tra các thay đổi cấu hình khi ứng dụng khôi phục từ trạng thái
+  tạm dừng.
+    <p class="note">
+      <strong>Lưu ý:</strong> Nếu bạn lưu trữ trong bộ đệm các dữ liệu phụ thuộc vào cấu hình thì nên
+   thêm siêu dữ liệu liên quan như kích cỡ
+     màn hình phù hợp hoặc mật độ điểm ảnh cho dữ liệu đó. Việc lưu siêu dữ liệu này cho phép bạn
+     quyết định liệu bạn có cần phải làm mới dữ liệu được lưu trữ đệm sau khi một cấu hình
+     thay đổi.
+    </p>
+  </li>
+
+  <li>Tránh chỉ định các kích thước theo đơn vị px vì chúng không thay đổi tỉ lệ theo
+   mật độ màn hình. Thay vào đó, hãy chỉ định các kích thước bằng các đơn vị <a href="{@docRoot}guide/practices/screens_support.html">điểm ảnh
+   độc lập với mật độ</a> (<code>dp</code>).
+  </li>
+</ul>
+
+<h3 id="vision-settings">Cài đặt Khả năng nhìn trong Trình Thiết lập</h3>
+
+<p>
+  Android N có Cài đặt Khả năng nhìn trên màn hình Chào mừng, nơi người dùng có thể
+   thiết lập các cài đặt trợ năng sau đây trên một thiết bị mới:
+ <strong>Magnification gesture</strong>, <strong>Font size</strong>,
+  <strong>Display size</strong> và <strong>TalkBack</strong>. Thay đổi này
+   sẽ tăng khả năng thấy được các khiếm khuyết liên quan đến những cài đặt màn hình khác nhau. Để
+  đánh giá tác động của tính năng này, bạn có thể kiểm thử ứng dụng của mình với các
+  cài đặt sau được bật. Bạn có thể tìm các cài đặt này trong <strong>Settings &gt;
+  Accessibility</strong>.
+</p>
+
+<h2 id="ndk">Liên kết Ứng dụng NDK với Thư viện Nền tảng</h2>
+
+<p>
+  Android N có các thay đổi đối với không gian tên để ngăn việc tải các API không công khai.
+ Nếu bạn sử dụng NDK, bạn chỉ nên sử dụng các API công khai từ nền tảng
+  Android. Sử dụng các API không công khai trong bản phát hành chính thức tiếp theo của Android
+   có thể khiến ứng dụng bị treo.
+</p>
+
+<p>
+  Để cảnh báo cho bạn việc sử dụng các API không công khai, các ứng dụng chạy trên thiết bị
+   Android N sẽ tạo ra một lỗi trong phần xuất ra của logcat khi một ứng dụng gọi một API không công khai.
+  Lỗi này cũng được hiển thị trên màn hình thiết bị dưới dạng thông báo để hỗ trợ
+  nâng cao nhận biết đối với tình huống này. Bạn nên xem lại mã của ứng dụng để
+  gỡ bỏ phần sử dụng các API nền tảng không công khai và kiểm thử kỹ lưỡng ứng dụng bằng
+   một thiết bị hoặc bộ giả lập của bản xem trước.
+</p>
+
+<p>
+  Nếu ứng dụng của bạn phụ thuộc vào các thư viện của nền tảng, hãy xem tài liệu NDK để biết
+  các cách khắc phục cơ bản nhằm thay thế các API không công khai bằng các API công khai tương ứng.
+   Bạn cũng có thể liên kết với các thư viện của nền tảng mà không nhận biết ứng dụng,
+   đặc biệt nếu ứng dụng của bạn sử dụng thư viện thuộc một phần của nền tảng (như
+  <code>libpng</code>), nhưng không thuộc NDK. Trong trường hợp đó, hãy đảm bảo rằng
+    tệp APK của bạn có chứa tất cả các tệp .so bạn dự định liên kết với.
+</p>
+
+<p class="caution">
+  <strong>Cẩn trọng:</strong> Một số thư viện của bên thứ ba có thể liên kết với các API
+  không công khai. Nếu ứng dụng của bạn sử dụng các thư viện này thì ứng dụng của bạn có thể gặp lỗi sụp đổ khi đang chạy
+  trong lần phát hành Android chính thức kế tiếp.
+</p>
+
+<p>
+  Các ứng dụng không nên phụ thuộc vào hoặc sử dụng các thư viện gốc không kèm theo trong
+  NDK bởi vì chúng có thể thay đổi hoặc bị gỡ bỏ khỏi khi phát hành bản Android khác
+  thay cho bản cũ. Việc chuyển từ OpenSSL sang BoringSSL là một ví dụ về sự thay đổi đó.
+  Ngoài ra, các thiết bị khác nhau có thể cung cấp các mức độ tương thích khác nhau bởi
+  không có yêu cầu nào về khả năng tương thích cho các thư viện nền tảng không đi kèm với
+  NDK. Nếu bạn buộc phải sử dụng các thư viện không thuộc NDK trên các thiết bị cũ, hãy thực hiện
+  quá trình tải phụ thuộc vào mức Android API.
+</p>
+
+<p>
+  Nhằm giúp bạn chẩn đoán các loại vấn đề này, sau đây là một số lỗi Java và NDK
+ ví dụ bạn có thể gặp phải khi cố dựng ứng dụng với Android N:
+</p>
+
+<p>Ví dụ lỗi Java:</p>
+<pre class="no-pretty-print">
+java.lang.UnsatisfiedLinkError: dlopen failed: library "/system/lib/libcutils.so"
+    is not accessible for the namespace "classloader-namespace"
+</pre>
+
+<p>Ví dụ lỗi NDK:</p>
+<pre class="no-pretty-print">
+dlopen failed: cannot locate symbol "__system_property_get" referenced by ...
+</pre>
+
+
+<p>
+  Sau đây là một số cách khắc phục đối với ứng dụng gặp phải các kiểu lỗi này:
+</p>
+
+<ul>
+  <li>Việc sử dụng getJavaVM và getJNIEnv trong libandroid_runtime.so có thể được thay
+  bằng các hàm JNI chuẩn:
+<pre class="no-pretty-print">
+AndroidRuntime::getJavaVM -&gt; GetJavaVM from &lt;jni.h&gt;
+AndroidRuntime::getJNIEnv -&gt; JavaVM::GetEnv or
+JavaVM::AttachCurrentThread from &lt;jni.h&gt;.
+</pre>
+  </li>
+
+  <li>Việc sử dụng ký hiệu {@code property_get} trong {@code libcutils.so} có thể được
+    thay bằng phương thức {@code __system_property_get} công khai thay thế.
+   Để làm điều này, hãy dùng {@code __system_property_get} với câu lệnh include sau:
+<pre>
+#include &lt;sys/system_properties.h&gt;
+</pre>
+  </li>
+
+  <li>Việc sử dụng ký hiệu {@code SSL_ctrl} trong {@code libcrypto.so} nên được
+  thay bằng một ký hiệu cục bộ của ứng dụng. Ví dụ, bạn nên liên kết tĩnh
+  {@code libcyrpto.a} trong tệp {@code .so} hoặc thêm tham chiếu
+  {@code libcrypto.so} động của riêng mình từ BoringSSL hoặc OpenSSL trong ứng dụng của bạn.
+  </li>
+</ul>
+
+<h2 id="afw">Android cho Công việc</h2>
+<p>
+  Android N có các thay đổi cho ứng dụng nhắm mục tiêu Android cho Công việc, bao gồm
+  các thay đổi đối với cài đặt chứng chỉ, đặt lại mật khẩu, quản lý người dùng
+  thứ hai và truy cập các mã định danh của thiết bị. Nếu bạn đang dựng các ứng dụng dành cho
+  các môi trường Android cho Công việc thì bạn nên xem lại các thay đổi này và chỉnh sửa
+  ứng dụng của mình cho phù hợp.
+</p>
+
+<ul>
+  <li>Bạn phải cài đặt một trình cài đặt chứng chỉ ủy thác trước khi DPC có thể đặt
+  nó. Đối với cả ứng dụng người sở hữu cấu hình và ứng dụng người sở hữu thiết bị nhắm mục tiêu SDK N, bạn cần
+  cài đặt trình cài đặt chứng chỉ ủy thác trước khi trình kiểm soát
+  chính sách của thiết bị (DPC) gọi
+  <code>DevicePolicyManager.setCertInstallerPackage()</code>. Nếu trình cài đặt
+  chưa được cài thì hệ thống sẽ đưa ra một
+  <code>IllegalArgumentException</code>.
+  </li>
+
+  <li>Giờ đây các hạn chế đặt lại mật khẩu cho người quản lý thiết bị sẽ áp dụng với người sở hữu
+   cấu hình. Người quản lý thiết bị không thể sử dụng
+  <code>DevicePolicyManager.resetPassword()</code> được nữa để xóa mật khẩu hoặc thay đổi
+  các mật khẩu đã đặt. Người quản lý thiết bị vẫn có thể đặt một mật khẩu nhưng chỉ
+  khi thiết bị không có mật khẩu, mã PIN hoặc mẫu hình.
+  </li>
+
+  <li>Người sở hữu thiết bị hoặc cấu hình có thể quản lý các tài khoản ngay cả khi các hạn chế được
+  đặt. Người sở hữu thiết bị và người sở hữu cấu hình có thể gọi các API Quản lý tài khoản
+  ngay cả khi các hạn chế người dùng <code>DISALLOW_MODIFY_ACCOUNTS</code> đã có sẵn.
+  </li>
+
+  <li>Người sở hữu thiết bị có thể quản lý những người dùng thứ cấp dễ dàng hơn. Khi một thiết bị
+  đang chạy trong chế độ người sở hữu thiết bị, hạn chế <code>DISALLOW_ADD_USER</code>
+  sẽ được đặt tự động. Điều này ngăn người dùng tạo các người dùng
+  thứ cấp không được quản lý. Ngoài ra, các phương thức <code>CreateUser()</code> và
+  <code>createAndInitial()</code> đã bị loại bỏ; phương thức
+<code>DevicePolicyManager.createAndManageUser()</code> mới sẽ thay thế chúng.
+  </li>
+
+  <li>Người sở hữu thiết bị có thể truy cập các mã định danh của thiết bị. Một người sở hữu thiết bị có thể truy cập
+ địa chỉ MAC của Wi-Fi của một thiết bị, bằng phương thức
+  <code>DevicePolicyManagewr.getWifiMacAddress()</code>. Nếu Wi-Fi chưa từng
+  được bật trên thiết bị đó thì phương thức này sẽ trả về một giá trị {@code null}.
+  </li>
+</ul>
+
+<p>
+  Để biết thêm thông tin về các thay đổi đối với Android cho Công việc trong Android N, hãy xem
+   <a href="{@docRoot}preview/features/afw.html">Cập nhật của Android cho Công việc</a>.
+</p>
+
+<h2 id="other">Các điểm quan trọng khác</h2>
+
+<ul>
+<li>Khi một ứng dụng đang chạy trên Android N nhưng nhắm mục tiêu mức API thấp hơn,
+và người dùng thay đổi kích cỡ hiển thị thì tiến trình của ứng dụng sẽ bị tắt. Ứng dụng
+phải có khả năng xử lý tình huống này một cách tinh tế. Nếu không, ứng dụng sẽ bị lỗi sụp đổ
+khi người dùng khôi phục nó từ mục Gần đây.
+
+<p>
+Bạn cần kiểm thử ứng dụng để đảm bảo
+rằng hành vi này không xảy ra.
+Bạn có thể thực hiện điều đó bằng cách gây ra một lỗi sụp đổ giống vậy
+khi tắt ứng dụng một cách thủ công qua DDMS.
+</p>
+
+<p>
+Các ứng dụng nhắm mục tiêu N và cao hơn sẽ không bị tắt tự động khi có các thay đổi về mật độ;
+tuy nhiên, chúng có thể phản hồi khó khăn đối với các thay đổi cấu hình.
+</p>
+</li>
+
+<li>
+Các ứng dụng trên Android N cần có khả năng xử lý các thay đổi cấu hình một cách tinh tế,
+và không bị lỗi sụp đổ trong các lần khởi động tiếp theo. Bạn có thể kiểm tra hành vi ứng dụng
+bằng cách thay đổi kích cỡ phông chữ (<strong>Setting</strong> &gt;
+<strong>Display</strong> &gt; <strong>Font size</strong>), và sau đó khôi phục
+ứng dụng từ mục Gần đây.
+</li>
+</ul>
+

@@ -1,0 +1,610 @@
+page.title=動作の変更点
+page.keywords=preview,sdk,compatibility
+meta.tags="preview", "compatibility"
+page.tags="preview", "developer preview"
+page.image=images/cards/card-n-changes_2x.png
+@jd:body
+
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>このドキュメントの内容</h2>
+
+<ol>
+  <li><a href="#perf">パフォーマンスの向上</a>
+    <ol>
+      <li><a href="#doze">Doze</a></li>
+      <li><a href="#bg-opt">バックグラウンド処理の最適化</a></li>
+    </ol>
+  </li>
+  <li><a href="#perm">パーミッションの変更</a>
+  </li>
+  <li><a href="#sharing-files">アプリ間のファイルの共有</a></li>
+  <li><a href="#accessibility">ユーザー補助機能の改善</a>
+    <ol>
+      <li><a href="#screen-zoom">画面のズーム</a></li>
+      <li><a href="#vision-settings">セットアップ ウィザードの [Vision Settings]</a></li>
+    </ol>
+  </li>
+  <li><a href="#ndk">プラットフォーム ライブラリにリンクした NDK アプリ</a></li>
+  <li><a href="#afw">Android for Work</a></li>
+  <li><a href="#annotations">アノテーションの保持</a></li>
+  <li><a href="#other">その他の重要事項</a></li>
+</ol>
+
+<h2>関連ドキュメント</h2>
+<ol>
+  <li><a href="{@docRoot}preview/api-overview.html">Android N API の概要</a>
+</li>
+</ol>
+
+</div>
+</div>
+
+
+<p>
+  新しい機能に加えて、Android N では、さまざまなシステムおよび API の動作が変更されています。
+このドキュメントでは、アプリ開発において把握しておくべき主な変更点について説明します。
+
+
+</p>
+
+<p>
+  過去に Android 向けのアプリを公開したことがある場合は、そのアプリが今回のプラットフォームの変更による影響を受ける可能性があることに注意してください。
+
+</p>
+
+
+<h2 id="perf">電池とメモリ</h2>
+
+<p>
+Android N では、端末の電池寿命を改善したり、RAM の使用量を削減したりするために、システムの動作がいくつか変更されています。
+これらの変更は、システム リソースへのアプリのアクセスに加え、特定の暗黙的インテントを介して他のアプリとやり取りする方法に影響を及ぼす可能性があります。
+
+
+</p>
+
+<h3 id="doze">Doze</h3>
+
+<p>
+  Android 6.0（API レベル 23）で Doze が導入されました。これは、ユーザーが端末を電源と接続せずに静止状態にし、画面をオフにすると、CPU とネットワークのアクティビティを保留して電池寿命を改善するものです。
+
+Android N では、Doze が改良されています。端末を電源と接続せずに画面をオフにすると、端末が静止していなくても（たとえば、ユーザーが携帯端末をポケットに入れて持ち歩いている場合）、CPU およびネットワーク制限のサブセットがアプリに適用されます。
+
+
+
+</p>
+
+
+<img src="{@docRoot}images/android-7.0/doze-diagram-1.png" alt="" height="251px" id="figure1" />
+<p class="img-caption">
+  <strong>図 1.</strong> Doze が第 1 レベルのシステム アクティビティ制限を適用して、電池寿命を改善
+
+</p>
+
+<p>
+  端末が電池電源で動作しているときに画面をしばらくオフにすると、端末は Doze モードになり、制限の最初のサブセットが適用されます。
+これにより、アプリのネットワーク アクセスが切断されてジョブと同期が保留されます。
+端末が Doze モードに入った後、しばらくの間静止状態になると、残りの Doze 制限が {@link android.os.PowerManager.WakeLock}、{@link android.app.AlarmManager} アラーム、GPS、Wi-Fi スキャンに適用されます。
+
+
+適用される Doze 制限が一部であるか完全なものであるかには関係なく、端末は Doze モードから短時間抜け出し、メンテナンス ウィンドウと呼ばれる状態になります。このとき、アプリはネットワーク アクセスを許可され、保留されたジョブや同期を実行することができます。
+
+
+
+</p>
+
+
+<img src="{@docRoot}images/android-7.0/doze-diagram-2.png" alt="" id="figure2" />
+<p class="img-caption">
+  <strong>図 2.</strong> 端末がしばらくの間静止状態になると、Doze が第 2 レベルのシステム アクティビティ制限を適用する
+
+</p>
+
+<p>
+  画面をオンにするか、端末を電源に接続すると、Doze モードは解除され、これらの処理の制限は適用されなくなります。
+<a href="{@docRoot}training/monitoring-device-state/doze-standby.html">Doze とアプリ スタンバイ用に最適化する</a>で説明したように、今回追加された動作は、Android 6.0（API レベル 23）で導入された以前のバージョンの Doze にアプリを対応させるための推奨事項とベスト プラクティスには影響を及ぼしません。
+
+
+
+メッセージの送受信に Google Cloud Messaging（GCM）を使用するなどの推奨事項を引き続き順守して、追加の Doze 動作に対応するためにアップデートを計画する必要があります。
+
+
+
+</p>
+
+
+<h3 id="bg-opt">Project Svelte:バックグラウンド処理の最適化</h3>
+
+<p>
+  Android N では、メモリ使用量と消費電力を最適化するために、3 つの暗黙的なブロードキャストが削除されています。
+この変更が必要になるのは、暗黙的なブロードキャストが行われると、バックグラウンドでブロードキャストをリッスンするように登録されているアプリが頻繁に起動されるためです。
+
+これらのブロードキャストを削除すると端末のパフォーマンスとユーザー エクスペリエンスが大幅に向上します。
+
+</p>
+
+<p>
+  モバイル端末では、Wi-Fi とモバイルデータ間を移動するときなど、接続が頻繁に変化します。
+現在のアプリでは、暗黙的な {@link
+  android.net.ConnectivityManager#CONNECTIVITY_ACTION} ブロードキャストのレシーバーをマニフェストに登録することにより、接続の変化を監視できるようになっています。
+
+多くのアプリがこのブロードキャストを受信する登録を行っているので、一度ネットワークの切り替えが起こるだけですべてのアプリがアクティブになり、ブロードキャストが同時に処理されます。
+
+
+</p>
+
+<p>
+  同様に、旧バージョンの Android では、暗黙的な {@link
+  android.hardware.Camera#ACTION_NEW_PICTURE} ブロードキャストと {@link
+  android.hardware.Camera#ACTION_NEW_VIDEO} ブロードキャストをカメラなどの他のアプリから受信するよう登録できました。
+ユーザーがカメラアプリで写真を撮ると、これらのアプリがアクティブになり、ブロードキャストが処理されます。
+
+</p>
+
+<p>
+  Android N では、こういった問題を緩和するために、以下の最適化手法が適用されます。
+
+</p>
+
+<ul>
+  <li>Android N 向けのアプリは、{@link
+  android.net.ConnectivityManager#CONNECTIVITY_ACTION} ブロードキャストを受信しません。これは、アプリにこれらのイベントの通知をリクエストするマニフェスト エントリがある場合も同様です。
+実行されているアプリが {@link android.content.BroadcastReceiver} で通知をリクエストした場合は、メインスレッドで {@code CONNECTIVITY_CHANGE} を引き続きリッスンできます。
+
+
+  </li>
+
+  <li>アプリは、{@link
+  android.hardware.Camera#ACTION_NEW_PICTURE} ブロードキャストまたは {@link
+  android.hardware.Camera#ACTION_NEW_VIDEO} ブロードキャストを送受信できません。この最適化は、Android N 向けのアプリだけでなく、すべてのアプリに影響を及ぼします。
+
+  </li>
+</ul>
+
+<p>アプリでこれらのインテントのいずれかを使用する場合は、Android N 端末を適切にターゲットにできるよう可能な限りインテントとの依存性を削除する必要があります。
+
+  Android フレームワークは、これらの暗黙的なブロードキャストの必要性を軽減するいくつかのソリューションを提供します。
+たとえば、{@link
+  android.app.job.JobScheduler} API は、従量制ではないネットワークへの接続など、指定された条件のときに、ネットワーク操作をスケジュールするための堅牢なメカニズムを提供します。
+
+また、{@link
+  android.app.job.JobScheduler} を使用して、コンテンツ プロバイダの変更に対応することもできます。
+</p>
+
+<p>
+  N でのバックグラウンド処理の最適化や、アプリで必要となる対応の詳細については、<a href="{@docRoot}preview/features/background-optimization.html">バックグラウンド処理の最適化</a>をご覧ください。
+
+
+</p>
+
+<h2 id="perm">パーミッションの変更</h2>
+
+<p>
+  Android N では、アプリに影響を及ぼす可能性のあるパーミッションが変更されています。
+</p>
+
+<h3 id="permfilesys">ファイル システムのパーミッションの変更</h3>
+
+<p>
+  プライベート ファイルのセキュリティを強化するために、Android N 以降向けのアプリのプライベート ディレクトリにはアクセス制限があります（<code>0700</code>）。
+
+  この設定により、サイズや存在など、プライベート ファイルのメタデータの漏洩を防ぐことができます。
+このパーミッションの変更には、以下のような複数の副作用があります。
+</p>
+
+<ul>
+  <li>
+    プライベート ファイルの所有者はこのファイル パーミッションを緩和することができず、{@link android.content.Context#MODE_WORLD_READABLE} や {@link android.content.Context#MODE_WORLD_WRITEABLE} を使用してこれを実行しようとすると、{@link java.lang.SecurityException} がトリガーされます。
+
+
+
+
+    <p class="note">
+      <strong>注:</strong>現在のところ、この制限は完全には適用されていません。
+      アプリはネイティブ API や {@link java.io.File File} API を使用して、プライベート ディレクトリのパーミッションを変更できる場合があります。
+ただし、プライベート ディレクトリのパーミッションを緩和できないようにすることをお勧めします。
+
+    </p>
+  </li>
+  <li>
+    パッケージ ドメイン以外の <code>file://</code> URI を渡すと、レシーバーがアクセスできないパスになる可能性があります。
+そのため、<code>file://</code> URI を渡そうとすると、<code>FileUriExposedException</code> がトリガーされます。
+
+プライベート ファイルのコンテンツの共有には、{@link
+    android.support.v4.content.FileProvider} を使用することをお勧めします。
+
+  </li>
+  <li>
+    {@link android.app.DownloadManager} では、ファイル名でプライベートに保存されたファイルを共有することはできなくなりました。
+以前のアプリで {@link
+    android.app.DownloadManager#COLUMN_LOCAL_FILENAME} にアクセスした場合、このパスにアクセスできないことがあります。
+Android N 以降向けのアプリが、{@link android.app.DownloadManager#COLUMN_LOCAL_FILENAME} にアクセスしようとすると、{@link java.lang.SecurityException} がトリガーされます。
+
+
+
+    ダウンロードの場所を {@link
+    android.app.DownloadManager.Request#setDestinationInExternalFilesDir
+    DownloadManager.Request.setDestinationInExternalFilesDir()} や {@link
+    android.app.DownloadManager.Request#setDestinationInExternalPublicDir
+    DownloadManager.Request.setDestinationInExternalPublicDir()} を使用してパブリックな場所に設定する以前のアプリは、{@link android.app.DownloadManager#COLUMN_LOCAL_FILENAME} でこのパスにアクセスできますが、このメソッドは使用しないことをお勧めします。
+
+
+
+
+
+{@link android.app.DownloadManager} で公開されているファイルへのアクセスには、{@link android.content.ContentResolver#openFileDescriptor
+    ContentResolver.openFileDescriptor()} を使用することをお勧めします。
+
+
+  </li>
+</ul>
+
+<h2 id="sharing-files">アプリ間のファイルの共有</h2>
+
+<p>
+Android N 向けのアプリでは、Android フレームワークにより、アプリ以外の {@code file://} URI の公開を禁止する {@link android.os.StrictMode} API ポリシーが適用されます。
+
+ファイル URI を含むインテントがアプリからなくなると、{@code FileUriExposedException} 例外によりアプリはエラーになります。
+
+</p>
+
+<p>
+アプリ間でファイルを共有するには、{@code content://} URI を送信して、この URI に一時的なアクセス パーミッションを付与する必要があります。
+このパーミッションを付与する最も簡単な方法は、{@link android.support.v4.content.FileProvider} クラスを使用することです。
+パーミッションとファイルの共有の詳細については、<a href="{@docRoot}training/secure-file-sharing/index.html">ファイルの共有</a>をご覧ください。
+
+
+</p>
+
+<h2 id="accessibility">ユーザー補助機能の改善</h2>
+
+<p>
+  Android N には、低視力のユーザーまたは視覚障害のあるユーザー向けのプラットフォームのユーザビリティを改善するための変更がいくつか追加されています。
+通常は、これらの変更によってアプリのコードを変更する必要はありませんが、この機能について理解し、アプリでテストして、ユーザー エクスペリエンスに与える潜在的な影響を評価する必要があります。
+
+
+
+</p>
+
+
+<h3 id="screen-zoom">画面のズーム</h3>
+
+<p>
+  Android N では、<strong>ディスプレイ サイズ</strong>を設定して、画面上のすべての要素を拡大または縮小することができるので、視覚障害のあるユーザーに対する端末のユーザー補助機能が向上しています。
+
+ユーザーは、一般的な中くらいのサイズの携帯端末 Nexus 4 の幅である <a href="http://developer.android.com/guide/topics/resources/providing-resources.html">sw320dp</a> の画面最小幅を超えて画面をズームできません。
+
+
+</p>
+
+<div class="cols">
+
+<div class="col-6">
+  <img src="{@docRoot}images/android-7.0/screen-zoom-1.png" alt="" height="XXX" id="figure1" />
+</div>
+<div class="col-6">
+  <img src="{@docRoot}images/android-7.0/screen-zoom-2.png" alt="" height="XXX" id="figure1" />
+</div>
+
+</div> <!-- end cols -->
+<p class="img-caption">
+  <strong>図 3.</strong> 右側の画面では、Android N システム イメージを実行している端末のディスプレイ サイズを拡大している
+
+</p>
+
+
+<p>
+  端末の画面密度が変更されると、以下の方法で実行中のアプリに通知されます。
+
+</p>
+
+<ul>
+  <li>アプリが API レベル 23 以前をターゲットにしている場合は、すべてのバックグラウンド処理が自動的に強制終了します。
+つまり、ユーザーがそのようなアプリから移動して [<em>Settings</em>] 画面を開き、<strong>ディスプレイ サイズ</strong>の設定を変更すると、メモリ不足の場合と同じように、アプリが強制終了します。
+
+
+アプリになんらかのフォアグラウンド処理がある場合は、<a href="{@docRoot}guide/topics/resources/runtime-changes.html">実行時の変更の処理</a>に記載されている設定変更の処理が通知されます。これは、端末の画面の向きが変わったときの処理と同様です。
+
+
+
+  </li>
+
+  <li>アプリが Android N をターゲットにしている場合、<a href="{@docRoot}guide/topics/resources/runtime-changes.html">実行時の変更の処理</a>に記載されているように、すべての処理（フォアグラウンド処理およびバックグラウンド処理）に対して設定変更が通知されます。
+
+
+
+  </li>
+</ul>
+
+<p>
+  Android のベスト プラクティスに従っているほとんどのアプリでは、この機能をサポートするための変更を加える必要はありません。
+以下の点は確認する必要があります。
+</p>
+
+<ul>
+  <li>画面幅 <code><a href=
+  "{@docRoot}guide/topics/resources/providing-resources.html">sw320dp</a></code> の端末でアプリをテストして、適切に機能することを確認します。
+
+  </li>
+
+  <li>端末設定が変更された場合、キャッシュ済みのビットマップやネットワークからロードされるリソースなど、画面密度に依存するキャッシュ情報を更新してください。
+
+また、アプリが一時停止状態から再開された場合は、設定変更をチェックしてください。
+
+    <p class="note">
+      <strong>注:</strong>設定に依存したデータをキャッシュに保存する場合は、そのデータ用の適切な画面サイズやピクセル密度など、関連するメタデータを含めることをお勧めします。
+
+このメタデータを保存しておくと、設定を変更した後、キャッシュ データを更新する必要があるかどうかを決定できます。
+
+
+    </p>
+  </li>
+
+  <li>ピクセル単位は画面密度に対応しないため、ピクセル単位で寸法を指定することは避けてください。
+その代わり、<a href="{@docRoot}guide/practices/screens_support.html">密度非依存ピクセル</a>（<code>dp</code>）単位で寸法を指定します。
+
+  </li>
+</ul>
+
+<h3 id="vision-settings">セットアップ ウィザードの [Vision Settings]</h3>
+
+<p>
+  Android N には、オープニング画面に [Vision Settings] が追加されています。ユーザーはこれを使用して、新しい端末で以下のユーザー補助機能設定を設定できます。
+
+  <strong>ズーム操作</strong>、<strong>フォントサイズ</strong>、<strong>ディスプレイ サイズ</strong>、<strong>TalkBack</strong>。
+この変更により、さまざまな画面設定に関連するバグが顕在化する可能性があります。
+この機能が及ぼす影響を評価するには、これらの設定を有効にしてアプリをテストする必要があります。
+
+設定は、<strong>[Settings] &gt; [Accessibility]</strong> にあります。
+
+</p>
+
+<h2 id="ndk">プラットフォーム ライブラリにリンクした NDK アプリ</h2>
+
+<p>
+  Android N では、非パブリック API のロードを防止するために、名前空間が変更されています。
+  NDK を使用する場合、Android プラットフォームのパブリック API のみを使用する必要があります。
+Android の次の公式リリースで非パブリック API を使用すると、アプリがクラッシュする可能性があります。
+
+</p>
+
+<p>
+  非パブリック API を使用していることを警告するために、アプリが非パブリック API を呼び出すと、Android N 端末で実行されているアプリは logcat 出力でエラーを生成します。
+
+  この状態を認識してもらえるよう、このエラーはメッセージとして端末の画面にも表示されます。
+アプリのコードを確認して、非パブリック プラットフォーム API を削除し、プレビュー端末またはエミュレータを使用して、アプリを十分にテストしてください。
+
+
+</p>
+
+<p>
+  アプリがプラットフォーム ライブラリに依存している場合は、NDK ドキュメントにある一般的な修正例を参照して、共通のプライベート API をそれと同等の機能を持つパブリック API に置き換えます。
+
+  特に、<code>libpng</code> など、プラットフォームに含まれていて NDK には含まれていないライブラリをアプリで使用している場合、気付かないうちにプラットフォーム ライブラリにリンクしていることがあります。
+
+この場合、APK にリンク対象のすべての .so ファイルが含まれていることを確認します。
+
+</p>
+
+<p class="caution">
+  <strong>警告:</strong>サードパーティのライブラリの中には非パブリック API にリンクしているものもあります。
+アプリがこれらのライブラリを使用している場合、Android の次の公式リリースでアプリを実行すると、アプリがクラッシュする可能性があります。
+
+</p>
+
+<p>
+  NDK に含まれていないネイティブ ライブラリは Android のリリース版が変わると変更または削除される場合があるため、アプリでは、こういったライブラリへの依存やその使用を避けてください。
+
+OpenSSL から BoringSSL への移行は、そのような変更の一例です。
+  また、NDK に含まれていないプラットフォーム ライブラリには互換性要件がないため、端末によって互換性レベルが異なる場合があります。
+
+古い端末で非 NDK ライブラリにアクセスする必要がある場合は、Android API レベルに応じてロードしてください。
+
+</p>
+
+<p>
+  こうしたタイプの問題の診断を支援するために、Android N でアプリをビルドするときに発生する可能性のある Java および NDK のエラーの例を以下に示します。
+
+</p>
+
+<p>Java のエラー例</p>
+<pre class="no-pretty-print">
+java.lang.UnsatisfiedLinkError: dlopen failed: library "/system/lib/libcutils.so"
+    is not accessible for the namespace "classloader-namespace"
+</pre>
+
+<p>NDK のエラー例</p>
+<pre class="no-pretty-print">
+dlopen failed: cannot locate symbol "__system_property_get" referenced by ...
+</pre>
+
+
+<p>
+  こうしたタイプのエラーが発生しているアプリの典型的な修正例を以下に示します。
+</p>
+
+<ul>
+  <li>libandroid_runtime.so の getJavaVM と getJNIEnv を使用している場合は、標準の JNI 関数に置き換えることができます。
+
+<pre class="no-pretty-print">
+AndroidRuntime::getJavaVM -&gt; GetJavaVM from &lt;jni.h&gt;
+AndroidRuntime::getJNIEnv -&gt; JavaVM::GetEnv or
+JavaVM::AttachCurrentThread from &lt;jni.h&gt;.
+</pre>
+  </li>
+
+  <li>{@code libcutils.so} の {@code property_get} シンボルを使用している場合は、public {@code alternative __system_property_get} に置き換えることができます。
+
+   これを行うには、次の include 文とともに {@code __system_property_get} を使用します。
+<pre>
+#include &lt;sys/system_properties.h&gt;
+</pre>
+  </li>
+
+  <li>{@code libcrypto.so} の {@code SSL_ctrl} シンボルを使用している場合は、ローカル版のアプリに置き換える必要があります。
+たとえば、{@code .so} ファイルに {@code libcyrpto.a} を静的にリンクするか、BoringSSL や OpenSSL の {@code libcrypto.so} をアプリに動的に含める必要があります。
+
+
+  </li>
+</ul>
+
+<h2 id="afw">Android for Work</h2>
+<p>
+  Android N には、証明書のインストール、パスワードの再設定、セカンダリ ユーザーの管理、端末識別子へのアクセスなど、Android for Work をターゲットにしているアプリに対する変更が含まれています。
+
+Android for Work 環境向けのアプリをビルドしている場合、これらの変更点を確認し、変更に応じてアプリを修正する必要があります。
+
+
+</p>
+
+<ul>
+  <li>DPC が代理証明書を設定する前に、代理証明書インストーラをインストールする必要があります。
+また、プロファイルと N SDK をターゲットにしているデバイス オーナー アプリに対して、デバイス ポリシー コントローラ（DPC）が <code>DevicePolicyManager.setCertInstallerPackage()</code> を呼び出す前に代理証明書インストーラをインストールする必要があります。
+
+
+このインストーラがインストールされていない場合、<code>IllegalArgumentException</code> がスローされます。
+
+
+  </li>
+
+  <li>端末管理者向けのパスワードの再設定制限がプロファイル オーナーに適用されます。
+端末管理者は、{@code DevicePolicyManager.resetPassword()} を使用して、既に設定されているパスワードを削除または変更できなくなりました。
+
+端末管理者は、端末にパスワード、PIN、またはパターンが設定されていない場合のみ、パスワードを設定できます。
+
+  </li>
+
+  <li>デバイス オーナーとプロファイル オーナーは、制限が設定されている場合でもアカウントを管理することができます。
+デバイス オーナーとプロファイル オーナーは、<code>DISALLOW_MODIFY_ACCOUNTS</code> ユーザー制限が適用されている場合でもアカウント管理 API を呼び出すことができます。
+
+  </li>
+
+  <li>デバイス オーナーによるセカンダリ ユーザーの管理がさらに簡単になりました。端末がデバイス オーナー モードで実行されている場合は、<code>DISALLOW_ADD_USER</code> 制限が自動的に設定されます。
+
+これにより、管理されていないセカンダリ ユーザーが作成されることを防ぐことができます。
+また、<code>CreateUser()</code> メソッドと <code>createAndInitializeUser()</code> メソッドは廃止され、新しい <code>DevicePolicyManager.createAndManageUser()</code> メソッドに置き換えられました。
+
+
+  </li>
+
+  <li>デバイス オーナーは、端末識別子にアクセスできます。また、デバイス オーナーは <code>DevicePolicyManagewr.getWifiMacAddress()</code> を使用して、端末の Wi-Fi MAC アドレスにもアクセスできます。
+
+端末で Wi-Fi が有効にされたことがない場合、このメソッドは {@code null} 値を返します。
+
+  </li>
+
+  <li>ワークモード設定により、仕事用アプリへのアクセスが制御されます。ワークモードがオフになると、システム ランチャーは仕事用アプリをグレーアウトしてこれらが利用できないことを示します。
+ワークモードが再度有効になると、通常の動作が復元されます。
+
+</ul>
+
+<p>
+  Android N での Android for Work の変更の詳細については、<a href="{@docRoot}preview/features/afw.html">Android for Work のアップデート</a>をご覧ください。
+
+</p>
+
+<h2 id="annotations">アノテーションの保持</h2>
+
+<p>
+Android N では、アノテーションの表示が無視されていたバグを修正しています。この問題は、ランタイムがこれまでできなかったアノテーションへのアクセスを可能にしました。
+
+これらのアノテーションは以下のとおりです。
+</p>
+
+<ul>
+   <li>{@code VISIBILITY_BUILD}:ビルド時にのみ表示されます。</li>
+   <li>{@code VISIBILITY_SYSTEM}:実行時に表示されますが、基幹システムにのみ表示されます。
+</li>
+</ul>
+
+<p>
+アプリでこの動作を利用している場合は、実行時に表示されるアノテーションに保持ポリシーを追加してください。
+これは {@code @Retention(RetentionPolicy.RUNTIME)} を使用して実行できます。
+</p>
+
+<h2 id="other">その他の重要事項</h2>
+
+<ul>
+<li>Android N 上で低い API レベルをターゲットにしたアプリが実行されている場合、ユーザーがディスプレイ サイズを変更すると、アプリのプロセスは強制終了されます。
+アプリは、このシナリオを適切に処理する必要があります。
+適切に処理しないと、ユーザーが [Recents] からアプリを復元したときに、アプリがクラッシュします。
+
+
+<p>
+アプリをテストして、この動作が発生しないようにしてください。DDMS でアプリを手動で強制終了させて同様のクラッシュを発生させることにより、アプリのテストを行うことができます。
+
+
+
+</p>
+
+<p>
+N 以上をターゲットにしたアプリは、画面密度の変更時に自動的に強制終了しませんが、設定変更への対応が不十分なままである可能性があります。
+
+</p>
+</li>
+
+<li>
+Android N 上のアプリは設定変更を適切に処理し、次回の起動時にクラッシュしないようにする必要があります。
+フォントのサイズを変更（[<strong>Setting</strong>] &gt; [<strong>Display</strong>] &gt; [<strong>Font size</strong>]）した後に [Recents] からアプリを復元すると、アプリの動作を確認できます。
+
+
+
+</li>
+
+<li>
+旧バージョンの Android では、バグにより、メインスレッドの TCP ソケットへの書き込みを厳格モード違反として報告していませんでした。
+Android N ではこのバグが修正されています。この動作を表示するアプリから {@code android.os.NetworkOnMainThreadException} がスローされるようになりました。通常、メインスレッドでネットワーク操作を実行することはお勧めできません。それは、これらの操作は一般的に ANR やジャンクを引き起こす大幅なテイル レイテンシが発生するためです。
+
+
+
+</li>
+
+<li>
+メソッドの {@code Debug.startMethodTracing()} ファミリーが、SD カードのトップレベルではなく、共有ストレージ上のパッケージ固有のディレクトリの storing output にデフォルト設定されました。
+
+
+つまり、これらの API を使用するためにアプリで {@code WRITE_EXTERNAL_STORAGE} パーミッションをリクエストする必要はありません。
+</li>
+
+<li>
+多くのプラットフォーム API は、{@link android.os.Binder} トランザクションで送信される大きなペイロードをチェックし、暗黙的にログ記録したり、削除したりするのではなく {@code TransactionTooLargeExceptions} を {@code RuntimeExceptions} として再度スローするようになりました。
+
+
+一般的な例としては、{@link android.app.Activity#onSaveInstanceState Activity.onSaveInstanceState()} で大量のデータを格納することです。これにより、アプリが Android N をターゲットにしている場合は、{@code ActivityThread.StopInfo} で {@code RuntimeException} がスローされます。
+
+
+
+
+</li>
+
+<li>
+アプリが {@link java.lang.Runnable} タスクを {@link android.view.View} に渡し、{@link android.view.View} がウィンドウにアタッチされない場合は、{@link java.lang.Runnable} タスクと {@link android.view.View} がキューに入れられます。{@link java.lang.Runnable} タスクは {@link android.view.View} がウィンドウにアタッチされるまで実行されません。
+
+
+
+
+
+この動作は以下のバグを修正します。
+<ul>
+   <li>対象ウィンドウの UI スレッド以外のスレッドからアプリが {@link android.view.View} に渡すと、結果として不適切なスレッドで {@link java.lang.Runnable} が実行される可能性があります。
+
+   </li>
+   <li>{@link java.lang.Runnable} タスクがルーパー スレッド以外のスレッドから渡されると、アプリは {@link java.lang.Runnable} タスクを公開できました。
+</li>
+</ul>
+</li>
+
+<li>
+{@link android.Manifest.permission#DELETE_PACKAGES DELETE_PACKAGES} パーミッションを持つ Android N 上のアプリが、別のアプリがインストールしたパッケージを削除しようとすると、ユーザー確認が要求されます。
+
+
+このシナリオでは、アプリが {@link android.content.pm.PackageInstaller#uninstall PackageInstaller.uninstall()} を呼び出した場合は、{@link android.content.pm.PackageInstaller#STATUS_PENDING_USER_ACTION STATUS_PENDING_USER_ACTION} をリターン ステータスとしてみなす必要があります。
+
+
+
+</li>
+
+</ul>
+

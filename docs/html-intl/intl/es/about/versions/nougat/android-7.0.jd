@@ -1,0 +1,1039 @@
+page.title=Android N for Developers
+meta.tags="preview", "androidn"
+page.tags="preview", "developer preview"
+page.image=images/cards/card-n-apis_2x.png
+@jd:body
+
+
+
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>Funciones claves para desarrolladores</h2>
+  <ol>
+      <ul style="list-style-type:none;">
+        <li><a href="#multi-window_support">Compatibilidad con ventanas múltiples</a></li>
+        <li><a href="#notification_enhancements">Notificaciones</a></li>
+        <li><a href="#jit_aot">Compilación de JIT y AOT</a></li>
+        <li><a href="#quick_path_to_app_install">Acceso rápido a la instalación de aplicaciones</a></li>
+        <li><a href="#doze_on_the_go">Descanso en movimiento</a></li>
+        <li><a href="#background_optimizations">Optimizaciones en segundo plano</a></li>
+        <li><a href="#data_saver">Ahorro de datos</a></li>
+        <li><a href="#vulkan">API Vulkan</a></li>
+        <li><a href="#tile_api">API para mosaicos de Quick Settings</a></li>
+        <li><a href="#number-blocking">Bloqueo de números</a></li>
+        <li><a href="#call_screening">Filtración de llamadas</a></li>
+        <li><a href="#multi-locale_languages">Configuraciones regionales e idiomas</a></li>
+        <li><a href="#emoji">Nuevos emojis</a></li>
+        <li><a href="#icu4">API de ICU4J en Android</a></li>
+        <li><a href="#gles_32">API de OpenGL ES 3.2</a></li>
+        <li><a href="#android_tv_recording">Grabación de Android TV</a></li>
+        <li><a href="#android_for_work">Android for Work</a></li>
+        <li><a href="#accessibility_enhancements">Accesibilidad</a></li>
+        <li><a href="#direct_boot">Inicio directo</a></li>
+        <li><a href="#key_attestation">Atestación de claves</a></li>
+        <li><a href="#network_security_config">Configuración de seguridad de la red</a></li>
+        <li><a href="#default_trusted_ca">CA de confianza predeterminada</a></li>
+        <li><a href="#apk_signature_v2">Esquema de firma de APK v2</a></li>
+        <li><a href="#scoped_directory_access">Acceso a directorios determinados</a></li>
+        <li><a href="#keyboard_shortcuts_helper">Ayuda en los métodos abreviados del teclado</a></li>
+        <li><a href="#sustained_performance_api">API de rendimiento sostenido</a></li>
+        <li><a href="#vr">Soporte de RV</a></li>
+        <li><a href="#print_svc">Mejoras del servicio de impresión</a></li>
+        <li><a href="#virtual_files">Archivos virtuales</a></li>
+        <li><a href="#framemetrics_api">API FrameMetricsListener</a></li>
+      </ol>
+</div>
+</div>
+
+
+
+<p>Android N aún se encuentra en proceso activo de desarrollo, pero puedes probarlo
+ahora como parte de la N Developer Preview. En las secciones siguientes se destacan algunas de
+las nuevas funciones para desarrolladores. </p>
+
+<p>
+  Asegúrate de ver los <a href="{@docRoot}preview/behavior-changes.html">Cambios de comportamiento</a> para obtener información sobre
+  áreas en las cuales los cambios en las plataformas puedan tener efecto en tus aplicaciones, consultar las
+  guías del desarrollador para conocer mejor las funciones claves y descargar la <a href="{@docRoot}preview/setup-sdk.html#docs-dl">Referencia de la API</a> para obtener información sobre
+  API nuevas.
+</p>
+
+<h2 id="multi-window_support">Compatibilidad con ventanas múltiples</h2>
+
+
+<p>En Android N, presentamos una nueva y muy solicitada función multitarea
+en la plataforma: la compatibilidad con ventanas múltiples. </p>
+
+  <p>Los usuarios ahora pueden abrir dos aplicaciones al mismo tiempo en la pantalla. </p>
+  <ul>
+  <li>En teléfonos y tabletas
+con Android N, los usuarios pueden ejecutar dos aplicaciones en paralelo
+una encima otra en el modo de pantalla dividida. También tienen la posibilidad de modificar el tamaño de las aplicaciones arrastrando
+la línea divisoria que se encuentra entre ellas. </li>
+
+<li>En los dispositivos con Android TV, las aplicaciones pueden habilitar en forma automática el <a href="{@docRoot}preview/features/picture-in-picture.html">modo
+"picture-in-picture"</a>. Esto les permite continuar mostrando contenido mientras el usuario explora otras
+aplicaciones o interactúa con ellas.</li>
+  </ul>
+
+<div class="col-4of10">
+<img src="{@docRoot}images/android-7.0/mw-portrait.png" alt="" style="height:460px;padding-left:1em;" id="img-split-screen" />
+<p class="img-caption">
+  <strong>Figura 1:</strong> Aplicaciones en ejecución en el modo de pantalla dividida.
+</p>
+
+  </div>
+
+<p>En las tabletas, en particular, y en otros dispositivos de pantallas más grandes, la compatibilidad con ventanas múltiples
+ofrece nuevas maneras de atraer a los usuarios Puedes, habilitar acciones de arrastrar y soltar en
+tu aplicación para que los usuarios arrastren contenido hacia tu aplicación &mdash;o desde ella; es una excelente
+manera de mejorar su experiencia. </p>
+
+<p>Es sencillo agregar compatibilidad con ventanas múltiples a tu aplicación y configurar la manera en que
+administra la visualización de estas ventanas. Por ejemplo, puedes especificar las dimensiones mínimas
+permitidas de tu actividad y evitar así que los usuarios den a la actividad un
+tamaño inferior. También puedes inhabilitar la visualización de ventanas múltiples para tu aplicación, lo que
+  garantiza que el sistema solo muestre tu aplicación en modo de pantalla completa.</p>
+
+<p>
+  Para obtener más información, consulta la documentación <a href="{@docRoot}preview/features/multi-window.html">Compatibilidad con ventanas múltiples</a>
+  para desarrolladores.
+</p>
+
+<h2 id="notification_enhancements">Mejoras en las notificaciones</h2>
+
+<p>En Android N, hemos rediseñado las notificaciones para facilitar y agilizar su
+uso. Entre los cambios, se incluyen los siguientes:</p>
+
+<ul>
+  <li>
+    <strong>Actualizaciones de plantillas</strong>: estamos actualizando las plantillas de notificaciones para
+    poner nuevo énfasis en la imagen de héroe y el avatar. Los desarrolladores podrán
+    aprovechar las nuevas plantillas con una cantidad mínima de ajustes en el código.
+  </li>
+
+  <li>
+    <strong>Personalización del estilo de mensaje</strong>: puedes personalizar más etiquetas
+    de la interfaz de usuario asociadas con tus notificaciones utilizando la clase
+    <code>MessageStyle</code>. Puedes configurar el mensaje, el título de
+    la conversación y la vista del contenido.
+  </li>
+
+  <li>
+    <strong>Notificaciones agrupadas</strong>: el sistema puede agrupar mensajes
+    (por ejemplo, por tema) y mostrar el grupo. Un usuario puede
+    aplicar acciones, como Dismiss o Archive, en ellos. Si
+    has implementado notificaciones para Android Wear, ya estarás familiarizado con
+    este modelo.
+  </li>
+
+  <li>
+    <strong>Respuesta directa</strong>: en el caso de las aplicaciones de comunicación en tiempo real, el
+    sistema de Android admite respuestas en línea para que los usuarios puedan responder rápidamente a
+    un mensaje SMS o de texto directamente dentro en la interfaz de notificaciones.
+  </li>
+
+  <li>
+    <strong>Vistas personalizadas</strong>: dos API nuevas te permiten aprovechar las decoraciones
+    del sistema, como los encabezados y las acciones de notificaciones, al usar vistas
+    personalizadas en las notificaciones.
+  </li>
+</ul>
+
+<div class="col-4of12">
+  <img src="{@docRoot}images/android-7.0/notifications-1.png" alt="" style="padding:.5em;max-width:226px">
+</div>
+
+<div class="col-4of12">
+  <img src="{@docRoot}images/android-7.0/notifications-3.png" alt="" style="padding:.5em;max-width:226px">
+</div>
+
+<div class="col-4of12">
+  <img src="{@docRoot}images/android-7.0/notifications-2.png" alt="" style="padding:.5em;max-width:226px">
+</div>
+
+
+<p class="img-caption">
+  <strong>Figura 2:</strong> Notificaciones agrupadas y respuesta directa.
+</p>
+
+<p>Para obtener información acerca de cómo implementar las nuevas funciones, consulta la guía
+  <a href="{@docRoot}preview/features/notification-updates.html">Notificaciones</a>.
+</p>
+
+
+
+<h2 id="jit_aot">Compilación de JIT y AOT guiada por perfiles</h2>
+
+<p>En Android N, agregamos un compilador Just in Time (JIT) con generación de perfiles de código para
+ART, lo cual te permite mejorar constantemente el rendimiento de las aplicaciones con Android mientras se
+ejecutan. El compilador JIT complementa el compilador Ahead of Time (AOT) actual de ART
+y permite mejorar el rendimiento del tiempo de ejecución, ahorrar espacio de almacenamiento y acelerar las actualizaciones
+de aplicaciones y del sistema.</p>
+
+<p>La compilación guiada por perfiles permite que ART maneje la compilación de AOT y JIT de cada aplicación
+conforme a su uso real, además de las condiciones en el dispositivo. Por
+ejemplo, ART conserva un perfil de los métodos directos de cada aplicación, y puede compilar previamente
+y almacenar en caché dichos métodos para obtener el mejor rendimiento. A su vez, deja otras partes de la aplicación
+sin compilar hasta que se usan realmente.</p>
+
+<p>Además de mejorar el rendimiento de partes claves de la aplicación, la compilación guiada por
+perfiles permite reducir la superficie de memora RAM total de una aplicación, incluidos los archivos binarios
+asociados. Esta función tiene particular importancia en los dispositivos de memoria reducida.</p>
+
+<p>ART administra la compilación guiada por perfiles de una manera que minimiza el impacto en la batería
+del dispositivo. Realiza compilaciones previas únicamente cuando el dispositivo se encuentra inactivo y
+en proceso de carga, lo cual permite ahorrar tiempo y batería haciendo el trabajo de manera anticipada.</p>
+
+<h2 id="quick_path_to_app_install">Acceso rápido a la instalación de aplicaciones</h2>
+
+<p>Uno de los beneficios más palpables del compilador JIT de ART es la velocidad de instalación de las
+aplicaciones y de actualización del sistema. Incluso las aplicaciones de mayor tamaño, en las que se necesitaban varios minutos para la
+optimización y la instalación en Android 6.0, ahora pueden instalarse en cuestión de
+segundos. Las actualizaciones del sistema también son más rápidas, debido a que ya no hay un paso de optimización. </p>
+
+<h2 id="doze_on_the_go">Descanso en movimiento...</h2>
+
+<p>En Android 6.0, se presentó Descanso, un modo de sistema que ahorra batería aplazando
+actividades de CPU y red de las aplicaciones cuando el dispositivo se encuentra inactivo; por ejemplo, al hallarse
+sobre una mesa o en un cajón. </p>
+
+<p>Ahora, en Android N, el modo Descanso ofrece el beneficio adicional de ahorrar batería en movimiento.
+Siempre que la pantalla permanezca apagada durante un tiempo y el dispositivo esté desenchufado,
+Descanso aplicará un subconjunto de las restricciones de CPU y red conocidas a las aplicaciones.
+Esto significa que los usuarios pueden ahorrar batería aun cuando lleven sus dispositivos
+en los bolsillos.</p>
+
+
+<img src="/preview/images/doze-diagram-1.png" alt="" id="figure1" />
+<p class="img-caption">
+  <strong>Figura 3:</strong> Descanso ahora aplica
+  restricciones para prolongar la duración de la batería aun cuando el dispositivo no está quieto.
+</p>
+
+
+<p>Poco tiempo después de que la pantalla se apaga, cuando el dispositivo no está enchufado, Descanso
+restringe el acceso a la red y aplaza tareas y sincronizaciones. Durante períodos de mantenimiento
+breves, las aplicaciones tienen acceso a la red y se ejecutan todas las
+tareas y sincronizaciones aplazadas. Ten en cuenta que, cuando se activa la pantalla o se enchufa el dispositivo, se
+desactiva el modo Descanso.</p>
+
+<p>Cuando el dispositivo vuelve a estar quieto, desenchufado y con la pantalla apagada durante un
+tiempo, Descanso aplica todas las restricciones de CPU y redes en {@link
+android.os.PowerManager.WakeLock}, alarmas de {@link android.app.AlarmManager} y análisis de
+GPS o Wi-Fi.</p>
+
+<p>Las prácticas recomendadas para adaptar tu aplicación a Descanso no varían si el
+dispositivo estará en movimiento o no. Por lo tanto, si ya actualizaste tu aplicación para que administre
+Descanso correctamente, no tienes nada más que hacer. Si no lo hiciste, comienza a <a href="{@docRoot}training/monitoring-device-state/doze-standby.html#assessing_your_app">adaptarla
+a Descanso</a> ahora.</p>
+
+<h2 id="background_optimizations">Project Svelte: Optimizaciones en segundo plano</h2>
+
+<p>Project Svelte representa un esfuerzo constante por minimizar el uso de memoria RAM a través del sistema y de las aplicaciones
+en los diferentes dispositivos Android del ecosistema. En Android N, el objetivo principal de Project
+Svelte es optimizar la manera en que las aplicaciones se ejecutan en segundo plano. </p>
+
+<p>El procesamiento en segundo plano es una parte esencial de la mayoría de las aplicaciones. Cuando se maneja en forma adecuada, puede
+hacer que la experiencia de tu usuario sea increíble &mdash;(inmediata, rápida y pertinente al contexto).
+Cuando no se maneja de tal manera, el procesamiento en segundo plano puede suponer un consumo innecesario de memoria RAM (y
+batería), y afectar el rendimiento del sistema para otras aplicaciones. </p>
+
+<p>A partir de Android 5.0, {@link android.app.job.JobScheduler} ha sido el
+método preferido para ejecutar tareas en segundo plano con resultados positivos
+para los usuarios. Las aplicaciones pueden programar tareas y, al mismo tiempo, permitir que el sistema se optimice según las condiciones de
+memoria, energía y conectividad. JobScheduler ofrece control y
+simpleza, y nuestro deseo es que todas las aplicaciones lo usen. </p>
+
+<p>
+  Otra buena opción es <a href="https://developers.google.com/android/reference/com/google/android/gms/gcm/GcmNetworkManager">
+  <code>GCMNetworkManager</code></a>, que forma parte de Google Play Services y
+  ofrece una capacidad similar de programación de tareas con compatibilidad en versiones heredadas de
+  Android.
+</p>
+
+<p>Continuaremos ampliando <code>JobScheduler</code> y
+<code>GCMNetworkManager</code> para que se apliquen a más
+casos de uso de tus aplicaciones; por ejemplo, en Android N ahora puedes programar procesos
+en segundo plano según los cambios de los proveedores de contenido. Al mismo tiempo, comenzaremos a
+dejar de usar algunos de los patrones anteriores que pueden reducir el rendimiento del sistema,
+en especial, en dispositivos de memoria reducida.</p>
+
+<p>En Android N, eliminaremos tres transmisiones implícitas que se usan normalmente &mdash;(
+ {@link android.net.ConnectivityManager#CONNECTIVITY_ACTION}, {@link
+  android.hardware.Camera#ACTION_NEW_PICTURE} y {@link
+  android.hardware.Camera#ACTION_NEW_VIDEO}), ya que pueden activar los
+procesos en segundo plano de varias aplicaciones al mismo tiempo, y así exigir la memoria y la batería. Si
+tu aplicación recibe estas transmisiones, aprovecha la N Developer Preview y
+  realiza la migración a <code>JobScheduler</code> y las API relacionadas, como alternativa. </p>
+
+<p>
+  Para obtener información detallada, consulta la documentación <a href="{@docRoot}preview/features/background-optimization.html">Optimizaciones
+  en segundo plano</a>.
+</p>
+
+
+<h2 id="data_saver">Ahorro de datos</h2>
+
+<div class="col-5of12" style="margin-right:1.5em;">
+<img src="{@docRoot}images/android-7.0/datasaver.png" style="border:2px solid #ddd">
+
+<p class="img-caption" style="padding-right:2em;">
+  <strong>Figura 4:</strong> Ahorro de datos en la configuración.
+</p>
+  </div>
+
+<p>Durante la vida útil de un dispositivo móvil, el costo de un plan de datos móviles puede
+superar fácilmente el costo del propio dispositivo. Para muchos usuarios, los datos móviles son un
+recurso costoso que desean conservar. </p>
+
+<p>En Android N, se presenta el modo de ahorro de datos, un nuevo servicio del sistema que permite reducir
+el uso de datos móviles de las aplicaciones, ya sea con servicio de itinerancia, cerca del final del ciclo de facturación
+o con un paquete de datos prepagos. El ahorro de datos permite que los usuarios controlen la manera en que las aplicaciones
+usan los datos móviles y que los desarrolladores brinden un servicio más eficaz cuando el ahorro
+de datos se encuentra activo. </p>
+
+<p>Cuando un usuario habilita el ahorro de datos en <strong>Settings</strong> y el dispositivo está
+conectado a una red o, el sistema bloquea el uso de datos en segundo plano y ordena a las aplicaciones
+usar menos datos en primer plano siempre que sea posible (por ejemplo, limitando
+la tasa de bits para la transmisión, reduciendo la calidad de la imagen y aplazando el valor optimista de almacenamiento previo en caché,
+entre otras posibilidades). Los usuarios pueden incluir aplicaciones específicas en la lista blanca para
+permitir el uso de datos medidos en segundo plano, incluso cuando está activado el ahorro de datos.</p>
+
+<p>Android N extiende {@link android.net.ConnectivityManager} para que las aplicaciones
+tengan una manera de <a href="{@docRoot}preview/features/data-saver.html#status">recuperar las
+preferencias de ahorro de datos del usuario</a> y<a href="{@docRoot}preview/features/data-saver.html#monitor-changes"> monitorear
+cambios en estas</a>. Todas las aplicaciones deben verificar si el usuario habilitó el ahorro
+de datos e intentar limitar el uso de datos en primer y segundo plano.</p>
+
+
+<h2 id="vulkan">API Vulkan</h2>
+
+<p>
+  Android N integra <a href="http://www.khronos.org/vulkan" class="external-link">Vulkan™</a>, una nueva API de visualización 3D, en la plataforma. Al igual que
+  <a href="https://www.khronos.org/opengles/" class="external-link">OpenGL™
+  ES</a>, Vulkan es un estándar abierto para gráficos y visualización 3D, cuyo mantenimiento está a cargo de
+  Khronos Group.
+</p>
+
+<p>
+  Vulkan se diseñó desde el principio para minimizar la sobrecarga de CPU en el controlador,
+ y permite que tu aplicación controle el funcionamiento de la unidad de procesamiento de gráficos más directamente. También
+  hace posible contar con un mejor trabajo en paralelo, ya que permite que varios subprocesos diversos realicen
+  trabajos, como la construcción del búfer de comandos, a la vez.
+</p>
+
+<p>
+  Las herramientas y las bibliotecas de desarrollo de Vulkan son parte del NDK de Android. Esto
+incluye lo siguiente:
+</p>
+
+<ul>
+  <li>Encabezados
+  </li>
+
+  <li>Capas de validación (bibliotecas de depuración)
+  </li>
+
+  <li>Compilador SPIR-V
+  </li>
+
+  <li>Biblioteca de compilación de tiempo de ejecución de SPIR-V
+  </li>
+</ul>
+
+<p>
+  Vulkan solo está disponible en las aplicaciones en dispositivos con hardware compatible con Vulkan,
+  como Nexus 5X, Nexus 6P y Nexus Player. Estamos trabajando estrechamente con nuestros
+  socios para que Vulkan se pueda utilizar en más dispositivos lo más pronto posible.
+</p>
+
+<p>
+  Para obtener más información, consulta la <a href="{@docRoot}ndk/guides/graphics/index.html">documentación de la API</a>.
+</p>
+
+<h2 id="tile_api">API para mosaicos de Quick Settings</h2>
+
+
+<div style="float:right;max-width:320px">
+<img src="{@docRoot}images/android-7.0/quicksettings.png" style="padding-left:1.5em;">
+
+<p class="img-caption" style="padding-left:2em;">
+  <strong>Figura 5:</strong> Mosaicos de Quick Settings del panel de notificaciones.
+</p>
+
+
+  </div><p>Quick Settings es una manera popular y simple de exhibir configuraciones y acciones claves
+directamente desde el panel de notificaciones. En Android N, expandimos el alcance de
+Quick Settings para que sea todavía más útil y práctico. </p>
+
+<p>Agregamos más espacio para mosaicos adicionales de Quick Settings, a los cuales los usuarios pueden
+acceder desde un área de visualización paginada deslizando el dedo hacia la izquierda o la derecha. También permitimos
+que los usuarios determinen los mosaicos de Quick Settings que aparecerán y los puntos en los cuales
+se mostrarán; pueden agregar o mover mosaicos con solo arrastrarlos y soltarlos. </p>
+
+<p>Para los desarrolladores, en Android N también se agrega una nueva API que les permite definir mosaicos de
+  Quick Settings propios para facilitar, dentro de sus aplicaciones, el acceso a controles y acciones claves por parte de los usuarios.</p>
+
+<p>
+  Los mosaicos de Quick Settings se reservan para controles o acciones que se necesiten
+  con urgencia o se usen con frecuencia; no deben emplearse como accesos directos para
+  iniciar una aplicación.
+</p>
+
+<p>
+  Una vez que hayas definido tus mosaicos, puedes dejarlos a disposición de los usuarios, quienes tendrán la posibilidad de agregarlos
+  a Quick Settings con solo arrastrarlos y soltarlos.
+</p>
+
+<p>
+  Para obtener información sobre la creación de un mosaico de aplicación, consulta la documentación de
+  <code>android.service.quicksettings.Tile</code> en la <a href="{@docRoot}preview/setup-sdk.html#docs-dl">referencia de la API</a> descargable.
+</p>
+
+
+
+<h2 id="number-blocking">Bloqueo de números</h2>
+
+<p>Android N ahora admite el bloqueo de números en la plataforma y proporciona una API
+de framework para que los proveedores de servicios dispongan de una lista con números bloqueados. La
+aplicación de SMS predeterminada, la aplicación telefónica predeterminada y las aplicaciones de proveedores tienen capacidad de lectura y
+escritura en la lista de números bloqueados. Otras aplicaciones no pueden acceder a la lista.</p>
+
+<p>Al hacer que el bloqueo de números sea una función estándar de la plataforma, Android permite que las
+aplicaciones admitan de manera uniforme el bloqueo de números en una amplia variedad de
+dispositivos. Entre los demás beneficios que pueden aprovechar las aplicaciones, se encuentran los siguientes:</p>
+
+<ul>
+  <li> Los números bloqueados en las llamadas también se bloquean en los mensajes de texto.
+  <li> Los números bloqueados pueden perdurar tras procesos de restablecimiento y cambios de dispositivos con la función Backup &amp;
+Restore.
+  <li> Varias aplicaciones pueden usar la misma lista de números bloqueados.
+</ul>
+
+<p>De manera adicional, la integración de aplicaciones de proveedores a través de Android permite que estos
+lean la lista de números bloqueados del dispositivo y realicen un bloqueo de servicio
+para el usuario, a fin de evitar que el usuario reciba llamadas o mensajes de texto no deseados
+por cualquier medio, como terminales VOIP o teléfonos con transferencia de llamadas.</p>
+
+<p>
+  Para obtener más información, consulta <code>android.provider.BlockedNumberContract</code>
+  en la <a href="{@docRoot}preview/setup-sdk.html#docs-dl">referencia de la API
+  </a>descargable.
+</p>
+
+<h2 id="call_screening">Filtración de llamadas</h2>
+
+<p>
+  Android N permite que la aplicación predeterminada de un teléfono filtre las llamadas entrantes. La aplicación
+  hace esto a través del nuevo <code>CallScreeningService</code>,
+  que le permite realizar varias acciones según la clase
+  {@link android.telecom.Call.Details Call.Details} de la llamada entrante. Algunos ejemplos:
+</p>
+
+<ul>
+  <li> rechazar la llamada entrante;
+  <li> no permitir el ingreso de la llamada en el registro de llamadas;
+  <li> no mostrar al usuario una notificación de la llamada.
+</ul>
+
+<p>
+  Para obtener más información, consulta <code>android.telecom.CallScreeningService</code>
+  en la <a href="{@docRoot}preview/setup-sdk.html#docs-dl">referencia de la API
+  </a>descargable.
+</p>
+
+
+<h2 id="multi-locale_languages">Compatibilidad con varias configuraciones regionales y más idiomas</h2>
+
+
+<p>Android N permite a los usuarios seleccionar <strong>varias configuraciones regionales</strong> en Settings,
+para brindar una mejor compatibilidad con casos de uso de dos idiomas. Las aplicaciones pueden usar
+una nueva API para obtener las configuraciones regionales seleccionadas del usuario y luego ofrecer experiencias más sofisticadas
+para usuarios que usen varias configuraciones regionales; por ejemplo, pueden mostrar resultados de búsqueda en
+varios idiomas y no ofrecer traducciones de páginas web con idiomas que el
+usuario conozca.</p>
+
+<p>Además de la compatibilidad con varias configuraciones regionales, en Android N también se amplía la variedad de idiomas
+disponibles para los usuarios. Se ofrecen más de 25 variantes, cada una de ellas para idiomas de uso
+común, como el inglés, el español, el francés y el árabe. También se agrega compatibilidad
+parcial con más de 100 idiomas nuevos.</p>
+
+<p>Las aplicaciones pueden obtener la lista de configuraciones regionales establecida por el usuario llamando a
+<code>LocaleList.GetDefault()</code>.  A fin de admitir la cantidad ampliada de configuraciones regionales, en Android N, se
+modificará la forma de resolver recursos. Asegúrate de controlar que tus aplicaciones
+funcionen de la manera esperada con la nueva lógica de resolución de recursos.</p>
+
+<p>Para obtener información sobre el nuevo comportamiento de resolución de recursos y las prácticas recomendadas que
+debes aplicar, consulta <a href="{@docRoot}preview/features/multilingual-support.html">Compatibilidad con varios idiomas</a>.</p>
+
+
+<h2 id="emoji">Nuevos emojis</h2>
+
+<p>
+  Android N presenta más emojis y funciones relacionadas con estos, como
+  emojis con diferentes tonos de piel y compatibilidad con selectores de
+  variación. Si tu aplicación admite emojis,
+  sigue las pautas a continuación para aprovechar estas funciones relacionadas con emojis.
+</p>
+
+<ul>
+  <li>
+    <strong>Comprueba que el dispositivo contenga el emoji antes de insertarlo.</strong>
+    Para corroborar qué emojis tiene la fuente del
+    sistema, usa el método {@link android.graphics.Paint#hasGlyph(String)}.
+  </li>
+  <li>
+    <strong>Comprueba que el emoji admita los selectores de variación.</strong>
+    Los selectores de variación te permiten
+    presentar determinados emojis en color o en blanco y negro.
+    En los dispositivos móviles, las aplicaciones deben representar los emojis en color, en lugar de hacerlo en blanco y negro. Sin embargo,
+    si tu aplicación muestra los emojis alineados con el texto, debe usar la variación de blanco y negro.
+    A fin de determinar si un emoji tiene una variación, usa el selector de variación.
+    Para conocer la lista completa de caracteres con variaciones, consulta la sección de
+    <em>secuencias de variación de emojis</em> de la
+    <a class="external-link" href="http://www.unicode.org/Public/9.0.0/ucd/StandardizedVariants-9.0.0d1.txt">
+      documentación de Unicode sobre variaciones</a>.
+  </li>
+  <li>
+    <strong>Comprueba que el emoji admita tonos de piel.</strong> Android N permite que los usuarios modifiquen el
+    tono de piel presentado de los emojis según su preferencia. Las aplicaciones de teclado deben brindar indicaciones
+    visuales para los emojis que tienen múltiples tonos de piel y permitir que los usuarios
+    seleccionen el tono que prefieran. Para determinar qué emojis del sistema tienen
+    modificadores del tono de piel, usa el método {@link android.graphics.Paint#hasGlyph(String)}.
+ Puedes determinar qué emojis usan tonos de piel leyendo la
+    <a class="external-link" href="http://unicode.org/emoji/charts/full-emoji-list.html">
+     documentación de Unicode</a>.
+  </li>
+</ul>
+
+
+<h2 id="icu4">API de ICU4J en Android</h2>
+
+<p>
+  Android N ahora ofrece un subconjunto de las API de <a href="http://site.icu-project.org/">ICU4J</a> dentro del framework de Android, en
+  el paquete <code>android.icu</code>. La migración es sencilla y en mayor medida implica
+  simplemente un cambio del espacio de nombres <code>com.java.icu</code> a
+  <code>android.icu</code>. Si ya usas el paquete ICU4J en tus
+  aplicaciones, el cambio a las API <code>android.icu</code> en el framework de Android
+  puede reducir notablemente el tamaño del APK.
+</p>
+
+<p>
+  Para obtener más información sobre las API de ICU4J de Android, consulta <a href="{@docRoot}preview/features/icu4j-framework.html">Compatibilidad con ICU4J</a>.
+</p>
+
+
+
+<h2 id="gles_32">API&trade; de OpenGL ES 3.2</h2>
+
+<p>En Android N se agregan interfaces de framework y compatibilidad con plataformas para OpenGL ES 3.2, entre las que se incluye lo siguiente:</p>
+
+<ul>
+  <li> todas las extensiones del <a class="external-link" href="https://www.khronos.org/registry/gles/extensions/ANDROID/ANDROID_extension_pack_es31a.txt">
+paquete de extensiones de Android</a></a> (AEP), a excepción de <code>EXT_texture_sRGB_decode</code>;
+  <li> búferes de fotogramas de punto flotante para HDR y sombreado aplazado;
+  <li> llamadas a draw a través de BaseVertex para mejorar el procesamiento por lotes y la transmisión;
+  <li> sólido control de acceso a búfer para reducir la sobrecarga de WebGL.
+</ul>
+
+<p>En Android N, la API de framework para OpenGL ES 3.2 se proporciona con la clase
+<code>GLES32</code>. Al usar OpenGL ES 3.2, asegúrate de declarar el
+requisito en tu archivo de manifiesto, con la etiqueta <code>&lt;uses-feature&gt;</code> y el
+atributo <code>android:glEsVersion</code>. </p>
+
+<p>Para obtener información sobre el uso de OpenGL ES, incluida la manera de comprobar la
+versión de OpenGL ES que admite el dispositivo durante el tiempo de ejecución, consulta la<a href="{@docRoot}guide/topics/graphics/opengl.html"> guía de la API OpenGL ES</a>.</p>
+
+
+<h2 id="android_tv_recording">Grabación de Android TV</h2>
+
+<p>En Android N, se agrega la capacidad de grabar y reproducir contenido de servicios
+de entrada de Android TV a través de las nuevas API de grabación.  Aprovechando las mejoras existentes de las API time shifting
+, los servicios de entrada de TV pueden controlar los datos de canales que pueden grabarse y la manera
+en que se guardan las sesiones grabadas, y administrar la interacción del usuario con el contenido grabado. </p>
+
+<p>Para obtener más información, consulta <a href="{@docRoot}preview/features/tv-recording-api.html">API de grabación de Android TV</a>.</p>
+
+
+<h2 id="android_for_work">Android for Work</h2>
+
+<p>Android for Work suma muchas funciones y API nuevas para dispositivos con Android N.
+A continuación, se muestran algunos aspectos destacados. Para ver la lista completa de cambios, consulta
+<a href="{@docRoot}preview/features/afw.html">Actualizaciones de Android for Work</a>.</p>
+
+<h3 id="work_profile_security_challenge">Comprobación de seguridad para perfiles de trabajo </h3>
+
+<p>
+  Los propietarios de perfiles orientados al SDK de Android N
+  pueden especificar una comprobación de seguridad independiente para las aplicaciones que se ejecutan en
+  el perfil de trabajo. La comprobación para perfiles de trabajo se muestra cuando un usuario intenta abrir
+  aplicaciones de trabajo. Cuando la comprobación de seguridad es exitosa, se desbloquea el
+  perfil de trabajo y se descifra si es necesario. Para quienes posean perfiles,
+  <code>ACTION_SET_NEW_PASSWORD</code> solicita al usuario establecer una comprobación de
+  trabajo y <code>ACTION_SET_NEW_PARENT_PROFILE_PASSWORD</code> le solicita
+  establecer un bloqueo de dispositivo.
+</p>
+
+<p>
+  Quienes posean perfiles pueden establecer políticas de contraseñas diferentes para la comprobación de seguridad de trabajo
+  (por ejemplo, la extensión que debe tener el PIN o la posibilidad de usar una huella digital
+  para desbloquear el perfil) usando <code>setPasswordQuality()</code>,
+  <code>setPasswordMinimumLength()</code> y métodos relacionados. También
+  pueden establecer el bloqueo del dispositivo usando la instancia de <code>DevicePolicyManager</code>
+  devuelta por el nuevo método <code>getParentProfileInstance()</code>.
+  Además, tienen la posibilidad de personalizar la pantalla de credenciales de la
+  comprobación de trabajo usando los nuevos métodos <code>setOrganizationColor()</code> y
+  <code>setOrganizationName()</code>.
+</p>
+<h3 id="turn_off_work">Desactivación del modo de trabajo </h3>
+
+<p>En dispositivos con perfil de trabajo, los usuarios pueden alternar el modo de trabajo. Cuando este último está
+inactivo, el usuario administrado queda deshabilitado temporalmente, con lo cual se desactivan las aplicaciones de perfiles
+de trabajo, la sincronización en segundo plano y las notificaciones. Esto incluye la aplicación del propietario del
+perfil. Cuando el modo de trabajo está inactivo, en el sistema se muestra un ícono
+de estado persistente para recordar al usuario que no puede iniciar aplicaciones de trabajo. El launcher
+indica que no es posible acceder a aplicaciones ni widgets de trabajo. </p>
+
+<h3 id="always_on_vpn">Always on VPN </h3>
+
+<p>Los propietarios de dispositivos y perfiles pueden asegurarse de que las aplicaciones de trabajo siempre se conecten
+a través de una VPN especificada. El sistema inicia dicha VPN en forma automática después del
+inicio del dispositivo.</p>
+
+<p>
+  Los nuevos métodos de <code>DevicePolicyManager</code> son
+  <code>setAlwaysOnVpnPackage()</code> y
+  <code>getAlwaysOnVpnPackage()</code>.
+</p>
+
+<p>Debido a que los servicios de VPN pueden enlazarse directamente a través del sistema sin interacción con
+aplicaciones, los clientes de VPN deben administrar nuevos puntos de entrada para Always on VPN. Al igual que
+antes, los servicios se indican al sistema con una
+clase <code>android.net.VpnService</code> de acción de coincidencia de filtro de intents. </p>
+
+<p>
+  Los usuarios también pueden establecer clientes Always on VPN que implementen métodos
+  <code>VPNService</code> en el usuario principal con
+  <strong>Settings &gt; More &gt; Vpn</strong>.
+</p>
+
+<h3 id="custom_provisioning">Aprovisionamiento personalizado</h3>
+
+<p>
+  En una aplicación, se pueden personalizar los flujos de aprovisionamiento
+ del propietario del perfil y del dispositivo con logos y colores corporativos.
+  <code>DevicePolicyManager.EXTRA_PROVISIONING_MAIN_COLOR</code> personaliza el
+  color del flujo. <code>DevicePolicyManager.EXTRA_PROVISIONING_LOGO_URI</code>
+  personaliza el flujo con un logotipo corporativo.
+</p>
+
+<h2 id="accessibility_enhancements">Mejoras de accesibilidad</h2>
+
+<p>Android N ahora ofrece Vision Settings directamente en la pantalla de bienvenida para la configuración de
+dispositivos nuevos. Esto permite a los usuarios descubrir y configurar de manera mucho más sencilla
+funciones de accesibilidad en sus dispositivos, como el gesto de ampliación, el tamaño
+de fuente, el tamaño de pantalla y TalkBack. </p>
+
+<p>Al tener estas funciones de accesibilidad una disposición más prominente, es más probable
+que tus usuarios prueben tu aplicación con ellas habilitadas. Asegúrate de probar tus aplicaciones
+anticipadamente con esta configuración habilitada. Puedes habilitarla en Settings &gt;
+Accessibility.</p>
+
+<p>Además, los servicios de accesibilidad de Android N ahora pueden asistir a los usuarios con discapacidades
+motrices con el uso de la pantalla. La nueva API permite crear servicios con
+funciones como el seguimiento de rostros u ojos y la exploración por puntos, entre otros, para satisfacer
+las necesidades de estos usuarios.</p>
+
+<p>Para obtener más información, consulta <code>android.accessibilityservice.GestureDescription</code>
+  en la <a href="{@docRoot}preview/setup-sdk.html#docs-dl">referencia de la API</a> descargable.</p>
+
+
+<h2 id="direct_boot">Inicio directo</h2>
+
+<p>El inicio directo optimiza los tiempos de inicio del dispositivo y permite una funcionalidad
+limitada de las aplicaciones aun después de un reinicio inesperado.
+Por ejemplo, si un dispositivo encriptado se reinicia mientras el usuario duerme,
+este último puede continuar recibiendo en forma normal notificaciones de alarmas, llamadas entrantes y mensajes
+registrados. Esto también significa que los servicios de accesibilidad también pueden estar
+  disponibles de inmediato después de un reinicio.</p>
+
+<p>El inicio directo aprovecha la encriptación basada en archivos de Android N,
+a fin de habilitar políticas de encriptación específicas para datos del sistema y de aplicaciones.
+El sistema usa un encriptado por el dispositivo para datos de sistema seleccionados y datos de aplicaciones
+explícitamente registrados. De forma predeterminada, se usa un depósito encriptado con credenciales para los
+  datos de sistema, los datos de usuario, las aplicaciones y los datos de aplicaciones restantes. </p>
+
+<p>Durante el inicio, el sistema se carga en un modo restringido con acceso únicamente
+a datos encriptados por el dispositivo y sin acceso general a aplicaciones o datos.
+Si hay componentes que deseas ejecutar en este modo, puedes registrarlos
+configurando un marcador en el manifiesto. Después del reinicio, el sistema activa
+componentes registrados transmitiendo la intent <code>LOCKED_BOOT_COMPLETED</code>
+. El sistema garantiza que estén disponibles los datos de aplicaciones encriptados por el dispositivo
+antes de la desactivación del bloqueo. No es posible acceder a los demás datos hasta que el usuario confirme sus credenciales de pantalla de
+  bloqueo para descifrarlos. </p>
+
+Para obtener más información, consulta <a href="{@docRoot}preview/features/direct-boot.html">Inicio directo</a>.</p>
+</p>
+
+
+<h2 id="key_attestation">Atestación de claves</h2>
+
+<p>Los depósitos de claves guardados en hardware proporcionan un método mucho más seguro para crear, almacenar
+y usar claves criptográficas en dispositivos Android. Protegen las claves contra funciones del kernel de
+Linux, vulnerabilidades potenciales de Android y extracciones
+de dispositivos con derechos de administrador.</p>
+
+<p>Para hacer más sencillo y seguro el uso de depósitos de claves guardados en hardware,
+en Android N, se presenta la atestación de claves. En las aplicaciones y en los servicios que no dependen de los dispositivos se puede usar la atestación
+de claves para determinar fehacientemente el almacenamiento de un par de claves RSA o EC se
+en hardware, las propiedades de dicho par y las
+  limitaciones aplicadas a su uso y validez. </p>
+
+<p>Los servicios que no dependen de los dispositivos y las aplicaciones pueden solicitar información acerca de un par de claves
+a través de un certificado de atestación X.509 que debe firmarse con una clave de atestación
+válida. La clave de atestación es una clave de firma ECDSA que se
+inyecta en el depósito de claves guardado en hardware en la fábrica.
+Por lo tanto, un certificado de atestación firmado con una clave de atestación
+válida confirma la existencia de un depósito de claves guardado en hardware y de información detallada
+  sobre los pares de claves en dicho depósito de claves.</p>
+
+<p>Para asegurarse de que el dispositivo use una imagen segura y oficial de fábrica de
+Android, la atestación de claves solicita que el <a class="external-link" href="https://source.android.com/security/verifiedboot/verified-boot.html#bootloader_requirements">bootloader</a>
+del dispositivo proporcione la siguiente información al <a class="external-link" href="https://source.android.com/security/trusty/index.html">entorno de ejecución
+seguro (TEE)</a>:</p>
+
+<ul>
+<li>la versión del SO y el nivel de revisión instalados en el dispositivo;</li>
+<li>la clave pública de <a href="https://source.android.com/security/verifiedboot/index.html" class="external-link">Verified Boot</a> y el estado de bloqueo.</li>
+  </ul>
+
+<p>Para obtener más información sobre la función de depósitos de claves guardados en hardware,
+consulta la guía de<a href="https://source.android.com/security/keystore/" class="external-link"> Depósito de clave guardado en hardware</a>.</p>
+
+<p>Además de la atestación de claves, en Android N también se presentan
+  claves enlazadas a huellas digitales no revocadas en la inscripción con estas huellas.</p>
+
+<h2 id="network_security_config">Configuración de seguridad de la red</h2>
+
+<p>En Android N, las aplicaciones pueden personalizar el comportamiento de sus conexiones protegidas (HTTPS y TLS)
+en forma segura, sin modificaciones en el código, a través de la
+<em>Configuración de seguridad de la red</em> en lugar de las API
+convencionales, propensas a generar errores (p. ej., X509TrustManager).</p>
+
+  <p>Funciones admitidas:</p>
+<ul>
+<li><b>Anclajes de confianza personalizados.</b> Permite personalizar qué autoridades de
+certificado (CA) son de confianza para las conexiones de seguridad de una aplicación. Por ejemplo,
+ confiar en certificados autofirmados particulares o un conjunto restringido de CA públicas.
+</li>
+<li><b>Anulaciones de solo depuración.</b> Permite que el desarrollador de una aplicación depure en forma segura
+conexiones protegidas de su aplicación sin riesgos adicionales para la base
+instalada.
+</li>
+<li><b>Desactivación del tráfico de Cleartext.</b> Permite que una aplicación se proteja a sí misma contra
+el uso accidental de tráfico de Cleartext.</li>
+<li><b>Fijación de certificados.</b> Esta es una función avanzada que permite a una aplicación
+  limitar las claves de servidores en las que se pueda confiar para conexiones protegidas.</li>
+</ul>
+
+<p>Para obtener más información, consulta <a href="{@docRoot}preview/features/security-config.html">Configuración de seguridad de
+la red</a>.</p>
+
+<h2 id="default_trusted_ca">Entidad de certificación de confianza predeterminada</h2>
+
+<p>De manera predeterminada, en las aplicaciones orientadas a Android N solo se consideran como confiables los certificados proporcionados por el sistema
+y ya no se da esta misma consideración a las entidades de certificación (CA) agregadas por usuarios. En aquellas aplicaciones orientadas a Android
+N para las cuales se desee considerar tales CA como válidas, se debe usar la
+<a href="{@docRoot}preview/features/security-config.html">Configuración de seguridad de la red</a> a fin de
+especificar los términos de confianza de dichas CA.</p>
+
+<h2 id="apk_signature_v2">Esquema de firma de APK v2</h2>
+
+<p>
+  Android N presenta el esquema de firma de APK v2, un nuevo esquema de firma de aplicaciones que
+  ofrece instalación más rápida de las aplicaciones y mayor protección contra alteraciones
+  no autorizadas de archivos APK. De forma predeterminada, Android Studio 2.2 y el complemento de Android
+  para Gradle 2.2 firman tu aplicación con el esquema de firma de APK v2 y
+  el esquema de firma tradicional, que utiliza la firma JAR.
+</p>
+
+<p>
+  Aunque recomendamos que implementes el esquema de firma de APK v2 en tu aplicación, este esquema
+  nuevo no es obligatorio. Si la aplicación no se compila correctamente con el
+  esquema de firma de APK v2, puedes deshabilitar este esquema nuevo. Si se deshabilita el proceso,
+  Android Studio 2.2 y el complemento de Android  para Gradle 2.2 firman tu
+  aplicación con el esquema de firma tradicional solamente. Para firmar solo con el
+  esquema tradicional, abre el archivo <code>build.gradle</code> del nivel del módulo, a continuación,
+  agrega la línea <code>v2SigningEnabled false</code> a la configuración de firma
+  de la versión:
+</p>
+
+<pre>
+  android {
+    ...
+    defaultConfig { ... }
+    signingConfigs {
+      release {
+        storeFile file("myreleasekey.keystore")
+        storePassword "password"
+        keyAlias "MyReleaseKey"
+        keyPassword "password"
+        <strong>v2SigningEnabled false</strong>
+      }
+    }
+  }
+</pre>
+
+<p class="caution"><strong>Advertencia: </strong> Si firmas la aplicación con el
+  esquema de firma de APK v2 y luego la modificas, se invalida
+  la firma de la aplicación. Por este motivo, usa herramientas como <code>zipalign</code>
+ antes de firmar la aplicación con el esquema de firma de APK v2, y no después.
+</p>
+
+<p>
+  Para obtener más información, lee los documentos de Android Studio que describen cómo
+  <a href="{@docRoot}studio/publish/app-signing.html#release-mode">
+  firmar una aplicación</a> en Android Studio y cómo<a href="{@docRoot}studio/build/build-variants.html#signing"> configurar
+  el archivo de compilación para firmar aplicaciones</a> con el complemento de Android para Gradle.
+</p>
+
+<h2 id="scoped_directory_access">Acceso a directorios determinados</h2>
+
+<p>En Android N, las aplicaciones pueden usar nuevas API para solicitar acceso a directorios de <a href="{@docRoot}guide/topics/data/data-storage.html#filesExternal">almacenamiento
+externo</a> específicos, incluidos los directorios de medios extraíbles, como las tarjetas
+SD. Las nuevas API simplifican enormemente la manera en que tu aplicación accede a directorios
+de almacenamiento externo estándares, como <code>Pictures</code>. Las aplicaciones
+de fotografía, por ejemplo, pueden usar estas API en lugar de
+<code>READ_EXTERNAL_STORAGE</code>, que otorga acceso a todos los directorios
+de almacenamiento, o del framework de acceso a almacenamiento, con el cual el usuario debe navegar hasta
+el directorio.</p>
+
+<p>A su vez, las nuevas API simplifican los pasos que un usuario debe seguir para otorgar a tu aplicación acceso a almacenamiento
+externo. Cuando se usan las nuevas API, el sistema emplea una IU de
+permisos simple en la que se detallan claramente los directorios a los cuales
+la aplicación solicita acceso.</p>
+
+<p>Para obtener más información, consulta la documentación
+<a href="{@docRoot}preview/features/scoped-folder-access.html">Acceso
+a directorios determinados</a> para desarrolladores.</p>
+
+<h2 id="keyboard_shortcuts_helper">Ayuda en los métodos abreviados del teclado</h2>
+
+<p>
+En Android N, el usuario puede presionar "Alt + /" para activar una pantalla de <em>métodos abreviados del teclado</em>
+que muestra todos los métodos abreviados disponibles, tanto para el
+sistema como la aplicación que esté en primer plano. Estos se recuperan automáticamente del menú de la aplicación si
+están disponibles, pero los desarrolladores pueden proporcionar sus propios métodos abreviados perfeccionados
+para la pantalla. Puedes hacerlo anulando el nuevo método
+<code>Activity.onProvideKeyboardShortcuts()</code>, lo que se describe en la
+<a href="{@docRoot}preview/setup-sdk.html#docs-dl">referencia de la API</a> descargable.
+</p>
+
+<p>
+Para activar la ayuda en los métodos abreviados del teclado desde cualquier ubicación en la aplicación,
+llama a {@code Activity.requestKeyboardShortcutsHelper()} para la actividad relevante.
+</p>
+
+<h2 id="sustained_performance_api">API de rendimiento sostenido</h2>
+
+<p>
+El rendimiento puede fluctuar considerablemente en las aplicaciones de ejecución prolongada porque el
+sistema limita los motores de sistemas en chip cuando los componentes del dispositivo alcanzan los
+límites de temperatura. Esta fluctuación presenta un objetivo móvil para los desarrolladores
+de aplicaciones que crean aplicaciones de alto rendimiento y ejecución prolongada.
+</p>
+
+<p>
+Android N incluye compatibilidad opcional para un
+<em>modo de rendimiento sostenido</em>, que permite que los fabricantes de equipo original (OEM) arrojen datos sobre las capacidades de rendimiento del dispositivo
+para las aplicaciones de ejecución prolongada. Los desarrolladores
+de aplicaciones pueden usar estos datos para perfeccionar sus aplicaciones y alcanzar un nivel
+uniforme y predecible de rendimiento en el dispositivo durante períodos prolongados.
+</p>
+
+<p>
+Los desarrolladores de aplicaciones solo pueden probar esta API nueva en la N Developer Preview instalada solo en dispositivos con
+Nexus 6P. Para usar esta función,
+establece el indicador de rendimiento sostenido de la ventana
+que deseas ejecutar en el modo de rendimiento sostenido. Establece este indicador con el método
+{@code Window.setSustainedPerformanceMode()}. El sistema deshabilita
+automáticamente este modo cuando la ventana deja de estar en primer plano.
+</p>
+
+<h2 id="vr">Soporte de RV</h2>
+
+<p>
+Android N agrega compatibilidad y optimizaciones de plataforma para un modo de RV nuevo, con el objetivo de que los
+ desarrolladores puedan forjar experiencias de RV móviles de alta calidad para los usuarios. Hay varias mejoras en el
+rendimiento, entre las que se incluye el acceso a un núcleo de CPU exclusivo para aplicaciones de RV.
+Dentro de tus aplicaciones, puedes aprovechar el seguimiento de cabeza inteligente
+y las notificaciones en sonido estéreo que funcionan para la RV. Un dato muy importante es que Android N presenta
+muy pocos gráficos de baja latencia. Para obtener información completa sobre el desarrollo de aplicaciones de RV para Android N,
+consulta <a href="https://developers.google.com/vr/android/">Google VR SDK para Android</a>.
+</p>
+
+
+<h2 id="print_svc">Mejoras del servicio de impresión</h2>
+
+<p>
+  En Android N, los desarrolladores de servicios de impresión ahora pueden publicar información adicional
+  sobre impresoras y trabajos de impresión individuales.
+</p>
+
+<p>
+  Al enumerar las impresoras individuales, un servicio de impresión ahora puede establecer íconos
+  por impresora de dos maneras:
+</p>
+
+<ul>
+  <li>Puedes establecer un ícono desde el id. de un recurso llamando a
+  <code>PrinterInfo.Builder.setResourceIconId()</code>.
+  </li>
+
+  <li>Puedes mostrar un ícono de la red llamando a
+  <code>PrinterInfo.Builder.setHasCustomPrinterIcon()</code> y configurando un
+  callback para cuando se solicite el ícono con
+  <code>android.printservice.PrinterDiscoverySession.onRequestCustomPrinterIcon()</code>.
+  </li>
+</ul>
+
+<p>
+  Además, puedes proporcionar las actividades por impresora para mostrar información
+  adicional llamando a <code>PrinterInfo.Builder.setInfoIntent()</code>.
+</p>
+
+<p>
+  Puedes indicar el progreso y el estado de los trabajos de impresión en la notificación de
+  trabajo de impresión llamando a
+  <code>android.printservice.PrintJob.setProgress()</code> y
+  <code>android.printservice.PrintJob.setStatus()</code>, respectivamente.
+</p>
+
+<p>
+  Para obtener más información sobre estos métodos, consulta la <a href="{@docRoot}preview/setup-sdk.html#docs-dl">referencia de la API</a> descargable.
+</p>
+
+<h2 id="framemetrics_api">API FrameMetricsListener</h2>
+
+<p>
+La API FrameMetricsListener permite que una aplicación monitoree el rendimiento de la representación
+de la IU. La API brinda esta capacidad mediante la exposición de una transmisión de API Pub/Sub para transferir información sobre el tiempo
+de los cuadros para la ventana actual de la aplicación. Los datos devueltos son
+equivalentes a lo que muestra <code><a href="{@docRoot}tools/help/shell.html#shellcommands">adb shell</a>
+dumpsys gfxinfo framestats</code>, pero no se limita a los últimos 120 cuadros.
+</p>
+
+<p>
+Puedes usar FrameMetricsListener para medir el rendimiento de
+la IU del nivel de interacción en producción sin contar con una conexión USB. Esta API
+permite recopilar datos con una especificidad mayor que
+{@code adb shell dumpsys gfxinfo}. Esta especificidad mayor es posible porque
+el sistema puede recopilar datos para interacciones determinadas en la aplicación, sin que sea
+necesario que el sistema obtenga un resumen global del
+rendimiento de toda la aplicación o borre un estado global. Puedes usar esta
+capacidad con el objetivo de recopilar datos de rendimiento e identificar regresiones en el rendimiento de la IU
+para casos de uso reales dentro de una aplicación.
+</p>
+
+<p>
+Para monitorear una ventana, implementa el callback <code>FrameMetricsListener.onMetricsAvailable()</code>
+y regístralo en esa ventana. Para obtener más información, consulta
+la documentación de la clase {@code FrameMetricsListener}
+en la <a href="{@docRoot}preview/setup-sdk.html#docs-dl">referencia de la API</a> descargable.
+</p>
+
+<p>
+La API proporciona un objeto {@code FrameMetrics}, que contiene datos de intervalos que
+el subsistema de representación informa sobre varios hitos en el ciclo de vida de un marco.
+Las métricas compatibles son {@code UNKNOWN_DELAY_DURATION},
+{@code INPUT_HANDLING_DURATION}, {@code ANIMATION_DURATION},
+{@code LAYOUT_MEASURE_DURATION}, {@code DRAW_DURATION}, {@code SYNC_DURATION},
+{@code COMMAND_ISSUE_DURATION}, {@code SWAP_BUFFERS_DURATION},
+{@code TOTAL_DURATION} y {@code FIRST_DRAW_FRAME}.
+</p>
+
+
+<h2 id="virtual_files">Archivos virtuales</h2>
+
+<p>
+  En versiones anteriores de Android, tu aplicación podía usar el framework
+  de acceso al almacenamiento para permitir a los usuarios seleccionar archivos de cuentas de almacenamiento en la nube,
+  como Google Drive. Sin embargo, no se podían representar los archivos que no
+  tenían una representación directa en código de bits; cada archivo debía brindar
+  un flujo de entrada.
+</p>
+
+<p>
+  Android N incorpora el concepto de <em>archivos virtuales</em> al framework
+  de acceso al almacenamiento. La función de archivos virtuales permite que tu
+  {@link android.provider.DocumentsProvider} devuelva URI de documentos que se pueden
+  usar en una intent {@link android.content.Intent#ACTION_VIEW} incluso si
+  no tienen una representación directa en código de bits. Android N también te permite
+  ofrecer formatos alternativos para archivos del usuario, virtuales u otros.
+</p>
+
+<p>
+  Para obtener un URI para un documento virtual en tu aplicación, primero crea una
+  {@link android.content.Intent} a fin de abrir la IU del selector de archivos. Como una aplicación
+  no puede abrir directamente un archivo virtual con el método
+  {@link android.content.ContentResolver#openInputStream(Uri) openInputStream()},
+  la aplicación no recibe ningún archivo virtual si incluyes la categoría
+  {@link android.content.Intent#CATEGORY_OPENABLE}.
+</p>
+
+<p>
+  Cuando el usuario realiza una selección, el sistema llama al método
+  {@link android.app.Activity#onActivityResult onActivityResult()}.
+  La aplicación puede recuperar el URI del archivo virtual y obtener un flujo de entrada, como
+  se demuestra en el fragmento de código a continuación.
+</p>
+
+<pre>
+  // Other Activity code ...
+
+  final static private int REQUEST_CODE = 64;
+
+  // We listen to the OnActivityResult event to respond to the user's selection.
+  &#64;Override
+  public void onActivityResult(int requestCode, int resultCode,
+    Intent resultData) {
+      try {
+        if (requestCode == REQUEST_CODE &amp;&amp;
+            resultCode == Activity.RESULT_OK) {
+
+            Uri uri = null;
+
+            if (resultData != null) {
+                uri = resultData.getData();
+
+                ContentResolver resolver = getContentResolver();
+
+                // Before attempting to coerce a file into a MIME type,
+                // check to see what alternative MIME types are available to
+                // coerce this file into.
+                String[] streamTypes =
+                  resolver.getStreamTypes(uri, "*/*");
+
+                AssetFileDescriptor descriptor =
+                    resolver.openTypedAssetFileDescriptor(
+                        uri,
+                        streamTypes[0],
+                        null);
+
+                // Retrieve a stream to the virtual file.
+                InputStream inputStream = descriptor.createInputStream();
+            }
+        }
+      } catch (Exception ex) {
+        Log.e("EXCEPTION", "ERROR: ", ex);
+      }
+  }
+</pre>
+
+<p>
+  Para obtener más información sobre el acceso a archivos del usuario, consulta la
+  <a href="{@docRoot}guide/topics/providers/document-provider.html">guía
+  Frameworks de acceso a almacenamiento</a>.
+</p>

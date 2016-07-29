@@ -1,0 +1,234 @@
+page.title=Ahorro de datos
+metaDescription=User-enabled data usage optimization.
+page.keywords="android N", "data usage", "metered network"
+page.image=images/cards/card-nyc_2x.jpg
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+    <h2>
+      En este documento
+    </h2>
+
+    <ol>
+      <li>
+        <a href="#status">Verificación de las preferencias de ahorro de datos</a>
+        <ol>
+          <li>
+            <a href="#request-whitelist">Solicitud de permisos de lista blanca</a>
+          </li>
+        </ol>
+      </li>
+
+      <li>
+        <a href="#monitor-changes">Control de cambios en las preferencias
+ de ahorro de datos</a>
+      </li>
+
+      <li>
+        <a href="#testing">Pruebas con comandos de Android Debug Bridge</a>
+      </li>
+    </ol>
+  </div>
+</div>
+
+<p>
+  Durante la vida útil de un smartphone, el costo de un plan de datos móviles puede
+ superar fácilmente el costo del propio dispositivo. En la versión N Developer Preview, los usuarios pueden
+ habilitar el ahorro de datos en todo el dispositivo a fin de reducir el uso de datos, ya sea con
+ servicio de itinerancia, cerca del final del ciclo de facturación o con un pequeño paquete de datos prepago.
+</p>
+
+<p>
+  Cuando un usuario habilita el ahorro de datos en <strong>Settings</strong> y el dispositivo está conectado
+ a una red de uso medido, el sistema bloquea el uso de datos en segundo plano y envía señales
+ a las aplicaciones para que utilicen menos datos en primer plano siempre que sea posible. Los usuarios pueden
+ incluir aplicaciones específicas en la lista blanca para permitir el uso de datos medidos en segundo plano, incluso cuando está activado el ahorro
+ de datos.
+</p>
+
+<p>
+  La N Developer Preview extiende la API {@link android.net.ConnectivityManager}
+ para que las aplicaciones puedan <a href="#status">recuperar las preferencias de
+ ahorro de datos del usuario</a> y <a href="#monitor-changes">controlar
+ los cambios en las preferencias</a>. Se considera una buena práctica que las aplicaciones verifiquen si el
+ usuario habilitó el ahorro de datos y se esfuercen por reducir el uso de datos en primer
+ y segundo plano.
+</p>
+
+<h2 id="status">
+  Verificación de las preferencias de ahorro de datos
+</h2>
+
+<p>
+  En la N Developer Preview, las aplicaciones pueden utilizar la API {@link
+  android.net.ConnectivityManager} para determinar qué restricciones
+ de uso de datos se aplican. Mediante el método {@code getRestrictBackgroundStatus()}
+, se devuelve uno de los siguientes valores:
+</p>
+
+<dl>
+  <dt>
+    {@code RESTRICT_BACKGROUND_STATUS_DISABLED}
+  </dt>
+
+  <dd>
+    El ahorro de datos está inhabilitado.
+  </dd>
+
+  <dt>
+    {@code RESTRICT_BACKGROUND_STATUS_ENABLED}
+  </dt>
+
+  <dd>
+    El usuario habilitó el ahorro de datos para esta aplicación. Las aplicaciones deben esforzarse por reducir
+ el uso de datos en primer plano y manejar correctamente las restricciones para
+ el uso de datos en segundo plano.
+  </dd>
+
+  <dt>
+    {@code RESTRICT_BACKGROUND_STATUS_WHITELISTED}
+  </dt>
+
+  <dd>
+    El usuario habilitó el ahorro de datos, pero la aplicación se encuentra en la lista blanca. Las aplicaciones aún deben
+ esforzarse por reducir el uso de datos en primer y segundo plano.
+  </dd>
+</dl>
+
+<p>
+  Se considera una buena práctica limitar el uso de datos siempre que el dispositivo esté
+ conectado a una red de uso medido, incluso si el ahorro de datos está deshabilitado o la aplicación
+ se encuentra en la lista blanca. El siguiente código de muestra utiliza {@link
+  android.net.ConnectivityManager#isActiveNetworkMetered
+  ConnectivityManager.isActiveNetworkMetered()} y {@code
+  ConnectivityManager.getRestrictBackgroundStatus()} para determinar la cantidad de datos
+ que la aplicación debe utilizar:
+</p>
+
+<pre>
+ConnectivityManager connMgr = (ConnectivityManager)
+        getSystemService(Context.CONNECTIVITY_SERVICE);
+// Checks if the device is on a metered network
+if (connMgr.isActiveNetworkMetered()) {
+  // Checks user’s Data Saver settings.
+  switch (connMgr.getRestrictBackgroundStatus()) {
+    case RESTRICT_BACKGROUND_STATUS_ENABLED:
+    // Background data usage is blocked for this app. Wherever possible,
+    // the app should also use less data in the foreground.
+
+    case RESTRICT_BACKGROUND_STATUS_WHITELISTED:
+    // The app is whitelisted. Wherever possible,
+    // the app should use less data in the foreground and background.
+
+    case RESTRICT_BACKGROUND_STATUS_DISABLED:
+    // Data Saver is disabled. Since the device is connected to a
+    // metered network, the app should use less data wherever possible.
+  }
+} else {
+  // The device is not on a metered network.
+  // Use data as required to perform syncs, downloads, and updates.
+}
+</pre>
+
+<h3 id="request-whitelist">
+  Solicitud de permisos de lista blanca
+</h3>
+
+<p>
+  Si la aplicación necesita utilizar datos en segundo plano, esta puede solicitar permisos de
+ lista blanca mediante el envío de una intent
+ <code>Settings.ACTION_IGNORE_BACKGROUND_DATA_RESTRICTIONS_SETTINGS</code>
+ que contenga un URI del nombre de paquete de la aplicación, como por ejemplo,
+ <code>package:MY_APP_ID</code>.
+</p>
+
+<p>
+  Mediante el envío de la intent y el URI, se inicia la aplicación <strong>Settings</strong> y
+ se muestra la configuración de uso de datos para la aplicación. El usuario luego puede decidir si
+ habilita los datos en segundo plano para la aplicación. Antes de enviar esta intent, resulta
+ buena práctica consultarle primero al usuario acerca de si desea iniciar la aplicación
+ <strong>Settings</strong> con el objetivo de habilitar el uso de datos
+ en segundo plano.
+</p>
+
+<h2 id="monitor-changes">
+  Control de cambios en las preferencias de ahorro de datos
+</h2>
+
+<p>
+  Las aplicaciones pueden controlar los cambios en las preferencias de ahorro de datos mediante la creación de un {@link
+  android.content.BroadcastReceiver} para escuchar {@code
+  ConnectivityManager.ACTION_RESTRICT_BACKGROUND_CHANGED} y mediante un registro
+ dinámico del receptor con {@link android.content.Context#registerReceiver
+  Context.registerReceiver()}. Cuando una aplicación recibe esta transmisión, debe
+ <a href="#status">verificar si las nuevas preferencias de ahorro de datos afectan los
+ permisos; para ello,</a> la aplicación debe llamar a {@code
+  ConnectivityManager.getRestrictBackgroundStatus()}.
+</p>
+
+<p class="note">
+  <strong>Nota:</strong> El sistema únicamente envía esta transmisión a las aplicaciones que
+ se registran dinámicamente para recibirla con {@link
+  android.content.Context#registerReceiver Context.registerReceiver()}. Las aplicaciones
+ que en su manifiesto registran que la reciben no la
+ recibirán.
+</p>
+
+<h2 id="testing">
+  Pruebas con comandos de Android Debug Bridge
+</h2>
+
+<a href="{@docRoot}tools/help/adb.html">Android Debug Bridge (ADB)</a>
+ofrece algunos comandos que puedes utilizar para verificar y configurar los permisos
+de red:
+
+<dl>
+  <dt>
+    <code>$ adb shell dumpsys netpolicy</code>
+  </dt>
+
+  <dd>
+    Se genera un informe en el que se incluyen la configuración global actual de restricciones de red
+ en segundo plano, los UID de paquetes que se encuentran actualmente en una lista blanca y los permisos
+ de red de otros paquetes conocidos.
+  </dd>
+
+  <dt>
+    <code>$ adb shell cmd netpolicy</code>
+  </dt>
+
+  <dd>
+    Se muestra una lista completa de los comandos del administrador de políticas de red (políticas de red).
+  </dd>
+
+  <dt>
+    <code>$ adb shell cmd netpolicy set restrict-background
+    &lt;boolean&gt;</code>
+  </dt>
+
+  <dd>
+    Se habilita o deshabilita el modo de ahorro de datos cuando se asignan los valores <code>true</code> o
+    <code>false</code>, respectivamente.
+  </dd>
+
+  <dt>
+    <code>$ adb shell cmd netpolicy add restrict-background-whitelist
+    &lt;UID&gt;</code>
+  </dt>
+
+  <dd>
+    Se agrega el UID del paquete específico a la lista blanca para permitir el uso de datos
+ medidos en segundo plano.
+  </dd>
+
+  <dt>
+    <code>$ adb shell cmd netpolicy remove restrict-background-whitelist
+    &lt;UID&gt;</code>
+  </dt>
+
+  <dd>
+    Se quita el UID del paquete específico de la lista blanca para bloquear el uso de datos
+ medidos en segundo plano mientras el ahorro de datos está habilitado.
+  </dd>
+</dl>
