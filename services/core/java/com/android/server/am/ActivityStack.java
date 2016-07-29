@@ -1635,6 +1635,16 @@ final class ActivityStack {
                 }
             }
         }
+        // If an on-top launcher is on the top of the home stack but the home stack is not focused,
+        // then the whole stack should be invisible.
+        TaskRecord topTask = topTask();
+        if (mStackId != focusedStackId && topTask != null && topTask.isOnTopLauncher()) {
+            // We're here mostly because the on-top launcher didn't have a chance to move itself to
+            // back. We should move it to back as soon as possible to avoid other activities
+            // returning to it or other visibility issues.
+            moveTaskToBackLocked(topTask.taskId);
+            return STACK_INVISIBLE;
+        }
 
         if (mStackId == FULLSCREEN_WORKSPACE_STACK_ID
                 && hasVisibleBehindActivity() && focusedStackId == HOME_STACK_ID
