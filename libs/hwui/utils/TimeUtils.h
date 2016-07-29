@@ -21,8 +21,16 @@
 namespace android {
 namespace uirenderer {
 
+constexpr nsecs_t operator"" _s (unsigned long long s) {
+    return seconds_to_nanoseconds(s);
+}
+
 constexpr nsecs_t operator"" _ms (unsigned long long ms) {
     return milliseconds_to_nanoseconds(ms);
+}
+
+constexpr nsecs_t operator"" _us (unsigned long long us) {
+    return microseconds_to_nanoseconds(us);
 }
 
 } /* namespace uirenderer */
