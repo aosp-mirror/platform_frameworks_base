@@ -829,10 +829,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             final int height = Math.min(mFrame.height(), mContentFrame.height());
             final int width = Math.min(mContentFrame.width(), mFrame.width());
             final DisplayMetrics displayMetrics = getDisplayContent().getDisplayMetrics();
-            final int minVisibleHeight = WindowManagerService.dipToPixel(
-                    MINIMUM_VISIBLE_HEIGHT_IN_DP, displayMetrics);
-            final int minVisibleWidth = WindowManagerService.dipToPixel(
-                    MINIMUM_VISIBLE_WIDTH_IN_DP, displayMetrics);
+            final int minVisibleHeight = Math.min(height, WindowManagerService.dipToPixel(
+                    MINIMUM_VISIBLE_HEIGHT_IN_DP, displayMetrics));
+            final int minVisibleWidth = Math.min(width, WindowManagerService.dipToPixel(
+                    MINIMUM_VISIBLE_WIDTH_IN_DP, displayMetrics));
             final int top = Math.max(mContentFrame.top,
                     Math.min(mFrame.top, mContentFrame.bottom - minVisibleHeight));
             final int left = Math.max(mContentFrame.left + minVisibleWidth - width,
