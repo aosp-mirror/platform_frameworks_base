@@ -624,6 +624,7 @@ public class NavigationBarView extends LinearLayout {
                 mCarMode = true;
                 uiCarModeChanged = true;
             }
+            getHomeButton().setCarMode(mCarMode);
         }
         return uiCarModeChanged;
     }
