@@ -240,6 +240,8 @@ public class ServiceState implements Parcelable {
 
     private boolean mIsDataRoamingFromRegistration;
 
+    private boolean mIsUsingCarrierAggregation;
+
     /**
      * get String description of roaming type
      * @hide
@@ -318,6 +320,7 @@ public class ServiceState implements Parcelable {
         mCdmaEriIconMode = s.mCdmaEriIconMode;
         mIsEmergencyOnly = s.mIsEmergencyOnly;
         mIsDataRoamingFromRegistration = s.mIsDataRoamingFromRegistration;
+        mIsUsingCarrierAggregation = s.mIsUsingCarrierAggregation;
     }
 
     /**
@@ -346,6 +349,7 @@ public class ServiceState implements Parcelable {
         mCdmaEriIconMode = in.readInt();
         mIsEmergencyOnly = in.readInt() != 0;
         mIsDataRoamingFromRegistration = in.readInt() != 0;
+        mIsUsingCarrierAggregation = in.readInt() != 0;
     }
 
     public void writeToParcel(Parcel out, int flags) {
@@ -371,6 +375,7 @@ public class ServiceState implements Parcelable {
         out.writeInt(mCdmaEriIconMode);
         out.writeInt(mIsEmergencyOnly ? 1 : 0);
         out.writeInt(mIsDataRoamingFromRegistration ? 1 : 0);
+        out.writeInt(mIsUsingCarrierAggregation ? 1 : 0);
     }
 
     public int describeContents() {
@@ -680,7 +685,8 @@ public class ServiceState implements Parcelable {
                 && equalsHandlesNulls(mCdmaDefaultRoamingIndicator,
                         s.mCdmaDefaultRoamingIndicator)
                 && mIsEmergencyOnly == s.mIsEmergencyOnly
-                && mIsDataRoamingFromRegistration == s.mIsDataRoamingFromRegistration);
+                && mIsDataRoamingFromRegistration == s.mIsDataRoamingFromRegistration
+                && mIsUsingCarrierAggregation == s.mIsUsingCarrierAggregation);
     }
 
     /**
@@ -788,7 +794,8 @@ public class ServiceState implements Parcelable {
                 + " RoamInd=" + mCdmaRoamingIndicator
                 + " DefRoamInd=" + mCdmaDefaultRoamingIndicator
                 + " EmergOnly=" + mIsEmergencyOnly
-                + " IsDataRoamingFromRegistration=" + mIsDataRoamingFromRegistration);
+                + " IsDataRoamingFromRegistration=" + mIsDataRoamingFromRegistration
+                + " IsUsingCarrierAggregation=" + mIsUsingCarrierAggregation);
     }
 
     private void setNullState(int state) {
@@ -815,6 +822,7 @@ public class ServiceState implements Parcelable {
         mCdmaEriIconMode = -1;
         mIsEmergencyOnly = false;
         mIsDataRoamingFromRegistration = false;
+        mIsUsingCarrierAggregation = false;
     }
 
     public void setStateOutOfService() {
@@ -988,6 +996,7 @@ public class ServiceState implements Parcelable {
         mCdmaDefaultRoamingIndicator = m.getInt("cdmaDefaultRoamingIndicator");
         mIsEmergencyOnly = m.getBoolean("emergencyOnly");
         mIsDataRoamingFromRegistration = m.getBoolean("isDataRoamingFromRegistration");
+        mIsUsingCarrierAggregation = m.getBoolean("isUsingCarrierAggregation");
     }
 
     /**
@@ -1017,18 +1026,39 @@ public class ServiceState implements Parcelable {
         m.putInt("cdmaDefaultRoamingIndicator", mCdmaDefaultRoamingIndicator);
         m.putBoolean("emergencyOnly", mIsEmergencyOnly);
         m.putBoolean("isDataRoamingFromRegistration", mIsDataRoamingFromRegistration);
+        m.putBoolean("isUsingCarrierAggregation", mIsUsingCarrierAggregation);
     }
 
     /** @hide */
     public void setRilVoiceRadioTechnology(int rt) {
+        if (rt == RIL_RADIO_TECHNOLOGY_LTE_CA) {
+            rt = RIL_RADIO_TECHNOLOGY_LTE;
+        }
+
         this.mRilVoiceRadioTechnology = rt;
     }
 
     /** @hide */
     public void setRilDataRadioTechnology(int rt) {
+        if (rt == RIL_RADIO_TECHNOLOGY_LTE_CA) {
+            rt = RIL_RADIO_TECHNOLOGY_LTE;
+            this.mIsUsingCarrierAggregation = true;
+        } else {
+            this.mIsUsingCarrierAggregation = false;
+        }
         this.mRilDataRadioTechnology = rt;
         if (VDBG) Rlog.d(LOG_TAG, "[ServiceState] setRilDataRadioTechnology=" +
                 mRilDataRadioTechnology);
+    }
+
+    /** @hide */
+    public boolean isUsingCarrierAggregation() {
+        return mIsUsingCarrierAggregation;
+    }
+
+    /** @hide */
+    public void setIsUsingCarrierAggregation(boolean ca) {
+        mIsUsingCarrierAggregation = ca;
     }
 
     /** @hide */
