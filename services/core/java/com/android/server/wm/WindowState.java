@@ -3205,4 +3205,8 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         mAnimatingExit = false;
         mService.mWallpaperControllerLocked.hideWallpapers(this);
     }
+
+    public boolean isRtl() {
+        return mMergedConfiguration.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
+    }
 }
