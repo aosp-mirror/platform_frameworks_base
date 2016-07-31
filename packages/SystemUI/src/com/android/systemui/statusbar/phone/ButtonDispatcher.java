@@ -176,8 +176,18 @@ public class ButtonDispatcher {
         mCurrentView = currentView.findViewById(mId);
     }
 
+    public void setCarMode(boolean carMode) {
+        final int N = mViews.size();
+        for (int i = 0; i < N; i++) {
+            final View view = mViews.get(i);
+            if (view instanceof ButtonInterface) {
+                ((ButtonInterface) view).setCarMode(carMode);
+            }
+        }
+    }
+
     /**
-     * Interface for ImageView button actions.
+     * Interface for button actions.
      */
     public interface ButtonInterface {
         void setImageResource(@DrawableRes int resId);
@@ -187,5 +197,7 @@ public class ButtonDispatcher {
         void abortCurrentGesture();
 
         void setLandscape(boolean landscape);
+
+        void setCarMode(boolean carMode);
     }
 }
