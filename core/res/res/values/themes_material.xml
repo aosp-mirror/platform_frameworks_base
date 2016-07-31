@@ -114,9 +114,9 @@ please see themes_device_defaults.xml.
         <item name="listPreferredItemHeightSmall">48dip</item>
         <item name="listPreferredItemHeightLarge">80dip</item>
         <item name="dropdownListPreferredItemHeight">?attr/listPreferredItemHeightSmall</item>
-        <item name="textAppearanceListItem">@style/TextAppearance.Material.Subhead</item>
-        <item name="textAppearanceListItemSmall">@style/TextAppearance.Material.Subhead</item>
-        <item name="textAppearanceListItemSecondary">@style/TextAppearance.Material.Body1</item>
+        <item name="textAppearanceListItem">@style/TextAppearance.Material.ListItem</item>
+        <item name="textAppearanceListItemSmall">@style/TextAppearance.Material.ListItem</item>
+        <item name="textAppearanceListItemSecondary">@style/TextAppearance.Material.ListItemSecondary</item>
         <item name="listPreferredItemPaddingLeft">@dimen/list_item_padding_horizontal_material</item>
         <item name="listPreferredItemPaddingRight">@dimen/list_item_padding_horizontal_material</item>
         <item name="listPreferredItemPaddingStart">@dimen/list_item_padding_start_material</item>
@@ -475,9 +475,9 @@ please see themes_device_defaults.xml.
         <item name="listPreferredItemHeightSmall">48dip</item>
         <item name="listPreferredItemHeightLarge">80dip</item>
         <item name="dropdownListPreferredItemHeight">?attr/listPreferredItemHeightSmall</item>
-        <item name="textAppearanceListItem">@style/TextAppearance.Material.Subhead</item>
-        <item name="textAppearanceListItemSmall">@style/TextAppearance.Material.Subhead</item>
-        <item name="textAppearanceListItemSecondary">@style/TextAppearance.Material.Body1</item>
+        <item name="textAppearanceListItem">@style/TextAppearance.Material.ListItem</item>
+        <item name="textAppearanceListItemSmall">@style/TextAppearance.Material.ListItem</item>
+        <item name="textAppearanceListItemSecondary">@style/TextAppearance.Material.ListItemSecondary</item>
         <item name="listPreferredItemPaddingLeft">@dimen/list_item_padding_horizontal_material</item>
         <item name="listPreferredItemPaddingRight">@dimen/list_item_padding_horizontal_material</item>
         <item name="listPreferredItemPaddingStart">@dimen/list_item_padding_start_material</item>
