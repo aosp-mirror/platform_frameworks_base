@@ -91,7 +91,7 @@ CanvasContext::CanvasContext(RenderThread& thread, bool translucent,
         : mRenderThread(thread)
         , mOpaque(!translucent)
         , mAnimationContext(contextFactory->createAnimationContext(mRenderThread.timeLord()))
-        , mJankTracker(thread.timeLord().frameIntervalNanos())
+        , mJankTracker(thread.mainDisplayInfo())
         , mProfiler(mFrames)
         , mContentDrawBounds(0, 0, 0, 0)
         , mRenderPipeline(std::move(renderPipeline)) {
@@ -283,11 +283,6 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo,
     if (CC_LIKELY(mSwapHistory.size() && !Properties::forceDrawFrame)) {
         nsecs_t latestVsync = mRenderThread.timeLord().latestVsync();
         SwapHistory& lastSwap = mSwapHistory.back();
-        int durationUs;
-        mNativeSurface->query(NATIVE_WINDOW_LAST_DEQUEUE_DURATION, &durationUs);
-        lastSwap.dequeueDuration = us2ns(durationUs);
-        mNativeSurface->query(NATIVE_WINDOW_LAST_QUEUE_DURATION, &durationUs);
-        lastSwap.queueDuration = us2ns(durationUs);
         nsecs_t vsyncDelta = std::abs(lastSwap.vsyncTime - latestVsync);
         // The slight fudge-factor is to deal with cases where
         // the vsync was estimated due to being slow handling the signal.
@@ -371,6 +366,15 @@ void CanvasContext::draw() {
         swap.damage = windowDirty;
         swap.swapCompletedTime = systemTime(CLOCK_MONOTONIC);
         swap.vsyncTime = mRenderThread.timeLord().latestVsync();
+        int durationUs;
+        mNativeSurface->query(NATIVE_WINDOW_LAST_DEQUEUE_DURATION, &durationUs);
+        swap.dequeueDuration = us2ns(durationUs);
+        mNativeSurface->query(NATIVE_WINDOW_LAST_QUEUE_DURATION, &durationUs);
+        swap.queueDuration = us2ns(durationUs);
+        mCurrentFrameInfo->set(FrameInfoIndex::DequeueBufferDuration)
+                = swap.dequeueDuration;
+        mCurrentFrameInfo->set(FrameInfoIndex::QueueBufferDuration)
+                = swap.queueDuration;
         mHaveNewSurface = false;
         mFrameNumber = -1;
     }
