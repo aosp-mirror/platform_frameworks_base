@@ -246,21 +246,21 @@ android {
 </pre>
 <p>
   Expressions within the layout are written in the attribute properties using
-  the “<code>&amp;commat;{}</code>” syntax. Here, the TextView’s text is set to
+  the "<code>&commat;{}</code>" syntax. Here, the TextView's text is set to
   the firstName property of user:
 </p>
 
 <pre>
 &lt;TextView android:layout_width="wrap_content"
           android:layout_height="wrap_content"
-          android:text="&amp;commat;{user.firstName}"/&gt;
+          android:text="&commat;{user.firstName}"/&gt;
 </pre>
 <h3 id="data_object">
   Data Object
 </h3>
 
 <p>
-  Let’s assume for now that you have a plain-old Java object (POJO) for User:
+  Let's assume for now that you have a plain-old Java object (POJO) for User:
 </p>
 
 <pre>
@@ -296,8 +296,8 @@ public class User {
 </pre>
 <p>
   From the perspective of data binding, these two classes are equivalent. The
-  expression <strong><code>&amp;commat;{user.firstName}</code></strong> used
-  for the TextView’s <strong><code>android:text</code></strong> attribute will
+  expression <strong><code>&commat;{user.firstName}</code></strong> used
+  for the TextView's <strong><code>android:text</code></strong> attribute will
   access the <strong><code>firstName</code></strong> field in the former class
   and the <code>getFirstName()</code> method in the latter class.
   Alternatively, it will also be resolved to <code>firstName()</code> if that
@@ -310,10 +310,10 @@ public class User {
 
 <p>
   By default, a Binding class will be generated based on the name of the layout
-  file, converting it to Pascal case and suffixing “Binding” to it. The above
+  file, converting it to Pascal case and suffixing "Binding" to it. The above
   layout file was <code>main_activity.xml</code> so the generate class was
   <code>MainActivityBinding</code>. This class holds all the bindings from the
-  layout properties (e.g. the <code>user</code> variable) to the layout’s Views
+  layout properties (e.g. the <code>user</code> variable) to the layout's Views
   and knows how to assign values for the binding expressions.The easiest means
   for creating the bindings is to do it while inflating:
 </p>
@@ -328,7 +328,7 @@ protected void onCreate(Bundle savedInstanceState) {
 }
 </pre>
 <p>
-  You’re done! Run the application and you’ll see Test User in the UI.
+  You're done! Run the application and you'll see Test User in the UI.
   Alternatively, you can get the view via:
 </p>
 
@@ -434,15 +434,15 @@ public class Presenter {
 </pre>
   Then you can bind the click event to your class as follows:
 <pre>
-  &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-  &lt;layout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;
+  &lt;?xml version="1.0" encoding="utf-8"?&gt;
+  &lt;layout xmlns:android="http://schemas.android.com/apk/res/android"&gt;
       &lt;data&gt;
-          &lt;variable name=&quot;task&quot; type=&quot;com.android.example.Task&quot; /&gt;
-          &lt;variable name=&quot;presenter&quot; type=&quot;com.android.example.Presenter&quot; /&gt;
+          &lt;variable name="task" type="com.android.example.Task" /&gt;
+          &lt;variable name="presenter" type="com.android.example.Presenter" /&gt;
       &lt;/data&gt;
-      &lt;LinearLayout android:layout_width=&quot;match_parent&quot; android:layout_height=&quot;match_parent&quot;&gt;
-          &lt;Button android:layout_width=&quot;wrap_content&quot; android:layout_height=&quot;wrap_content&quot;
-          android:onClick=&quot;@{() -&gt; presenter.onSaveClick(task)}&quot; /&gt;
+      &lt;LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"&gt;
+          &lt;Button android:layout_width="wrap_content" android:layout_height="wrap_content"
+          android:onClick="@{() -&gt; presenter.onSaveClick(task)}" /&gt;
       &lt;/LinearLayout&gt;
   &lt;/layout&gt;
 </pre>
@@ -465,7 +465,7 @@ public class Presenter {
   above could be written as:
 </p>
 <pre>
-  android:onClick=&quot;@{(view) -&gt; presenter.onSaveClick(task)}&quot;
+  android:onClick="@{(view) -&gt; presenter.onSaveClick(task)}"
 </pre>
 Or if you wanted to use the parameter in the expression, it could work as follows:
 <pre>
@@ -474,7 +474,7 @@ public class Presenter {
 }
 </pre>
 <pre>
-  android:onClick=&quot;@{(theView) -&gt; presenter.onSaveClick(theView, task)}&quot;
+  android:onClick="@{(theView) -&gt; presenter.onSaveClick(theView, task)}"
 </pre>
 You can use a lambda expression with more than one parameter:
 <pre>
@@ -483,8 +483,8 @@ public class Presenter {
 }
 </pre>
 <pre>
-  &lt;CheckBox android:layout_width=&quot;wrap_content&quot; android:layout_height=&quot;wrap_content&quot;
-        android:onCheckedChanged=&quot;@{(cb, isChecked) -&gt; presenter.completeChanged(task, isChecked)}&quot; /&gt;
+  &lt;CheckBox android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:onCheckedChanged="@{(cb, isChecked) -&gt; presenter.completeChanged(task, isChecked)}" /&gt;
 </pre>
 <p>
   If the event you are listening to returns a value whose type is not {@code
@@ -498,7 +498,7 @@ public class Presenter {
 }
 </pre>
 <pre>
-  android:onLongClick=&quot;@{(theView) -&gt; presenter.onLongClick(theView, task)}&quot;
+  android:onLongClick="@{(theView) -&gt; presenter.onLongClick(theView, task)}"
 </pre>
 <p>
 If the expression cannot be evaluated due to {@code null} objects, Data Binding returns
@@ -510,7 +510,7 @@ If you need to use an expression with a predicate (e.g. ternary), you can use
 {@code void} as a symbol.
 </p>
 <pre>
-  android:onClick=&quot;@{(v) -&gt; v.isVisible() ? doSomething() : void}&quot;
+  android:onClick="@{(v) -&gt; v.isVisible() ? doSomething() : void}"
 </pre>
 
 <h5>Avoid Complex Listeners</h5>
@@ -580,7 +580,7 @@ any business logic inside the callback method that you invoked from the listener
 </pre>
 <p>
   When there are class name conflicts, one of the classes may be renamed to an
-  “alias:”
+  "alias:"
 </p>
 
 <pre>
@@ -601,7 +601,7 @@ any business logic inside the callback method that you invoked from the listener
     &lt;import type="com.example.User"/&gt;
     &lt;import type="java.util.List"/&gt;
     &lt;variable name="user" type="User"/&gt;
-    &lt;variable name="userList" type="List&amp;lt;User&gt;"/&gt;
+    &lt;variable name="userList" type="List&lt;User&gt;"/&gt;
 &lt;/data&gt;
 </pre>
 <p class="caution">
@@ -695,7 +695,7 @@ any business logic inside the callback method that you invoked from the listener
 <p>
   By default, a Binding class is generated based on the name of the layout
   file, starting it with upper-case, removing underscores ( _ ) and
-  capitalizing the following letter and then suffixing “Binding”. This class
+  capitalizing the following letter and then suffixing "Binding". This class
   will be placed in a databinding package under the module package. For
   example, the layout file <code>contact_item.xml</code> will generate
   <code>ContactItemBinding</code>. If the module package is
@@ -718,7 +718,7 @@ any business logic inside the callback method that you invoked from the listener
   This generates the binding class as <code>ContactItem</code> in the
   databinding package in the module package. If the class should be generated
   in a different package within the module package, it may be prefixed with
-  “.”:
+  ".":
 </p>
 
 <pre>
@@ -741,7 +741,7 @@ any business logic inside the callback method that you invoked from the listener
 </h3>
 
 <p>
-  Variables may be passed into an included layout&apos;s binding from the
+  Variables may be passed into an included layout's binding from the
   containing layout by using the application namespace and the variable name in
   an attribute:
 </p>
@@ -855,8 +855,8 @@ any business logic inside the callback method that you invoked from the listener
 
 <pre>
 android:text="&commat;{String.valueOf(index + 1)}"
-android:visibility="&commat;{age &amp;lt; 13 ? View.GONE : View.VISIBLE}"
-android:transitionName=&apos;&commat;{"image_" + id}&apos;
+android:visibility="&commat;{age &lt; 13 ? View.GONE : View.VISIBLE}"
+android:transitionName='&commat;{"image_" + id}'
 </pre>
 <h4 id="missing_operations">
   Missing Operations
@@ -945,9 +945,9 @@ android:transitionName=&apos;&commat;{"image_" + id}&apos;
     &lt;import type="android.util.SparseArray"/&gt;
     &lt;import type="java.util.Map"/&gt;
     &lt;import type="java.util.List"/&gt;
-    &lt;variable name="list" type="List&amp;lt;String&gt;"/&gt;
-    &lt;variable name="sparse" type="SparseArray&amp;lt;String&gt;"/&gt;
-    &lt;variable name="map" type="Map&amp;lt;String, String&gt;"/&gt;
+    &lt;variable name="list" type="List&lt;String&gt;"/&gt;
+    &lt;variable name="sparse" type="SparseArray&lt;String&gt;"/&gt;
+    &lt;variable name="map" type="Map&lt;String, String&gt;"/&gt;
     &lt;variable name="index" type="int"/&gt;
     &lt;variable name="key" type="String"/&gt;
 &lt;/data&gt;
@@ -969,17 +969,17 @@ android:text="&commat;{map[key]}"
 </p>
 
 <pre>
-android:text=&apos;&commat;{map["firstName"]}&apos;
+android:text='&commat;{map["firstName"]}'
 </pre>
 <p>
   It is also possible to use double quotes to surround the attribute value.
-  When doing so, String literals should either use the &amp;quot; or back quote
+  When doing so, String literals should either use the ' or back quote
   (`).
 </p>
 
 <pre>
 android:text="&commat;{map[`firstName`}"
-android:text="&commat;{map[&amp;quot;firstName&amp;quot;]}"
+android:text="&commat;{map['firstName']}"
 </pre>
 <h4 id="resources">
   Resources
@@ -1216,7 +1216,7 @@ private static class User {
 }
 </pre>
 <p>
-  That&apos;s it! To access the value, use the set and get accessor methods:
+  That's it! To access the value, use the set and get accessor methods:
 </p>
 
 <pre>
@@ -1247,15 +1247,15 @@ user.put("age", 17);
 <pre>
 &lt;data&gt;
     &lt;import type="android.databinding.ObservableMap"/&gt;
-    &lt;variable name="user" type="ObservableMap&amp;lt;String, Object&gt;"/&gt;
+    &lt;variable name="user" type="ObservableMap&lt;String, Object&gt;"/&gt;
 &lt;/data&gt;
 …
 &lt;TextView
-   android:text=&apos;&commat;{user["lastName"]}&apos;
+   android:text='&commat;{user["lastName"]}'
    android:layout_width="wrap_content"
    android:layout_height="wrap_content"/&gt;
 &lt;TextView
-   android:text=&apos;&commat;{String.valueOf(1 + (Integer)user["age"])}&apos;
+   android:text='&commat;{String.valueOf(1 + (Integer)user["age"])}'
    android:layout_width="wrap_content"
    android:layout_height="wrap_content"/&gt;
 </pre>
@@ -1277,15 +1277,15 @@ user.add(17);
 &lt;data&gt;
     &lt;import type="android.databinding.ObservableList"/&gt;
     &lt;import type="com.example.my.app.Fields"/&gt;
-    &lt;variable name="user" type="ObservableList&amp;lt;Object&gt;"/&gt;
+    &lt;variable name="user" type="ObservableList&lt;Object&gt;"/&gt;
 &lt;/data&gt;
 …
 &lt;TextView
-   android:text=&apos;&commat;{user[Fields.LAST_NAME]}&apos;
+   android:text='&commat;{user[Fields.LAST_NAME]}'
    android:layout_width="wrap_content"
    android:layout_height="wrap_content"/&gt;
 &lt;TextView
-   android:text=&apos;&commat;{String.valueOf(1 + (Integer)user[Fields.AGE])}&apos;
+   android:text='&commat;{String.valueOf(1 + (Integer)user[Fields.AGE])}'
    android:layout_width="wrap_content"
    android:layout_height="wrap_content"/&gt;
 </pre>
@@ -1428,7 +1428,7 @@ public abstract void setNote(String note);
 
 <p>
   When inflating another layout, a binding must be established for the new
-  layout. Therefore, the <code>ViewStubProxy</code> must listen to the <code>ViewStub</code>&apos;s
+  layout. Therefore, the <code>ViewStubProxy</code> must listen to the <code>ViewStub</code>'s
   {@link android.view.ViewStub.OnInflateListener} and establish the binding at that time. Since
   only one can exist, the <code>ViewStubProxy</code> allows the developer to set an
   <code>OnInflateListener</code> on it that it will call after establishing the binding.
@@ -1443,9 +1443,9 @@ public abstract void setNote(String note);
 </h4>
 
 <p>
-  At times, the specific binding class won&apos;t be known. For example, a
+  At times, the specific binding class won't be known. For example, a
   {@link android.support.v7.widget.RecyclerView.Adapter} operating against arbitrary layouts
-  won&apos;t know the specific binding class. It still must assign the binding value during the
+  won't know the specific binding class. It still must assign the binding value during the
   {@link android.support.v7.widget.RecyclerView.Adapter#onBindViewHolder}.
 </p>
 
@@ -1499,13 +1499,13 @@ public void onBindViewHolder(BindingHolder holder, int position) {
 For an attribute, data binding tries to find the method setAttribute. The
 namespace for the attribute does not matter, only the attribute name itself.
 <p>
-  For example, an expression associated with TextView&apos;s attribute
+  For example, an expression associated with TextView's attribute
   <strong><code>android:text</code></strong> will look for a setText(String).
   If the expression returns an int, data binding will search for a setText(int)
   method. Be careful to have the expression return the correct type, casting if
   necessary. Note that data binding will work even if no attribute exists with
   the given name. You can then easily "create" attributes for any setter by
-  using data binding. For example, support DrawerLayout doesn&apos;t have any
+  using data binding. For example, support DrawerLayout doesn't have any
   attributes, but plenty of setters. You can use the automatic setters to use
   one of these.
 </p>
@@ -1522,7 +1522,7 @@ namespace for the attribute does not matter, only the attribute name itself.
 </h3>
 
 <p>
-  Some attributes have setters that don&apos;t match by name. For these
+  Some attributes have setters that don't match by name. For these
   methods, an attribute may be associated with the setter through
   {@link android.databinding.BindingMethods} annotation. This must be associated with
   a class and contains {@link android.databinding.BindingMethod} annotations, one for
@@ -1591,8 +1591,8 @@ public static void loadImage(ImageView view, String url, Drawable error) {
 }
 </pre>
 <pre>
-&lt;ImageView app:imageUrl=“&commat;{venue.imageUrl}”
-app:error=“&commat;{&commat;drawable/venueError}”/&gt;
+&lt;ImageView app:imageUrl="&commat;{venue.imageUrl}"
+app:error="&commat;{&commat;drawable/venueError}"/&gt;
 </pre>
 
 <p>
@@ -1747,7 +1747,7 @@ public static void setListener(View view, final OnViewDetachedFromWindow detach,
 
 <pre>
 &lt;TextView
-   android:text=&apos;&commat;{userMap["lastName"]}&apos;
+   android:text='&commat;{userMap["lastName"]}'
    android:layout_width="wrap_content"
    android:layout_height="wrap_content"/&gt;
 </pre>
