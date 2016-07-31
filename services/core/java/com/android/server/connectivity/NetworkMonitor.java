@@ -200,7 +200,7 @@ public class NetworkMonitor extends StateMachine {
     private final WifiManager mWifiManager;
     private final AlarmManager mAlarmManager;
     private final NetworkRequest mDefaultRequest;
-    private final IpConnectivityLog mMetricsLog = new IpConnectivityLog();
+    private final IpConnectivityLog mMetricsLog;
 
     private boolean mIsCaptivePortalCheckEnabled;
     private boolean mUseHttps;
@@ -226,10 +226,17 @@ public class NetworkMonitor extends StateMachine {
 
     public NetworkMonitor(Context context, Handler handler, NetworkAgentInfo networkAgentInfo,
             NetworkRequest defaultRequest) {
+        this(context, handler, networkAgentInfo, defaultRequest, new IpConnectivityLog());
+    }
+
+    @VisibleForTesting
+    protected NetworkMonitor(Context context, Handler handler, NetworkAgentInfo networkAgentInfo,
+            NetworkRequest defaultRequest, IpConnectivityLog logger) {
         // Add suffix indicating which NetworkMonitor we're talking about.
         super(TAG + networkAgentInfo.name());
 
         mContext = context;
+        mMetricsLog = logger;
         mConnectivityServiceHandler = handler;
         mNetworkAgentInfo = networkAgentInfo;
         mNetId = mNetworkAgentInfo.network.netId;
