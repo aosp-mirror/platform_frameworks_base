@@ -1249,7 +1249,7 @@ please see styles_device_defaults.xml.
     <style name="DialogWindowTitleBackground.Material.Light" />
 
     <style name="DialogWindowTitle.Material">
-        <item name="maxLines">@integer/config_dialogWindowTitleMaxLines</item>
+        <item name="maxLines">1</item>
         <item name="scrollHorizontally">true</item>
         <item name="textAppearance">@style/TextAppearance.Material.DialogWindowTitle</item>
     </style>
