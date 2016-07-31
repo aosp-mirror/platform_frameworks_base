@@ -492,7 +492,7 @@ public class LauncherApps {
      * If the calling launcher application contains pinned shortcuts, they will still work,
      * even though the caller no longer has the shortcut host permission.
      *
-     * <p>Returns {@code false} when the user is locked.
+     * @throws IllegalStateException when the user is locked.
      *
      * @see ShortcutManager
      */
@@ -510,13 +510,12 @@ public class LauncherApps {
      * <p>Callers must be allowed to access the shortcut information, as defined in {@link
      * #hasShortcutHostPermission()}.
      *
-     * <p>Returns am empty list when the user is locked, or when the {@code user} user
-     * is locked or not running.
-     *
      * @param query result includes shortcuts matching this query.
      * @param user The UserHandle of the profile.
      *
      * @return the IDs of {@link ShortcutInfo}s that match the query.
+     * @throws IllegalStateException when the user is locked, or when the {@code user} user
+     * is locked or not running.
      *
      * @see ShortcutManager
      */
@@ -556,12 +555,11 @@ public class LauncherApps {
      * <p>The calling launcher application must be allowed to access the shortcut information,
      * as defined in {@link #hasShortcutHostPermission()}.
      *
-     * <p>Call will be ignored when the user is locked, or when the {@code user} user
-     * is locked or not running.
-     *
      * @param packageName The target package name.
      * @param shortcutIds The IDs of the shortcut to be pinned.
      * @param user The UserHandle of the profile.
+     * @throws IllegalStateException when the user is locked, or when the {@code user} user
+     * is locked or not running.
      *
      * @see ShortcutManager
      */
@@ -630,13 +628,12 @@ public class LauncherApps {
      * <p>The calling launcher application must be allowed to access the shortcut information,
      * as defined in {@link #hasShortcutHostPermission()}.
      *
-     * <p>Returns {@code null} when the user is locked, or when the user owning the shortcut
-     * is locked or not running.
-     *
      * @param density The preferred density of the icon, zero for default density. Use
      * density DPI values from {@link DisplayMetrics}.
      *
      * @return The drawable associated with the shortcut.
+     * @throws IllegalStateException when the user is locked, or when the {@code user} user
+     * is locked or not running.
      *
      * @see ShortcutManager
      * @see #getShortcutBadgedIconDrawable(ShortcutInfo, int)
@@ -681,11 +678,10 @@ public class LauncherApps {
      * <p>The calling launcher application must be allowed to access the shortcut information,
      * as defined in {@link #hasShortcutHostPermission()}.
      *
-     * <p>Returns {@code 0} when the user is locked, or when the user owning the shortcut
-     * is locked or not running.
-     *
      * @param density Optional density for the icon, or 0 to use the default density. Use
      * @return A badged icon for the shortcut.
+     * @throws IllegalStateException when the user is locked, or when the {@code user} user
+     * is locked or not running.
      *
      * @see ShortcutManager
      * @see #getShortcutIconDrawable(ShortcutInfo, int)
@@ -704,15 +700,13 @@ public class LauncherApps {
      * <p>The calling launcher application must be allowed to access the shortcut information,
      * as defined in {@link #hasShortcutHostPermission()}.
      *
-     * <p>Throws {@link android.content.ActivityNotFoundException}
-     * when the user is locked, or when the {@code user} user
-     * is locked or not running.
-     *
      * @param packageName The target shortcut package name.
      * @param shortcutId The target shortcut ID.
      * @param sourceBounds The Rect containing the source bounds of the clicked icon.
      * @param startActivityOptions Options to pass to startActivity.
      * @param user The UserHandle of the profile.
+     * @throws IllegalStateException when the user is locked, or when the {@code user} user
+     * is locked or not running.
      *
      * @throws android.content.ActivityNotFoundException failed to start shortcut. (e.g.
      * the shortcut no longer exists, is disabled, the intent receiver activity doesn't exist, etc)
@@ -730,13 +724,11 @@ public class LauncherApps {
      * <p>The calling launcher application must be allowed to access the shortcut information,
      * as defined in {@link #hasShortcutHostPermission()}.
      *
-     * <p>Throws {@link android.content.ActivityNotFoundException}
-     * when the user is locked, or when the user owning the shortcut
-     * is locked or not running.
-     *
      * @param shortcut The target shortcut.
      * @param sourceBounds The Rect containing the source bounds of the clicked icon.
      * @param startActivityOptions Options to pass to startActivity.
+     * @throws IllegalStateException when the user is locked, or when the {@code user} user
+     * is locked or not running.
      *
      * @throws android.content.ActivityNotFoundException failed to start shortcut. (e.g.
      * the shortcut no longer exists, is disabled, the intent receiver activity doesn't exist, etc)
