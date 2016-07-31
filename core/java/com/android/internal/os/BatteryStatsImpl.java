@@ -1801,11 +1801,17 @@ public class BatteryStatsImpl extends BatteryStats {
     public abstract class OverflowArrayMap<T> {
         private static final String OVERFLOW_NAME = "*overflow*";
 
+        final int mUid;
         final ArrayMap<String, T> mMap = new ArrayMap<>();
         T mCurOverflow;
         ArrayMap<String, MutableInt> mActiveOverflow;
+        long mLastOverflowTime;
+        long mLastOverflowFinishTime;
+        long mLastClearTime;
+        long mLastCleanupTime;
 
-        public OverflowArrayMap() {
+        public OverflowArrayMap(int uid) {
+            mUid = uid;
         }
 
         public ArrayMap<String, T> getMap() {
@@ -1813,6 +1819,7 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         public void clear() {
+            mLastClearTime = SystemClock.elapsedRealtime();
             mMap.clear();
             mCurOverflow = null;
             mActiveOverflow = null;
@@ -1829,6 +1836,7 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         public void cleanup() {
+            mLastCleanupTime = SystemClock.elapsedRealtime();
             if (mActiveOverflow != null) {
                 if (mActiveOverflow.size() == 0) {
                     mActiveOverflow = null;
@@ -1895,6 +1903,7 @@ public class BatteryStatsImpl extends BatteryStats {
                     mActiveOverflow = new ArrayMap<>();
                 }
                 mActiveOverflow.put(name, new MutableInt(1));
+                mLastOverflowTime = SystemClock.elapsedRealtime();
                 return obj;
             }
 
@@ -1924,6 +1933,7 @@ public class BatteryStatsImpl extends BatteryStats {
                         over.value--;
                         if (over.value <= 0) {
                             mActiveOverflow.remove(name);
+                            mLastOverflowFinishTime = SystemClock.elapsedRealtime();
                         }
                         return obj;
                     }
@@ -1932,9 +1942,35 @@ public class BatteryStatsImpl extends BatteryStats {
 
             // Huh, they are stopping an active operation but we can't find one!
             // That's not good.
-            Slog.wtf(TAG, "Unable to find object for " + name + " mapsize="
-                    + mMap.size() + " activeoverflow=" + mActiveOverflow
-                    + " curoverflow=" + mCurOverflow);
+            StringBuilder sb = new StringBuilder();
+            sb.append("Unable to find object for ");
+            sb.append(name);
+            sb.append(" in uid ");
+            sb.append(mUid);
+            sb.append(" mapsize=");
+            sb.append(mMap.size());
+            sb.append(" activeoverflow=");
+            sb.append(mActiveOverflow);
+            sb.append(" curoverflow=");
+            sb.append(mCurOverflow);
+            long now = SystemClock.elapsedRealtime();
+            if (mLastOverflowTime != 0) {
+                sb.append(" lastOverflowTime=");
+                TimeUtils.formatDuration(mLastOverflowTime-now, sb);
+            }
+            if (mLastOverflowFinishTime != 0) {
+                sb.append(" lastOverflowFinishTime=");
+                TimeUtils.formatDuration(mLastOverflowFinishTime-now, sb);
+            }
+            if (mLastClearTime != 0) {
+                sb.append(" lastClearTime=");
+                TimeUtils.formatDuration(mLastClearTime-now, sb);
+            }
+            if (mLastCleanupTime != 0) {
+                sb.append(" lastCleanupTime=");
+                TimeUtils.formatDuration(mLastCleanupTime-now, sb);
+            }
+            Slog.wtf(TAG, sb.toString());
             return null;
         }
 
@@ -5103,18 +5139,18 @@ public class BatteryStatsImpl extends BatteryStats {
             mSystemCpuTime = new LongSamplingCounter(mBsi.mOnBatteryTimeBase);
             mCpuPower = new LongSamplingCounter(mBsi.mOnBatteryTimeBase);
 
-            mWakelockStats = mBsi.new OverflowArrayMap<Wakelock>() {
+            mWakelockStats = mBsi.new OverflowArrayMap<Wakelock>(uid) {
                 @Override public Wakelock instantiateObject() {
                     return new Wakelock(mBsi, Uid.this);
                 }
             };
-            mSyncStats = mBsi.new OverflowArrayMap<StopwatchTimer>() {
+            mSyncStats = mBsi.new OverflowArrayMap<StopwatchTimer>(uid) {
                 @Override public StopwatchTimer instantiateObject() {
                     return new StopwatchTimer(mBsi.mClocks, Uid.this, SYNC, null,
                             mBsi.mOnBatteryTimeBase);
                 }
             };
-            mJobStats = mBsi.new OverflowArrayMap<StopwatchTimer>() {
+            mJobStats = mBsi.new OverflowArrayMap<StopwatchTimer>(uid) {
                 @Override public StopwatchTimer instantiateObject() {
                     return new StopwatchTimer(mBsi.mClocks, Uid.this, JOB, null,
                             mBsi.mOnBatteryTimeBase);
