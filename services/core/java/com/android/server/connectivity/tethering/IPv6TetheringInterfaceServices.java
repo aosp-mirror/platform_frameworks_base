@@ -176,9 +176,21 @@ class IPv6TetheringInterfaceServices {
 
     private void updateRaParams(RaParams params) {
         if (mRaDaemon != null) {
+            HashSet<IpPrefix> deprecated = null;
+
+            if (mLastRaParams != null) {
+                deprecated = new HashSet<>();
+
+                for (IpPrefix ipp : mLastRaParams.prefixes) {
+                    if (params == null || !params.prefixes.contains(ipp)) {
+                        deprecated.add(ipp);
+                    }
+                }
+            }
+
             // Currently, we send spurious RAs (5) whenever there's any update.
             // TODO: Compare params with mLastParams to avoid spurious updates.
-            mRaDaemon.buildNewRa(params);
+            mRaDaemon.buildNewRa(params, deprecated);
         }
 
         mLastRaParams = params;
