@@ -678,6 +678,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Betul!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Cuba lagi"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Cuba lagi"</string>
+    <string name="lockscreen_storage_locked" msgid="9167551160010625200">"Buka kunci semua ciri dan data"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Telah melepasi had cubaan Buka Kunci Wajah"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Tiada kad SIM"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Tiada kad SIM dalam tablet."</string>
@@ -1022,7 +1023,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android sedang menaik taraf..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android sedang dimulakan…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Mengoptimumkan storan."</string>
-    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android sedang ditingkatkan"</string>
+    <!-- no translation found for android_upgrading_notification_title (8428357096969413169) -->
+    <skip />
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Sesetengah apl mungkin tidak berfungsi dengan betul sehingga peningkatan selesai"</string>
     <string name="app_upgrading_toast" msgid="3008139776215597053">"<xliff:g id="APPLICATION">%1$s</xliff:g> sedang ditingkatkan…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Mengoptimumkan apl <xliff:g id="NUMBER_0">%1$d</xliff:g> daripada <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>

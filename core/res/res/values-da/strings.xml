@@ -678,6 +678,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Rigtigt!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Prøv igen"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Prøv igen"</string>
+    <string name="lockscreen_storage_locked" msgid="9167551160010625200">"Lås op for at se alle funktioner og data"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Det maksimale antal forsøg på at bruge Ansigtslås er overskredet"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Intet SIM-kort"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Der er ikke noget SIM-kort i tabletcomputeren."</string>
@@ -1022,7 +1023,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android opgraderes..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android starter..."</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Lageret optimeres."</string>
-    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android opgraderes"</string>
+    <!-- no translation found for android_upgrading_notification_title (8428357096969413169) -->
+    <skip />
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Nogle apps fungerer muligvis ikke korrekt, før opgraderingen er gennemført"</string>
     <string name="app_upgrading_toast" msgid="3008139776215597053">"<xliff:g id="APPLICATION">%1$s</xliff:g> opgraderer…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Optimerer app <xliff:g id="NUMBER_0">%1$d</xliff:g> ud af <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
