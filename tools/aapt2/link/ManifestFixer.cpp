@@ -211,9 +211,11 @@ bool ManifestFixer::buildRules(xml::XmlActionExecutor* executor, IDiagnostics* d
 
     // Provider actions.
     applicationAction["provider"].action(requiredNameIsJavaClassName);
-    applicationAction["provider"]["grant-uri-permissions"];
+    applicationAction["provider"]["intent-filter"] = intentFilterAction;
     applicationAction["provider"]["meta-data"] = metaDataAction;
+    applicationAction["provider"]["grant-uri-permissions"];
     applicationAction["provider"]["path-permissions"];
+
     return true;
 }
 
