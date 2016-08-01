@@ -4,8 +4,8 @@ page.tags=androidn
 
 @jd:body
 
-<div id="qv-wrapper">
-<div id="qv">
+<div id="tb-wrapper">
+<div id="tb">
   <h2>此文件內容</h2>
   <ol>
     <li><a href="#accessing">存取外部儲存空間目錄</a></li>
