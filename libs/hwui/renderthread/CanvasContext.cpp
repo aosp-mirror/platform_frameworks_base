@@ -562,11 +562,16 @@ void CanvasContext::draw() {
         swap.damage = screenDirty;
         swap.swapCompletedTime = systemTime(CLOCK_MONOTONIC);
         swap.vsyncTime = mRenderThread.timeLord().latestVsync();
-        int durationUs;
-        mNativeSurface->query(NATIVE_WINDOW_LAST_DEQUEUE_DURATION, &durationUs);
-        swap.dequeueDuration = us2ns(durationUs);
-        mNativeSurface->query(NATIVE_WINDOW_LAST_QUEUE_DURATION, &durationUs);
-        swap.queueDuration = us2ns(durationUs);
+        if (mNativeSurface.get()) {
+            int durationUs;
+            mNativeSurface->query(NATIVE_WINDOW_LAST_DEQUEUE_DURATION, &durationUs);
+            swap.dequeueDuration = us2ns(durationUs);
+            mNativeSurface->query(NATIVE_WINDOW_LAST_QUEUE_DURATION, &durationUs);
+            swap.queueDuration = us2ns(durationUs);
+        } else {
+            swap.dequeueDuration = 0;
+            swap.queueDuration = 0;
+        }
         mCurrentFrameInfo->set(FrameInfoIndex::DequeueBufferDuration)
                 = swap.dequeueDuration;
         mCurrentFrameInfo->set(FrameInfoIndex::QueueBufferDuration)
