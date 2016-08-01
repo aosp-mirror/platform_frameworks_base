@@ -2170,9 +2170,9 @@ public class ShortcutService extends IShortcutService.Stub {
                 @Nullable ComponentName componentName,
                 int queryFlags, int userId) {
             final ArrayList<ShortcutInfo> ret = new ArrayList<>();
-
-            throwIfUserLocked(userId);
-            throwIfUserLocked(launcherUserId);
+            if (!isUserUnlocked(userId) || !isUserUnlocked(launcherUserId)) {
+                return ret;
+            }
 
             final boolean cloneKeyFieldOnly =
                     ((queryFlags & ShortcutQuery.FLAG_GET_KEY_FIELDS_ONLY) != 0);
@@ -2251,8 +2251,9 @@ public class ShortcutService extends IShortcutService.Stub {
             Preconditions.checkStringNotEmpty(packageName, "packageName");
             Preconditions.checkStringNotEmpty(shortcutId, "shortcutId");
 
-            throwIfUserLocked(userId);
-            throwIfUserLocked(launcherUserId);
+            if (!isUserUnlocked(userId) || !isUserUnlocked(launcherUserId)) {
+                return false;
+            }
 
             synchronized (mLock) {
                 getLauncherShortcutsLocked(callingPackage, userId, launcherUserId)
@@ -2270,8 +2271,9 @@ public class ShortcutService extends IShortcutService.Stub {
             Preconditions.checkStringNotEmpty(packageName, "packageName");
             Preconditions.checkStringNotEmpty(shortcutId, "shortcutId");
 
-            throwIfUserLocked(userId);
-            throwIfUserLocked(launcherUserId);
+            if (!isUserUnlocked(userId) || !isUserUnlocked(launcherUserId)) {
+                return null;
+            }
 
             final ShortcutPackage p = getUserShortcutsLocked(userId)
                     .getPackageShortcutsIfExists(packageName);
@@ -2294,8 +2296,9 @@ public class ShortcutService extends IShortcutService.Stub {
             Preconditions.checkStringNotEmpty(packageName, "packageName");
             Preconditions.checkNotNull(shortcutIds, "shortcutIds");
 
-            throwIfUserLocked(userId);
-            throwIfUserLocked(launcherUserId);
+            if (!isUserUnlocked(userId) || !isUserUnlocked(launcherUserId)) {
+                return;
+            }
 
             synchronized (mLock) {
                 final ShortcutLauncher launcher =
@@ -2317,8 +2320,9 @@ public class ShortcutService extends IShortcutService.Stub {
             Preconditions.checkStringNotEmpty(packageName, "packageName can't be empty");
             Preconditions.checkStringNotEmpty(shortcutId, "shortcutId can't be empty");
 
-            throwIfUserLocked(userId);
-            throwIfUserLocked(launcherUserId);
+            if (!isUserUnlocked(userId) || !isUserUnlocked(launcherUserId)) {
+                return null;
+            }
 
             synchronized (mLock) {
                 getLauncherShortcutsLocked(callingPackage, userId, launcherUserId)
@@ -2350,8 +2354,9 @@ public class ShortcutService extends IShortcutService.Stub {
             Preconditions.checkNotNull(packageName, "packageName");
             Preconditions.checkNotNull(shortcutId, "shortcutId");
 
-            throwIfUserLocked(userId);
-            throwIfUserLocked(launcherUserId);
+            if (!isUserUnlocked(userId) || !isUserUnlocked(launcherUserId)) {
+                return 0;
+            }
 
             synchronized (mLock) {
                 getLauncherShortcutsLocked(callingPackage, userId, launcherUserId)
@@ -2377,8 +2382,9 @@ public class ShortcutService extends IShortcutService.Stub {
             Preconditions.checkNotNull(packageName, "packageName");
             Preconditions.checkNotNull(shortcutId, "shortcutId");
 
-            throwIfUserLocked(userId);
-            throwIfUserLocked(launcherUserId);
+            if (!isUserUnlocked(userId) || !isUserUnlocked(launcherUserId)) {
+                return null;
+            }
 
             synchronized (mLock) {
                 getLauncherShortcutsLocked(callingPackage, userId, launcherUserId)
@@ -2412,7 +2418,9 @@ public class ShortcutService extends IShortcutService.Stub {
         @Override
         public boolean hasShortcutHostPermission(int launcherUserId,
                 @NonNull String callingPackage) {
-            throwIfUserLocked(launcherUserId);
+            if (!isUserUnlocked(launcherUserId)) {
+                return false;
+            }
             return ShortcutService.this.hasShortcutHostPermission(callingPackage, launcherUserId);
         }
     }
