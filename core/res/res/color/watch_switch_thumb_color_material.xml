@@ -12,6 +12,7 @@
 -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:color="?android:colorAccent" android:state_checked="true" />
-    <item android:color="?android:colorButtonNormal" android:state_checked="false" />
+    <item android:color="?android:colorButtonNormal" android:state_enabled="false" />
+    <item android:color="?android:colorControlActivated" android:state_checked="true" />
+    <item android:color="?android:colorButtonNormal" />
 </selector>
