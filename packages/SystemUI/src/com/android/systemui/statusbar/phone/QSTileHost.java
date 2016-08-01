@@ -334,6 +334,9 @@ public class QSTileHost implements QSTile.Host, Tunable {
                     || ((CustomTile) tile).getUser() == currentUser)) {
                 if (DEBUG) Log.d(TAG, "Adding " + tile);
                 tile.removeCallbacks();
+                if (!(tile instanceof CustomTile) && mCurrentUser != currentUser) {
+                    tile.userSwitch(currentUser);
+                }
                 newTiles.put(tileSpec, tile);
             } else {
                 if (DEBUG) Log.d(TAG, "Creating tile: " + tileSpec);
