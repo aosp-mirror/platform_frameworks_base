@@ -5,8 +5,8 @@ page.image=images/cards/card-nyc_2x.jpg
 
 @jd:body
 
-<div id="qv-wrapper">
-<div id="qv">
+<div id="tb-wrapper">
+<div id="tb">
   <h2>本文内容</h2>
   <ol>
     <li><a href="#supporting">指示支持录制</a></li>
