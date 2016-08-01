@@ -82,9 +82,31 @@ public class UriMatcherTest extends TestCase {
         checkAll(matcher);
     }
 
+    @SmallTest
+    public void testContentUrisWithLeadingSlashAndOnlySlash() {
+        UriMatcher matcher = new UriMatcher(ROOT);
+        matcher.addURI("people", "/", PEOPLE);
+        matcher.addURI("people", "/#", PEOPLE_ID);
+        matcher.addURI("people", "/#/phones", PEOPLE_PHONES);
+        matcher.addURI("people", "/#/phones/blah", PEOPLE_PHONES_ID);
+        matcher.addURI("people", "/#/phones/#", PEOPLE_PHONES_ID);
+        matcher.addURI("people", "/#/addresses", PEOPLE_ADDRESSES);
+        matcher.addURI("people", "/#/addresses/#", PEOPLE_ADDRESSES_ID);
+        matcher.addURI("people", "/#/contact-methods", PEOPLE_CONTACTMETH);
+        matcher.addURI("people", "/#/contact-methods/#", PEOPLE_CONTACTMETH_ID);
+        matcher.addURI("calls", "/", CALLS);
+        matcher.addURI("calls", "/#", CALLS_ID);
+        matcher.addURI("caller-id", "/", CALLERID);
+        matcher.addURI("caller-id", "/*", CALLERID_TEXT);
+        matcher.addURI("filter-recent", null, FILTERRECENT);
+        matcher.addURI("auth", "/another/path/segment", ANOTHER_PATH_SEGMENT);
+        checkAll(matcher);
+    }
+
     private void checkAll(UriMatcher matcher) {
         check("content://asdf", UriMatcher.NO_MATCH, matcher);
         check("content://people", PEOPLE, matcher);
+        check("content://people/", PEOPLE, matcher);
         check("content://people/1", PEOPLE_ID, matcher);
         check("content://people/asdf", UriMatcher.NO_MATCH, matcher);
         check("content://people/2/phones", PEOPLE_PHONES, matcher);
@@ -97,9 +119,11 @@ public class UriMatcherTest extends TestCase {
         check("content://people/2/contact-methods/3", PEOPLE_CONTACTMETH_ID, matcher);
         check("content://people/2/contact-methods/asdf", UriMatcher.NO_MATCH, matcher);
         check("content://calls", CALLS, matcher);
+        check("content://calls/", CALLS, matcher);
         check("content://calls/1", CALLS_ID, matcher);
         check("content://calls/asdf", UriMatcher.NO_MATCH, matcher);
         check("content://caller-id", CALLERID, matcher);
+        check("content://caller-id/", CALLERID, matcher);
         check("content://caller-id/asdf", CALLERID_TEXT, matcher);
         check("content://caller-id/1", CALLERID_TEXT, matcher);
         check("content://filter-recent", FILTERRECENT, matcher);
