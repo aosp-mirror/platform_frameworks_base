@@ -1096,6 +1096,26 @@ class WindowSurfacePlacer {
         boolean fullscreenAnim = false;
         boolean voiceInteraction = false;
 
+        int i;
+        for (i = 0; i < appsCount; i++) {
+            final AppWindowToken wtoken = mService.mOpeningApps.valueAt(i);
+            // Clearing the mAnimatingExit flag before entering animation. It's set to
+            // true if app window is removed, or window relayout to invisible.
+            // This also affects window visibility. We need to clear it *before*
+            // maybeUpdateTransitToWallpaper() as the transition selection depends on
+            // wallpaper target visibility.
+            wtoken.clearAnimatingFlags();
+
+        }
+        // Adjust wallpaper before we pull the lower/upper target, since pending changes
+        // (like the clearAnimatingFlags() above) might affect wallpaper target result.
+        final DisplayContent displayContent = mService.getDefaultDisplayContentLocked();
+        if ((displayContent.pendingLayoutChanges & FINISH_LAYOUT_REDO_WALLPAPER) != 0 &&
+                mWallpaperControllerLocked.adjustWallpaperWindows()) {
+            mService.mLayersController.assignLayersLocked(windows);
+            displayContent.layoutNeeded = true;
+        }
+
         final WindowState lowerWallpaperTarget =
                 mWallpaperControllerLocked.getLowerWallpaperTarget();
         final WindowState upperWallpaperTarget =
@@ -1112,7 +1132,6 @@ class WindowSurfacePlacer {
             upperWallpaperAppToken = upperWallpaperTarget.mAppToken;
         }
 
-        int i;
         // Do a first pass through the tokens for two
         // things:
         // (1) Determine if both the closing and opening
@@ -1137,12 +1156,6 @@ class WindowSurfacePlacer {
                 if (wtoken == lowerWallpaperAppToken || wtoken == upperWallpaperAppToken) {
                     openingAppHasWallpaper = true;
                 }
-                // Clearing the mAnimatingExit flag before entering animation. It's set to
-                // true if app window is removed, or window relayout to invisible.
-                // This also affects window visibility. We need to clear it *before*
-                // maybeUpdateTransitToWallpaper() as the transition selection depends on
-                // wallpaper target visibility.
-                wtoken.clearAnimatingFlags();
             }
 
             voiceInteraction |= wtoken.voiceInteraction;
@@ -1205,7 +1218,7 @@ class WindowSurfacePlacer {
 
         // This has changed the visibility of windows, so perform
         // a new layout to get them all up-to-date.
-        mService.getDefaultDisplayContentLocked().layoutNeeded = true;
+        displayContent.layoutNeeded = true;
 
         // TODO(multidisplay): IMEs are only supported on the default display.
         if (windows == mService.getDefaultWindowListLocked()
