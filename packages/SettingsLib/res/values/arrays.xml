@@ -290,11 +290,11 @@
         <item>highlight</item>
     </string-array>
 
-    <!-- Titles for frame time tracking preference. [CHAR LIMIT=35] -->
+    <!-- Titles for frame time tracking preference. [CHAR LIMIT=50] -->
     <string-array name="track_frame_time_entries">
         <item>Off</item>
         <item>On screen as bars</item>
-        <item>In adb shell dumpsys gfxinfo</item>
+        <item>In <xliff:g id="as_typed_command">adb shell dumpsys gfxinfo</xliff:g></item>
     </string-array>
 
     <!-- Values for frame time tracking preference. -->
