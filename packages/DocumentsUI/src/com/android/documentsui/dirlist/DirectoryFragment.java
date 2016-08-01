@@ -53,10 +53,13 @@ import android.provider.DocumentsContract.Document;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v13.view.DragStartHelper;
+import android.support.v4.view.accessibility.AccessibilityNodeInfoCompat;
+import android.support.v4.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.GridLayoutManager.SpanSizeLookup;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.OnItemTouchListener;
+import android.support.v7.widget.RecyclerView.Recycler;
 import android.support.v7.widget.RecyclerView.RecyclerListener;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.text.BidiFormatter;
@@ -243,7 +246,40 @@ public class DirectoryFragment extends Fragment
 
         mRecView.setAdapter(mAdapter);
 
-        mLayout = new GridLayoutManager(getContext(), mColumnCount);
+        // Switch Access Accessibility API needs an {@link AccessibilityDelegate} to know the proper
+        // route when user selects an UI element. It usually guesses this if the element has an
+        // {@link OnClickListener}, but since we do not have one for itemView, we will need to
+        // manually route it to the right behavior. RecyclerView has its own AccessibilityDelegate,
+        // and routes it to its LayoutManager; so we must override the LayoutManager's accessibility
+        // methods to route clicks correctly.
+        mLayout = new GridLayoutManager(getContext(), mColumnCount) {
+            @Override
+            public void onInitializeAccessibilityNodeInfoForItem(
+                    RecyclerView.Recycler recycler, RecyclerView.State state,
+                    View host, AccessibilityNodeInfoCompat info) {
+                super.onInitializeAccessibilityNodeInfoForItem(recycler, state, host, info);
+                info.addAction(AccessibilityActionCompat.ACTION_CLICK);
+            }
+
+            @Override
+            public boolean performAccessibilityActionForItem(
+                    RecyclerView.Recycler recycler, RecyclerView.State state, View view,
+                    int action, Bundle args) {
+                // We are only handling click events; route all other to default implementation
+                if (action == AccessibilityNodeInfoCompat.ACTION_CLICK) {
+                    RecyclerView.ViewHolder vh = mRecView.getChildViewHolder(view);
+                    if (vh instanceof DocumentHolder) {
+                        DocumentHolder dh = (DocumentHolder) vh;
+                        if (dh.mEventListener != null) {
+                            dh.mEventListener.onActivate(dh);
+                            return true;
+                        }
+                    }
+                }
+                return super.performAccessibilityActionForItem(recycler, state, view, action,
+                        args);
+            }
+        };
         SpanSizeLookup lookup = mAdapter.createSpanSizeLookup();
         if (lookup != null) {
             mLayout.setSpanSizeLookup(lookup);
