@@ -4955,6 +4955,19 @@ public class PackageParser {
             }
         }
 
+        public List<String> getChildPackageNames() {
+            if (childPackages == null) {
+                return null;
+            }
+            final int childCount = childPackages.size();
+            final List<String> childPackageNames = new ArrayList<>(childCount);
+            for (int i = 0; i < childCount; i++) {
+                String childPackageName = childPackages.get(i).packageName;
+                childPackageNames.add(childPackageName);
+            }
+            return childPackageNames;
+        }
+
         public boolean hasChildPackage(String packageName) {
             final int childCount = (childPackages != null) ? childPackages.size() : 0;
             for (int i = 0; i < childCount; i++) {
