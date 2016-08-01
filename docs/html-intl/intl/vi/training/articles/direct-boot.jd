@@ -5,8 +5,8 @@ page.image=images/cards/card-nyc_2x.jpg
 
 @jd:body
 
-<div id="qv-wrapper">
-<div id="qv">
+<div id="tb-wrapper">
+<div id="tb">
   <h2>Trong tài liệu này</h2>
   <ol>
     <li><a href="#run">Yêu cầu Truy cập để Chạy trong quá trình Khởi động Trực tiếp</a></li>
