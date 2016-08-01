@@ -800,7 +800,6 @@ public class Path {
      *                        Path. Typically this would be 0.5 so that
      *                        the error is less than half a pixel.
      * @return An array of components for points approximating the Path.
-     * @hide
      */
     public float[] approximate(float acceptableError) {
         return native_approximate(mNativePath, acceptableError);
