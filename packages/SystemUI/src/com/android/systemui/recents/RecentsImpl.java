@@ -807,15 +807,19 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             boolean isHomeStackVisible, boolean animate, int growTarget) {
         RecentsTaskLoader loader = Recents.getTaskLoader();
         RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        boolean isBlacklisted = (runningTask != null)
+                ? ssp.isBlackListedActivity(runningTask.baseActivity.getClassName())
+                : false;
 
-        int runningTaskId = !mLaunchedWhileDocking && (runningTask != null)
+        int runningTaskId = !mLaunchedWhileDocking && !isBlacklisted && (runningTask != null)
                 ? runningTask.id
                 : -1;
 
         // In the case where alt-tab is triggered, we never get a preloadRecents() call, so we
         // should always preload the tasks now. If we are dragging in recents, reload them as
         // the stacks might have changed.
-        if (mLaunchedWhileDocking || mTriggeredFromAltTab ||sInstanceLoadPlan == null) {
+        if (mLaunchedWhileDocking || mTriggeredFromAltTab || sInstanceLoadPlan == null) {
             // Create a new load plan if preloadRecents() was never triggered
             sInstanceLoadPlan = loader.createLoadPlan(mContext);
         }
@@ -825,11 +829,13 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
 
         TaskStack stack = sInstanceLoadPlan.getTaskStack();
         boolean hasRecentTasks = stack.getTaskCount() > 0;
-        boolean useThumbnailTransition = (runningTask != null) && !isHomeStackVisible && hasRecentTasks;
+        boolean useThumbnailTransition = (runningTask != null) && !isHomeStackVisible &&
+                hasRecentTasks;
 
         // Update the launch state that we need in updateHeaderBarLayout()
         launchState.launchedFromHome = !useThumbnailTransition && !mLaunchedWhileDocking;
         launchState.launchedFromApp = useThumbnailTransition || mLaunchedWhileDocking;
+        launchState.launchedFromBlacklistedApp = launchState.launchedFromApp && isBlacklisted;
         launchState.launchedViaDockGesture = mLaunchedWhileDocking;
         launchState.launchedViaDragGesture = mDraggingInRecents;
         launchState.launchedToTaskId = runningTaskId;
@@ -857,7 +863,9 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         }
 
         ActivityOptions opts;
-        if (useThumbnailTransition) {
+        if (isBlacklisted) {
+            opts = getUnknownTransitionActivityOptions();
+        } else if (useThumbnailTransition) {
             // Try starting with a thumbnail transition
             opts = getThumbnailTransitionActivityOptions(runningTask, mDummyStackView,
                     windowOverrideRect);

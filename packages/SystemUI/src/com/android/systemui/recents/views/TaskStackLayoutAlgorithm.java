@@ -556,7 +556,9 @@ public class TaskStackLayoutAlgorithm {
                     Math.max(0, mUnfocusedRange.getAbsoluteX(maxBottomNormX)));
             boolean scrollToFront = launchState.launchedFromHome ||
                     launchState.launchedViaDockGesture;
-            if (launchState.launchedWithAltTab) {
+            if (launchState.launchedFromBlacklistedApp) {
+                mInitialScrollP = mMaxScrollP;
+            } else if (launchState.launchedWithAltTab) {
                 mInitialScrollP = Utilities.clamp(launchTaskIndex, mMinScrollP, mMaxScrollP);
             } else if (scrollToFront) {
                 mInitialScrollP = Utilities.clamp(launchTaskIndex, mMinScrollP, mMaxScrollP);
@@ -579,6 +581,7 @@ public class TaskStackLayoutAlgorithm {
         mTaskIndexOverrideMap.clear();
 
         boolean scrollToFront = launchState.launchedFromHome ||
+                launchState.launchedFromBlacklistedApp ||
                 launchState.launchedViaDockGesture;
         if (getInitialFocusState() == STATE_UNFOCUSED && mNumStackTasks > 1) {
             if (ignoreScrollToFront || (!launchState.launchedWithAltTab && !scrollToFront)) {

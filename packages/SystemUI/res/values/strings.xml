@@ -790,6 +790,10 @@
     <!-- Recents: MultiStack add stack split custom radio button. [CHAR LIMIT=NONE] -->
     <string name="recents_multistack_add_stack_dialog_split_custom">Split Custom</string>
 
+    <!-- Fully qualified activity class names to be blacklisted in Recents, add package names into overlay as needed -->
+    <string-array name="recents_blacklist_array">
+    </string-array>
+
     <!-- Expanded Status Bar Header: Battery Charged [CHAR LIMIT=40] -->
     <string name="expanded_header_battery_charged">Charged</string>
 
