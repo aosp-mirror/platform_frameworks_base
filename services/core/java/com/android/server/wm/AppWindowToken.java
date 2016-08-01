@@ -280,10 +280,10 @@ class AppWindowToken extends WindowToken {
 
     WindowState findMainWindow() {
         WindowState candidate = null;
-        int j = windows.size();
+        int j = allAppWindows.size();
         while (j > 0) {
             j--;
-            WindowState win = windows.get(j);
+            WindowState win = allAppWindows.get(j);
             if (win.mAttrs.type == WindowManager.LayoutParams.TYPE_BASE_APPLICATION
                     || win.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING) {
                 // In cases where there are multiple windows, we prefer the non-exiting window. This
@@ -542,7 +542,7 @@ class AppWindowToken extends WindowToken {
         clearVisibleBeforeClientHidden();
 
         if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.d(TAG,
-                "restoreSavedSurfaces: " + appWindowToken + " allDrawn=" + allDrawn
+                "restoreSavedSurfaces: " + this + " allDrawn=" + allDrawn
                 + " numInteresting=" + numInteresting + " numDrawn=" + numDrawn);
     }
 
@@ -609,8 +609,8 @@ class AppWindowToken extends WindowToken {
     }
 
     void setReplacingWindows(boolean animate) {
-        if (DEBUG_ADD_REMOVE) Slog.d(TAG_WM, "Marking app token " + appWindowToken
-                + " with replacing windows.");
+        if (DEBUG_ADD_REMOVE) Slog.d(TAG_WM,
+                "Marking app token " + this + " with replacing windows.");
 
         for (int i = allAppWindows.size() - 1; i >= 0; i--) {
             final WindowState w = allAppWindows.get(i);
@@ -627,7 +627,7 @@ class AppWindowToken extends WindowToken {
     }
 
     void setReplacingChildren() {
-        if (DEBUG_ADD_REMOVE) Slog.d(TAG_WM, "Marking app token " + appWindowToken
+        if (DEBUG_ADD_REMOVE) Slog.d(TAG_WM, "Marking app token " + this
                 + " with replacing child windows.");
         for (int i = allAppWindows.size() - 1; i >= 0; i--) {
             final WindowState w = allAppWindows.get(i);
@@ -638,8 +638,8 @@ class AppWindowToken extends WindowToken {
     }
 
     void resetReplacingWindows() {
-        if (DEBUG_ADD_REMOVE) Slog.d(TAG_WM, "Resetting app token " + appWindowToken
-                + " of replacing window marks.");
+        if (DEBUG_ADD_REMOVE) Slog.d(TAG_WM,
+                "Resetting app token " + this + " of replacing window marks.");
 
         for (int i = allAppWindows.size() - 1; i >= 0; i--) {
             final WindowState w = allAppWindows.get(i);
@@ -769,8 +769,8 @@ class AppWindowToken extends WindowToken {
         if (!mFrozenMergedConfig.isEmpty()) {
             mFrozenMergedConfig.remove();
         }
-        for (int i = windows.size() - 1; i >= 0; i--) {
-            final WindowState win = windows.get(i);
+        for (int i = allAppWindows.size() - 1; i >= 0; i--) {
+            final WindowState win = allAppWindows.get(i);
             if (!win.mHasSurface) {
                 continue;
             }

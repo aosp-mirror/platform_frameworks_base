@@ -158,7 +158,6 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
     WindowToken mToken;
     WindowToken mRootToken;
     AppWindowToken mAppToken;
-    AppWindowToken mTargetAppToken;
 
     // mAttrs.flags is tested in animation without being locked. If the bits tested are ever
     // modified they will need to be locked.
@@ -619,17 +618,17 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         }
         mIsFloatingLayer = mIsImWindow || mIsWallpaper;
 
-        final WindowState appWin = getTopParentWindow();
-        WindowToken appToken = appWin.mToken;
-        while (appToken.appWindowToken == null) {
-            WindowToken parent = mService.mTokenMap.get(appToken.token);
-            if (parent == null || appToken == parent) {
+        final WindowState topParentWindow = getTopParentWindow();
+        WindowToken rootToken = topParentWindow.mToken;
+        while (rootToken.appWindowToken == null) {
+            WindowToken parent = mService.mTokenMap.get(rootToken.token);
+            if (parent == null || rootToken == parent) {
                 break;
             }
-            appToken = parent;
+            rootToken = parent;
         }
-        mRootToken = appToken;
-        mAppToken = appToken.appWindowToken;
+        mRootToken = rootToken;
+        mAppToken = rootToken.appWindowToken;
         if (mAppToken != null) {
             final DisplayContent appDisplay = getDisplayContent();
             mNotOnAppsDisplay = displayContent != appDisplay;
@@ -1495,14 +1494,21 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
     }
 
     int getAnimLayerAdjustment() {
-        if (mTargetAppToken != null) {
-            return mTargetAppToken.mAppAnimator.animLayerAdjustment;
-        } else if (mAppToken != null) {
-            return mAppToken.mAppAnimator.animLayerAdjustment;
-        } else {
-            // Nothing is animating, so there is no animation adjustment.
-            return 0;
+        final boolean isImeType =
+                mAttrs.type == TYPE_INPUT_METHOD || mAttrs.type == TYPE_INPUT_METHOD_DIALOG;
+        if (isImeType && mService.mInputMethodTarget != null) {
+            final AppWindowToken appToken = mService.mInputMethodTarget.mAppToken;
+            if (appToken != null) {
+                return appToken.mAppAnimator.animLayerAdjustment;
+            }
         }
+
+        if (mAppToken != null) {
+            return mAppToken.mAppAnimator.animLayerAdjustment;
+        }
+
+        // Nothing is animating, so there is no animation adjustment.
+        return 0;
     }
 
     void scheduleAnimationIfDimming() {
@@ -2580,9 +2586,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
             pw.print(prefix); pw.print("mBaseLayer="); pw.print(mBaseLayer);
                     pw.print(" mSubLayer="); pw.print(mSubLayer);
                     pw.print(" mAnimLayer="); pw.print(mLayer); pw.print("+");
-                    pw.print((mTargetAppToken != null ?
-                            mTargetAppToken.mAppAnimator.animLayerAdjustment
-                          : (mAppToken != null ? mAppToken.mAppAnimator.animLayerAdjustment : 0)));
+                    pw.print(getAnimLayerAdjustment());
                     pw.print("="); pw.print(mWinAnimator.mAnimLayer);
                     pw.print(" mLastLayer="); pw.println(mWinAnimator.mLastLayer);
         }
@@ -2594,9 +2598,6 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
                 pw.print(prefix); pw.print(" isAnimatingWithSavedSurface()=");
                 pw.print(isAnimatingWithSavedSurface());
                 pw.print(" mAppDied=");pw.println(mAppDied);
-            }
-            if (mTargetAppToken != null) {
-                pw.print(prefix); pw.print("mTargetAppToken="); pw.println(mTargetAppToken);
             }
             pw.print(prefix); pw.print("mViewVisibility=0x");
             pw.print(Integer.toHexString(mViewVisibility));
