@@ -250,7 +250,7 @@
     <integer name="doze_pulse_duration_in">900</integer>
 
     <!-- Doze: pulse parameter - how long does it take to fade in after a pickup? -->
-    <integer name="doze_pulse_duration_in_pickup">300</integer>
+    <integer name="doze_pulse_duration_in_pickup">130</integer>
 
     <!-- Doze: pulse parameter - once faded in, how long does it stay visible? -->
     <integer name="doze_pulse_duration_visible">3000</integer>
