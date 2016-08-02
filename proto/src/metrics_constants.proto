@@ -2197,6 +2197,12 @@ message MetricsEvent {
     // Night Light on
     SETTINGS_CONDITION_NIGHT_DISPLAY = 492;
 
+    // System navigation key up.
+    ACTION_SYSTEM_NAVIGATION_KEY_UP = 493;
+
+    // System navigation key down.
+    ACTION_SYSTEM_NAVIGATION_KEY_DOWN = 494;
+
     // ---- End N-MR1 Constants, all N-MR1 constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
