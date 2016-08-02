@@ -699,7 +699,7 @@ public final class ActiveServices {
                         throw new IllegalArgumentException("null notification");
                     }
                     if (r.foregroundId != id) {
-                        r.cancelNotification();
+                        cancelForegroudNotificationLocked(r);
                         r.foregroundId = id;
                     }
                     notification.flags |= Notification.FLAG_FOREGROUND_SERVICE;
@@ -721,7 +721,7 @@ public final class ActiveServices {
                         }
                     }
                     if ((flags & Service.STOP_FOREGROUND_REMOVE) != 0) {
-                        r.cancelNotification();
+                        cancelForegroudNotificationLocked(r);
                         r.foregroundId = 0;
                         r.foregroundNoti = null;
                     } else if (r.appInfo.targetSdkVersion >= Build.VERSION_CODES.LOLLIPOP) {
@@ -735,6 +735,27 @@ public final class ActiveServices {
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    private void cancelForegroudNotificationLocked(ServiceRecord r) {
+        if (r.foregroundId != 0) {
+            // First check to see if this app has any other active foreground services
+            // with the same notification ID.  If so, we shouldn't actually cancel it,
+            // because that would wipe away the notification that still needs to be shown
+            // due the other service.
+            ServiceMap sm = getServiceMap(r.userId);
+            if (sm != null) {
+                for (int i = sm.mServicesByName.size()-1; i >= 0; i--) {
+                    ServiceRecord other = sm.mServicesByName.valueAt(i);
+                    if (other.foregroundId == r.foregroundId
+                            && other.packageName.equals(r.packageName)) {
+                        // Found one!  Abort the cancel.
+                        return;
+                    }
+                }
+            }
+            r.cancelNotification();
         }
     }
 
@@ -1560,7 +1581,7 @@ public final class ActiveServices {
             r.makeRestarting(mAm.mProcessStats.getMemFactorLocked(), now);
         }
 
-        r.cancelNotification();
+        cancelForegroudNotificationLocked(r);
 
         mAm.mHandler.removeCallbacks(r.restarter);
         mAm.mHandler.postAtTime(r.restarter, r.nextRestartTime);
@@ -2022,7 +2043,7 @@ public final class ActiveServices {
             }
         }
 
-        r.cancelNotification();
+        cancelForegroudNotificationLocked(r);
         r.isForeground = false;
         r.foregroundId = 0;
         r.foregroundNoti = null;
