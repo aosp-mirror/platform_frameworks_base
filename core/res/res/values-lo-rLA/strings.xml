@@ -678,6 +678,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"ຖືກຕ້ອງ!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"ລອງໃໝ່ອີກຄັ້ງ"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"ທົດລອງອີກຄັ້ງ"</string>
+    <string name="lockscreen_storage_locked" msgid="9167551160010625200">"ປົດລັອກຄຸນສົມບັດ ແລະ ຂໍ້ມູນທັງໝົດ"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"ຄວາມພະຍາຍາມປົດລັອກດ້ວຍໜ້ານັ້ນ ເກີນຈຳນວນທີ່ກຳນົດແລ້ວ"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"ບໍ່ມີ SIM card."</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"ບໍ່ມີຊິມກາດໃນແທັບເລັດ."</string>
@@ -1022,7 +1023,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"ກຳລັງອັບເກຣດ Android..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"ກຳ​ລັງ​ເລີ່ມລະ​ບົບ​ Android …"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"ການ​ປັບ​ບ່ອນ​ເກັບ​ຂໍ້​ມູນ​ໃຫ້​ເໝາະ​ສົມ."</string>
-    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"ກຳລັງອັບເກຣດ Android"</string>
+    <!-- no translation found for android_upgrading_notification_title (8428357096969413169) -->
+    <skip />
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"ບາງແອັບອາດບໍ່ສາມາດເຮັດວຽກໄດ້ປົກກະຕິຈົນກວ່າຈະອັບເກຣດສຳເລັດ"</string>
     <string name="app_upgrading_toast" msgid="3008139776215597053">"ກຳລັງອັບເກຣດ<xliff:g id="APPLICATION">%1$s</xliff:g>…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"ກຳລັງ​ປັບປຸງ​ປະສິດທິພາບ​ແອັບຯ​ທີ <xliff:g id="NUMBER_0">%1$d</xliff:g> ຈາກ​ທັງ​ໝົດ <xliff:g id="NUMBER_1">%2$d</xliff:g> ແອັບຯ."</string>

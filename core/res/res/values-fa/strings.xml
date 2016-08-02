@@ -127,7 +127,7 @@
     <item msgid="2254967670088539682">"‏برای برقراری تماس و ارسال پیام از طریق Wi-Fi، ابتدا از شرکت مخابراتی‌تان درخواست کنید این سرویس را راه‌اندازی کند. سپس دوباره از تنظیمات، تماس Wi-Fi را روشن کنید."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
-    <item msgid="6177300162212449033">"ثبت نام با شرکت مخابراتی شما"</item>
+    <item msgid="6177300162212449033">"ثبت‌نام با شرکت مخابراتی شما"</item>
   </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
@@ -678,6 +678,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"صحیح است!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"دوباره امتحان کنید"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"دوباره امتحان کنید"</string>
+    <string name="lockscreen_storage_locked" msgid="9167551160010625200">"باز کردن قفل تمام قابلیت‌ها و داده‌ها"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"‏دفعات تلاش برای Face Unlock از حداکثر مجاز بیشتر شد"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"سیم کارت موجود نیست"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"سیم کارت درون رایانهٔ لوحی نیست."</string>
@@ -1022,7 +1023,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"‏Android در حال ارتقا است..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"‏Android در حال راه‌اندازی است..."</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"بهینه‌سازی فضای ذخیره‌سازی."</string>
-    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"‏Android درحال ارتقا است"</string>
+    <!-- no translation found for android_upgrading_notification_title (8428357096969413169) -->
+    <skip />
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"تا پایان ارتقا، ممکن است برخی از برنامه‌ها به‌درستی کار نکنند."</string>
     <string name="app_upgrading_toast" msgid="3008139776215597053">"<xliff:g id="APPLICATION">%1$s</xliff:g> درحال ارتقا است...."</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"در حال بهینه‌سازی برنامهٔ <xliff:g id="NUMBER_0">%1$d</xliff:g> از <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
@@ -1511,8 +1513,8 @@
     <string name="mediasize_japanese_kahu" msgid="6872696027560065173">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="2359077233775455405">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="2091777168747058008">"You4"</string>
-    <string name="mediasize_unknown_portrait" msgid="3088043641616409762">"عمودی ناشناخته"</string>
-    <string name="mediasize_unknown_landscape" msgid="4876995327029361552">"افقی ناشناخته"</string>
+    <string name="mediasize_unknown_portrait" msgid="3088043641616409762">"عمودی ناشناس"</string>
+    <string name="mediasize_unknown_landscape" msgid="4876995327029361552">"افقی ناشناس"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"لغو شد"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"خطا هنگام نوشتن محتوا"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"نامعلوم"</string>

@@ -678,6 +678,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"సరైనది!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"మళ్లీ ప్రయత్నించండి"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"మళ్లీ ప్రయత్నించండి"</string>
+    <string name="lockscreen_storage_locked" msgid="9167551160010625200">"అన్ని లక్షణాలు మరియు డేటా కోసం అన్‌లాక్ చేయండి"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"ముఖంతో అన్‌లాక్ ప్రయత్నాల గరిష్ట పరిమితి మించిపోయారు"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"సిమ్ కార్డు లేదు"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"టాబ్లెట్‌లో సిమ్ కార్డు లేదు."</string>
@@ -1022,7 +1023,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android అప్‌గ్రేడ్ అవుతోంది…"</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android ప్రారంభమవుతోంది…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"నిల్వను అనుకూలపరుస్తోంది."</string>
-    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android అప్‌గ్రేడ్ అవుతోంది"</string>
+    <!-- no translation found for android_upgrading_notification_title (8428357096969413169) -->
+    <skip />
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"అప్‌గ్రేడ్ పూర్తయ్యే వరకు కొన్ని అనువర్తనాలు సరిగ్గా పని చేయకపోవచ్చు"</string>
     <string name="app_upgrading_toast" msgid="3008139776215597053">"<xliff:g id="APPLICATION">%1$s</xliff:g>ని అప్‌గ్రేడ్ చేస్తోంది…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_1">%2$d</xliff:g>లో <xliff:g id="NUMBER_0">%1$d</xliff:g> అనువర్తనాన్ని అనుకూలీకరిస్తోంది."</string>
