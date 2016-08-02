@@ -110,8 +110,8 @@ public class RatingBar extends AbsSeekBar {
         }
 
         // A touch inside a star fill up to that fractional area (slightly more
-        // than 1 so boundaries round up).
-        mTouchProgressOffset = 1.1f;
+        // than 0.5 so boundaries round up).
+        mTouchProgressOffset = 0.6f;
     }
 
     public RatingBar(Context context, AttributeSet attrs) {
