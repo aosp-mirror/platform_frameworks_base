@@ -574,6 +574,7 @@ public class AppLaunch extends InstrumentationTestCase {
             mLaunchIntent = intent;
             mForceStopBeforeLaunch = forceStopBeforeLaunch;
             mLaunchReason = launchReason;
+            mResult = -1L;
         }
 
         public Long getResult() {
