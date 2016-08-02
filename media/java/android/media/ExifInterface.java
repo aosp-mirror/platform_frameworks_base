@@ -1169,7 +1169,7 @@ public class ExifInterface {
     };
     // List of indices of the indicated tag groups according to the EXIF_POINTER_TAGS
     private static final int[] EXIF_POINTER_TAG_HINTS = new int[] {
-            IFD_TIFF_HINT, IFD_EXIF_HINT, IFD_GPS_HINT, IFD_INTEROPERABILITY_HINT,
+            IFD_PREVIEW_HINT, IFD_EXIF_HINT, IFD_GPS_HINT, IFD_INTEROPERABILITY_HINT,
             ORF_CAMERA_SETTINGS_HINT, ORF_IMAGE_PROCESSING_HINT
     };
     // Tags for indicating the thumbnail offset and length
@@ -2298,35 +2298,15 @@ public class ExifInterface {
         parseTiffHeaders(dataInputStream, exifBytes.length);
 
         // Read TIFF image file directories. See JEITA CP-3451C Section 4.5.2. Figure 6.
-        readImageFileDirectory(dataInputStream, IFD_PREVIEW_HINT);
+        readImageFileDirectory(dataInputStream, IFD_TIFF_HINT);
 
-        // Check if the preview image data should be a primary image data.
-        // The 0th IFD (first to be parsed) is presumed to be a preview image data, with a SubIFD
-        // that is a primary image data.
-        // But if the 0th IFD does not have a SubIFD, then it must be a primary image data since
-        // a primary image data must exist, but a preview image data does not have to.
-        if (mAttributes[IFD_TIFF_HINT].isEmpty() && !mAttributes[IFD_PREVIEW_HINT].isEmpty()) {
-            mAttributes[IFD_TIFF_HINT] = mAttributes[IFD_PREVIEW_HINT];
-            mAttributes[IFD_PREVIEW_HINT] = new HashMap();
-        }
+        // Update ImageLength/Width tags for all image data.
+        updateImageSizeValues(in, IFD_TIFF_HINT);
+        updateImageSizeValues(in, IFD_PREVIEW_HINT);
+        updateImageSizeValues(in, IFD_THUMBNAIL_HINT);
 
-        // Update TAG_IMAGE_WIDTH and TAG_IMAGE_LENGTH for primary image.
-        updatePrimaryImageSizeValues(in);
-
-        // Check if the preview image data should be a thumbnail image data.
-        // In a RAW file, there may be a preview image, which is smaller than a primary image but
-        // larger than a thumbnail image. Normally, the preview image can be considered a thumbnail
-        // image if its size meets the requirements. Therefore, when a thumbnail image has not yet
-        // been found, we should check if the preview image can be one.
-        if (!mAttributes[IFD_PREVIEW_HINT].isEmpty() && mAttributes[IFD_THUMBNAIL_HINT].isEmpty()) {
-            // Update preview image size if necessary
-            retrieveJpegImageSize(in, IFD_PREVIEW_HINT);
-
-            if (isThumbnail(mAttributes[IFD_PREVIEW_HINT])) {
-                mAttributes[IFD_THUMBNAIL_HINT] = mAttributes[IFD_PREVIEW_HINT];
-                mAttributes[IFD_PREVIEW_HINT] = new HashMap();
-            }
-        }
+        // Check if each image data is in valid position.
+        validateImages(in);
 
         if (mMimeType == IMAGE_TYPE_PEF) {
             // PEF files contain a MakerNote data, which contains the data for ColorSpace tag.
@@ -2923,6 +2903,8 @@ public class ExifInterface {
                 if (mAttributes[IFD_THUMBNAIL_HINT].isEmpty()) {
                     // Do not overwrite thumbnail IFD data if it alreay exists.
                     readImageFileDirectory(dataInputStream, IFD_THUMBNAIL_HINT);
+                } else if (mAttributes[IFD_PREVIEW_HINT].isEmpty()) {
+                    readImageFileDirectory(dataInputStream, IFD_PREVIEW_HINT);
                 }
             }
         }
@@ -3081,6 +3063,28 @@ public class ExifInterface {
         return false;
     }
 
+    // Validate primary, preview, thumbnail image data by comparing image size
+    private void validateImages(InputStream in) throws IOException {
+        // Swap images based on size (primary > preview > thumbnail)
+        swapBasedOnImageSize(IFD_TIFF_HINT, IFD_PREVIEW_HINT);
+        swapBasedOnImageSize(IFD_TIFF_HINT, IFD_THUMBNAIL_HINT);
+        swapBasedOnImageSize(IFD_PREVIEW_HINT, IFD_THUMBNAIL_HINT);
+
+        // Check whether thumbnail image exists and whether preview image satisfies the thumbnail
+        // image requirements
+        if (mAttributes[IFD_THUMBNAIL_HINT].isEmpty()) {
+            if (isThumbnail(mAttributes[IFD_PREVIEW_HINT])) {
+                mAttributes[IFD_THUMBNAIL_HINT] = mAttributes[IFD_PREVIEW_HINT];
+                mAttributes[IFD_PREVIEW_HINT] = new HashMap();
+            }
+        }
+
+        // Check if the thumbnail image satisfies the thumbnail size requirements
+        if (!isThumbnail(mAttributes[IFD_THUMBNAIL_HINT])) {
+            Log.d(TAG, "No image meets the size requirements of a thumbnail image.");
+        }
+    }
+
     /**
      * If image is uncompressed, ImageWidth/Length tags are used to store size info.
      * However, uncompressed images often store extra pixels around the edges of the final image,
@@ -3098,24 +3102,19 @@ public class ExifInterface {
      * If image is a RW2 file, valid image sizes are stored in SensorBorder tags.
      * See tiff_parser.cc GetFullDimension32()
      * */
-    private void updatePrimaryImageSizeValues(InputStream in) throws IOException {
+    private void updateImageSizeValues(InputStream in, int imageType) throws IOException {
         // Uncompressed image valid image size values
         ExifAttribute defaultCropSizeAttribute =
-                (ExifAttribute) mAttributes[IFD_TIFF_HINT].get(TAG_DEFAULT_CROP_SIZE);
-        // Compressed image valid image size values
-        ExifAttribute pixelXDimAttribute =
-                (ExifAttribute) mAttributes[IFD_EXIF_HINT].get(TAG_PIXEL_X_DIMENSION);
-        ExifAttribute pixelYDimAttribute =
-                (ExifAttribute) mAttributes[IFD_EXIF_HINT].get(TAG_PIXEL_Y_DIMENSION);
+                (ExifAttribute) mAttributes[imageType].get(TAG_DEFAULT_CROP_SIZE);
         // RW2 image valid image size values
         ExifAttribute topBorderAttribute =
-                (ExifAttribute) mAttributes[IFD_TIFF_HINT].get(TAG_RW2_SENSOR_TOP_BORDER);
+                (ExifAttribute) mAttributes[imageType].get(TAG_RW2_SENSOR_TOP_BORDER);
         ExifAttribute leftBorderAttribute =
-                (ExifAttribute) mAttributes[IFD_TIFF_HINT].get(TAG_RW2_SENSOR_LEFT_BORDER);
+                (ExifAttribute) mAttributes[imageType].get(TAG_RW2_SENSOR_LEFT_BORDER);
         ExifAttribute bottomBorderAttribute =
-                (ExifAttribute) mAttributes[IFD_TIFF_HINT].get(TAG_RW2_SENSOR_BOTTOM_BORDER);
+                (ExifAttribute) mAttributes[imageType].get(TAG_RW2_SENSOR_BOTTOM_BORDER);
         ExifAttribute rightBorderAttribute =
-                (ExifAttribute) mAttributes[IFD_TIFF_HINT].get(TAG_RW2_SENSOR_RIGHT_BORDER);
+                (ExifAttribute) mAttributes[imageType].get(TAG_RW2_SENSOR_RIGHT_BORDER);
 
         if (defaultCropSizeAttribute != null) {
             // Update for uncompressed image
@@ -3135,8 +3134,8 @@ public class ExifInterface {
                 defaultCropSizeYAttribute =
                         ExifAttribute.createUShort(defaultCropSizeValue[1], mExifByteOrder);
             }
-            mAttributes[IFD_TIFF_HINT].put(TAG_IMAGE_WIDTH, defaultCropSizeXAttribute);
-            mAttributes[IFD_TIFF_HINT].put(TAG_IMAGE_LENGTH, defaultCropSizeYAttribute);
+            mAttributes[imageType].put(TAG_IMAGE_WIDTH, defaultCropSizeXAttribute);
+            mAttributes[imageType].put(TAG_IMAGE_LENGTH, defaultCropSizeYAttribute);
         } else if (topBorderAttribute != null && leftBorderAttribute != null &&
                 bottomBorderAttribute != null && rightBorderAttribute != null) {
             // Update for RW2 image
@@ -3151,17 +3150,24 @@ public class ExifInterface {
                         ExifAttribute.createUShort(length, mExifByteOrder);
                 ExifAttribute imageWidthAttribute =
                         ExifAttribute.createUShort(width, mExifByteOrder);
-                mAttributes[IFD_TIFF_HINT].put(TAG_IMAGE_LENGTH, imageLengthAttribute);
-                mAttributes[IFD_TIFF_HINT].put(TAG_IMAGE_WIDTH, imageWidthAttribute);
+                mAttributes[imageType].put(TAG_IMAGE_LENGTH, imageLengthAttribute);
+                mAttributes[imageType].put(TAG_IMAGE_WIDTH, imageWidthAttribute);
             }
         } else {
             // Update for JPEG image
-            if (pixelXDimAttribute != null && pixelYDimAttribute != null) {
-                mAttributes[IFD_TIFF_HINT].put(TAG_IMAGE_WIDTH, pixelXDimAttribute);
-                mAttributes[IFD_TIFF_HINT].put(TAG_IMAGE_LENGTH, pixelYDimAttribute);
+            if (imageType == IFD_TIFF_HINT) {
+                ExifAttribute pixelXDimAttribute =
+                        (ExifAttribute) mAttributes[IFD_EXIF_HINT].get(TAG_PIXEL_X_DIMENSION);
+                ExifAttribute pixelYDimAttribute =
+                        (ExifAttribute) mAttributes[IFD_EXIF_HINT].get(TAG_PIXEL_Y_DIMENSION);
+                if (pixelXDimAttribute != null && pixelYDimAttribute != null) {
+                    mAttributes[imageType].put(TAG_IMAGE_WIDTH, pixelXDimAttribute);
+                    mAttributes[imageType].put(TAG_IMAGE_LENGTH, pixelYDimAttribute);
+                } else {
+                    retrieveJpegImageSize(in, imageType);
+                }
             } else {
-                // Update image size values from SOF marker if necessary
-                retrieveJpegImageSize(in, IFD_TIFF_HINT);
+                retrieveJpegImageSize(in, imageType);
             }
         }
     }
@@ -3651,6 +3657,48 @@ public class ExifInterface {
 
         public void writeUnsignedInt(long val) throws IOException {
             writeInt((int) val);
+        }
+    }
+
+    // Swaps image data based on image size
+    private void swapBasedOnImageSize(int firstImageHint, int secondImageHint)
+            throws IOException {
+        if (mAttributes[firstImageHint].isEmpty() || mAttributes[secondImageHint].isEmpty()) {
+            if (DEBUG) {
+                Log.d(TAG, "Cannot perform swap since only one image data exists");
+            }
+            return;
+        }
+
+        ExifAttribute firstImageLengthAttribute =
+                (ExifAttribute) mAttributes[firstImageHint].get(TAG_IMAGE_LENGTH);
+        ExifAttribute firstImageWidthAttribute =
+                (ExifAttribute) mAttributes[firstImageHint].get(TAG_IMAGE_WIDTH);
+        ExifAttribute secondImageLengthAttribute =
+                (ExifAttribute) mAttributes[secondImageHint].get(TAG_IMAGE_LENGTH);
+        ExifAttribute secondImageWidthAttribute =
+                (ExifAttribute) mAttributes[secondImageHint].get(TAG_IMAGE_WIDTH);
+
+        if (firstImageLengthAttribute == null || firstImageWidthAttribute == null) {
+            if (DEBUG) {
+                Log.d(TAG, "First image does not contain valid size information");
+            }
+        } else if (secondImageLengthAttribute == null || secondImageWidthAttribute == null) {
+            if (DEBUG) {
+                Log.d(TAG, "Second image does not contain valid size information");
+            }
+        } else {
+            int firstImageLengthValue = firstImageLengthAttribute.getIntValue(mExifByteOrder);
+            int firstImageWidthValue = firstImageWidthAttribute.getIntValue(mExifByteOrder);
+            int secondImageLengthValue = secondImageLengthAttribute.getIntValue(mExifByteOrder);
+            int secondImageWidthValue = secondImageWidthAttribute.getIntValue(mExifByteOrder);
+
+            if (firstImageLengthValue < secondImageLengthValue &&
+                    firstImageWidthValue < secondImageWidthValue) {
+                HashMap tempMap = mAttributes[firstImageHint];
+                mAttributes[firstImageHint] = mAttributes[secondImageHint];
+                mAttributes[secondImageHint] = tempMap;
+            }
         }
     }
 
