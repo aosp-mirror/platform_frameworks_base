@@ -373,7 +373,7 @@ public class DozeService extends DreamService {
         if (DEBUG) Log.d(mTag, "mScheduleResetsRemaining = " + mScheduleResetsRemaining);
         mNotificationPulseTime = notificationTimeMs;
         if (pulseImmediately) {
-            DozeLog.traceNotificationPulse(0);
+            DozeLog.traceNotificationPulse(mContext, 0);
             requestPulse(DozeLog.PULSE_REASON_NOTIFICATION);
         }
         // schedule the rest of the pulses
@@ -442,7 +442,7 @@ public class DozeService extends DreamService {
             if (NOTIFICATION_PULSE_ACTION.equals(intent.getAction())) {
                 final long instance = intent.getLongExtra(EXTRA_INSTANCE, -1);
                 if (DEBUG) Log.d(mTag, "Received notification pulse intent instance=" + instance);
-                DozeLog.traceNotificationPulse(instance);
+                DozeLog.traceNotificationPulse(mContext, instance);
                 requestPulse(DozeLog.PULSE_REASON_NOTIFICATION);
                 rescheduleNotificationPulse(mNotificationLightOn);
             }
@@ -576,7 +576,7 @@ public class DozeService extends DreamService {
                     resetNotificationResets();
                 }
                 if (mSensor.getType() == Sensor.TYPE_PICK_UP_GESTURE) {
-                    DozeLog.tracePickupPulse(withinVibrationThreshold);
+                    DozeLog.tracePickupPulse(mContext, withinVibrationThreshold);
                 }
             } finally {
                 mWakeLock.release();
