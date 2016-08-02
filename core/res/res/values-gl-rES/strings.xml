@@ -249,7 +249,7 @@
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Calendario"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"acceder ao teu calendario"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="4656988620100940350">"envíar e consultar mensaxes de SMS"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"enviar e consultar mensaxes de SMS"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Almacenamento"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"acceder a fotos, contido multimedia e ficheiros no teu dispositivo"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Micrófono"</string>
@@ -259,7 +259,7 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Teléfono"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"facer e xestionar chamadas telefónicas"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Sensores corporais"</string>
-    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"accede aos datos do sensor sobre as túas constantes vitais"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"acceder aos datos do sensor sobre as túas constantes vitais"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Recuperar contido da ventá"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspecciona o contido dunha ventá coa que estás interactuando."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Activar a exploración táctil"</string>
@@ -678,6 +678,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Correcto!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Téntao de novo"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Téntao de novo"</string>
+    <string name="lockscreen_storage_locked" msgid="9167551160010625200">"Desbloquea para gozar todas as funcións e datos"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Superouse o número máximo de intentos de desbloqueo facial"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Non hai ningunha tarxeta SIM"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Non hai ningunha tarxeta SIM na tableta."</string>
@@ -1022,7 +1023,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Estase actualizando Android…"</string>
     <string name="android_start_title" msgid="8418054686415318207">"Estase iniciando Android…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Optimizando almacenamento."</string>
-    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Estase actualizando Android"</string>
+    <!-- no translation found for android_upgrading_notification_title (8428357096969413169) -->
+    <skip />
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"É posible que algunhas aplicacións non funcionen correctamente ata que finalice o proceso de actualización"</string>
     <string name="app_upgrading_toast" msgid="3008139776215597053">"Actualizando <xliff:g id="APPLICATION">%1$s</xliff:g>…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Optimizando aplicación <xliff:g id="NUMBER_0">%1$d</xliff:g> de <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>

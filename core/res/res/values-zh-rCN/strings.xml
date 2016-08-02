@@ -678,6 +678,8 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"正确！"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"重试"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"重试"</string>
+    <!-- no translation found for lockscreen_storage_locked (9167551160010625200) -->
+    <skip />
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"已超过“人脸解锁”尝试次数上限"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"没有 SIM 卡"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"平板电脑中没有SIM卡。"</string>
@@ -1022,7 +1024,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android正在升级..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android 正在启动…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"正在优化存储空间。"</string>
-    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android 正在升级"</string>
+    <!-- no translation found for android_upgrading_notification_title (8428357096969413169) -->
+    <skip />
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"在升级完成之前，部分应用可能无法正常运行"</string>
     <string name="app_upgrading_toast" msgid="3008139776215597053">"正在升级<xliff:g id="APPLICATION">%1$s</xliff:g>…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"正在优化第<xliff:g id="NUMBER_0">%1$d</xliff:g>个应用（共<xliff:g id="NUMBER_1">%2$d</xliff:g>个）。"</string>

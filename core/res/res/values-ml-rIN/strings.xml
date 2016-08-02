@@ -678,6 +678,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"ശരി!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"വീണ്ടും ശ്രമിക്കുക"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"വീണ്ടും ശ്രമിക്കുക"</string>
+    <string name="lockscreen_storage_locked" msgid="9167551160010625200">"എല്ലാ ഫീച്ചറുകളും വിവരങ്ങളും ലഭിക്കാൻ അൺലോക്കുചെയ്യുക"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"മുഖം തിരിച്ചറിഞ്ഞുള്ള അൺലോക്ക് ശ്രമങ്ങളുടെ പരമാവധി കഴിഞ്ഞു"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"സിം കാർഡില്ല"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"ടാബ്‌ലെറ്റിൽ സിം കാർഡൊന്നുമില്ല."</string>
@@ -1022,7 +1023,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android അപ്ഗ്രേഡുചെയ്യുന്നു…"</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android ആരംഭിക്കുന്നു…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"സ്റ്റോറേജ്  ഒപ്‌റ്റിമൈസ് ചെയ്യുന്നു."</string>
-    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android അപ്ഗ്രേഡുചെയ്യുന്നു"</string>
+    <!-- no translation found for android_upgrading_notification_title (8428357096969413169) -->
+    <skip />
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"അപ്‌ഗ്രേഡ് പൂർത്തിയാകുന്നത് വരെ ചില ആപ്‌സ് ശരിയായി പ്രവർത്തിച്ചേക്കില്ല"</string>
     <string name="app_upgrading_toast" msgid="3008139776215597053">"<xliff:g id="APPLICATION">%1$s</xliff:g> അപ്ഗ്രേഡ് ചെയ്യുന്നു…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_0">%1$d</xliff:g> / <xliff:g id="NUMBER_1">%2$d</xliff:g> അപ്ലിക്കേഷൻ ഓപ്റ്റിമൈസ് ചെയ്യുന്നു."</string>
