@@ -144,11 +144,7 @@
     <item msgid="675719912558941285">"שרטט אזור חיתוך שאינו מלבני בצבע כחול"</item>
     <item msgid="1064373276095698656">"הדגש את פקודות האיור שנבדקות בצבע ירוק"</item>
   </string-array>
-  <string-array name="track_frame_time_entries">
-    <item msgid="2193584639058893150">"כבוי"</item>
-    <item msgid="2751513398307949636">"במסך כעמודות"</item>
-    <item msgid="1851438178120770973">"‏ב-adb shell dumpsys gfxinfo"</item>
-  </string-array>
+    <!-- no translation found for track_frame_time_entries:2 (2355151170975410323) -->
   <string-array name="debug_hw_overdraw_entries">
     <item msgid="8190572633763871652">"כבוי"</item>
     <item msgid="7688197031296835369">"הצגת אזורים עם חריגה"</item>

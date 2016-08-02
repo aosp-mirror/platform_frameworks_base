@@ -144,11 +144,7 @@
     <item msgid="675719912558941285">"Σχεδίαση μη ορθογώνιας περιοχής με μπλε χρώμα"</item>
     <item msgid="1064373276095698656">"Επισ/ση ελεγμένων εντολών με πράσ."</item>
   </string-array>
-  <string-array name="track_frame_time_entries">
-    <item msgid="2193584639058893150">"Απενεργοποιημένο"</item>
-    <item msgid="2751513398307949636">"Στην οθόνη ως ράβδοι"</item>
-    <item msgid="1851438178120770973">"Σε adb shell dumpsys gfxinfo"</item>
-  </string-array>
+    <!-- no translation found for track_frame_time_entries:2 (2355151170975410323) -->
   <string-array name="debug_hw_overdraw_entries">
     <item msgid="8190572633763871652">"Ανενεργές"</item>
     <item msgid="7688197031296835369">"Εμφάνιση περιοχών υπέρβασης"</item>

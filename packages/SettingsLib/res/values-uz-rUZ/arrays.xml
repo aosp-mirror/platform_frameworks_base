@@ -144,11 +144,7 @@
     <item msgid="675719912558941285">"To‘g‘ri burchakli bo‘lmagan kesishmalarni ko‘k bilan"</item>
     <item msgid="1064373276095698656">"Chizmaning sinov buyruqlarini yashil bilan"</item>
   </string-array>
-  <string-array name="track_frame_time_entries">
-    <item msgid="2193584639058893150">"O‘chirib qo‘yish"</item>
-    <item msgid="2751513398307949636">"Ekranda bo‘laklar tarzida"</item>
-    <item msgid="1851438178120770973">"adb shell dumpsys gfxinfo ichida"</item>
-  </string-array>
+    <!-- no translation found for track_frame_time_entries:2 (2355151170975410323) -->
   <string-array name="debug_hw_overdraw_entries">
     <item msgid="8190572633763871652">"O‘CHIQ"</item>
     <item msgid="7688197031296835369">"Ortiqcha chizilgan joylarni ko‘rsatish"</item>

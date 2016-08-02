@@ -144,11 +144,7 @@
     <item msgid="675719912558941285">"Тик бурчтуу эмес кесилген аймакты көк түстө тартуу"</item>
     <item msgid="1064373276095698656">"Текшерилген тартуу буйруктарын жашыл менен белгилөө"</item>
   </string-array>
-  <string-array name="track_frame_time_entries">
-    <item msgid="2193584639058893150">"Өчүк"</item>
-    <item msgid="2751513398307949636">"Экранда тилке катары"</item>
-    <item msgid="1851438178120770973">"adb кабыгында dumpsys gfxinfo"</item>
-  </string-array>
+    <!-- no translation found for track_frame_time_entries:2 (2355151170975410323) -->
   <string-array name="debug_hw_overdraw_entries">
     <item msgid="8190572633763871652">"Өчүк"</item>
     <item msgid="7688197031296835369">"Үстүнө тартуу аймагын көргөзүү"</item>
