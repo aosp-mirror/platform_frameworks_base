@@ -208,7 +208,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                 String selection, String[] selectionArgs, String sortOrder,
                 ICancellationSignal cancellationSignal) {
             validateIncomingUri(uri);
-            uri = getUriWithoutUserId(uri);
+            uri = maybeGetUriWithoutUserId(uri);
             if (enforceReadPermission(callingPkg, uri, null) != AppOpsManager.MODE_ALLOWED) {
                 // The caller has no access to the data, so return an empty cursor with
                 // the columns in the requested order. The caller may ask for an invalid
@@ -247,7 +247,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         @Override
         public String getType(Uri uri) {
             validateIncomingUri(uri);
-            uri = getUriWithoutUserId(uri);
+            uri = maybeGetUriWithoutUserId(uri);
             return ContentProvider.this.getType(uri);
         }
 
@@ -255,7 +255,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         public Uri insert(String callingPkg, Uri uri, ContentValues initialValues) {
             validateIncomingUri(uri);
             int userId = getUserIdFromUri(uri);
-            uri = getUriWithoutUserId(uri);
+            uri = maybeGetUriWithoutUserId(uri);
             if (enforceWritePermission(callingPkg, uri, null) != AppOpsManager.MODE_ALLOWED) {
                 return rejectInsert(uri, initialValues);
             }
@@ -270,7 +270,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         @Override
         public int bulkInsert(String callingPkg, Uri uri, ContentValues[] initialValues) {
             validateIncomingUri(uri);
-            uri = getUriWithoutUserId(uri);
+            uri = maybeGetUriWithoutUserId(uri);
             if (enforceWritePermission(callingPkg, uri, null) != AppOpsManager.MODE_ALLOWED) {
                 return 0;
             }
@@ -331,7 +331,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         @Override
         public int delete(String callingPkg, Uri uri, String selection, String[] selectionArgs) {
             validateIncomingUri(uri);
-            uri = getUriWithoutUserId(uri);
+            uri = maybeGetUriWithoutUserId(uri);
             if (enforceWritePermission(callingPkg, uri, null) != AppOpsManager.MODE_ALLOWED) {
                 return 0;
             }
@@ -347,7 +347,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         public int update(String callingPkg, Uri uri, ContentValues values, String selection,
                 String[] selectionArgs) {
             validateIncomingUri(uri);
-            uri = getUriWithoutUserId(uri);
+            uri = maybeGetUriWithoutUserId(uri);
             if (enforceWritePermission(callingPkg, uri, null) != AppOpsManager.MODE_ALLOWED) {
                 return 0;
             }
@@ -364,7 +364,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                 String callingPkg, Uri uri, String mode, ICancellationSignal cancellationSignal,
                 IBinder callerToken) throws FileNotFoundException {
             validateIncomingUri(uri);
-            uri = getUriWithoutUserId(uri);
+            uri = maybeGetUriWithoutUserId(uri);
             enforceFilePermission(callingPkg, uri, mode, callerToken);
             final String original = setCallingPackage(callingPkg);
             try {
@@ -380,7 +380,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                 String callingPkg, Uri uri, String mode, ICancellationSignal cancellationSignal)
                 throws FileNotFoundException {
             validateIncomingUri(uri);
-            uri = getUriWithoutUserId(uri);
+            uri = maybeGetUriWithoutUserId(uri);
             enforceFilePermission(callingPkg, uri, mode, null);
             final String original = setCallingPackage(callingPkg);
             try {
@@ -406,7 +406,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         @Override
         public String[] getStreamTypes(Uri uri, String mimeTypeFilter) {
             validateIncomingUri(uri);
-            uri = getUriWithoutUserId(uri);
+            uri = maybeGetUriWithoutUserId(uri);
             return ContentProvider.this.getStreamTypes(uri, mimeTypeFilter);
         }
 
@@ -415,7 +415,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                 Bundle opts, ICancellationSignal cancellationSignal) throws FileNotFoundException {
             Bundle.setDefusable(opts, true);
             validateIncomingUri(uri);
-            uri = getUriWithoutUserId(uri);
+            uri = maybeGetUriWithoutUserId(uri);
             enforceFilePermission(callingPkg, uri, "r", null);
             final String original = setCallingPackage(callingPkg);
             try {
@@ -1846,10 +1846,12 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
     /** @hide */
     private void validateIncomingUri(Uri uri) throws SecurityException {
         String auth = uri.getAuthority();
-        int userId = getUserIdFromAuthority(auth, UserHandle.USER_CURRENT);
-        if (userId != UserHandle.USER_CURRENT && userId != mContext.getUserId()) {
-            throw new SecurityException("trying to query a ContentProvider in user "
-                    + mContext.getUserId() + " with a uri belonging to user " + userId);
+        if (!mSingleUser) {
+            int userId = getUserIdFromAuthority(auth, UserHandle.USER_CURRENT);
+            if (userId != UserHandle.USER_CURRENT && userId != mContext.getUserId()) {
+                throw new SecurityException("trying to query a ContentProvider in user "
+                        + mContext.getUserId() + " with a uri belonging to user " + userId);
+            }
         }
         if (!matchesOurAuthorities(getAuthorityWithoutUserId(auth))) {
             String message = "The authority of the uri " + uri + " does not match the one of the "
@@ -1861,6 +1863,14 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             }
             throw new SecurityException(message);
         }
+    }
+
+    /** @hide */
+    private Uri maybeGetUriWithoutUserId(Uri uri) {
+        if (mSingleUser) {
+            return uri;
+        }
+        return getUriWithoutUserId(uri);
     }
 
     /** @hide */
