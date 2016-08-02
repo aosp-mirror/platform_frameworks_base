@@ -231,6 +231,7 @@ Maybe<xml::AaptAttribute> ReferenceLinker::compileXmlAttribute(const Reference& 
                                                                std::string* outError) {
     const SymbolTable::Symbol* symbol = resolveSymbol(reference, nameMangler, symbols);
     if (!symbol) {
+        if (outError) *outError = "not found";
         return {};
     }
 
