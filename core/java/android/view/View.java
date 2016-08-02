@@ -12303,6 +12303,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public void setAlpha(@FloatRange(from=0.0, to=1.0) float alpha) {
         ensureTransformationInfo();
         if (mTransformationInfo.mAlpha != alpha) {
+            // Report visibility changes, which can affect children, to accessibility
+            if ((alpha == 0) ^ (mTransformationInfo.mAlpha == 0)) {
+                notifySubtreeAccessibilityStateChangedIfNeeded();
+            }
             mTransformationInfo.mAlpha = alpha;
             if (onSetAlpha((int) (alpha * 255))) {
                 mPrivateFlags |= PFLAG_ALPHA_SET;
@@ -12313,8 +12317,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 mPrivateFlags &= ~PFLAG_ALPHA_SET;
                 invalidateViewProperty(true, false);
                 mRenderNode.setAlpha(getFinalAlpha());
-                notifyViewAccessibilityStateChangedIfNeeded(
-                        AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
             }
         }
     }
