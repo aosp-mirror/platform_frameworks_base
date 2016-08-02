@@ -111,7 +111,7 @@
     <string name="tts_play_example_summary" msgid="8029071615047894486">"Reprodueix una breu demostració de síntesi de veu"</string>
     <string name="tts_install_data_title" msgid="4264378440508149986">"Instal·la dades de veu"</string>
     <string name="tts_install_data_summary" msgid="5742135732511822589">"Instal·la les dades de veu necessàries per a la síntesi de veu"</string>
-    <string name="tts_engine_security_warning" msgid="8786238102020223650">"Pot ser que aquest motor de síntesi de la parla pugui recopilar tot el text que es dirà en veu alta, incloses les dades personals, com ara les contrasenyes i els números de les targetes de crèdit. Ve del motor <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>. Voleu activar l\'ús d\'aquest motor de síntesi de la parla?"</string>
+    <string name="tts_engine_security_warning" msgid="8786238102020223650">"Pot ser que aquest motor de síntesi de la parla pugui recopilar tot el text que es dirà en veu alta, incloses les dades personals, com ara les contrasenyes i els números de les targetes de crèdit. Ve del motor <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>. Vols activar l\'ús d\'aquest motor de síntesi de la parla?"</string>
     <string name="tts_engine_network_required" msgid="1190837151485314743">"Aquest idioma requereix una connexió de xarxa activa per a la sortida de síntesi de veu."</string>
     <string name="tts_default_sample_string" msgid="4040835213373086322">"Això és un exemple de síntesi de veu"</string>
     <string name="tts_status_title" msgid="7268566550242584413">"Estat de l\'idioma predeterminat"</string>

@@ -144,11 +144,7 @@
     <item msgid="675719912558941285">"將非矩形裁剪區域塗上藍色"</item>
     <item msgid="1064373276095698656">"使用綠色標明測試繪圖指令"</item>
   </string-array>
-  <string-array name="track_frame_time_entries">
-    <item msgid="2193584639058893150">"關閉"</item>
-    <item msgid="2751513398307949636">"在螢幕上以列顯示"</item>
-    <item msgid="1851438178120770973">"在「adb shell dumpsys gfxinfo」指令中"</item>
-  </string-array>
+    <!-- no translation found for track_frame_time_entries:2 (2355151170975410323) -->
   <string-array name="debug_hw_overdraw_entries">
     <item msgid="8190572633763871652">"關閉"</item>
     <item msgid="7688197031296835369">"顯示透支區域"</item>

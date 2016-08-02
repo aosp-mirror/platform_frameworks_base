@@ -144,11 +144,7 @@
     <item msgid="675719912558941285">"Dweba indawo yesiqeshana engesiyena unxantathu ngokuphuzi okwesibhakabhaka"</item>
     <item msgid="1064373276095698656">"Beka obala iziqondiso ezihloliwe zokudwebela ngokuphuzi"</item>
   </string-array>
-  <string-array name="track_frame_time_entries">
-    <item msgid="2193584639058893150">"Valiwe"</item>
-    <item msgid="2751513398307949636">"Kusikrini njengamabha"</item>
-    <item msgid="1851438178120770973">"Ku-adb shell dumpsys gfxinfo"</item>
-  </string-array>
+    <!-- no translation found for track_frame_time_entries:2 (2355151170975410323) -->
   <string-array name="debug_hw_overdraw_entries">
     <item msgid="8190572633763871652">"Valiwe"</item>
     <item msgid="7688197031296835369">"Bonisa izindawo zokukhipha okungaphezulu"</item>

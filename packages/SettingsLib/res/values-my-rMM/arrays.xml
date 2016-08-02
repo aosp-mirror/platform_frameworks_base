@@ -144,11 +144,7 @@
     <item msgid="675719912558941285">"စတုဂံမဟုတ်သော ဖောက်ရန်အပိုင်းကို အပြာရောင်ဖြင့်ဆွဲပါ"</item>
     <item msgid="1064373276095698656">"စမ်းသပ်ထားသော ပုံဆွဲရန်ညွှန်ကြားချက်များကို အစိမ်းရောင်ဖြင့် အသားပေး ဖော်ပြပါ"</item>
   </string-array>
-  <string-array name="track_frame_time_entries">
-    <item msgid="2193584639058893150">"ပိတ်"</item>
-    <item msgid="2751513398307949636">"ဖန်သားပြင်ပေါ်မှာ မျဉ်းတန်းကဲ့သို့"</item>
-    <item msgid="1851438178120770973">"adb shell dumpsys ထဲမှ gfxinfo"</item>
-  </string-array>
+    <!-- no translation found for track_frame_time_entries:2 (2355151170975410323) -->
   <string-array name="debug_hw_overdraw_entries">
     <item msgid="8190572633763871652">"ပိတ်"</item>
     <item msgid="7688197031296835369">"ရှိရင်းစွဲထက်ပိုသော ဧရိယာများကိုပြရန်"</item>

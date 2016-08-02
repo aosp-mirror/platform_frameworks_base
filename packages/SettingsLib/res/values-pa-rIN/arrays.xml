@@ -144,11 +144,7 @@
     <item msgid="675719912558941285">"ਨੀਲੇ ਵਿੱਚ ਗ਼ੈਰ-ਆਇਤਾਕਾਰ ਕਲਿਪ ਖੇਤਰ ਡ੍ਰਾ ਕਰੋ"</item>
     <item msgid="1064373276095698656">"ਹਾਈਲਾਈਟ ਜਾਂਚ ਕੀਤੀਆਂ ਡ੍ਰਾਇੰਗ ਕਮਾਂਡਾਂ ਹਰੇ ਵਿੱਚ ਹਨ"</item>
   </string-array>
-  <string-array name="track_frame_time_entries">
-    <item msgid="2193584639058893150">"ਬੰਦ"</item>
-    <item msgid="2751513398307949636">"ਬਾਰਸ ਦੇ ਤੌਰ ਤੇ ਸਕ੍ਰੀਨ ਤੇ"</item>
-    <item msgid="1851438178120770973">"adb shell dumpsys gfxinfo ਵਿੱਚ"</item>
-  </string-array>
+    <!-- no translation found for track_frame_time_entries:2 (2355151170975410323) -->
   <string-array name="debug_hw_overdraw_entries">
     <item msgid="8190572633763871652">"ਬੰਦ"</item>
     <item msgid="7688197031296835369">"ਓਵਰਡ੍ਰਾ ਖੇਤਰ ਦਿਖਾਓ"</item>

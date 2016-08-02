@@ -144,11 +144,7 @@
     <item msgid="675719912558941285">"គូរ​តំបន់​កាត់​មិនមែន​រាង​ចតុកោណ​ជា​ពណ៌​ខៀវ"</item>
     <item msgid="1064373276095698656">"រំលេច​ពាក្យ​បញ្ជា​គូរ​បាន​សាកល្បង​ជា​ពណ៌​បៃតង"</item>
   </string-array>
-  <string-array name="track_frame_time_entries">
-    <item msgid="2193584639058893150">"បិទ"</item>
-    <item msgid="2751513398307949636">"លើ​អេក្រង់​ជា​របារ"</item>
-    <item msgid="1851438178120770973">"ក្នុង adb shell dumpsys gfxinfo"</item>
-  </string-array>
+    <!-- no translation found for track_frame_time_entries:2 (2355151170975410323) -->
   <string-array name="debug_hw_overdraw_entries">
     <item msgid="8190572633763871652">"បិទ"</item>
     <item msgid="7688197031296835369">"បង្ហាញ​តំបន់​​ដែល​លើស"</item>

@@ -144,11 +144,7 @@
     <item msgid="675719912558941285">"Dikdörtgen olm. kırpma bölgesini mavi çiz"</item>
     <item msgid="1064373276095698656">"Test edilmiş çizim komutlarını yeşille vurgula"</item>
   </string-array>
-  <string-array name="track_frame_time_entries">
-    <item msgid="2193584639058893150">"Kapalı"</item>
-    <item msgid="2751513398307949636">"Ekranda çubuk şeklinde"</item>
-    <item msgid="1851438178120770973">"adb shell dumpsys gfxinfo içinde"</item>
-  </string-array>
+    <!-- no translation found for track_frame_time_entries:2 (2355151170975410323) -->
   <string-array name="debug_hw_overdraw_entries">
     <item msgid="8190572633763871652">"Kapalı"</item>
     <item msgid="7688197031296835369">"Fazla çizilen alanları göster"</item>
