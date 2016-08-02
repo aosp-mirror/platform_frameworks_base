@@ -434,7 +434,11 @@ std::u16string utf8ToUtf16(const StringPiece& utf8) {
 
     std::u16string utf16;
     utf16.resize(utf16Length);
-    utf8_to_utf16(reinterpret_cast<const uint8_t*>(utf8.data()), utf8.length(), &*utf16.begin());
+    utf8_to_utf16(
+            reinterpret_cast<const uint8_t*>(utf8.data()),
+            utf8.length(),
+            &*utf16.begin(),
+            (size_t) utf16Length + 1);
     return utf16;
 }
 
