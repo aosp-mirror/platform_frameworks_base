@@ -242,6 +242,16 @@ public:
         mPausedVDAnimators.clear();
     }
 
+    // Move all the animators to the paused list, and send a delayed message to notify the finished
+    // listener.
+    void pauseAnimators() {
+        mPausedVDAnimators.insert(mRunningVDAnimators.begin(), mRunningVDAnimators.end());
+        for (auto& anim : mRunningVDAnimators) {
+            detachVectorDrawableAnimator(anim.get());
+        }
+        mRunningVDAnimators.clear();
+    }
+
     void doAttachAnimatingNodes(AnimationContext* context) {
         for (size_t i = 0; i < mPendingAnimatingRenderNodes.size(); i++) {
             RenderNode* node = mPendingAnimatingRenderNodes[i].get();
@@ -415,8 +425,8 @@ public:
         postOnFinishedEvents();
     }
 
-    virtual void detachAnimators() override {
-        mRootNode->detachAnimators();
+    virtual void pauseAnimators() override {
+        mRootNode->pauseAnimators();
     }
 
     virtual void callOnFinished(BaseRenderNodeAnimator* animator, AnimationListener* listener) {
@@ -426,7 +436,7 @@ public:
 
     virtual void destroy() {
         AnimationContext::destroy();
-        detachAnimators();
+        mRootNode->detachAnimators();
         postOnFinishedEvents();
     }
 
