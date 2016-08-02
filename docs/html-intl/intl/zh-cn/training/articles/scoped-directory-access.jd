@@ -8,8 +8,8 @@ page.tags=Android N
 
 
 
-<div id="qv-wrapper">
-<div id="qv">
+<div id="tb-wrapper">
+<div id="tb">
   <h2>本文内容</h2>
   <ol>
     <li><a href="#accessing">访问外部存储目录</a></li>

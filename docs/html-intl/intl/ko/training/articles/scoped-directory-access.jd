@@ -4,8 +4,8 @@ page.tags=androidn
 
 @jd:body
 
-<div id="qv-wrapper">
-<div id="qv">
+<div id="tb-wrapper">
+<div id="tb">
   <h2>이 문서의 내용</h2>
   <ol>
     <li><a href="#accessing">외부 저장소 디렉터리 액세스</a></li>
