@@ -21,7 +21,6 @@ import android.accounts.Account;
 import android.accounts.AuthenticatorDescription;
 import android.os.Bundle;
 
-
 /**
  * Central application service that provides account management.
  * @hide
@@ -92,7 +91,8 @@ interface IAccountManager {
     void startUpdateCredentialsSession(in IAccountManagerResponse response, in Account account,
         String authTokenType, boolean expectActivityLaunch, in Bundle options);
 
-    /* Finish session started by startAddAccountSession(...) or startUpdateCredentialsSession(...) for user */
+    /* Finish session started by startAddAccountSession(...) or startUpdateCredentialsSession(...)
+    for user */
     void finishSessionAsUser(in IAccountManagerResponse response, in Bundle sessionBundle,
         boolean expectActivityLaunch, in Bundle appInfo, int userId);
 
@@ -102,4 +102,17 @@ interface IAccountManager {
     /* Check if credentials update is suggested */
     void isCredentialsUpdateSuggested(in IAccountManagerResponse response, in Account account,
         String statusToken);
+
+    /* Allows Authenticator to view what packages or UIDs on phone have requested it. */
+    int[] getRequestingUidsForType(String accountType);
+
+    /* Allows authenticator to add an account explicitly that is only visible to
+     certain uids; the authenticator learns of these UIDs */
+    boolean addAccountExplicitlyWithUid(in Account account, String password, in Bundle extras,
+            in int[] selectedUids);
+
+    /* Controls visibility of UIDs of applications to Accounts */
+    boolean removeAccountVisibility(in Account a, in int uid);
+    boolean makeAccountVisible(in Account a, in int uid);
+    boolean isAccountVisible(in Account a, in int uid);
 }

@@ -733,6 +733,115 @@ public class AccountManager {
     }
 
     /**
+     * Adds an account directly to the AccountManager. Additionally this
+     * makes the Account visible to desired UIDs of applications on the device,
+     * and sends directed broadcasts to these individual applications.
+     * <p>Normally used by sign-up wizards associated with authenticators, not
+     *  directly by applications.
+     * <p>Calling this method does not update the last authenticated timestamp,
+     * referred by {@link #KEY_LAST_AUTHENTICATED_TIME}. To update it, call
+     * {@link #notifyAccountAuthenticated(Account)} after getting success.
+     * <p>It is safe to call this method from the main thread.
+     * <p>This method requires the caller to have a signature match with the
+     * authenticator that owns the specified account.
+     *
+     * @param account The {@link Account} to add
+     * @param password The password to associate with the account, null for none
+     * @param extras String values to use for the account's userdata, null for
+     *            none
+     * @param selectedUids Array of uids whose associated applications can access
+     * this account without any additional user approval.
+     *
+     * @return True if the account was successfully added, false if the account
+     *         already exists, the account is null, or another error occurs.
+     */
+    public boolean addAccountExplicitly(Account account, String password, Bundle extras,
+                int[] selectedUids) {
+        if (account == null) throw new IllegalArgumentException("account is null");
+        try {
+            return mService.addAccountExplicitlyWithUid(account, password, extras, selectedUids);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns all UIDs for applications that requested the account type.
+     * <p>This method requires the caller to have a signature match with the authenticator
+     * that owns the specified account.
+     *
+     * @param accountType The account type to be authenticated.
+     *
+     * @return array of all UIDs that support accounts of this
+     * account type that seek approval (to be used to know which accounts for
+     * the authenticator to include in addAccountExplicitly). Null if none.
+     */
+    public int[] getRequestingUidsForType(String accountType) {
+        try {
+            return mService.getRequestingUidsForType(accountType);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gives a certain UID, represented a application, access to an account
+     * <p>This method requires the caller to have a signature match with the authenticator
+     * that owns the specified account.
+     *
+     * @param account Account to make visible.
+     * @param uid The UID of the application to add account access.
+     *
+     * @return True if account made visible to application and was not previously visible.
+     */
+    public boolean makeAccountVisible(Account account, int uid) {
+        try {
+            return mService.makeAccountVisible(account, uid);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Removes visibility of certain account of a process identified
+     * by a given UID to an application.
+     * This is called by the Authenticator.
+     * <p>This method requires the caller to have a signature match with the authenticator
+     * that owns the specified account.
+     *
+     * @param account Remove visibility of this account..
+     * @param uid The UID of the application to remove account access.
+     *
+     * @return True if application access to account removed and was previously visible.
+     */
+    public boolean removeAccountVisibility(Account account, int uid) {
+        try {
+            return mService.removeAccountVisibility(account, uid);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Checks visibility of certain account of a process identified
+     * by a given UID. This is called by the Authenticator.
+     * <p>This method requires the caller to have a signature match with the authenticator
+     * that owns the specified account.
+     *
+     * @param account Account to check visibility.
+     * @param uid The UID of the application to check account access.
+     *
+     * @return True if application has access to the account
+     */
+    public boolean isAccountVisible(Account account, int uid) {
+        try {
+            return mService.isAccountVisible(account, uid);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Notifies the system that the account has just been authenticated. This
      * information may be used by other applications to verify the account. This
      * should be called only when the user has entered correct credentials for
