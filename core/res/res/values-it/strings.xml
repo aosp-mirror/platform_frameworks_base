@@ -310,7 +310,7 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Consente all\'applicazione di abilitare la modalità automobile."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"chiusura altre applicazioni"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Consente all\'applicazione di terminare i processi in background di altre applicazioni. Ciò potrebbe causare l\'interruzione di altre applicazioni."</string>
-    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"posizionamento davanti ad altre app"</string>
+    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"visualizzazione sopra altre app"</string>
     <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Consente all\'applicazione di spostarsi sopra ad altre applicazioni o parti dell\'interfaccia utente. Potrebbe interferire con il tuo utilizzo dell\'interfaccia in qualsiasi applicazione o cambiare ciò che credi di vedere in altre applicazioni."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"esecuzione permanente delle applicazioni"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Consente all\'applicazione di rendere persistenti in memoria alcune sue parti. Ciò può limitare la memoria disponibile per altre applicazioni, rallentando il tablet."</string>
@@ -678,6 +678,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Corretta."</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Riprova"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Riprova"</string>
+    <string name="lockscreen_storage_locked" msgid="9167551160010625200">"Sblocca per accedere a funzioni e dati"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Numero massimo di tentativi di Sblocco col sorriso superato"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Nessuna scheda SIM"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Nessuna scheda SIM presente nel tablet."</string>
@@ -1022,7 +1023,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Aggiornamento di Android..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Avvio di Android…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Ottimizzazione archiviazione."</string>
-    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Aggiornamento di Android in corso"</string>
+    <!-- no translation found for android_upgrading_notification_title (8428357096969413169) -->
+    <skip />
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Alcune app potrebbero non funzionare correttamente fino al completamento dell\'upgrade"</string>
     <string name="app_upgrading_toast" msgid="3008139776215597053">"Upgrade dell\'app <xliff:g id="APPLICATION">%1$s</xliff:g>…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Ottimizzazione applicazione <xliff:g id="NUMBER_0">%1$d</xliff:g> di <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
