@@ -46,6 +46,7 @@ import android.service.vr.IVrListener;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
 import android.service.vr.VrListenerService;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -643,7 +644,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
 
         for (String c : current) {
             ComponentName component = ComponentName.unflattenFromString(c);
-            if (component.getPackageName().equals(pkg)) {
+            if (component != null && component.getPackageName().equals(pkg)) {
                 toRemove.add(c);
             }
         }
@@ -671,7 +672,9 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         if (flat != null) {
             String[] allowed = flat.split(":");
             for (String s : allowed) {
-                current.add(s);
+                if (!TextUtils.isEmpty(s)) {
+                    current.add(s);
+                }
             }
         }
         return current;
