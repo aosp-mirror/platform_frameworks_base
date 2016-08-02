@@ -164,6 +164,7 @@ public class TaskViewThumbnail extends View {
     /** Sets the thumbnail to a given bitmap. */
     void setThumbnail(Bitmap bm, ActivityManager.TaskThumbnailInfo thumbnailInfo) {
         if (bm != null) {
+            bm.prepareToDraw();
             mBitmapShader = new BitmapShader(bm, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
             mDrawPaint.setShader(mBitmapShader);
             mThumbnailRect.set(0, 0, bm.getWidth(), bm.getHeight());

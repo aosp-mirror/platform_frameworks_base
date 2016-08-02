@@ -18,6 +18,7 @@
 #include "CreateJavaOutputStreamAdaptor.h"
 #include <Caches.h>
 #include <hwui/Paint.h>
+#include <renderthread/RenderProxy.h>
 
 #include "core_jni_helpers.h"
 
@@ -1361,6 +1362,14 @@ static jlong Bitmap_refPixelRef(JNIEnv* env, jobject, jlong bitmapHandle) {
     return reinterpret_cast<jlong>(pixelRef);
 }
 
+static void Bitmap_prepareToDraw(JNIEnv* env, jobject, jlong bitmapPtr) {
+    LocalScopedBitmap bitmapHandle(bitmapPtr);
+    if (!bitmapHandle.valid()) return;
+    SkBitmap bitmap;
+    bitmapHandle->getSkBitmap(&bitmap);
+    android::uirenderer::renderthread::RenderProxy::prepareToDraw(bitmap);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static const JNINativeMethod gBitmapMethods[] = {
@@ -1404,6 +1413,7 @@ static const JNINativeMethod gBitmapMethods[] = {
                                             (void*)Bitmap_copyPixelsFromBuffer },
     {   "nativeSameAs",             "(JJ)Z", (void*)Bitmap_sameAs },
     {   "nativeRefPixelRef",        "(J)J", (void*)Bitmap_refPixelRef },
+    {   "nativePrepareToDraw",      "(J)V", (void*)Bitmap_prepareToDraw },
 };
 
 int register_android_graphics_Bitmap(JNIEnv* env)
