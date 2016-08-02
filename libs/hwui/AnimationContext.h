@@ -100,7 +100,7 @@ public:
 
     ANDROID_API virtual void destroy();
 
-    ANDROID_API virtual void detachAnimators() {}
+    ANDROID_API virtual void pauseAnimators() {}
 
 private:
     friend class AnimationHandle;
