@@ -47,6 +47,7 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -60,10 +61,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  *     - Rewrite using Handler (and friends) so that AlarmManager can deliver
  *       "kick" messages when it's time to send a multicast RA.
- *
- *     - Support transmitting MAX_URGENT_RTR_ADVERTISEMENTS number of empty
- *       RAs with zero default router lifetime when transitioning from an
- *       advertising state to a non-advertising state.
  *
  * @hide
  */
@@ -112,8 +109,7 @@ public class RouterAdvertisementDaemon {
     @GuardedBy("mLock")
     private int mRaLength;
     @GuardedBy("mLock")
-    private final HashMap<IpPrefix, Integer> mDeprecatedPrefixes;
-
+    private final DeprecatedInfoTracker mDeprecatedInfoTracker;
     @GuardedBy("mLock")
     private RaParams mRaParams;
 
@@ -140,6 +136,88 @@ public class RouterAdvertisementDaemon {
             prefixes = (HashSet) other.prefixes.clone();
             dnses = (HashSet) other.dnses.clone();
         }
+
+        // Returns the subset of RA parameters that become deprecated when
+        // moving from announcing oldRa to announcing newRa.
+        //
+        // Currently only tracks differences in |prefixes| and |dnses|.
+        public static RaParams getDeprecatedRaParams(RaParams oldRa, RaParams newRa) {
+            RaParams newlyDeprecated = new RaParams();
+
+            if (oldRa != null) {
+                for (IpPrefix ipp : oldRa.prefixes) {
+                    if (newRa == null || !newRa.prefixes.contains(ipp)) {
+                        newlyDeprecated.prefixes.add(ipp);
+                    }
+                }
+
+                for (Inet6Address dns : oldRa.dnses) {
+                    if (newRa == null || !newRa.dnses.contains(dns)) {
+                        newlyDeprecated.dnses.add(dns);
+                    }
+                }
+            }
+
+            return newlyDeprecated;
+        }
+    }
+
+    private static class DeprecatedInfoTracker {
+        private final HashMap<IpPrefix, Integer> mPrefixes = new HashMap<>();
+        private final HashMap<Inet6Address, Integer> mDnses = new HashMap<>();
+
+        Set<IpPrefix> getPrefixes() { return mPrefixes.keySet(); }
+
+        void putPrefixes(Set<IpPrefix> prefixes) {
+            for (IpPrefix ipp : prefixes) {
+                mPrefixes.put(ipp, MAX_URGENT_RTR_ADVERTISEMENTS);
+            }
+        }
+
+        void removePrefixes(Set<IpPrefix> prefixes) {
+            for (IpPrefix ipp : prefixes) {
+                mPrefixes.remove(ipp);
+            }
+        }
+
+        Set<Inet6Address> getDnses() { return mDnses.keySet(); }
+
+        void putDnses(Set<Inet6Address> dnses) {
+            for (Inet6Address dns : dnses) {
+                mDnses.put(dns, MAX_URGENT_RTR_ADVERTISEMENTS);
+            }
+        }
+
+        void removeDnses(Set<Inet6Address> dnses) {
+            for (Inet6Address dns : dnses) {
+                mDnses.remove(dns);
+            }
+        }
+
+        boolean isEmpty() { return mPrefixes.isEmpty() && mDnses.isEmpty(); }
+
+        private boolean decrementCounters() {
+            boolean removed = decrementCounter(mPrefixes);
+            removed |= decrementCounter(mDnses);
+            return removed;
+        }
+
+        private <T> boolean decrementCounter(HashMap<T, Integer> map) {
+            boolean removed = false;
+
+            for (Iterator<Map.Entry<T, Integer>> it = map.entrySet().iterator();
+                 it.hasNext();) {
+                Map.Entry<T, Integer> kv = it.next();
+                if (kv.getValue() == 0) {
+                    it.remove();
+                    removed = true;
+                } else {
+                    kv.setValue(kv.getValue() - 1);
+                }
+            }
+
+            return removed;
+        }
     }
 
 
@@ -148,29 +226,24 @@ public class RouterAdvertisementDaemon {
         mIfIndex = ifindex;
         mHwAddr = hwaddr;
         mAllNodes = new InetSocketAddress(getAllNodesForScopeId(mIfIndex), 0);
-        mDeprecatedPrefixes = new HashMap<>();
+        mDeprecatedInfoTracker = new DeprecatedInfoTracker();
     }
 
-    public void buildNewRa(RaParams params, HashSet<IpPrefix> newlyDeprecated) {
-        if (newlyDeprecated != null) {
-            synchronized (mLock) {
-                for (IpPrefix ipp : newlyDeprecated) {
-                    mDeprecatedPrefixes.put(ipp, MAX_URGENT_RTR_ADVERTISEMENTS);
-                }
-            }
-        }
-
-        // TODO: Send MAX_URGENT_RTR_ADVERTISEMENTS zero router lifetime RAs,
-        // iff. we have already sent an RA.
-        if (params == null || params.prefixes.isEmpty()) {
-            // No RA to be served at this time.
-            clearRa();
-            return;
-        }
-
+    public void buildNewRa(RaParams deprecatedParams, RaParams newParams) {
         synchronized (mLock) {
-            mRaParams = params;
-            assembleRa();
+            if (deprecatedParams != null) {
+                mDeprecatedInfoTracker.putPrefixes(deprecatedParams.prefixes);
+                mDeprecatedInfoTracker.putDnses(deprecatedParams.dnses);
+            }
+
+            if (newParams != null) {
+                // Process information that is no longer deprecated.
+                mDeprecatedInfoTracker.removePrefixes(newParams.prefixes);
+                mDeprecatedInfoTracker.removeDnses(newParams.dnses);
+            }
+
+            mRaParams = newParams;
+            assembleRaLocked();
         }
 
         maybeNotifyMulticastTransmitter();
@@ -196,73 +269,64 @@ public class RouterAdvertisementDaemon {
         mUnicastResponder = null;
     }
 
-    private void clearRa() {
-        boolean notifySocket;
-        synchronized (mLock) {
-            notifySocket = (mRaLength != 0);
-            mRaLength = 0;
-        }
-        if (notifySocket) {
-            maybeNotifyMulticastTransmitter();
-        }
-    }
-
-    private void assembleRa() {
+    private void assembleRaLocked() {
         final ByteBuffer ra = ByteBuffer.wrap(mRA);
         ra.order(ByteOrder.BIG_ENDIAN);
 
-        synchronized (mLock) {
-            try {
-                putHeader(ra, mRaParams.hasDefaultRoute);
+        boolean shouldSendRA = false;
 
-                putSlla(ra, mHwAddr);
+        try {
+            putHeader(ra, mRaParams != null && mRaParams.hasDefaultRoute);
+            putSlla(ra, mHwAddr);
+            mRaLength = ra.position();
 
-                // https://tools.ietf.org/html/rfc5175#section-4 says:
-                //
-                //     "MUST NOT be added to a Router Advertisement message
-                //      if no flags in the option are set."
-                //
-                // putExpandedFlagsOption(ra);
+            // https://tools.ietf.org/html/rfc5175#section-4 says:
+            //
+            //     "MUST NOT be added to a Router Advertisement message
+            //      if no flags in the option are set."
+            //
+            // putExpandedFlagsOption(ra);
 
+            if (mRaParams != null) {
                 putMtu(ra, mRaParams.mtu);
+                mRaLength = ra.position();
 
                 for (IpPrefix ipp : mRaParams.prefixes) {
                     putPio(ra, ipp, DEFAULT_LIFETIME, DEFAULT_LIFETIME);
-                    mDeprecatedPrefixes.remove(ipp);
-                }
-
-                for (IpPrefix ipp : mDeprecatedPrefixes.keySet()) {
-                    putPio(ra, ipp, 0, 0);
+                    mRaLength = ra.position();
+                    shouldSendRA = true;
                 }
 
                 if (mRaParams.dnses.size() > 0) {
-                    putRdnss(ra, mRaParams.dnses);
+                    putRdnss(ra, mRaParams.dnses, DEFAULT_LIFETIME);
+                    mRaLength = ra.position();
+                    shouldSendRA = true;
                 }
+            }
 
+            for (IpPrefix ipp : mDeprecatedInfoTracker.getPrefixes()) {
+                putPio(ra, ipp, 0, 0);
                 mRaLength = ra.position();
-            } catch (BufferOverflowException e) {
-                Log.e(TAG, "Could not construct new RA: " + e);
-                mRaLength = 0;
-                return;
+                shouldSendRA = true;
             }
-        }
-    }
 
-    private int decrementDeprecatedPrefixes() {
-        int removed = 0;
-
-        synchronized (mLock) {
-            for (Map.Entry<IpPrefix, Integer> kv : mDeprecatedPrefixes.entrySet()) {
-                if (kv.getValue() == 0) {
-                    mDeprecatedPrefixes.remove(kv.getKey());
-                    removed++;
-                } else {
-                    kv.setValue(kv.getValue() - 1);
-                }
+            final Set<Inet6Address> deprecatedDnses = mDeprecatedInfoTracker.getDnses();
+            if (!deprecatedDnses.isEmpty()) {
+                putRdnss(ra, deprecatedDnses, 0);
+                mRaLength = ra.position();
+                shouldSendRA = true;
             }
+        } catch (BufferOverflowException e) {
+            // The packet up to mRaLength  is valid, since it has been updated
+            // progressively as the RA was built. Log an error, and continue
+            // on as best as possible.
+            Log.e(TAG, "Could not construct new RA: " + e);
         }
 
-        return removed;
+        // We have nothing worth announcing; indicate as much to maybeSendRA().
+        if (!shouldSendRA) {
+            mRaLength = 0;
+        }
     }
 
     private void maybeNotifyMulticastTransmitter() {
@@ -461,7 +525,7 @@ public class RouterAdvertisementDaemon {
         }
     }
 
-    private static void putRdnss(ByteBuffer ra, Set<Inet6Address> dnses) {
+    private static void putRdnss(ByteBuffer ra, Set<Inet6Address> dnses, int lifetime) {
         /**
             Recursive DNS Server (RDNSS) Option
 
@@ -483,9 +547,15 @@ public class RouterAdvertisementDaemon {
         ra.put(ND_OPTION_RDNSS)
           .put(RDNSS_NUM_8OCTETS)
           .putShort(asShort(0))
-          .putInt(DEFAULT_LIFETIME);
+          .putInt(lifetime);
 
         for (Inet6Address dns : dnses) {
+            // NOTE: If the full of list DNS servers doesn't fit in the packet,
+            // this code will cause a buffer overflow and the RA won't include
+            // include this instance of the option at all.
+            //
+            // TODO: Consider looking at ra.remaining() to determine how many
+            // DNS servers will fit, and adding only those.
             ra.put(dns.getAddress());
         }
     }
@@ -601,10 +671,12 @@ public class RouterAdvertisementDaemon {
                 }
 
                 maybeSendRA(mAllNodes);
-                if (decrementDeprecatedPrefixes() > 0) {
-                    // At least one deprecated PIO has been removed;
-                    // reassemble the RA.
-                    assembleRa();
+                synchronized (mLock) {
+                    if (mDeprecatedInfoTracker.decrementCounters()) {
+                        // At least one deprecated PIO has been removed;
+                        // reassemble the RA.
+                        assembleRaLocked();
+                    }
                 }
             }
         }
@@ -619,17 +691,17 @@ public class RouterAdvertisementDaemon {
         }
 
         private int getNextMulticastTransmitDelaySec() {
-            int countDeprecatedPrefixes = 0;
+            boolean deprecationInProgress = false;
             synchronized (mLock) {
                 if (mRaLength < MIN_RA_HEADER_SIZE) {
                     // No actual RA to send; just sleep for 1 day.
                     return DAY_IN_SECONDS;
                 }
-                countDeprecatedPrefixes = mDeprecatedPrefixes.size();
+                deprecationInProgress = !mDeprecatedInfoTracker.isEmpty();
             }
 
             final int urgentPending = mUrgentAnnouncements.getAndDecrement();
-            if (urgentPending > 0 || countDeprecatedPrefixes > 0) {
+            if ((urgentPending > 0) || deprecationInProgress) {
                 return MIN_DELAY_BETWEEN_RAS_SEC;
             }
 

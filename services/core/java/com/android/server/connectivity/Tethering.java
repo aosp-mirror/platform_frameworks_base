@@ -1392,6 +1392,8 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
 
                     for (Integer netType : mUpstreamIfaceTypes) {
                         NetworkInfo info = cm.getNetworkInfo(netType.intValue());
+                        // TODO: if the network is suspended we should consider
+                        // that to be the same as connected here.
                         if ((info != null) && info.isConnected()) {
                             upType = netType.intValue();
                             break;
@@ -1465,6 +1467,10 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                     // it immediately, because there likely will be no second
                     // EVENT_ON_AVAILABLE (it was already received).
                     handleNewUpstreamNetworkState(ns);
+                } else if (mCurrentUpstreamIface == null) {
+                    // There are no available upstream networks, or none that
+                    // have an IPv4 default route (current metric for success).
+                    handleNewUpstreamNetworkState(null);
                 }
             }
 
@@ -1639,6 +1645,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                 chooseUpstreamType(mTryCell);
                 mTryCell = !mTryCell;
             }
+
             @Override
             public void exit() {
                 // TODO: examine if we should check the return value.
@@ -1646,7 +1653,9 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                 mUpstreamNetworkMonitor.stop();
                 stopListeningForSimChanges();
                 notifyTetheredOfNewUpstreamIface(null);
+                handleNewUpstreamNetworkState(null);
             }
+
             @Override
             public boolean processMessage(Message message) {
                 maybeLogMessage(this, message.what);
@@ -1734,6 +1743,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                                 // reevaluation is triggered via received CONNECTIVITY_ACTION
                                 // broadcasts that result in being passed a
                                 // TetherMasterSM.CMD_UPSTREAM_CHANGED.
+                                handleNewUpstreamNetworkState(null);
                                 break;
                             default:
                                 break;
