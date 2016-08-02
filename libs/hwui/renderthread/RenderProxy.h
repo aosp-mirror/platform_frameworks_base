@@ -129,6 +129,7 @@ public:
     ANDROID_API long getDroppedFrameReportCount();
 
     ANDROID_API static int copySurfaceInto(sp<Surface>& surface, SkBitmap* bitmap);
+    ANDROID_API static void prepareToDraw(const SkBitmap& bitmap);
 
 private:
     RenderThread& mRenderThread;
