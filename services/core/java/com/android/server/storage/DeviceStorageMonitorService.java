@@ -330,7 +330,8 @@ public class DeviceStorageMonitorService extends SystemService {
         mLastReportedFreeMemTime = 0;
         mResolver = context.getContentResolver();
         mIsBootImageOnDisk = isBootImageOnDisk();
-        //create StatFs object
+        // If these constructors throw IllegalArgumentException, something
+        // is so seriously wrong that we just let the Exception propagate.
         mDataFileStats = new StatFs(DATA_PATH.getAbsolutePath());
         mSystemFileStats = new StatFs(SYSTEM_PATH.getAbsolutePath());
         mCacheFileStats = new StatFs(CACHE_PATH.getAbsolutePath());
