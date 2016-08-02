@@ -165,7 +165,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     boolean mPolicyVisibility = true;
     boolean mPolicyVisibilityAfterAnim = true;
     boolean mAppOpVisibility = true;
-    boolean mPermanentlyHidden;
     boolean mAppFreezing;
     boolean mAttachedHidden;    // is our parent window hidden?
     boolean mWallpaperVisible;  // for wallpaper, what was last vis report?
@@ -1874,11 +1873,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             // Being hidden due to app op request.
             return false;
         }
-        if (mPermanentlyHidden) {
-            // Permanently hidden until the app exists as apps aren't prepared
-            // to handle their windows being removed from under them.
-            return false;
-        }
         if (mPolicyVisibility && mPolicyVisibilityAfterAnim) {
             // Already showing.
             return false;
@@ -1966,13 +1960,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             } else {
                 hideLw(true, true);
             }
-        }
-    }
-
-    public void markPermanentlyHiddenLw() {
-        if (!mPermanentlyHidden) {
-            mPermanentlyHidden = true;
-            hideLw(true, true);
         }
     }
 
@@ -2625,7 +2612,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             pw.println(Integer.toHexString(mSystemUiVisibility));
         }
         if (!mPolicyVisibility || !mPolicyVisibilityAfterAnim || !mAppOpVisibility
-                || mAttachedHidden || mPermanentlyHidden) {
+                || mAttachedHidden) {
             pw.print(prefix); pw.print("mPolicyVisibility=");
                     pw.print(mPolicyVisibility);
                     pw.print(" mPolicyVisibilityAfterAnim=");
@@ -2633,7 +2620,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     pw.print(" mAppOpVisibility=");
                     pw.print(mAppOpVisibility);
                     pw.print(" mAttachedHidden="); pw.println(mAttachedHidden);
-                    pw.print(" mPermanentlyHidden="); pw.println(mPermanentlyHidden);
         }
         if (!mRelayoutCalled || mLayoutNeeded) {
             pw.print(prefix); pw.print("mRelayoutCalled="); pw.print(mRelayoutCalled);

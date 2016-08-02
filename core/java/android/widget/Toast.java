@@ -25,8 +25,6 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.os.Handler;
-import android.os.IBinder;
-import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
@@ -328,6 +326,13 @@ public class Toast {
     }
 
     private static class TN extends ITransientNotification.Stub {
+        final Runnable mShow = new Runnable() {
+            @Override
+            public void run() {
+                handleShow();
+            }
+        };
+
         final Runnable mHide = new Runnable() {
             @Override
             public void run() {
@@ -338,13 +343,7 @@ public class Toast {
         };
 
         private final WindowManager.LayoutParams mParams = new WindowManager.LayoutParams();
-        final Handler mHandler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                IBinder token = (IBinder) msg.obj;
-                handleShow(token);
-            }
-        };
+        final Handler mHandler = new Handler();
 
         int mGravity;
         int mX, mY;
@@ -380,9 +379,9 @@ public class Toast {
          * schedule handleShow into the right thread
          */
         @Override
-        public void show(IBinder windowToken) {
+        public void show() {
             if (localLOGV) Log.v(TAG, "SHOW: " + this);
-            mHandler.obtainMessage(0, windowToken).sendToTarget();
+            mHandler.post(mShow);
         }
 
         /**
@@ -394,7 +393,7 @@ public class Toast {
             mHandler.post(mHide);
         }
 
-        public void handleShow(IBinder windowToken) {
+        public void handleShow() {
             if (localLOGV) Log.v(TAG, "HANDLE SHOW: " + this + " mView=" + mView
                     + " mNextView=" + mNextView);
             if (mView != mNextView) {
@@ -423,9 +422,8 @@ public class Toast {
                 mParams.verticalMargin = mVerticalMargin;
                 mParams.horizontalMargin = mHorizontalMargin;
                 mParams.packageName = packageName;
-                mParams.hideTimeoutMilliseconds = mDuration ==
+                mParams.removeTimeoutMilliseconds = mDuration ==
                     Toast.LENGTH_LONG ? LONG_DURATION_TIMEOUT : SHORT_DURATION_TIMEOUT;
-                mParams.token = windowToken;
                 if (mView.getParent() != null) {
                     if (localLOGV) Log.v(TAG, "REMOVE! " + mView + " in " + this);
                     mWM.removeView(mView);

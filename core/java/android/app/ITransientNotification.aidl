@@ -19,7 +19,7 @@ package android.app;
 
 /** @hide */
 oneway interface ITransientNotification {
-    void show(IBinder windowToken);
+    void show();
     void hide();
 }
 
