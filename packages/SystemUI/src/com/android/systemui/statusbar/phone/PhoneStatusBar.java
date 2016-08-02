@@ -2628,12 +2628,16 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (!mUserSetup) return;
 
         if (KeyEvent.KEYCODE_SYSTEM_NAVIGATION_UP == key) {
+            MetricsLogger.action(mContext, MetricsEvent.ACTION_SYSTEM_NAVIGATION_KEY_UP);
             mNotificationPanel.collapse(false /* delayed */, 1.0f /* speedUpFactor */);
         } else if (KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN == key) {
+            MetricsLogger.action(mContext, MetricsEvent.ACTION_SYSTEM_NAVIGATION_KEY_DOWN);
             if (mNotificationPanel.isFullyCollapsed()) {
                 mNotificationPanel.expand(true /* animate */);
+                MetricsLogger.count(mContext, NotificationPanelView.COUNTER_PANEL_OPEN, 1);
             } else if (!mNotificationPanel.isInSettings() && !mNotificationPanel.isExpanding()){
                 mNotificationPanel.flingSettings(0 /* velocity */, true /* expand */);
+                MetricsLogger.count(mContext, NotificationPanelView.COUNTER_PANEL_OPEN_QS, 1);
             }
         }
 
