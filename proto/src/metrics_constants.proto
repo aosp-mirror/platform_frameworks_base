@@ -2256,6 +2256,10 @@ message MetricsEvent {
     // Package: Package of print service
     ACTION_PRINT_RECOMMENDED_SERVICE_INSTALL = 512;
 
+    // OPEN: Settings > Display -> Ambient Display
+    // CATEGORY: SETTINGS
+    ACTION_AMBIENT_DISPLAY = 513;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
