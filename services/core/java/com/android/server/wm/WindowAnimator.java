@@ -624,7 +624,7 @@ public class WindowAnimator {
                         // windows shown...  what to do, what to do?
                         if (appAnimator.freezingScreen) {
                             appAnimator.showAllWindowsLocked();
-                            mService.unsetAppFreezingScreenLocked(wtoken, false, true);
+                            wtoken.stopFreezingScreen(false, true);
                             if (DEBUG_ORIENTATION) Slog.i(TAG,
                                     "Setting mOrientationChangeComplete=true because wtoken "
                                     + wtoken + " numInteresting=" + wtoken.numInterestingWindows
@@ -800,21 +800,23 @@ public class WindowAnimator {
     }
 
     private void removeReplacedWindowsLocked() {
-        if (SHOW_TRANSACTIONS) Slog.i(
-                TAG, ">>> OPEN TRANSACTION removeReplacedWindows");
+        if (SHOW_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION removeReplacedWindows");
         SurfaceControl.openTransaction();
         try {
             for (int i = mService.mDisplayContents.size() - 1; i >= 0; i--) {
                 DisplayContent display = mService.mDisplayContents.valueAt(i);
                 final WindowList windows = mService.getWindowListLocked(display.getDisplayId());
                 for (int j = windows.size() - 1; j >= 0; j--) {
-                    windows.get(j).maybeRemoveReplacedWindow();
+                    final WindowState win = windows.get(j);
+                    final AppWindowToken aToken = win.mAppToken;
+                    if (aToken != null) {
+                        aToken.removeReplacedWindowIfNeeded(win);
+                    }
                 }
             }
         } finally {
             SurfaceControl.closeTransaction();
-            if (SHOW_TRANSACTIONS) Slog.i(
-                    TAG, "<<< CLOSE TRANSACTION removeReplacedWindows");
+            if (SHOW_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION removeReplacedWindows");
         }
         mRemoveReplacedWindows = false;
     }
@@ -903,19 +905,9 @@ public class WindowAnimator {
         }
     }
 
-    void setAppLayoutChanges(final AppWindowAnimator appAnimator, final int changes, String reason,
-            final int displayId) {
-        WindowList windows = appAnimator.mAppToken.allAppWindows;
-        for (int i = windows.size() - 1; i >= 0; i--) {
-            if (displayId == windows.get(i).getDisplayId()) {
-                setPendingLayoutChanges(displayId, changes);
-                if (DEBUG_LAYOUT_REPEATS) {
-                    mWindowPlacerLocked.debugLayoutRepeats(reason,
-                            getPendingLayoutChanges(displayId));
-                }
-                break;
-            }
-        }
+    void setAppLayoutChanges(
+            AppWindowAnimator appAnimator, int changes, String reason, int displayId) {
+        appAnimator.mAppToken.setAppLayoutChanges(changes, reason, displayId);
     }
 
     private DisplayContentsAnimator getDisplayContentsAnimatorLocked(int displayId) {

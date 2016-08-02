@@ -148,13 +148,19 @@ class WindowToken {
         }
     }
 
-    void adjustAnimLayer(int adj) {
+    int adjustAnimLayer(int adj) {
+        int highestAnimLayer = -1;
         for (int j = windows.size() - 1; j >= 0; j--) {
             final WindowState w = windows.get(j);
             w.adjustAnimLayer(adj);
-            if (DEBUG_LAYERS || DEBUG_WALLPAPER) Slog.v(TAG, "adjustAnimLayer win "
-                    + w + " anim layer: " + w.mWinAnimator.mAnimLayer);
+            final int animLayer = w.mWinAnimator.mAnimLayer;
+            if (DEBUG_LAYERS || DEBUG_WALLPAPER) Slog.v(TAG,
+                    "adjustAnimLayer win " + w + " anim layer: " + animLayer);
+            if (animLayer > highestAnimLayer) {
+                highestAnimLayer = animLayer;
+            }
         }
+        return highestAnimLayer;
     }
 
     private WindowState getTopWindow() {
@@ -274,7 +280,7 @@ class WindowToken {
         }
 
         final AppWindowToken appToken = win.mAppToken;
-        if (appToken != null && !appToken.allAppWindows.contains(win)) {
+        if (appToken != null) {
             appToken.addWindow(win);
         }
     }

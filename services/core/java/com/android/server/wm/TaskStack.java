@@ -477,15 +477,9 @@ public class TaskStack implements DimLayer.DimLayerUser,
 
     boolean isAnimating() {
         for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
-            final ArrayList<AppWindowToken> activities = mTasks.get(taskNdx).mAppTokens;
-            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-                final ArrayList<WindowState> windows = activities.get(activityNdx).allAppWindows;
-                for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
-                    final WindowStateAnimator winAnimator = windows.get(winNdx).mWinAnimator;
-                    if (winAnimator.isAnimationSet() || winAnimator.mWin.mAnimatingExit) {
-                        return true;
-                    }
-                }
+            final Task task = mTasks.get(taskNdx);
+            if (task.isAnimating()) {
+                return true;
             }
         }
         return false;
@@ -532,12 +526,11 @@ public class TaskStack implements DimLayer.DimLayerUser,
         }
 
         if (StackId.windowsAreScaleable(mStackId)) {
-            // We force windows out of SCALING_MODE_FREEZE
-            // so that we can continue to animate them
+            // We force windows out of SCALING_MODE_FREEZE so that we can continue to animate them
             // while a resize is pending.
-            forceWindowsScaleable(task, true);
+            task.forceWindowsScaleable(true);
         } else {
-            forceWindowsScaleable(task, false);
+            task.forceWindowsScaleable(false);
         }
         EventLog.writeEvent(EventLogTags.WM_TASK_MOVED, task.mTaskId, toTop ? 1 : 0, position);
     }
@@ -773,21 +766,8 @@ public class TaskStack implements DimLayer.DimLayerUser,
     void detachDisplay() {
         EventLog.writeEvent(EventLogTags.WM_STACK_REMOVED, mStackId);
 
-        boolean doAnotherLayoutPass = false;
         for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
-            final AppTokenList appWindowTokens = mTasks.get(taskNdx).mAppTokens;
-            for (int appNdx = appWindowTokens.size() - 1; appNdx >= 0; --appNdx) {
-                final WindowList appWindows = appWindowTokens.get(appNdx).allAppWindows;
-                for (int winNdx = appWindows.size() - 1; winNdx >= 0; --winNdx) {
-                    // We are in the middle of changing the state of displays/stacks/tasks. We need
-                    // to finish that, before we let layout interfere with it.
-                    mService.removeWindowLocked(appWindows.get(winNdx));
-                    doAnotherLayoutPass = true;
-                }
-            }
-        }
-        if (doAnotherLayoutPass) {
-            mService.mWindowPlacerLocked.requestTraversal();
+            mTasks.get(taskNdx).detachDisplay();
         }
 
         close();
@@ -922,7 +902,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
             final Task task = mTasks.get(j);
             if (task.isVisibleForUser()) {
                 task.setDragResizing(true, DRAG_RESIZE_MODE_DOCKED_DIVIDER);
-                task.addWindowsWaitingForDrawnIfResizingChanged();
+                task.setWaitingForDrawnIfResizingChanged();
             }
         }
     }
@@ -1288,25 +1268,6 @@ public class TaskStack implements DimLayer.DimLayerUser,
             // I don't believe you.
         }
         return true;
-    }
-
-    void forceWindowsScaleable(Task task, boolean force) {
-        SurfaceControl.openTransaction();
-        try {
-            final ArrayList<AppWindowToken> activities = task.mAppTokens;
-            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-                final ArrayList<WindowState> windows = activities.get(activityNdx).allAppWindows;
-                for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
-                    final WindowStateAnimator winAnimator = windows.get(winNdx).mWinAnimator;
-                    if (winAnimator == null || !winAnimator.hasSurface()) {
-                        continue;
-                    }
-                    winAnimator.mSurfaceController.forceScaleableInTransaction(force);
-                }
-            }
-        } finally {
-            SurfaceControl.closeTransaction();
-        }
     }
 
     @Override  // AnimatesBounds

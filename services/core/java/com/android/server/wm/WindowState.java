@@ -25,6 +25,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.os.Binder;
 import android.os.Debug;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -97,6 +98,8 @@ import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+import static android.view.WindowManagerPolicy.TRANSIT_EXIT;
+import static android.view.WindowManagerPolicy.TRANSIT_PREVIEW_DONE;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_FREEFORM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
@@ -117,8 +120,12 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIG
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.WindowManagerService.H.SEND_NEW_CONFIGURATION;
 import static com.android.server.wm.WindowManagerService.TYPE_LAYER_MULTIPLIER;
 import static com.android.server.wm.WindowManagerService.TYPE_LAYER_OFFSET;
+import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
+import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
+import static com.android.server.wm.WindowManagerService.localLOGV;
 import static com.android.server.wm.WindowStateAnimator.COMMIT_DRAW_PENDING;
 import static com.android.server.wm.WindowStateAnimator.HAS_DRAWN;
 import static com.android.server.wm.WindowStateAnimator.READY_TO_SHOW;
@@ -570,7 +577,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         DeathRecipient deathRecipient = new DeathRecipient();
         mSeq = seq;
         mEnforceSizeCompat = (mAttrs.privateFlags & PRIVATE_FLAG_COMPATIBLE_WINDOW) != 0;
-        if (WindowManagerService.localLOGV) Slog.v(
+        if (localLOGV) Slog.v(
             TAG, "Window " + this + " client=" + c.asBinder()
             + " token=" + token + " (" + mAttrs.token + ")" + " params=" + a);
         try {
@@ -658,7 +665,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
     }
 
     void attach() {
-        if (WindowManagerService.localLOGV) Slog.v(TAG, "Attaching " + this + " token=" + mToken);
+        if (localLOGV) Slog.v(TAG, "Attaching " + this + " token=" + mToken);
         mSession.windowAddedLocked();
     }
 
@@ -943,7 +950,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
             }
         }
 
-        if (DEBUG_LAYOUT || WindowManagerService.localLOGV) Slog.v(TAG,
+        if (DEBUG_LAYOUT || localLOGV) Slog.v(TAG,
                 "Resolving (mRequestedWidth="
                 + mRequestedWidth + ", mRequestedheight="
                 + mRequestedHeight + ") to" + " (pw=" + pw + ", ph=" + ph
@@ -1489,6 +1496,154 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         mService.postWindowRemoveCleanupLocked(this);
     }
 
+    void removeIfPossible(boolean keepVisibleDeadWindow) {
+        mWindowRemovalAllowed = true;
+        if (DEBUG_ADD_REMOVE) Slog.v(TAG,
+                "removeIfPossible: " + this + " callers=" + Debug.getCallers(5));
+
+        final boolean startingWindow = mAttrs.type == TYPE_APPLICATION_STARTING;
+        if (startingWindow && DEBUG_STARTING_WINDOW) Slog.d(TAG_WM,
+                "Starting window removed " + this);
+
+        if (localLOGV || DEBUG_FOCUS || DEBUG_FOCUS_LIGHT && this == mService.mCurrentFocus)
+            Slog.v(TAG_WM, "Remove " + this + " client="
+                        + Integer.toHexString(System.identityHashCode(mClient.asBinder()))
+                        + ", surfaceController=" + mWinAnimator.mSurfaceController + " Callers="
+                        + Debug.getCallers(5));
+
+        final long origId = Binder.clearCallingIdentity();
+
+        disposeInputChannel();
+
+        if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM, "Remove " + this
+                + ": mSurfaceController=" + mWinAnimator.mSurfaceController
+                + " mAnimatingExit=" + mAnimatingExit
+                + " mRemoveOnExit=" + mRemoveOnExit
+                + " mHasSurface=" + mHasSurface
+                + " surfaceShowing=" + mWinAnimator.getShown()
+                + " isAnimationSet=" + mWinAnimator.isAnimationSet()
+                + " app-animation="
+                + (mAppToken != null ? mAppToken.mAppAnimator.animation : null)
+                + " mWillReplaceWindow=" + mWillReplaceWindow
+                + " inPendingTransaction="
+                + (mAppToken != null ? mAppToken.inPendingTransaction : false)
+                + " mDisplayFrozen=" + mService.mDisplayFrozen
+                + " callers=" + Debug.getCallers(6));
+
+        // Visibility of the removed window. Will be used later to update orientation later on.
+        boolean wasVisible = false;
+
+        // First, see if we need to run an animation. If we do, we have to hold off on removing the
+        // window until the animation is done. If the display is frozen, just remove immediately,
+        // since the animation wouldn't be seen.
+        if (mHasSurface && mService.okToDisplay()) {
+            if (mWillReplaceWindow) {
+                // This window is going to be replaced. We need to keep it around until the new one
+                // gets added, then we will get rid of this one.
+                if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
+                        "Preserving " + this + " until the new one is " + "added");
+                // TODO: We are overloading mAnimatingExit flag to prevent the window state from
+                // been removed. We probably need another flag to indicate that window removal
+                // should be deffered vs. overloading the flag that says we are playing an exit
+                // animation.
+                mAnimatingExit = true;
+                mReplacingRemoveRequested = true;
+                Binder.restoreCallingIdentity(origId);
+                return;
+            }
+
+            if (isAnimatingWithSavedSurface() && !mAppToken.allDrawnExcludingSaved) {
+                // We started enter animation early with a saved surface, now the app asks to remove
+                // this window. If we remove it now and the app is not yet drawn, we'll show a
+                // flicker. Delay the removal now until it's really drawn.
+                if (DEBUG_ADD_REMOVE) Slog.d(TAG_WM,
+                        "removeWindowLocked: delay removal of " + this + " due to early animation");
+                // Do not set mAnimatingExit to true here, it will cause the surface to be hidden
+                // immediately after the enter animation is done. If the app is not yet drawn then
+                // it will show up as a flicker.
+                setupWindowForRemoveOnExit();
+                Binder.restoreCallingIdentity(origId);
+                return;
+            }
+            // If we are not currently running the exit animation, we need to see about starting one
+            wasVisible = isWinVisibleLw();
+
+            if (keepVisibleDeadWindow) {
+                if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
+                        "Not removing " + this + " because app died while it's visible");
+
+                mAppDied = true;
+                setDisplayLayoutNeeded();
+                mService.mWindowPlacerLocked.performSurfacePlacement();
+
+                // Set up a replacement input channel since the app is now dead.
+                // We need to catch tapping on the dead window to restart the app.
+                openInputChannel(null);
+                mService.mInputMonitor.updateInputWindowsLw(true /*force*/);
+
+                Binder.restoreCallingIdentity(origId);
+                return;
+            }
+
+            if (wasVisible) {
+                final int transit = (!startingWindow) ? TRANSIT_EXIT : TRANSIT_PREVIEW_DONE;
+
+                // Try starting an animation.
+                if (mWinAnimator.applyAnimationLocked(transit, false)) {
+                    mAnimatingExit = true;
+                }
+                //TODO (multidisplay): Magnification is supported only for the default display.
+                if (mService.mAccessibilityController != null
+                        && getDisplayId() == Display.DEFAULT_DISPLAY) {
+                    mService.mAccessibilityController.onWindowTransitionLocked(this, transit);
+                }
+            }
+            final boolean isAnimating =
+                    mWinAnimator.isAnimationSet() && !mWinAnimator.isDummyAnimation();
+            final boolean lastWindowIsStartingWindow = startingWindow && mAppToken != null
+                    && mAppToken.getWindowsCount() == 1;
+            // We delay the removal of a window if it has a showing surface that can be used to run
+            // exit animation and it is marked as exiting.
+            // Also, If isn't the an animating starting window that is the last window in the app.
+            // We allow the removal of the non-animating starting window now as there is no
+            // additional window or animation that will trigger its removal.
+            if (mWinAnimator.getShown() && mAnimatingExit
+                    && (!lastWindowIsStartingWindow || isAnimating)) {
+                // The exit animation is running or should run... wait for it!
+                if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
+                        "Not removing " + this + " due to exit animation ");
+                setupWindowForRemoveOnExit();
+                if (mAppToken != null) {
+                    mAppToken.updateReportedVisibilityLocked();
+                }
+                Binder.restoreCallingIdentity(origId);
+                return;
+            }
+        }
+
+        remove();
+        // Removing a visible window will effect the computed orientation
+        // So just update orientation if needed.
+        if (wasVisible && mService.updateOrientationFromAppTokensLocked(false)) {
+            mService.mH.sendEmptyMessage(SEND_NEW_CONFIGURATION);
+        }
+        mService.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, true /*updateInputWindows*/);
+        Binder.restoreCallingIdentity(origId);
+    }
+
+    private void setupWindowForRemoveOnExit() {
+        mRemoveOnExit = true;
+        setDisplayLayoutNeeded();
+        // Request a focus update as this window's input channel is already gone. Otherwise
+        // we could have no focused window in input manager.
+        final boolean focusChanged = mService.updateFocusedWindowLocked(
+                UPDATE_FOCUS_WILL_PLACE_SURFACES, false /*updateInputWindows*/);
+        mService.mWindowPlacerLocked.performSurfacePlacement();
+        if (focusChanged) {
+            mService.mInputMonitor.updateInputWindowsLw(false /*force*/);
+        }
+    }
+
     void setHasSurface(boolean hasSurface) {
         mHasSurface = hasSurface;
     }
@@ -1637,27 +1792,17 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         return getStack();
     }
 
-    void maybeRemoveReplacedWindow() {
-        if (mAppToken == null) {
-            return;
+    void removeReplacedWindow() {
+        if (DEBUG_ADD_REMOVE) Slog.d(TAG, "Removing replaced window: " + this);
+        if (isDimming()) {
+            transferDimToReplacement();
         }
-        for (int i = mAppToken.allAppWindows.size() - 1; i >= 0; i--) {
-            final WindowState win = mAppToken.allAppWindows.get(i);
-            if (win.mWillReplaceWindow && win.mReplacingWindow == this && hasDrawnLw()) {
-                if (DEBUG_ADD_REMOVE) Slog.d(TAG, "Removing replaced window: " + win);
-                if (win.isDimming()) {
-                    win.transferDimToReplacement();
-                }
-                win.mWillReplaceWindow = false;
-                final boolean animateReplacingWindow = win.mAnimateReplacingWindow;
-                win.mAnimateReplacingWindow = false;
-                win.mReplacingRemoveRequested = false;
-                win.mReplacingWindow = null;
-                mSkipEnterAnimationForSeamlessReplacement = false;
-                if (win.mAnimatingExit || !animateReplacingWindow) {
-                    win.remove();
-                }
-            }
+        mWillReplaceWindow = false;
+        mAnimateReplacingWindow = false;
+        mReplacingRemoveRequested = false;
+        mReplacingWindow = null;
+        if (mAnimatingExit || !mAnimateReplacingWindow) {
+            remove();
         }
     }
 
@@ -1797,10 +1942,10 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         public void binderDied() {
             try {
                 synchronized(mService.mWindowMap) {
-                    WindowState win = mService.windowForClientLocked(mSession, mClient, false);
+                    final WindowState win = mService.windowForClientLocked(mSession, mClient, false);
                     Slog.i(TAG, "WIN DEATH: " + win);
                     if (win != null) {
-                        mService.removeWindowLocked(win, shouldKeepVisibleDeadAppWindow());
+                        win.removeIfPossible(shouldKeepVisibleDeadAppWindow());
                         if (win.mAttrs.type == TYPE_DOCK_DIVIDER) {
                             // The owner of the docked divider died :( We reset the docked stack,
                             // just in case they have the divider at an unstable position. Better
@@ -3178,7 +3323,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
             return;
         }
 
-        if (WindowManagerService.localLOGV || DEBUG_ADD_REMOVE) Slog.v(TAG,
+        if (localLOGV || DEBUG_ADD_REMOVE) Slog.v(TAG,
                 "Exit animation finished in " + this + ": remove=" + mRemoveOnExit);
 
         mDestroying = true;

@@ -453,7 +453,7 @@ class WindowSurfacePlacer {
             for (i = exitingAppTokens.size() - 1; i >= 0; i--) {
                 AppWindowToken token = exitingAppTokens.get(i);
                 if (!token.hasVisible && !mService.mClosingApps.contains(token) &&
-                        (!token.mIsExiting || token.allAppWindows.isEmpty())) {
+                        (!token.mIsExiting || token.isEmpty())) {
                     // Make sure there is no animation running on this token,
                     // so any windows associated with it will be removed as
                     // soon as their animations are complete
@@ -1248,10 +1248,8 @@ class WindowSurfacePlacer {
                 appAnimator.clearThumbnail();
                 appAnimator.setNullAnimation();
             }
-            wtoken.inPendingTransaction = false;
 
-            if (!mService.setTokenVisibilityLocked(
-                    wtoken, animLp, true, transit, false, voiceInteraction)){
+            if (!wtoken.setVisibility(animLp, true, transit, false, voiceInteraction)){
                 // This token isn't going to be animating. Add it to the list of tokens to
                 // be notified of app transition complete since the notification will not be
                 // sent be the app window animator.
@@ -1259,12 +1257,8 @@ class WindowSurfacePlacer {
             }
             wtoken.updateReportedVisibilityLocked();
             wtoken.waitingToShow = false;
+            wtoken.setAllAppWinAnimators();
 
-            appAnimator.mAllAppWinAnimators.clear();
-            final int windowsCount = wtoken.allAppWindows.size();
-            for (int j = 0; j < windowsCount; j++) {
-                appAnimator.mAllAppWinAnimators.add(wtoken.allAppWindows.get(j).mWinAnimator);
-            }
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                     ">>> OPEN TRANSACTION handleAppTransitionReadyLocked()");
             SurfaceControl.openTransaction();
@@ -1279,13 +1273,7 @@ class WindowSurfacePlacer {
 
             int topOpeningLayer = 0;
             if (animLp != null) {
-                int layer = -1;
-                for (int j = 0; j < wtoken.allAppWindows.size(); j++) {
-                    final WindowState win = wtoken.allAppWindows.get(j);
-                    if (win.mWinAnimator.mAnimLayer > layer) {
-                        layer = win.mWinAnimator.mAnimLayer;
-                    }
-                }
+                final int layer = wtoken.getHighestAnimLayer();
                 if (topOpeningApp == null || layer > topOpeningLayer) {
                     topOpeningApp = wtoken;
                     topOpeningLayer = layer;
@@ -1316,9 +1304,7 @@ class WindowSurfacePlacer {
             if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Now closing app " + wtoken);
             appAnimator.clearThumbnail();
             appAnimator.setNullAnimation();
-            wtoken.inPendingTransaction = false;
-            mService.setTokenVisibilityLocked(wtoken, animLp, false, transit, false,
-                    voiceInteraction);
+            wtoken.setVisibility(animLp, false, transit, false, voiceInteraction);
             wtoken.updateReportedVisibilityLocked();
             // Force the allDrawn flag, because we want to start
             // this guy's animations regardless of whether it's
@@ -1604,12 +1590,7 @@ class WindowSurfacePlacer {
                 appAnimator.setNullAnimation();
                 mService.updateTokenInPlaceLocked(wtoken, transit);
                 wtoken.updateReportedVisibilityLocked();
-
-                appAnimator.mAllAppWinAnimators.clear();
-                final int N = wtoken.allAppWindows.size();
-                for (int j = 0; j < N; j++) {
-                    appAnimator.mAllAppWinAnimators.add(wtoken.allAppWindows.get(j).mWinAnimator);
-                }
+                wtoken.setAllAppWinAnimators();
                 mService.mAnimator.mAppWindowAnimating |= appAnimator.isAnimating();
                 mService.mAnimator.orAnimating(appAnimator.showAllWindowsLocked());
             }

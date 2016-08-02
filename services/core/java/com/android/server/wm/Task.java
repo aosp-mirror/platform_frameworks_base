@@ -39,6 +39,7 @@ import android.util.Slog;
 import android.view.DisplayInfo;
 import android.view.Surface;
 
+import android.view.SurfaceControl;
 import com.android.server.EventLogTags;
 
 import java.io.PrintWriter;
@@ -178,11 +179,7 @@ class Task implements DimLayer.DimLayerUser {
         resizeLocked(bounds, config, false /* force */);
 
         for (int activityNdx = mAppTokens.size() - 1; activityNdx >= 0; --activityNdx) {
-            final ArrayList<WindowState> windows = mAppTokens.get(activityNdx).allAppWindows;
-            for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
-                final WindowState win = windows.get(winNdx);
-                win.notifyMovedInStack();
-            }
+            mAppTokens.get(activityNdx).notifyMovedInStack();
         }
     }
 
@@ -478,11 +475,7 @@ class Task implements DimLayer.DimLayerUser {
 
     void resetDragResizingChangeReported() {
         for (int activityNdx = mAppTokens.size() - 1; activityNdx >= 0; --activityNdx) {
-            final ArrayList<WindowState> windows = mAppTokens.get(activityNdx).allAppWindows;
-            for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
-                final WindowState win = windows.get(winNdx);
-                win.resetDragResizingChangeReported();
-            }
+            mAppTokens.get(activityNdx).resetDragResizingChangeReported();
         }
     }
 
@@ -498,15 +491,15 @@ class Task implements DimLayer.DimLayerUser {
      * Adds all of the tasks windows to {@link WindowManagerService#mWaitingForDrawn} if drag
      * resizing state of the window has been changed.
      */
-    void addWindowsWaitingForDrawnIfResizingChanged() {
-        for (int activityNdx = mAppTokens.size() - 1; activityNdx >= 0; --activityNdx) {
-            final ArrayList<WindowState> windows = mAppTokens.get(activityNdx).allAppWindows;
-            for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
-                final WindowState win = windows.get(winNdx);
-                if (win.isDragResizeChanged()) {
-                    mService.mWaitingForDrawn.add(win);
-                }
-            }
+    void setWaitingForDrawnIfResizingChanged() {
+        for (int i = mAppTokens.size() - 1; i >= 0; --i) {
+            mAppTokens.get(i).setWaitingForDrawnIfResizingChanged();
+        }
+    }
+
+    void detachDisplay() {
+        for (int i = mAppTokens.size() - 1; i >= 0; --i) {
+            mAppTokens.get(i).detachDisplay();
         }
     }
 
@@ -546,52 +539,14 @@ class Task implements DimLayer.DimLayerUser {
     }
 
     void resizeWindows() {
-        final ArrayList<WindowState> resizingWindows = mService.mResizingWindows;
         for (int activityNdx = mAppTokens.size() - 1; activityNdx >= 0; --activityNdx) {
-            final AppWindowToken atoken = mAppTokens.get(activityNdx);
-
-            // Some windows won't go through the resizing process, if they don't have a surface, so
-            // destroy all saved surfaces here.
-            atoken.destroySavedSurfaces();
-            final ArrayList<WindowState> windows = atoken.allAppWindows;
-            for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
-                final WindowState win = windows.get(winNdx);
-                if (win.mHasSurface && !resizingWindows.contains(win)) {
-                    if (DEBUG_RESIZE) Slog.d(TAG, "resizeWindows: Resizing " + win);
-                    resizingWindows.add(win);
-
-                    // If we are not drag resizing, force recreating of a new surface so updating
-                    // the content and positioning that surface will be in sync.
-                    //
-                    // As we use this flag as a hint to freeze surface boundary updates,
-                    // we'd like to only apply this to TYPE_BASE_APPLICATION,
-                    // windows of TYPE_APPLICATION like dialogs, could appear
-                    // to not be drag resizing while they resize, but we'd
-                    // still like to manipulate their frame to update crop, etc...
-                    //
-                    // Anyway we don't need to synchronize position and content updates for these
-                    // windows since they aren't at the base layer and could be moved around anyway.
-                    if (!win.computeDragResizing() && win.mAttrs.type == TYPE_BASE_APPLICATION &&
-                            !mStack.getBoundsAnimating() && !win.isGoneForLayoutLw() &&
-                            !inPinnedWorkspace()) {
-                        win.setResizedWhileNotDragResizing(true);
-                    }
-                }
-                if (win.isGoneForLayoutLw()) {
-                    win.mResizedWhileGone = true;
-                }
-            }
+            mAppTokens.get(activityNdx).resizeWindows();
         }
     }
 
     void moveWindows() {
-        for (int activityNdx = mAppTokens.size() - 1; activityNdx >= 0; --activityNdx) {
-            final ArrayList<WindowState> windows = mAppTokens.get(activityNdx).allAppWindows;
-            for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
-                final WindowState win = windows.get(winNdx);
-                if (DEBUG_RESIZE) Slog.d(TAG, "moveWindows: Moving " + win);
-                win.mMovedByResize = true;
-            }
+        for (int i = mAppTokens.size() - 1; i >= 0; --i) {
+            mAppTokens.get(i).moveWindows();
         }
     }
 
@@ -621,11 +576,8 @@ class Task implements DimLayer.DimLayerUser {
     boolean isVisibleForUser() {
         for (int i = mAppTokens.size() - 1; i >= 0; i--) {
             final AppWindowToken appToken = mAppTokens.get(i);
-            for (int j = appToken.allAppWindows.size() - 1; j >= 0; j--) {
-                WindowState window = appToken.allAppWindows.get(j);
-                if (!window.isHiddenFromUserLocked()) {
-                    return true;
-                }
+            if (appToken.isVisibleForUser()) {
+                return true;
             }
         }
         return false;
@@ -695,6 +647,27 @@ class Task implements DimLayer.DimLayerUser {
     @Override
     public DisplayInfo getDisplayInfo() {
         return mStack.getDisplayContent().getDisplayInfo();
+    }
+
+    void forceWindowsScaleable(boolean force) {
+        SurfaceControl.openTransaction();
+        try {
+            for (int i = mAppTokens.size() - 1; i >= 0; i--) {
+                mAppTokens.get(i).forceWindowsScaleableInTransaction(force);
+            }
+        } finally {
+            SurfaceControl.closeTransaction();
+        }
+    }
+
+    boolean isAnimating() {
+        for (int i = mAppTokens.size() - 1; i >= 0; i--) {
+            final AppWindowToken aToken = mAppTokens.get(i);
+            if (aToken.isAnimating()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

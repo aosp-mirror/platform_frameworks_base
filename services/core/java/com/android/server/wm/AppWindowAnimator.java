@@ -157,11 +157,9 @@ public class AppWindowAnimator {
         }
 
         // Since we are finally starting our animation, we don't need the logic anymore to prevent
-        // the app from showing again if we just moved between stacks. See
-        // {@link WindowState#notifyMovedInStack}.
-        for (int i = mAppToken.allAppWindows.size() - 1; i >= 0; i--) {
-            mAppToken.allAppWindows.get(i).resetJustMovedInStack();
-        }
+        // the app from showing again if we just moved between stacks.
+        // See {@link WindowState#notifyMovedInStack}.
+        mAppToken.resetJustMovedInStack();
     }
 
     public void setDummyAnimation() {
@@ -234,23 +232,7 @@ public class AppWindowAnimator {
     }
 
     void updateLayers() {
-        final int windowCount = mAppToken.allAppWindows.size();
-        final int adj = animLayerAdjustment;
-        thumbnailLayer = -1;
-        final WallpaperController wallpaperController = mService.mWallpaperControllerLocked;
-        for (int i = 0; i < windowCount; i++) {
-            final WindowState w = mAppToken.allAppWindows.get(i);
-            final WindowStateAnimator winAnimator = w.mWinAnimator;
-            winAnimator.mAnimLayer = w.mLayer + adj;
-            if (winAnimator.mAnimLayer > thumbnailLayer) {
-                thumbnailLayer = winAnimator.mAnimLayer;
-            }
-            if (DEBUG_LAYERS) Slog.v(TAG, "Updating layer " + w + ": " + winAnimator.mAnimLayer);
-            if (w == mService.mInputMethodTarget && !mService.mInputMethodTargetWaitingAnim) {
-                mService.mLayersController.setInputMethodAnimLayerAdjustment(adj);
-            }
-            wallpaperController.setAnimLayerAdjustment(w, adj);
-        }
+        thumbnailLayer = mAppToken.adjustAnimLayer(animLayerAdjustment);
     }
 
     private void stepThumbnailAnimation(long currentTime) {
