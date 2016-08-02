@@ -113,6 +113,7 @@ public class TabHost extends FrameLayout implements ViewTreeObserver.OnTouchMode
      * Creates a new {@link TabSpec} associated with this tab host.
      *
      * @param tag tag for the tab specification, must be non-null
+     * @throws IllegalArgumentException If the passed tag is null
      */
     @NonNull
     public TabSpec newTabSpec(@NonNull String tag) {
@@ -203,6 +204,8 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
     /**
      * Add a tab.
      * @param tabSpec Specifies how to create the indicator and content.
+     * @throws IllegalArgumentException If the passed tab spec has null indicator strategy and / or
+     *      null content strategy.
      */
     public void addTab(TabSpec tabSpec) {
 
