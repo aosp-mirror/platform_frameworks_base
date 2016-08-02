@@ -2547,6 +2547,7 @@
     <!-- @hide This really shouldn't be public; clients using it should use @* to ref it.  -->
     <public type="style" name="Theme.Leanback.FormWizard" id="0x010302d0" />
 
+    <!-- @hide @SystemApi This shouldn't be public. -->
     <public type="array" name="config_keySystemUuidMapping" id="0x01070005" />
 
     <!-- An interpolator which accelerates fast but decelerates slowly. -->
