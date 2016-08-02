@@ -72,7 +72,9 @@ public interface SharedPreferences {
          * {@link #commit} or {@link #apply} are called.
          * 
          * @param key The name of the preference to modify.
-         * @param value The new value for the preference.
+         * @param value The new value for the preference.  Passing {@code null}
+         *    for this argument is equivalent to calling {@link #remove(String)} with
+         *    this key.
          * 
          * @return Returns a reference to the same Editor object, so you can
          * chain put calls together.
