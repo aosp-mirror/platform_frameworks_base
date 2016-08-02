@@ -133,7 +133,7 @@ hostStaticLibs := \
 	libziparchive-host \
 	libpng \
 	libbase \
-	libprotobuf-cpp-lite_static
+	libprotobuf-cpp-lite
 
 
 # Statically link libz for MinGW (Win SDK under Linux),
