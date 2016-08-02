@@ -768,41 +768,46 @@ public class LauncherAppsService extends SystemService {
 
             private void onShortcutChangedInner(@NonNull String packageName,
                     @UserIdInt int userId) {
-                final UserHandle user = UserHandle.of(userId);
+                try {
+                    final UserHandle user = UserHandle.of(userId);
 
-                final int n = mListeners.beginBroadcast();
-                for (int i = 0; i < n; i++) {
-                    IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
-                    BroadcastCookie cookie = (BroadcastCookie) mListeners.getBroadcastCookie(i);
-                    if (!isEnabledProfileOf(user, cookie.user, "onShortcutChanged")) continue;
+                    final int n = mListeners.beginBroadcast();
+                    for (int i = 0; i < n; i++) {
+                        IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
+                        BroadcastCookie cookie = (BroadcastCookie) mListeners.getBroadcastCookie(i);
+                        if (!isEnabledProfileOf(user, cookie.user, "onShortcutChanged")) continue;
 
-                    final int launcherUserId = cookie.user.getIdentifier();
+                        final int launcherUserId = cookie.user.getIdentifier();
 
-                    // Make sure the caller has the permission.
-                    if (!mShortcutServiceInternal.hasShortcutHostPermission(
-                            launcherUserId, cookie.packageName)) {
-                        continue;
+                        // Make sure the caller has the permission.
+                        if (!mShortcutServiceInternal.hasShortcutHostPermission(
+                                launcherUserId, cookie.packageName)) {
+                            continue;
+                        }
+                        // Each launcher has a different set of pinned shortcuts, so we need to do a
+                        // query in here.
+                        // (As of now, only one launcher has the permission at a time, so it's bit
+                        // moot, but we may change the permission model eventually.)
+                        final List<ShortcutInfo> list =
+                                mShortcutServiceInternal.getShortcuts(launcherUserId,
+                                        cookie.packageName,
+                                        /* changedSince= */ 0, packageName, /* shortcutIds=*/ null,
+                                        /* component= */ null,
+                                        ShortcutQuery.FLAG_GET_KEY_FIELDS_ONLY
+                                        | ShortcutQuery.FLAG_GET_ALL_KINDS
+                                        , userId);
+                        try {
+                            listener.onShortcutChanged(user, packageName,
+                                    new ParceledListSlice<>(list));
+                        } catch (RemoteException re) {
+                            Slog.d(TAG, "Callback failed ", re);
+                        }
                     }
-                    // Each launcher has a different set of pinned shortcuts, so we need to do a
-                    // query in here.
-                    // (As of now, only one launcher has the permission at a time, so it's bit
-                    // moot, but we may change the permission model eventually.)
-                    final List<ShortcutInfo> list =
-                            mShortcutServiceInternal.getShortcuts(launcherUserId,
-                                    cookie.packageName,
-                                    /* changedSince= */ 0, packageName, /* shortcutIds=*/ null,
-                                    /* component= */ null,
-                                    ShortcutQuery.FLAG_GET_KEY_FIELDS_ONLY
-                                    | ShortcutQuery.FLAG_GET_ALL_KINDS
-                                    , userId);
-                    try {
-                        listener.onShortcutChanged(user, packageName,
-                                new ParceledListSlice<>(list));
-                    } catch (RemoteException re) {
-                        Slog.d(TAG, "Callback failed ", re);
-                    }
+                    mListeners.finishBroadcast();
+                } catch (RuntimeException e) {
+                    // When the user is locked we get IllegalState, so just catch all.
+                    Log.w(TAG, e.getMessage(), e);
                 }
-                mListeners.finishBroadcast();
             }
         }
 
