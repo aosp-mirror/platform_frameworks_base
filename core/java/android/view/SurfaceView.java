@@ -233,7 +233,6 @@ public class SurfaceView extends View {
         mSession = getWindowSession();
         mLayout.token = getWindowToken();
         mLayout.setTitle("SurfaceView - " + getViewRootImpl().getTitle());
-        mLayout.packageName = mContext.getOpPackageName();
         mViewVisibility = getVisibility() == VISIBLE;
 
         if (!mGlobalListenersAdded) {

@@ -58,6 +58,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.NotificationManager.Policy;
 import android.app.PendingIntent;
+import android.app.RemoteInput;
 import android.app.StatusBarManager;
 import android.app.backup.BackupManager;
 import android.app.usage.UsageEvents;
@@ -92,6 +93,7 @@ import android.os.IBinder;
 import android.os.IInterface;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -120,8 +122,6 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.Xml;
-import android.view.WindowManager;
-import android.view.WindowManagerInternal;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.Toast;
@@ -138,7 +138,6 @@ import com.android.server.SystemService;
 import com.android.server.lights.Light;
 import com.android.server.lights.LightsManager;
 import com.android.server.notification.ManagedServices.ManagedServiceInfo;
-import com.android.server.policy.PhoneWindowManager;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.vr.VrManagerInternal;
 import com.android.server.notification.ManagedServices.UserProfiles;
@@ -194,7 +193,7 @@ public class NotificationManagerService extends SystemService {
     private static final int MESSAGE_RECONSIDER_RANKING = 1000;
     private static final int MESSAGE_RANKING_SORT = 1001;
 
-    static final int LONG_DELAY = PhoneWindowManager.TOAST_WINDOW_TIMEOUT;
+    static final int LONG_DELAY = 3500; // 3.5 seconds
     static final int SHORT_DELAY = 2000; // 2 seconds
 
     static final long[] DEFAULT_VIBRATE_PATTERN = {0, 250, 250, 250};
@@ -233,7 +232,6 @@ public class NotificationManagerService extends SystemService {
     @Nullable StatusBarManagerInternal mStatusBar;
     Vibrator mVibrator;
     private VrManagerInternal mVrManagerInternal;
-    private WindowManagerInternal mWindowManagerInternal;
 
     final IBinder mForegroundToken = new Binder();
     private Handler mHandler;
@@ -454,15 +452,13 @@ public class NotificationManagerService extends SystemService {
         final String pkg;
         final ITransientNotification callback;
         int duration;
-        Binder token;
 
-        ToastRecord(int pid, String pkg, ITransientNotification callback, int duration,
-                    Binder token) {
+        ToastRecord(int pid, String pkg, ITransientNotification callback, int duration)
+        {
             this.pid = pid;
             this.pkg = pkg;
             this.callback = callback;
             this.duration = duration;
-            this.token = token;
         }
 
         void update(int duration) {
@@ -1129,7 +1125,6 @@ public class NotificationManagerService extends SystemService {
             mAudioManager = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
             mAudioManagerInternal = getLocalService(AudioManagerInternal.class);
             mVrManagerInternal = getLocalService(VrManagerInternal.class);
-            mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
             mZenModeHelper.onSystemReady();
         } else if (phase == SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) {
             // This observer will force an update when observe is called, causing us to
@@ -1330,13 +1325,10 @@ public class NotificationManagerService extends SystemService {
                             }
                         }
 
-                        Binder token = new Binder();
-                        mWindowManagerInternal.addWindowToken(token,
-                                WindowManager.LayoutParams.TYPE_TOAST);
-                        record = new ToastRecord(callingPid, pkg, callback, duration, token);
+                        record = new ToastRecord(callingPid, pkg, callback, duration);
                         mToastQueue.add(record);
                         index = mToastQueue.size() - 1;
-                        keepProcessAliveIfNeededLocked(callingPid);
+                        keepProcessAliveLocked(callingPid);
                     }
                     // If it's at index 0, it's the current toast.  It doesn't matter if it's
                     // new or just been updated.  Call back and tell it to show itself.
@@ -2995,7 +2987,7 @@ public class NotificationManagerService extends SystemService {
         while (record != null) {
             if (DBG) Slog.d(TAG, "Show pkg=" + record.pkg + " callback=" + record.callback);
             try {
-                record.callback.show(record.token);
+                record.callback.show();
                 scheduleTimeoutLocked(record);
                 return;
             } catch (RemoteException e) {
@@ -3006,7 +2998,7 @@ public class NotificationManagerService extends SystemService {
                 if (index >= 0) {
                     mToastQueue.remove(index);
                 }
-                keepProcessAliveIfNeededLocked(record.pid);
+                keepProcessAliveLocked(record.pid);
                 if (mToastQueue.size() > 0) {
                     record = mToastQueue.get(0);
                 } else {
@@ -3026,11 +3018,8 @@ public class NotificationManagerService extends SystemService {
             // don't worry about this, we're about to remove it from
             // the list anyway
         }
-
-        ToastRecord lastToast = mToastQueue.remove(index);
-        mWindowManagerInternal.removeWindowToken(lastToast.token, true);
-
-        keepProcessAliveIfNeededLocked(record.pid);
+        mToastQueue.remove(index);
+        keepProcessAliveLocked(record.pid);
         if (mToastQueue.size() > 0) {
             // Show the next one. If the callback fails, this will remove
             // it from the list, so don't assume that the list hasn't changed
@@ -3074,7 +3063,7 @@ public class NotificationManagerService extends SystemService {
     }
 
     // lock on mToastQueue
-    void keepProcessAliveIfNeededLocked(int pid)
+    void keepProcessAliveLocked(int pid)
     {
         int toastCount = 0; // toasts from this pid
         ArrayList<ToastRecord> list = mToastQueue;

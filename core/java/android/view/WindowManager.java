@@ -1734,18 +1734,14 @@ public interface WindowManager extends ViewManager {
         public CharSequence accessibilityTitle;
 
         /**
-         * Sets a timeout in milliseconds before which the window will be hidden
+         * Sets a timeout in milliseconds before which the window will be removed
          * by the window manager. Useful for transient notifications like toasts
          * so we don't have to rely on client cooperation to ensure the window
-         * is hidden. Must be specified at window creation time. Note that apps
-         * are not prepared to handle their windows being removed without their
-         * explicit request and may try to interact with the removed window
-         * resulting in undefined behavior and crashes. Therefore, we do hide
-         * such windows to prevent them from overlaying other apps.
+         * is removed. Must be specified at window creation time.
          *
          * @hide
          */
-        public long hideTimeoutMilliseconds = -1;
+        public long removeTimeoutMilliseconds = -1;
 
         public LayoutParams() {
             super(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
@@ -1881,7 +1877,7 @@ public interface WindowManager extends ViewManager {
             out.writeInt(needsMenuKey);
             out.writeInt(accessibilityIdOfAnchor);
             TextUtils.writeToParcel(accessibilityTitle, out, parcelableFlags);
-            out.writeLong(hideTimeoutMilliseconds);
+            out.writeLong(removeTimeoutMilliseconds);
         }
 
         public static final Parcelable.Creator<LayoutParams> CREATOR
@@ -1935,7 +1931,7 @@ public interface WindowManager extends ViewManager {
             needsMenuKey = in.readInt();
             accessibilityIdOfAnchor = in.readInt();
             accessibilityTitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
-            hideTimeoutMilliseconds = in.readLong();
+            removeTimeoutMilliseconds = in.readLong();
         }
 
         @SuppressWarnings({"PointlessBitwiseExpression"})
@@ -2157,7 +2153,7 @@ public interface WindowManager extends ViewManager {
             }
 
             // This can't change, it's only set at window creation time.
-            hideTimeoutMilliseconds = o.hideTimeoutMilliseconds;
+            removeTimeoutMilliseconds = o.removeTimeoutMilliseconds;
 
             return changes;
         }
