@@ -17728,6 +17728,70 @@ public final class ActivityManagerService extends ActivityManagerNative
         return INTENT_REMOTE_BUGREPORT_FINISHED.equals(intent.getAction());
     }
 
+    private void checkBroadcastFromSystem(Intent intent, ProcessRecord callerApp,
+            String callerPackage, int callingUid, boolean isProtectedBroadcast, List receivers) {
+        final String action = intent.getAction();
+        if (isProtectedBroadcast
+                || Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)
+                || Intent.ACTION_DISMISS_KEYBOARD_SHORTCUTS.equals(action)
+                || Intent.ACTION_MEDIA_BUTTON.equals(action)
+                || Intent.ACTION_MEDIA_SCANNER_SCAN_FILE.equals(action)
+                || Intent.ACTION_SHOW_KEYBOARD_SHORTCUTS.equals(action)
+                || AppWidgetManager.ACTION_APPWIDGET_CONFIGURE.equals(action)
+                || AppWidgetManager.ACTION_APPWIDGET_UPDATE.equals(action)
+                || LocationManager.HIGH_POWER_REQUEST_CHANGE_ACTION.equals(action)
+                || TelephonyIntents.ACTION_REQUEST_OMADM_CONFIGURATION_UPDATE.equals(action)
+                || SuggestionSpan.ACTION_SUGGESTION_PICKED.equals(action)) {
+            // Broadcast is either protected, or it's a public action that
+            // we've relaxed, so it's fine for system internals to send.
+            return;
+        }
+
+        // This broadcast may be a problem...  but there are often system components that
+        // want to send an internal broadcast to themselves, which is annoying to have to
+        // explicitly list each action as a protected broadcast, so we will check for that
+        // one safe case and allow it: an explicit broadcast, only being received by something
+        // that has protected itself.
+        if (receivers != null && receivers.size() > 0
+                && (intent.getPackage() != null || intent.getComponent() != null)) {
+            boolean allProtected = true;
+            for (int i = receivers.size()-1; i >= 0; i--) {
+                Object target = receivers.get(i);
+                if (target instanceof ResolveInfo) {
+                    ResolveInfo ri = (ResolveInfo)target;
+                    if (ri.activityInfo.exported && ri.activityInfo.permission == null) {
+                        allProtected = false;
+                        break;
+                    }
+                } else {
+                    BroadcastFilter bf = (BroadcastFilter)target;
+                    if (bf.requiredPermission == null) {
+                        allProtected = false;
+                        break;
+                    }
+                }
+            }
+            if (allProtected) {
+                // All safe!
+                return;
+            }
+        }
+
+        // The vast majority of broadcasts sent from system internals
+        // should be protected to avoid security holes, so yell loudly
+        // to ensure we examine these cases.
+        if (callerApp != null) {
+            Log.wtf(TAG, "Sending non-protected broadcast " + action
+                            + " from system " + callerApp.toShortString() + " pkg " + callerPackage,
+                    new Throwable());
+        } else {
+            Log.wtf(TAG, "Sending non-protected broadcast " + action
+                            + " from system uid " + UserHandle.formatUid(callingUid)
+                            + " pkg " + callerPackage,
+                    new Throwable());
+        }
+    }
+
     final int broadcastIntentLocked(ProcessRecord callerApp,
             String callerPackage, Intent intent, String resolvedType,
             IIntentReceiver resultTo, int resultCode, String resultData,
@@ -17814,37 +17878,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 break;
         }
 
-        if (isCallerSystem) {
-            if (isProtectedBroadcast
-                    || Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)
-                    || Intent.ACTION_DISMISS_KEYBOARD_SHORTCUTS.equals(action)
-                    || Intent.ACTION_MEDIA_BUTTON.equals(action)
-                    || Intent.ACTION_MEDIA_SCANNER_SCAN_FILE.equals(action)
-                    || Intent.ACTION_SHOW_KEYBOARD_SHORTCUTS.equals(action)
-                    || AppWidgetManager.ACTION_APPWIDGET_CONFIGURE.equals(action)
-                    || AppWidgetManager.ACTION_APPWIDGET_UPDATE.equals(action)
-                    || LocationManager.HIGH_POWER_REQUEST_CHANGE_ACTION.equals(action)
-                    || TelephonyIntents.ACTION_REQUEST_OMADM_CONFIGURATION_UPDATE.equals(action)
-                    || SuggestionSpan.ACTION_SUGGESTION_PICKED.equals(action)) {
-                // Broadcast is either protected, or it's a public action that
-                // we've relaxed, so it's fine for system internals to send.
-            } else {
-                // The vast majority of broadcasts sent from system internals
-                // should be protected to avoid security holes, so yell loudly
-                // to ensure we examine these cases.
-                if (callerApp != null) {
-                    Log.wtf(TAG, "Sending non-protected broadcast " + action
-                            + " from system " + callerApp.toShortString() + " pkg " + callerPackage,
-                            new Throwable());
-                } else {
-                    Log.wtf(TAG, "Sending non-protected broadcast " + action
-                            + " from system uid " + UserHandle.formatUid(callingUid)
-                            + " pkg " + callerPackage,
-                            new Throwable());
-                }
-            }
-
-        } else {
+        // First line security check before anything else: stop non-system apps from
+        // sending protected broadcasts.
+        if (!isCallerSystem) {
             if (isProtectedBroadcast) {
                 String msg = "Permission Denial: not allowed to send broadcast "
                         + action + " from pid="
@@ -18227,6 +18263,10 @@ public final class ActivityManagerService extends ActivityManagerNative
             // If we are not serializing this broadcast, then send the
             // registered receivers separately so they don't wait for the
             // components to be launched.
+            if (isCallerSystem) {
+                checkBroadcastFromSystem(intent, callerApp, callerPackage, callingUid,
+                        isProtectedBroadcast, registeredReceivers);
+            }
             final BroadcastQueue queue = broadcastQueueForIntent(intent);
             BroadcastRecord r = new BroadcastRecord(queue, intent, callerApp,
                     callerPackage, callingPid, callingUid, resolvedType, requiredPermissions,
@@ -18312,6 +18352,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             receivers.add(registeredReceivers.get(ir));
             ir++;
+        }
+
+        if (isCallerSystem) {
+            checkBroadcastFromSystem(intent, callerApp, callerPackage, callingUid,
+                    isProtectedBroadcast, receivers);
         }
 
         if ((receivers != null && receivers.size() > 0)
