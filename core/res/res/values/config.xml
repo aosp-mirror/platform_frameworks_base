@@ -2516,4 +2516,7 @@
          Note: Also update appropriate overlay files. -->
     <string-array translatable="false" name="config_defaultFirstUserRestrictions">
     </string-array>
+
+    <string name="config_networkOverLimitComponent" translatable="false">com.android.systemui/com.android.systemui.net.NetworkOverLimitActivity</string>
+    <string name="config_dataUsageSummaryComponent" translatable="false">com.android.settings/com.android.settings.Settings$DataUsageSummaryActivity</string>
 </resources>
