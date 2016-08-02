@@ -21,6 +21,7 @@ import static com.android.shell.BugreportPrefs.STATE_SHOW;
 import static com.android.shell.BugreportPrefs.STATE_UNKNOWN;
 import static com.android.shell.BugreportPrefs.getWarningState;
 import static com.android.shell.BugreportPrefs.setWarningState;
+import static com.android.shell.BugreportProgressService.sendShareIntent;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -78,7 +79,7 @@ public class BugreportWarningActivity extends AlertActivity
         if (which == AlertDialog.BUTTON_POSITIVE) {
             // Remember confirm state, and launch target
             setWarningState(this, mConfirmRepeat.isChecked() ? STATE_HIDE : STATE_SHOW);
-            startActivity(mSendIntent);
+            sendShareIntent(this, mSendIntent);
         }
 
         finish();

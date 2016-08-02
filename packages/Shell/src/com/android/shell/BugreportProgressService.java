@@ -1000,10 +1000,15 @@ public class BugreportProgressService extends Service {
         notifIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
         // Send the share intent...
-        mContext.startActivity(notifIntent);
+        sendShareIntent(mContext, notifIntent);
 
         // ... and stop watching this process.
         stopProgress(id);
+    }
+
+    static void sendShareIntent(Context context, Intent intent) {
+        context.startActivity(Intent.createChooser(intent,
+                context.getResources().getText(R.string.bugreport_intent_chooser_title)));
     }
 
     /**
