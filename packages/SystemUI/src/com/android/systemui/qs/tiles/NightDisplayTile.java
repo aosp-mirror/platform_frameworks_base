@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles;
 
+import android.app.ActivityManager;
 import android.content.Intent;
 import android.provider.Settings;
 import android.widget.Switch;
@@ -29,11 +30,12 @@ import com.android.systemui.qs.QSTile;
 public class NightDisplayTile extends QSTile<QSTile.BooleanState>
         implements NightDisplayController.Callback {
 
-    private final NightDisplayController mController;
+    private NightDisplayController mController;
+    private boolean mIsListening;
 
     public NightDisplayTile(Host host) {
         super(host);
-        mController = new NightDisplayController(mContext);
+        mController = new NightDisplayController(mContext, ActivityManager.getCurrentUser());
     }
 
     @Override
@@ -51,6 +53,22 @@ public class NightDisplayTile extends QSTile<QSTile.BooleanState>
         final boolean activated = !mState.value;
         MetricsLogger.action(mContext, getMetricsCategory(), activated);
         mController.setActivated(activated);
+    }
+
+    @Override
+    protected void handleUserSwitch(int newUserId) {
+        // Stop listening to the old controller.
+        if (mIsListening) {
+            mController.setListener(null);
+        }
+
+        // Make a new controller for the new user.
+        mController = new NightDisplayController(mContext, newUserId);
+        if (mIsListening) {
+            mController.setListener(this);
+        }
+
+        super.handleUserSwitch(newUserId);
     }
 
     @Override
@@ -79,6 +97,7 @@ public class NightDisplayTile extends QSTile<QSTile.BooleanState>
 
     @Override
     protected void setListening(boolean listening) {
+        mIsListening = listening;
         if (listening) {
             mController.setListener(this);
             refreshState();
