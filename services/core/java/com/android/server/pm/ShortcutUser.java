@@ -57,7 +57,9 @@ class ShortcutUser {
 
     private static final String ATTR_VALUE = "value";
     private static final String ATTR_KNOWN_LOCALES = "locales";
-    private static final String ATTR_LAST_APP_SCAN_TIME = "last-app-scan-time";
+
+    // Suffix "2" was added to force rescan all packages after the next OTA.
+    private static final String ATTR_LAST_APP_SCAN_TIME = "last-app-scan-time2";
     private static final String KEY_USER_ID = "userId";
     private static final String KEY_LAUNCHERS = "launchers";
     private static final String KEY_PACKAGES = "packages";
