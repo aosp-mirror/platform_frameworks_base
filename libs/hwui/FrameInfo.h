@@ -52,6 +52,7 @@ enum class FrameInfoIndex {
     QueueBufferDuration,
 
     // Must be the last value!
+    // Also must be kept in sync with FrameMetrics.java#FRAME_STATS_COUNT
     NumIndexes
 };
 
