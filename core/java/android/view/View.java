@@ -821,6 +821,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     static boolean sTextureViewIgnoresDrawableSetters = false;
 
     /**
+     * Prior to N, some ViewGroups would not convert LayoutParams properly even though both extend
+     * MarginLayoutParams. For instance, converting LinearLayout.LayoutParams to
+     * RelativeLayout.LayoutParams would lose margin information. This is fixed on N but target API
+     * check is implemented for backwards compatibility.
+     *
+     * {@hide}
+     */
+    protected static boolean sPreserveMarginParamsInLayoutParamConversion;
+
+
+    /**
      * This view does not want keystrokes. Use with TAKES_FOCUS_MASK when
      * calling setFlags.
      */
@@ -4051,6 +4062,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // Prior to N, TextureView would silently ignore calls to setBackground/setForeground.
             // On N+, we throw, but that breaks compatibility with apps that use these methods.
             sTextureViewIgnoresDrawableSetters = targetSdkVersion <= M;
+
+            // Prior to N, we would drop margins in LayoutParam conversions. The fix triggers bugs
+            // in apps so we target check it to avoid breaking existing apps.
+            sPreserveMarginParamsInLayoutParamConversion = targetSdkVersion >= N;
 
             sCompatibilityDone = true;
         }
