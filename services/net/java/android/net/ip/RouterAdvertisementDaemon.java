@@ -45,7 +45,9 @@ import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -109,6 +111,11 @@ public class RouterAdvertisementDaemon {
     private final byte[] mRA = new byte[IPV6_MIN_MTU];
     @GuardedBy("mLock")
     private int mRaLength;
+    @GuardedBy("mLock")
+    private final HashMap<IpPrefix, Integer> mDeprecatedPrefixes;
+
+    @GuardedBy("mLock")
+    private RaParams mRaParams;
 
     private volatile FileDescriptor mSocket;
     private volatile MulticastTransmitter mMulticastTransmitter;
@@ -141,45 +148,29 @@ public class RouterAdvertisementDaemon {
         mIfIndex = ifindex;
         mHwAddr = hwaddr;
         mAllNodes = new InetSocketAddress(getAllNodesForScopeId(mIfIndex), 0);
+        mDeprecatedPrefixes = new HashMap<>();
     }
 
-    public void buildNewRa(RaParams params) {
+    public void buildNewRa(RaParams params, HashSet<IpPrefix> newlyDeprecated) {
+        if (newlyDeprecated != null) {
+            synchronized (mLock) {
+                for (IpPrefix ipp : newlyDeprecated) {
+                    mDeprecatedPrefixes.put(ipp, MAX_URGENT_RTR_ADVERTISEMENTS);
+                }
+            }
+        }
+
+        // TODO: Send MAX_URGENT_RTR_ADVERTISEMENTS zero router lifetime RAs,
+        // iff. we have already sent an RA.
         if (params == null || params.prefixes.isEmpty()) {
             // No RA to be served at this time.
             clearRa();
             return;
         }
 
-        if (params.mtu < IPV6_MIN_MTU) {
-            params.mtu = IPV6_MIN_MTU;
-        }
-
-        final ByteBuffer ra = ByteBuffer.wrap(mRA);
-        ra.order(ByteOrder.BIG_ENDIAN);
-
         synchronized (mLock) {
-            try {
-                putHeader(ra, params.hasDefaultRoute);
-                putSlla(ra, mHwAddr);
-                // https://tools.ietf.org/html/rfc5175#section-4 says:
-                //
-                //     "MUST NOT be added to a Router Advertisement message
-                //      if no flags in the option are set."
-                //
-                // putExpandedFlagsOption(ra);
-                putMtu(ra, params.mtu);
-                for (IpPrefix ipp : params.prefixes) {
-                    putPio(ra, ipp);
-                }
-                if (params.dnses.size() > 0) {
-                    putRdnss(ra, params.dnses);
-                }
-                mRaLength = ra.position();
-            } catch (BufferOverflowException e) {
-                Log.e(TAG, "Could not construct new RA: " + e);
-                mRaLength = 0;
-                return;
-            }
+            mRaParams = params;
+            assembleRa();
         }
 
         maybeNotifyMulticastTransmitter();
@@ -214,6 +205,64 @@ public class RouterAdvertisementDaemon {
         if (notifySocket) {
             maybeNotifyMulticastTransmitter();
         }
+    }
+
+    private void assembleRa() {
+        final ByteBuffer ra = ByteBuffer.wrap(mRA);
+        ra.order(ByteOrder.BIG_ENDIAN);
+
+        synchronized (mLock) {
+            try {
+                putHeader(ra, mRaParams.hasDefaultRoute);
+
+                putSlla(ra, mHwAddr);
+
+                // https://tools.ietf.org/html/rfc5175#section-4 says:
+                //
+                //     "MUST NOT be added to a Router Advertisement message
+                //      if no flags in the option are set."
+                //
+                // putExpandedFlagsOption(ra);
+
+                putMtu(ra, mRaParams.mtu);
+
+                for (IpPrefix ipp : mRaParams.prefixes) {
+                    putPio(ra, ipp, DEFAULT_LIFETIME, DEFAULT_LIFETIME);
+                    mDeprecatedPrefixes.remove(ipp);
+                }
+
+                for (IpPrefix ipp : mDeprecatedPrefixes.keySet()) {
+                    putPio(ra, ipp, 0, 0);
+                }
+
+                if (mRaParams.dnses.size() > 0) {
+                    putRdnss(ra, mRaParams.dnses);
+                }
+
+                mRaLength = ra.position();
+            } catch (BufferOverflowException e) {
+                Log.e(TAG, "Could not construct new RA: " + e);
+                mRaLength = 0;
+                return;
+            }
+        }
+    }
+
+    private int decrementDeprecatedPrefixes() {
+        int removed = 0;
+
+        synchronized (mLock) {
+            for (Map.Entry<IpPrefix, Integer> kv : mDeprecatedPrefixes.entrySet()) {
+                if (kv.getValue() == 0) {
+                    mDeprecatedPrefixes.remove(kv.getKey());
+                    removed++;
+                } else {
+                    kv.setValue(kv.getValue() - 1);
+                }
+            }
+        }
+
+        return removed;
     }
 
     private void maybeNotifyMulticastTransmitter() {
@@ -325,10 +374,11 @@ public class RouterAdvertisementDaemon {
         ra.put(ND_OPTION_MTU)
           .put(MTU_NUM_8OCTETS)
           .putShort(asShort(0))
-          .putInt(mtu);
+          .putInt((mtu < IPV6_MIN_MTU) ? IPV6_MIN_MTU : mtu);
     }
 
-    private static void putPio(ByteBuffer ra, IpPrefix ipp) {
+    private static void putPio(ByteBuffer ra, IpPrefix ipp,
+                               int validTime, int preferredTime) {
         /**
             Prefix Information
 
@@ -359,13 +409,17 @@ public class RouterAdvertisementDaemon {
         final byte ND_OPTION_PIO = 3;
         final byte PIO_NUM_8OCTETS = 4;
 
+        if (validTime < 0) validTime = 0;
+        if (preferredTime < 0) preferredTime = 0;
+        if (preferredTime > validTime) preferredTime = validTime;
+
         final byte[] addr = ipp.getAddress().getAddress();
         ra.put(ND_OPTION_PIO)
           .put(PIO_NUM_8OCTETS)
           .put(asByte(prefixLength))
-          .put(asByte(0xc0))  // L&A set
-          .putInt(DEFAULT_LIFETIME)
-          .putInt(DEFAULT_LIFETIME)
+          .put(asByte(0xc0)) /* L & A set */
+          .putInt(validTime)
+          .putInt(preferredTime)
           .putInt(0)
           .put(addr);
     }
@@ -547,6 +601,11 @@ public class RouterAdvertisementDaemon {
                 }
 
                 maybeSendRA(mAllNodes);
+                if (decrementDeprecatedPrefixes() > 0) {
+                    // At least one deprecated PIO has been removed;
+                    // reassemble the RA.
+                    assembleRa();
+                }
             }
         }
 
@@ -560,15 +619,17 @@ public class RouterAdvertisementDaemon {
         }
 
         private int getNextMulticastTransmitDelaySec() {
+            int countDeprecatedPrefixes = 0;
             synchronized (mLock) {
                 if (mRaLength < MIN_RA_HEADER_SIZE) {
                     // No actual RA to send; just sleep for 1 day.
                     return DAY_IN_SECONDS;
                 }
+                countDeprecatedPrefixes = mDeprecatedPrefixes.size();
             }
 
             final int urgentPending = mUrgentAnnouncements.getAndDecrement();
-            if (urgentPending > 0) {
+            if (urgentPending > 0 || countDeprecatedPrefixes > 0) {
                 return MIN_DELAY_BETWEEN_RAS_SEC;
             }
 
