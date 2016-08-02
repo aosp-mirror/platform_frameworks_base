@@ -2648,6 +2648,10 @@
   <!-- Colon separated list of package names that should be granted DND access -->
   <java-symbol type="string" name="config_defaultDndAccessPackages" />
 
+  <!-- For NetworkPolicyManagerService -->
+  <java-symbol type="string" name="config_networkOverLimitComponent" />
+  <java-symbol type="string" name="config_dataUsageSummaryComponent" />
+
   <java-symbol type="string" name="lockscreen_storage_locked" />
 
   <!-- Used for MimeIconUtils. -->

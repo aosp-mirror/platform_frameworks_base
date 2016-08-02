@@ -2532,4 +2532,6 @@
          is installed. -->
     <bool name="config_permissionReviewRequired">false</bool>
 
+    <string name="config_networkOverLimitComponent" translatable="false">com.android.systemui/com.android.systemui.net.NetworkOverLimitActivity</string>
+    <string name="config_dataUsageSummaryComponent" translatable="false">com.android.settings/com.android.settings.Settings$DataUsageSummaryActivity</string>
 </resources>
