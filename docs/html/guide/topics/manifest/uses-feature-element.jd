@@ -1230,7 +1230,7 @@ densities: '160'
     </p>
 
     <p>
-      When declared as required, this feature indicates that the app is
+      By default, your app requires this feature. This feature indicates that the app is
       compatible with a device only if that device emulates a touchscreen
       ("fake touch" interface) or has an actual touchscreen.
     </p>
@@ -1240,19 +1240,12 @@ densities: '160'
       that emulates a subset of a touchscreen's capabilities. For example, a
       mouse or remote control could drive an on-screen cursor. If your app
       requires basic point and click interaction (in other words, it won't work
-      with only a d-pad controller), you should declare this feature. Because
+      with only a d-pad controller), you should declare this feature or simply
+      avoid declaring any {@code android.hardware.touchscreen.*} features. Because
       this is the minimum level of touch interaction, you can also use an app
       that declares this feature on devices that offer more complex touch
       interfaces.
     </p>
-
-    <p class="note">
-      <strong>Note:</strong> Apps require the {@code android.hardware.touchscreen}
-      feature by default. If you want your app to be available to devices that
-      provide a fake touch interface, you must also explicitly declare that a
-      touchscreen is not required as follows:
-    </p>
-    <pre>&lt;uses-feature android:name="android.hardware.touchscreen" <strong>android:required="false"</strong> /&gt;</pre>
   </dd>
 
   <dt>
@@ -1327,21 +1320,9 @@ densities: '160'
     </p>
 
     <p>
-      By default, your app requires this feature. As such, your app is not
-      available to devices that provide only an emulated touch interface ("fake
-      touch") by default. If you want to make your app available on devices
-      that provide a fake touch interface (or even on devices that provide only
-      a d-pad controller), you must explicitly declare that a touchscreen is
-      not required by declaring {@code android.hardware.touchscreen} with
-      {@code android:required="false"}. You should add this declaration if your
-      app uses—but does not require—a real touchscreen interface.
-    </p>
-
-    <p>
       If your app in fact requires a touch interface (to perform more advanced
-      touch gestures such as fling), then you don't need to declare any touch
-      interface features because they're required by default. However, it's
-      best if you explicitly declare all features that your app uses.
+      touch gestures such as fling), then you must explicitly declare this feature
+      or any advanced touchscreen features.
     </p>
 
     <p>
