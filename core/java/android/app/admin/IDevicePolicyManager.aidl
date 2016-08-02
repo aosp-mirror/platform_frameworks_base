@@ -18,6 +18,7 @@
 package android.app.admin;
 
 import android.app.admin.SystemUpdatePolicy;
+import android.app.admin.PasswordMetrics;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -29,6 +30,7 @@ import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.os.RemoteCallback;
 import android.os.UserHandle;
+
 import java.util.List;
 
 /**
@@ -117,8 +119,7 @@ interface IDevicePolicyManager {
     void forceRemoveActiveAdmin(in ComponentName policyReceiver, int userHandle);
     boolean hasGrantedPolicy(in ComponentName policyReceiver, int usesPolicy, int userHandle);
 
-    void setActivePasswordState(int quality, int length, int letters, int uppercase, int lowercase,
-        int numbers, int symbols, int nonletter, int userHandle);
+    void setActivePasswordState(in PasswordMetrics metrics, int userHandle);
     void reportFailedPasswordAttempt(int userHandle);
     void reportSuccessfulPasswordAttempt(int userHandle);
     void reportFailedFingerprintAttempt(int userHandle);

@@ -19,6 +19,7 @@ package com.android.internal.widget;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.app.admin.DevicePolicyManager;
+import android.app.admin.PasswordMetrics;
 import android.app.trust.IStrongAuthTracker;
 import android.app.trust.TrustManager;
 import android.content.ComponentName;
@@ -136,10 +137,6 @@ public class LockPatternUtils {
 
     private static final String ENABLED_TRUST_AGENTS = "lockscreen.enabledtrustagents";
     private static final String IS_TRUST_USUALLY_MANAGED = "lockscreen.istrustusuallymanaged";
-
-    // Maximum allowed number of repeated or ordered characters in a sequence before we'll
-    // consider it a complex PIN/password.
-    public static final int MAX_ALLOWED_SEQUENCE = 3;
 
     public static final String PROFILE_KEY_NAME_ENCRYPT = "profile_key_name_encrypt_";
     public static final String PROFILE_KEY_NAME_DECRYPT = "profile_key_name_decrypt_";
@@ -593,8 +590,7 @@ public class LockPatternUtils {
             setCredentialRequiredToDecrypt(false);
         }
 
-        getDevicePolicyManager().setActivePasswordState(
-                DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, 0, 0, 0, 0, 0, 0, 0, userHandle);
+        getDevicePolicyManager().setActivePasswordState(new PasswordMetrics(), userHandle);
 
         onAfterChangingPassword(userHandle);
     }
@@ -665,8 +661,8 @@ public class LockPatternUtils {
             setBoolean(PATTERN_EVER_CHOSEN_KEY, true, userId);
 
             setLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING, userId);
-            dpm.setActivePasswordState(DevicePolicyManager.PASSWORD_QUALITY_SOMETHING,
-                    pattern.size(), 0, 0, 0, 0, 0, 0, userId);
+            dpm.setActivePasswordState(new PasswordMetrics(
+                    DevicePolicyManager.PASSWORD_QUALITY_SOMETHING, pattern.size()), userId);
             onAfterChangingPassword(userId);
         } catch (RemoteException re) {
             Log.e(TAG, "Couldn't save lock pattern " + re);
@@ -736,96 +732,6 @@ public class LockPatternUtils {
         return getDeviceOwnerInfo() != null;
     }
 
-    /**
-     * Compute the password quality from the given password string.
-     */
-    static public int computePasswordQuality(String password) {
-        boolean hasDigit = false;
-        boolean hasNonDigit = false;
-        final int len = password.length();
-        for (int i = 0; i < len; i++) {
-            if (Character.isDigit(password.charAt(i))) {
-                hasDigit = true;
-            } else {
-                hasNonDigit = true;
-            }
-        }
-
-        if (hasNonDigit && hasDigit) {
-            return DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC;
-        }
-        if (hasNonDigit) {
-            return DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC;
-        }
-        if (hasDigit) {
-            return maxLengthSequence(password) > MAX_ALLOWED_SEQUENCE
-                    ? DevicePolicyManager.PASSWORD_QUALITY_NUMERIC
-                    : DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX;
-        }
-        return DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
-    }
-
-    private static int categoryChar(char c) {
-        if ('a' <= c && c <= 'z') return 0;
-        if ('A' <= c && c <= 'Z') return 1;
-        if ('0' <= c && c <= '9') return 2;
-        return 3;
-    }
-
-    private static int maxDiffCategory(int category) {
-        if (category == 0 || category == 1) return 1;
-        else if (category == 2) return 10;
-        return 0;
-    }
-
-    /*
-     * Returns the maximum length of a sequential characters.  A sequence is defined as
-     * monotonically increasing characters with a constant interval or the same character repeated.
-     *
-     * For example:
-     * maxLengthSequence("1234") == 4
-     * maxLengthSequence("1234abc") == 4
-     * maxLengthSequence("aabc") == 3
-     * maxLengthSequence("qwertyuio") == 1
-     * maxLengthSequence("@ABC") == 3
-     * maxLengthSequence(";;;;") == 4 (anything that repeats)
-     * maxLengthSequence(":;<=>") == 1  (ordered, but not composed of alphas or digits)
-     *
-     * @param string the pass
-     * @return the number of sequential letters or digits
-     */
-    public static int maxLengthSequence(String string) {
-        if (string.length() == 0) return 0;
-        char previousChar = string.charAt(0);
-        int category = categoryChar(previousChar); //current category of the sequence
-        int diff = 0; //difference between two consecutive characters
-        boolean hasDiff = false; //if we are currently targeting a sequence
-        int maxLength = 0; //maximum length of a sequence already found
-        int startSequence = 0; //where the current sequence started
-        for (int current = 1; current < string.length(); current++) {
-            char currentChar = string.charAt(current);
-            int categoryCurrent = categoryChar(currentChar);
-            int currentDiff = (int) currentChar - (int) previousChar;
-            if (categoryCurrent != category || Math.abs(currentDiff) > maxDiffCategory(category)) {
-                maxLength = Math.max(maxLength, current - startSequence);
-                startSequence = current;
-                hasDiff = false;
-                category = categoryCurrent;
-            }
-            else {
-                if(hasDiff && currentDiff != diff) {
-                    maxLength = Math.max(maxLength, current - startSequence);
-                    startSequence = current - 1;
-                }
-                diff = currentDiff;
-                hasDiff = true;
-            }
-            previousChar = currentChar;
-        }
-        maxLength = Math.max(maxLength, string.length() - startSequence);
-        return maxLength;
-    }
-
     /** Update the encryption password if it is enabled **/
     private void updateEncryptionPassword(final int type, final String password) {
         if (!isDeviceEncryptionEnabled()) {
@@ -871,7 +777,8 @@ public class LockPatternUtils {
 
             getLockSettings().setLockPassword(password, savedPassword, userHandle);
             getLockSettings().setSeparateProfileChallengeEnabled(userHandle, true, null);
-            int computedQuality = computePasswordQuality(password);
+            final PasswordMetrics metrics = PasswordMetrics.computeForPassword(password);
+            final int computedQuality = metrics.quality;
 
             // Update the device encryption password.
             if (userHandle == UserHandle.USER_SYSTEM
@@ -891,36 +798,11 @@ public class LockPatternUtils {
 
             setLong(PASSWORD_TYPE_KEY, Math.max(quality, computedQuality), userHandle);
             if (computedQuality != DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) {
-                int letters = 0;
-                int uppercase = 0;
-                int lowercase = 0;
-                int numbers = 0;
-                int symbols = 0;
-                int nonletter = 0;
-                for (int i = 0; i < password.length(); i++) {
-                    char c = password.charAt(i);
-                    if (c >= 'A' && c <= 'Z') {
-                        letters++;
-                        uppercase++;
-                    } else if (c >= 'a' && c <= 'z') {
-                        letters++;
-                        lowercase++;
-                    } else if (c >= '0' && c <= '9') {
-                        numbers++;
-                        nonletter++;
-                    } else {
-                        symbols++;
-                        nonletter++;
-                    }
-                }
-                dpm.setActivePasswordState(Math.max(quality, computedQuality),
-                        password.length(), letters, uppercase, lowercase,
-                        numbers, symbols, nonletter, userHandle);
+                metrics.quality = Math.max(quality, metrics.quality);
+                dpm.setActivePasswordState(metrics, userHandle);
             } else {
                 // The password is not anything.
-                dpm.setActivePasswordState(
-                        DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED,
-                        0, 0, 0, 0, 0, 0, 0, userHandle);
+                dpm.setActivePasswordState(new PasswordMetrics(), userHandle);
             }
 
             // Add the password to the password history. We assume all
