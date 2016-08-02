@@ -17,6 +17,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     services.core \
     services.devicepolicy \
     services.net \
+    services.retaildemo \
     services.usage \
     easymocklib \
     guava \
