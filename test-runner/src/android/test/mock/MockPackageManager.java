@@ -752,13 +752,6 @@ public class MockPackageManager extends PackageManager {
         throw new UnsupportedOperationException();
     }
 
-    /** @hide - hidden in superclass */
-    @Override
-    public void setComponentEnabledSettingAsUser(ComponentName componentName,
-            int newState, int flags, int userId) {
-        throw new UnsupportedOperationException();
-    }
-
     @Override
     public int getComponentEnabledSetting(ComponentName componentName) {
         throw new UnsupportedOperationException();
@@ -766,13 +759,6 @@ public class MockPackageManager extends PackageManager {
 
     @Override
     public void setApplicationEnabledSetting(String packageName, int newState, int flags) {
-        throw new UnsupportedOperationException();
-    }
-
-    /** @hide - hidden in superclass */
-    @Override
-    public void setApplicationEnabledSettingAsUser(String packageName, int newState, int flags,
-            int userId) {
         throw new UnsupportedOperationException();
     }
 

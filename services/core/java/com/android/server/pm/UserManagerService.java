@@ -27,6 +27,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerNative;
+import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.app.IStopUserCallback;
 import android.app.KeyguardManager;
@@ -37,6 +38,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
@@ -2940,13 +2942,17 @@ public class UserManagerService extends IUserManager.Stub {
             if (!TextUtils.isEmpty(demoLauncher)) {
                 ComponentName componentToEnable = ComponentName.unflattenFromString(demoLauncher);
                 String demoLauncherPkg = componentToEnable.getPackageName();
-                final PackageManager pm = mContext.getPackageManager();
-                pm.setComponentEnabledSettingAsUser(componentToEnable,
-                        PackageManager.COMPONENT_ENABLED_STATE_ENABLED, /* flags= */ 0,
-                        /* userId= */ userId);
-                pm.setApplicationEnabledSettingAsUser(demoLauncherPkg,
-                        PackageManager.COMPONENT_ENABLED_STATE_ENABLED, /* flags= */ 0,
-                        /* userId= */ userId);
+                try {
+                    final IPackageManager iPm = AppGlobals.getPackageManager();
+                    iPm.setComponentEnabledSetting(componentToEnable,
+                            PackageManager.COMPONENT_ENABLED_STATE_ENABLED, /* flags= */ 0,
+                            /* userId= */ userId);
+                    iPm.setApplicationEnabledSetting(demoLauncherPkg,
+                            PackageManager.COMPONENT_ENABLED_STATE_ENABLED, /* flags= */ 0,
+                            /* userId= */ userId, null);
+                } catch (RemoteException re) {
+                    // Internal, shouldn't happen
+                }
             }
         }
     }

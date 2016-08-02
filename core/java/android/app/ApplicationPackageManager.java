@@ -2080,14 +2080,8 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public void setComponentEnabledSetting(ComponentName componentName,
                                            int newState, int flags) {
-        setComponentEnabledSettingAsUser(componentName, newState, flags, mContext.getUserId());
-    }
-
-    @Override
-    public void setComponentEnabledSettingAsUser(ComponentName componentName,
-            int newState, int flags, int userId) {
         try {
-            mPM.setComponentEnabledSetting(componentName, newState, flags, userId);
+            mPM.setComponentEnabledSetting(componentName, newState, flags, mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2105,16 +2099,9 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public void setApplicationEnabledSetting(String packageName,
                                              int newState, int flags) {
-        setApplicationEnabledSettingAsUser(packageName, newState, flags,
-                mContext.getUserId());
-    }
-
-    @Override
-    public void setApplicationEnabledSettingAsUser(String packageName,
-            int newState, int flags, int userId) {
         try {
             mPM.setApplicationEnabledSetting(packageName, newState, flags,
-                    userId, mContext.getOpPackageName());
+                    mContext.getUserId(), mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
