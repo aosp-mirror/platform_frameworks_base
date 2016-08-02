@@ -147,6 +147,7 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.text.format.Formatter;
 import android.text.format.Time;
 import android.util.ArrayMap;
@@ -1065,10 +1066,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 com.android.internal.R.color.system_notification_accent_color));
 
         final Resources res = mContext.getResources();
+        CharSequence body = null;
         switch (type) {
             case TYPE_WARNING: {
                 final CharSequence title = res.getText(R.string.data_usage_warning_title);
-                final CharSequence body = res.getString(R.string.data_usage_warning_body);
+                body = res.getString(R.string.data_usage_warning_body);
 
                 builder.setSmallIcon(R.drawable.stat_notify_error);
                 builder.setTicker(title);
@@ -1086,7 +1088,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 break;
             }
             case TYPE_LIMIT: {
-                final CharSequence body = res.getText(R.string.data_usage_limit_body);
+                body = res.getText(R.string.data_usage_limit_body);
 
                 final CharSequence title;
                 int icon = R.drawable.stat_notify_disabled_data;
@@ -1122,7 +1124,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
             case TYPE_LIMIT_SNOOZED: {
                 final long overBytes = totalBytes - policy.limitBytes;
-                final CharSequence body = res.getString(R.string.data_usage_limit_snoozed_body,
+                body = res.getString(R.string.data_usage_limit_snoozed_body,
                         Formatter.formatFileSize(mContext, overBytes));
 
                 final CharSequence title;
@@ -1161,8 +1163,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         try {
             final String packageName = mContext.getPackageName();
             final int[] idReceived = new int[1];
+            if(!TextUtils.isEmpty(body)) {
+                builder.setStyle(new Notification.BigTextStyle()
+                        .bigText(body));
+            }
             mNotifManager.enqueueNotificationWithTag(
-                    packageName, packageName, tag, 0x0, builder.getNotification(), idReceived,
+                    packageName, packageName, tag, 0x0, builder.build(), idReceived,
                     UserHandle.USER_ALL);
             mActiveNotifs.add(tag);
         } catch (RemoteException e) {
