@@ -249,23 +249,23 @@
     <string name="user_owner_label" msgid="1119010402169916617">"Prepnúť na osobný"</string>
     <string name="managed_profile_label" msgid="5289992269827577857">"Prepnúť na pracovný"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontakty"</string>
-    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"prístup k vašim kontaktom"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"prístup ku kontaktom"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Poloha"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"prístup k polohe tohto zariadenia"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendár"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"prístup ku kalendáru"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="4656988620100940350">"posielať a zobrazovať SMS"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"posielanie a zobrazovanie SMS"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Úložisko"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"prístup k fotkám, médiám a súborom na zariadení"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"prístup k fotkám, médiám a súborom v zariadení"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofón"</string>
-    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"zaznamenávanie zvuku"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"nahrávanie zvuku"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Fotoaparát"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"fotenie a natáčanie videí"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefón"</string>
-    <string name="permgroupdesc_phone" msgid="6234224354060641055">"telefonovať a spravovať hovory"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"telefonovanie a správu hovorov"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Telesné senzory"</string>
-    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"prístup k údajom senzorov o životných funkciách"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"prístup k dátam senzorov vašich životných funkcií"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Načítať obsah okna"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Môžete preskúmať obsah okna, s ktorým pracujete."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Zapnúť funkciu Preskúmanie dotykom"</string>
@@ -684,6 +684,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Správne!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Skúsiť znova"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Skúsiť znova"</string>
+    <string name="lockscreen_storage_locked" msgid="9167551160010625200">"Všetky funkcie a dáta získate po odomknutí"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Prekročili ste maximálny povolený počet pokusov o odomknutie tvárou"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Nie je vložená SIM karta"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"V tablete nie je žiadna SIM karta."</string>
@@ -1068,7 +1069,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Prebieha inovácia systému Android..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Systém Android sa spúšťa…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Optimalizuje sa úložisko"</string>
-    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Prebieha inovácia systému Android"</string>
+    <!-- no translation found for android_upgrading_notification_title (8428357096969413169) -->
+    <skip />
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Niektoré aplikácie môžu správne fungovať až po dokončení inovácie"</string>
     <string name="app_upgrading_toast" msgid="3008139776215597053">"Aplikácia <xliff:g id="APPLICATION">%1$s</xliff:g> sa inovuje…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Prebieha optimalizácia aplikácie <xliff:g id="NUMBER_0">%1$d</xliff:g> z <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>

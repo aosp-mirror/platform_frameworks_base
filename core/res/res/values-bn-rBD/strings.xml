@@ -678,6 +678,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"সঠিক!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"আবার চেষ্টা করুন"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"আবার চেষ্টা করুন"</string>
+    <string name="lockscreen_storage_locked" msgid="9167551160010625200">"সমস্ত বৈশিষ্ট্য এবং ডেটার জন্য আনলক করুন"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"মুখের সাহায্যে আনলক করার প্রচেষ্টা যতবার করা যায় তার সীমা পেরিয়ে গেছে"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"কোনো সিম কার্ড নেই"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"ট্যাবলেটের মধ্যে কোনো সিম কার্ড নেই৷"</string>
@@ -1022,7 +1023,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android আপগ্রেড করা হচ্ছে..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android চালু হচ্ছে…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"সঞ্চয়স্থান অপ্টিমাইজ করা হচ্ছে৷"</string>
-    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Android আপগ্রেড করা হচ্ছে"</string>
+    <!-- no translation found for android_upgrading_notification_title (8428357096969413169) -->
+    <skip />
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"আপগ্রেড সম্পন্ন না হওয়া পর্যন্ত কিছু অ্যাপ্লিকেশান সঠিকভাবে কাজ নাও করতে পারে"</string>
     <string name="app_upgrading_toast" msgid="3008139776215597053">"<xliff:g id="APPLICATION">%1$s</xliff:g> আপগ্রেড করা হচ্ছে…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_1">%2$d</xliff:g>টির মধ্যে <xliff:g id="NUMBER_0">%1$d</xliff:g>টি অ্যাপ্লিকেশান অপ্টিমাইজ করা হচ্ছে৷"</string>
@@ -1069,8 +1071,8 @@
       <item quantity="one">খোলা ওয়াই-ফাই নেটওয়ার্কগুলি উপলব্ধ রয়েছে</item>
       <item quantity="other">খোলা ওয়াই-ফাই নেটওয়ার্কগুলি উপলব্ধ রয়েছে</item>
     </plurals>
-    <string name="wifi_available_sign_in" msgid="9157196203958866662">"ওয়াই-ফাই নেটওয়ার্কে প্রবেশ করুন করুন"</string>
-    <string name="network_available_sign_in" msgid="1848877297365446605">"নেটওয়ার্কে প্রবেশ করুন করুন"</string>
+    <string name="wifi_available_sign_in" msgid="9157196203958866662">"ওয়াই-ফাই নেটওয়ার্কে প্রবেশ করুন"</string>
+    <string name="network_available_sign_in" msgid="1848877297365446605">"নেটওয়ার্কে প্রবেশ করুন"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"ওয়াই-ফাই -তে কোনো ইন্টারনেট অ্যাক্সেস নেই"</string>
@@ -1400,7 +1402,7 @@
     <string name="kg_login_instructions" msgid="1100551261265506448">"আনলক করতে আপনার Google অ্যাকাউন্টের মাধ্যমে প্রবেশ করুন করুন৷"</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"ব্যবহারকারী নাম (ইমেল)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"পাসওয়ার্ড"</string>
-    <string name="kg_login_submit_button" msgid="5355904582674054702">"প্রবেশ করুন করুন"</string>
+    <string name="kg_login_submit_button" msgid="5355904582674054702">"প্রবেশ করুন"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"অবৈধ ব্যবহারকারী নাম অথবা পাসওয়ার্ড৷"</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"আপনার ব্যবহারকারী নাম অথবা পাসওয়ার্ড ভুলে গেছেন?\n"<b>"google.com/accounts/recovery"</b>" এ যান৷"</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"অ্যাকাউন্ট পরীক্ষা করা হচ্ছে..."</string>

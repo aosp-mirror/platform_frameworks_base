@@ -678,6 +678,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Tama!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Subukang muli"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Subukang muli"</string>
+    <string name="lockscreen_storage_locked" msgid="9167551160010625200">"I-unlock para sa lahat ng feature at data"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Nalagpasan na ang maximum na mga pagtatangka sa Face Unlock"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Walang SIM card"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Walang SIM card sa tablet."</string>
@@ -1022,7 +1023,8 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Nag-a-upgrade ang Android…"</string>
     <string name="android_start_title" msgid="8418054686415318207">"Nagsisimula ang Android…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Ino-optimize ang storage."</string>
-    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"Nag-a-upgrade ang Android"</string>
+    <!-- no translation found for android_upgrading_notification_title (8428357096969413169) -->
+    <skip />
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Maaaring hindi gumana nang maayos ang ilang app hangga\'t hindi pa natatapos ang pag-upgrade"</string>
     <string name="app_upgrading_toast" msgid="3008139776215597053">"Nag-a-upgrade ang <xliff:g id="APPLICATION">%1$s</xliff:g>…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Ino-optimize ang app <xliff:g id="NUMBER_0">%1$d</xliff:g> ng <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
