@@ -827,7 +827,8 @@ public final class MediaBrowser {
         }
 
         /**
-         * Returns the media id for this item.
+         * Returns the media id in the {@link MediaDescription} for this item.
+         * @see android.media.MediaMetadata#METADATA_KEY_MEDIA_ID
          */
         public @NonNull String getMediaId() {
             return mDescription.getMediaId();
