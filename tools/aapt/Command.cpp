@@ -529,6 +529,16 @@ struct FeatureGroup {
     int openGLESVersion;
 };
 
+static bool hasFeature(const char* name, const FeatureGroup& grp,
+                       const KeyedVector<String8, ImpliedFeature>& implied) {
+    String8 name8(name);
+    ssize_t idx = grp.features.indexOfKey(name8);
+    if (idx < 0) {
+        idx = implied.indexOfKey(name8);
+    }
+    return idx >= 0;
+}
+
 static void addImpliedFeature(KeyedVector<String8, ImpliedFeature>* impliedFeatures,
                               const char* name, const char* reason, bool sdk23) {
     String8 name8(name);
@@ -616,9 +626,16 @@ static void addParentFeatures(FeatureGroup* grp, const String8& name) {
     } else if (name == "android.hardware.location.gps" ||
             name == "android.hardware.location.network") {
         grp->features.add(String8("android.hardware.location"), Feature(true));
+    } else if (name == "android.hardware.faketouch.multitouch") {
+        grp->features.add(String8("android.hardware.faketouch"), Feature(true));
+    } else if (name == "android.hardware.faketouch.multitouch.distinct" ||
+            name == "android.hardware.faketouch.multitouch.jazzhands") {
+        grp->features.add(String8("android.hardware.faketouch.multitouch"), Feature(true));
+        grp->features.add(String8("android.hardware.faketouch"), Feature(true));
     } else if (name == "android.hardware.touchscreen.multitouch") {
         grp->features.add(String8("android.hardware.touchscreen"), Feature(true));
-    } else if (name == "android.hardware.touchscreen.multitouch.distinct") {
+    } else if (name == "android.hardware.touchscreen.multitouch.distinct" ||
+            name == "android.hardware.touchscreen.multitouch.jazzhands") {
         grp->features.add(String8("android.hardware.touchscreen.multitouch"), Feature(true));
         grp->features.add(String8("android.hardware.touchscreen"), Feature(true));
     } else if (name == "android.hardware.opengles.aep") {
@@ -2005,8 +2022,12 @@ int doDump(Bundle* bundle)
                 }
             }
 
-            addImpliedFeature(&impliedFeatures, "android.hardware.touchscreen",
-                    "default feature for all apps", false);
+            // If the app hasn't declared the touchscreen as a feature requirement (either
+            // directly or implied, required or not), then the faketouch feature is implied.
+            if (!hasFeature("android.hardware.touchscreen", commonFeatures, impliedFeatures)) {
+                addImpliedFeature(&impliedFeatures, "android.hardware.faketouch",
+                                  "default feature for all apps", false);
+            }
 
             const size_t numFeatureGroups = featureGroups.size();
             if (numFeatureGroups == 0) {
