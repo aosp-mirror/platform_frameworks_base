@@ -233,10 +233,14 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                     .addFloat(mQsPanel.getTileLayout(), "alpha", 0, 1)
                     .addFloat(mQsPanel.getFooter().getView(), "alpha", 0, 1).build();
             mAllViews.add(mQsPanel.getFooter().getView());
-            Path path = new Path();
-            path.moveTo(0, 0);
-            path.cubicTo(0, 0, 0, 1, 1, 1);
-            PathInterpolatorBuilder interpolatorBuilder = new PathInterpolatorBuilder(0, 0, 0, 1);
+            float px = 0;
+            float py = 1;
+            if (tiles.size() <= 3) {
+                px = 1;
+            } else if (tiles.size() <= 6) {
+                px = .4f;
+            }
+            PathInterpolatorBuilder interpolatorBuilder = new PathInterpolatorBuilder(0, 0, px, py);
             translationXBuilder.setInterpolator(interpolatorBuilder.getXInterpolator());
             translationYBuilder.setInterpolator(interpolatorBuilder.getYInterpolator());
             mTranslationXAnimator = translationXBuilder.build();
