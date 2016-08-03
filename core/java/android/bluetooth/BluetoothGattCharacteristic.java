@@ -321,10 +321,10 @@ public class BluetoothGattCharacteristic implements Parcelable {
     }
 
     /**
-     * Returns the deisred key size.
+     * Returns the desired key size.
      * @hide
      */
-    /*package*/ int getKeySize() {
+    public int getKeySize() {
         return mKeySize;
     }
 
@@ -390,6 +390,14 @@ public class BluetoothGattCharacteristic implements Parcelable {
      */
     public int getInstanceId() {
         return mInstance;
+    }
+
+    /**
+     * Force the instance ID.
+     * @hide
+     */
+    public void setInstanceId(int instanceId) {
+        mInstance = instanceId;
     }
 
     /**
