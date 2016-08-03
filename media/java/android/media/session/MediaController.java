@@ -63,7 +63,9 @@ public final class MediaController {
     private static final int MSG_UPDATE_QUEUE = 5;
     private static final int MSG_UPDATE_QUEUE_TITLE = 6;
     private static final int MSG_UPDATE_EXTRAS = 7;
-    private static final int MSG_DESTROYED = 8;
+    private static final int MSG_UPDATE_REPEAT_MODE = 8;
+    private static final int MSG_UPDATE_SHUFFLE_MODE = 9;
+    private static final int MSG_DESTROYED = 10;
 
     private final ISessionController mSessionBinder;
 
@@ -230,6 +232,35 @@ public final class MediaController {
         } catch (RemoteException e) {
             Log.wtf(TAG, "Error calling getRatingType.", e);
             return Rating.RATING_NONE;
+        }
+    }
+
+    /**
+     * Get the repeat mode for this session.
+     *
+     * @return The latest repeat mode set to the session, or
+     *         {@link PlaybackState#REPEAT_MODE_NONE} if not set.
+     */
+    public int getRepeatMode() {
+        try {
+            return mSessionBinder.getRepeatMode();
+        } catch (RemoteException e) {
+            Log.wtf(TAG, "Error calling getRepeatMode.", e);
+            return PlaybackState.REPEAT_MODE_NONE;
+        }
+    }
+
+    /**
+     * Get the shuffle mode for this session.
+     *
+     * @return The latest shuffle mode set to the session, or false if not set.
+     */
+    public boolean getShuffleMode() {
+        try {
+            return mSessionBinder.getShuffleMode();
+        } catch (RemoteException e) {
+            Log.wtf(TAG, "Error calling getShuffleMode.", e);
+            return false;
         }
     }
 
@@ -579,6 +610,26 @@ public final class MediaController {
          */
         public void onAudioInfoChanged(PlaybackInfo info) {
         }
+
+        /**
+         * Override to handle changes to the repeat mode.
+         *
+         * @param repeatMode The repeat mode. It should be one of followings:
+         *                   {@link PlaybackState#REPEAT_MODE_NONE},
+         *                   {@link PlaybackState#REPEAT_MODE_ONE},
+         *                   {@link PlaybackState#REPEAT_MODE_ALL}
+         */
+        public void onRepeatModeChanged(@PlaybackState.RepeatMode int repeatMode) {
+        }
+
+        /**
+         * Override to handle changes to the shuffle mode.
+         *
+         * @param shuffleMode The shuffle mode. {@code true} if _the_ shuffle mode is on,
+         *                    {@code false} otherwise.
+         */
+        public void onShuffleModeChanged(boolean shuffleMode) {
+        }
     }
 
     /**
@@ -862,6 +913,35 @@ public final class MediaController {
         }
 
         /**
+         * Set the repeat mode for this session.
+         *
+         * @param repeatMode The repeat mode. Must be one of the followings:
+         *                   {@link PlaybackState#REPEAT_MODE_NONE},
+         *                   {@link PlaybackState#REPEAT_MODE_ONE},
+         *                   {@link PlaybackState#REPEAT_MODE_ALL}
+         */
+        public void setRepeatMode(@PlaybackState.RepeatMode int repeatMode) {
+            try {
+                mSessionBinder.repeatMode(repeatMode);
+            } catch (RemoteException e) {
+                Log.wtf(TAG, "Error calling setRepeatMode.", e);
+            }
+        }
+
+        /**
+         * Set the shuffle mode for this session.
+         *
+         * @param shuffleMode {@code true} if the shuffle mode is on, {@code false} otherwise.
+         */
+        public void setShuffleMode(boolean shuffleMode) {
+            try {
+                mSessionBinder.shuffleMode(shuffleMode);
+            } catch (RemoteException e) {
+                Log.wtf(TAG, "Error calling shuffleQueue.", e);
+            }
+        }
+
+        /**
          * Send a custom action back for the {@link MediaSession} to perform.
          *
          * @param customAction The action to perform.
@@ -1062,6 +1142,21 @@ public final class MediaController {
             }
         }
 
+        @Override
+        public void onRepeatModeChanged(int repeatMode) {
+            MediaController controller = mController.get();
+            if (controller != null) {
+                controller.postMessage(MSG_UPDATE_REPEAT_MODE, repeatMode, null);
+            }
+        }
+
+        @Override
+        public void onShuffleModeChanged(boolean shuffleMode) {
+            MediaController controller = mController.get();
+            if (controller != null) {
+                controller.postMessage(MSG_UPDATE_SHUFFLE_MODE, shuffleMode, null);
+            }
+        }
     }
 
     private final static class MessageHandler extends Handler {
@@ -1099,6 +1194,12 @@ public final class MediaController {
                     break;
                 case MSG_UPDATE_VOLUME:
                     mCallback.onAudioInfoChanged((PlaybackInfo) msg.obj);
+                    break;
+                case MSG_UPDATE_REPEAT_MODE:
+                    mCallback.onRepeatModeChanged((int) msg.obj);
+                    break;
+                case MSG_UPDATE_SHUFFLE_MODE:
+                    mCallback.onShuffleModeChanged((boolean) msg.obj);
                     break;
                 case MSG_DESTROYED:
                     mCallback.onSessionDestroyed();

@@ -107,6 +107,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     private ParceledListSlice mQueue;
     private CharSequence mQueueTitle;
     private int mRatingType;
+    private int mRepeatMode;
+    private boolean mShuffleMode;
     private long mLastActiveTime;
     // End TransportPerformer fields
 
@@ -620,6 +622,44 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
     }
 
+    private void pushRepeatModeUpdate() {
+        synchronized (mLock) {
+            if (mDestroyed) {
+                return;
+            }
+            for (int i = mControllerCallbacks.size() - 1; i >= 0; i--) {
+                ISessionControllerCallback cb = mControllerCallbacks.get(i);
+                try {
+                    cb.onRepeatModeChanged(mRepeatMode);
+                } catch (DeadObjectException e) {
+                    mControllerCallbacks.remove(i);
+                    Log.w(TAG, "Removed dead callback in pushRepeatModeUpdate.", e);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "unexpected exception in pushRepeatModeUpdate.", e);
+                }
+            }
+        }
+    }
+
+    private void pushShuffleModeUpdate() {
+        synchronized (mLock) {
+            if (mDestroyed) {
+                return;
+            }
+            for (int i = mControllerCallbacks.size() - 1; i >= 0; i--) {
+                ISessionControllerCallback cb = mControllerCallbacks.get(i);
+                try {
+                    cb.onShuffleModeChanged(mShuffleMode);
+                } catch (DeadObjectException e) {
+                    mControllerCallbacks.remove(i);
+                    Log.w(TAG, "Removed dead callback in pushShuffleModeUpdate.", e);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "unexpected exception in pushShuffleModeUpdate.", e);
+                }
+            }
+        }
+    }
+
     private void pushSessionDestroyed() {
         synchronized (mLock) {
             // This is the only method that may be (and can only be) called
@@ -825,6 +865,30 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         @Override
         public void setRatingType(int type) {
             mRatingType = type;
+        }
+
+        @Override
+        public void setRepeatMode(int repeatMode) {
+            boolean changed;
+            synchronized (mLock) {
+                changed = mRepeatMode != repeatMode;
+                mRepeatMode = repeatMode;
+            }
+            if (changed) {
+                mHandler.post(MessageHandler.MSG_UPDATE_REPEAT_MODE);
+            }
+        }
+
+        @Override
+        public void setShuffleMode(boolean shuffleMode) {
+            boolean changed;
+            synchronized (mLock) {
+                changed = mShuffleMode != shuffleMode;
+                mShuffleMode = shuffleMode;
+            }
+            if (changed) {
+                mHandler.post(MessageHandler.MSG_UPDATE_SHUFFLE_MODE);
+            }
         }
 
         @Override
@@ -1040,6 +1104,22 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                 mCb.onRate(rating);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in rate.", e);
+            }
+        }
+
+        public void repeatMode(int repeatMode) {
+            try {
+                mCb.onRepeatMode(repeatMode);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote failure in repeatMode.", e);
+            }
+        }
+
+        public void shuffleMode(boolean shuffleMode) {
+            try {
+                mCb.onShuffleMode(shuffleMode);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote failure in shuffleMode.", e);
             }
         }
 
@@ -1278,12 +1358,24 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
+        public void repeatMode(int repeatMode) {
+            updateCallingPackage();
+            mSessionCb.repeatMode(repeatMode);
+        }
+
+        @Override
+        public void shuffleMode(boolean shuffleMode) throws RemoteException {
+            updateCallingPackage();
+            mSessionCb.shuffleMode(shuffleMode);
+        }
+
+
+        @Override
         public void sendCustomAction(String action, Bundle args)
                 throws RemoteException {
             updateCallingPackage();
             mSessionCb.sendCustomAction(action, args);
         }
-
 
         @Override
         public MediaMetadata getMetadata() {
@@ -1322,6 +1414,16 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
+        public int getRepeatMode() {
+            return mRepeatMode;
+        }
+
+        @Override
+        public boolean getShuffleMode() {
+            return mShuffleMode;
+        }
+
+        @Override
         public boolean isTransportControlEnabled() {
             return MediaSessionRecord.this.isTransportControlEnabled();
         }
@@ -1336,7 +1438,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         private static final int MSG_SEND_EVENT = 6;
         private static final int MSG_UPDATE_SESSION_STATE = 7;
         private static final int MSG_UPDATE_VOLUME = 8;
-        private static final int MSG_DESTROYED = 9;
+        private static final int MSG_UPDATE_REPEAT_MODE = 9;
+        private static final int MSG_UPDATE_SHUFFLE_MODE = 10;
+        private static final int MSG_DESTROYED = 11;
 
         public MessageHandler(Looper looper) {
             super(looper);
@@ -1367,6 +1471,12 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                     break;
                 case MSG_UPDATE_VOLUME:
                     pushVolumeUpdate();
+                    break;
+                case MSG_UPDATE_REPEAT_MODE:
+                    pushRepeatModeUpdate();
+                    break;
+                case MSG_UPDATE_SHUFFLE_MODE:
+                    pushShuffleModeUpdate();
                     break;
                 case MSG_DESTROYED:
                     pushSessionDestroyed();

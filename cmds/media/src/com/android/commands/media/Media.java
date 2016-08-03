@@ -57,6 +57,7 @@ public class Media extends BaseCommand {
         (new Media()).run(args);
     }
 
+    @Override
     public void onShowUsage(PrintStream out) {
         out.println(
                 "usage: media [subcommand] [options]\n" +
@@ -73,6 +74,7 @@ public class Media extends BaseCommand {
         );
     }
 
+    @Override
     public void onRun() throws Exception {
         mSessionService = ISessionManager.Stub.asInterface(ServiceManager.checkService(
                 Context.MEDIA_SESSION_SERVICE));
@@ -220,6 +222,16 @@ public class Media extends BaseCommand {
         @Override
         public void onVolumeInfoChanged(ParcelableVolumeInfo info) throws RemoteException {
             System.out.println("onVolumeInfoChanged " + info);
+        }
+
+        @Override
+        public void onRepeatModeChanged(int repeatMode) throws RemoteException {
+            System.out.println("onRepeatModeChanged " + repeatMode);
+        }
+
+        @Override
+        public void onShuffleModeChanged(boolean shuffleMode) throws RemoteException {
+            System.out.println("onShuffleModeChanged " + shuffleMode);
         }
 
         void printUsageMessage() {
