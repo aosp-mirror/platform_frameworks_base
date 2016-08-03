@@ -523,15 +523,21 @@ public class AccountManagerService
      *
      */
     private boolean isAccountVisible(Account a, int uid, UserAccounts ua) {
+        if(isAccountManagedByCaller(a.type, uid, UserHandle.getUserId(uid))) {
+            return true;
+        }
         int accountMapping = getMockAccountNumber(a, ua);
         if(accountMapping < 0) {
             return true;
         }
         synchronized(ua.cacheLock) {
+            SparseArray<Account> userAcctIdToAcctMap = ua.mMockAccountIdToAccount;
             SparseArray<ArrayList<Integer>> userWlUidToMockAccountNums =
                     ua.mVisibleListUidToMockAccountNumbers;
             ArrayList<Integer> linkedAccountsToUid = userWlUidToMockAccountNums.get(uid);
-            return linkedAccountsToUid != null && linkedAccountsToUid.contains(accountMapping);
+            int indexOfAccountMapping = userAcctIdToAcctMap.indexOfValueByValue(a);
+            return indexOfAccountMapping == -1 || (linkedAccountsToUid != null
+                    && linkedAccountsToUid.contains(accountMapping));
         }
     }
 
@@ -563,7 +569,6 @@ public class AccountManagerService
         if(accountMapping < 0) {
             accountMapping = makeAccountNumber(a, ua);
         }
-
         synchronized(ua.cacheLock) {
             SparseArray<ArrayList<Integer>> userWlUidToMockAccountNums =
                     ua.mVisibleListUidToMockAccountNumbers;
@@ -4062,11 +4067,23 @@ public class AccountManagerService
         long identityToken = clearCallingIdentity();
         try {
             UserAccounts accounts = getUserAccounts(userId);
-            return getAccountsInternal(
+            Account[] accountsToReturn = getAccountsInternal(
                     accounts,
                     callingUid,
                     callingPackage,
                     visibleAccountTypes);
+            ArrayList<Account> accountsToReturnList = new
+                    ArrayList<Account>(Arrays.asList(accountsToReturn));
+            for(int i = accountsToReturnList.size() - 1; i >= 0 ; i--) {
+                // if account not visible to caller or managed by caller, remove from
+                // accounts to return. Note that all accounts visible by default unless
+                // visible list functionality implemented
+                if(!(isAccountVisible(accountsToReturnList.get(i), callingUid,
+                        getUserAccounts(userId)))) {
+                    accountsToReturnList.remove(i);
+                }
+            }
+            return accountsToReturnList.toArray(new Account[accountsToReturnList.size()]);
         } finally {
             restoreCallingIdentity(identityToken);
         }
@@ -4197,23 +4214,7 @@ public class AccountManagerService
     @Override
     @NonNull
     public Account[] getAccounts(String type, String opPackageName) {
-        Account[] accessibleAccounts =
-                getAccountsAsUser(type, UserHandle.getCallingUserId(), opPackageName);
-        /* Up until now, access to accounts is User Specific. With Push API, these accounts
-        can be filtered by application as well. Therefore, in this method specifically,
-        we will additionally add the visible listed accounts tied to the Application
-        specifically through visible listing, as approved by the AccountAuthenticator
-        for a specific application on a device. */
-        ArrayList<Account> allAccounts = new ArrayList<>(Arrays.asList(accessibleAccounts));
-        Account[] visibleListedAccounts = getVisibleListedAccounts(Binder.getCallingUid(),
-                getUserAccounts(UserHandle.getCallingUserId()));
-        for(Account visibleAccount : visibleListedAccounts) {
-            if(!allAccounts.contains(visibleAccount)) {
-                allAccounts.add(visibleAccount);
-            }
-        }
-        Account[] allAccountsArr = new Account[allAccounts.size()];
-        return allAccounts.toArray(allAccountsArr);
+        return getAccountsAsUser(type, UserHandle.getCallingUserId(), opPackageName);
     }
 
     @Override
