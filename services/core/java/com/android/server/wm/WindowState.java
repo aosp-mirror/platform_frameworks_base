@@ -629,7 +629,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
 
         final WindowState topParentWindow = getTopParentWindow();
         WindowToken rootToken = topParentWindow.mToken;
-        while (rootToken.appWindowToken == null) {
+        while (rootToken.asAppWindowToken() == null) {
             WindowToken parent = mService.mTokenMap.get(rootToken.token);
             if (parent == null || rootToken == parent) {
                 break;
@@ -637,7 +637,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
             rootToken = parent;
         }
         mRootToken = rootToken;
-        mAppToken = rootToken.appWindowToken;
+        mAppToken = rootToken.asAppWindowToken();
         if (mAppToken != null) {
             final DisplayContent appDisplay = getDisplayContent();
             mNotOnAppsDisplay = displayContent != appDisplay;

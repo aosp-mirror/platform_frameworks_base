@@ -109,9 +109,9 @@ public class AppWindowAnimator {
 
     static final Animation sDummyAnimation = new DummyAnimation();
 
-    public AppWindowAnimator(final AppWindowToken atoken) {
+    public AppWindowAnimator(final AppWindowToken atoken, WindowManagerService service) {
         mAppToken = atoken;
-        mService = atoken.service;
+        mService = service;
         mAnimator = mService.mAnimator;
     }
 
