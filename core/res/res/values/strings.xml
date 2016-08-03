@@ -1955,7 +1955,7 @@
     <string name="lockscreen_access_pattern_cleared">Pattern cleared</string>
     <!-- Accessibility description sent when user adds a dot to the pattern. [CHAR LIMIT=NONE]  -->
     <string name="lockscreen_access_pattern_cell_added">Cell added</string>
-    <!-- Accessibility description sent when user adds a dot to the pattern. Announces the 
+    <!-- Accessibility description sent when user adds a dot to the pattern. Announces the
     actual cell when headphones are connected [CHAR LIMIT=NONE]  -->
     <string name="lockscreen_access_pattern_cell_added_verbose">
             Cell <xliff:g id="cell_index" example="3">%1$s</xliff:g> added</string>
@@ -2034,6 +2034,12 @@
         FACTORY_TEST action.</string>
     <!-- Button to restart the device after the factory test. -->
     <string name="factorytest_reboot">Reboot</string>
+
+    <!-- Do not translate.  timepicker mode, overridden for watch -->
+    <string name="time_picker_mode" translatable="false">"clock"</string>
+
+    <!-- Do not translate.  datepicker mode, overridden for watch -->
+    <string name="date_picker_mode" translatable="false">"calendar"</string>
 
     <!-- Do not translate.  WebView User Agent string -->
     <string name="web_user_agent" translatable="false">Mozilla/5.0 (Linux; U; <xliff:g id="x">Android %s</xliff:g>)

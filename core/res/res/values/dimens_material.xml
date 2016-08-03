@@ -189,4 +189,8 @@
     <dimen name="day_picker_button_margin_top">0dp</dimen>
 
     <dimen name="datepicker_view_animator_height">226dp</dimen>
+
+    <!-- Date and time picker legacy dimens -->
+    <dimen name="picker_top_margin">16dip</dimen>
+    <dimen name="picker_bottom_margin">16dip</dimen>
 </resources>

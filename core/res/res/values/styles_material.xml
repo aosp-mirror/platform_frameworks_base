@@ -255,6 +255,8 @@ please see styles_device_defaults.xml.
         <item name="textColor">?attr/textColorPrimary</item>
     </style>
 
+    <style name="TextAppearance.Material.NumberPicker" parent="TextAppearance.Material.Body1"/>
+
     <!-- Deprecated text styles -->
 
     <style name="TextAppearance.Material.Inverse">
@@ -687,7 +689,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Material.TimePicker">
-        <item name="timePickerMode">clock</item>
+        <item name="timePickerMode">@string/time_picker_mode</item>
         <item name="legacyLayout">@layout/time_picker_legacy_material</item>
         <!-- Attributes for new-style TimePicker. -->
         <item name="internalLayout">@layout/time_picker_material</item>
@@ -701,7 +703,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Material.DatePicker">
-        <item name="datePickerMode">calendar</item>
+        <item name="datePickerMode">@string/date_picker_mode</item>
         <item name="legacyLayout">@layout/date_picker_legacy_holo</item>
         <item name="calendarViewShown">true</item>
         <!-- Attributes for new-style DatePicker. -->
