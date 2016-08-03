@@ -20,13 +20,14 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 
 /**
  * A Pin based Keyguard input view
  */
 public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
-        implements View.OnKeyListener {
+        implements View.OnKeyListener, View.OnTouchListener {
 
     protected PasswordTextView mPasswordEntry;
     private View mOkButton;
@@ -185,10 +186,10 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
 
         mOkButton = findViewById(R.id.key_enter);
         if (mOkButton != null) {
+            mOkButton.setOnTouchListener(this);
             mOkButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    doHapticKeyClick();
                     if (mPasswordEntry.isEnabled()) {
                         verifyPasswordAndUnlock();
                     }
@@ -199,6 +200,7 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
 
         mDeleteButton = findViewById(R.id.delete_button);
         mDeleteButton.setVisibility(View.VISIBLE);
+        mDeleteButton.setOnTouchListener(this);
         mDeleteButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -206,7 +208,6 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
                 if (mPasswordEntry.isEnabled()) {
                     mPasswordEntry.deleteLastChar();
                 }
-                doHapticKeyClick();
             }
         });
         mDeleteButton.setOnLongClickListener(new View.OnLongClickListener() {
@@ -234,6 +235,14 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
 
         mPasswordEntry.requestFocus();
         super.onFinishInflate();
+    }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+            doHapticKeyClick();
+        }
+        return false;
     }
 
     @Override
