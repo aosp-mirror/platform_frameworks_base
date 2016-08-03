@@ -250,9 +250,6 @@ public final class BluetoothGatt implements BluetoothProfile {
                 if (VDBG) Log.d(TAG, "onCharacteristicRead() - Device=" + address
                             + " handle=" + handle + " Status=" + status);
 
-                 Log.w(TAG, "onCharacteristicRead() - Device=" + address
-                            + " handle=" + handle + " Status=" + status);
-
                 if (!address.equals(mDevice.getAddress())) {
                     return;
                 }
