@@ -15,8 +15,7 @@
  */
 package android.bluetooth;
 
-import android.os.ParcelUuid;
-
+import android.bluetooth.BluetoothGattService;
 
 /**
  * Callback definitions for interacting with BLE / GATT
@@ -27,36 +26,18 @@ oneway interface IBluetoothGattServerCallback {
     void onScanResult(in String address, in int rssi, in byte[] advData);
     void onServerConnectionState(in int status, in int serverIf,
                                  in boolean connected, in String address);
-    void onServiceAdded(in int status, in int srvcType,
-                        in int srvcInstId, in ParcelUuid srvcId);
-    void onCharacteristicReadRequest(in String address, in int transId,
-                                     in int offset, in boolean isLong,
-                                     in int srvcType,
-                                     in int srvcInstId, in ParcelUuid srvcId,
-                                     in int charInstId, in ParcelUuid charId);
+    void onServiceAdded(in int status, in BluetoothGattService service);
+    void onCharacteristicReadRequest(in String address, in int transId, in int offset,
+                                     in boolean isLong, in int handle);
     void onDescriptorReadRequest(in String address, in int transId,
                                      in int offset, in boolean isLong,
-                                     in int srvcType,
-                                     in int srvcInstId, in ParcelUuid srvcId,
-                                     in int charInstId, in ParcelUuid charId,
-                                     in ParcelUuid descrId);
-    void onCharacteristicWriteRequest(in String address, in int transId,
-                                     in int offset, in int length,
-                                     in boolean isPrep,
-                                     in boolean needRsp,
-                                     in int srvcType,
-                                     in int srvcInstId, in ParcelUuid srvcId,
-                                     in int charInstId, in ParcelUuid charId,
-                                     in byte[] value);
-    void onDescriptorWriteRequest(in String address, in int transId,
-                                     in int offset, in int length,
-                                     in boolean isPrep,
-                                     in boolean needRsp,
-                                     in int srvcType,
-                                     in int srvcInstId, in ParcelUuid srvcId,
-                                     in int charInstId, in ParcelUuid charId,
-                                     in ParcelUuid descrId,
-                                     in byte[] value);
+                                     in int handle);
+    void onCharacteristicWriteRequest(in String address, in int transId, in int offset,
+                                     in int length, in boolean isPrep, in boolean needRsp,
+                                     in int handle, in byte[] value);
+    void onDescriptorWriteRequest(in String address, in int transId, in int offset,
+                                     in int length, in boolean isPrep, in boolean needRsp,
+                                     in int handle, in byte[] value);
     void onExecuteWrite(in String address, in int transId, in boolean execWrite);
     void onNotificationSent(in String address, in int status);
     void onMtuChanged(in String address, in int mtu);
