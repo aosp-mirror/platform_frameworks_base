@@ -44,6 +44,8 @@ ifdef LOCAL_JACK_ENABLED
 LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/test.jpp
 endif
 
+LOCAL_MIN_SDK_VERSION := 8
+
 include $(BUILD_PACKAGE)
 
 ifndef LOCAL_JACK_ENABLED
@@ -84,6 +86,8 @@ include $(BUILD_SYSTEM)/configure_local_jack.mk
 ifdef LOCAL_JACK_ENABLED
 LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/test.jpp
 endif
+
+LOCAL_MIN_SDK_VERSION := 8
 
 include $(BUILD_PACKAGE)
 

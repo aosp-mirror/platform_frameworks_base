@@ -22,7 +22,15 @@
         <uses-library android:name="android.test.runner" />
     </application>
 
-    <instrumentation android:name="android.test.InstrumentationTestRunner"
+    <instrumentation android:name="com.android.test.runner.MultiDexTestRunner"
+                     android:targetPackage="com.android.multidexlegacyandexception"
+                     android:label="Test for MultiDexLegacyAndException" />
+
+    <instrumentation android:name="com.android.multidexlegacyandexception.tests.MultiDexAndroidJUnitRunner"
+                     android:targetPackage="com.android.multidexlegacyandexception"
+                     android:label="Test for MultiDexLegacyAndException" />
+
+    <instrumentation android:name="android.support.test.runner.AndroidJUnitRunner"
                      android:targetPackage="com.android.multidexlegacyandexception"
                      android:label="Test for MultiDexLegacyAndException" />
 </manifest>
