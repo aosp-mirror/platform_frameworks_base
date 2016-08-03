@@ -622,7 +622,8 @@ public class ZygoteInit {
             OsConstants.CAP_SYS_NICE,
             OsConstants.CAP_SYS_RESOURCE,
             OsConstants.CAP_SYS_TIME,
-            OsConstants.CAP_SYS_TTY_CONFIG
+            OsConstants.CAP_SYS_TTY_CONFIG,
+            OsConstants.CAP_WAKE_ALARM
         );
         /* Containers run without this capability, so avoid setting it in that case */
         if (!SystemProperties.getBoolean(PROPERTY_RUNNING_IN_CONTAINER, false)) {
