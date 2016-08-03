@@ -42,6 +42,7 @@ import android.os.UserManager;
 import android.test.AndroidTestCase;
 import android.test.mock.MockContext;
 import android.test.mock.MockPackageManager;
+import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 
 import java.io.File;
@@ -76,7 +77,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         super.tearDown();
     }
 
-    public class AccountSorter implements Comparator<Account> {
+    class AccountSorter implements Comparator<Account> {
         public int compare(Account object1, Account object2) {
             if (object1 == object2) return 0;
             if (object1 == null) return 1;
@@ -87,6 +88,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         }
     }
 
+    @SmallTest
     public void testCheckAddAccount() throws Exception {
         unlockSystemUser();
         Account a11 = new Account("account1", "type1");
@@ -128,6 +130,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         assertEquals(a31, accounts[1]);
     }
 
+    @SmallTest
     public void testPasswords() throws Exception {
         unlockSystemUser();
         Account a11 = new Account("account1", "type1");
@@ -144,6 +147,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         assertEquals("p12", mAms.getPassword(a12));
     }
 
+    @SmallTest
     public void testUserdata() throws Exception {
         unlockSystemUser();
         Account a11 = new Account("account1", "type1");
@@ -177,6 +181,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         assertNull(mAms.getUserData(a12, "c"));
     }
 
+    @SmallTest
     public void testAuthtokens() throws Exception {
         unlockSystemUser();
         Account a11 = new Account("account1", "type1");
@@ -211,6 +216,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         assertNull(mAms.peekAuthToken(a12, "att2"));
     }
 
+    @SmallTest
     public void testRemovedAccountSync() throws Exception {
         unlockSystemUser();
         Account a1 = new Account("account1", "type1");
@@ -242,6 +248,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         assertEquals("Only a2 should be returned", a2, accounts[0]);
     }
 
+    @SmallTest
     public void testPreNDatabaseMigration() throws Exception {
         String preNDatabaseName = mAms.getPreNDatabaseName(UserHandle.USER_SYSTEM);
         Context originalContext = ((MyMockContext) getContext()).mTestContext;
@@ -296,10 +303,10 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         return intent;
     }
 
-    static public class MockAccountAuthenticatorCache implements IAccountAuthenticatorCache {
+    static class MockAccountAuthenticatorCache implements IAccountAuthenticatorCache {
         private ArrayList<ServiceInfo<AuthenticatorDescription>> mServices;
 
-        public MockAccountAuthenticatorCache() {
+        MockAccountAuthenticatorCache() {
             mServices = new ArrayList<>();
             AuthenticatorDescription d1 = new AuthenticatorDescription("type1", "p1", 0, 0, 0, 0);
             AuthenticatorDescription d2 = new AuthenticatorDescription("type2", "p2", 0, 0, 0, 0);
@@ -339,13 +346,13 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         }
     }
 
-    static public class MyMockContext extends MockContext {
+    static class MyMockContext extends MockContext {
         private Context mTestContext;
         private AppOpsManager mAppOpsManager;
         private UserManager mUserManager;
         private PackageManager mPackageManager;
 
-        public MyMockContext(Context testContext) {
+        MyMockContext(Context testContext) {
             this.mTestContext = testContext;
             this.mAppOpsManager = mock(AppOpsManager.class);
             this.mUserManager = mock(UserManager.class);
@@ -411,16 +418,16 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         }
     }
 
-    static public class MyMockPackageManager extends MockPackageManager {
+    static class MyMockPackageManager extends MockPackageManager {
         @Override
         public int checkSignatures(final int uid1, final int uid2) {
             return PackageManager.SIGNATURE_MATCH;
         }
     }
 
-    static public class MyAccountManagerService extends AccountManagerService {
+    static class MyAccountManagerService extends AccountManagerService {
         private Context mRealTestContext;
-        public MyAccountManagerService(Context context, PackageManager packageManager,
+        MyAccountManagerService(Context context, PackageManager packageManager,
                 IAccountAuthenticatorCache authenticatorCache, Context realTestContext) {
             super(context, packageManager, authenticatorCache);
             this.mRealTestContext = realTestContext;
