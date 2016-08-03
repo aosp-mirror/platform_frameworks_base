@@ -83,8 +83,11 @@ void AnimatorManager::pushStaging() {
         }
         mNewAnimators.clear();
     }
-    for (auto& animator : mAnimators) {
-        animator->pushStaging(mAnimationHandle->context());
+    if (mAnimators.size()) {
+        for (auto& animator : mAnimators) {
+            animator->pushStaging(mAnimationHandle->context());
+        }
+        mParent.mProperties.updateMatrix();
     }
 }
 
