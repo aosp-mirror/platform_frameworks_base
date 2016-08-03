@@ -218,33 +218,45 @@ public class TextureView extends View {
     /** @hide */
     @Override
     protected void onDetachedFromWindowInternal() {
-        destroySurface();
+        destroyHardwareLayer();
+        releaseSurfaceTexture();
         super.onDetachedFromWindowInternal();
     }
 
-    private void destroySurface() {
+    /**
+     * @hide
+     */
+    @Override
+    protected void destroyHardwareResources() {
+        destroyHardwareLayer();
+        mUpdateSurface = mSurface != null;
+    }
+
+    private void destroyHardwareLayer() {
         if (mLayer != null) {
             mLayer.detachSurfaceTexture();
-
-            boolean shouldRelease = true;
-            if (mListener != null) {
-                shouldRelease = mListener.onSurfaceTextureDestroyed(mSurface);
-            }
-
-            synchronized (mNativeWindowLock) {
-                nDestroyNativeWindow();
-            }
-
             mLayer.destroy();
-            if (shouldRelease) mSurface.release();
-            mSurface = null;
             mLayer = null;
-
-            // Make sure if/when new layer gets re-created, transform matrix will
-            // be re-applied.
             mMatrixChanged = true;
-            mHadSurface = true;
         }
+    }
+
+    private void releaseSurfaceTexture() {
+        boolean shouldRelease = true;
+
+        if (mListener != null) {
+            shouldRelease = mListener.onSurfaceTextureDestroyed(mSurface);
+        }
+
+        synchronized (mNativeWindowLock) {
+            nDestroyNativeWindow();
+        }
+
+        if (shouldRelease) {
+            mSurface.release();
+        }
+        mSurface = null;
+        mHadSurface = true;
     }
 
     /**
@@ -366,9 +378,9 @@ public class TextureView extends View {
                 // Create a new SurfaceTexture for the layer.
                 mSurface = new SurfaceTexture(false);
                 mLayer.setSurfaceTexture(mSurface);
+                nCreateNativeWindow(mSurface);
             }
             mSurface.setDefaultBufferSize(getWidth(), getHeight());
-            nCreateNativeWindow(mSurface);
 
             mSurface.setOnFrameAvailableListener(mUpdateListener, mAttachInfo.mHandler);
 
