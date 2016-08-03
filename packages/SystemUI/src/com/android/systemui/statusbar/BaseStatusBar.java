@@ -965,7 +965,6 @@ public abstract class BaseStatusBar extends SystemUI implements
                 mNotificationGutsExposed = entry.row.getGuts();
                 bindGuts(entry.row);
             }
-            entry.cacheContentViews(mContext, null /* updatedNotification */);
             inflateViews(entry, mStackScroller);
         }
     }
@@ -1589,7 +1588,12 @@ public abstract class BaseStatusBar extends SystemUI implements
                 entry.notification.getUser().getIdentifier());
 
         final StatusBarNotification sbn = entry.notification;
-        entry.cacheContentViews(mContext, null);
+        try {
+            entry.cacheContentViews(mContext, null);
+        } catch (RuntimeException e) {
+            Log.e(TAG, "Unable to get notification remote views", e);
+            return false;
+        }
 
         final RemoteViews contentView = entry.cachedContentView;
         final RemoteViews bigContentView = entry.cachedBigContentView;
@@ -2358,7 +2362,13 @@ public abstract class BaseStatusBar extends SystemUI implements
         Notification n = notification.getNotification();
         mNotificationData.updateRanking(ranking);
 
-        boolean applyInPlace = entry.cacheContentViews(mContext, notification.getNotification());
+        boolean applyInPlace;
+        try {
+            applyInPlace = entry.cacheContentViews(mContext, notification.getNotification());
+        } catch (RuntimeException e) {
+            Log.e(TAG, "Unable to get notification remote views", e);
+            applyInPlace = false;
+        }
         boolean shouldPeek = shouldPeek(entry, notification);
         boolean alertAgain = alertAgain(entry, n);
         if (DEBUG) {
@@ -2410,7 +2420,10 @@ public abstract class BaseStatusBar extends SystemUI implements
                     StatusBarIconView.contentDescForNotification(mContext, n));
             entry.icon.setNotification(n);
             entry.icon.set(ic);
-            inflateViews(entry, mStackScroller);
+            if (!inflateViews(entry, mStackScroller)) {
+                handleNotificationError(notification, "Couldn't update remote views for: "
+                        + notification);
+            }
         }
         updateHeadsUp(key, entry, shouldPeek, alertAgain);
         updateNotifications();
