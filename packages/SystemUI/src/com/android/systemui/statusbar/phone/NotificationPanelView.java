@@ -1013,7 +1013,7 @@ public class NotificationPanelView extends PanelView implements
             mKeyguardStatusBar.setAlpha(1f);
             mKeyguardStatusBar.setVisibility(keyguardShowing ? View.VISIBLE : View.INVISIBLE);
             if (keyguardShowing && oldState != mStatusBarState) {
-                mKeyguardBottomArea.updateLeftAffordance();
+                mKeyguardBottomArea.onKeyguardShowingChanged();
                 mAfforanceHelper.updatePreviews();
             }
         }
