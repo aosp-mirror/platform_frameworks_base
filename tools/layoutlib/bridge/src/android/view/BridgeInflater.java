@@ -55,6 +55,7 @@ import static com.android.SdkConstants.CHECKED_TEXT_VIEW;
 import static com.android.SdkConstants.CHECK_BOX;
 import static com.android.SdkConstants.EDIT_TEXT;
 import static com.android.SdkConstants.IMAGE_BUTTON;
+import static com.android.SdkConstants.IMAGE_VIEW;
 import static com.android.SdkConstants.MULTI_AUTO_COMPLETE_TEXT_VIEW;
 import static com.android.SdkConstants.RADIO_BUTTON;
 import static com.android.SdkConstants.SEEK_BAR;
@@ -94,7 +95,7 @@ public final class BridgeInflater extends LayoutInflater {
     /** List of platform widgets that have an AppCompat version */
     private static final Set<String> APPCOMPAT_VIEWS = Collections.unmodifiableSet(
             new HashSet<>(
-                    Arrays.asList(TEXT_VIEW, "ImageSwitcher", BUTTON, EDIT_TEXT, SPINNER,
+                    Arrays.asList(TEXT_VIEW, IMAGE_VIEW, BUTTON, EDIT_TEXT, SPINNER,
                             IMAGE_BUTTON, CHECK_BOX, RADIO_BUTTON, CHECKED_TEXT_VIEW,
                             AUTO_COMPLETE_TEXT_VIEW, MULTI_AUTO_COMPLETE_TEXT_VIEW, "RatingBar",
                             SEEK_BAR)));
