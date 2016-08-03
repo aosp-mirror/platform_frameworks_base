@@ -1507,7 +1507,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 return WindowManagerGlobal.ADD_PERMISSION_DENIED;
             }
 
-            boolean addToken = false;
             WindowToken token = mTokenMap.get(attrs.token);
             AppWindowToken atoken = null;
             if (token == null) {
@@ -1547,7 +1546,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
                 token = new WindowToken(this, attrs.token, -1, false);
-                addToken = true;
             } else if (type >= FIRST_APPLICATION_WINDOW && type <= LAST_APPLICATION_WINDOW) {
                 atoken = token.asAppWindowToken();
                 if (atoken == null) {
@@ -1607,7 +1605,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 // instead make a new token for it (as if null had been passed in for the token).
                 attrs.token = null;
                 token = new WindowToken(this, null, -1, false);
-                addToken = true;
             }
 
             WindowState win = new WindowState(this, session, client, token, attachedWindow,
@@ -1649,9 +1646,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
             origId = Binder.clearCallingIdentity();
 
-            if (addToken) {
-                mTokenMap.put(attrs.token, token);
-            }
             win.attach();
             mWindowMap.put(client.asBinder(), win);
             if (win.mAppOp != AppOpsManager.OP_NONE) {
@@ -2743,7 +2737,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
             wtoken = new WindowToken(this, token, type, true);
-            mTokenMap.put(token, wtoken);
             if (type == TYPE_WALLPAPER) {
                 mWallpaperControllerLocked.addWallpaperToken(wtoken);
             }
@@ -2841,8 +2834,6 @@ public class WindowManagerService extends IWindowManager.Stub
                         isOnTopLauncher);
             }
             task.addAppToken(addPos, atoken, taskResizeMode, homeTask);
-
-            mTokenMap.put(token.asBinder(), atoken);
 
             // Application tokens start out hidden.
             atoken.hidden = true;

@@ -91,6 +91,7 @@ class WindowToken {
         token = _token;
         windowType = type;
         explicit = _explicit;
+        mService.mTokenMap.put(token, this);
     }
 
     void removeAllWindows() {
