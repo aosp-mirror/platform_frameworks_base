@@ -56,7 +56,7 @@ interface IBluetoothGatt {
                             in int writeType, in int authReq, in byte[] value);
     void readDescriptor(in int clientIf, in String address, in int handle, in int authReq);
     void writeDescriptor(in int clientIf, in String address, in int handle,
-                            in int writeType, in int authReq, in byte[] value);
+                            in int authReq, in byte[] value);
     void registerForNotification(in int clientIf, in String address, in int handle, in boolean enable);
     void beginReliableWrite(in int clientIf, in String address);
     void endReliableWrite(in int clientIf, in String address, in boolean execute);
