@@ -31,6 +31,7 @@ import android.graphics.Region.Op;
 import android.hardware.display.DisplayManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.util.AttributeSet;
 import android.view.Display;
 import android.view.DisplayInfo;
@@ -106,6 +107,11 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     private static final Interpolator IME_ADJUST_INTERPOLATOR =
             new PathInterpolator(0.2f, 0f, 0.1f, 1f);
 
+    private static final long ONE_MS_IN_NS = 1000000;
+    private static final long ONE_S_IN_NS = ONE_MS_IN_NS * 1000;
+
+    private static final int MSG_RESIZE_STACK = 0;
+
     private DividerHandleView mHandle;
     private View mBackground;
     private MinimizedDockShadow mMinimizedShadow;
@@ -150,7 +156,25 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     private boolean mDockedStackMinimized;
     private boolean mAdjustedForIme;
     private DividerState mState;
-    private final Handler mHandler = new Handler();
+
+    /**
+     * The offset between vsync-app and vsync-surfaceflinger. See
+     * {@link #calculateAppSurfaceFlingerVsyncOffsetMs} why this is necessary.
+     */
+    private long mSurfaceFlingerOffsetMs;
+
+    private final Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_RESIZE_STACK:
+                    resizeStack(msg.arg1, msg.arg2, (SnapTarget) msg.obj);
+                    break;
+                default:
+                    super.handleMessage(msg);
+            }
+        }
+    };
 
     private final AccessibilityDelegate mHandleDelegate = new AccessibilityDelegate() {
         @Override
@@ -290,12 +314,32 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         EventBus.getDefault().register(this);
+        mSurfaceFlingerOffsetMs = calculateAppSurfaceFlingerVsyncOffsetMs();
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         EventBus.getDefault().unregister(this);
+    }
+
+    /**
+     * This method calculates the offset between vsync-surfaceflinger and vsync-app. If vsync-app
+     * is a couple of milliseconds before vsync-sf, a touch or animation event that causes the
+     * stacks to be resized are sometimes processed before the vsync-sf tick, and sometimes after,
+     * which leads to jank. Figure out this difference here and then post all the touch/animation
+     * events to start being processed at vsync-sf.
+     *
+     * @return The offset between vsync-app and vsync-sf, or 0 if vsync app happens after vsync-sf.
+     */
+    private long calculateAppSurfaceFlingerVsyncOffsetMs() {
+        Display display = getDisplay();
+
+        // Calculate vsync offset from SurfaceFlinger.
+        // See frameworks/native/services/surfaceflinger/SurfaceFlinger.cpp:getDisplayConfigs
+        long vsyncPeriod = (long) (ONE_S_IN_NS / display.getRefreshRate());
+        long sfVsyncOffset = vsyncPeriod - (display.getPresentationDeadlineNanos() - ONE_MS_IN_NS);
+        return Math.max(0, (sfVsyncOffset - display.getAppVsyncOffsetNanos()) / ONE_MS_IN_NS);
     }
 
     @Override
@@ -453,7 +497,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 if (mMoving && mDockSide != WindowManager.DOCKED_INVALID) {
                     SnapTarget snapTarget = mSnapAlgorithm.calculateSnapTarget(
                             mStartPosition, 0 /* velocity */, false /* hardDismiss */);
-                    resizeStack(calculatePosition(x, y), mStartPosition, snapTarget);
+                    resizeStackDelayed(calculatePosition(x, y), mStartPosition, snapTarget);
                 }
                 break;
             case MotionEvent.ACTION_UP:
@@ -532,10 +576,11 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             final long endDelay) {
         final boolean taskPositionSameAtEnd = snapTarget.flag == SnapTarget.FLAG_NONE;
         ValueAnimator anim = ValueAnimator.ofInt(position, snapTarget.position);
-        anim.addUpdateListener(animation -> resizeStack((Integer) animation.getAnimatedValue(),
+        anim.addUpdateListener(animation -> resizeStackDelayed((int) animation.getAnimatedValue(),
                 taskPositionSameAtEnd && animation.getAnimatedFraction() == 1f
                         ? TASK_POSITION_SAME
-                        : snapTarget.taskPosition, snapTarget));
+                        : snapTarget.taskPosition,
+                snapTarget));
         Runnable endAction = () -> {
             commitSnapFlags(snapTarget);
             mWindowManagerProxy.setResizing(false);
@@ -551,15 +596,24 @@ public class DividerView extends FrameLayout implements OnTouchListener,
 
             @Override
             public void onAnimationCancel(Animator animation) {
+                mHandler.removeMessages(MSG_RESIZE_STACK);
                 mCancelled = true;
             }
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                if (endDelay == 0 || mCancelled) {
+                long delay = 0;
+                if (endDelay != 0) {
+                    delay = endDelay;
+                } else if (mCancelled) {
+                    delay = 0;
+                } else if (mSurfaceFlingerOffsetMs != 0) {
+                    delay = mSurfaceFlingerOffsetMs;
+                }
+                if (delay == 0) {
                     endAction.run();
                 } else {
-                    mHandler.postDelayed(endAction, endDelay);
+                    mHandler.postDelayed(endAction, delay);
                 }
             }
         });
@@ -791,6 +845,17 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     public void calculateBoundsForPosition(int position, int dockSide, Rect outRect) {
         DockedDividerUtils.calculateBoundsForPosition(position, dockSide, outRect, mDisplayWidth,
                 mDisplayHeight, mDividerSize);
+    }
+
+    public void resizeStackDelayed(int position, int taskPosition, SnapTarget taskSnapTarget) {
+        if (mSurfaceFlingerOffsetMs != 0) {
+            Message message = mHandler.obtainMessage(MSG_RESIZE_STACK, position, taskPosition,
+                    taskSnapTarget);
+            message.setAsynchronous(true);
+            mHandler.sendMessageDelayed(message, mSurfaceFlingerOffsetMs);
+        } else {
+            resizeStack(position, taskPosition, taskSnapTarget);
+        }
     }
 
     public void resizeStack(int position, int taskPosition, SnapTarget taskSnapTarget) {

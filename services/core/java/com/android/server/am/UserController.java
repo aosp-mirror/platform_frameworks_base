@@ -292,6 +292,7 @@ final class UserController {
      */
     private void finishUserUnlocking(final UserState uss) {
         final int userId = uss.mHandle.getIdentifier();
+        boolean proceedWithUnlock = false;
         synchronized (mLock) {
             // Bail if we ended up with a stale user
             if (mStartedUsers.get(uss.mHandle.getIdentifier()) != uss) return;
@@ -301,19 +302,23 @@ final class UserController {
 
             if (uss.setState(STATE_RUNNING_LOCKED, STATE_RUNNING_UNLOCKING)) {
                 mInjector.getUserManagerInternal().setUserState(userId, uss.state);
-                uss.mUnlockProgress.start();
-
-                // Prepare app storage before we go any further
-                uss.mUnlockProgress.setProgress(5,
-                        mInjector.getContext().getString(R.string.android_start_title));
-                mInjector.getUserManager().onBeforeUnlockUser(userId);
-                uss.mUnlockProgress.setProgress(20);
-
-                // Dispatch unlocked to system services; when fully dispatched,
-                // that calls through to the next "unlocked" phase
-                mHandler.obtainMessage(SYSTEM_USER_UNLOCK_MSG, userId, 0, uss)
-                        .sendToTarget();
+                proceedWithUnlock = true;
             }
+        }
+
+        if (proceedWithUnlock) {
+            uss.mUnlockProgress.start();
+
+            // Prepare app storage before we go any further
+            uss.mUnlockProgress.setProgress(5,
+                        mInjector.getContext().getString(R.string.android_start_title));
+            mInjector.getUserManager().onBeforeUnlockUser(userId);
+            uss.mUnlockProgress.setProgress(20);
+
+            // Dispatch unlocked to system services; when fully dispatched,
+            // that calls through to the next "unlocked" phase
+            mHandler.obtainMessage(SYSTEM_USER_UNLOCK_MSG, userId, 0, uss)
+                    .sendToTarget();
         }
     }
 
@@ -961,6 +966,7 @@ final class UserController {
 
     boolean unlockUserCleared(final int userId, byte[] token, byte[] secret,
             IProgressListener listener) {
+        UserState uss;
         synchronized (mLock) {
             // TODO Move this block outside of synchronized if it causes lock contention
             if (!StorageManager.isUserKeyUnlocked(userId)) {
@@ -975,7 +981,7 @@ final class UserController {
             }
             // Bail if user isn't actually running, otherwise register the given
             // listener to watch for unlock progress
-            final UserState uss = mStartedUsers.get(userId);
+            uss = mStartedUsers.get(userId);
             if (uss == null) {
                 notifyFinished(userId, listener);
                 return false;
@@ -983,8 +989,12 @@ final class UserController {
                 uss.mUnlockProgress.addListener(listener);
                 uss.tokenProvided = (token != null);
             }
+        }
 
-            finishUserUnlocking(uss);
+        finishUserUnlocking(uss);
+
+        final ArraySet<Integer> childProfilesToUnlock = new ArraySet<>();
+        synchronized (mLock) {
 
             // We just unlocked a user, so let's now attempt to unlock any
             // managed profiles under that user.
@@ -994,9 +1004,14 @@ final class UserController {
                 if (parent != null && parent.id == userId && testUserId != userId) {
                     Slog.d(TAG, "User " + testUserId + " (parent " + parent.id
                             + "): attempting unlock because parent was just unlocked");
-                    maybeUnlockUser(testUserId);
+                    childProfilesToUnlock.add(testUserId);
                 }
             }
+        }
+
+        final int size = childProfilesToUnlock.size();
+        for (int i = 0; i < size; i++) {
+            maybeUnlockUser(childProfilesToUnlock.valueAt(i));
         }
 
         return true;
