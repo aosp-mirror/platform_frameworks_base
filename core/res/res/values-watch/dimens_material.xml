@@ -35,4 +35,8 @@
     <dimen name="text_size_small_material">12sp</dimen>
 
     <item name="text_line_spacing_multiplier_material" format="float" type="dimen">1.2</item>
+
+    <!-- Date and time picker legacy dimens -->
+    <dimen name="picker_top_margin">1dip</dimen>
+    <dimen name="picker_bottom_margin">1dip</dimen>
 </resources>

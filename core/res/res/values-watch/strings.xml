@@ -26,4 +26,10 @@
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. Override from base which says "Body Sensors". [CHAR_LIMIT=25] -->
     <string name="permgrouplab_sensors">Sensors</string>
+
+    <!-- Do not translate.  timepicker mode, overridden for watch -->
+    <string name="time_picker_mode" translatable="false">"spinner"</string>
+
+    <!-- Do not translate.  datepicker mode, overridden for watch -->
+    <string name="date_picker_mode" translatable="false">"spinner"</string>
 </resources>

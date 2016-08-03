@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 **
-** Copyright 2012, The Android Open Source Project
+** Copyright 2007, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
 ** you may not use this file except in compliance with the License.
@@ -17,15 +17,10 @@
 */
 -->
 
-<merge xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <view class="android.widget.NumberPicker$CustomEditText"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:id="@+id/numberpicker_input"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:singleLine="true"
-        android:background="@null" />
-
-</merge>
+<TimePicker xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/timePicker"
+    android:layout_gravity="center_horizontal"
+    android:gravity="center_horizontal"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:timePickerMode="@integer/time_picker_mode" />
