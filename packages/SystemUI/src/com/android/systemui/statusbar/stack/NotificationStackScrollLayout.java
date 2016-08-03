@@ -2009,7 +2009,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 bottom = Math.min(bottom, getHeight());
             }
         } else {
-            top = (int) (mTopPadding + mStackTranslation);
+            top = mTopPadding;
             bottom = top;
         }
         if (mPhoneStatusBar.getBarState() != StatusBarState.KEYGUARD) {
