@@ -736,7 +736,7 @@ public final class DropBoxManagerService extends SystemService {
      * Trims the files on disk to make sure they aren't using too much space.
      * @return the overall quota for storage (in bytes)
      */
-    private synchronized long trimToFit() {
+    private synchronized long trimToFit() throws IOException {
         // Expunge aged items (including tombstones marking deleted data).
 
         int ageSeconds = Settings.Global.getInt(mContentResolver,
@@ -768,7 +768,12 @@ public final class DropBoxManagerService extends SystemService {
             int quotaKb = Settings.Global.getInt(mContentResolver,
                     Settings.Global.DROPBOX_QUOTA_KB, DEFAULT_QUOTA_KB);
 
-            mStatFs.restat(mDropBoxDir.getPath());
+            String dirPath = mDropBoxDir.getPath();
+            try {
+                mStatFs.restat(dirPath);
+            } catch (IllegalArgumentException e) {  // restat throws this on error
+                throw new IOException("Can't restat: " + mDropBoxDir);
+            }
             int available = mStatFs.getAvailableBlocks();
             int nonreserved = available - mStatFs.getBlockCount() * reservePercent / 100;
             int maximum = quotaKb * 1024 / mBlockSize;
