@@ -88,9 +88,14 @@ struct XmlFlattenerVisitor : public xml::Visitor {
     }
 
     void visit(xml::Namespace* node) override {
-        writeNamespace(node, android::RES_XML_START_NAMESPACE_TYPE);
-        xml::Visitor::visit(node);
-        writeNamespace(node, android::RES_XML_END_NAMESPACE_TYPE);
+        if (node->namespaceUri == xml::kSchemaTools) {
+            // Skip dedicated tools namespace.
+            xml::Visitor::visit(node);
+        } else {
+            writeNamespace(node, android::RES_XML_START_NAMESPACE_TYPE);
+            xml::Visitor::visit(node);
+            writeNamespace(node, android::RES_XML_END_NAMESPACE_TYPE);
+        }
     }
 
     void visit(xml::Text* node) override {
@@ -182,6 +187,9 @@ struct XmlFlattenerVisitor : public xml::Visitor {
                 if (sdkLevel > mOptions.maxSdkLevel.value()) {
                     continue;
                 }
+            }
+            if (attr.namespaceUri == xml::kSchemaTools) {
+                continue;
             }
             mFilteredAttrs.push_back(&attr);
         }
