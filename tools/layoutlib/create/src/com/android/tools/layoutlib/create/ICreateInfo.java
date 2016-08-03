@@ -45,13 +45,6 @@ public interface ICreateInfo {
     String[] getDelegateClassNatives();
 
     /**
-     * Returns The list of methods to stub out. Each entry must be in the form
-     * "package.package.OuterClass$InnerClass#MethodName".
-     * The list can be empty but must not be null.
-     */
-    String[] getOverriddenMethods();
-
-    /**
      * Returns the list of classes to rename, must be an even list: the binary FQCN
      * of class to replace followed by the new FQCN.
      * The list can be empty but must not be null.
