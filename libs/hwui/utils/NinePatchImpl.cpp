@@ -20,7 +20,6 @@
 #include "SkBitmap.h"
 #include "SkCanvas.h"
 #include "SkColorPriv.h"
-#include "SkNinePatch.h"
 #include "SkPaint.h"
 #include "SkUnPreMultiply.h"
 
