@@ -57,8 +57,9 @@ public class DozeLog {
     private static SummaryStats sEmergencyCallStats;
     private static SummaryStats[][] sProxStats; // [reason][near/far]
 
-    public static void tracePickupPulse(boolean withinVibrationThreshold) {
+    public static void tracePickupPulse(Context context, boolean withinVibrationThreshold) {
         if (!ENABLED) return;
+        init(context);
         log("pickupPulse withinVibrationThreshold=" + withinVibrationThreshold);
         (withinVibrationThreshold ? sPickupPulseNearVibrationStats
                 : sPickupPulseNotNearVibrationStats).append();
@@ -76,8 +77,9 @@ public class DozeLog {
         log("pulseFinish");
     }
 
-    public static void traceNotificationPulse(long instance) {
+    public static void traceNotificationPulse(Context context, long instance) {
         if (!ENABLED) return;
+        init(context);
         log("notificationPulse instance=" + instance);
         sNotificationPulseStats.append();
     }
@@ -153,9 +155,9 @@ public class DozeLog {
     public static void traceProximityResult(Context context, boolean near, long millis,
             int pulseReason) {
         if (!ENABLED) return;
+        init(context);
         log("proximityResult reason=" + pulseReasonToString(pulseReason) + " near=" + near
                 + " millis=" + millis);
-        init(context);
         sProxStats[pulseReason][near ? 0 : 1].append();
     }
 
