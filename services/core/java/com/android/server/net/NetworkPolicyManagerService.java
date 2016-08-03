@@ -2824,7 +2824,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             for (int j = mPowerSaveTempWhitelistAppIds.size() - 1; j >= 0; j--) {
                 int appId = mPowerSaveTempWhitelistAppIds.keyAt(j);
                 int uid = UserHandle.getUid(user.id, appId);
-                updateRulesForRestrictPowerUL();
                 // Update external firewall rules.
                 updateRuleForAppIdleUL(uid);
                 updateRuleForDeviceIdleUL(uid);
