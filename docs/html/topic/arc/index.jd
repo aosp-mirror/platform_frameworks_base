@@ -1,0 +1,398 @@
+page.title=Optimizing Apps for Chromebooks
+@jd:body
+
+<div id="qv-wrapper">
+    <div id="qv">
+      <h2>On this page</h2>
+
+      <ol>
+        <li><a href="#update-manifest">Update Your App's Manifest File</a></li>
+        <li><a href="#leverage">Leverage Support for Multi-Window Mode</li>
+        <li><a href="#keyboard">Support the Keyboard, Trackpad, and Mouse</a></li>
+        <li><a href="#backup">Use Backup and Restore Effectively</a></li>
+        <li><a href="#update-ndk">Update the NDK Libraries</a></li>
+        <li><a href="#support-new-features">Plan Support for New Android Features</a></li>
+        <li><a href="#testing">Test Your App</a></li>
+        <li><a href="#setup">Set Up ADB</a></li>
+        <li><a href="#learning-materials">Additional Learning Materials</a></li>
+      </ol>
+    </div>
+  </div>
+
+<p>
+Google Chromebooks now support the Google Play Store and Android apps. This
+document describes some ways that you can optimize your Android apps for
+Chromebooks.
+</p>
+
+<h2 id="update-manifest">Update Your App's Manifest File</h2>
+
+<p>
+To begin optimizing your Android app for Chromebooks, update your manifest file
+(<code>AndroidManifest.xml</code>) to account for some key hardware and software
+differences between Chromebooks and other devices running Android.
+</p>
+
+<p>
+As of Chrome OS version M53, all Android apps that don't explicitly require the
+<a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html#touchscreen-hw-features"><code>android.hardware.touchscreen</code></a>
+feature will also work on Chrome OS devices that support the
+<code>android.hardware.faketouch</code> feature. However, if you want your app
+to work on all Chromebooks in the best possible way, go to your manifest file
+and adjust the settings so that the <code>android.hardware.touchscreen</code>
+feature is not required, as shown in the following example. You should also
+review your mouse and keyboard interactions.
+</p>
+
+<pre>
+&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          ... &gt;
+    &lt;!-- Some Chromebooks don't support touch. Although not essential,
+         it's a good idea to explicitly include this declaration. --&gt;
+    &lt;uses-feature android:name="android.hardware.touchscreen"
+                  required="false" /&gt;
+&lt;/manifest&gt;
+</pre>
+
+<p>
+Different devices often have different sensors available in them. See the <a
+href="https://developer.android.com/guide/topics/sensors/sensors_overview.html">Sensors
+Overview</a> document for an overview of all sensors that the Android platform
+supports. Although Android handheld devices may have GPS and accelerometers,
+sensors are not guaranteed to be available in every Chromebook. However, there
+are cases where the functionality of a sensor is provided in another way. For
+example, Chromebooks may not have GPS sensors, but they still provide location
+data based on Wi-Fi connections. If you want your app to run on Chromebooks,
+regardless of sensor support, you should update your manifest file so that none
+of the sensors are required.
+</p>
+
+<p class="note"><strong>Note</strong>: If you don't require a particular sensor
+for your app but still use measurements from the sensor when it's available,
+make sure you dynamically check for the sensor's availability before trying to
+gather information from it in your app.
+</p>
+
+<p>
+Some software features are unsupported on Chromebooks. For example, apps that
+provide custom IMEs, app widgets, live wallpapers, and app launchers aren't
+supported and won't be available for installation on Chromebooks. For a complete
+list of software features that aren't currently supported on Chromebooks, see <a
+href="{@docRoot}topic/arc/manifest.html#incompat-software-features">incompatible
+software features</a>.
+</p>
+
+<h2 id="leverage">Leverage Support for Multi-Window Mode</h2>
+
+<p>
+The implementation of Android apps on Chrome OS includes basic multi-window
+support. Instead of automatically drawing over the full screen, Android renders
+apps on Chrome OS into layouts that are appropriate for this form factor. Google
+provides support for the most common window layouts:
+
+<ul>
+  <li>
+    <strong>Portrait</strong> &ndash; Similar to Nexus 5.
+  </li>
+  <li>
+    <strong>Landscape</strong> &ndash; Similar to Nexus 7.
+  </li>
+  <li>
+    <strong>Maximized</strong> &ndash; Uses all available screen pixels.
+  </li>
+</ul>
+
+<p>
+In addition, end users are presented with window controls to toggle among all
+available layouts. By choosing the correct orientation option, you can ensure
+that the user has the correct layout upon launching the app. If an app is
+available in portrait and landscape, it defaults to landscape if possible. After
+this option is set, it is remembered on a per-app basis. Google recommends that
+you test your app to ensure that it handles changes in window size
+appropriately.
+</p>
+
+<h2 id="keyboard">Support the Keyboard, Trackpad, and Mouse</h2>
+
+<p>
+All Chromebooks have a physical keyboard and a trackpad, and some Chromebooks
+have a touchscreen as well. Some devices can even convert from a laptop to a
+tablet.
+</p>
+
+<p>
+Many existing apps already support mouse and trackpad interactions with no extra
+work required. However, it's always best to adjust your app's behavior
+appropriately when users interact with it using a trackpad instead of a
+touchscreen, and you should support and distinguish between both interfaces
+properly. Given the support for physical keyboards, you can now provide hotkeys
+to enable your app's users to be more productive. For example, if your app
+supports printing, you can use <strong>Ctrl+P</strong> to open a print dialog.
+</p>
+
+<h2 id="backup">Use Backup and Restore Effectively</h2>
+
+<p>
+One of the strongest features of Chromebooks is that users can easily migrate
+from one device to another. That is, if someone stops using one Chromebook and
+starts using another, they simply have to sign in, and all of their apps appear.
+</p>
+
+<p class="note"><strong>Tip: </strong> Although it's not mandatory, backing up
+your app's data to the cloud is a good idea.
+</p>
+
+<p>
+Chromebooks can also be shared among a large number of people, such as in
+schools. Since local storage is not infinite, entire accounts&mdash;together
+with their storage&mdash;can be removed from the device at any point. For
+educational settings, it's a good idea to keep this scenario in mind.
+</p>
+
+<h2 id="update-ndk">Update the NDK Libraries</h2>
+
+<p>
+If your app uses the Android NDK libraries, and its target SDK version is 23 or
+higher, ensure that text relocations are removed from both the ARM and x86
+versions of your NDK libraries, as they're not compatible in Android 6.0 (API
+level 23) and higher. By leaving text relocations in your NDK libraries, you may
+also cause incompatibility errors with Chromebooks, especially when running on
+a device that uses an x86 architecture.
+</p>
+
+<p class="note"><strong>Note: </strong>To view more details on updating NDK
+libraries properly, see the <a
+href="https://developer.android.com/about/versions/marshmallow/android-6.0-changes.html#behavior-runtime">
+Runtime</a> section of the Android 6.0 Changes document.
+</p>
+
+<h2 id="support-new-features">Plan Support for New Android Features</h2>
+
+<p>
+Android apps on Chromebooks initially ship with APIs for Android 6.0 (API level
+23). By following the best practices outlined above, your app is likely to be
+compatible with the multi-window improvements introduced in Android 7.0 (API
+level 24). It's good to plan support for the APIs and behaviors available as of
+Android 7.0, which feature several improvements. For example, multi-window
+support is better integrated, and you're able to resize activities arbitrarily,
+making them feel more natural. You can also access APIs for drag-and-drop
+operations across apps and mouse cursor control.
+</p>
+
+<h2 id="testing">Test Your App</h2>
+
+<p>
+To <a href="{@docRoot}topic/arc/sideload.html">load</a> your app onto your
+Chromebook for testing, you must enter <em>Developer</em> mode on your Chrome OS
+device and enable <em>unknown sources</em>. See the <a class="external-link"
+href="https://www.chromium.org/chromium-os/poking-around-your-chrome-os-device#TOC-Putting-your-Chrome-OS-Device-into-Developer-Mode">
+Putting your Chrome OS Device into Developer Mode</a> document for detailed
+instructions about moving your device into Developer mode. After your device is
+in Developer mode, you can go to your Chrome settings and select <strong>Enable
+Unknown Sources</strong> under the <em>security in app</em> settings.
+</p>
+
+<p>
+After enabling Developer mode, you can load an Android app onto your Chrome OS
+device using one of several methods. For more details, see the <a
+href="{@docRoot}topic/arc/sideload.html#load-app">Load Your App</a> section of
+the Loading Apps on Chromebooks page.
+</p>
+
+<p class="note"><strong>Note: </strong>To ensure that your Android app works
+well on a variety of Chromebook devices and available form factors, Google
+recommends that you test your app on an ARM-based Chromebook, an x86-based
+Chromebook, a device with a touchscreen and one without one, and on a
+convertible device (one that can change between a laptop and a tablet). To view
+the full list of supported devices, see the <a
+href="{@docRoot}topic/arc/device-support.html">Chrome OS Device Support for
+Apps</a> page.</p>
+
+<h2 id="setup">Set Up ADB</h2>
+
+<p>
+Before attempting to set up an ADB connection, you must start your Chrome OS in
+<a class="external-link"
+href="https://www.chromium.org/chromium-os/poking-around-your-chrome-os-device">
+Developer Mode</a> so that you have the ability to install Android apps on the
+Chromebook.
+</p>
+
+<p class="caution"><strong>Caution: </strong>After switching your Chrome OS
+device to Developer mode, it restarts and clears all existing data on the
+device.
+</p>
+
+<p>
+To set up ADB, complete the following steps:
+</p>
+
+<ol>
+  <li>
+    Press <strong>Ctrl+D</strong> to start your device.
+  </li>
+  <li>
+    Finish the setup process.
+  </li>
+  <li>
+    Log into your test account.
+  </li>
+  <li>
+    Accept the Google Play Store terms and service conditions.
+  </li>
+</ol>
+
+<h3>Configure the firewall</h3>
+
+<p>
+To configure the Chrome OS firewall to allow incoming ADB connections, complete
+the following steps:
+</p>
+
+<ol>
+  <li>
+    Press <strong>Ctrl+Alt+T</strong> to start the Chrome OS terminal.
+  </li>
+  <li>
+    Type <strong>shell</strong> to get to the bash command shell:
+<pre class="no-pretty-print">
+crosh> shell
+chronos@localhost / $
+</pre>
+  </li>
+  <li>
+    Type the following commands to set up developer features and enable
+    disk-write access for the firewall settings changes:
+<pre class="no-pretty-print">
+chronos@localhost / $ sudo /usr/libexec/debugd/helpers/dev_features_rootfs_verification
+chronos@localhost / $ sudo reboot
+</pre>
+    The <em>sudo reboot</em> command restarts your Chromebook.
+<p class="note"><strong>Note</strong>: You can press the <strong>Tab</strong>
+key to enable autocompletion of file names.</p>
+  </li>
+  <li>
+    After your device restarts, log in to your test account and type the
+    following command to enable the <em>secure shell</em> and configure the
+    firewall properly:
+<pre class="no-pretty-print">
+chronos@localhost / $ sudo /usr/libexec/debugd/helpers/dev_features_ssh
+</pre>
+    You can now exit out of the shell.
+  </li>
+</ol>
+
+<p class="note"><strong>Note</strong>: You must complete this procedure only
+once on your Chromebook.</p>
+
+<h3>Check the IP address of your Chromebook</h3>
+
+<p>
+To verify the IP address of your Chromebook, complete the following steps:
+</p>
+
+<ol>
+  <li>
+    Click the clock icon in the bottom-right area of the screen.
+  </li>
+  <li>
+    Click <strong>Settings</strong>.
+  </li>
+  <li>
+    The <em>Internet Connection</em> section in the Settings area lists all of
+    the available networks. Select the one that you want to use for ADB.
+  </li>
+  <li>
+    Take note of the IP address that appears.
+  </li>
+</ol>
+
+<h3>Enable ADB debugging</h3>
+
+<p>
+To enable ADB debugging, complete the following steps:
+</p>
+
+<ol>
+  <li>
+    Click the clock icon in the bottom-right area of the screen.
+  </li>
+  <li>
+    Click <strong>Settings</strong>.
+  </li>
+  <li>
+    In the <em>Android Apps</em> section, click the <strong>Settings</strong>
+    link in the line that reads <em>Manage your Android apps in Settings</em>.
+    This brings up the Android apps settings.
+  </li>
+  <li>
+    Click <strong>About device</strong>.
+  </li>
+  <li>
+    Click <strong>Build number</strong> seven times to move into Developer mode.
+  </li>
+  <li>
+    Click the arrow in the top-left area of the window to go back to the main
+    Settings screen.
+  </li>
+  <li>
+    Click the new <strong>Developer options</strong> item, activate <strong>ADB
+    debugging</strong>, and then click <strong>OK</strong> to allow ADB
+    debugging.
+  </li>
+  <li>
+    Return to your development machine and use ADB to connect to your
+    Chromebook's using its IP address and port 22.
+  </li>
+  <li>
+    On your Chromebook, click <strong>Allow</strong> when prompted whether you
+    want to allow the debugger. Your ADB session is established.
+  </li>
+</ol>
+
+<h4>Troubleshooting ADB debugging</h4>
+
+<p>
+Sometimes the ADB device shows that it's offline when everything is connected
+properly. In this case, complete the following steps to troubleshoot the issue:
+</p>
+
+<ol>
+  <li>
+    Deactivate <strong>ADB debugging</strong> in <em>Developer options</em>.
+  </li>
+  <li>
+    In a terminal window, run <code>adb kill-server</code>.
+  </li>
+  <li>
+    Re-activate the <strong>ADB debugging</strong> option.
+  </li>
+  <li>
+    In a terminal window, attempt to run <code>adb connect</code>.
+  </li>
+  <li>
+    Click <strong>Allow</strong> when prompted whether you want to allow
+    debugging. Your ADB session is established.
+  </li>
+</ol>
+
+<h2 id="learning-materials">Additional Learning Materials</h2>
+
+<p>
+To learn more about optimizing your Android apps for Chromebooks, consult the
+following resources:
+</p>
+
+<ul>
+  <li>
+    Review the
+    <a class="external-link" href="http://android-developers.blogspot.com/2016/05/bring-your-android-app-to-chromebooks.html">
+    Bring your Android App to Chromebooks</a> I/O session.
+  </li>
+  <li>
+    Post a question on the <a class="external-link"
+    href="https://plus.sandbox.google.com/+AndroidDevelopers">Android developer
+    community</a> with hashtag <em>#AndroidAppsOnChromeOS</em>.
+  </li>
+</ul>
