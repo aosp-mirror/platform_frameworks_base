@@ -250,7 +250,6 @@ public class BluetoothGattService implements Parcelable {
 
     /**
      * Force the instance ID.
-     * This is needed for conformance testing only.
      * @hide
      */
     public void setInstanceId(int instanceId) {
