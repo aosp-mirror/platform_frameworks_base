@@ -342,7 +342,6 @@ void RenderNode::prepareTreeImpl(TreeInfo& info, bool functorsNeedLayer) {
         pushStagingDisplayListChanges(info);
     }
     prepareSubTree(info, childFunctorsNeedLayer, mDisplayList);
-    pushLayerUpdate(info);
 
     if (mDisplayList) {
         for (auto& vectorDrawable : mDisplayList->getVectorDrawables()) {
@@ -353,6 +352,7 @@ void RenderNode::prepareTreeImpl(TreeInfo& info, bool functorsNeedLayer) {
             vectorDrawable->setPropertyChangeWillBeConsumed(true);
         }
     }
+    pushLayerUpdate(info);
 
     info.damageAccumulator->popTransform();
 }
