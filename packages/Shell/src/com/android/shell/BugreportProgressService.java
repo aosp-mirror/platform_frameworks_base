@@ -1455,7 +1455,7 @@ public class BugreportProgressService extends Service {
                 mDialog = new AlertDialog.Builder(context)
                         .setView(view)
                         .setTitle(dialogTitle)
-                        .setCancelable(false)
+                        .setCancelable(true)
                         .setPositiveButton(context.getString(R.string.save),
                                 null)
                         .setNegativeButton(context.getString(com.android.internal.R.string.cancel),
@@ -1474,7 +1474,6 @@ public class BugreportProgressService extends Service {
                                     }
                                 })
                         .create();
-                mDialog.setCancelable(true);
 
                 mDialog.getWindow().setAttributes(
                         new WindowManager.LayoutParams(
