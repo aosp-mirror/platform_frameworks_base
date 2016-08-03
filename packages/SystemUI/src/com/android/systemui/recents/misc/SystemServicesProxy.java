@@ -243,6 +243,9 @@ public class SystemServicesProxy {
         if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION) {
             Collections.addAll(sRecentsBlacklist,
                     res.getStringArray(R.array.recents_tv_blacklist_array));
+        } else {
+            Collections.addAll(sRecentsBlacklist,
+                    res.getStringArray(R.array.recents_blacklist_array));
         }
     }
 
@@ -258,6 +261,13 @@ public class SystemServicesProxy {
             sSystemServicesProxy = new SystemServicesProxy(context);
         }
         return sSystemServicesProxy;
+    }
+
+    /**
+     * @return whether the provided {@param className} is blacklisted
+     */
+    public boolean isBlackListedActivity(String className) {
+        return sRecentsBlacklist.contains(className);
     }
 
     /**
