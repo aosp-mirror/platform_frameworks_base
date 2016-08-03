@@ -70,6 +70,10 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Material.ButtonBar" parent="Widget.Material.BaseButtonBar" />
 
+    <style name="TextAppearance.Material.NumberPicker" parent="TextAppearance.Material.Body1">
+        <item name="textSize">@dimen/text_size_medium_material</item>
+    </style>
+
     <!-- Alert dialog button bar button -->
     <style name="Widget.Material.Button.ButtonBar.AlertDialog" parent="Widget.Material.Button.Borderless.Small">
         <item name="paddingStart">@dimen/list_item_padding_start_material</item>
@@ -85,9 +89,9 @@ please see styles_device_defaults.xml.
         <item name="solidColor">@color/transparent</item>
         <item name="selectionDivider">@drawable/numberpicker_selection_divider</item>
         <item name="selectionDividerHeight">2dp</item>
-        <item name="selectionDividersDistance">48dp</item>
-        <item name="internalMinWidth">64dp</item>
-        <item name="internalMaxHeight">180dp</item>
+        <item name="selectionDividersDistance">24dp</item>
+        <item name="internalMinWidth">32dp</item>
+        <item name="internalMaxHeight">90dp</item>
         <item name="virtualButtonPressedDrawable">?selectableItemBackground</item>
         <item name="descendantFocusability">blocksDescendants</item>
     </style>
