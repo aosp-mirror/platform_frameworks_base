@@ -81,8 +81,8 @@ public class NotificationPanelView extends PanelView implements
 
     private static final float LOCK_ICON_ACTIVE_SCALE = 1.2f;
 
-    private static final String COUNTER_PANEL_OPEN = "panel_open";
-    private static final String COUNTER_PANEL_OPEN_QS = "panel_open_qs";
+    static final String COUNTER_PANEL_OPEN = "panel_open";
+    static final String COUNTER_PANEL_OPEN_QS = "panel_open_qs";
     private static final String COUNTER_PANEL_OPEN_PEEK = "panel_open_peek";
 
     private static final Rect mDummyDirtyRect = new Rect(0, 0, 1, 1);
