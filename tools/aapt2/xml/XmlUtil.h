@@ -29,6 +29,7 @@ constexpr const char* kSchemaAuto = "http://schemas.android.com/apk/res-auto";
 constexpr const char* kSchemaPublicPrefix = "http://schemas.android.com/apk/res/";
 constexpr const char* kSchemaPrivatePrefix = "http://schemas.android.com/apk/prv/res/";
 constexpr const char* kSchemaAndroid = "http://schemas.android.com/apk/res/android";
+constexpr const char* kSchemaTools = "http://schemas.android.com/tools";
 
 /**
  * Result of extracting a package name from a namespace URI declaration.

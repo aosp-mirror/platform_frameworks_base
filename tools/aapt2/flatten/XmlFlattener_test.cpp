@@ -167,6 +167,33 @@ TEST_F(XmlFlattenerTest, FlattenCompiledXmlAndStripSdk21) {
     EXPECT_EQ(uint32_t(0x010103b3), tree.getAttributeNameResID(0));
 }
 
+TEST_F(XmlFlattenerTest, FlattenCompiledXmlAndStripOnlyTools) {
+    std::unique_ptr<xml::XmlResource> doc = test::buildXmlDom(R"EOF(
+            <View xmlns:tools="http://schemas.android.com/tools"
+                xmlns:foo="http://schemas.android.com/foo"
+                foo:bar="Foo"
+                tools:ignore="MissingTranslation"/>)EOF");
+
+    android::ResXMLTree tree;
+    ASSERT_TRUE(flatten(doc.get(), &tree));
+
+    ASSERT_EQ(tree.next(), android::ResXMLTree::START_NAMESPACE);
+
+    size_t len;
+    const char16_t* namespacePrefix = tree.getNamespacePrefix(&len);
+    EXPECT_EQ(StringPiece16(namespacePrefix, len), u"foo");
+
+    const char16_t* namespaceUri = tree.getNamespaceUri(&len);
+    ASSERT_EQ(StringPiece16(namespaceUri, len), u"http://schemas.android.com/foo");
+
+    ASSERT_EQ(tree.next(), android::ResXMLTree::START_TAG);
+
+    EXPECT_EQ(
+            tree.indexOfAttribute("http://schemas.android.com/tools", "ignore"),
+            android::NAME_NOT_FOUND);
+    EXPECT_GE(tree.indexOfAttribute("http://schemas.android.com/foo", "bar"), 0);
+}
+
 TEST_F(XmlFlattenerTest, AssignSpecialAttributeIndices) {
     std::unique_ptr<xml::XmlResource> doc = test::buildXmlDom(R"EOF(
             <View xmlns:android="http://schemas.android.com/apk/res/android"
