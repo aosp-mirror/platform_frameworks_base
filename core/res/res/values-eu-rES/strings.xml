@@ -439,7 +439,7 @@
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Hatz-marka digitala ez da osorik hauteman. Saiatu berriro."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Ezin izan da hatza-marka prozesatu. Saiatu berriro."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Hatz-marka digitalen sentsorea zikina dago. Garbi ezazu, eta saiatu berriro."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Hatza bizkorregi mugitu duzu. Saiatu berriro."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Hatza azkarregi mugitu duzu. Saiatu berriro."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Mantsoegi mugitu duzu hatza. Saiatu berriro."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
