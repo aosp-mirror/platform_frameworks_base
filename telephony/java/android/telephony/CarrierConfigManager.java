@@ -892,6 +892,14 @@ public class CarrierConfigManager {
     public static final String KEY_IMS_REASONINFO_MAPPING_STRING_ARRAY =
             "ims_reasoninfo_mapping_string_array";
 
+    /**
+     * When {@code false}, use default title for Enhanced 4G LTE Mode settings.
+     * When {@code true}, use the variant.
+     * @hide
+     */
+    public static final String KEY_ENHANCED_4G_LTE_TITLE_VARIANT_BOOL =
+            "enhanced_4g_lte_title_variant_bool";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -1056,6 +1064,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_VIDEO_CALLS_CAN_BE_HD_AUDIO, true);
 
         sDefaults.putStringArray(KEY_IMS_REASONINFO_MAPPING_STRING_ARRAY, null);
+        sDefaults.putBoolean(KEY_ENHANCED_4G_LTE_TITLE_VARIANT_BOOL, false);
     }
 
     /**
