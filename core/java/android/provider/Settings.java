@@ -4291,8 +4291,7 @@ public final class Settings {
         public static boolean putStringForUser(ContentResolver resolver, String name, String value,
                 int userHandle) {
             if (LOCATION_MODE.equals(name)) {
-                // HACK ALERT: temporary hack to work around b/10491283.
-                // TODO: once b/10491283 fixed, remove this hack
+                // Map LOCATION_MODE to underlying location provider storage API
                 return setLocationModeForUser(resolver, Integer.parseInt(value), userHandle);
             }
             if (MOVED_TO_GLOBAL.contains(name)) {
@@ -4339,8 +4338,7 @@ public final class Settings {
         /** @hide */
         public static int getIntForUser(ContentResolver cr, String name, int def, int userHandle) {
             if (LOCATION_MODE.equals(name)) {
-                // HACK ALERT: temporary hack to work around b/10491283.
-                // TODO: once b/10491283 fixed, remove this hack
+                // Map from to underlying location provider storage API to location mode
                 return getLocationModeForUser(cr, userHandle);
             }
             String v = getStringForUser(cr, name, userHandle);
@@ -4378,8 +4376,7 @@ public final class Settings {
         public static int getIntForUser(ContentResolver cr, String name, int userHandle)
                 throws SettingNotFoundException {
             if (LOCATION_MODE.equals(name)) {
-                // HACK ALERT: temporary hack to work around b/10491283.
-                // TODO: once b/10491283 fixed, remove this hack
+                // Map from to underlying location provider storage API to location mode
                 return getLocationModeForUser(cr, userHandle);
             }
             String v = getStringForUser(cr, name, userHandle);
@@ -6546,6 +6543,8 @@ public final class Settings {
          * Thread-safe method for setting the location mode to one of
          * {@link #LOCATION_MODE_HIGH_ACCURACY}, {@link #LOCATION_MODE_SENSORS_ONLY},
          * {@link #LOCATION_MODE_BATTERY_SAVING}, or {@link #LOCATION_MODE_OFF}.
+         * Necessary because the mode is a composite of the underlying location provider
+         * settings.
          *
          * @param cr the content resolver to use
          * @param mode such as {@link #LOCATION_MODE_HIGH_ACCURACY}
@@ -6599,7 +6598,8 @@ public final class Settings {
         /**
          * Thread-safe method for reading the location mode, returns one of
          * {@link #LOCATION_MODE_HIGH_ACCURACY}, {@link #LOCATION_MODE_SENSORS_ONLY},
-         * {@link #LOCATION_MODE_BATTERY_SAVING}, or {@link #LOCATION_MODE_OFF}.
+         * {@link #LOCATION_MODE_BATTERY_SAVING}, or {@link #LOCATION_MODE_OFF}. Necessary
+         * because the mode is a composite of the underlying location provider settings.
          *
          * @param cr the content resolver to use
          * @param userId the userId for which to read the mode
