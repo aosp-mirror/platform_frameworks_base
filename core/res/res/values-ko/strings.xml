@@ -245,17 +245,17 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"주소록"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"주소록에 접근할 수 있도록"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"위치"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"이 기기의 위치정보에 접근할 수 있도록"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"이 기기의 위치정보에 액세스"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"캘린더"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"일정에 접근할 수 있도록"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"문자 메시지를 보내고 확인할 수 있도록"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"저장"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"기기 사진, 미디어, 파일에 접근할 수 있도록"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"기기 사진, 미디어, 파일 액세스"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"마이크"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"오디오를 녹음할 수 있도록"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"카메라"</string>
-    <string name="permgroupdesc_camera" msgid="3250611594678347720">"사진 및 동영상을 촬영할 수 있도록"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"사진 및 동영상 촬영"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"전화"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"통화 상태를 관리하거나 전화를 걸 수 있도록"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"신체 센서"</string>
