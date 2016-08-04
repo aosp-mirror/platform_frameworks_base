@@ -419,6 +419,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         detailsUi.assertName(NAME);
         detailsUi.assertTitle("");
         detailsUi.assertDescription("");
+        assertTrue("didn't enable name on UI", detailsUi.nameField.isEnabled());
         detailsUi.nameField.setText(NEW_NAME);
         detailsUi.titleField.setText(TITLE);
         detailsUi.descField.setText(DESCRIPTION);
@@ -433,6 +434,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         detailsUi.assertName(NAME2);
         detailsUi.assertTitle("");
         detailsUi.assertDescription("");
+        assertTrue("didn't enable name on UI", detailsUi.nameField.isEnabled());
         detailsUi.nameField.setText(NEW_NAME2);
         detailsUi.titleField.setText(TITLE2);
         detailsUi.descField.setText(DESCRIPTION2);
