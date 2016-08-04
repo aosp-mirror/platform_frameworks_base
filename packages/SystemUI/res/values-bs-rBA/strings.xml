@@ -259,7 +259,7 @@
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Ekran je zaključan u vodoravnom prikazu."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Ekran je zaključan u uspravnom prikazu."</string>
     <string name="accessibility_rotation_lock_off_changed" msgid="8134601071026305153">"Ekran će se sada automatski rotirati."</string>
-    <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"Ekran je sada zaključan u vodoravnom položaju."</string>
+    <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"Ekran je sada zaključan u vodoravnom prikazu."</string>
     <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"Ekran je sada zaključan u uspravnom položaju."</string>
     <string name="dessert_case" msgid="1295161776223959221">"Slika sa desertima"</string>
     <string name="start_dreams" msgid="5640361424498338327">"Čuvar ekrana"</string>
@@ -337,6 +337,8 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Podjela po horizontali"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Podjela po vertikali"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Prilagođena podjela"</string>
+  <string-array name="recents_blacklist_array">
+  </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Napunjeno"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Punjenje"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"Do kraja punjenja preostalo <xliff:g id="CHARGING_TIME">%s</xliff:g>"</string>
@@ -543,7 +545,7 @@
     <string name="keyboard_key_backspace" msgid="1559580097512385854">"Tipka za brisanje"</string>
     <string name="keyboard_key_media_play_pause" msgid="3861975717393887428">"Pokreni/pauziraj"</string>
     <string name="keyboard_key_media_stop" msgid="2859963958595908962">"Zaustavi"</string>
-    <string name="keyboard_key_media_next" msgid="1894394911630345607">"Sljedeće"</string>
+    <string name="keyboard_key_media_next" msgid="1894394911630345607">"Naprijed"</string>
     <string name="keyboard_key_media_previous" msgid="4256072387192967261">"Prethodno"</string>
     <string name="keyboard_key_media_rewind" msgid="2654808213360820186">"Premotaj"</string>
     <string name="keyboard_key_media_fast_forward" msgid="3849417047738200605">"Ubrzaj"</string>
