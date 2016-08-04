@@ -28,7 +28,6 @@ import android.util.Xml;
 import android.provider.Settings;
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.content.ContentValues;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.view.InflateException;
@@ -175,6 +174,9 @@ public class SuggestionParser {
             return isSupportedResource != 0 ? res.getBoolean(isSupportedResource) : true;
         } catch (PackageManager.NameNotFoundException e) {
             Log.w(TAG, "Cannot find resources for " + suggestion.intent.getComponent());
+            return false;
+        } catch (Resources.NotFoundException e) {
+            Log.w(TAG, "Cannot find resources for " + suggestion.intent.getComponent(), e);
             return false;
         }
     }
