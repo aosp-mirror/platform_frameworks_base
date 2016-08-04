@@ -45,19 +45,19 @@ page.image=images/cards/card-n-apis_2x.png
 <p>
   The Android Wear Preview API is still in active development, but you can try
   it now as part of the Wear 2.0 Developer Preview. The sections below
-  highlight some of the new features for Wear developers.
+  highlight some of the new features for Android Wear developers.
 </p>
 
 
 <h2 id="ui">User Interface Improvements</h2>
 
-<p>The preview introduces powerful additions to the user interface, opening up
-exciting possibilities to developers.
-A complication is any feature in a watch face that displays more than hours and
-minutes. With the Complications API,
- watch faces can display extra information and separate apps can expose complication
-  data.
-The navigation and action drawers provide users with new ways to interact with apps.
+<p>
+  The preview introduces powerful additions to the user interface, opening up
+  exciting possibilities to developers. A complication
+  is any feature in a watch face that displays more than hours and
+  minutes. With the Complications API, watch faces can display extra information
+  and separate apps can expose complication data. The navigation and action
+  drawers provide users with new ways to interact with apps.
 </p>
 
 
@@ -69,8 +69,8 @@ The navigation and action drawers provide users with new ways to interact with a
   A <a href=
   "https://en.wikipedia.org/wiki/Complication_(horology)">complication</a> is a
   feature of a watch face that displays more than hours and minutes, such as a
-  battery indicator or a step counter. The Complications API helps watch face
-  developers create these features visual features and data connections they
+  battery indicator or a step counter. The Complications API thus helps watch face
+  developers create visual features and the data connections they
   require.
 </p>
 
