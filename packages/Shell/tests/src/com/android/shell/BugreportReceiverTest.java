@@ -65,6 +65,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.service.notification.StatusBarNotification;
 import android.support.test.uiautomator.UiDevice;
@@ -150,7 +151,8 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        Log.i(TAG, "#### setup() on " + getName());
+        super.setUp();
+        Log.i(TAG, getName() + ".setup()");
         Instrumentation instrumentation = getInstrumentation();
         mContext = instrumentation.getTargetContext();
         mUiBot = new UiBot(instrumentation, TIMEOUT);
@@ -179,6 +181,13 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         mUiBot.turnScreenOn();
     }
 
+    @Override
+    protected void tearDown() throws Exception {
+        Log.i(TAG, getName() + ".tearDown()");
+        cancelExistingNotifications();
+        super.tearDown();
+    }
+
     public void testProgress() throws Exception {
         resetProperties();
         sendBugreportStarted(1000);
@@ -196,7 +205,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
 
         // Make sure progress never goes back...
         SystemProperties.set(MAX_PROPERTY, "2000");
-        Thread.sleep(POLLING_FREQUENCY + DateUtils.SECOND_IN_MILLIS);
+        sleep(POLLING_FREQUENCY + DateUtils.SECOND_IN_MILLIS);
         assertProgressNotification(NAME, 95.00f);
 
         SystemProperties.set(PROGRESS_PROPERTY, "1000");
@@ -268,7 +277,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         waitShareNotification(ID);
 
         // There's no indication in the UI about the screenshot finish, so just sleep like a baby...
-        Thread.sleep(SAFE_SCREENSHOT_DELAY * DateUtils.SECOND_IN_MILLIS);
+        sleep(SAFE_SCREENSHOT_DELAY * DateUtils.SECOND_IN_MILLIS);
 
         Bundle extras = acceptBugreportAndGetSharedIntent(ID);
         assertActionSendMultiple(extras, BUGREPORT_CONTENT, NO_SCREENSHOT, ID, PID, ZIP_FILE,
@@ -282,7 +291,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         sendBugreportStarted(1000);
         waitForScreenshotButtonEnabled(true);
 
-        DetailsUi detailsUi = new DetailsUi(mUiBot, ID);
+        DetailsUi detailsUi = new DetailsUi(mUiBot, ID, NAME);
 
         // Check initial name.
         detailsUi.assertName(NAME);
@@ -298,13 +307,13 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         assertPropertyValue(NAME_PROPERTY, NAME);
 
         // Now try to set an invalid name.
-        detailsUi.reOpen();
+        detailsUi.reOpen(NAME);
         detailsUi.nameField.setText("/etc/passwd");
         detailsUi.clickOk();
         assertPropertyValue(NAME_PROPERTY, "_etc_passwd");
 
         // Finally, make the real changes.
-        detailsUi.reOpen();
+        detailsUi.reOpen("_etc_passwd");
         detailsUi.nameField.setText(NEW_NAME);
         detailsUi.titleField.setText(TITLE);
         detailsUi.descField.setText(mDescription);
@@ -327,7 +336,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         sendBugreportStarted(1000);
         waitForScreenshotButtonEnabled(true);
 
-        DetailsUi detailsUi = new DetailsUi(mUiBot, ID);
+        DetailsUi detailsUi = new DetailsUi(mUiBot, ID, NAME);
         detailsUi.assertName(NAME);  // Sanity check
 
         cancelFromNotification();
@@ -345,18 +354,18 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         changeDetailsTest(false);
     }
 
-    public void changeDetailsTest(boolean plainText) throws Exception {
+    private void changeDetailsTest(boolean plainText) throws Exception {
         resetProperties();
         sendBugreportStarted(1000);
         waitForScreenshotButtonEnabled(true);
 
-        DetailsUi detailsUi = new DetailsUi(mUiBot, ID);
+        DetailsUi detailsUi = new DetailsUi(mUiBot, ID, NAME);
 
         // Check initial name.
         detailsUi.assertName(NAME);
 
         // Change fields.
-        detailsUi.reOpen();
+        detailsUi.reOpen(NAME);
         detailsUi.nameField.setText(NEW_NAME);
         detailsUi.titleField.setText(TITLE);
         detailsUi.descField.setText(mDescription);
@@ -387,7 +396,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         sendBugreportStarted(1000);
         waitForScreenshotButtonEnabled(true);
 
-        DetailsUi detailsUi = new DetailsUi(mUiBot, ID, touchDetails);
+        DetailsUi detailsUi = new DetailsUi(mUiBot, ID, NAME, touchDetails);
 
         detailsUi.nameField.setText("");
         detailsUi.titleField.setText("");
@@ -401,20 +410,12 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         assertServiceNotRunning();
     }
 
-    /*
-     * TODO: this test can be flanky because it relies in the order the notifications are displayed,
-     * since mUiBot gets the first notification.
-     * Ideally, openProgressNotification() should return the whole notification, so DetailsUi
-     * could use it and find children instead, but unfortunately the notification object hierarchy
-     * is too complex and getting it from the notification text object would be to fragile
-     * (for instance, it could require navigating many parents up in the hierarchy).
-     */
     public void testProgress_changeJustDetailsIsClearedOnSecondBugreport() throws Exception {
         resetProperties();
         sendBugreportStarted(ID, PID, NAME, 1000);
         waitForScreenshotButtonEnabled(true);
 
-        DetailsUi detailsUi = new DetailsUi(mUiBot, ID);
+        DetailsUi detailsUi = new DetailsUi(mUiBot, ID, NAME);
         detailsUi.assertName(NAME);
         detailsUi.assertTitle("");
         detailsUi.assertDescription("");
@@ -428,7 +429,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         sendBugreportFinished(ID, mZipPath, mScreenshotPath);
         Bundle extras = acceptBugreportAndGetSharedIntent(ID);
 
-        detailsUi = new DetailsUi(mUiBot, ID2);
+        detailsUi = new DetailsUi(mUiBot, ID2, NAME2);
         detailsUi.assertName(NAME2);
         detailsUi.assertTitle("");
         detailsUi.assertDescription("");
@@ -469,7 +470,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
             waitForScreenshotButtonEnabled(true);
         }
 
-        DetailsUi detailsUi = new DetailsUi(mUiBot, ID);
+        DetailsUi detailsUi = new DetailsUi(mUiBot, ID, NAME);
 
         // Finish the bugreport while user's still typing the name.
         detailsUi.nameField.setText(NEW_NAME);
@@ -586,33 +587,43 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
 
     private void cancelExistingNotifications() {
         NotificationManager nm = NotificationManager.from(mContext);
-        for (StatusBarNotification notification : nm.getActiveNotifications()) {
-            int id = notification.getId();
-            Log.i(TAG, "Canceling existing notification (id=" + id + ")");
-            nm.cancel(id);
+        StatusBarNotification[] activeNotifications = nm.getActiveNotifications();
+        if (activeNotifications.length == 0) {
+            return;
         }
+
+        Log.w(TAG, getName() + ": " + activeNotifications.length + " active notifications");
+
+        nm.cancelAll();
+
+        // Wait a little bit...
+        for (int i = 1; i < 5; i++) {
+            int total = nm.getActiveNotifications().length;
+            if (total == 0) {
+                return;
+            }
+            Log.d(TAG, total + "notifications are still active; sleeping ");
+            nm.cancelAll();
+            sleep(1000);
+        }
+        assertEquals("old notifications were not cancelled", 0, nm.getActiveNotifications().length);
     }
 
     private void cancelFromNotification() {
-        openProgressNotification(ID);
+        openProgressNotification(NAME);
         UiObject cancelButton = mUiBot.getVisibleObject(mContext.getString(
                 com.android.internal.R.string.cancel).toUpperCase());
         mUiBot.click(cancelButton, "cancel_button");
     }
 
     private void assertProgressNotification(String name, float percent) {
-        // TODO: it currently looks for 3 distinct objects, without taking advantage of their
-        // relationship.
-        openProgressNotification(ID);
-        Log.v(TAG, "Looking for progress notification details: '" + name + "-" + percent + "'");
-        mUiBot.getObject(name);
+        openProgressNotification(name);
         // TODO: need a way to get the ProgresBar from the "android:id/progress" UIObject...
     }
 
-    private UiObject openProgressNotification(int id) {
-        String title = mContext.getString(R.string.bugreport_in_progress_title, id);
-        Log.v(TAG, "Looking for progress notification title: '" + title + "'");
-        return mUiBot.getNotification(title);
+    private UiObject openProgressNotification(String bugreportName) {
+        Log.v(TAG, "Looking for progress notification for '" + bugreportName + "'");
+        return mUiBot.getNotification(bugreportName);
     }
 
     void resetProperties() {
@@ -836,6 +847,20 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
     }
 
     private void assertPropertyValue(String key, String expectedValue) {
+        // Since the property is set in a different thread by BugreportProgressService, we need to
+        // poll it a couple times...
+
+        for (int i = 1; i <= 5; i++) {
+            String actualValue = SystemProperties.get(key);
+            if (expectedValue.equals(actualValue)) {
+                return;
+            }
+            Log.d(TAG, "Value of property " + key + " (" + actualValue
+                    + ") does not match expected value (" + expectedValue
+                    + ") on attempt " + i + ". Sleeping before next attempt...");
+            sleep(1000);
+        }
+        // Final try...
         String actualValue = SystemProperties.get(key);
         assertEquals("Wrong value for property '" + key + "'", expectedValue, actualValue);
     }
@@ -866,12 +891,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
             if (actualRunning == expectRunning) {
                 return;
             }
-            try {
-                Thread.sleep(DateUtils.SECOND_IN_MILLIS);
-            } catch (InterruptedException e) {
-                Log.w(TAG, "thread interrupted");
-                Thread.currentThread().interrupt();
-            }
+            sleep(DateUtils.SECOND_IN_MILLIS);
         }
 
         fail("Service status didn't change to " + expectRunning);
@@ -913,7 +933,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
      * Gets the notification button used to take a screenshot.
      */
     private UiObject getScreenshotButton() {
-        openProgressNotification(ID);
+        openProgressNotification(NAME);
         return mUiBot.getVisibleObject(
                 mContext.getString(R.string.bugreport_screenshot_action).toUpperCase());
     }
@@ -955,6 +975,12 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         mUiBot.assertNotVisibleById("android:id/alertTitle");
     }
 
+    private static void sleep(long ms) {
+        Log.d(TAG, "sleeping for " + ms + "ms");
+        SystemClock.sleep(ms);
+        Log.d(TAG, "woke up");
+    }
+
     /**
      * Helper class containing the UiObjects present in the bugreport info dialog.
      */
@@ -968,18 +994,25 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         final UiObject cancelButton;
 
         /**
-         * Gets the UI objects by opening the progress notification and clicking DETAILS.
+         * Gets the UI objects by opening the progress notification and clicking on DETAILS.
+         *
+         * @param id bugreport id
+         * @param id bugreport name
          */
-        DetailsUi(UiBot uiBot, int id) throws UiObjectNotFoundException {
-            this(uiBot, id, true);
+        DetailsUi(UiBot uiBot, int id, String name) throws UiObjectNotFoundException {
+            this(uiBot, id, name, true);
         }
 
         /**
          * Gets the UI objects by opening the progress notification and clicking on DETAILS or in
          * the notification itself.
+         *
+         * @param id bugreport id
+         * @param id bugreport name
          */
-        DetailsUi(UiBot uiBot, int id, boolean clickDetails) throws UiObjectNotFoundException {
-            UiObject notification = openProgressNotification(id);
+        DetailsUi(UiBot uiBot, int id, String name, boolean clickDetails)
+                throws UiObjectNotFoundException {
+            final UiObject notification = openProgressNotification(name);
             detailsButton = mUiBot.getVisibleObject(mContext.getString(
                     R.string.bugreport_info_action).toUpperCase());
 
@@ -1030,12 +1063,11 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
          */
         void focusAwayFromName() throws UiObjectNotFoundException {
             mUiBot.click(titleField, "title_field"); // Change focus.
-            mUiBot.pressBack(); // Dismiss keyboard.
             assertFalse("name_field is focused", nameField.isFocused());
         }
 
-        void reOpen() {
-            openProgressNotification(ID);
+        void reOpen(String name) {
+            openProgressNotification(name);
             mUiBot.click(detailsButton, "details_button");
         }
 

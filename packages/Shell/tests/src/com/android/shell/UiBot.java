@@ -162,7 +162,7 @@ final class UiBot {
      */
     public void chooseActivity(String name) {
         // It uses an intent chooser now, so just getting the activity by text is enough...
-        UiObject activity = getVisibleObject(name);
+        UiObject activity = getObject(name);
         click(activity, name);
     }
 
