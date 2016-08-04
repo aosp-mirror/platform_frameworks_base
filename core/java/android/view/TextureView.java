@@ -242,21 +242,23 @@ public class TextureView extends View {
     }
 
     private void releaseSurfaceTexture() {
-        boolean shouldRelease = true;
+        if (mSurface != null) {
+            boolean shouldRelease = true;
 
-        if (mListener != null) {
-            shouldRelease = mListener.onSurfaceTextureDestroyed(mSurface);
-        }
+            if (mListener != null) {
+                shouldRelease = mListener.onSurfaceTextureDestroyed(mSurface);
+            }
 
-        synchronized (mNativeWindowLock) {
-            nDestroyNativeWindow();
-        }
+            synchronized (mNativeWindowLock) {
+                nDestroyNativeWindow();
+            }
 
-        if (shouldRelease) {
-            mSurface.release();
+            if (shouldRelease) {
+                mSurface.release();
+            }
+            mSurface = null;
+            mHadSurface = true;
         }
-        mSurface = null;
-        mHadSurface = true;
     }
 
     /**
