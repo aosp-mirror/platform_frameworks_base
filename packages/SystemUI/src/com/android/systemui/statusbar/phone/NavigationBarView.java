@@ -65,6 +65,7 @@ public class NavigationBarView extends LinearLayout {
 
     boolean mVertical;
     boolean mScreenOn;
+    private int mCurrentRotation = -1;
 
     boolean mShowMenu;
     int mDisabledFlags = 0;
@@ -526,6 +527,10 @@ public class NavigationBarView extends LinearLayout {
         updateCurrentView();
     }
 
+    public boolean needsReorient() {
+        return mCurrentRotation != mDisplay.getRotation();
+    }
+
     private void updateCurrentView() {
         final int rot = mDisplay.getRotation();
         for (int i=0; i<4; i++) {
@@ -538,6 +543,7 @@ public class NavigationBarView extends LinearLayout {
             mButtonDisatchers.valueAt(i).setCurrentView(mCurrentView);
         }
         updateLayoutTransitionsEnabled();
+        mCurrentRotation = rot;
     }
 
     private void updateRecentsIcon() {
