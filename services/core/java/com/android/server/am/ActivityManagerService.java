@@ -2328,12 +2328,17 @@ public final class ActivityManagerService extends ActivityManagerNative
                             ProcessRecord proc = r.app;
                             if (proc.vrThreadTid > 0) {
                                 if (proc.curSchedGroup == ProcessList.SCHED_GROUP_TOP_APP) {
-                                    if (mInVrMode == true) {
-                                        Process.setThreadScheduler(proc.vrThreadTid,
-                                            Process.SCHED_FIFO | Process.SCHED_RESET_ON_FORK, 1);
-                                    } else {
-                                        Process.setThreadScheduler(proc.vrThreadTid,
-                                            Process.SCHED_OTHER, 0);
+                                    try {
+                                        if (mInVrMode == true) {
+                                            Process.setThreadScheduler(proc.vrThreadTid,
+                                                Process.SCHED_FIFO | Process.SCHED_RESET_ON_FORK, 1);
+                                        } else {
+                                            Process.setThreadScheduler(proc.vrThreadTid,
+                                                Process.SCHED_OTHER, 0);
+                                        }
+                                    } catch (IllegalArgumentException e) {
+                                        Slog.e(TAG, "Failed to set scheduling policy, thread does"
+                                                + " not exist:\n" + e);
                                     }
                                 }
                             }
