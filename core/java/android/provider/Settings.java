@@ -6061,6 +6061,17 @@ public final class Settings {
         public static final String VOLUME_CONTROLLER_SERVICE_COMPONENT
                 = "volume_controller_service_component";
 
+        /**
+         * Defines whether managed profile ringtones should be synced from it's parent profile
+         * <p>
+         * 0 = ringtones are not synced
+         * 1 = ringtones are synced from the profile's parent (default)
+         * <p>
+         * This value is only used for managed profiles.
+         * @hide
+         */
+        public static final String SYNC_PARENT_SOUNDS = "sync_parent_sounds";
+
         /** @hide */
         public static final String IMMERSIVE_MODE_CONFIRMATIONS = "immersive_mode_confirmations";
 
@@ -6432,7 +6443,8 @@ public final class Settings {
             NIGHT_DISPLAY_CUSTOM_START_TIME,
             NIGHT_DISPLAY_CUSTOM_END_TIME,
             NIGHT_DISPLAY_AUTO_MODE,
-            NIGHT_DISPLAY_ACTIVATED
+            NIGHT_DISPLAY_ACTIVATED,
+            SYNC_PARENT_SOUNDS
         };
 
         /**

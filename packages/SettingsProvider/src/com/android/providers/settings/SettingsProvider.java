@@ -2108,7 +2108,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 131;
+            private static final int SETTINGS_VERSION = 132;
 
             private final int mUserId;
 
@@ -2430,6 +2430,18 @@ public class SettingsProvider extends ContentProvider {
                     }
 
                     currentVersion = 131;
+                }
+
+                if (currentVersion == 131) {
+                    // Version 131: Allow managed profile to optionally use the parent's ringtones
+                    final SettingsState systemSecureSettings = getSecureSettingsLocked(userId);
+                    String defaultSyncParentSounds = (getContext().getResources()
+                            .getBoolean(R.bool.def_sync_parent_sounds) ? "1" : "0");
+                    systemSecureSettings.insertSettingLocked(
+                            Settings.Secure.SYNC_PARENT_SOUNDS,
+                            defaultSyncParentSounds,
+                            SettingsState.SYSTEM_PACKAGE_NAME);
+                    currentVersion = 132;
                 }
 
                 if (currentVersion != newVersion) {

@@ -89,6 +89,9 @@
     <!-- Default for Settings.System.VIBRATE_IN_SILENT -->
     <bool name="def_vibrate_in_silent">true</bool>
 
+    <!-- Default for Settings.Secure.SYNC_PARENT_SOUNDS -->
+    <bool name="def_sync_parent_sounds">true</bool>
+
     <!-- Default for Settings.Secure.ACCESSIBILITY_SCRIPT_INJECTION -->
     <bool name="def_accessibility_script_injection">false</bool>
 
