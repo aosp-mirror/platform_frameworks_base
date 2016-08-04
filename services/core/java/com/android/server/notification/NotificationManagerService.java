@@ -180,7 +180,7 @@ public class NotificationManagerService extends SystemService {
             = SystemProperties.getBoolean("debug.child_notifs", true);
 
     static final int MAX_PACKAGE_NOTIFICATIONS = 50;
-    static final float DEFAULT_MAX_NOTIFICATION_ENQUEUE_RATE = 50f;
+    static final float DEFAULT_MAX_NOTIFICATION_ENQUEUE_RATE = 10f;
 
     // message codes
     static final int MESSAGE_TIMEOUT = 2;
@@ -2538,20 +2538,32 @@ public class NotificationManagerService extends SystemService {
 
         mUsageStats.registerEnqueuedByApp(pkg);
 
+
+        if (pkg == null || notification == null) {
+            throw new IllegalArgumentException("null not allowed: pkg=" + pkg
+                    + " id=" + id + " notification=" + notification);
+        }
+        final StatusBarNotification n = new StatusBarNotification(
+                pkg, opPkg, id, tag, callingUid, callingPid, 0, notification,
+                user);
+
         // Limit the number of notifications that any given package except the android
         // package or a registered listener can enqueue.  Prevents DOS attacks and deals with leaks.
         if (!isSystemNotification && !isNotificationFromListener) {
             synchronized (mNotificationList) {
-                final float appEnqueueRate = mUsageStats.getAppEnqueueRate(pkg);
-                if (appEnqueueRate > mMaxPackageEnqueueRate) {
-                    mUsageStats.registerOverRateQuota(pkg);
-                    final long now = SystemClock.elapsedRealtime();
-                    if ((now - mLastOverRateLogTime) > MIN_PACKAGE_OVERRATE_LOG_INTERVAL) {
-                        Slog.e(TAG, "Package enqueue rate is " + appEnqueueRate
-                                + ". Shedding events. package=" + pkg);
-                        mLastOverRateLogTime = now;
+                if(mNotificationsByKey.get(n.getKey()) != null) {
+                    // this is an update, rate limit updates only
+                    final float appEnqueueRate = mUsageStats.getAppEnqueueRate(pkg);
+                    if (appEnqueueRate > mMaxPackageEnqueueRate) {
+                        mUsageStats.registerOverRateQuota(pkg);
+                        final long now = SystemClock.elapsedRealtime();
+                        if ((now - mLastOverRateLogTime) > MIN_PACKAGE_OVERRATE_LOG_INTERVAL) {
+                            Slog.e(TAG, "Package enqueue rate is " + appEnqueueRate
+                                    + ". Shedding events. package=" + pkg);
+                            mLastOverRateLogTime = now;
+                        }
+                        return;
                     }
-                    return;
                 }
 
                 int count = 0;
@@ -2572,11 +2584,6 @@ public class NotificationManagerService extends SystemService {
                     }
                 }
             }
-        }
-
-        if (pkg == null || notification == null) {
-            throw new IllegalArgumentException("null not allowed: pkg=" + pkg
-                    + " id=" + id + " notification=" + notification);
         }
 
         // Whitelist pending intents.
@@ -2601,9 +2608,6 @@ public class NotificationManagerService extends SystemService {
                 Notification.PRIORITY_MAX);
 
         // setup local book-keeping
-        final StatusBarNotification n = new StatusBarNotification(
-                pkg, opPkg, id, tag, callingUid, callingPid, 0, notification,
-                user);
         final NotificationRecord r = new NotificationRecord(getContext(), n);
         mHandler.post(new EnqueueNotificationRunnable(userId, r));
 
