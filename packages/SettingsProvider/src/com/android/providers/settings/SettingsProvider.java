@@ -1090,7 +1090,7 @@ public class SettingsProvider extends ContentProvider {
         }
         if (cacheName != null) {
             final File cacheFile = new File(
-                    getRingtoneCacheDir(UserHandle.getCallingUserId()), cacheName);
+                    getRingtoneCacheDir(owningUserId), cacheName);
             cacheFile.delete();
         }
 
