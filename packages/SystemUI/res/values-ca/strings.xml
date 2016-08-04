@@ -335,6 +335,8 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Divisió horitzontal"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Divisió vertical"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Divisió personalitzada"</string>
+  <string-array name="recents_blacklist_array">
+  </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Carregada"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"S\'està carregant"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> per completar la càrrega"</string>
@@ -602,7 +604,7 @@
     <string name="select_keycode" msgid="7413765103381924584">"Selecciona un botó de teclat"</string>
     <string name="preview" msgid="9077832302472282938">"Previsualització"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Arrossega per afegir funcions"</string>
-    <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Arrossega\'ls aquí per suprimir-los"</string>
+    <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Arrossega aquí per suprimir una funció"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Edita"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Hora"</string>
   <string-array name="clock_options">
