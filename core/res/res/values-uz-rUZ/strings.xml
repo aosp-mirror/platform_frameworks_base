@@ -678,7 +678,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"To‘g‘ri!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Qaytadan urining"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Qaytadan urining"</string>
-    <string name="lockscreen_storage_locked" msgid="9167551160010625200">"Barcha funksiya va ma’lumotlardan foydalanish uchun qulfdan chiqaring"</string>
+    <string name="lockscreen_storage_locked" msgid="9167551160010625200">"Barcha funksiya va ma’lumotlar uchun qulfdan chiqaring"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Yuzni tanitib qulfni ochishga urinish miqdoridan oshib ketdi"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"SIM karta yo‘q"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Planshetingizda SIM karta yo‘q."</string>
