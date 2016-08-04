@@ -133,7 +133,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
                     List<BluetoothGattDescriptor> temp_descs = temp_char.getDescriptors();
                     List<BluetoothGattDescriptor> svc_descs = svc_char.getDescriptors();
                     for (int j=0; j<svc_descs.size(); j++) {
-                        temp_descs.get(i).setInstanceId(svc_descs.get(i).getInstanceId());
+                        temp_descs.get(j).setInstanceId(svc_descs.get(j).getInstanceId());
                     }
                 }
 
