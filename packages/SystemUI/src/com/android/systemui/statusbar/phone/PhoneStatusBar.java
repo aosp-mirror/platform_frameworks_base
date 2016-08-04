@@ -3553,7 +3553,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     @Override
     public void onDisplayChanged(int displayId) {
-        if (displayId == Display.DEFAULT_DISPLAY) {
+        if (displayId == Display.DEFAULT_DISPLAY
+                && mNavigationBarView != null && mNavigationBarView.needsReorient()) {
             repositionNavigationBar();
         }
     }
