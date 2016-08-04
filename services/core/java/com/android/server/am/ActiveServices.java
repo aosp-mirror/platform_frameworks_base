@@ -748,7 +748,7 @@ public final class ActiveServices {
             if (sm != null) {
                 for (int i = sm.mServicesByName.size()-1; i >= 0; i--) {
                     ServiceRecord other = sm.mServicesByName.valueAt(i);
-                    if (other.foregroundId == r.foregroundId
+                    if (other != r && other.foregroundId == r.foregroundId
                             && other.packageName.equals(r.packageName)) {
                         // Found one!  Abort the cancel.
                         return;
