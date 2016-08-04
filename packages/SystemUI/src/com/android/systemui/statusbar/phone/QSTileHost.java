@@ -467,6 +467,13 @@ public class QSTileHost implements QSTile.Host, Tunable {
             tileList = res.getString(R.string.quick_settings_tiles);
             if (DEBUG) Log.d(TAG, "Loaded tile specs from config: " + tileList);
         } else {
+            for (String tile : res.getString(R.string.quick_settings_tiles).split(",")) {
+                tile = tile.trim();
+                if (tile.isEmpty()) continue;
+                if(tile.startsWith(IntentTile.PREFIX)){
+                    tileList = tileList.concat(",").concat(tile);
+                }
+            }
             if (DEBUG) Log.d(TAG, "Loaded tile specs from setting: " + tileList);
         }
         final ArrayList<String> tiles = new ArrayList<String>();
