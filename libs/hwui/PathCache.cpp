@@ -127,8 +127,8 @@ static void computePathBounds(const SkPath* path, const SkPaint* paint, PathText
     const float pathWidth = std::max(bounds.width(), 1.0f);
     const float pathHeight = std::max(bounds.height(), 1.0f);
 
-    texture->left = bounds.fLeft;
-    texture->top = bounds.fTop;
+    texture->left = floorf(bounds.fLeft);
+    texture->top = floorf(bounds.fTop);
 
     texture->offset = (int) floorf(std::max(paint->getStrokeWidth(), 1.0f) * 1.5f + 0.5f);
 
