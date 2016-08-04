@@ -98,9 +98,9 @@ static jboolean FontFamily_addFont(JNIEnv* env, jobject clazz, jlong familyPtr, 
         return false;
     }
     jobject fontRef = MakeGlobalRefOrDie(env, bytebuf);
-    SkAutoTUnref<SkData> data(SkData::NewWithProc(fontPtr, fontSize,
+    sk_sp<SkData> data(SkData::MakeWithProc(fontPtr, fontSize,
             release_global_ref, reinterpret_cast<void*>(fontRef)));
-    std::unique_ptr<SkStreamAsset> fontData(new SkMemoryStream(data));
+    std::unique_ptr<SkStreamAsset> fontData(new SkMemoryStream(std::move(data)));
 
     SkFontMgr::FontParameters params;
     params.setCollectionIndex(ttcIndex);
@@ -163,9 +163,9 @@ static jboolean FontFamily_addFontWeightStyle(JNIEnv* env, jobject clazz, jlong 
         return false;
     }
     jobject fontRef = MakeGlobalRefOrDie(env, font);
-    SkAutoTUnref<SkData> data(SkData::NewWithProc(fontPtr, fontSize,
+    sk_sp<SkData> data(SkData::MakeWithProc(fontPtr, fontSize,
             release_global_ref, reinterpret_cast<void*>(fontRef)));
-    std::unique_ptr<SkStreamAsset> fontData(new SkMemoryStream(data.get()));
+    std::unique_ptr<SkStreamAsset> fontData(new SkMemoryStream(std::move(data)));
 
     SkFontMgr::FontParameters params;
     params.setCollectionIndex(ttcIndex);
@@ -212,10 +212,11 @@ static jboolean FontFamily_addFontFromAsset(JNIEnv* env, jobject, jlong familyPt
     }
 
     size_t bufSize = asset->getLength();
-    SkAutoTUnref<SkData> data(SkData::NewWithProc(buf, asset->getLength(), releaseAsset, asset));
-    SkMemoryStream* stream = new SkMemoryStream(data.get());
-    // CreateFromStream takes ownership of stream.
-    SkTypeface* face = SkTypeface::CreateFromStream(stream);
+    sk_sp<SkData> data(SkData::MakeWithProc(buf, asset->getLength(), releaseAsset, asset));
+    std::unique_ptr<SkStreamAsset> fontData(new SkMemoryStream(std::move(data)));
+
+    SkAutoTUnref<SkFontMgr> fm(SkFontMgr::RefDefault());
+    SkTypeface* face = fm->createFromStream(fontData.release(), SkFontMgr::FontParameters());
     if (face == NULL) {
         ALOGE("addFontFromAsset failed to create font %s", str.c_str());
         return false;

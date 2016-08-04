@@ -41,11 +41,10 @@
 
 using namespace android;
 
-// Takes ownership of the SkStreamRewindable. For consistency, deletes stream even
-// when returning null.
-static jobject createBitmapRegionDecoder(JNIEnv* env, SkStreamRewindable* stream) {
+static jobject createBitmapRegionDecoder(JNIEnv* env, std::unique_ptr<SkStreamRewindable> stream) {
     SkAutoTDelete<SkBitmapRegionDecoder> brd(
-            SkBitmapRegionDecoder::Create(stream, SkBitmapRegionDecoder::kAndroidCodec_Strategy));
+            SkBitmapRegionDecoder::Create(stream.release(),
+                                          SkBitmapRegionDecoder::kAndroidCodec_Strategy));
     if (NULL == brd) {
         doThrowIOE(env, "Image format not supported");
         return nullObjectReturn("CreateBitmapRegionDecoder returned null");
@@ -61,10 +60,10 @@ static jobject nativeNewInstanceFromByteArray(JNIEnv* env, jobject, jbyteArray b
         For now we just always copy the array's data if isShareable.
      */
     AutoJavaByteArray ar(env, byteArray);
-    SkMemoryStream* stream = new SkMemoryStream(ar.ptr() + offset, length, true);
+    std::unique_ptr<SkMemoryStream> stream(new SkMemoryStream(ar.ptr() + offset, length, true));
 
     // the decoder owns the stream.
-    jobject brd = createBitmapRegionDecoder(env, stream);
+    jobject brd = createBitmapRegionDecoder(env, std::move(stream));
     return brd;
 }
 
@@ -80,11 +79,11 @@ static jobject nativeNewInstanceFromFileDescriptor(JNIEnv* env, jobject clazz,
         return nullObjectReturn("fstat return -1");
     }
 
-    SkAutoTUnref<SkData> data(SkData::NewFromFD(descriptor));
-    SkMemoryStream* stream = new SkMemoryStream(data);
+    sk_sp<SkData> data(SkData::MakeFromFD(descriptor));
+    std::unique_ptr<SkMemoryStream> stream(new SkMemoryStream(std::move(data)));
 
     // the decoder owns the stream.
-    jobject brd = createBitmapRegionDecoder(env, stream);
+    jobject brd = createBitmapRegionDecoder(env, std::move(stream));
     return brd;
 }
 
@@ -94,11 +93,11 @@ static jobject nativeNewInstanceFromStream(JNIEnv* env, jobject clazz,
                                   jboolean isShareable) {
     jobject brd = NULL;
     // for now we don't allow shareable with java inputstreams
-    SkStreamRewindable* stream = CopyJavaInputStream(env, is, storage);
+    std::unique_ptr<SkStreamRewindable> stream(CopyJavaInputStream(env, is, storage));
 
     if (stream) {
         // the decoder owns the stream.
-        brd = createBitmapRegionDecoder(env, stream);
+        brd = createBitmapRegionDecoder(env, std::move(stream));
     }
     return brd;
 }
@@ -107,13 +106,13 @@ static jobject nativeNewInstanceFromAsset(JNIEnv* env, jobject clazz,
                                  jlong native_asset, // Asset
                                  jboolean isShareable) {
     Asset* asset = reinterpret_cast<Asset*>(native_asset);
-    SkMemoryStream* stream = CopyAssetToStream(asset);
+    std::unique_ptr<SkMemoryStream> stream(CopyAssetToStream(asset));
     if (NULL == stream) {
         return NULL;
     }
 
     // the decoder owns the stream.
-    jobject brd = createBitmapRegionDecoder(env, stream);
+    jobject brd = createBitmapRegionDecoder(env, std::move(stream));
     return brd;
 }
 
