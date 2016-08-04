@@ -7936,6 +7936,9 @@ public final class Settings {
         /** {@hide} */
         public static final String
                 BLUETOOTH_SAP_PRIORITY_PREFIX = "bluetooth_sap_priority_";
+        /** {@hide} */
+        public static final String
+                BLUETOOTH_PAN_PRIORITY_PREFIX = "bluetooth_pan_priority_";
 
         /**
          * Device Idle (Doze) specific settings.
@@ -8110,6 +8113,14 @@ public final class Settings {
          */
         public static final String getBluetoothInputDevicePriorityKey(String address) {
             return BLUETOOTH_INPUT_DEVICE_PRIORITY_PREFIX + address.toUpperCase(Locale.ROOT);
+        }
+
+        /**
+         * Get the key that retrieves a bluetooth pan client priority.
+         * @hide
+         */
+        public static final String getBluetoothPanPriorityKey(String address) {
+            return BLUETOOTH_PAN_PRIORITY_PREFIX + address.toUpperCase(Locale.ROOT);
         }
 
         /**
