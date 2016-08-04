@@ -1483,6 +1483,7 @@ public class BugreportProgressService extends Service {
                 // Re-use view, but reset fields first.
                 mDialog.setTitle(dialogTitle);
                 mInfoName.setText(null);
+                mInfoName.setEnabled(true);
                 mInfoTitle.setText(null);
                 mInfoDescription.setText(null);
             }
