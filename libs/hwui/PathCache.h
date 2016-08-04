@@ -61,14 +61,6 @@ class Caches;
  * Alpha texture used to represent a path.
  */
 struct PathTexture: public Texture {
-    PathTexture(Caches& caches, float left, float top,
-            float offset, int generation)
-            : Texture(caches)
-            , left(left)
-            , top(top)
-            , offset(offset) {
-        this->generation = generation;
-    }
     PathTexture(Caches& caches, int generation)
         : Texture(caches) {
         this->generation = generation;
@@ -227,12 +219,6 @@ public:
      */
     void precache(const SkPath* path, const SkPaint* paint);
 
-    static bool canDrawAsConvexPath(SkPath* path, const SkPaint* paint);
-    static void computePathBounds(const SkPath* path, const SkPaint* paint,
-            float& left, float& top, float& offset, uint32_t& width, uint32_t& height);
-    static void computeBounds(const SkRect& bounds, const SkPaint* paint,
-            float& left, float& top, float& offset, uint32_t& width, uint32_t& height);
-
 private:
     PathTexture* addTexture(const PathDescription& entry,
             const SkPath *path, const SkPaint* paint);
@@ -256,15 +242,6 @@ private:
     void purgeCache(uint32_t width, uint32_t height);
 
     void removeTexture(PathTexture* texture);
-
-    bool checkTextureSize(uint32_t width, uint32_t height) {
-        if (width > mMaxTextureSize || height > mMaxTextureSize) {
-            ALOGW("Shape too large to be rendered into a texture (%dx%d, max=%dx%d)",
-                    width, height, mMaxTextureSize, mMaxTextureSize);
-            return false;
-        }
-        return true;
-    }
 
     void init();
 

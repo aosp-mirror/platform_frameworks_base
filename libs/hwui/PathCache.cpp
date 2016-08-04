@@ -121,29 +121,19 @@ bool PathDescription::operator==(const PathDescription& rhs) const {
 // Utilities
 ///////////////////////////////////////////////////////////////////////////////
 
-bool PathCache::canDrawAsConvexPath(SkPath* path, const SkPaint* paint) {
-    // NOTE: This should only be used after PathTessellator handles joins properly
-    return paint->getPathEffect() == nullptr && path->getConvexity() == SkPath::kConvex_Convexity;
-}
-
-void PathCache::computePathBounds(const SkPath* path, const SkPaint* paint,
-        float& left, float& top, float& offset, uint32_t& width, uint32_t& height) {
+static void computePathBounds(const SkPath* path, const SkPaint* paint, PathTexture* texture,
+        uint32_t& width, uint32_t& height) {
     const SkRect& bounds = path->getBounds();
-    PathCache::computeBounds(bounds, paint, left, top, offset, width, height);
-}
-
-void PathCache::computeBounds(const SkRect& bounds, const SkPaint* paint,
-        float& left, float& top, float& offset, uint32_t& width, uint32_t& height) {
     const float pathWidth = std::max(bounds.width(), 1.0f);
     const float pathHeight = std::max(bounds.height(), 1.0f);
 
-    left = bounds.fLeft;
-    top = bounds.fTop;
+    texture->left = bounds.fLeft;
+    texture->top = bounds.fTop;
 
-    offset = (int) floorf(std::max(paint->getStrokeWidth(), 1.0f) * 1.5f + 0.5f);
+    texture->offset = (int) floorf(std::max(paint->getStrokeWidth(), 1.0f) * 1.5f + 0.5f);
 
-    width = uint32_t(pathWidth + offset * 2.0 + 0.5);
-    height = uint32_t(pathHeight + offset * 2.0 + 0.5);
+    width = uint32_t(pathWidth + texture->offset * 2.0 + 0.5);
+    height = uint32_t(pathHeight + texture->offset * 2.0 + 0.5);
 }
 
 static void initBitmap(SkBitmap& bitmap, uint32_t width, uint32_t height) {
@@ -163,16 +153,26 @@ static void initPaint(SkPaint& paint) {
     SkSafeUnref(paint.setXfermode(mode));
 }
 
-static void drawPath(const SkPath *path, const SkPaint* paint, SkBitmap& bitmap,
-        float left, float top, float offset, uint32_t width, uint32_t height) {
-    initBitmap(bitmap, width, height);
+static SkBitmap* drawPath(const SkPath* path, const SkPaint* paint, PathTexture* texture,
+        uint32_t maxTextureSize) {
+    uint32_t width, height;
+    computePathBounds(path, paint, texture, width, height);
+    if (width > maxTextureSize || height > maxTextureSize) {
+        ALOGW("Shape too large to be rendered into a texture (%dx%d, max=%dx%d)",
+                width, height, maxTextureSize, maxTextureSize);
+        return nullptr;
+    }
+
+    SkBitmap* bitmap = new SkBitmap();
+    initBitmap(*bitmap, width, height);
 
     SkPaint pathPaint(*paint);
     initPaint(pathPaint);
 
-    SkCanvas canvas(bitmap);
-    canvas.translate(-left + offset, -top + offset);
+    SkCanvas canvas(*bitmap);
+    canvas.translate(-texture->left + texture->offset, -texture->top + texture->offset);
     canvas.drawPath(*path, pathPaint);
+    return bitmap;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -271,21 +271,15 @@ PathTexture* PathCache::addTexture(const PathDescription& entry, const SkPath *p
         const SkPaint* paint) {
     ATRACE_NAME("Generate Path Texture");
 
-    float left, top, offset;
-    uint32_t width, height;
-    computePathBounds(path, paint, left, top, offset, width, height);
+    PathTexture* texture = new PathTexture(Caches::getInstance(), path->getGenerationID());
+    std::unique_ptr<SkBitmap> bitmap(drawPath(path, paint, texture, mMaxTextureSize));
+    if (!bitmap.get()) {
+        delete texture;
+        return nullptr;
+    }
 
-    if (!checkTextureSize(width, height)) return nullptr;
-
-    purgeCache(width, height);
-
-    SkBitmap bitmap;
-    drawPath(path, paint, bitmap, left, top, offset, width, height);
-
-    PathTexture* texture = new PathTexture(Caches::getInstance(),
-            left, top, offset, path->getGenerationID());
-    generateTexture(entry, &bitmap, texture);
-
+    purgeCache(bitmap->width(), bitmap->height());
+    generateTexture(entry, bitmap.get(), texture);
     return texture;
 }
 
@@ -330,22 +324,7 @@ void PathCache::PathProcessor::onProcess(const sp<Task<SkBitmap*> >& task) {
     PathTask* t = static_cast<PathTask*>(task.get());
     ATRACE_NAME("pathPrecache");
 
-    float left, top, offset;
-    uint32_t width, height;
-    PathCache::computePathBounds(&t->path, &t->paint, left, top, offset, width, height);
-
-    PathTexture* texture = t->texture;
-    texture->left = left;
-    texture->top = top;
-    texture->offset = offset;
-
-    if (width <= mMaxTextureSize && height <= mMaxTextureSize) {
-        SkBitmap* bitmap = new SkBitmap();
-        drawPath(&t->path, &t->paint, *bitmap, left, top, offset, width, height);
-        t->setResult(bitmap);
-    } else {
-        t->setResult(nullptr);
-    }
+    t->setResult(drawPath(&t->path, &t->paint, t->texture, mMaxTextureSize));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -399,7 +378,6 @@ PathTexture* PathCache::get(const SkPath* path, const SkPaint* paint) {
                 generateTexture(entry, bitmap, texture, false);
                 texture->clearTask();
             } else {
-                ALOGW("Path too large to be rendered into a texture");
                 texture->clearTask();
                 texture = nullptr;
                 mCache.remove(entry);
