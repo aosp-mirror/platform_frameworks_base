@@ -40,4 +40,6 @@
     <string name="bugreport_info_title" msgid="2306030793918239804">"錯誤標題"</string>
     <string name="bugreport_info_description" msgid="5072835127481627722">"錯誤摘要"</string>
     <string name="save" msgid="4781509040564835759">"儲存"</string>
+    <!-- no translation found for bugreport_intent_chooser_title (7605709494790894076) -->
+    <skip />
 </resources>
