@@ -2623,6 +2623,14 @@ status_t ResourceTable::assignResourceIds()
         const SourcePos unknown(String8("????"), 0);
         sp<Type> attr = p->getType(String16("attr"), unknown);
 
+        // Force creation of ID if we are building feature splits.
+        // Auto-generated ID resources won't apply the type ID offset correctly unless
+        // the offset is applied here first.
+        // b/30607637
+        if (mPackageType == AppFeature && p->getName() == mAssetsPackage) {
+            sp<Type> id = p->getType(String16("id"), unknown);
+        }
+
         // Assign indices...
         const size_t typeCount = p->getOrderedTypes().size();
         for (size_t ti = 0; ti < typeCount; ti++) {
