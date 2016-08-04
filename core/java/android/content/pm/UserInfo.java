@@ -188,8 +188,7 @@ public class UserInfo implements Parcelable {
             // Don't support switching to an ephemeral user with removal in progress.
             return false;
         }
-        // TODO remove fw.show_hidden_users when we have finished developing managed profiles.
-        return !isManagedProfile() || SystemProperties.getBoolean("fw.show_hidden_users", false);
+        return !isManagedProfile();
     }
 
     /**
