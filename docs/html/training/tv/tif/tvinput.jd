@@ -10,9 +10,8 @@ trainingnavtop=true
 <div id="tb">
   <h2>This lesson teaches you to</h2>
   <ol>
-    <li><a href="#manifest">Declare Your TV Input Service in the Manifest</a></li>
-    <li><a href="#tvinput">Define Your TV Input Service</a></li>
-    <li><a href="#setup">Define Your Setup Activity</a></li>
+    <li><a href="#TIFCompanion">Create a TV Input Service Using the TIF Companion Library</a></li>
+    <li><a href="#NoTIFCompanion">Create a TV Input Service Using the TIF Framework</a></li>
   </ol>
   <h2>You should also read</h2>
   <ul>
@@ -30,14 +29,253 @@ trainingnavtop=true
 </div>
 
 <p>A TV input service represents a media stream source, and lets you present your media content in a
-linear, broadcast TV fashion as channels and programs. With the TV input service, you can provide
+linear, broadcast TV fashion as channels and programs. With a TV input service, you can provide
 parental controls, program guide information, and content ratings. The TV input service works
-with the Android system TV app, developed for the device and immutable by third-party apps, which
-ultimately controls and presents content on the TV. See
+with the Android system TV app. This app ultimately controls and presents channel content
+on the TV. The system TV app is developed specifically for the device and immutable
+by third-party apps. For more information about the TV Input Framework (TIF)
+architecture and its components, see
 <a class="external-link" href="http://source.android.com/devices/tv/index.html">
-TV Input Framework</a> for more information about the framework architecture and its components.</p>
+TV Input Framework</a>.</p>
 
-<p>To develop a TV input service, you implement the following components:</p>
+<h2 id="TIFCompanion">Create a TV Input Service Using the TIF Companion Library</h2>
+
+<p>
+The TIF Companion Library is a framework that provides extensible
+implementations of common TV input service features. Use the TIF Companion
+Library to quickly and easily create your own TV input service that follows
+best practices for Android TV.
+</p>
+
+<h3 id="build">Update your build.gradle file</h3>
+
+<p>
+To get started using the TIF Companion Library, add the following line to your
+app's <code>build.gradle</code> file:
+</p>
+
+<pre>
+compile 'com.google.android.media.tv.companionlibrary:1.0.0'
+</pre>
+
+<p>The TIF Companion Library is not currently part of the Android
+framework. It is distributed as part of the <a class="external-link"
+href="https://github.com/googlesamples/androidtv-sample-inputs">
+TV Input Service sample app</a>, and not with the Android SDK.
+</p>
+
+<h3 id="manifest">Declare your TV input service in the manifest</h3>
+
+<p>Your app must provide a {@link android.media.tv.TvInputService}-compatible
+service that the system uses to access your app. The TIF
+Companion Library provides the <code>BaseTvInputService</code> class, which
+provides a default implementation of {@link android.media.tv.TvInputService}
+that you can customize. Create a subclass of <code>BaseTvInputService</code>,
+and declare the subclass in your manifest as a service.</p>
+
+<p>Within the manifest declaration, specify the
+{@link android.Manifest.permission#BIND_TV_INPUT} permission to allow the
+service to connect the TV input to the system. A system service
+performs the binding and has the
+{@link android.Manifest.permission#BIND_TV_INPUT} permission.
+The system TV app sends requests to TV input services
+via the {@link android.media.tv.TvInputManager} interface.</p>
+
+<p>In your service declaration, include an intent filter that specifies
+{@link android.media.tv.TvInputService} as the action to perform with the
+intent. Also declare the service metadata as a separate XML resource. The
+service declaration, intent filter, and service metadata declaration are shown
+in the following example:</p>
+
+<pre>
+&lt;service android:name=".rich.RichTvInputService"
+    android:label="@string/rich_input_label"
+    android:permission="android.permission.BIND_TV_INPUT"&gt;
+    &lt;!-- Required filter used by the system to launch our account service. --&gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.media.tv.TvInputService" /&gt;
+    &lt;/intent-filter&gt;
+    &lt;!-- An XML file which describes this input. This provides pointers to
+    the RichTvInputSetupActivity to the system/TV app. --&gt;
+    &lt;meta-data
+        android:name="android.media.tv.input"
+        android:resource="@xml/richtvinputservice" /&gt;
+&lt;/service&gt;
+</pre>
+
+<p>Define the service metadata in a separate XML file. The service
+metadata XML file must include a setup interface that describes the TV input's
+initial configuration and channel scan. The metadata file should also contain a
+flag stating whether or not users are able to record content. For more
+information on how to support recording content in your app, see
+<a href="{@docRoot}preview/features/tv-recording-api.html">TV Recording</a>.
+</p>
+
+<p>The service metadata file is located in the XML resources directory
+for your app and must match the name of the resource you declared in the
+manifest. Using the manifest entries from the previous example, you would
+create the XML file at <code>res/xml/richtvinputservice.xml</code>, with the
+following contents:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;tv-input xmlns:android="http://schemas.android.com/apk/res/android"
+  android:canRecord="true"
+  android:setupActivity="com.example.android.sampletvinput.rich.RichTvInputSetupActivity" /&gt;
+</pre>
+
+<h3 id="setup">Define channels and create your setup activity</h3>
+
+<p>Your TV input service must define at least one channel that users
+access via the system TV app. You should register your channels
+in the system database, and provide a setup activity that the system
+invokes when it cannot find a channel for your app.</p>
+
+<p>First, enable your app to read from and write to the system Electronic
+Programming Guide (EPG), whose data includes channels and programs available
+to the user. To enable your app to perform these actions, and sync with the
+EPG after device restart, add the following elements to your app manifest:</p>
+
+<pre>
+&lt;uses-permission android:name="com.android.providers.tv.permission.READ_EPG_DATA" /&gt;
+&lt;uses-permission android:name="com.android.providers.tv.permission.WRITE_EPG_DATA" /&gt;
+&lt;uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED "/&gt;
+</pre>
+
+<p>Add the following element to ensure that your app shows up in the
+Google Play Store as an app that provides content channels in Android TV:</p>
+
+<pre>
+&lt;uses-feature
+    android:name="android.software.live_tv"
+    android:required="true" /&gt;
+</pre>
+
+<p>Next, create a class which extends the <code>EpgSyncJobService</code>
+class. This abstract class makes it easy to create a job service that
+creates and updates channels in the system database.</p>
+
+<p>In your subclass, create and return your full list of channels in
+<code>getChannels()</code>. If your channels come from an XMLTV file,
+use the <code>XmlTvParser</code> class. Otherwise generate
+channels programmatically using the <code>Channel.Builder</code> class.
+</p>
+
+<p>For each channel, the system calls <code>getProgramsForChannel()</code>
+when it needs a list of programs that can be viewed within a given time window
+on the channel. Return a list of <code>Program</code> objects for the
+channel. Use the <code>XmlTvParser</code> class to obtain programs from an
+XMLTV file, or generate them programmatically using the
+<code>Program.Builder</code> class.</p>
+
+<p>For each <code>Program</code> object, use an
+<code>InternalProviderData</code> object to set program information such as the
+program's video type. If you only have a limited number of programs that you
+want the channel to repeat in a loop, use the
+<code>InternalProviderData.setRepeatable()</code> method with a value of
+<code>true</code> when setting information about your program.</p>
+
+<p>After you've implemented the job service, add it to your app manifest:</p>
+
+<pre>
+&lt;service
+    android:name=".sync.SampleJobService"
+    android:permission="android.permission.BIND_JOB_SERVICE"
+    android:exported="true" /&gt;
+</pre>
+
+<p>Finally, create a setup activity. Your setup activity should provide a way
+to sync channel and program data. One way to do this is for the user to do it
+via the UI in the activity. You might also have the app do it automatically
+when the activity starts. When the setup activity needs to sync channel and
+program info, the app should start the job service:</p>
+
+<pre>
+String inputId = getActivity().getIntent().getStringExtra(TvInputInfo.EXTRA_INPUT_ID);
+EpgSyncJobService.cancelAllSyncRequests(getActivity());
+EpgSyncJobService.requestImmediateSync(getActivity(), inputId,
+        new ComponentName(getActivity(), SampleJobService.class));
+</pre>
+
+<p>Use the <code>requestImmediateSync()</code> method to sync
+the job service. The user must wait for the sync to finish, so you should
+keep your request period relatively short.</p>
+
+<p>Use the <code>setUpPeriodicSync()</code> method to have the job service
+periodically sync channel and program data in the background:</p>
+
+<pre>
+EpgSyncJobService.setUpPeriodicSync(context, inputId,
+        new ComponentName(context, SampleJobService.class));
+</pre>
+
+<p>The TIF Companion Library provides an additional overloaded method of
+<code>requestImmediateSync()</code> that lets you specify the duration of
+channel data to sync in milliseconds. The default method syncs one hour's
+worth of channel data.
+</p>
+
+<p>The TIF Companion Library also provides an additional overloaded method of
+<code>setUpPeriodicSync()</code> that lets you specify the duration of
+channel data to sync, and how often the periodic sync should occur. The
+default method syncs 48 hours of channel data every 12 hours.
+</p>
+
+<p>For more details about channel data and the EPG, see
+<a href="{@docRoot}training/tv/tif/channel.html"> Working with Channel Data</a>.
+</p>
+
+<h3 id="playback">Handle tuning requests and media playback</h3>
+
+<p>When a user selects a specific channel, the system TV app uses a
+<code>Session</code>, created by your app, to tune to the requested channel
+and play content. The TIF Companion Library provides several
+classes you can extend to handle channel and session calls from the system.</p>
+
+<p>Your <code>BaseTvInputService</code> subclass creates sessions which handle
+tuning requests. Override the
+<code>onCreateSession()</code> method, create a session extended from
+the <code>BaseTvInputService.Session</code> class, and call
+<code>super.sessionCreated()</code> with your new session. In the following
+example, <code>onCreateSession()</code> returns a
+<code>RichTvInputSessionImpl</code> object that extends
+<code>BaseTvInputService.Session</code>:</p>
+
+<pre>
+&#64;Override
+public final Session onCreateSession(String inputId) {
+    RichTvInputSessionImpl session = new RichTvInputSessionImpl(this, inputId);
+    session.setOverlayViewEnabled(true);
+    return super.sessionCreated(session);
+}
+</pre>
+
+<p>When the user uses the system TV app to start viewing one of your channels,
+the system calls your session's <code>onPlayChannel()</code> method. Override
+this method if you need to do any special channel initialization before the
+program starts playing.</p>
+
+<p>The system then obtains the currently scheduled program and calls your
+session's <code>onPlayProgram()</code> method, specifying the program
+information and start time in milliseconds. Use the
+<code>TvPlayer</code> interface to start playing the program.</p>
+
+<p>Your media player code should implement <code>TvPlayer</code> to handle
+specific playback events. The <code>TvPlayer</code> class handles features
+like time-shifting controls without adding complexity to your
+<code>BaseTvInputService</code> implementation.</p>
+
+<p>In your session's <code>getTvPlayer()</code> method, return
+your media player that implements <code>TvPlayer</code>. The
+<a class="external-link"
+href="https://github.com/googlesamples/androidtv-sample-inputs">
+TV Input Service sample app</a> implements a media player that uses
+<a href="{@docRoot}guide/topics/media/exoplayer.html">ExoPlayer</a>.</p>
+
+<h2 id="NoTIFCompanion">Create a TV Input Service Using the TIF Framework</h2>
+
+<p>If your TV input service can't use the TIF Companion Library, you need
+to implement the following components:</p>
 
 <ul>
   <li>{@link android.media.tv.TvInputService} provides long-running and background availability for
@@ -56,43 +294,18 @@ TV Input Framework</a> for more information about the framework architecture and
   the interaction with TV inputs and apps</li>
 </ul>
 
-<h2 id="manifest">Declare Your TV Input Service in the Manifest</h2>
+<p>You also need to do the following:</p>
 
-<p>Your app manifest must declare your {@link android.media.tv.TvInputService}. Within that
-declaration, specify the {@link android.Manifest.permission#BIND_TV_INPUT} permission to allow the
-service to connect the TV input to the system. A system service (<code>TvInputManagerService</code>)
-performs the binding and has that permission. The system TV app sends requests to TV input services
-via the {@link android.media.tv.TvInputManager} interface. The service declaration must also
-include an intent filter that specifies the {@link android.media.tv.TvInputService}
-as the action to perform with the intent. Also within the service declaration, declare the service
-meta data in a separate XML resource. The service declaration, the intent filter and the service
-meta data are described in the following example.</p>
+<ol>
+<li>Declare your TV input service in the manifest, as
+described in <a href="#manifest">Declare your TV input service in the
+manifest</a>.</li>
+<li>Create the service metadata file.</li>
+<li>Create and register your channel and program information.</li>
+<li>Create your setup activity.</li>
+</ol>
 
-<pre>
-&lt;service android:name="com.example.sampletvinput.SampleTvInput"
-    android:label="@string/sample_tv_input_label"
-    android:permission="android.permission.BIND_TV_INPUT"&gt;
-    &lt;intent-filter&gt;
-        &lt;action android:name="android.media.tv.TvInputService" /&gt;
-    &lt;/intent-filter&gt;
-    &lt;meta-data android:name="android.media.tv.input"
-      android:resource="@xml/sample_tv_input" /&gt;
-&lt;/service&gt;
-</pre>
-
-<p>Define the service meta data in separate XML file, as shown in the following example. The service
-meta data must include a setup interface that describes the TV input's initial configuration and
-channel scan. The service meta data file is located in the XML resources directory
-for your application and must match the name of the resource in the manifest. Using the example
-manifest entries above, you would create an XML file in the location
-<code>res/xml/sample_tv_input.xml</code>, with the following contents:</p>
-
-<pre>
-&lt;tv-input xmlns:android="http://schemas.android.com/apk/res/android"
-  android:setupActivity="com.example.sampletvinput.SampleTvInputSetupActivity" /&gt;
-</pre>
-
-<h2 id="tvinput">Define Your TV Input Service</h2>
+<h3 id="tvinput">Define your TV input service</h3>
 
 <div class="figure">
 <img id="tvinputlife" src="{@docRoot}images/tv/tvinput-life.png" alt=""/>
@@ -102,7 +315,7 @@ manifest entries above, you would create an XML file in the location
 <p>For your service, you extend the {@link android.media.tv.TvInputService} class. A
 {@link android.media.tv.TvInputService} implementation is a
 <a href="{@docRoot}guide/components/bound-services.html">bound service</a> where the system service
-(<code>TvInputManagerService</code>) is the client that binds to it. The service life cycle methods
+is the client that binds to it. The service life cycle methods
 you need to implement are illustrated in figure 1.</p>
 
 <p>The {@link android.app.Service#onCreate()} method initializes and starts the
@@ -145,7 +358,8 @@ you may want to handle in your TV input service.</p>
 
 <p>The {@link android.media.tv.TvInputService} creates a
 {@link android.media.tv.TvInputService.Session} that implements {@link android.os.Handler.Callback}
-to handle player state changes. With {@link android.media.tv.TvInputService.Session#onSetSurface(android.view.Surface) onSetSurface()},
+to handle player state changes. With
+{@link android.media.tv.TvInputService.Session#onSetSurface(android.view.Surface) onSetSurface()},
 the {@link android.media.tv.TvInputService.Session} sets the {@link android.view.Surface} with the
 video content. See <a href="{@docRoot}training/tv/tif/ui.html#surface">Integrate Player with Surface</a>
 for more information about working with {@link android.view.Surface} to render video.</p>
@@ -153,16 +367,16 @@ for more information about working with {@link android.view.Surface} to render v
 <p>The {@link android.media.tv.TvInputService.Session} handles the
 {@link android.media.tv.TvInputService.Session#onTune(android.net.Uri) onTune()}
 event when the user selects a channel, and notifies the system TV app for changes in the content and
-content meta data. These <code>notify()</code> methods are described in
+content metadata. These <code>notify()</code> methods are described in
 <a href="{@docRoot}training/tv/tif/ui.html#control">
 Control Content</a> and <a href="{@docRoot}training/tv/tif/ui.html#track">Handle Track Selection</a>
 further in this training.</p>
 
-<h2 id="setup">Define Your Setup Activity</h2>
+<h3 id="setup">Define your setup activity</h3>
 
 <p>The system TV app works with the setup activity you define for your TV input. The
 setup activity is required and must provide at least one channel record for the system database. The
-system TV app will invoke the setup activity when it cannot find a channel for the TV input.
+system TV app invokes the setup activity when it cannot find a channel for the TV input.
 <p>The setup activity describes to the system TV app the channels made available through the TV
 input, as demonstrated in the next lesson, <a href="{@docRoot}training/tv/tif/channel.html">Creating
 and Updating Channel Data</a>.</p>
