@@ -85,7 +85,7 @@
     <string name="accessibility_menu" msgid="316839303324695949">"Мени"</string>
     <string name="accessibility_recent" msgid="5208608566793607626">"Краток преглед"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"Пребарај"</string>
-    <string name="accessibility_camera_button" msgid="8064671582820358152">"Фотоапарат"</string>
+    <string name="accessibility_camera_button" msgid="8064671582820358152">"Камера"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Телефон"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"Гласовна помош"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Отклучување"</string>
@@ -334,6 +334,8 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Раздели хоризонтално"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Раздели вертикално"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Раздели прилагодено"</string>
+  <string-array name="recents_blacklist_array">
+  </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Наполнета"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Се полни"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> додека не се наполни"</string>
