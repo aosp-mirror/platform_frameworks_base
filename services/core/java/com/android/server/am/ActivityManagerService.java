@@ -21916,6 +21916,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                         /*resultTo*/ null, bOptions, userId);
             }
         }
+
+        @Override
+        public int getUidProcessState(int uid) {
+            return getUidState(uid);
+        }
     }
 
     private final class SleepTokenImpl extends SleepToken {

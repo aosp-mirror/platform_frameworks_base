@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
 import android.app.IUidObserver;
@@ -284,6 +285,7 @@ public class ShortcutService extends IShortcutService.Stub {
     private final PackageManagerInternal mPackageManagerInternal;
     private final UserManager mUserManager;
     private final UsageStatsManagerInternal mUsageStatsManagerInternal;
+    private final ActivityManagerInternal mActivityManagerInternal;
 
     @GuardedBy("mLock")
     final SparseIntArray mUidState = new SparseIntArray();
@@ -372,6 +374,8 @@ public class ShortcutService extends IShortcutService.Stub {
         mUserManager = Preconditions.checkNotNull(context.getSystemService(UserManager.class));
         mUsageStatsManagerInternal = Preconditions.checkNotNull(
                 LocalServices.getService(UsageStatsManagerInternal.class));
+        mActivityManagerInternal = Preconditions.checkNotNull(
+                LocalServices.getService(ActivityManagerInternal.class));
 
         if (onlyForPackageManagerApis) {
             return; // Don't do anything further.  For unit tests only.
@@ -456,7 +460,8 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     private boolean isProcessStateForeground(int processState) {
-        return processState <= PROCESS_STATE_FOREGROUND_THRESHOLD;
+        return (processState != ActivityManager.PROCESS_STATE_NONEXISTENT)
+                && (processState <= PROCESS_STATE_FOREGROUND_THRESHOLD);
     }
 
     boolean isUidForegroundLocked(int uid) {
@@ -465,7 +470,13 @@ public class ShortcutService extends IShortcutService.Stub {
             // so it's foreground anyway.
             return true;
         }
-        return isProcessStateForeground(mUidState.get(uid, ActivityManager.MAX_PROCESS_STATE));
+        // First, check with the local cache.
+        if (isProcessStateForeground(mUidState.get(uid, ActivityManager.MAX_PROCESS_STATE))) {
+            return true;
+        }
+        // If the cache says background, reach out to AM.  Since it'll internally need to hold
+        // the AM lock, we use it as a last resort.
+        return isProcessStateForeground(mActivityManagerInternal.getUidProcessState(uid));
     }
 
     long getUidLastForegroundElapsedTimeLocked(int uid) {

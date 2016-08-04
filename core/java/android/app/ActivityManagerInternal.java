@@ -171,4 +171,12 @@ public abstract class ActivityManagerInternal {
      */
     public abstract int startActivitiesAsPackage(String packageName,
             int userId, Intent[] intents, Bundle bOptions);
+
+    /**
+     * Get the procstate for the UID.  The return value will be between
+     * {@link ActivityManager#MIN_PROCESS_STATE} and {@link ActivityManager#MAX_PROCESS_STATE}.
+     * Note if the UID doesn't exist, it'll return {@link ActivityManager#PROCESS_STATE_NONEXISTENT}
+     * (-1).
+     */
+    public abstract int getUidProcessState(int uid);
 }
