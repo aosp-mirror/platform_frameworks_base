@@ -254,7 +254,7 @@
     <string name="permgroupdesc_storage" msgid="637758554581589203">"пристапува до фотографии, аудио-видео и датотеки на уредот"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"снима аудио"</string>
-    <string name="permgrouplab_camera" msgid="4820372495894586615">"Фотоапарат"</string>
+    <string name="permgrouplab_camera" msgid="4820372495894586615">"Камера"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"фотографира и снима видео"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Телефон"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"упатува и управува со телефонски повици"</string>
@@ -741,7 +741,7 @@
     <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"Виџет <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>."</string>
     <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Избирач на корисник"</string>
     <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Статус"</string>
-    <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"Фотоапарат"</string>
+    <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"Камера"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Контроли на медиуми"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"Прередувањето виџети започна."</string>
     <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"Прередувањето виџети заврши."</string>
