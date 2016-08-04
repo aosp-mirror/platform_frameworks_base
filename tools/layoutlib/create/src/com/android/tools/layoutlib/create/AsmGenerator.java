@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.ListIterator;
@@ -48,8 +49,6 @@ public class AsmGenerator {
     private final String mOsDestJar;
     /** List of classes to inject in the final JAR from _this_ archive. */
     private final Class<?>[] mInjectClasses;
-    /** The set of methods to stub out. */
-    private final Set<String> mStubMethods;
     /** All classes to output as-is, except if they have native methods. */
     private Map<String, ClassReader> mKeep;
     /** All dependencies that must be completely stubbed. */
@@ -107,7 +106,6 @@ public class AsmGenerator {
             }
         }
         mInjectClasses = injectedClasses.toArray(new Class<?>[0]);
-        mStubMethods = new HashSet<>(Arrays.asList(createInfo.getOverriddenMethods()));
 
         // Create the map/set of methods to change to delegates
         mDelegateMethods = new HashMap<>();
@@ -384,7 +382,7 @@ public class AsmGenerator {
         if (mInjectedMethodsMap.keySet().contains(binaryNewName)) {
             cv = new InjectMethodsAdapter(cv, mInjectedMethodsMap.get(binaryNewName));
         }
-        cv = new TransformClassAdapter(mLog, mStubMethods, mDeleteReturns.get(className),
+        cv = new TransformClassAdapter(mLog, Collections.emptySet(), mDeleteReturns.get(className),
                 newName, cv, stubNativesOnly);
 
         Set<String> delegateMethods = mDelegateMethods.get(className);

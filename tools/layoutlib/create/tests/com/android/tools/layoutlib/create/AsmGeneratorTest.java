@@ -107,12 +107,6 @@ public class AsmGeneratorTest {
             }
 
             @Override
-            public String[] getOverriddenMethods() {
-                // methods to force override
-                return EMPTY_STRING_ARRAY;
-            }
-
-            @Override
             public String[] getRenamedClasses() {
                 // classes to rename (so that we can replace them)
                 return new String[] {
@@ -183,12 +177,6 @@ public class AsmGeneratorTest {
 
             @Override
             public String[] getDelegateClassNatives() {
-                return EMPTY_STRING_ARRAY;
-            }
-
-            @Override
-            public String[] getOverriddenMethods() {
-                // methods to force override
                 return EMPTY_STRING_ARRAY;
             }
 
@@ -274,12 +262,6 @@ public class AsmGeneratorTest {
             }
 
             @Override
-            public String[] getOverriddenMethods() {
-                // methods to force override
-                return EMPTY_STRING_ARRAY;
-            }
-
-            @Override
             public String[] getRenamedClasses() {
                 // classes to rename (so that we can replace them)
                 return EMPTY_STRING_ARRAY;
@@ -356,12 +338,6 @@ public class AsmGeneratorTest {
 
             @Override
             public String[] getDelegateClassNatives() {
-                return EMPTY_STRING_ARRAY;
-            }
-
-            @Override
-            public String[] getOverriddenMethods() {
-                // methods to force override
                 return EMPTY_STRING_ARRAY;
             }
 
