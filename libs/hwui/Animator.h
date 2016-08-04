@@ -159,6 +159,17 @@ private:
         Cancel,
         End
     };
+
+    // Defines different actions upon finish.
+    enum class Action {
+        // For animations that got canceled or finished normally. no more action needs to be done.
+        None,
+        // For animations that get reset, the reset will happen in the next animation pulse.
+        Reset,
+        // For animations being ended, in the next animation pulse the animation will skip to end.
+        End
+    };
+
     inline void checkMutable();
     virtual void transitionToRunning(AnimationContext& context);
     void doSetStartValue(float value);
@@ -166,7 +177,7 @@ private:
     void resolveStagingRequest(Request request);
 
     std::vector<Request> mStagingRequests;
-
+    Action mPendingActionUponFinish = Action::None;
 };
 
 class RenderPropertyAnimator : public BaseRenderNodeAnimator {
