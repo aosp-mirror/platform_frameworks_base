@@ -17,26 +17,23 @@
 package com.android.server;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.content.res.Resources;
-import android.content.Intent;
-import android.util.EventLog;
-import android.util.Slog;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Process;
+import android.os.UserHandle;
 import android.provider.MediaStore;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
 import android.system.StructStat;
+import android.util.Slog;
 
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.os.BackgroundThread;
@@ -44,12 +41,10 @@ import com.android.internal.os.BackgroundThread;
 import dalvik.system.DexFile;
 import dalvik.system.VMRuntime;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.io.FileDescriptor;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 
 /**
  * <p>PinnerService pins important files for key processes in memory.</p>
@@ -89,20 +84,10 @@ public final class PinnerService extends SystemService {
         }
         mBinderService = new BinderService();
         publishBinderService("pinner", mBinderService);
-        mPinnerHandler.sendMessage(
-                mPinnerHandler.obtainMessage(PinnerHandler.PIN_ONSTART_MSG));
-    }
 
-    /**
-     * Pin camera on unlock.
-     * We have to wait for unlock because the user's
-     * preference for camera is not available from PackageManager until after
-     * unlock
-     */
-    @Override
-    public void onUnlockUser(int userHandle) {
-        mPinnerHandler.sendMessage(
-                mPinnerHandler.obtainMessage(PinnerHandler.PIN_CAMERA_MSG, userHandle, 0));
+        mPinnerHandler.obtainMessage(PinnerHandler.PIN_ONSTART_MSG).sendToTarget();
+        mPinnerHandler.obtainMessage(PinnerHandler.PIN_CAMERA_MSG, UserHandle.USER_SYSTEM, 0)
+                .sendToTarget();
     }
 
     /**
@@ -113,8 +98,7 @@ public final class PinnerService extends SystemService {
      */
     @Override
     public void onSwitchUser(int userHandle) {
-        mPinnerHandler.sendMessage(
-                mPinnerHandler.obtainMessage(PinnerHandler.PIN_CAMERA_MSG, userHandle, 0));
+        mPinnerHandler.obtainMessage(PinnerHandler.PIN_CAMERA_MSG, userHandle, 0).sendToTarget();
     }
 
     /**
@@ -194,8 +178,10 @@ public final class PinnerService extends SystemService {
         //  device without a fbe enabled, the _SECURE intent will never get set.
         Intent cameraIntent = new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA);
         PackageManager pm = mContext.getPackageManager();
-        ResolveInfo cameraResolveInfo = pm.resolveActivityAsUser(
-                cameraIntent, PackageManager.MATCH_DEFAULT_ONLY, userHandle);
+        ResolveInfo cameraResolveInfo = pm.resolveActivityAsUser(cameraIntent,
+                PackageManager.MATCH_DEFAULT_ONLY | PackageManager.MATCH_DIRECT_BOOT_AWARE
+                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
+                userHandle);
         if (cameraResolveInfo == null ) {
             //this is not necessarily an error
             if (DEBUG) {
