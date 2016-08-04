@@ -550,7 +550,7 @@ public class SettingsProvider extends ContentProvider {
                 final int userCount = users.size();
                 for (int i = 0; i < userCount; i++) {
                     UserInfo user = users.get(i);
-                    dumpForUser(user.id, pw);
+                    dumpForUserLocked(user.id, pw);
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -558,12 +558,16 @@ public class SettingsProvider extends ContentProvider {
         }
     }
 
-    private void dumpForUser(int userId, PrintWriter pw) {
+    private void dumpForUserLocked(int userId, PrintWriter pw) {
         if (userId == UserHandle.USER_SYSTEM) {
             pw.println("GLOBAL SETTINGS (user " + userId + ")");
             Cursor globalCursor = getAllGlobalSettings(ALL_COLUMNS);
             dumpSettings(globalCursor, pw);
             pw.println();
+
+            SettingsState globalSettings = mSettingsRegistry.getSettingsLocked(
+                    SETTINGS_TYPE_GLOBAL, UserHandle.USER_SYSTEM);
+            globalSettings.dumpHistoricalOperations(pw);
         }
 
         pw.println("SECURE SETTINGS (user " + userId + ")");
@@ -571,10 +575,18 @@ public class SettingsProvider extends ContentProvider {
         dumpSettings(secureCursor, pw);
         pw.println();
 
+        SettingsState secureSettings = mSettingsRegistry.getSettingsLocked(
+                SETTINGS_TYPE_SECURE, userId);
+        secureSettings.dumpHistoricalOperations(pw);
+
         pw.println("SYSTEM SETTINGS (user " + userId + ")");
         Cursor systemCursor = getAllSystemSettings(userId, ALL_COLUMNS);
         dumpSettings(systemCursor, pw);
         pw.println();
+
+        SettingsState systemSettings = mSettingsRegistry.getSettingsLocked(
+                SETTINGS_TYPE_SYSTEM, userId);
+        systemSettings.dumpHistoricalOperations(pw);
     }
 
     private void dumpSettings(Cursor cursor, PrintWriter pw) {
