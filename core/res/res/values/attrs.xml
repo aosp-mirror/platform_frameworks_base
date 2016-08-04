@@ -5341,7 +5341,10 @@ i
         <attr name="innerRadius" format="dimension" />
         <!-- Thickness of the ring. When defined, thicknessRatio is ignored. -->
         <attr name="thickness" format="dimension" />
-        <!-- Indicates whether the drawable's level affects the way the gradient is drawn. -->
+        <!-- Whether the drawable level value (see
+             {@link android.graphics.drawable.Drawable#getLevel()}) is used to scale the shape.
+             Scaling behavior depends on the shape type. For "ring", the angle is scaled from 0 to
+             360. For all other types, there is no effect. The default value is true. -->
         <attr name="useLevel" />
         <!-- If set, specifies the color to apply to the drawable as a tint. By default,
              no tint is applied. May be a color state list. -->
@@ -5375,28 +5378,37 @@ i
     <declare-styleable name="GradientDrawableGradient">
         <!-- Start color of the gradient. -->
         <attr name="startColor" format="color" />
-        <!-- Optional center color. For linear gradients, use centerX or centerY
-             to place the center color. -->
+        <!-- Optional center color. For linear gradients, use centerX or centerY to place the center
+             color. -->
         <attr name="centerColor" format="color" />
         <!-- End color of the gradient. -->
         <attr name="endColor" format="color" />
+        <!-- Whether the drawable level value (see
+             {@link android.graphics.drawable.Drawable#getLevel()}) is used to scale the gradient.
+             Scaling behavior varies based on gradient type. For "linear", adjusts the ending
+             position along the gradient's axis of orientation. For "radial", adjusts the outer
+             radius. For "sweep", adjusts the ending angle. The default value is false. -->
         <attr name="useLevel" format="boolean" />
-        <!-- Angle of the gradient. -->
+        <!-- Angle of the gradient, used only with linear gradient. Must be a multiple of 45 in the
+             range [0, 315]. -->
         <attr name="angle" format="float" />
         <!-- Type of gradient. The default type is linear. -->
         <attr name="type">
-            <!-- Linear gradient. -->
+            <!-- Linear gradient extending across the center point. -->
             <enum name="linear" value="0" />
-            <!-- Radial, or circular, gradient. -->
+            <!-- Radial gradient extending from the center point outward. -->
             <enum name="radial" value="1" />
-            <!-- Sweep, or angled or diamond, gradient. -->
+            <!-- Sweep (or angular) gradient sweeping counter-clockwise around the center point. -->
             <enum name="sweep"  value="2" />
         </attr>
-        <!-- X coordinate of the origin of the gradient within the shape. -->
+        <!-- X-position of the center point of the gradient within the shape as a fraction of the
+             width. The default value is 0.5. -->
         <attr name="centerX" format="float|fraction" />
-        <!-- Y coordinate of the origin of the gradient within the shape. -->
+        <!-- Y-position of the center point of the gradient within the shape as a fraction of the
+             height. The default value is 0.5. -->
         <attr name="centerY" format="float|fraction" />
-        <!-- Radius of the gradient, used only with radial gradient. -->
+        <!-- Radius of the gradient, used only with radial gradient. May be an explicit dimension
+             or a fractional value relative to the shape's minimum dimension. -->
         <attr name="gradientRadius" format="float|fraction|dimension" />
     </declare-styleable>
 
