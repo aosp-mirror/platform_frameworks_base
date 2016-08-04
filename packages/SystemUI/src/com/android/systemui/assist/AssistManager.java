@@ -29,6 +29,7 @@ import android.widget.ImageView;
 
 import com.android.internal.app.AssistUtils;
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.CommandQueue;
@@ -259,7 +260,7 @@ public class AssistManager {
 
     @Nullable
     private ComponentName getAssistInfo() {
-        return mAssistUtils.getAssistComponentForUser(UserHandle.USER_CURRENT);
+        return mAssistUtils.getAssistComponentForUser(KeyguardUpdateMonitor.getCurrentUser());
     }
 
     public void showDisclosure() {
