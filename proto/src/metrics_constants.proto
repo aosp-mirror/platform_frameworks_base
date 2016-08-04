@@ -2203,6 +2203,10 @@ message MetricsEvent {
     // System navigation key down.
     ACTION_SYSTEM_NAVIGATION_KEY_DOWN = 494;
 
+    // OPEN: Settings > Display -> Ambient Display
+    // CATEGORY: SETTINGS
+    ACTION_AMBIENT_DISPLAY = 495;
+
     // ---- End N-MR1 Constants, all N-MR1 constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
