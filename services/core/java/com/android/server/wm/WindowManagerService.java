@@ -9454,10 +9454,17 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             final boolean dragResizingChanged = w.isDragResizeChanged()
                     && !w.isDragResizingChangeReported();
+
             if (localLOGV) Slog.v(TAG_WM, "Resizing " + w
                     + ": configChanged=" + configChanged
                     + " dragResizingChanged=" + dragResizingChanged
                     + " last=" + w.mLastFrame + " frame=" + w.mFrame);
+
+            // We update mLastFrame always rather than in the conditional with the
+            // last inset variables, because mFrameSizeChanged only tracks the
+            // width and height changing.
+            w.mLastFrame.set(w.mFrame);
+
             if (w.mContentInsetsChanged
                     || w.mVisibleInsetsChanged
                     || winAnimator.mSurfaceResized
@@ -9495,7 +9502,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 w.mLastVisibleInsets.set(w.mVisibleInsets);
                 w.mLastStableInsets.set(w.mStableInsets);
                 w.mLastOutsets.set(w.mOutsets);
-                w.mLastFrame.set(w.mFrame);
                 makeWindowFreezingScreenIfNeededLocked(w);
                 // If the orientation is changing, or we're starting or ending
                 // a drag resizing action, then we need to hold off on unfreezing
