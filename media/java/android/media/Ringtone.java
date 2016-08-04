@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
@@ -206,11 +207,11 @@ public class Ringtone {
     public static String getTitle(
             Context context, Uri uri, boolean followSettingsUri, boolean allowRemote) {
         ContentResolver res = context.getContentResolver();
-        
+
         String title = null;
 
         if (uri != null) {
-            String authority = uri.getAuthority();
+            String authority = ContentProvider.getAuthorityWithoutUserId(uri.getAuthority());
 
             if (Settings.AUTHORITY.equals(authority)) {
                 if (followSettingsUri) {

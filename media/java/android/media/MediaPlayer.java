@@ -992,7 +992,7 @@ public class MediaPlayer extends PlayerBase
             // Try cached ringtone first since the actual provider may not be
             // encryption aware, or it may be stored on CE media storage
             final int type = RingtoneManager.getDefaultType(uri);
-            final Uri cacheUri = RingtoneManager.getCacheForType(type);
+            final Uri cacheUri = RingtoneManager.getCacheForType(type, context.getUserId());
             final Uri actualUri = RingtoneManager.getActualDefaultRingtoneUri(context, type);
             if (attemptDataSource(resolver, cacheUri)) {
                 return;

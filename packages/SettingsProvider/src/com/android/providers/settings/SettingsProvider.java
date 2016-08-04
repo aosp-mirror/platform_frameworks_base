@@ -58,6 +58,7 @@ import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -76,6 +77,7 @@ import java.io.PrintWriter;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -193,6 +195,13 @@ public class SettingsProvider extends ContentProvider {
     private static final Set<String> sSystemCloneToManagedSettings = new ArraySet<>();
     static {
         Settings.System.getCloneToManagedProfileSettings(sSystemCloneToManagedSettings);
+    }
+
+    // Per user system settings that are cloned from the profile's parent when a dependency
+    // in {@link Settings.Secure} is set to "1".
+    public static final Map<String, String> sSystemCloneFromParentOnDependency = new ArrayMap<>();
+    static {
+        Settings.System.getCloneFromParentOnValueSettings(sSystemCloneFromParentOnDependency);
     }
 
     private final Object mLock = new Object();
@@ -518,19 +527,29 @@ public class SettingsProvider extends ContentProvider {
         }
         uri = ContentProvider.getUriWithoutUserId(uri);
 
+        final String cacheRingtoneSetting;
         final String cacheName;
         if (Settings.System.RINGTONE_CACHE_URI.equals(uri)) {
+            cacheRingtoneSetting = Settings.System.RINGTONE;
             cacheName = Settings.System.RINGTONE_CACHE;
         } else if (Settings.System.NOTIFICATION_SOUND_CACHE_URI.equals(uri)) {
+            cacheRingtoneSetting = Settings.System.NOTIFICATION_SOUND;
             cacheName = Settings.System.NOTIFICATION_SOUND_CACHE;
         } else if (Settings.System.ALARM_ALERT_CACHE_URI.equals(uri)) {
+            cacheRingtoneSetting = Settings.System.ALARM_ALERT;
             cacheName = Settings.System.ALARM_ALERT_CACHE;
         } else {
             throw new FileNotFoundException("Direct file access no longer supported; "
                     + "ringtone playback is available through android.media.Ringtone");
         }
 
-        final File cacheFile = new File(getRingtoneCacheDir(userId), cacheName);
+        int actualCacheOwner;
+        // Redirect cache to parent if ringtone setting is owned by profile parent
+        synchronized (mLock) {
+            actualCacheOwner = resolveOwningUserIdForSystemSettingLocked(userId,
+                    cacheRingtoneSetting);
+        }
+        final File cacheFile = new File(getRingtoneCacheDir(actualCacheOwner), cacheName);
         return ParcelFileDescriptor.open(cacheFile, ParcelFileDescriptor.parseMode(mode));
     }
 
@@ -1102,7 +1121,7 @@ public class SettingsProvider extends ContentProvider {
         }
         if (cacheName != null) {
             final File cacheFile = new File(
-                    getRingtoneCacheDir(UserHandle.getCallingUserId()), cacheName);
+                    getRingtoneCacheDir(owningUserId), cacheName);
             cacheFile.delete();
         }
 
@@ -1242,6 +1261,16 @@ public class SettingsProvider extends ContentProvider {
     }
 
     private int resolveOwningUserIdForSystemSettingLocked(int userId, String setting) {
+        final int parentId;
+        // Resolves dependency if setting has a dependency and the calling user has a parent
+        if (sSystemCloneFromParentOnDependency.containsKey(setting)
+                && (parentId = getGroupParentLocked(userId)) != userId) {
+            // The setting has a dependency and the profile has a parent
+            String dependency = sSystemCloneFromParentOnDependency.get(setting);
+            if (getSecureSetting(dependency, userId).getValue().equals("1")) {
+                return parentId;
+            }
+        }
         return resolveOwningUserIdLocked(userId, sSystemCloneToManagedSettings, setting);
     }
 

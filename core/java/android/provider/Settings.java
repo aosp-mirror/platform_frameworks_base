@@ -3817,6 +3817,26 @@ public final class Settings {
         }
 
         /**
+         * These entries should be cloned from this profile's parent only if the dependency's
+         * value is true ("1")
+         *
+         * Note: the dependencies must be Secure settings
+         *
+         * @hide
+         */
+        public static final Map<String, String> CLONE_FROM_PARENT_ON_VALUE = new ArrayMap<>();
+        static {
+            CLONE_FROM_PARENT_ON_VALUE.put(RINGTONE, Secure.SYNC_PARENT_SOUNDS);
+            CLONE_FROM_PARENT_ON_VALUE.put(NOTIFICATION_SOUND, Secure.SYNC_PARENT_SOUNDS);
+            CLONE_FROM_PARENT_ON_VALUE.put(ALARM_ALERT, Secure.SYNC_PARENT_SOUNDS);
+        }
+
+        /** @hide */
+        public static void getCloneFromParentOnValueSettings(Map<String, String> outMap) {
+            outMap.putAll(CLONE_FROM_PARENT_ON_VALUE);
+        }
+
+        /**
          * When to use Wi-Fi calling
          *
          * @see android.telephony.TelephonyManager.WifiCallingChoices
