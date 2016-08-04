@@ -67,10 +67,11 @@ class PreloadAppsInstaller {
 
     void installApps(int userId) {
         File[] files = preloadsAppsDirectory.listFiles();
+        AppInstallCounter counter = new AppInstallCounter(mContext, userId);
         if (ArrayUtils.isEmpty(files)) {
+            counter.setExpectedAppsCount(0);
             return;
         }
-        AppInstallCounter counter = new AppInstallCounter(mContext, userId);
         int expectedCount = 0;
         for (File file : files) {
             String apkName = file.getName();
