@@ -105,7 +105,7 @@ abstract class PackageSettingBase extends SettingBase {
 
     PackageKeySetData keySetData = new PackageKeySetData();
 
-    private static final PackageUserState DEFAULT_USER_STATE = new PackageUserState();
+    static final PackageUserState DEFAULT_USER_STATE = new PackageUserState();
 
     // Whether this package is currently stopped, thus can not be
     // started until explicitly launched by the user.

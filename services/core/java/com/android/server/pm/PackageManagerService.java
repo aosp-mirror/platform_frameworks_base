@@ -3146,7 +3146,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         // reader
         synchronized (mPackages) {
             for (int i=names.length-1; i>=0; i--) {
-                String cur = mSettings.mRenamedPackages.get(names[i]);
+                String cur = mSettings.getRenamedPackage(names[i]);
                 out[i] = cur != null ? cur : names[i];
             }
         }
@@ -6795,7 +6795,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         // reader
         synchronized (mPackages) {
             // Look to see if we already know about this package.
-            String oldName = mSettings.mRenamedPackages.get(pkg.packageName);
+            String oldName = mSettings.getRenamedPackage(pkg.packageName);
             if (pkg.mOriginalPackages != null && pkg.mOriginalPackages.contains(oldName)) {
                 // This package has been renamed to its original name.  Let's
                 // use that.
@@ -8104,7 +8104,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (pkg.mOriginalPackages != null) {
                 // This package may need to be renamed to a previously
                 // installed name.  Let's check on that...
-                final String renamed = mSettings.mRenamedPackages.get(pkg.mRealPackage);
+                final String renamed = mSettings.getRenamedPackage(pkg.mRealPackage);
                 if (pkg.mOriginalPackages.contains(renamed)) {
                     // This package had originally been installed as the
                     // original name, and we have already taken care of
@@ -14044,14 +14044,15 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (DEBUG_INSTALL) Slog.d(TAG, "installNewPackageLI: " + pkg);
 
         synchronized(mPackages) {
-            if (mSettings.mRenamedPackages.containsKey(pkgName)) {
+            final String renamedPackage = mSettings.getRenamedPackage(pkgName);
+            if (renamedPackage != null) {
                 // A package with the same name is already installed, though
                 // it has been renamed to an older name.  The package we
                 // are trying to install should be installed as an update to
                 // the existing one, but that has not been requested, so bail.
                 res.setError(INSTALL_FAILED_ALREADY_EXISTS, "Attempt to re-install " + pkgName
                         + " without first uninstalling package running as "
-                        + mSettings.mRenamedPackages.get(pkgName));
+                        + renamedPackage);
                 return;
             }
             if (mPackages.containsKey(pkgName)) {
@@ -14910,7 +14911,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             // Check if installing already existing package
             if ((installFlags & PackageManager.INSTALL_REPLACE_EXISTING) != 0) {
-                String oldName = mSettings.mRenamedPackages.get(pkgName);
+                String oldName = mSettings.getRenamedPackage(pkgName);
                 if (pkg.mOriginalPackages != null
                         && pkg.mOriginalPackages.contains(oldName)
                         && mPackages.containsKey(oldName)) {

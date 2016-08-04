@@ -29,6 +29,7 @@ import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 
 import android.util.ArraySet;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 
 /**
@@ -146,5 +147,77 @@ public class PackageUserState {
         }
 
         return componentInfo.enabled;
+    }
+
+    @Override
+    final public boolean equals(Object obj) {
+        if (!(obj instanceof PackageUserState)) {
+            return false;
+        }
+        final PackageUserState oldState = (PackageUserState) obj;
+        if (ceDataInode != oldState.ceDataInode) {
+            return false;
+        }
+        if (installed != oldState.installed) {
+            return false;
+        }
+        if (stopped != oldState.stopped) {
+            return false;
+        }
+        if (notLaunched != oldState.notLaunched) {
+            return false;
+        }
+        if (hidden != oldState.hidden) {
+            return false;
+        }
+        if (suspended != oldState.suspended) {
+            return false;
+        }
+        if (blockUninstall != oldState.blockUninstall) {
+            return false;
+        }
+        if (enabled != oldState.enabled) {
+            return false;
+        }
+        if ((lastDisableAppCaller == null && oldState.lastDisableAppCaller != null)
+                || (lastDisableAppCaller != null
+                        && !lastDisableAppCaller.equals(oldState.lastDisableAppCaller))) {
+            return false;
+        }
+        if (domainVerificationStatus != oldState.domainVerificationStatus) {
+            return false;
+        }
+        if (appLinkGeneration != oldState.appLinkGeneration) {
+            return false;
+        }
+        if ((disabledComponents == null && oldState.disabledComponents != null)
+                || (disabledComponents != null && oldState.disabledComponents == null)) {
+            return false;
+        }
+        if (disabledComponents != null) {
+            if (disabledComponents.size() != oldState.disabledComponents.size()) {
+                return false;
+            }
+            for (int i = disabledComponents.size() - 1; i >=0; --i) {
+                if (!oldState.disabledComponents.contains(disabledComponents.valueAt(i))) {
+                    return false;
+                }
+            }
+        }
+        if ((enabledComponents == null && oldState.enabledComponents != null)
+                || (enabledComponents != null && oldState.enabledComponents == null)) {
+            return false;
+        }
+        if (enabledComponents != null) {
+            if (enabledComponents.size() != oldState.enabledComponents.size()) {
+                return false;
+            }
+            for (int i = enabledComponents.size() - 1; i >=0; --i) {
+                if (!oldState.enabledComponents.contains(enabledComponents.valueAt(i))) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }

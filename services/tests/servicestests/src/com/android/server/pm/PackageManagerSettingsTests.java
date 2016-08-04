@@ -22,15 +22,21 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageParser;
+import android.content.pm.PackageUserState;
 import android.content.pm.UserInfo;
+import android.os.Process;
 import android.os.UserHandle;
+import android.os.UserManagerInternal;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -40,14 +46,22 @@ import android.util.Log;
 import android.util.LongSparseArray;
 
 import com.android.internal.os.AtomicFile;
+import com.android.internal.util.FastPrintWriter;
+import com.android.server.LocalServices;
 
+import org.hamcrest.core.IsNot;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
@@ -67,7 +81,6 @@ public class PackageManagerSettingsTests {
             throws ReflectiveOperationException, IllegalAccessException {
         /* write out files and read */
         writeOldFiles();
-        createUserManagerServiceRef();
         Settings settings =
                 new Settings(InstrumentationRegistry.getContext().getFilesDir(), new Object());
         assertThat(settings.readLPw(createFakeUsers()), is(true));
@@ -80,7 +93,6 @@ public class PackageManagerSettingsTests {
             throws ReflectiveOperationException, IllegalAccessException {
         // write out files and read
         writeOldFiles();
-        createUserManagerServiceRef();
         Settings settings =
                 new Settings(InstrumentationRegistry.getContext().getFilesDir(), new Object());
         assertThat(settings.readLPw(createFakeUsers()), is(true));
@@ -115,7 +127,6 @@ public class PackageManagerSettingsTests {
     public void testNewPackageRestrictionsFile() throws ReflectiveOperationException {
         // Write the package files and make sure they're parsed properly the first time
         writeOldFiles();
-        createUserManagerServiceRef();
         Settings settings =
                 new Settings(InstrumentationRegistry.getContext().getFilesDir(), new Object());
         assertThat(settings.readLPw(createFakeUsers()), is(true));
@@ -165,6 +176,353 @@ public class PackageManagerSettingsTests {
         assertThat(ps.getEnabledComponents(1).size(), is(1));
         hasEnabled = ps.getEnabledComponents(0) != null && ps.getEnabledComponents(0).size() > 0;
         assertThat(hasEnabled, is(false));
+    }
+
+    private static final String PACKAGE_NAME = "com.android.bar";
+    private static final String REAL_PACKAGE_NAME = "com.android.foo";
+    private static final File INITIAL_CODE_PATH =
+            new File(InstrumentationRegistry.getContext().getFilesDir(), "com.android.bar-1");
+    private static final File UPDATED_CODE_PATH =
+            new File(InstrumentationRegistry.getContext().getFilesDir(), "com.android.bar-2");
+    private static final int INITIAL_VERSION_CODE = 10023;
+    private static final int UPDATED_VERSION_CODE = 10025;
+
+    /** Update existing package; don't install */
+    @Test
+    public void testUpdatePackageSetting01()
+            throws ReflectiveOperationException, PackageManagerException {
+        final PackageSetting pkgSetting01 = createPackageSetting(0 /*pkgFlags*/);
+        final PackageSetting oldPkgSetting01 = new PackageSetting(pkgSetting01);
+        final PackageSetting testPkgSetting01 = Settings.updatePackageSetting(
+                pkgSetting01,
+                PACKAGE_NAME,
+                null /*realPkgName*/,
+                null /*originalPkg*/,
+                null /*disabledPkg*/,
+                null /*sharedUser*/,
+                UPDATED_CODE_PATH /*codePath*/,
+                UPDATED_CODE_PATH /*resourcePath*/,
+                null /*legacyNativeLibraryPath*/,
+                "arm64-v8a" /*primaryCpuAbi*/,
+                "armeabi" /*secondaryCpuAbi*/,
+                UPDATED_VERSION_CODE /*versionCode*/,
+                ApplicationInfo.FLAG_SYSTEM /*pkgFlags*/,
+                ApplicationInfo.PRIVATE_FLAG_PRIVILEGED /*pkgPrivateFlags*/,
+                null /*installUser*/,
+                false /*allowInstall*/,
+                null /*parentPkgName*/,
+                null /*childPkgNames*/,
+                UserManagerService.getInstance());
+        assertThat(testPkgSetting01, is(pkgSetting01));
+        assertThat(testPkgSetting01.primaryCpuAbiString, is("arm64-v8a"));
+        assertThat(testPkgSetting01.secondaryCpuAbiString, is("armeabi"));
+        assertThat(testPkgSetting01.origPackage, is(nullValue()));
+        assertThat(testPkgSetting01.pkgFlags, is(ApplicationInfo.FLAG_SYSTEM));
+        assertThat(testPkgSetting01.pkgPrivateFlags, is(ApplicationInfo.PRIVATE_FLAG_PRIVILEGED));
+        final PackageUserState userState = testPkgSetting01.readUserState(UserHandle.USER_SYSTEM);
+        final PackageUserState oldUserState = oldPkgSetting01.readUserState(UserHandle.USER_SYSTEM);
+        verifyUserState(userState, oldUserState, false /*userStateChanged*/);
+    }
+
+    /** Update existing package; install for UserHandle.SYSTEM */
+    @Test
+    public void testUpdatePackageSetting02()
+            throws ReflectiveOperationException, PackageManagerException {
+        final PackageSetting pkgSetting01 = createPackageSetting(0 /*pkgFlags*/);
+        final PackageSetting oldPkgSetting01 = new PackageSetting(pkgSetting01);
+        final PackageSetting testPkgSetting01 = Settings.updatePackageSetting(
+                pkgSetting01,
+                PACKAGE_NAME,
+                null /*realPkgName*/,
+                null /*originalPkg*/,
+                null /*disabledPkg*/,
+                null /*sharedUser*/,
+                UPDATED_CODE_PATH /*codePath*/,
+                UPDATED_CODE_PATH /*resourcePath*/,
+                null /*legacyNativeLibraryPath*/,
+                "arm64-v8a" /*primaryCpuAbi*/,
+                "armeabi" /*secondaryCpuAbi*/,
+                UPDATED_VERSION_CODE /*versionCode*/,
+                0 /*pkgFlags*/,
+                0 /*pkgPrivateFlags*/,
+                UserHandle.SYSTEM /*installUser*/,
+                true /*allowInstall*/,
+                null /*parentPkgName*/,
+                null /*childPkgNames*/,
+                UserManagerService.getInstance());
+        assertThat(testPkgSetting01, is(pkgSetting01));
+        assertThat(testPkgSetting01.primaryCpuAbiString, is("arm64-v8a"));
+        assertThat(testPkgSetting01.secondaryCpuAbiString, is("armeabi"));
+        assertThat(testPkgSetting01.origPackage, is(nullValue()));
+        assertThat(testPkgSetting01.pkgFlags, is(0));
+        assertThat(testPkgSetting01.pkgPrivateFlags, is(0));
+        final PackageUserState userState = testPkgSetting01.readUserState(UserHandle.USER_SYSTEM);
+        final PackageUserState oldUserState = oldPkgSetting01.readUserState(UserHandle.USER_SYSTEM);
+        // The user state won't be changed in this scenario; the default user state is for
+        // the package to be installed.
+        verifyUserState(userState, oldUserState, false /*userStateChanged*/,
+                false /*notLaunched*/, false /*stopped*/);
+    }
+
+    /** Update existing package; install for {@code null} */
+    @Test
+    public void testUpdatePackageSetting03()
+            throws ReflectiveOperationException, PackageManagerException {
+        final PackageSetting pkgSetting01 = createPackageSetting(0 /*pkgFlags*/);
+        final PackageSetting oldPkgSetting01 = new PackageSetting(pkgSetting01);
+        final PackageSetting testPkgSetting01 = Settings.updatePackageSetting(
+                pkgSetting01,
+                PACKAGE_NAME,
+                null /*realPkgName*/,
+                null /*originalPkg*/,
+                null /*disabledPkg*/,
+                null /*sharedUser*/,
+                UPDATED_CODE_PATH /*codePath*/,
+                UPDATED_CODE_PATH /*resourcePath*/,
+                null /*legacyNativeLibraryPath*/,
+                "arm64-v8a" /*primaryCpuAbi*/,
+                "armeabi" /*secondaryCpuAbi*/,
+                UPDATED_VERSION_CODE /*versionCode*/,
+                0 /*pkgFlags*/,
+                0 /*pkgPrivateFlags*/,
+                null /*installUser*/,
+                true /*allowInstall*/,
+                null /*parentPkgName*/,
+                null /*childPkgNames*/,
+                UserManagerService.getInstance());
+        assertThat(testPkgSetting01, is(pkgSetting01));
+        assertThat(testPkgSetting01.primaryCpuAbiString, is("arm64-v8a"));
+        assertThat(testPkgSetting01.secondaryCpuAbiString, is("armeabi"));
+        assertThat(testPkgSetting01.origPackage, is(nullValue()));
+        assertThat(testPkgSetting01.pkgFlags, is(0));
+        assertThat(testPkgSetting01.pkgPrivateFlags, is(0));
+        final PackageUserState userState = testPkgSetting01.readUserState(UserHandle.USER_SYSTEM);
+        final PackageUserState oldUserState = oldPkgSetting01.readUserState(UserHandle.USER_SYSTEM);
+        verifyUserState(userState, oldUserState, false /*userStateChanged*/);
+    }
+
+    /** Update renamed package */
+    @Test
+    public void testUpdatePackageSetting04()
+            throws ReflectiveOperationException, PackageManagerException {
+        final PackageSetting originalPkgSetting = createPackageSetting(0 /*pkgFlags*/);
+        final PackageSetting testPkgSetting01 = Settings.updatePackageSetting(
+                null /*pkgSetting*/,
+                PACKAGE_NAME,
+                null /*realPkgName*/,
+                originalPkgSetting /*originalPkg*/,
+                null /*disabledPkg*/,
+                null /*sharedUser*/,
+                UPDATED_CODE_PATH /*codePath*/,
+                UPDATED_CODE_PATH /*resourcePath*/,
+                null /*legacyNativeLibraryPath*/,
+                "arm64-v8a" /*primaryCpuAbi*/,
+                "armeabi" /*secondaryCpuAbi*/,
+                UPDATED_VERSION_CODE /*versionCode*/,
+                0 /*pkgFlags*/,
+                0 /*pkgPrivateFlags*/,
+                UserHandle.SYSTEM /*installUser*/,
+                false /*allowInstall*/,
+                null /*parentPkgName*/,
+                null /*childPkgNames*/,
+                UserManagerService.getInstance());
+        assertThat(testPkgSetting01, is(not(originalPkgSetting)));
+        // ABI isn't pulled from the original package setting
+        assertThat(testPkgSetting01.primaryCpuAbiString, is("x86_64"));
+        assertThat(testPkgSetting01.secondaryCpuAbiString, is("x86"));
+        assertThat(testPkgSetting01.origPackage, is(originalPkgSetting));
+        assertThat(testPkgSetting01.pkgFlags, is(0));
+        assertThat(testPkgSetting01.pkgPrivateFlags, is(0));
+        final PackageUserState userState = testPkgSetting01.readUserState(UserHandle.USER_SYSTEM);
+        verifyUserState(userState, PackageSettingBase.DEFAULT_USER_STATE /*oldUserState*/,
+                false /*userStateChanged*/);
+    }
+
+    /** Update new package */
+    @Test
+    public void testUpdatePackageSetting05()
+            throws ReflectiveOperationException, PackageManagerException {
+        final PackageSetting testPkgSetting01 = Settings.updatePackageSetting(
+                null /*pkgSetting*/,
+                PACKAGE_NAME,
+                null /*realPkgName*/,
+                null /*originalPkg*/,
+                null /*disabledPkg*/,
+                null /*sharedUser*/,
+                UPDATED_CODE_PATH /*codePath*/,
+                UPDATED_CODE_PATH /*resourcePath*/,
+                null /*legacyNativeLibraryPath*/,
+                "arm64-v8a" /*primaryCpuAbi*/,
+                "armeabi" /*secondaryCpuAbi*/,
+                UPDATED_VERSION_CODE /*versionCode*/,
+                0 /*pkgFlags*/,
+                0 /*pkgPrivateFlags*/,
+                null /*installUser*/,
+                false /*allowInstall*/,
+                null /*parentPkgName*/,
+                null /*childPkgNames*/,
+                UserManagerService.getInstance());
+        assertThat(testPkgSetting01, is(notNullValue()));
+        assertThat(testPkgSetting01.primaryCpuAbiString, is("arm64-v8a"));
+        assertThat(testPkgSetting01.secondaryCpuAbiString, is("armeabi"));
+        assertThat(testPkgSetting01.origPackage, is(nullValue()));
+        assertThat(testPkgSetting01.pkgFlags, is(0));
+        assertThat(testPkgSetting01.pkgPrivateFlags, is(0));
+        final PackageUserState userState = testPkgSetting01.readUserState(UserHandle.USER_SYSTEM);
+        verifyUserState(userState, PackageSettingBase.DEFAULT_USER_STATE /*oldUserState*/,
+                false /*userStateChanged*/);
+    }
+
+    /** Update new package; install for {@code null} user */
+    @Test
+    public void testUpdatePackageSetting06()
+            throws ReflectiveOperationException, PackageManagerException {
+        final PackageSetting testPkgSetting01 = Settings.updatePackageSetting(
+                null /*pkgSetting*/,
+                PACKAGE_NAME,
+                null /*realPkgName*/,
+                null /*originalPkg*/,
+                null /*disabledPkg*/,
+                null /*sharedUser*/,
+                UPDATED_CODE_PATH /*codePath*/,
+                UPDATED_CODE_PATH /*resourcePath*/,
+                null /*legacyNativeLibraryPath*/,
+                "arm64-v8a" /*primaryCpuAbi*/,
+                "armeabi" /*secondaryCpuAbi*/,
+                UPDATED_VERSION_CODE /*versionCode*/,
+                0 /*pkgFlags*/,
+                0 /*pkgPrivateFlags*/,
+                null /*installUser*/,
+                true /*allowInstall*/,
+                null /*parentPkgName*/,
+                null /*childPkgNames*/,
+                UserManagerService.getInstance());
+        assertThat(testPkgSetting01, is(notNullValue()));
+        assertThat(testPkgSetting01.primaryCpuAbiString, is("arm64-v8a"));
+        assertThat(testPkgSetting01.secondaryCpuAbiString, is("armeabi"));
+        assertThat(testPkgSetting01.origPackage, is(nullValue()));
+        assertThat(testPkgSetting01.pkgFlags, is(0));
+        assertThat(testPkgSetting01.pkgPrivateFlags, is(0));
+        final PackageUserState userState = testPkgSetting01.readUserState(UserHandle.USER_SYSTEM);
+        verifyUserState(userState, PackageSettingBase.DEFAULT_USER_STATE /*oldUserState*/,
+                true /*userStateChanged*/, true /*notLaunched*/, true /*stopped*/);
+    }
+
+    /** Update new package; install for UserHandle.SYSTEM */
+    @Test
+    public void testUpdatePackageSetting07()
+            throws ReflectiveOperationException, PackageManagerException {
+        final PackageSetting testPkgSetting01 = Settings.updatePackageSetting(
+                null /*pkgSetting*/,
+                PACKAGE_NAME,
+                null /*realPkgName*/,
+                null /*originalPkg*/,
+                null /*disabledPkg*/,
+                null /*sharedUser*/,
+                UPDATED_CODE_PATH /*codePath*/,
+                UPDATED_CODE_PATH /*resourcePath*/,
+                null /*legacyNativeLibraryPath*/,
+                "arm64-v8a" /*primaryCpuAbi*/,
+                "armeabi" /*secondaryCpuAbi*/,
+                UPDATED_VERSION_CODE /*versionCode*/,
+                0 /*pkgFlags*/,
+                0 /*pkgPrivateFlags*/,
+                UserHandle.SYSTEM /*installUser*/,
+                true /*allowInstall*/,
+                null /*parentPkgName*/,
+                null /*childPkgNames*/,
+                UserManagerService.getInstance());
+        assertThat(testPkgSetting01, is(notNullValue()));
+        assertThat(testPkgSetting01.primaryCpuAbiString, is("arm64-v8a"));
+        assertThat(testPkgSetting01.secondaryCpuAbiString, is("armeabi"));
+        assertThat(testPkgSetting01.origPackage, is(nullValue()));
+        assertThat(testPkgSetting01.pkgFlags, is(0));
+        assertThat(testPkgSetting01.pkgPrivateFlags, is(0));
+        final PackageUserState userState = testPkgSetting01.readUserState(UserHandle.USER_SYSTEM);
+        verifyUserState(userState, PackageSettingBase.DEFAULT_USER_STATE /*oldUserState*/,
+                true /*userStateChanged*/, true /*notLaunched*/, true /*stopped*/);
+    }
+
+    /** Update package, but, shared user changed; ensure old setting not modified */
+    @Test
+    public void testUpdatePackageSetting08()
+            throws ReflectiveOperationException, PackageManagerException {
+        final SharedUserSetting testSharedUser =
+                new SharedUserSetting("testSharedUser", 0 /*pkgFlags*/, 0 /*_pkgPrivateFlags*/);
+        testSharedUser.userId = Process.FIRST_APPLICATION_UID + 9995;
+        final PackageSetting pkgSetting01 = createPackageSetting(0 /*pkgFlags*/);
+        final PackageSetting oldPkgSetting01 = new PackageSetting(pkgSetting01);
+        final PackageSetting testPkgSetting01 = Settings.updatePackageSetting(
+                pkgSetting01,
+                PACKAGE_NAME,
+                null /*realPkgName*/,
+                null /*originalPkg*/,
+                null /*disabledPkg*/,
+                testSharedUser /*sharedUser*/,
+                UPDATED_CODE_PATH /*codePath*/,
+                UPDATED_CODE_PATH /*resourcePath*/,
+                null /*legacyNativeLibraryPath*/,
+                "arm64-v8a" /*primaryCpuAbi*/,
+                "armeabi" /*secondaryCpuAbi*/,
+                UPDATED_VERSION_CODE /*versionCode*/,
+                0 /*pkgFlags*/,
+                0 /*pkgPrivateFlags*/,
+                UserHandle.SYSTEM /*installUser*/,
+                true /*allowInstall*/,
+                null /*parentPkgName*/,
+                null /*childPkgNames*/,
+                UserManagerService.getInstance());
+        assertThat(testPkgSetting01, is(not(pkgSetting01)));
+        assertThat(testPkgSetting01.primaryCpuAbiString, is("arm64-v8a"));
+        assertThat(testPkgSetting01.secondaryCpuAbiString, is("armeabi"));
+        assertThat(testPkgSetting01.origPackage, is(nullValue()));
+        assertThat(testPkgSetting01.appId, is(19995));
+        assertThat(testPkgSetting01.pkgFlags, is(0));
+        assertThat(testPkgSetting01.pkgPrivateFlags, is(0));
+        // package setting should not have been modified
+        assertThat(pkgSetting01.primaryCpuAbiString, is("x86_64"));
+        assertThat(pkgSetting01.secondaryCpuAbiString, is("x86"));
+        final PackageUserState userState = testPkgSetting01.readUserState(UserHandle.USER_SYSTEM);
+        final PackageUserState oldUserState = oldPkgSetting01.readUserState(UserHandle.USER_SYSTEM);
+        verifyUserState(userState, oldUserState, true /*userStateChanged*/,
+                true /*notLaunched*/, true /*stopped*/);
+    }
+
+    private void verifyUserState(PackageUserState userState, PackageUserState oldUserState,
+            boolean userStateChanged) {
+        verifyUserState(userState, oldUserState, userStateChanged, false /*notLaunched*/,
+                false /*stopped*/);
+    }
+
+    private void verifyUserState(PackageUserState userState, PackageUserState oldUserState,
+            boolean userStateChanged, boolean notLaunched, boolean stopped) {
+        assertThat(userState.blockUninstall, is(false));
+        assertThat(userState.enabled, is(0));
+        assertThat(userState.hidden, is(false));
+        assertThat(userState.installed, is(true));
+        assertThat(userState.notLaunched, is(notLaunched));
+        assertThat(userState.stopped, is(stopped));
+        assertThat(userState.suspended, is(false));
+        if (oldUserState != null) {
+            assertThat(userState.equals(oldUserState), is(not(userStateChanged)));
+        }
+    }
+
+    private PackageSetting createPackageSetting(int pkgFlags) {
+        return new PackageSetting(
+                PACKAGE_NAME,
+                REAL_PACKAGE_NAME,
+                INITIAL_CODE_PATH /*codePath*/,
+                INITIAL_CODE_PATH /*resourcePath*/,
+                null /*legacyNativeLibraryPathString*/,
+                "x86_64" /*primaryCpuAbiString*/,
+                "x86" /*secondaryCpuAbiString*/,
+                null /*cpuAbiOverrideString*/,
+                INITIAL_VERSION_CODE,
+                pkgFlags,
+                0 /*privateFlags*/,
+                null /*parentPackageName*/,
+                null /*childPackageNames*/);
     }
 
     private @NonNull List<UserInfo> createFakeUsers() {
@@ -295,12 +653,19 @@ public class PackageManagerSettingsTests {
         writePackagesList();
     }
 
-    private void createUserManagerServiceRef() throws ReflectiveOperationException {
+    @Before
+    public void createUserManagerServiceRef() throws ReflectiveOperationException {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(new Runnable() {
             @Override
             public void run() {
                 Constructor<UserManagerService> umsc;
                 try {
+                    // unregister the user manager from the local service
+                    Method removeServiceForTest = LocalServices.class.getDeclaredMethod(
+                            "removeServiceForTest", Class.class);
+                    removeServiceForTest.invoke(null, UserManagerInternal.class);
+
+                    // now create a new user manager [which registers again with the local service]
                     umsc = UserManagerService.class.getDeclaredConstructor(
                             Context.class,
                             PackageManagerService.class,
@@ -313,7 +678,7 @@ public class PackageManagerSettingsTests {
                 } catch (SecurityException
                         | ReflectiveOperationException
                         | IllegalArgumentException e) {
-                    fail("Could not create user manager service; msg=" + e.getMessage());
+                    fail("Could not create user manager service; " + e);
                 }
             }
         });

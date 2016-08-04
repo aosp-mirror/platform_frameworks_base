@@ -23,6 +23,7 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKE_ON_UPGRADE;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
+import static android.content.pm.PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
 import static android.content.pm.PackageManager.MATCH_DEFAULT_ONLY;
@@ -32,6 +33,7 @@ import static android.os.Process.SYSTEM_UID;
 import static com.android.server.pm.PackageManagerService.DEBUG_DOMAIN_VERIFICATION;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -369,9 +371,9 @@ final class Settings {
 
     // Packages that have been renamed since they were first installed.
     // Keys are the new names of the packages, values are the original
-    // names.  The packages appear everwhere else under their original
+    // names.  The packages appear everywhere else under their original
     // names.
-    final ArrayMap<String, String> mRenamedPackages = new ArrayMap<String, String>();
+    private final ArrayMap<String, String> mRenamedPackages = new ArrayMap<String, String>();
 
     // For every user, it is used to find the package name of the default Browser App.
     final SparseArray<String> mDefaultBrowserApp = new SparseArray<String>();
@@ -428,30 +430,24 @@ final class Settings {
     PackageSetting getPackageLPw(PackageParser.Package pkg, PackageSetting origPackage,
             String realName, SharedUserSetting sharedUser, File codePath, File resourcePath,
             String legacyNativeLibraryPathString, String primaryCpuAbi, String secondaryCpuAbi,
-            int pkgFlags, int pkgPrivateFlags, UserHandle user, boolean add) {
+            int pkgFlags, int pkgPrivateFlags, UserHandle user, boolean add)
+                    throws PackageManagerException {
         final String name = pkg.packageName;
         final String parentPackageName = (pkg.parentPackage != null)
                 ? pkg.parentPackage.packageName : null;
-
-        List<String> childPackageNames = null;
-        if (pkg.childPackages != null) {
-            final int childCount = pkg.childPackages.size();
-            childPackageNames = new ArrayList<>(childCount);
-            for (int i = 0; i < childCount; i++) {
-                String childPackageName = pkg.childPackages.get(i).packageName;
-                childPackageNames.add(childPackageName);
-            }
-        }
-
         PackageSetting p = getPackageLPw(name, origPackage, realName, sharedUser, codePath,
                 resourcePath, legacyNativeLibraryPathString, primaryCpuAbi, secondaryCpuAbi,
-                pkg.mVersionCode, pkgFlags, pkgPrivateFlags, user, add, true /* allowInstall */,
-                parentPackageName, childPackageNames);
+                pkg.mVersionCode, pkgFlags, pkgPrivateFlags, user, add, true /*allowInstall*/,
+                parentPackageName, pkg.getChildPackageNames());
         return p;
     }
 
-    PackageSetting peekPackageLPr(String name) {
-        return mPackages.get(name);
+    PackageSetting peekPackageLPr(String pkgName) {
+        return mPackages.get(pkgName);
+    }
+
+    String getRenamedPackage(String pkgName) {
+        return mRenamedPackages.get(pkgName);
     }
 
     void setInstallStatus(String pkgName, final int status) {
@@ -510,6 +506,7 @@ final class Settings {
         }
     }
 
+    /** Gets and optionally creates a new shared user id. */
     SharedUserSetting getSharedUserLPw(String name,
             int pkgFlags, int pkgPrivateFlags, boolean create) {
         SharedUserSetting s = mSharedUsers.get(name);
@@ -687,40 +684,157 @@ final class Settings {
             String legacyNativeLibraryPathString, String primaryCpuAbiString,
             String secondaryCpuAbiString, int vc, int pkgFlags, int pkgPrivateFlags,
             UserHandle installUser, boolean add, boolean allowInstall, String parentPackage,
-            List<String> childPackageNames) {
-        PackageSetting p = mPackages.get(name);
-        UserManagerService userManager = UserManagerService.getInstance();
-        if (p != null) {
-            p.primaryCpuAbiString = primaryCpuAbiString;
-            p.secondaryCpuAbiString = secondaryCpuAbiString;
-            if (childPackageNames != null) {
-                p.childPackageNames = new ArrayList<>(childPackageNames);
+            List<String> childPackageNames) throws PackageManagerException {
+        final UserManagerService userManager = UserManagerService.getInstance();
+        final PackageSetting disabledPackage = getDisabledSystemPkgLPr(name);
+        final PackageSetting peekPackage = peekPackageLPr(name);
+        final PackageSetting oldPackage =
+                peekPackage == null ? null : new PackageSetting(peekPackage);
+        final PackageSetting p = updatePackageSetting(peekPackage, name, realName,
+                origPackage, disabledPackage, sharedUser, codePath, resourcePath,
+                legacyNativeLibraryPathString, primaryCpuAbiString, secondaryCpuAbiString, vc,
+                pkgFlags, pkgPrivateFlags, installUser, allowInstall, parentPackage,
+                childPackageNames, userManager);
+        final boolean newPackageCreated = (peekPackage == null || p != peekPackage);
+        final boolean renamedPackage = newPackageCreated && origPackage != null;
+        if (renamedPackage) {
+            mRenamedPackages.put(name, origPackage.name);
+        }
+        if (newPackageCreated) {
+            if (p.appId == 0) {
+                // Assign new user ID
+                p.appId = newUserIdLPw(p);
+            } else {
+                // Add new setting to list of user IDs
+                addUserIdLPw(p.appId, p, name);
+            }
+            if (p.appId < 0) {
+                PackageManagerService.reportSettingsProblem(Log.WARN,
+                        "Package " + name + " could not be assigned a valid uid");
+                throw new PackageManagerException(INSTALL_FAILED_INSUFFICIENT_STORAGE,
+                        "Creating application package " + name + " failed");
+            }
+            if (add) {
+                // Finish adding new package by adding it and updating shared
+                // user preferences
+                addPackageSettingLPw(p, name, sharedUser);
+            }
+        }
+        if (peekPackageLPr(name) != null) {
+            final List<UserInfo> allUsers = getAllUsers(UserManagerService.getInstance());
+            if (allUsers != null) {
+                for (UserInfo user : allUsers) {
+                    final PackageUserState oldUserState = oldPackage == null
+                            ? PackageSettingBase.DEFAULT_USER_STATE
+                            : oldPackage.readUserState(user.id);
+                    if (!oldUserState.equals(p.readUserState(user.id))) {
+                        writePackageRestrictionsLPr(user.id);
+                    }
+                }
+            }
+        }
+        return p;
+    }
+
+    /**
+     * Updates the given package setting using the provided information.
+     * <p>
+     * WARNING: The provided PackageSetting object may be mutated.
+     *
+     * @param pkgSetting The package setting to update. If {@code null} a new PackageSetting
+     * object is created and populated.
+     * @param pkgName The name of the package.
+     * @param realPkgName The real name of the package. A package can change its name during
+     * an update. In that case, all references are to the package's original name, but, we
+     * still need it's real [new] name.
+     * @param originalPkg If the package name has changed, the package setting for the originally
+     * installed package. May be {@code null}.
+     * @param disabledPkg If the package is a system package that has been updated, the package
+     * setting for the disabled system package. May be {@code null}.
+     * @param sharedUser Shared user settings if the package declares a shared user ID.
+     * May be {@code null}.
+     * @param codePath The path to the applications code.
+     * @param resourcePath The path to the application's resources.
+     * @param legacyNativeLibraryPath The path where native libraries are unpacked.
+     * @param primaryCpuAbi The primary CPU architecture. May be {@code null}.
+     * @param secondaryCpuAbi The secondary CPU architecture, if one is defined.
+     * May be {@code null}.
+     * @param versionCode The version code of the package.
+     * @param pkgFlags Application flags for the package. {@link ApplicationInfo#flags}.
+     * @param pkgPrivateFlags Private application flags for the package.
+     * {@link ApplicationInfo#privateFlags}.
+     * @param installUser The user to install the package for. May be {@code null}.
+     * @param allowInstall Whether or not the user state for a newly created package setting can
+     * be installed.
+     * @param parentPkgName The name of the parent package. May be {@code null}.
+     * @param childPkgNames A list of child package names. May be {@code null}.
+     * @param userManager The user manager service.
+     * @return An updated package setting. It may be different than pkgSetting even when pkgSetting
+     * is not {@code null}.
+     * @throws PackageManagerException
+     */
+    static PackageSetting updatePackageSetting(@Nullable PackageSetting pkgSetting,
+            @NonNull String pkgName, @Nullable String realPkgName,
+            @Nullable PackageSetting originalPkg, @Nullable PackageSetting disabledPkg,
+            @Nullable SharedUserSetting sharedUser, @NonNull File codePath,
+            @NonNull File resourcePath, @Nullable String legacyNativeLibraryPath,
+            @Nullable String primaryCpuAbi, @Nullable String secondaryCpuAbi, int versionCode,
+            int pkgFlags, int pkgPrivateFlags, @Nullable UserHandle installUser,
+            boolean allowInstall, @Nullable String parentPkgName,
+            @Nullable List<String> childPkgNames, @NonNull UserManagerService userManager)
+                    throws PackageManagerException {
+        if (pkgSetting != null) {
+            if (pkgSetting.sharedUser != sharedUser) {
+                PackageManagerService.reportSettingsProblem(Log.WARN,
+                        "Package " + pkgName + " shared user changed from "
+                        + (pkgSetting.sharedUser != null ? pkgSetting.sharedUser.name : "<nothing>")
+                        + " to "
+                        + (sharedUser != null ? sharedUser.name : "<nothing>")
+                        + "; replacing with new");
+                pkgSetting = null;
+            } else {
+                // If what we are scanning is a system (and possibly privileged) package,
+                // then make it so, regardless of whether it was previously installed only
+                // in the data partition.
+                pkgSetting.pkgFlags |= pkgFlags & ApplicationInfo.FLAG_SYSTEM;
+                pkgSetting.pkgPrivateFlags |=
+                        pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
+            }
+        }
+        if (pkgSetting != null) {
+            pkgSetting.primaryCpuAbiString = primaryCpuAbi;
+            pkgSetting.secondaryCpuAbiString = secondaryCpuAbi;
+            if (childPkgNames != null) {
+                pkgSetting.childPackageNames = new ArrayList<>(childPkgNames);
             }
 
-            if (!p.codePath.equals(codePath)) {
+            if (!pkgSetting.codePath.equals(codePath)) {
                 // Check to see if its a disabled system app
-                if ((p.pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                if ((pkgSetting.pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0) {
                     // This is an updated system app with versions in both system
                     // and data partition. Just let the most recent version
                     // take precedence.
-                    Slog.w(PackageManagerService.TAG, "Trying to update system app code path from "
-                            + p.codePathString + " to " + codePath.toString());
+                    Slog.w(PackageManagerService.TAG,
+                            "Trying to update system app code path from "
+                            + pkgSetting.codePathString + " to " + codePath.toString());
                 } else {
                     // Just a change in the code path is not an issue, but
                     // let's log a message about it.
-                    Slog.i(PackageManagerService.TAG, "Package " + name + " codePath changed from "
-                            + p.codePath + " to " + codePath + "; Retaining data and using new");
+                    Slog.i(PackageManagerService.TAG,
+                            "Package " + pkgName + " codePath changed from "
+                            + pkgSetting.codePath + " to " + codePath
+                            + "; Retaining data and using new");
 
                     // The owner user's installed flag is set false
                     // when the application was installed by other user
                     // and the installed flag is not updated
                     // when the application is appended as system app later.
-                    if ((pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0 &&
-                            getDisabledSystemPkgLPr(name) == null) {
-                        List<UserInfo> allUserInfos = getAllUsers();
+                    if ((pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0
+                            && disabledPkg == null) {
+                        List<UserInfo> allUserInfos = getAllUsers(userManager);
                         if (allUserInfos != null) {
                             for (UserInfo userInfo : allUserInfos) {
-                                p.setInstalled(true, userInfo.id);
+                                pkgSetting.setInstalled(true, userInfo.id);
                             }
                         }
                     }
@@ -731,62 +845,48 @@ final class Settings {
                      * package settings since we might have moved from
                      * internal to external storage or vice versa.
                      */
-                    p.legacyNativeLibraryPathString = legacyNativeLibraryPathString;
+                    pkgSetting.legacyNativeLibraryPathString = legacyNativeLibraryPath;
                 }
             }
-            if (p.sharedUser != sharedUser) {
-                PackageManagerService.reportSettingsProblem(Log.WARN,
-                        "Package " + name + " shared user changed from "
-                        + (p.sharedUser != null ? p.sharedUser.name : "<nothing>")
-                        + " to "
-                        + (sharedUser != null ? sharedUser.name : "<nothing>")
-                        + "; replacing with new");
-                p = null;
-            } else {
-                // If what we are scanning is a system (and possibly privileged) package,
-                // then make it so, regardless of whether it was previously installed only
-                // in the data partition.
-                p.pkgFlags |= pkgFlags & ApplicationInfo.FLAG_SYSTEM;
-                p.pkgPrivateFlags |= pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
-            }
         }
-        if (p == null) {
-            if (origPackage != null) {
+        // TODO: split package setting creation logic out; invoke where getPackageLPw() is
+        // called from
+        if (pkgSetting == null) {
+            if (originalPkg != null) {
                 // We are consuming the data from an existing package.
-                p = new PackageSetting(origPackage.name, name, codePath, resourcePath,
-                        legacyNativeLibraryPathString, primaryCpuAbiString, secondaryCpuAbiString,
-                        null /* cpuAbiOverrideString */, vc, pkgFlags, pkgPrivateFlags,
-                        parentPackage, childPackageNames);
+                pkgSetting = new PackageSetting(originalPkg.name, pkgName, codePath, resourcePath,
+                        legacyNativeLibraryPath, primaryCpuAbi, secondaryCpuAbi,
+                        null /*cpuAbiOverrideString*/, versionCode, pkgFlags, pkgPrivateFlags,
+                        parentPkgName, childPkgNames);
                 if (PackageManagerService.DEBUG_UPGRADE) Log.v(PackageManagerService.TAG, "Package "
-                        + name + " is adopting original package " + origPackage.name);
+                        + pkgName + " is adopting original package " + originalPkg.name);
                 // Note that we will retain the new package's signature so
                 // that we can keep its data.
-                PackageSignatures s = p.signatures;
-                p.copyFrom(origPackage);
-                p.signatures = s;
-                p.sharedUser = origPackage.sharedUser;
-                p.appId = origPackage.appId;
-                p.origPackage = origPackage;
-                p.getPermissionsState().copyFrom(origPackage.getPermissionsState());
-                mRenamedPackages.put(name, origPackage.name);
-                name = origPackage.name;
+                PackageSignatures s = pkgSetting.signatures;
+                pkgSetting.copyFrom(originalPkg);
+                pkgSetting.signatures = s;
+                pkgSetting.sharedUser = originalPkg.sharedUser;
+                pkgSetting.appId = originalPkg.appId;
+                pkgSetting.origPackage = originalPkg;
+                pkgSetting.getPermissionsState().copyFrom(originalPkg.getPermissionsState());
+                pkgName = originalPkg.name;
                 // Update new package state.
-                p.setTimeStamp(codePath.lastModified());
+                pkgSetting.setTimeStamp(codePath.lastModified());
             } else {
-                p = new PackageSetting(name, realName, codePath, resourcePath,
-                        legacyNativeLibraryPathString, primaryCpuAbiString, secondaryCpuAbiString,
-                        null /* cpuAbiOverrideString */, vc, pkgFlags, pkgPrivateFlags,
-                        parentPackage, childPackageNames);
-                p.setTimeStamp(codePath.lastModified());
-                p.sharedUser = sharedUser;
+                pkgSetting = new PackageSetting(pkgName, realPkgName, codePath, resourcePath,
+                        legacyNativeLibraryPath, primaryCpuAbi, secondaryCpuAbi,
+                        null /*cpuAbiOverrideString*/, versionCode, pkgFlags, pkgPrivateFlags,
+                        parentPkgName, childPkgNames);
+                pkgSetting.setTimeStamp(codePath.lastModified());
+                pkgSetting.sharedUser = sharedUser;
                 // If this is not a system app, it starts out stopped.
                 if ((pkgFlags&ApplicationInfo.FLAG_SYSTEM) == 0) {
                     if (DEBUG_STOPPED) {
                         RuntimeException e = new RuntimeException("here");
                         e.fillInStackTrace();
-                        Slog.i(PackageManagerService.TAG, "Stopping package " + name, e);
+                        Slog.i(PackageManagerService.TAG, "Stopping package " + pkgName, e);
                     }
-                    List<UserInfo> users = getAllUsers();
+                    List<UserInfo> users = getAllUsers(userManager);
                     final int installUserId = installUser != null ? installUser.getIdentifier() : 0;
                     if (users != null && allowInstall) {
                         for (UserInfo user : users) {
@@ -800,7 +900,7 @@ final class Settings {
                                     || (installUserId == UserHandle.USER_ALL
                                         && !isAdbInstallDisallowed(userManager, user.id))
                                     || installUserId == user.id;
-                            p.setUserState(user.id, 0, COMPONENT_ENABLED_STATE_DEFAULT,
+                            pkgSetting.setUserState(user.id, 0, COMPONENT_ENABLED_STATE_DEFAULT,
                                     installed,
                                     true, // stopped,
                                     true, // notLaunched
@@ -809,80 +909,64 @@ final class Settings {
                                     null, null, null,
                                     false, // blockUninstall
                                     INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED, 0);
-                            writePackageRestrictionsLPr(user.id);
                         }
                     }
                 }
                 if (sharedUser != null) {
-                    p.appId = sharedUser.userId;
+                    pkgSetting.appId = sharedUser.userId;
                 } else {
                     // Clone the setting here for disabled system packages
-                    PackageSetting dis = mDisabledSysPackages.get(name);
-                    if (dis != null) {
+                    if (disabledPkg != null) {
                         // For disabled packages a new setting is created
                         // from the existing user id. This still has to be
                         // added to list of user id's
                         // Copy signatures from previous setting
-                        if (dis.signatures.mSignatures != null) {
-                            p.signatures.mSignatures = dis.signatures.mSignatures.clone();
+                        if (disabledPkg.signatures.mSignatures != null) {
+                            pkgSetting.signatures.mSignatures =
+                                    disabledPkg.signatures.mSignatures.clone();
                         }
-                        p.appId = dis.appId;
+                        pkgSetting.appId = disabledPkg.appId;
                         // Clone permissions
-                        p.getPermissionsState().copyFrom(dis.getPermissionsState());
+                        pkgSetting.getPermissionsState().copyFrom(
+                                disabledPkg.getPermissionsState());
                         // Clone component info
-                        List<UserInfo> users = getAllUsers();
+                        List<UserInfo> users = getAllUsers(userManager);
                         if (users != null) {
                             for (UserInfo user : users) {
                                 int userId = user.id;
-                                p.setDisabledComponentsCopy(
-                                        dis.getDisabledComponents(userId), userId);
-                                p.setEnabledComponentsCopy(
-                                        dis.getEnabledComponents(userId), userId);
+                                pkgSetting.setDisabledComponentsCopy(
+                                        disabledPkg.getDisabledComponents(userId), userId);
+                                pkgSetting.setEnabledComponentsCopy(
+                                        disabledPkg.getEnabledComponents(userId), userId);
                             }
                         }
-                        // Add new setting to list of user ids
-                        addUserIdLPw(p.appId, p, name);
-                    } else {
-                        // Assign new user id
-                        p.appId = newUserIdLPw(p);
                     }
                 }
-            }
-            if (p.appId < 0) {
-                PackageManagerService.reportSettingsProblem(Log.WARN,
-                        "Package " + name + " could not be assigned a valid uid");
-                return null;
-            }
-            if (add) {
-                // Finish adding new package by adding it and updating shared
-                // user preferences
-                addPackageSettingLPw(p, name, sharedUser);
             }
         } else {
             if (installUser != null && allowInstall) {
                 // The caller has explicitly specified the user they want this
                 // package installed for, and the package already exists.
                 // Make sure it conforms to the new request.
-                List<UserInfo> users = getAllUsers();
+                List<UserInfo> users = getAllUsers(userManager);
                 if (users != null) {
                     for (UserInfo user : users) {
                         if ((installUser.getIdentifier() == UserHandle.USER_ALL
                                     && !isAdbInstallDisallowed(userManager, user.id))
                                 || installUser.getIdentifier() == user.id) {
-                            boolean installed = p.getInstalled(user.id);
+                            boolean installed = pkgSetting.getInstalled(user.id);
                             if (!installed) {
-                                p.setInstalled(true, user.id);
-                                writePackageRestrictionsLPr(user.id);
+                                pkgSetting.setInstalled(true, user.id);
                             }
                         }
                     }
                 }
             }
         }
-        return p;
+        return pkgSetting;
     }
 
-    boolean isAdbInstallDisallowed(UserManagerService userManager, int userId) {
+    static boolean isAdbInstallDisallowed(UserManagerService userManager, int userId) {
         return userManager.hasUserRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES,
                 userId);
     }
@@ -1382,7 +1466,7 @@ final class Settings {
     }
 
     void writeAllUsersPackageRestrictionsLPr() {
-        List<UserInfo> users = getAllUsers();
+        List<UserInfo> users = getAllUsers(UserManagerService.getInstance());
         if (users == null) return;
 
         for (UserInfo user : users) {
@@ -2958,18 +3042,19 @@ final class Settings {
             final PendingPackage pp = mPendingPackages.get(i);
             Object idObj = getUserIdLPr(pp.sharedId);
             if (idObj != null && idObj instanceof SharedUserSetting) {
-                PackageSetting p = getPackageLPw(pp.name, null, pp.realName,
-                        (SharedUserSetting) idObj, pp.codePath, pp.resourcePath,
-                        pp.legacyNativeLibraryPathString, pp.primaryCpuAbiString,
-                        pp.secondaryCpuAbiString, pp.versionCode, pp.pkgFlags, pp.pkgPrivateFlags,
-                        null, true /* add */, false /* allowInstall */, pp.parentPackageName,
-                        pp.childPackageNames);
-                if (p == null) {
+                try {
+                    PackageSetting p = getPackageLPw(pp.name, null, pp.realName,
+                            (SharedUserSetting) idObj, pp.codePath, pp.resourcePath,
+                            pp.legacyNativeLibraryPathString, pp.primaryCpuAbiString,
+                            pp.secondaryCpuAbiString, pp.versionCode, pp.pkgFlags,
+                            pp.pkgPrivateFlags, null /*installUser*/, true /*add*/,
+                            false /*allowInstall*/, pp.parentPackageName, pp.childPackageNames);
+                    p.copyFrom(pp);
+                } catch (PackageManagerException e) {
                     PackageManagerService.reportSettingsProblem(Log.WARN,
                             "Unable to create application package for " + pp.name);
                     continue;
                 }
-                p.copyFrom(pp);
             } else if (idObj != null) {
                 String msg = "Bad package setting: package " + pp.name + " has shared uid "
                         + pp.sharedId + " that is not a shared uid\n";
@@ -4188,10 +4273,10 @@ final class Settings {
         return false;
     }
 
-    List<UserInfo> getAllUsers() {
+    private static List<UserInfo> getAllUsers(UserManagerService userManager) {
         long id = Binder.clearCallingIdentity();
         try {
-            return UserManagerService.getInstance().getUsers(false);
+            return userManager.getUsers(false);
         } catch (NullPointerException npe) {
             // packagemanager not yet initialized
         } finally {
@@ -4600,7 +4685,7 @@ final class Settings {
         final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         final Date date = new Date();
         boolean printedSomething = false;
-        List<UserInfo> users = getAllUsers();
+        List<UserInfo> users = getAllUsers(UserManagerService.getInstance());
         for (final PackageSetting ps : mPackages.values()) {
             if (packageName != null && !packageName.equals(ps.realName)
                     && !packageName.equals(ps.name)) {
