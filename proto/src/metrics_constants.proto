@@ -2203,6 +2203,10 @@ message MetricsEvent {
     // System navigation key down.
     ACTION_SYSTEM_NAVIGATION_KEY_DOWN = 494;
 
+    // OPEN: Settings > Display -> Ambient Display
+    // CATEGORY: SETTINGS
+    ACTION_AMBIENT_DISPLAY = 495;
+
     // ---- End N-MR1 Constants, all N-MR1 constants go above this line ----
 
     // ------- Begin N Keyboard Shortcuts Helper -----
@@ -2261,10 +2265,6 @@ message MetricsEvent {
     // ACTION: User installs print recommended print service
     // Package: Package of print service
     ACTION_PRINT_RECOMMENDED_SERVICE_INSTALL = 512;
-
-    // OPEN: Settings > Display -> Ambient Display
-    // CATEGORY: SETTINGS
-    ACTION_AMBIENT_DISPLAY = 513;
 
     // ---- End O Constants, all O constants go above this line ----
 
