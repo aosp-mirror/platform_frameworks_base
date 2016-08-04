@@ -1260,7 +1260,6 @@ class AppWindowToken extends WindowToken {
             fromToken.startingWindow = null;
             fromToken.startingMoved = true;
             tStartingWindow.mToken = this;
-            tStartingWindow.mRootToken = this;
             tStartingWindow.mAppToken = this;
 
             if (DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE || DEBUG_STARTING_WINDOW) Slog.v(TAG_WM,

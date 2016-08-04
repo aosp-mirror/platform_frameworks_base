@@ -1461,7 +1461,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         boolean reportNewConfig = false;
-        WindowState attachedWindow = null;
+        WindowState parentWindow = null;
         long origId;
         final int type = attrs.type;
 
@@ -1488,14 +1488,14 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             if (type >= FIRST_SUB_WINDOW && type <= LAST_SUB_WINDOW) {
-                attachedWindow = windowForClientLocked(null, attrs.token, false);
-                if (attachedWindow == null) {
+                parentWindow = windowForClientLocked(null, attrs.token, false);
+                if (parentWindow == null) {
                     Slog.w(TAG_WM, "Attempted to add window with token that is not a window: "
                           + attrs.token + ".  Aborting.");
                     return WindowManagerGlobal.ADD_BAD_SUBWINDOW_TOKEN;
                 }
-                if (attachedWindow.mAttrs.type >= FIRST_SUB_WINDOW
-                        && attachedWindow.mAttrs.type <= LAST_SUB_WINDOW) {
+                if (parentWindow.mAttrs.type >= FIRST_SUB_WINDOW
+                        && parentWindow.mAttrs.type <= LAST_SUB_WINDOW) {
                     Slog.w(TAG_WM, "Attempted to add window with token that is a sub-window: "
                             + attrs.token + ".  Aborting.");
                     return WindowManagerGlobal.ADD_BAD_SUBWINDOW_TOKEN;
@@ -1507,46 +1507,52 @@ public class WindowManagerService extends IWindowManager.Stub
                 return WindowManagerGlobal.ADD_PERMISSION_DENIED;
             }
 
-            WindowToken token = mTokenMap.get(attrs.token);
             AppWindowToken atoken = null;
+            final boolean hasParent = parentWindow != null;
+            // Use existing parent window token for child windows since they go in the same token
+            // as there parent window so we can apply the same policy on them.
+            WindowToken token = mTokenMap.get(hasParent ? parentWindow.mAttrs.token : attrs.token);
+            // If this is a child window, we want to apply the same type checking rules as the
+            // parent window type.
+            final int rootType = hasParent ? parentWindow.mAttrs.type : type;
             if (token == null) {
-                if (type >= FIRST_APPLICATION_WINDOW && type <= LAST_APPLICATION_WINDOW) {
+                if (rootType >= FIRST_APPLICATION_WINDOW && rootType <= LAST_APPLICATION_WINDOW) {
                     Slog.w(TAG_WM, "Attempted to add application window with unknown token "
                           + attrs.token + ".  Aborting.");
                     return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
-                if (type == TYPE_INPUT_METHOD) {
+                if (rootType == TYPE_INPUT_METHOD) {
                     Slog.w(TAG_WM, "Attempted to add input method window with unknown token "
                           + attrs.token + ".  Aborting.");
                     return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
-                if (type == TYPE_VOICE_INTERACTION) {
+                if (rootType == TYPE_VOICE_INTERACTION) {
                     Slog.w(TAG_WM, "Attempted to add voice interaction window with unknown token "
                           + attrs.token + ".  Aborting.");
                     return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
-                if (type == TYPE_WALLPAPER) {
+                if (rootType == TYPE_WALLPAPER) {
                     Slog.w(TAG_WM, "Attempted to add wallpaper window with unknown token "
                           + attrs.token + ".  Aborting.");
                     return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
-                if (type == TYPE_DREAM) {
+                if (rootType == TYPE_DREAM) {
                     Slog.w(TAG_WM, "Attempted to add Dream window with unknown token "
                           + attrs.token + ".  Aborting.");
                     return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
-                if (type == TYPE_QS_DIALOG) {
+                if (rootType == TYPE_QS_DIALOG) {
                     Slog.w(TAG_WM, "Attempted to add QS dialog window with unknown token "
                           + attrs.token + ".  Aborting.");
                     return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
-                if (type == TYPE_ACCESSIBILITY_OVERLAY) {
+                if (rootType == TYPE_ACCESSIBILITY_OVERLAY) {
                     Slog.w(TAG_WM, "Attempted to add Accessibility overlay window with unknown token "
                             + attrs.token + ".  Aborting.");
                     return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
                 token = new WindowToken(this, attrs.token, -1, false);
-            } else if (type >= FIRST_APPLICATION_WINDOW && type <= LAST_APPLICATION_WINDOW) {
+            } else if (rootType >= FIRST_APPLICATION_WINDOW && rootType <= LAST_APPLICATION_WINDOW) {
                 atoken = token.asAppWindowToken();
                 if (atoken == null) {
                     Slog.w(TAG_WM, "Attempted to add window with non-application token "
@@ -1557,57 +1563,57 @@ public class WindowManagerService extends IWindowManager.Stub
                           + token + ".  Aborting.");
                     return WindowManagerGlobal.ADD_APP_EXITING;
                 }
-                if (type == TYPE_APPLICATION_STARTING && atoken.firstWindowDrawn) {
+                if (rootType == TYPE_APPLICATION_STARTING && atoken.firstWindowDrawn) {
                     // No need for this guy!
                     if (DEBUG_STARTING_WINDOW || localLOGV) Slog.v(
                             TAG_WM, "**** NO NEED TO START: " + attrs.getTitle());
                     return WindowManagerGlobal.ADD_STARTING_NOT_NEEDED;
                 }
-            } else if (type == TYPE_INPUT_METHOD) {
+            } else if (rootType == TYPE_INPUT_METHOD) {
                 if (token.windowType != TYPE_INPUT_METHOD) {
                     Slog.w(TAG_WM, "Attempted to add input method window with bad token "
                             + attrs.token + ".  Aborting.");
                       return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
-            } else if (type == TYPE_VOICE_INTERACTION) {
+            } else if (rootType == TYPE_VOICE_INTERACTION) {
                 if (token.windowType != TYPE_VOICE_INTERACTION) {
                     Slog.w(TAG_WM, "Attempted to add voice interaction window with bad token "
                             + attrs.token + ".  Aborting.");
                       return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
-            } else if (type == TYPE_WALLPAPER) {
+            } else if (rootType == TYPE_WALLPAPER) {
                 if (token.windowType != TYPE_WALLPAPER) {
                     Slog.w(TAG_WM, "Attempted to add wallpaper window with bad token "
                             + attrs.token + ".  Aborting.");
                       return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
-            } else if (type == TYPE_DREAM) {
+            } else if (rootType == TYPE_DREAM) {
                 if (token.windowType != TYPE_DREAM) {
                     Slog.w(TAG_WM, "Attempted to add Dream window with bad token "
                             + attrs.token + ".  Aborting.");
                       return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
-            } else if (type == TYPE_ACCESSIBILITY_OVERLAY) {
+            } else if (rootType == TYPE_ACCESSIBILITY_OVERLAY) {
                 if (token.windowType != TYPE_ACCESSIBILITY_OVERLAY) {
                     Slog.w(TAG_WM, "Attempted to add Accessibility overlay window with bad token "
                             + attrs.token + ".  Aborting.");
                     return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
-            } else if (type == TYPE_QS_DIALOG) {
+            } else if (rootType == TYPE_QS_DIALOG) {
                 if (token.windowType != TYPE_QS_DIALOG) {
                     Slog.w(TAG_WM, "Attempted to add QS dialog window with bad token "
                             + attrs.token + ".  Aborting.");
                     return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
             } else if (token.asAppWindowToken() != null) {
-                Slog.w(TAG_WM, "Non-null appWindowToken for system window of type=" + type);
+                Slog.w(TAG_WM, "Non-null appWindowToken for system window of rootType=" + rootType);
                 // It is not valid to use an app token with other system types; we will
                 // instead make a new token for it (as if null had been passed in for the token).
                 attrs.token = null;
                 token = new WindowToken(this, null, -1, false);
             }
 
-            WindowState win = new WindowState(this, session, client, token, attachedWindow,
+            WindowState win = new WindowState(this, session, client, token, parentWindow,
                     appOp[0], seq, attrs, viewVisibility, displayContent, session.mUid);
             if (win.mDeathRecipient == null) {
                 // Client has apparently died, so there is no reason to
@@ -8176,16 +8182,13 @@ public class WindowManagerService extends IWindowManager.Stub
     // Internals
     // -------------------------------------------------------------
 
-    final WindowState windowForClientLocked(Session session, IWindow client,
-            boolean throwOnError) {
+    final WindowState windowForClientLocked(Session session, IWindow client, boolean throwOnError) {
         return windowForClientLocked(session, client.asBinder(), throwOnError);
     }
 
-    final WindowState windowForClientLocked(Session session, IBinder client,
-            boolean throwOnError) {
+    final WindowState windowForClientLocked(Session session, IBinder client, boolean throwOnError) {
         WindowState win = mWindowMap.get(client);
-        if (localLOGV) Slog.v(
-            TAG_WM, "Looking up client " + client + ": " + win);
+        if (localLOGV) Slog.v(TAG_WM, "Looking up client " + client + ": " + win);
         if (win == null) {
             RuntimeException ex = new IllegalArgumentException(
                     "Requested window " + client + " does not exist");
@@ -8245,15 +8248,13 @@ public class WindowManagerService extends IWindowManager.Stub
             i++;
         }
 
-        // Keep whatever windows were below the app windows still below,
-        // by skipping them.
+        // Keep whatever windows were below the app windows still below, by skipping them.
         lastBelow++;
         i = lastBelow;
 
-        // First add all of the exiting app tokens...  these are no longer
-        // in the main app list, but still have windows shown.  We put them
-        // in the back because now that the animation is over we no longer
-        // will care about them.
+        // First add all of the exiting app tokens...  these are no longer in the main app list,
+        // but still have windows shown. We put them in the back because now that the animation is
+        // over we no longer will care about them.
         final ArrayList<TaskStack> stacks = displayContent.getStacks();
         final int numStacks = stacks.size();
         for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
