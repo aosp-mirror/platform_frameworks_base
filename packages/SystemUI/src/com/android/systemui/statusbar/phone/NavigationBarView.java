@@ -623,11 +623,12 @@ public class NavigationBarView extends LinearLayout {
             if (mCarMode && uiMode != Configuration.UI_MODE_TYPE_CAR) {
                 mCarMode = false;
                 uiCarModeChanged = true;
+                getHomeButton().setCarMode(mCarMode);
             } else if (uiMode == Configuration.UI_MODE_TYPE_CAR) {
                 mCarMode = true;
                 uiCarModeChanged = true;
+                getHomeButton().setCarMode(mCarMode);
             }
-            getHomeButton().setCarMode(mCarMode);
         }
         return uiCarModeChanged;
     }
