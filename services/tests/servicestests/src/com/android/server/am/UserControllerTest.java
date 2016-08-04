@@ -31,6 +31,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.UserManagerInternal;
 import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 
 import com.android.server.pm.UserManagerService;
@@ -83,6 +84,7 @@ public class UserControllerTest extends AndroidTestCase {
 
     }
 
+    @SmallTest
     public void testStartUser() throws RemoteException {
         mUserController.startUser(TEST_USER_ID, true);
         Mockito.verify(mInjector.getWindowManager()).startFreezingScreen(anyInt(), anyInt());
@@ -105,6 +107,7 @@ public class UserControllerTest extends AndroidTestCase {
         assertEquals("Unexpected new user id", TEST_USER_ID, reportMsg.arg2);
     }
 
+    @SmallTest
     public void testDispatchUserSwitch() throws RemoteException {
         // Prepare mock observer and register it
         IUserSwitchObserver observer = mock(IUserSwitchObserver.class);
@@ -139,6 +142,7 @@ public class UserControllerTest extends AndroidTestCase {
         assertEquals("Unexpected new user id", TEST_USER_ID, conMsg.arg2);
     }
 
+    @SmallTest
     public void testDispatchUserSwitchBadReceiver() throws RemoteException {
         // Prepare mock observer which doesn't notify the callback and register it
         IUserSwitchObserver observer = mock(IUserSwitchObserver.class);
@@ -160,6 +164,7 @@ public class UserControllerTest extends AndroidTestCase {
         assertTrue("No messages should be sent", actualCodes.isEmpty());
     }
 
+    @SmallTest
     public void testContinueUserSwitch() throws RemoteException {
         // Start user -- this will update state of mUserController
         mUserController.startUser(TEST_USER_ID, true);
