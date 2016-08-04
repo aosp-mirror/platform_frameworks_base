@@ -310,7 +310,7 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"允许应用启用车载模式。"</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"关闭其他应用"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"允许该应用结束其他应用的后台进程。此权限可导致其他应用停止运行。"</string>
-    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"在其他应用之上显示内容"</string>
+    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"出现在其他应用上"</string>
     <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"允许该应用在其他应用之上或用户界面的特定部分绘图。这可能会干扰您对所有应用界面的使用，或使您在其他应用中看到的内容发生变化。"</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"让应用始终运行"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"允许该应用在内存中持续保留其自身的某些组件。这会限制其他应用可用的内存，从而减缓平板电脑运行速度。"</string>
@@ -678,8 +678,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"正确！"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"重试"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"重试"</string>
-    <!-- no translation found for lockscreen_storage_locked (9167551160010625200) -->
-    <skip />
+    <string name="lockscreen_storage_locked" msgid="9167551160010625200">"解锁即可使用所有功能和数据"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"已超过“人脸解锁”尝试次数上限"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"没有 SIM 卡"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"平板电脑中没有SIM卡。"</string>
