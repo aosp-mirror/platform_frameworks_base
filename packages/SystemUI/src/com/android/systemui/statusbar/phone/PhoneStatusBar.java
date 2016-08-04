@@ -73,6 +73,7 @@ import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.MediaSessionManager;
 import android.media.session.PlaybackState;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -85,6 +86,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.Trace;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.Vibrator;
@@ -195,6 +197,7 @@ import com.android.systemui.volume.VolumeComponent;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -364,6 +367,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     // RemoteInputView to be activated after unlock
     private View mPendingRemoteInputView;
     private View mPendingWorkRemoteInputView;
+
+    private View mReportRejectedTouch;
 
     int mMaxAllowedKeyguardNotifications;
 
@@ -929,6 +934,36 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         ((BatteryMeterView) mStatusBarView.findViewById(R.id.battery)).setBatteryController(
                 mBatteryController);
         mKeyguardStatusBar.setBatteryController(mBatteryController);
+
+        mReportRejectedTouch = mStatusBarWindow.findViewById(R.id.report_rejected_touch);
+        if (mReportRejectedTouch != null) {
+            updateReportRejectedTouchVisibility();
+            mReportRejectedTouch.setOnClickListener(v -> {
+                Uri session = mFalsingManager.reportRejectedTouch();
+                if (session == null) { return; }
+
+                StringWriter message = new StringWriter();
+                message.write("Build info: ");
+                message.write(SystemProperties.get("ro.build.description"));
+                message.write("\nSerial number: ");
+                message.write(SystemProperties.get("ro.serialno"));
+                message.write("\n");
+
+                PrintWriter falsingPw = new PrintWriter(message);
+                FalsingLog.dump(falsingPw);
+                falsingPw.flush();
+
+                startActivityDismissingKeyguard(Intent.createChooser(new Intent(Intent.ACTION_SEND)
+                                .setType("*/*")
+                                .putExtra(Intent.EXTRA_SUBJECT, "Rejected touch report")
+                                .putExtra(Intent.EXTRA_STREAM, session)
+                                .putExtra(Intent.EXTRA_TEXT, message.toString()),
+                        "Share rejected touch report")
+                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                        true /* onlyProvisioned */, true /* dismissShade */);
+            });
+        }
+
 
         PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mBroadcastReceiver.onReceive(mContext,
@@ -2259,6 +2294,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }
         }
         Trace.endSection();
+    }
+
+    private void updateReportRejectedTouchVisibility() {
+        if (mReportRejectedTouch == null) {
+            return;
+        }
+        mReportRejectedTouch.setVisibility(mState == StatusBarState.KEYGUARD
+                && mFalsingManager.isReportingEnabled() ? View.VISIBLE : View.INVISIBLE);
     }
 
     protected int adjustDisableFlags(int state) {
@@ -4411,6 +4454,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mGroupManager.setStatusBarState(state);
         mFalsingManager.setStatusBarState(state);
         mStatusBarWindowManager.setStatusBarState(state);
+        updateReportRejectedTouchVisibility();
         updateDozing();
     }
 

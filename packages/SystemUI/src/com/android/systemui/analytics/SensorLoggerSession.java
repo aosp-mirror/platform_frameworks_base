@@ -53,6 +53,10 @@ public class SensorLoggerSession {
         mType = Session.REAL;
     }
 
+    public void setType(int type) {
+        mType = type;
+    }
+
     public void end(long endTimestampMillis, int result) {
         mResult = result;
         mEndTimestampMillis = endTimestampMillis;
