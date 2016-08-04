@@ -340,9 +340,8 @@ public class RetailDemoModeService extends SystemService {
                 UserHandle.SYSTEM);
         Settings.Secure.putIntForUser(getContext().getContentResolver(),
                 Settings.Secure.SKIP_FIRST_USE_HINTS, 1, userInfo.id);
-        Settings.Secure.putIntForUser(getContext().getContentResolver(),
-                Settings.Global.PACKAGE_VERIFIER_ENABLE, 0, userInfo.id);
-
+        Settings.Global.putInt(getContext().getContentResolver(),
+                Settings.Global.PACKAGE_VERIFIER_ENABLE, 0);
         grantRuntimePermissionToCamera(user);
         clearPrimaryCallLog();
     }
