@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.internal.app;
+package android.app;
 
-import android.content.Intent;
 import android.os.IRemoteCallback;
 
+/** @hide */
 oneway interface IEphemeralResolver {
     void getEphemeralResolveInfoList(IRemoteCallback callback, in int[] digestPrefix,
             int prefixMask, int sequence);
