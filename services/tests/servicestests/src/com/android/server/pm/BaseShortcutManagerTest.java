@@ -36,6 +36,7 @@ import static org.mockito.Mockito.when;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.IUidObserver;
 import android.app.usage.UsageStatsManagerInternal;
@@ -714,6 +715,9 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                     final int userId = (Integer) inv.getArguments()[0];
                     return b(mRunningUsers.get(userId)) && b(mUnlockedUsers.get(userId));
                 }));
+
+        when(mMockActivityManagerInternal.getUidProcessState(anyInt())).thenReturn(
+                ActivityManager.PROCESS_STATE_CACHED_EMPTY);
 
         // User 0 and P0 are always running
         mRunningUsers.put(USER_0, true);
