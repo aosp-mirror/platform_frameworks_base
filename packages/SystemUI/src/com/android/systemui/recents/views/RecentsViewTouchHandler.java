@@ -47,9 +47,13 @@ import java.util.ArrayList;
  * Represents the dock regions for each orientation.
  */
 class DockRegion {
-    public static TaskStack.DockState[] PHONE_LANDSCAPE = {
-            // We only allow docking to the left for now on small devices
+    // The phone landscape dock states correspond to the opposite end of the screen that the nav bar
+    // appears
+    public static TaskStack.DockState[] PHONE_LANDSCAPE_LEFT = {
             TaskStack.DockState.LEFT
+    };
+    public static TaskStack.DockState[] PHONE_LANDSCAPE_RIGHT = {
+            TaskStack.DockState.RIGHT
     };
     public static TaskStack.DockState[] PHONE_PORTRAIT = {
             // We only allow docking to the top for now on small devices
@@ -116,10 +120,17 @@ public class RecentsViewTouchHandler {
         boolean isLandscape = mRv.getResources().getConfiguration().orientation ==
                 Configuration.ORIENTATION_LANDSCAPE;
         RecentsConfiguration config = Recents.getConfiguration();
-        TaskStack.DockState[] dockStates = isLandscape ?
-                (config.isLargeScreen ? DockRegion.TABLET_LANDSCAPE : DockRegion.PHONE_LANDSCAPE) :
-                (config.isLargeScreen ? DockRegion.TABLET_PORTRAIT : DockRegion.PHONE_PORTRAIT);
-        return dockStates;
+        if (config.isLargeScreen) {
+            return isLandscape ? DockRegion.TABLET_LANDSCAPE : DockRegion.TABLET_PORTRAIT;
+        } else {
+            if (isLandscape) {
+                return mRv.isNavBarOnRight()
+                        ? DockRegion.PHONE_LANDSCAPE_LEFT
+                        : DockRegion.PHONE_LANDSCAPE_RIGHT;
+            } else {
+                return DockRegion.PHONE_PORTRAIT;
+            }
+        }
     }
 
     /**

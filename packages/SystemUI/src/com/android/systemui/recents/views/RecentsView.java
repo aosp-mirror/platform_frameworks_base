@@ -223,6 +223,13 @@ public class RecentsView extends FrameLayout {
     }
 
     /**
+     * Returns whether the nav bar is on the right.
+     */
+    public boolean isNavBarOnRight() {
+        return mSystemInsets.right > 0;
+    }
+
+    /**
      * Returns whether the last task launched was in the freeform stack or not.
      */
     public boolean isLastTaskLaunchedFreeform() {
