@@ -16,19 +16,19 @@
 
 package android.widget;
 
+import com.android.internal.R;
+
+import android.annotation.IntRange;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.Widget;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 import android.util.AttributeSet;
+import android.util.MathUtils;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
-import com.android.internal.R;
 
 import java.util.Locale;
 
@@ -102,8 +102,8 @@ public class TimePicker extends FrameLayout {
      * @param hour the hour to set, in the range (0-23)
      * @see #getHour()
      */
-    public void setHour(int hour) {
-        mDelegate.setHour(hour);
+    public void setHour(@IntRange(from = 0, to = 23) int hour) {
+        mDelegate.setHour(MathUtils.constrain(hour, 0, 23));
     }
 
     /**
@@ -117,13 +117,13 @@ public class TimePicker extends FrameLayout {
     }
 
     /**
-     * Sets the currently selected minute..
+     * Sets the currently selected minute.
      *
      * @param minute the minute to set, in the range (0-59)
      * @see #getMinute()
      */
-    public void setMinute(int minute) {
-        mDelegate.setMinute(minute);
+    public void setMinute(@IntRange(from = 0, to = 59) int minute) {
+        mDelegate.setMinute(MathUtils.constrain(minute, 0, 59));
     }
 
     /**
@@ -137,8 +137,9 @@ public class TimePicker extends FrameLayout {
     }
 
     /**
-     * Sets the current hour.
+     * Sets the currently selected hour using 24-hour time.
      *
+     * @param currentHour the hour to set, in the range (0-23)
      * @deprecated Use {@link #setHour(int)}
      */
     @Deprecated
@@ -147,33 +148,34 @@ public class TimePicker extends FrameLayout {
     }
 
     /**
-     * @return the current hour in the range (0-23)
+     * @return the currently selected hour, in the range (0-23)
      * @deprecated Use {@link #getHour()}
      */
     @NonNull
     @Deprecated
     public Integer getCurrentHour() {
-        return mDelegate.getHour();
+        return getHour();
     }
 
     /**
-     * Set the current minute (0-59).
+     * Sets the currently selected minute.
      *
+     * @param currentMinute the minute to set, in the range (0-59)
      * @deprecated Use {@link #setMinute(int)}
      */
     @Deprecated
     public void setCurrentMinute(@NonNull Integer currentMinute) {
-        mDelegate.setMinute(currentMinute);
+        setMinute(currentMinute);
     }
 
     /**
-     * @return the current minute
+     * @return the currently selected minute, in the range (0-59)
      * @deprecated Use {@link #getMinute()}
      */
     @NonNull
     @Deprecated
     public Integer getCurrentMinute() {
-        return mDelegate.getMinute();
+        return getMinute();
     }
 
     /**
@@ -256,10 +258,10 @@ public class TimePicker extends FrameLayout {
      * for the real behavior.
      */
     interface TimePickerDelegate {
-        void setHour(int hour);
+        void setHour(@IntRange(from = 0, to = 23) int hour);
         int getHour();
 
-        void setMinute(int minute);
+        void setMinute(@IntRange(from = 0, to = 59) int minute);
         int getMinute();
 
         void setIs24Hour(boolean is24Hour);
