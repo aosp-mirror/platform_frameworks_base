@@ -26,12 +26,13 @@ namespace uirenderer {
 class PropertyAnimator {
 public:
     PropertyAnimator(PropertyValuesHolder* holder, Interpolator* interpolator, nsecs_t startDelay,
-            nsecs_t duration, int repeatCount);
+            nsecs_t duration, int repeatCount, RepeatMode repeatMode);
     void setCurrentPlayTime(nsecs_t playTime);
     nsecs_t getTotalDuration() {
         return mTotalDuration;
     }
-    void setFraction(float fraction);
+    // fraction range: [0, 1], iteration range [0, repeatCount]
+    void setFraction(float fraction, long iteration);
 
 private:
     std::unique_ptr<PropertyValuesHolder> mPropertyValuesHolder;
@@ -40,7 +41,8 @@ private:
     nsecs_t mDuration;
     uint32_t mRepeatCount;
     nsecs_t mTotalDuration;
-    float mLatestFraction = 0.0f;
+    RepeatMode mRepeatMode;
+    double mLatestFraction = 0;
 };
 
 // TODO: This class should really be named VectorDrawableAnimator
@@ -56,7 +58,7 @@ public:
 
     void addPropertyAnimator(PropertyValuesHolder* propertyValuesHolder,
             Interpolator* interpolators, int64_t startDelays,
-            nsecs_t durations, int repeatCount);
+            nsecs_t durations, int repeatCount, RepeatMode repeatMode);
     virtual uint32_t dirtyMask();
     bool isInfinite() { return mIsInfinite; }
     void setVectorDrawable(VectorDrawableRoot* vd) { mVectorDrawable = vd; }
