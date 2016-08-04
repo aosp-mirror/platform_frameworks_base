@@ -65,6 +65,14 @@
             layout="@layout/keyguard_status_bar"
             android:visibility="invisible" />
 
+        <Button
+            android:id="@+id/report_rejected_touch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/status_bar_header_height_keyguard"
+            android:text="@string/report_rejected_touch"
+            android:visibility="gone" />
+
     </com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer>
 
     <include
