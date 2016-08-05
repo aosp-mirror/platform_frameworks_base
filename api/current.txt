@@ -49281,6 +49281,7 @@ package java.lang {
     method protected T initialValue();
     method public void remove();
     method public void set(T);
+    method public static java.lang.ThreadLocal<S> withInitial(java.util.function.Supplier<? extends S>);
   }
 
   public class Throwable implements java.io.Serializable {
