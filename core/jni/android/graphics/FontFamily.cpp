@@ -53,9 +53,10 @@ static void FontFamily_unref(JNIEnv* env, jobject clazz, jlong familyPtr) {
     fontFamily->Unref();
 }
 
-static jboolean addSkTypeface(minikin::FontFamily* family, SkTypeface* face, const void* fontData,
-        size_t fontSize, int ttcIndex) {
-    minikin::MinikinFont* minikinFont = new MinikinFontSkia(face, fontData, fontSize, ttcIndex);
+static jboolean addSkTypeface(minikin::FontFamily* family, sk_sp<SkTypeface> face,
+        const void* fontData, size_t fontSize, int ttcIndex) {
+    minikin::MinikinFont* minikinFont =
+            new MinikinFontSkia(std::move(face), fontData, fontSize, ttcIndex);
     bool result = family->addFont(minikinFont);
     minikinFont->Unref();
     return result;
@@ -106,13 +107,13 @@ static jboolean FontFamily_addFont(JNIEnv* env, jobject clazz, jlong familyPtr, 
     params.setCollectionIndex(ttcIndex);
 
     SkAutoTUnref<SkFontMgr> fm(SkFontMgr::RefDefault());
-    SkTypeface* face = fm->createFromStream(fontData.release(), params);
+    sk_sp<SkTypeface> face(fm->createFromStream(fontData.release(), params));
     if (face == NULL) {
         ALOGE("addFont failed to create font");
         return false;
     }
     minikin::FontFamily* fontFamily = reinterpret_cast<minikin::FontFamily*>(familyPtr);
-    return addSkTypeface(fontFamily, face, fontPtr, (size_t)fontSize, ttcIndex);
+    return addSkTypeface(fontFamily, std::move(face), fontPtr, (size_t)fontSize, ttcIndex);
 }
 
 static struct {
@@ -172,14 +173,14 @@ static jboolean FontFamily_addFontWeightStyle(JNIEnv* env, jobject clazz, jlong 
     params.setAxes(skiaAxes.get(), skiaAxesLength);
 
     SkAutoTUnref<SkFontMgr> fm(SkFontMgr::RefDefault());
-    SkTypeface* face = fm->createFromStream(fontData.release(), params);
+    sk_sp<SkTypeface> face(fm->createFromStream(fontData.release(), params));
     if (face == NULL) {
         ALOGE("addFont failed to create font, invalid request");
         return false;
     }
     minikin::FontFamily* fontFamily = reinterpret_cast<minikin::FontFamily*>(familyPtr);
     minikin::MinikinFont* minikinFont =
-            new MinikinFontSkia(face, fontPtr, (size_t)fontSize, ttcIndex);
+            new MinikinFontSkia(std::move(face), fontPtr, (size_t)fontSize, ttcIndex);
     fontFamily->addFont(minikinFont, minikin::FontStyle(weight / 100, isItalic));
     minikinFont->Unref();
     return true;
@@ -216,13 +217,13 @@ static jboolean FontFamily_addFontFromAsset(JNIEnv* env, jobject, jlong familyPt
     std::unique_ptr<SkStreamAsset> fontData(new SkMemoryStream(std::move(data)));
 
     SkAutoTUnref<SkFontMgr> fm(SkFontMgr::RefDefault());
-    SkTypeface* face = fm->createFromStream(fontData.release(), SkFontMgr::FontParameters());
+    sk_sp<SkTypeface> face(fm->createFromStream(fontData.release(), SkFontMgr::FontParameters()));
     if (face == NULL) {
         ALOGE("addFontFromAsset failed to create font %s", str.c_str());
         return false;
     }
     minikin::FontFamily* fontFamily = reinterpret_cast<minikin::FontFamily*>(familyPtr);
-    return addSkTypeface(fontFamily, face, buf, bufSize, /* ttcIndex */ 0);
+    return addSkTypeface(fontFamily, std::move(face), buf, bufSize, /* ttcIndex */ 0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

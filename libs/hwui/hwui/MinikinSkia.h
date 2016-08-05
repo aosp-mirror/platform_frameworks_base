@@ -19,6 +19,7 @@
 
 #include <cutils/compiler.h>
 #include <minikin/MinikinFont.h>
+#include <SkRefCnt.h>
 
 class SkPaint;
 class SkTypeface;
@@ -27,11 +28,8 @@ namespace android {
 
 class ANDROID_API MinikinFontSkia : public minikin::MinikinFont {
 public:
-    // Note: this takes ownership of the reference (will unref on dtor)
-    explicit MinikinFontSkia(SkTypeface *typeface, const void* fontData, size_t fontSize,
+    explicit MinikinFontSkia(sk_sp<SkTypeface> typeface, const void* fontData, size_t fontSize,
         int ttcIndex);
-
-    ~MinikinFontSkia();
 
     float GetHorizontalAdvance(uint32_t glyph_id,
         const minikin::MinikinPaint &paint) const;
@@ -42,6 +40,7 @@ public:
     const void* GetTable(uint32_t tag, size_t* size, minikin::MinikinDestroyFunc* destroy);
 
     SkTypeface* GetSkTypeface() const;
+    sk_sp<SkTypeface> RefSkTypeface() const;
 
     // Access to underlying raw font bytes
     const void* GetFontData() const;
@@ -55,7 +54,7 @@ public:
     static void populateSkPaint(SkPaint* paint, const minikin::MinikinFont* font,
             minikin::FontFakery fakery);
 private:
-    SkTypeface* mTypeface;
+    sk_sp<SkTypeface> mTypeface;
 
     // A raw pointer to the font data - it should be owned by some other object with
     // lifetime at least as long as this object.

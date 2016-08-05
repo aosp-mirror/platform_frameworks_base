@@ -31,7 +31,6 @@
 #include "SkPath.h"
 #include "SkRasterizer.h"
 #include "SkShader.h"
-#include "SkTypeface.h"
 #include "SkXfermode.h"
 #include "unicode/uloc.h"
 #include "unicode/ushape.h"
