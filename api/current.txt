@@ -48743,9 +48743,39 @@ package java.lang {
     method public java.io.File directory();
     method public java.lang.ProcessBuilder directory(java.io.File);
     method public java.util.Map<java.lang.String, java.lang.String> environment();
+    method public java.lang.ProcessBuilder inheritIO();
+    method public java.lang.ProcessBuilder redirectError(java.lang.ProcessBuilder.Redirect);
+    method public java.lang.ProcessBuilder redirectError(java.io.File);
+    method public java.lang.ProcessBuilder.Redirect redirectError();
     method public boolean redirectErrorStream();
     method public java.lang.ProcessBuilder redirectErrorStream(boolean);
+    method public java.lang.ProcessBuilder redirectInput(java.lang.ProcessBuilder.Redirect);
+    method public java.lang.ProcessBuilder redirectInput(java.io.File);
+    method public java.lang.ProcessBuilder.Redirect redirectInput();
+    method public java.lang.ProcessBuilder redirectOutput(java.lang.ProcessBuilder.Redirect);
+    method public java.lang.ProcessBuilder redirectOutput(java.io.File);
+    method public java.lang.ProcessBuilder.Redirect redirectOutput();
     method public java.lang.Process start() throws java.io.IOException;
+  }
+
+  public static abstract class ProcessBuilder.Redirect {
+    method public static java.lang.ProcessBuilder.Redirect appendTo(java.io.File);
+    method public java.io.File file();
+    method public static java.lang.ProcessBuilder.Redirect from(java.io.File);
+    method public static java.lang.ProcessBuilder.Redirect to(java.io.File);
+    method public abstract java.lang.ProcessBuilder.Redirect.Type type();
+    field public static final java.lang.ProcessBuilder.Redirect INHERIT;
+    field public static final java.lang.ProcessBuilder.Redirect PIPE;
+  }
+
+  public static final class ProcessBuilder.Redirect.Type extends java.lang.Enum {
+    method public static java.lang.ProcessBuilder.Redirect.Type valueOf(java.lang.String);
+    method public static final java.lang.ProcessBuilder.Redirect.Type[] values();
+    enum_constant public static final java.lang.ProcessBuilder.Redirect.Type APPEND;
+    enum_constant public static final java.lang.ProcessBuilder.Redirect.Type INHERIT;
+    enum_constant public static final java.lang.ProcessBuilder.Redirect.Type PIPE;
+    enum_constant public static final java.lang.ProcessBuilder.Redirect.Type READ;
+    enum_constant public static final java.lang.ProcessBuilder.Redirect.Type WRITE;
   }
 
   public abstract interface Readable {
