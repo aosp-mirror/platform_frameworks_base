@@ -199,6 +199,13 @@ public class KeyguardServiceDelegate {
         return mKeyguardState.showing;
     }
 
+    public boolean isTrusted() {
+        if (mKeyguardService != null) {
+            return mKeyguardService.isTrusted();
+        }
+        return false;
+    }
+
     public boolean isInputRestricted() {
         if (mKeyguardService != null) {
             mKeyguardState.inputRestricted = mKeyguardService.isInputRestricted();
@@ -220,14 +227,15 @@ public class KeyguardServiceDelegate {
 
     public void setOccluded(boolean isOccluded) {
         if (mKeyguardService != null) {
+            if (DEBUG) Log.v(TAG, "setOccluded(" + isOccluded + ")");
             mKeyguardService.setOccluded(isOccluded);
         }
         mKeyguardState.occluded = isOccluded;
     }
 
-    public void dismiss() {
+    public void dismiss(boolean allowWhileOccluded) {
         if (mKeyguardService != null) {
-            mKeyguardService.dismiss();
+            mKeyguardService.dismiss(allowWhileOccluded);
         }
     }
 

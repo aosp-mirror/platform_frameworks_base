@@ -34,7 +34,7 @@ oneway interface IKeyguardService {
     void addStateMonitorCallback(IKeyguardStateCallback callback);
     void verifyUnlock(IKeyguardExitCallback callback);
     void keyguardDone(boolean authenticated, boolean wakeup);
-    void dismiss();
+    void dismiss(boolean allowWhileOccluded);
     void onDreamingStarted();
     void onDreamingStopped();
 
