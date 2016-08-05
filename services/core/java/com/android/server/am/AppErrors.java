@@ -638,7 +638,8 @@ class AppErrors {
 
             // Allow restarting for started or bound foreground services that are crashing the
             // first time. This includes wallpapers.
-            if (sr.crashCount <= 1 && (sr.isForeground || procIsBoundForeground)) {
+            if ((data != null) && (sr.crashCount <= 1)
+                    && (sr.isForeground || procIsBoundForeground)) {
                 data.isRestartableForService = true;
             }
         }
