@@ -216,7 +216,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     private CountDownLatch mConnectedSignal = new CountDownLatch(1);
 
     private final RemoteCallbackList<INetworkManagementEventObserver> mObservers =
-            new RemoteCallbackList<INetworkManagementEventObserver>();
+            new RemoteCallbackList<>();
 
     private final NetworkStatsFactory mStatsFactory = new NetworkStatsFactory();
 
@@ -289,7 +289,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     private int mLastPowerStateFromWifi = DataConnectionRealTimeInfo.DC_POWER_STATE_LOW;
 
     private final RemoteCallbackList<INetworkActivityListener> mNetworkActivityListeners =
-            new RemoteCallbackList<INetworkActivityListener>();
+            new RemoteCallbackList<>();
     private boolean mNetworkActive;
 
     /**
@@ -1172,7 +1172,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     private ArrayList<String> readRouteList(String filename) {
         FileInputStream fstream = null;
-        ArrayList<String> list = new ArrayList<String>();
+        ArrayList<String> list = new ArrayList<>();
 
         try {
             fstream = new FileInputStream(filename);
@@ -1296,7 +1296,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
-        List<RouteInfo> routes = new ArrayList<RouteInfo>();
+        List<RouteInfo> routes = new ArrayList<>();
         // The RouteInfo constructor truncates the LinkAddress to a network prefix, thus making it
         // suitable to use as a route destination.
         routes.add(new RouteInfo(getInterfaceConfig(iface).getLinkAddress(), null, iface));
@@ -1356,7 +1356,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     private List<InterfaceAddress> excludeLinkLocal(List<InterfaceAddress> addresses) {
-        ArrayList<InterfaceAddress> filtered = new ArrayList<InterfaceAddress>(addresses.size());
+        ArrayList<InterfaceAddress> filtered = new ArrayList<>(addresses.size());
         for (InterfaceAddress ia : addresses) {
             if (!ia.getAddress().isLinkLocalAddress())
                 filtered.add(ia);
@@ -1464,99 +1464,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
             mConnector.execute("pppd", "detach", tty);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
-        }
-    }
-
-    /**
-     * Private method used to call execute for a command given the provided arguments.
-     *
-     * This function checks the returned NativeDaemonEvent for the provided expected response code
-     * and message.  If either of these is not correct, an error is logged.
-     *
-     * @param String command The command to execute.
-     * @param Object[] args If needed, arguments for the command to execute.
-     * @param int expectedResponseCode The code expected to be returned in the corresponding event.
-     * @param String expectedResponseMessage The message expected in the returned event.
-     * @param String logMsg The message to log as an error (TAG will be applied).
-     */
-    private void executeOrLogWithMessage(String command, Object[] args,
-            int expectedResponseCode, String expectedResponseMessage, String logMsg)
-            throws NativeDaemonConnectorException {
-        NativeDaemonEvent event = mConnector.execute(command, args);
-        if (event.getCode() != expectedResponseCode
-                || !event.getMessage().equals(expectedResponseMessage)) {
-            Log.e(TAG, logMsg + ": event = " + event);
-        }
-    }
-
-    @Override
-    public void startAccessPoint(WifiConfiguration wifiConfig, String wlanIface) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        Object[] args;
-        String logMsg = "startAccessPoint Error setting up softap";
-        try {
-            if (wifiConfig == null) {
-                args = new Object[] {"set", wlanIface};
-            } else {
-                args = new Object[] {"set", wlanIface, wifiConfig.SSID,
-                        "broadcast", Integer.toString(wifiConfig.apChannel),
-                        getSecurityType(wifiConfig), new SensitiveArg(wifiConfig.preSharedKey)};
-            }
-            executeOrLogWithMessage(SOFT_AP_COMMAND, args, NetdResponseCode.SoftapStatusResult,
-                    SOFT_AP_COMMAND_SUCCESS, logMsg);
-
-            logMsg = "startAccessPoint Error starting softap";
-            args = new Object[] {"startap"};
-            executeOrLogWithMessage(SOFT_AP_COMMAND, args, NetdResponseCode.SoftapStatusResult,
-                    SOFT_AP_COMMAND_SUCCESS, logMsg);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
-        }
-    }
-
-    private static String getSecurityType(WifiConfiguration wifiConfig) {
-        switch (wifiConfig.getAuthType()) {
-            case KeyMgmt.WPA_PSK:
-                return "wpa-psk";
-            case KeyMgmt.WPA2_PSK:
-                return "wpa2-psk";
-            default:
-                return "open";
-        }
-    }
-
-    /* @param mode can be "AP", "STA" or "P2P" */
-    @Override
-    public void wifiFirmwareReload(String wlanIface, String mode) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        Object[] args = {"fwreload", wlanIface, mode};
-        String logMsg = "wifiFirmwareReload Error reloading "
-                + wlanIface + " fw in " + mode + " mode";
-        try {
-            executeOrLogWithMessage(SOFT_AP_COMMAND, args, NetdResponseCode.SoftapStatusResult,
-                    SOFT_AP_COMMAND_SUCCESS, logMsg);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
-        }
-
-        // Ensure that before we return from this command, any asynchronous
-        // notifications generated before the command completed have been
-        // processed by all NetworkManagementEventObservers.
-        mConnector.waitForCallbacks();
-    }
-
-    @Override
-    public void stopAccessPoint(String wlanIface) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        Object[] args = {"stopap"};
-        String logMsg = "stopAccessPoint Error stopping softap";
-
-        try {
-            executeOrLogWithMessage(SOFT_AP_COMMAND, args, NetdResponseCode.SoftapStatusResult,
-                    SOFT_AP_COMMAND_SUCCESS, logMsg);
-            wifiFirmwareReload(wlanIface, "STA");
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
