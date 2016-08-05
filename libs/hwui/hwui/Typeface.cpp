@@ -64,12 +64,12 @@ static minikin::FontCollection *makeFontCollection() {
     for (size_t i = 0; i < sizeof(fns)/sizeof(fns[0]); i++) {
         const char *fn = fns[i];
         ALOGD("makeFontCollection adding %s", fn);
-        SkTypeface *skFace = SkTypeface::CreateFromFile(fn);
+        sk_sp<SkTypeface> skFace = SkTypeface::MakeFromFile(fn);
         if (skFace != NULL) {
             // TODO: might be a nice optimization to get access to the underlying font
             // data, but would require us opening the file ourselves and passing that
             // to the appropriate Create method of SkTypeface.
-            minikin::MinikinFont *font = new MinikinFontSkia(skFace, NULL, 0, 0);
+            minikin::MinikinFont *font = new MinikinFontSkia(std::move(skFace), NULL, 0, 0);
             family->addFont(font);
             font->Unref();
         } else {

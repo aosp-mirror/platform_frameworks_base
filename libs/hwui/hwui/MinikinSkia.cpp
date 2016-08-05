@@ -22,14 +22,10 @@
 
 namespace android {
 
-MinikinFontSkia::MinikinFontSkia(SkTypeface* typeface, const void* fontData, size_t fontSize,
+MinikinFontSkia::MinikinFontSkia(sk_sp<SkTypeface> typeface, const void* fontData, size_t fontSize,
         int ttcIndex) :
-    minikin::MinikinFont(typeface->uniqueID()), mTypeface(typeface), mFontData(fontData),
+    minikin::MinikinFont(typeface->uniqueID()), mTypeface(std::move(typeface)), mFontData(fontData),
     mFontSize(fontSize), mTtcIndex(ttcIndex) {
-}
-
-MinikinFontSkia::~MinikinFontSkia() {
-    SkSafeUnref(mTypeface);
 }
 
 static void MinikinFontSkia_SetSkiaPaint(const minikin::MinikinFont* font, SkPaint* skPaint,
@@ -87,6 +83,10 @@ const void* MinikinFontSkia::GetTable(uint32_t tag, size_t* size,
 }
 
 SkTypeface *MinikinFontSkia::GetSkTypeface() const {
+    return mTypeface.get();
+}
+
+sk_sp<SkTypeface> MinikinFontSkia::RefSkTypeface() const {
     return mTypeface;
 }
 
@@ -121,7 +121,7 @@ void MinikinFontSkia::unpackPaintFlags(SkPaint* paint, uint32_t paintFlags) {
 
 void MinikinFontSkia::populateSkPaint(SkPaint* paint, const MinikinFont* font,
         minikin::FontFakery fakery) {
-    paint->setTypeface(reinterpret_cast<const MinikinFontSkia*>(font)->GetSkTypeface());
+    paint->setTypeface(reinterpret_cast<const MinikinFontSkia*>(font)->RefSkTypeface());
     paint->setFakeBoldText(paint->isFakeBoldText() || fakery.isFakeBold());
     if (fakery.isFakeItalic()) {
         paint->setTextSkewX(paint->getTextSkewX() - 0.25f);
