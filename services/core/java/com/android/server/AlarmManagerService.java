@@ -2472,8 +2472,10 @@ class AlarmManagerService extends SystemService {
                             Slog.v(TAG, "Time changed notification from kernel; rebatching");
                         }
                         removeImpl(mTimeTickSender);
+                        removeImpl(mDateChangeSender);
                         rebatchAllAlarms();
                         mClockReceiver.scheduleTimeTickEvent();
+                        mClockReceiver.scheduleDateChangedEvent();
                         synchronized (mLock) {
                             mNumTimeChanged++;
                             mLastTimeChangeClockTime = nowRTC;
