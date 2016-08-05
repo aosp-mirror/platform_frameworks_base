@@ -56425,9 +56425,17 @@ package java.util {
     ctor public HashMap();
     ctor public HashMap(java.util.Map<? extends K, ? extends V>);
     method public java.lang.Object clone();
+    method public V compute(K, java.util.function.BiFunction<? super K, ? super V, ? extends V>);
+    method public V computeIfAbsent(K, java.util.function.Function<? super K, ? extends V>);
+    method public V computeIfPresent(K, java.util.function.BiFunction<? super K, ? super V, ? extends V>);
     method public java.util.Set<java.util.Map.Entry<K, V>> entrySet();
     method public void forEach(java.util.function.BiConsumer<? super K, ? super V>);
+    method public V getOrDefault(java.lang.Object, V);
+    method public V merge(K, V, java.util.function.BiFunction<? super V, ? super V, ? extends V>);
+    method public V putIfAbsent(K, V);
+    method public boolean remove(java.lang.Object, java.lang.Object);
     method public boolean replace(K, V, V);
+    method public V replace(K, V);
     method public void replaceAll(java.util.function.BiFunction<? super K, ? super V, ? extends V>);
   }
 
