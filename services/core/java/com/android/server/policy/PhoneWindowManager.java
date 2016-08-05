@@ -3560,6 +3560,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    @Override
+    public boolean canShowDismissingWindowWhileLockedLw() {
+        // If the keyguard is trusted, it will unlock without a challange. Therefore, windows with
+        // FLAG_DISMISS_KEYGUARD don't need to be force hidden, as they will unlock the phone right
+        // away anyways.
+        return mKeyguardDelegate != null && mKeyguardDelegate.isTrusted();
+    }
+
     private void launchAssistLongPressAction() {
         performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
         sendCloseSystemWindows(SYSTEM_DIALOG_REASON_ASSIST);
@@ -5256,7 +5264,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
             } else if (mDismissKeyguard != DISMISS_KEYGUARD_NONE) {
                 mKeyguardHidden = false;
-                if (setKeyguardOccludedLw(false)) {
+                final boolean trusted = mKeyguardDelegate.isTrusted();
+                if (trusted) {
+                    // No need to un-occlude keyguard - we'll dimiss it right away anyways.
+                } else if (setKeyguardOccludedLw(false)) {
                     changes |= FINISH_LAYOUT_REDO_LAYOUT
                             | FINISH_LAYOUT_REDO_CONFIG
                             | FINISH_LAYOUT_REDO_WALLPAPER;
@@ -5266,7 +5277,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            mKeyguardDelegate.dismiss();
+                            mKeyguardDelegate.dismiss(trusted /* allowWhileOccluded */);
                         }
                     });
                 }
@@ -6511,7 +6522,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 @Override
                 public void run() {
                     // ask the keyguard to prompt the user to authenticate if necessary
-                    mKeyguardDelegate.dismiss();
+                    mKeyguardDelegate.dismiss(false /* allowWhileOccluded */);
                 }
             });
         }
