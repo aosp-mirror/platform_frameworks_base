@@ -1129,9 +1129,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private void addServiceLocked(Service service, UserState userState) {
         try {
-            service.onAdded();
-            userState.mBoundServices.add(service);
-            userState.mComponentNameToServiceMap.put(service.mComponentName, service);
+            if (!userState.mBoundServices.contains(service)) {
+                service.onAdded();
+                userState.mBoundServices.add(service);
+                userState.mComponentNameToServiceMap.put(service.mComponentName, service);
+            }
         } catch (RemoteException re) {
             /* do nothing */
         }
@@ -1144,8 +1146,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
      */
     private void removeServiceLocked(Service service, UserState userState) {
         userState.mBoundServices.remove(service);
-        userState.mComponentNameToServiceMap.remove(service.mComponentName);
         service.onRemoved();
+        // It may be possible to bind a service twice, which confuses the map. Rebuild the map
+        // to make sure we can still reach a service
+        userState.mComponentNameToServiceMap.clear();
+        for (int i = 0; i < userState.mBoundServices.size(); i++) {
+            Service boundService = userState.mBoundServices.get(i);
+            userState.mComponentNameToServiceMap.put(boundService.mComponentName, boundService);
+        }
     }
 
     /**
@@ -2359,15 +2367,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
 
         /**
-         * Unbinds form the accessibility service and removes it from the data
+         * Unbinds from the accessibility service and removes it from the data
          * structures for service management.
          *
          * @return True if unbinding is successful.
          */
         public boolean unbindLocked() {
-            if (mService == null) {
-                return false;
-            }
             UserState userState = getUserStateLocked(mUserId);
             getKeyEventDispatcher().flush(this);
             if (!mIsAutomation) {
@@ -3068,7 +3073,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
-            /* do nothing - #binderDied takes care */
+            binderDied();
         }
 
         public void onAdded() throws RemoteException {
@@ -3097,14 +3102,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
 
         public void unlinkToOwnDeathLocked() {
-            mService.unlinkToDeath(this, 0);
+            if (mService != null) {
+                mService.unlinkToDeath(this, 0);
+            }
         }
 
         public void resetLocked() {
             try {
                 // Clear the proxy in the other process so this
                 // IAccessibilityServiceConnection can be garbage collected.
-                mServiceInterface.init(null, mId, null);
+                if (mServiceInterface != null) {
+                    mServiceInterface.init(null, mId, null);
+                }
             } catch (RemoteException re) {
                 /* ignore */
             }
@@ -3128,10 +3137,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 mWasConnectedAndDied = true;
                 getKeyEventDispatcher().flush(this);
                 UserState userState = getUserStateLocked(mUserId);
-                // The death recipient is unregistered in removeServiceLocked
-                removeServiceLocked(this, userState);
                 resetLocked();
                 if (mIsAutomation) {
+                    // This is typically done when unbinding, but UiAutomation isn't bound.
+                    removeServiceLocked(this, userState);
                     // We no longer have an automation service, so restore
                     // the state based on values in the settings database.
                     userState.mInstalledServices.remove(mAccessibilityServiceInfo);
