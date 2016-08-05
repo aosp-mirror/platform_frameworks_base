@@ -627,17 +627,8 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         }
         mIsFloatingLayer = mIsImWindow || mIsWallpaper;
 
-        final WindowState topParentWindow = getTopParentWindow();
-        WindowToken rootToken = topParentWindow.mToken;
-        while (rootToken.appWindowToken == null) {
-            WindowToken parent = mService.mTokenMap.get(rootToken.token);
-            if (parent == null || rootToken == parent) {
-                break;
-            }
-            rootToken = parent;
-        }
-        mRootToken = rootToken;
-        mAppToken = rootToken.appWindowToken;
+        mRootToken = getTopParentWindow().mToken;
+        mAppToken = mRootToken.asAppWindowToken();
         if (mAppToken != null) {
             final DisplayContent appDisplay = getDisplayContent();
             mNotOnAppsDisplay = displayContent != appDisplay;

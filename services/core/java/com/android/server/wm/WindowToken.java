@@ -51,7 +51,7 @@ class WindowToken {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "WindowToken" : TAG_WM;
 
     // The window manager!
-    final WindowManagerService service;
+    protected final WindowManagerService mService;
 
     // The actual token.
     final IBinder token;
@@ -65,9 +65,6 @@ class WindowToken {
 
     // For printing.
     String stringName;
-
-    // If this is an AppWindowToken, this is non-null.
-    AppWindowToken appWindowToken;
 
     // All of the windows associated with this token.
     protected final WindowList windows = new WindowList();
@@ -89,11 +86,12 @@ class WindowToken {
     // windows will be put to the bottom of the list.
     boolean sendingToBottom;
 
-    WindowToken(WindowManagerService _service, IBinder _token, int type, boolean _explicit) {
-        service = _service;
+    WindowToken(WindowManagerService service, IBinder _token, int type, boolean _explicit) {
+        mService = service;
         token = _token;
         windowType = type;
         explicit = _explicit;
+        mService.mTokenMap.put(token, this);
     }
 
     void removeAllWindows() {
@@ -126,8 +124,8 @@ class WindowToken {
             if (win.isVisibleNow()) {
                 win.mWinAnimator.applyAnimationLocked(TRANSIT_EXIT, false);
                 //TODO (multidisplay): Magnification is supported only for the default
-                if (service.mAccessibilityController != null && win.isDefaultDisplay()) {
-                    service.mAccessibilityController.onWindowTransitionLocked(win, TRANSIT_EXIT);
+                if (mService.mAccessibilityController != null && win.isDefaultDisplay()) {
+                    mService.mAccessibilityController.onWindowTransitionLocked(win, TRANSIT_EXIT);
                 }
                 changed = true;
                 if (displayContent != null) {
@@ -139,8 +137,8 @@ class WindowToken {
         hidden = true;
 
         if (changed) {
-            service.mWindowPlacerLocked.performSurfacePlacement();
-            service.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, false /*updateInputWindows*/);
+            mService.mWindowPlacerLocked.performSurfacePlacement();
+            mService.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, false /*updateInputWindows*/);
         }
 
         if (delayed && displayContent != null) {
@@ -266,7 +264,7 @@ class WindowToken {
 
         if (!win.isChildWindow()) {
             int tokenWindowsPos = 0;
-            if (appWindowToken != null) {
+            if (asAppWindowToken() != null) {
                 tokenWindowsPos = addAppWindow(win);
             } else {
                 win.addNonAppWindowToList();
@@ -301,7 +299,7 @@ class WindowToken {
         }
 
         // No windows from this token on this display
-        if (service.localLOGV) Slog.v(TAG_WM, "Figuring out where to add app window "
+        if (mService.localLOGV) Slog.v(TAG_WM, "Figuring out where to add app window "
                 + client.asBinder() + " (token=" + this + ")");
 
         // Figure out where the window should go, based on the order of applications.
@@ -343,7 +341,7 @@ class WindowToken {
         // position; else we need to look some more.
         if (pos != null) {
             // Move behind any windows attached to this one.
-            final WindowToken atoken = service.mTokenMap.get(pos.mClient.asBinder());
+            final WindowToken atoken = mService.mTokenMap.get(pos.mClient.asBinder());
             if (atoken != null) {
                 tokenWindowList = atoken.getTokenWindowsOnDisplay(displayContent);
                 final int NC = tokenWindowList.size();
@@ -378,7 +376,7 @@ class WindowToken {
 
         if (pos != null) {
             // Move in front of any windows attached to this one.
-            final WindowToken atoken = service.mTokenMap.get(pos.mClient.asBinder());
+            final WindowToken atoken = mService.mTokenMap.get(pos.mClient.asBinder());
             if (atoken != null) {
                 final WindowState top = atoken.getTopWindow();
                 if (top != null && top.mSubLayer >= 0) {
@@ -406,7 +404,7 @@ class WindowToken {
                 "Based on layer: Adding window " + win + " at " + (i + 1) + " of "
                         + windows.size());
         windows.add(i + 1, win);
-        service.mWindowsChanged = true;
+        mService.mWindowsChanged = true;
         return tokenWindowsPos;
     }
 
@@ -443,7 +441,7 @@ class WindowToken {
                 } else {
                     tokenWindowsPos = getWindowIndex(windowList.get(newIdx)) + 1;
                 }
-                service.mWindowsChanged = true;
+                mService.mWindowsChanged = true;
             }
         }
         return tokenWindowsPos;
@@ -529,7 +527,7 @@ class WindowToken {
     }
 
     void updateWallpaperOffset(int dw, int dh, boolean sync) {
-        final WallpaperController wallpaperController = service.mWallpaperControllerLocked;
+        final WallpaperController wallpaperController = mService.mWallpaperControllerLocked;
         for (int wallpaperNdx = windows.size() - 1; wallpaperNdx >= 0; wallpaperNdx--) {
             WindowState wallpaper = windows.get(wallpaperNdx);
             if (wallpaperController.updateWallpaperOffset(wallpaper, dw, dh, sync)) {
@@ -550,7 +548,7 @@ class WindowToken {
             displayContent.layoutNeeded = true;
         }
 
-        final WallpaperController wallpaperController = service.mWallpaperControllerLocked;
+        final WallpaperController wallpaperController = mService.mWallpaperControllerLocked;
         for (int wallpaperNdx = windows.size() - 1; wallpaperNdx >= 0; wallpaperNdx--) {
             WindowState wallpaper = windows.get(wallpaperNdx);
             if (visible) {
@@ -570,10 +568,10 @@ class WindowToken {
                     "Wallpaper token " + token + " hidden=" + !visible);
             hidden = !visible;
             // Need to do a layout to ensure the wallpaper now has the correct size.
-            service.getDefaultDisplayContentLocked().layoutNeeded = true;
+            mService.getDefaultDisplayContentLocked().layoutNeeded = true;
         }
 
-        final WallpaperController wallpaperController = service.mWallpaperControllerLocked;
+        final WallpaperController wallpaperController = mService.mWallpaperControllerLocked;
         for (int wallpaperNdx = windows.size() - 1; wallpaperNdx >= 0; wallpaperNdx--) {
             final WindowState wallpaper = windows.get(wallpaperNdx);
 
@@ -603,7 +601,7 @@ class WindowToken {
                 if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG,
                         "Wallpaper removing at " + oldIndex + ": " + wallpaper);
                 windowList.remove(oldIndex);
-                service.mWindowsChanged = true;
+                mService.mWindowsChanged = true;
                 if (oldIndex < wallpaperTargetIndex) {
                     wallpaperTargetIndex--;
                 }
@@ -624,7 +622,7 @@ class WindowToken {
                     "Moving wallpaper " + wallpaper + " from " + oldIndex + " to " + insertionIndex);
 
             windowList.add(insertionIndex, wallpaper);
-            service.mWindowsChanged = true;
+            mService.mWindowsChanged = true;
             changed = true;
         }
 
@@ -650,6 +648,12 @@ class WindowToken {
             }
         }
         return layer;
+    }
+
+    AppWindowToken asAppWindowToken() {
+        // TODO: Not sure if this is the best way to handle this vs. using instanceof and casting.
+        // I am not an app window token!
+        return null;
     }
 
     void dump(PrintWriter pw, String prefix) {
