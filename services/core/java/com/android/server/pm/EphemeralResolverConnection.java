@@ -16,6 +16,8 @@
 
 package com.android.server.pm;
 
+import android.app.EphemeralResolverService;
+import android.app.IEphemeralResolver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -29,9 +31,6 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.TimedRemoteCaller;
-
-import com.android.internal.app.EphemeralResolverService;
-import com.android.internal.app.IEphemeralResolver;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;

@@ -75,6 +75,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/app/IAppTask.aidl \
 	core/java/android/app/ITaskStackListener.aidl \
 	core/java/android/app/IBackupAgent.aidl \
+	core/java/android/app/IEphemeralResolver.aidl \
 	core/java/android/app/IInstrumentationWatcher.aidl \
 	core/java/android/app/INotificationManager.aidl \
 	core/java/android/app/IProcessObserver.aidl \
@@ -305,7 +306,6 @@ LOCAL_SRC_FILES += \
 	core/java/com/android/internal/app/IAppOpsService.aidl \
 	core/java/com/android/internal/app/IAssistScreenshotReceiver.aidl \
 	core/java/com/android/internal/app/IBatteryStats.aidl \
-	core/java/com/android/internal/app/IEphemeralResolver.aidl \
 	core/java/com/android/internal/app/ISoundTriggerService.aidl \
 	core/java/com/android/internal/app/IVoiceInteractionManagerService.aidl \
 	core/java/com/android/internal/app/IVoiceInteractionSessionListener.aidl \
