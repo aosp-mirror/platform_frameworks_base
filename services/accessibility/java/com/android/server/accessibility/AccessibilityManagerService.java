@@ -21,6 +21,7 @@ import static android.accessibilityservice.AccessibilityServiceInfo.DEFAULT;
 import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.accessibilityservice.GestureDescription;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.annotation.NonNull;
@@ -2747,7 +2748,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
 
         @Override
-        public void sendMotionEvents(int sequence, ParceledListSlice events) {
+        public void sendGesture(int sequence, ParceledListSlice gestureSteps) {
             synchronized (mLock) {
                 if (mSecurityPolicy.canPerformGestures(this)) {
                     final long endMillis =
@@ -2761,9 +2762,16 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                         }
                     }
                     if (mMotionEventInjector != null) {
-                        mMotionEventInjector.injectEvents((List<MotionEvent>) events.getList(),
-                                mServiceInterface, sequence);
-                        return;
+                        List<GestureDescription.GestureStep> steps = gestureSteps.getList();
+                        List<MotionEvent> events = GestureDescription.MotionEventGenerator
+                                .getMotionEventsFromGestureSteps(steps);
+                        // Confirm that the motion events end with an UP event.
+                        if (events.get(events.size() - 1).getAction() == MotionEvent.ACTION_UP) {
+                            mMotionEventInjector.injectEvents(events, mServiceInterface, sequence);
+                            return;
+                        } else {
+                            Slog.e(LOG_TAG, "Gesture is not well-formed");
+                        }
                     } else {
                         Slog.e(LOG_TAG, "MotionEventInjector installation timed out");
                     }
