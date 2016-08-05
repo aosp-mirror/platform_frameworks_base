@@ -26,11 +26,20 @@
         android:id="@+id/volume_dialog_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingTop="@dimen/volume_dialog_collapsed_padding_top"
-        android:animateLayoutChanges="true" >
+        android:orientation="vertical" >
 
-        <!-- volume rows added and removed here! :-) -->
+        <LinearLayout
+                android:id="@+id/volume_dialog_rows"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingEnd="@dimen/volume_button_size"
+                android:orientation="vertical" >
+            <View android:id="@+id/spacer"
+                  android:layout_width="match_parent"
+                  android:layout_height="@dimen/volume_dialog_expanded_spacer"
+                  android:visibility="gone"/>
+            <!-- volume rows added and removed here! :-) -->
+        </LinearLayout>
 
         <include layout="@layout/volume_zen_footer" />
 
