@@ -297,6 +297,9 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         mAccessibilityMoving = false;
         mTiles.remove(mEditIndex--);
         notifyItemRemoved(mEditIndex - 1);
+        // Don't remove items when the last position is selected.
+        if (position == mEditIndex) position--;
+
         move(mAccessibilityFromIndex, position, v);
         notifyDataSetChanged();
     }
