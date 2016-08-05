@@ -302,6 +302,11 @@ public final class BroadcastQueue {
         boolean didSomething = false;
         final BroadcastRecord br = mPendingBroadcast;
         if (br != null && br.curApp.pid == app.pid) {
+            if (br.curApp != app) {
+                Slog.e(TAG, "App mismatch when sending pending broadcast to "
+                        + app.processName + ", intended target is " + br.curApp.processName);
+                return false;
+            }
             try {
                 mPendingBroadcast = null;
                 processCurBroadcastLocked(br, app);
