@@ -5047,18 +5047,32 @@ public class WindowManagerService extends IWindowManager.Stub
         try {
             synchronized (mWindowMap) {
                 final DisplayContent displayContent = mDisplayContents.get(displayId);
+                boolean attachedToDisplay = false;
                 if (displayContent != null) {
                     TaskStack stack = mStackIdToStack.get(stackId);
                     if (stack == null) {
                         if (DEBUG_STACK) Slog.d(TAG_WM, "attachStack: stackId=" + stackId);
-                        stack = new TaskStack(this, stackId);
+
+                        stack = displayContent.getStackById(stackId);
+                        if (stack != null) {
+                            // It's already attached to the display. Detach and re-attach
+                            // because onTop might change, and be sure to clear mDeferDetach!
+                            displayContent.detachStack(stack);
+                            stack.mDeferDetach = false;
+                            attachedToDisplay = true;
+                        } else {
+                            stack = new TaskStack(this, stackId);
+                        }
+
                         mStackIdToStack.put(stackId, stack);
                         if (stackId == DOCKED_STACK_ID) {
                             getDefaultDisplayContentLocked().mDividerControllerLocked
                                     .notifyDockedStackExistsChanged(true);
                         }
                     }
-                    stack.attachDisplayContent(displayContent);
+                    if (!attachedToDisplay) {
+                        stack.attachDisplayContent(displayContent);
+                    }
                     displayContent.attachStack(stack, onTop);
                     if (stack.getRawFullscreen()) {
                         return null;
