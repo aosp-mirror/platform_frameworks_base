@@ -9816,6 +9816,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public void dispatchFinishTemporaryDetach() {
         onFinishTemporaryDetach();
         mPrivateFlags3 &= ~PFLAG3_TEMPORARY_DETACH;
+        if (hasWindowFocus() && hasFocus()) {
+            InputMethodManager.getInstance().focusIn(this);
+        }
     }
 
     /**
