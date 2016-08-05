@@ -98,9 +98,9 @@ public class KeyguardService extends Service {
         }
 
         @Override // Binder interface
-        public void dismiss() {
+        public void dismiss(boolean allowWhileOccluded) {
             checkPermission();
-            mKeyguardViewMediator.dismiss();
+            mKeyguardViewMediator.dismiss(allowWhileOccluded);
         }
 
         @Override // Binder interface
