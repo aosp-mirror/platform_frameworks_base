@@ -27,6 +27,7 @@
 
 #include <SkBlurDrawLooper.h>
 #include <SkDashPathEffect.h>
+#include <SkPath.h>
 
 using namespace android::uirenderer;
 
@@ -272,4 +273,18 @@ RENDERTHREAD_TEST(BakedOpDispatcher, layerUpdateProperties) {
             EXPECT_EQ(expectedCount, glopCount);
         }
     }
+}
+
+RENDERTHREAD_TEST(BakedOpDispatcher, pathTextureSnapping) {
+    Rect bounds(10, 15, 20, 25);
+    SkPaint paint;
+    SkPath path;
+    path.addRect(SkRect::MakeXYWH(1.5, 3.8, 100, 90));
+    PathOp op(bounds, Matrix4::identity(), nullptr, &paint, &path);
+    testUnmergedGlopDispatch(renderThread, &op, [] (const Glop& glop) {
+        auto texture = glop.fill.texture.texture;
+        ASSERT_NE(nullptr, texture);
+        EXPECT_EQ(1, reinterpret_cast<PathTexture*>(texture)->left);
+        EXPECT_EQ(3, reinterpret_cast<PathTexture*>(texture)->top);
+    });
 }
