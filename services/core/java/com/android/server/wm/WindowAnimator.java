@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SYSTEM_ERROR;
@@ -231,6 +232,12 @@ public class WindowAnimator {
                     // Show error dialogs over apps that dismiss keyguard.
                     || (win.mAttrs.privateFlags & PRIVATE_FLAG_SYSTEM_ERROR) != 0;
         }
+
+        // Allow showing a window that dismisses Keyguard if the policy allows it. This is used for
+        // when the policy knows that the Keyguard can be dismissed without user interaction to
+        // provide a smooth transition in that case.
+        allowWhenLocked |= (win.mAttrs.flags & FLAG_DISMISS_KEYGUARD) != 0
+                && mPolicy.canShowDismissingWindowWhileLockedLw();
 
         // Only hide windows if the keyguard is active and not animating away.
         boolean keyguardOn = mPolicy.isKeyguardShowingOrOccluded()

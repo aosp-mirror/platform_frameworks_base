@@ -136,6 +136,12 @@ public interface WindowManagerPolicy {
             throws RemoteException;
 
     /**
+     * @return true if windows with FLAG_DISMISS_KEYGUARD should be allowed to show even if
+     *         the keyguard is locked.
+     */
+    boolean canShowDismissingWindowWhileLockedLw();
+
+    /**
      * Interface to the Window Manager state associated with a particular
      * window.  You can hold on to an instance of this interface from the call
      * to prepareAddWindow() until removeWindow().
