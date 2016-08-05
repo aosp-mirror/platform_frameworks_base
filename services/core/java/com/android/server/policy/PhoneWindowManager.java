@@ -200,6 +200,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int MULTI_PRESS_POWER_THEATER_MODE = 1;
     static final int MULTI_PRESS_POWER_BRIGHTNESS_BOOST = 2;
 
+    // Number of presses needed before we induce panic press behavior on the back button
+    static final int PANIC_PRESS_BACK_COUNT = 4;
+    static final int PANIC_PRESS_BACK_NOTHING = 0;
+    static final int PANIC_PRESS_BACK_HOME = 1;
+
     // These need to match the documentation/constant in
     // core/res/res/values/config.xml
     static final int LONG_PRESS_HOME_NOTHING = 0;
@@ -406,6 +411,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     volatile boolean mBackKeyHandled;
     volatile boolean mBeganFromNonInteractive;
     volatile int mPowerKeyPressCounter;
+    volatile int mBackKeyPressCounter;
     volatile boolean mEndCallKeyHandled;
     volatile boolean mCameraGestureTriggeredDuringGoingToSleep;
     volatile boolean mGoingToSleep;
@@ -464,6 +470,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mDoublePressOnPowerBehavior;
     int mTriplePressOnPowerBehavior;
     int mLongPressOnBackBehavior;
+    int mPanicPressOnBackBehavior;
     int mShortPressOnSleepBehavior;
     int mShortPressWindowBehavior;
     boolean mAwake;
@@ -726,6 +733,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_SHOW_TV_PICTURE_IN_PICTURE_MENU = 17;
     private static final int MSG_BACK_LONG_PRESS = 18;
     private static final int MSG_DISPOSE_INPUT_CONSUMER = 19;
+    private static final int MSG_BACK_DELAYED_PRESS = 20;
 
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_STATUS = 0;
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_NAVIGATION = 1;
@@ -792,9 +800,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 case MSG_BACK_LONG_PRESS:
                     backLongPress();
+                    finishBackKeyPress();
                     break;
                 case MSG_DISPOSE_INPUT_CONSUMER:
                     disposeInputConsumer((InputConsumer) msg.obj);
+                    break;
+                case MSG_BACK_DELAYED_PRESS:
+                    backMultiPressAction((Long) msg.obj, msg.arg1);
+                    finishBackKeyPress();
                     break;
             }
         }
@@ -1010,6 +1023,52 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    private void interceptBackKeyDown() {
+        // Reset back key state for long press
+        mBackKeyHandled = false;
+
+        // Cancel multi-press detection timeout.
+        if (hasPanicPressOnBackBehavior()) {
+            if (mBackKeyPressCounter != 0
+                    && mBackKeyPressCounter < PANIC_PRESS_BACK_COUNT) {
+                mHandler.removeMessages(MSG_BACK_DELAYED_PRESS);
+            }
+        }
+
+        if (hasLongPressOnBackBehavior()) {
+            Message msg = mHandler.obtainMessage(MSG_BACK_LONG_PRESS);
+            msg.setAsynchronous(true);
+            mHandler.sendMessageDelayed(msg,
+                    ViewConfiguration.get(mContext).getDeviceGlobalActionKeyTimeout());
+        }
+    }
+
+    // returns true if the key was handled and should not be passed to the user
+    private boolean interceptBackKeyUp(KeyEvent event) {
+        // Cache handled state
+        boolean handled = mBackKeyHandled;
+
+        if (hasPanicPressOnBackBehavior()) {
+            // Check for back key panic press
+            ++mBackKeyPressCounter;
+
+            final long eventTime = event.getDownTime();
+
+            if (mBackKeyPressCounter <= PANIC_PRESS_BACK_COUNT) {
+                // This could be a multi-press.  Wait a little bit longer to confirm.
+                Message msg = mHandler.obtainMessage(MSG_BACK_DELAYED_PRESS,
+                        mBackKeyPressCounter, 0, eventTime);
+                msg.setAsynchronous(true);
+                mHandler.sendMessageDelayed(msg, ViewConfiguration.getMultiPressTimeout());
+            }
+        }
+
+        // Reset back long press state
+        cancelPendingBackKeyAction();
+
+        return handled;
+    }
+
     private void interceptPowerKeyDown(KeyEvent event, boolean interactive) {
         // Hold a wake lock until the power key is released.
         if (!mPowerKeyWakeLock.isHeld()) {
@@ -1140,6 +1199,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    private void finishBackKeyPress() {
+        mBackKeyPressCounter = 0;
+    }
+
     private void cancelPendingPowerKeyAction() {
         if (!mPowerKeyHandled) {
             mPowerKeyHandled = true;
@@ -1151,6 +1214,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (!mBackKeyHandled) {
             mBackKeyHandled = true;
             mHandler.removeMessages(MSG_BACK_LONG_PRESS);
+        }
+    }
+
+    private void backMultiPressAction(long eventTime, int count) {
+        if (count >= PANIC_PRESS_BACK_COUNT) {
+            switch (mPanicPressOnBackBehavior) {
+                case PANIC_PRESS_BACK_NOTHING:
+                    break;
+                case PANIC_PRESS_BACK_HOME:
+                    launchHomeFromHotKey();
+                    break;
+            }
         }
     }
 
@@ -1310,6 +1385,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private boolean hasLongPressOnBackBehavior() {
         return mLongPressOnBackBehavior != LONG_PRESS_BACK_NOTHING;
+    }
+
+    private boolean hasPanicPressOnBackBehavior() {
+        return mPanicPressOnBackBehavior != PANIC_PRESS_BACK_NOTHING;
     }
 
     private void interceptScreenshotChord() {
@@ -1639,6 +1718,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         mLongPressOnBackBehavior = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_longPressOnBackBehavior);
+        mPanicPressOnBackBehavior = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_backPanicBehavior);
 
         mShortPressOnPowerBehavior = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_shortPressOnPowerBehavior);
@@ -5607,20 +5688,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         switch (keyCode) {
             case KeyEvent.KEYCODE_BACK: {
                 if (down) {
-                    mBackKeyHandled = false;
-                    if (hasLongPressOnBackBehavior()) {
-                        Message msg = mHandler.obtainMessage(MSG_BACK_LONG_PRESS);
-                        msg.setAsynchronous(true);
-                        mHandler.sendMessageDelayed(msg,
-                                ViewConfiguration.get(mContext).getDeviceGlobalActionKeyTimeout());
-                    }
+                    interceptBackKeyDown();
                 } else {
-                    boolean handled = mBackKeyHandled;
+                    boolean handled = interceptBackKeyUp(event);
 
-                    // Reset back key state
-                    cancelPendingBackKeyAction();
-
-                    // Don't pass back press to app if we've already handled it
+                    // Don't pass back press to app if we've already handled it via long press
                     if (handled) {
                         result &= ~ACTION_PASS_TO_USER;
                     }

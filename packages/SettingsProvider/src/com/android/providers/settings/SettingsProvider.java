@@ -2108,7 +2108,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 130;
+            private static final int SETTINGS_VERSION = 131;
 
             private final int mUserId;
 
@@ -2414,6 +2414,22 @@ public class SettingsProvider extends ContentProvider {
                                 SettingsState.SYSTEM_PACKAGE_NAME);
                     }
                     currentVersion = 130;
+                }
+
+                if (currentVersion == 130) {
+                    // Initialize new multi-press timeout to default value
+                    final SettingsState systemSecureSettings = getSecureSettingsLocked(userId);
+                    final String oldValue = systemSecureSettings.getSettingLocked(
+                            Settings.Secure.MULTI_PRESS_TIMEOUT).getValue();
+                    if (TextUtils.equals(null, oldValue)) {
+                        systemSecureSettings.insertSettingLocked(
+                                Settings.Secure.MULTI_PRESS_TIMEOUT,
+                                String.valueOf(getContext().getResources().getInteger(
+                                        R.integer.def_multi_press_timeout_millis)),
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+
+                    currentVersion = 131;
                 }
 
                 if (currentVersion != newVersion) {

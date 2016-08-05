@@ -64,6 +64,12 @@ public class ViewConfiguration {
     private static final int DEFAULT_LONG_PRESS_TIMEOUT = 500;
 
     /**
+     * Defines the default duration in milliseconds between the first tap's up event and the second
+     * tap's down event for an interaction to be considered part of the same multi-press.
+     */
+    private static final int DEFAULT_MULTI_PRESS_TIMEOUT = 300;
+
+    /**
      * Defines the time between successive key repeats in milliseconds.
      */
     private static final int KEY_REPEAT_DELAY = 50;
@@ -438,6 +444,16 @@ public class ViewConfiguration {
     public static int getLongPressTimeout() {
         return AppGlobals.getIntCoreSetting(Settings.Secure.LONG_PRESS_TIMEOUT,
                 DEFAULT_LONG_PRESS_TIMEOUT);
+    }
+
+    /**
+     * @return the duration in milliseconds between the first tap's up event and the second tap's
+     * down event for an interaction to be considered part of the same multi-press.
+     * @hide
+     */
+    public static int getMultiPressTimeout() {
+        return AppGlobals.getIntCoreSetting(Settings.Secure.MULTI_PRESS_TIMEOUT,
+                DEFAULT_MULTI_PRESS_TIMEOUT);
     }
 
     /**
