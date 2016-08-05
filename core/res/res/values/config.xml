@@ -796,6 +796,12 @@
     -->
     <integer name="config_longPressOnBackBehavior">0</integer>
 
+    <!-- Control the behavior when the user panic presses the back button.
+            0 - Nothing
+            1 - Go to home
+    -->
+    <integer name="config_backPanicBehavior">0</integer>
+
     <!-- Control the behavior when the user short presses the power button.
             0 - Nothing
             1 - Go to sleep (doze)
