@@ -191,6 +191,16 @@ class DisplayContent {
         return mHomeStack;
     }
 
+    TaskStack getStackById(int stackId) {
+        for (int i = mStacks.size() - 1; i >= 0; --i) {
+            final TaskStack stack = mStacks.get(i);
+            if (stack.mStackId == stackId) {
+                return stack;
+            }
+        }
+        return null;
+    }
+
     void updateDisplayInfo() {
         mDisplay.getDisplayInfo(mDisplayInfo);
         mDisplay.getMetrics(mDisplayMetrics);
