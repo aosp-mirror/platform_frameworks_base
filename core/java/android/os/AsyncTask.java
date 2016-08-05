@@ -298,12 +298,16 @@ public abstract class AsyncTask<Params, Progress, Result> {
         mWorker = new WorkerRunnable<Params, Result>() {
             public Result call() throws Exception {
                 mTaskInvoked.set(true);
-
-                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                //noinspection unchecked
-                Result result = doInBackground(mParams);
-                Binder.flushPendingCommands();
-                return postResult(result);
+                Result result = null;
+                try {
+                    Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                    //noinspection unchecked
+                    result = doInBackground(mParams);
+                    Binder.flushPendingCommands();
+                } finally {
+                    postResult(result);
+                }
+                return result;
             }
         };
 
