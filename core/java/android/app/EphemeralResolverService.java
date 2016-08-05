@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.app;
+package android.app;
 
 import android.annotation.SystemApi;
 import android.app.Service;
@@ -37,9 +37,9 @@ import java.util.List;
  */
 @SystemApi
 public abstract class EphemeralResolverService extends Service {
-    public static final String EXTRA_RESOLVE_INFO = "com.android.internal.app.RESOLVE_INFO";
-    public static final String EXTRA_SEQUENCE = "com.android.internal.app.SEQUENCE";
-    private static final String EXTRA_PREFIX = "com.android.internal.app.PREFIX";
+    public static final String EXTRA_RESOLVE_INFO = "android.app.extra.RESOLVE_INFO";
+    public static final String EXTRA_SEQUENCE = "android.app.extra.SEQUENCE";
+    private static final String EXTRA_PREFIX = "android.app.PREFIX";
     private Handler mHandler;
 
     /**
@@ -50,11 +50,11 @@ public abstract class EphemeralResolverService extends Service {
      *      be used when comparing against the digest prefixes as all bits might
      *      not be set.
      */
-    protected abstract List<EphemeralResolveInfo> getEphemeralResolveInfoList(
+    public abstract List<EphemeralResolveInfo> onEphemeralResolveInfoList(
             int digestPrefix[], int prefixMask);
 
     @Override
-    protected final void attachBaseContext(Context base) {
+    public final void attachBaseContext(Context base) {
         super.attachBaseContext(base);
         mHandler = new ServiceHandler(base.getMainLooper());
     }
@@ -91,7 +91,7 @@ public abstract class EphemeralResolverService extends Service {
                     final IRemoteCallback callback = (IRemoteCallback) message.obj;
                     final int[] digestPrefix = message.getData().getIntArray(EXTRA_PREFIX);
                     final List<EphemeralResolveInfo> resolveInfo =
-                            getEphemeralResolveInfoList(digestPrefix, message.arg1);
+                            onEphemeralResolveInfoList(digestPrefix, message.arg1);
                     final Bundle data = new Bundle();
                     data.putInt(EXTRA_SEQUENCE, message.arg2);
                     data.putParcelableList(EXTRA_RESOLVE_INFO, resolveInfo);
