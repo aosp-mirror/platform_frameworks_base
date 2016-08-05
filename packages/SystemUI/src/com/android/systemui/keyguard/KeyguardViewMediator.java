@@ -1395,6 +1395,7 @@ public class KeyguardViewMediator extends SystemUI {
     public void keyguardDone(boolean authenticated) {
         Trace.beginSection("KeyguardViewMediator#keyguardDone");
         if (DEBUG) Log.d(TAG, "keyguardDone(" + authenticated +")");
+        userActivity();
         EventLog.writeEvent(70000, 2);
         Message msg = mHandler.obtainMessage(KEYGUARD_DONE, authenticated ? 1 : 0);
         mHandler.sendMessage(msg);
@@ -1652,6 +1653,7 @@ public class KeyguardViewMediator extends SystemUI {
         @Override
         public void run() {
             Trace.beginSection("KeyguardViewMediator.mKeyGuardGoingAwayRunnable");
+            if (DEBUG) Log.d(TAG, "keyguardGoingAway");
             try {
                 mStatusBarKeyguardViewManager.keyguardGoingAway();
 
@@ -1723,6 +1725,8 @@ public class KeyguardViewMediator extends SystemUI {
 
     private void handleStartKeyguardExitAnimation(long startTime, long fadeoutDuration) {
         Trace.beginSection("KeyguardViewMediator#handleStartKeyguardExitAnimation");
+        if (DEBUG) Log.d(TAG, "handleStartKeyguardExitAnimation startTime=" + startTime
+                + " fadeoutDuration=" + fadeoutDuration);
         synchronized (KeyguardViewMediator.this) {
 
             if (!mHiding) {
