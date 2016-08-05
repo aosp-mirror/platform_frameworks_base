@@ -146,7 +146,7 @@
         <item>kernel</item>
     </string-array>
 
-    <!-- Titles for logpersist state selection preference. [CHAR LIMIT=14] -->
+    <!-- Titles for logpersist state selection preference. [CHAR LIMIT=26] -->
     <string-array name="select_logpersist_titles">
         <item>Off</item>
         <item>All</item>
