@@ -19,11 +19,8 @@
     android:layout_height="@dimen/volume_row_height"
     android:clipChildren="false"
     android:clipToPadding="false"
-    android:id="@+id/volume_dialog_row"
-    android:paddingEnd="@dimen/volume_dialog_padding_end"
     android:orientation="vertical"
-    android:paddingBottom="@dimen/volume_row_padding_bottom"
-    android:animateLayoutChanges="true">
+    android:paddingBottom="@dimen/volume_row_padding_bottom" >
 
     <TextView
         android:id="@+id/volume_row_header"
