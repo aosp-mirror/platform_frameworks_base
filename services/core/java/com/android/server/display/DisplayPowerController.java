@@ -102,9 +102,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     // Trigger proximity if distance is less than 5 cm.
     private static final float TYPICAL_PROXIMITY_THRESHOLD = 5.0f;
 
-    // Brightness animation ramp rate in brightness units per second.
-    private static final int BRIGHTNESS_RAMP_RATE_SLOW = 40;
-
     private static final int REPORTED_TO_POLICY_SCREEN_OFF = 0;
     private static final int REPORTED_TO_POLICY_SCREEN_TURNING_ON = 1;
     private static final int REPORTED_TO_POLICY_SCREEN_ON = 2;
@@ -243,8 +240,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private boolean mAppliedDimming;
     private boolean mAppliedLowPower;
 
-    // Brightness ramp rate fast.
+    // Brightness animation ramp rates in brightness units per second
     private final int mBrightnessRampRateFast;
+    private final int mBrightnessRampRateSlow;
 
     // The controller for the automatic brightness level.
     private AutomaticBrightnessController mAutomaticBrightnessController;
@@ -307,6 +305,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
         mBrightnessRampRateFast = resources.getInteger(
                 com.android.internal.R.integer.config_brightness_ramp_rate_fast);
+        mBrightnessRampRateSlow = resources.getInteger(
+                com.android.internal.R.integer.config_brightness_ramp_rate_slow);
 
         int lightSensorRate = resources.getInteger(
                 com.android.internal.R.integer.config_autoBrightnessLightSensorRate);
@@ -691,7 +691,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         if (!mPendingScreenOff) {
             if (state == Display.STATE_ON || state == Display.STATE_DOZE) {
                 animateScreenBrightness(brightness,
-                        slowChange ? BRIGHTNESS_RAMP_RATE_SLOW : mBrightnessRampRateFast);
+                        slowChange ? mBrightnessRampRateSlow : mBrightnessRampRateFast);
             } else {
                 animateScreenBrightness(brightness, 0);
             }
