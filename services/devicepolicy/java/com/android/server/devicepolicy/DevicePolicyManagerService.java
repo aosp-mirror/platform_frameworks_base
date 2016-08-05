@@ -2093,8 +2093,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     void removeActiveAdminLocked(final ComponentName adminReceiver, final int userHandle) {
         final ActiveAdmin admin = getActiveAdminUncheckedLocked(adminReceiver, userHandle);
-        if (admin != null) {
-            getUserData(userHandle).mRemovingAdmins.add(adminReceiver);
+        DevicePolicyData policy = getUserData(userHandle);
+        if (admin != null && !policy.mRemovingAdmins.contains(adminReceiver)) {
+            policy.mRemovingAdmins.add(adminReceiver);
             sendAdminCommandLocked(admin,
                     DeviceAdminReceiver.ACTION_DEVICE_ADMIN_DISABLED,
                     new BroadcastReceiver() {
@@ -5706,7 +5707,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         synchronized (this) {
             enforceCanSetDeviceOwnerLocked(userId);
-            if (getActiveAdminUncheckedLocked(admin, userId) == null) {
+            if (getActiveAdminUncheckedLocked(admin, userId) == null
+                    || getUserData(userId).mRemovingAdmins.contains(admin)) {
                 throw new IllegalArgumentException("Not active admin: " + admin);
             }
 
@@ -5894,7 +5896,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             enforceCanSetProfileOwnerLocked(userHandle);
 
-            if (getActiveAdminUncheckedLocked(who, userHandle) == null) {
+            if (getActiveAdminUncheckedLocked(who, userHandle) == null
+                    || getUserData(userHandle).mRemovingAdmins.contains(who)) {
                 throw new IllegalArgumentException("Not active admin: " + who);
             }
 
