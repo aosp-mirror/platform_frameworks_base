@@ -35,6 +35,7 @@ Snapshot::Snapshot()
         , projectionPathMask(nullptr)
         , mClipArea(&mClipAreaRoot) {
     transform = &mTransformRoot;
+    mRelativeLightCenter.x = mRelativeLightCenter.y = mRelativeLightCenter.z = 0;
 }
 
 /**
