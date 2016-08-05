@@ -1737,6 +1737,7 @@ public class KeyguardViewMediator extends SystemUI {
                 // this to our ViewRootImpl.
                 mStatusBarKeyguardViewManager.getViewRootImpl().setReportNextDraw();
                 notifyDrawn(mDrawnCallback);
+                mDrawnCallback = null;
             }
 
             // only play "unlock" noises if not on a call (since the incall UI
@@ -1745,6 +1746,7 @@ public class KeyguardViewMediator extends SystemUI {
                 playSounds(false);
             }
 
+            mWakeAndUnlocking = false;
             setShowingLocked(false);
             mStatusBarKeyguardViewManager.hide(startTime, fadeoutDuration);
             resetKeyguardDonePendingLocked();
@@ -1871,6 +1873,7 @@ public class KeyguardViewMediator extends SystemUI {
         synchronized (this) {
             if (DEBUG) Log.d(TAG, "handleNotifyScreenTurnedOff");
             mStatusBarKeyguardViewManager.onScreenTurnedOff();
+            mDrawnCallback = null;
             mWakeAndUnlocking = false;
         }
     }

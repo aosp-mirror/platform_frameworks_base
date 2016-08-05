@@ -10393,8 +10393,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
                     final WindowState win = windows.get(winNdx);
                     final boolean isForceHiding = mPolicy.isForceHiding(win.mAttrs);
+                    final boolean keyguard = mPolicy.isKeyguardHostWindow(win.mAttrs);
                     if (win.isVisibleLw()
-                            && (win.mAppToken != null || isForceHiding)) {
+                            && (win.mAppToken != null || isForceHiding || keyguard)) {
                         win.mWinAnimator.mDrawState = DRAW_PENDING;
                         // Force add to mResizingWindows.
                         win.mLastContentInsets.set(-1, -1, -1, -1);
