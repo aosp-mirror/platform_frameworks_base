@@ -104,7 +104,7 @@ public class RecentsView extends FrameLayout {
     private boolean mLastTaskLaunchedWasFreeform;
 
     @ViewDebug.ExportedProperty(category="recents")
-    private Rect mSystemInsets = new Rect();
+    Rect mSystemInsets = new Rect();
     private int mDividerSize;
 
     private Drawable mBackgroundScrim = new ColorDrawable(
@@ -220,13 +220,6 @@ public class RecentsView extends FrameLayout {
      */
     public Drawable getBackgroundScrim() {
         return mBackgroundScrim;
-    }
-
-    /**
-     * Returns whether the nav bar is on the right.
-     */
-    public boolean isNavBarOnRight() {
-        return mSystemInsets.right > 0;
     }
 
     /**
@@ -746,9 +739,10 @@ public class RecentsView extends FrameLayout {
                         ? overrideHintAlpha
                         : viewState.hintTextAlpha;
                 Rect bounds = isDefaultDockState
-                        ? dockState.getPreDockedBounds(getMeasuredWidth(), getMeasuredHeight())
+                        ? dockState.getPreDockedBounds(getMeasuredWidth(), getMeasuredHeight(),
+                                mSystemInsets)
                         : dockState.getDockedBounds(getMeasuredWidth(), getMeasuredHeight(),
-                        mDividerSize, mSystemInsets, getResources());
+                                mDividerSize, mSystemInsets, getResources());
                 if (viewState.dockAreaOverlay.getCallback() != this) {
                     viewState.dockAreaOverlay.setCallback(this);
                     viewState.dockAreaOverlay.setBounds(bounds);
