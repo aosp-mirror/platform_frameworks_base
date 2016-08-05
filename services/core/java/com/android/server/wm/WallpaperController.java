@@ -26,7 +26,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYERS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEMENT;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -43,7 +42,6 @@ import android.os.SystemClock;
 import android.util.Slog;
 import android.view.DisplayInfo;
 import android.view.WindowManager;
-import android.view.WindowManagerPolicy;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -92,7 +90,7 @@ class WallpaperController {
     // This is useful in cases where we don't want the wallpaper to be hidden when the close app
     // is a wallpaper target and is done animating out, but the opening app isn't a wallpaper
     // target and isn't done animating in.
-    private WindowState mDeferredHideWallpaper = null;
+    WindowState mDeferredHideWallpaper = null;
 
     // We give a wallpaper up to 500ms to finish drawing before playing app transitions.
     private static final long WALLPAPER_DRAW_PENDING_TIMEOUT_DURATION = 500;
@@ -161,23 +159,8 @@ class WallpaperController {
         final int dh = displayInfo.logicalHeight;
 
         for (int curTokenNdx = mWallpaperTokens.size() - 1; curTokenNdx >= 0; curTokenNdx--) {
-            WindowToken token = mWallpaperTokens.get(curTokenNdx);
-            if (token.hidden == visible) {
-                token.hidden = !visible;
-                // Need to do a layout to ensure the wallpaper now has the
-                // correct size.
-                displayContent.layoutNeeded = true;
-            }
-
-            final WindowList windows = token.windows;
-            for (int wallpaperNdx = windows.size() - 1; wallpaperNdx >= 0; wallpaperNdx--) {
-                WindowState wallpaper = windows.get(wallpaperNdx);
-                if (visible) {
-                    updateWallpaperOffset(wallpaper, dw, dh, false);
-                }
-
-                dispatchWallpaperVisibility(wallpaper, visible);
-            }
+            final WindowToken token = mWallpaperTokens.get(curTokenNdx);
+            token.updateWallpaperVisibility(dw, dh, visible, displayContent);
         }
     }
 
@@ -203,44 +186,10 @@ class WallpaperController {
         final boolean wasDeferred = (mDeferredHideWallpaper == winGoingAway);
         for (int i = mWallpaperTokens.size() - 1; i >= 0; i--) {
             final WindowToken token = mWallpaperTokens.get(i);
-            for (int j = token.windows.size() - 1; j >= 0; j--) {
-                final WindowState wallpaper = token.windows.get(j);
-                final WindowStateAnimator winAnimator = wallpaper.mWinAnimator;
-                if (!winAnimator.mLastHidden || wasDeferred) {
-                    winAnimator.hide("hideWallpapers");
-                    dispatchWallpaperVisibility(wallpaper, false);
-                    final DisplayContent displayContent = wallpaper.getDisplayContent();
-                    if (displayContent != null) {
-                        displayContent.pendingLayoutChanges |=
-                                WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
-                    }
-                }
-            }
+            token.hideWallpaperToken(wasDeferred, "hideWallpapers");
             if (DEBUG_WALLPAPER_LIGHT && !token.hidden) Slog.d(TAG, "Hiding wallpaper " + token
                     + " from " + winGoingAway + " target=" + mWallpaperTarget + " lower="
                     + mLowerWallpaperTarget + "\n" + Debug.getCallers(5, "  "));
-            token.hidden = true;
-        }
-    }
-
-    /**
-     * Check wallpaper for visibility change and notify window if so.
-     * @param wallpaper The wallpaper to test and notify.
-     * @param visible Current visibility.
-     */
-    void dispatchWallpaperVisibility(final WindowState wallpaper, final boolean visible) {
-        // Only send notification if the visibility actually changed and we are not trying to hide
-        // the wallpaper when we are deferring hiding of the wallpaper.
-        if (wallpaper.mWallpaperVisible != visible
-                && (mDeferredHideWallpaper == null || visible)) {
-            wallpaper.mWallpaperVisible = visible;
-            try {
-                if (DEBUG_VISIBILITY || DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
-                        "Updating vis of wallpaper " + wallpaper
-                                + ": " + visible + " from:\n" + Debug.getCallers(4, "  "));
-                wallpaper.mClient.dispatchAppVisibility(visible);
-            } catch (RemoteException e) {
-            }
         }
     }
 
@@ -351,17 +300,8 @@ class WallpaperController {
                 || window == mUpperWallpaperTarget) {
             boolean doWait = sync;
             for (int curTokenNdx = mWallpaperTokens.size() - 1; curTokenNdx >= 0; curTokenNdx--) {
-                final WindowList windows = mWallpaperTokens.get(curTokenNdx).windows;
-                for (int wallpaperNdx = windows.size() - 1; wallpaperNdx >= 0; wallpaperNdx--) {
-                    WindowState wallpaper = windows.get(wallpaperNdx);
-                    try {
-                        wallpaper.mClient.dispatchWallpaperCommand(action,
-                                x, y, z, extras, sync);
-                        // We only want to be synchronous with one wallpaper.
-                        sync = false;
-                    } catch (RemoteException e) {
-                    }
-                }
+                final WindowToken token = mWallpaperTokens.get(curTokenNdx);
+                token.sendWindowWallpaperCommand(action, x, y, z, extras, sync);
             }
 
             if (doWait) {
@@ -416,19 +356,7 @@ class WallpaperController {
         }
 
         for (int curTokenNdx = mWallpaperTokens.size() - 1; curTokenNdx >= 0; curTokenNdx--) {
-            WindowList windows = mWallpaperTokens.get(curTokenNdx).windows;
-            for (int wallpaperNdx = windows.size() - 1; wallpaperNdx >= 0; wallpaperNdx--) {
-                WindowState wallpaper = windows.get(wallpaperNdx);
-                if (updateWallpaperOffset(wallpaper, dw, dh, sync)) {
-                    WindowStateAnimator winAnimator = wallpaper.mWinAnimator;
-                    winAnimator.computeShownFrameLocked();
-                    // No need to lay out the windows - we can just set the wallpaper position
-                    // directly.
-                    winAnimator.setWallpaperOffset(wallpaper.mShownPosition);
-                    // We only want to be synchronous with one wallpaper.
-                    sync = false;
-                }
-            }
+            mWallpaperTokens.get(curTokenNdx).updateWallpaperOffset(dw, dh, sync);
         }
     }
 
@@ -464,13 +392,7 @@ class WallpaperController {
         if (DEBUG_LAYERS || DEBUG_WALLPAPER) Slog.v(TAG, "Setting wallpaper layer adj to " + adj);
         mWallpaperAnimLayerAdjustment = adj;
         for (int i = mWallpaperTokens.size() - 1; i >= 0; i--) {
-            WindowList windows = mWallpaperTokens.get(i).windows;
-            for (int j = windows.size() - 1; j >= 0; j--) {
-                WindowState wallpaper = windows.get(j);
-                wallpaper.mWinAnimator.mAnimLayer = wallpaper.mLayer + adj;
-                if (DEBUG_LAYERS || DEBUG_WALLPAPER) Slog.v(TAG, "setWallpaper win "
-                        + wallpaper + " anim layer: " + wallpaper.mWinAnimator.mAnimLayer);
-            }
+            mWallpaperTokens.get(i).adjustAnimLayer(adj);
         }
     }
 
@@ -695,76 +617,12 @@ class WallpaperController {
         final int dw = displayInfo.logicalWidth;
         final int dh = displayInfo.logicalHeight;
 
-        // Start stepping backwards from here, ensuring that our wallpaper windows
-        // are correctly placed.
+        // Start stepping backwards from here, ensuring that our wallpaper windows are correctly placed.
         boolean changed = false;
         for (int curTokenNdx = mWallpaperTokens.size() - 1; curTokenNdx >= 0; curTokenNdx--) {
-            WindowToken token = mWallpaperTokens.get(curTokenNdx);
-            if (token.hidden == visible) {
-                if (DEBUG_WALLPAPER_LIGHT) Slog.d(TAG,
-                        "Wallpaper token " + token + " hidden=" + !visible);
-                token.hidden = !visible;
-                // Need to do a layout to ensure the wallpaper now has the correct size.
-                mService.getDefaultDisplayContentLocked().layoutNeeded = true;
-            }
-
-            final WindowList tokenWindows = token.windows;
-            for (int wallpaperNdx = tokenWindows.size() - 1; wallpaperNdx >= 0; wallpaperNdx--) {
-                WindowState wallpaper = tokenWindows.get(wallpaperNdx);
-
-                if (visible) {
-                    updateWallpaperOffset(wallpaper, dw, dh, false);
-                }
-
-                // First, make sure the client has the current visibility state.
-                dispatchWallpaperVisibility(wallpaper, visible);
-
-                wallpaper.mWinAnimator.mAnimLayer =
-                        wallpaper.mLayer + mWallpaperAnimLayerAdjustment;
-                if (DEBUG_LAYERS || DEBUG_WALLPAPER_LIGHT) Slog.v(TAG, "adjustWallpaper win "
-                        + wallpaper + " anim layer: " + wallpaper.mWinAnimator.mAnimLayer);
-
-                // First, if this window is at the current index, then all is well.
-                if (wallpaper == wallpaperTarget) {
-                    wallpaperTargetIndex--;
-                    wallpaperTarget = wallpaperTargetIndex > 0
-                            ? windows.get(wallpaperTargetIndex - 1) : null;
-                    continue;
-                }
-
-                // The window didn't match...  the current wallpaper window,
-                // wherever it is, is in the wrong place, so make sure it is not in the list.
-                int oldIndex = windows.indexOf(wallpaper);
-                if (oldIndex >= 0) {
-                    if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG,
-                            "Wallpaper removing at " + oldIndex + ": " + wallpaper);
-                    windows.remove(oldIndex);
-                    mService.mWindowsChanged = true;
-                    if (oldIndex < wallpaperTargetIndex) {
-                        wallpaperTargetIndex--;
-                    }
-                }
-
-                // Now stick it in. For apps over wallpaper keep the wallpaper at the bottommost
-                // layer. For keyguard over wallpaper put the wallpaper under the keyguard.
-                int insertionIndex = 0;
-                if (visible && wallpaperTarget != null) {
-                    final int type = wallpaperTarget.mAttrs.type;
-                    final int privateFlags = wallpaperTarget.mAttrs.privateFlags;
-                    if ((privateFlags & PRIVATE_FLAG_KEYGUARD) != 0
-                            || type == TYPE_KEYGUARD_SCRIM) {
-                        insertionIndex = windows.indexOf(wallpaperTarget);
-                    }
-                }
-                if (DEBUG_WALLPAPER_LIGHT || DEBUG_WINDOW_MOVEMENT
-                        || (DEBUG_ADD_REMOVE && oldIndex != insertionIndex)) Slog.v(TAG,
-                        "Moving wallpaper " + wallpaper
-                        + " from " + oldIndex + " to " + insertionIndex);
-
-                windows.add(insertionIndex, wallpaper);
-                mService.mWindowsChanged = true;
-                changed = true;
-            }
+            final WindowToken token = mWallpaperTokens.get(curTokenNdx);
+            changed |= token.updateWallpaperWindowsPlacement(windows, wallpaperTarget,
+                    wallpaperTargetIndex, visible, dw, dh, mWallpaperAnimLayerAdjustment);
         }
 
         return changed;
@@ -836,28 +694,24 @@ class WallpaperController {
         boolean wallpaperReady = true;
         for (int curTokenIndex = mWallpaperTokens.size() - 1;
                 curTokenIndex >= 0 && wallpaperReady; curTokenIndex--) {
-            WindowToken token = mWallpaperTokens.get(curTokenIndex);
-            for (int curWallpaperIndex = token.windows.size() - 1; curWallpaperIndex >= 0;
-                    curWallpaperIndex--) {
-                WindowState wallpaper = token.windows.get(curWallpaperIndex);
-                if (wallpaper.mWallpaperVisible && !wallpaper.isDrawnLw()) {
-                    // We've told this wallpaper to be visible, but it is not drawn yet
-                    wallpaperReady = false;
-                    if (mWallpaperDrawState != WALLPAPER_DRAW_TIMEOUT) {
-                        // wait for this wallpaper until it is drawn or timeout
-                        transitionReady = false;
-                    }
-                    if (mWallpaperDrawState == WALLPAPER_DRAW_NORMAL) {
-                        mWallpaperDrawState = WALLPAPER_DRAW_PENDING;
-                        mService.mH.removeMessages(WALLPAPER_DRAW_PENDING_TIMEOUT);
-                        mService.mH.sendEmptyMessageDelayed(WALLPAPER_DRAW_PENDING_TIMEOUT,
-                                WALLPAPER_DRAW_PENDING_TIMEOUT_DURATION);
-                    }
-                    if (DEBUG_APP_TRANSITIONS || DEBUG_WALLPAPER) Slog.v(TAG,
-                            "Wallpaper should be visible but has not been drawn yet. " +
-                                    "mWallpaperDrawState=" + mWallpaperDrawState);
-                    break;
+            final WindowToken token = mWallpaperTokens.get(curTokenIndex);
+            if (token.hasVisibleNotDrawnWallpaper()) {
+                // We've told this wallpaper to be visible, but it is not drawn yet
+                wallpaperReady = false;
+                if (mWallpaperDrawState != WALLPAPER_DRAW_TIMEOUT) {
+                    // wait for this wallpaper until it is drawn or timeout
+                    transitionReady = false;
                 }
+                if (mWallpaperDrawState == WALLPAPER_DRAW_NORMAL) {
+                    mWallpaperDrawState = WALLPAPER_DRAW_PENDING;
+                    mService.mH.removeMessages(WALLPAPER_DRAW_PENDING_TIMEOUT);
+                    mService.mH.sendEmptyMessageDelayed(WALLPAPER_DRAW_PENDING_TIMEOUT,
+                            WALLPAPER_DRAW_PENDING_TIMEOUT_DURATION);
+                }
+                if (DEBUG_APP_TRANSITIONS || DEBUG_WALLPAPER) Slog.v(TAG,
+                        "Wallpaper should be visible but has not been drawn yet. " +
+                                "mWallpaperDrawState=" + mWallpaperDrawState);
+                break;
             }
         }
         if (wallpaperReady) {

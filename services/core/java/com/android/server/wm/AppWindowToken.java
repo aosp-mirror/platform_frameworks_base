@@ -501,7 +501,7 @@ class AppWindowToken extends WindowToken {
                 w.clearAnimatingWithSavedSurface();
                 w.mDestroying = true;
                 w.mWinAnimator.hide("stopUsingSavedSurfaceLocked");
-                w.mWinAnimator.mWallpaperControllerLocked.hideWallpapers(w);
+                service.mWallpaperControllerLocked.hideWallpapers(w);
             }
         }
         destroySurfaces();

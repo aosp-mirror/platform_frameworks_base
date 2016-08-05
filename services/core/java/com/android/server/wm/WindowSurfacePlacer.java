@@ -1333,13 +1333,7 @@ class WindowSurfacePlacer {
             mService.mAnimator.mAppWindowAnimating |= appAnimator.isAnimating();
 
             if (animLp != null) {
-                int layer = -1;
-                for (int j = 0; j < wtoken.windows.size(); j++) {
-                    WindowState win = wtoken.windows.get(j);
-                    if (win.mWinAnimator.mAnimLayer > layer) {
-                        layer = win.mWinAnimator.mAnimLayer;
-                    }
-                }
+                int layer = wtoken.getHighestAnimLayer();
                 if (layerAndToken.token == null || layer > layerAndToken.layer) {
                     layerAndToken.token = wtoken;
                     layerAndToken.layer = layer;

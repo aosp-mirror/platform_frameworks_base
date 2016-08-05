@@ -190,7 +190,6 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WI
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
-import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
@@ -1081,364 +1080,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private void placeWindowAfter(WindowState pos, WindowState window) {
-        final WindowList windows = pos.getWindowList();
-        final int i = windows.indexOf(pos);
-        if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(
-            TAG_WM, "Adding window " + window + " at "
-            + (i+1) + " of " + windows.size() + " (after " + pos + ")");
-        windows.add(i+1, window);
-        mWindowsChanged = true;
-    }
-
-    private void placeWindowBefore(WindowState pos, WindowState window) {
-        final WindowList windows = pos.getWindowList();
-        int i = windows.indexOf(pos);
-        if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(
-            TAG_WM, "Adding window " + window + " at "
-            + i + " of " + windows.size() + " (before " + pos + ")");
-        if (i < 0) {
-            Slog.w(TAG_WM, "placeWindowBefore: Unable to find " + pos + " in " + windows);
-            i = 0;
-        }
-        windows.add(i, window);
-        mWindowsChanged = true;
-    }
-
-    //This method finds out the index of a window that has the same app token as
-    //win. used for z ordering the windows in mWindows
-    private int findIdxBasedOnAppTokens(WindowState win) {
-        WindowList windows = win.getWindowList();
-        for(int j = windows.size() - 1; j >= 0; j--) {
-            WindowState wentry = windows.get(j);
-            if(wentry.mAppToken == win.mAppToken) {
-                return j;
-            }
-        }
-        return -1;
-    }
-
-    /**
-     * Return the list of Windows from the passed token on the given Display.
-     * @param token The token with all the windows.
-     * @param displayContent The display we are interested in.
-     * @return List of windows from token that are on displayContent.
-     */
-    private WindowList getTokenWindowsOnDisplay(WindowToken token, DisplayContent displayContent) {
-        final WindowList windowList = new WindowList();
-        final int count = token.windows.size();
-        for (int i = 0; i < count; i++) {
-            final WindowState win = token.windows.get(i);
-            if (win.getDisplayContent() == displayContent) {
-                windowList.add(win);
-            }
-        }
-        return windowList;
-    }
-
-    /**
-     * Recursive search through a WindowList and all of its windows' children.
-     * @param targetWin The window to search for.
-     * @param windows The list to search.
-     * @return The index of win in windows or of the window that is an ancestor of win.
-     */
-    private int indexOfWinInWindowList(WindowState targetWin, WindowList windows) {
-        for (int i = windows.size() - 1; i >= 0; i--) {
-            final WindowState w = windows.get(i);
-            if (w == targetWin || w.hasChild(targetWin)) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    private int addAppWindowToListLocked(final WindowState win) {
-        final DisplayContent displayContent = win.getDisplayContent();
-        if (displayContent == null) {
-            // It doesn't matter this display is going away.
-            return 0;
-        }
-        final IWindow client = win.mClient;
-        final WindowToken token = win.mToken;
-
-        final WindowList windows = displayContent.getWindowList();
-        WindowList tokenWindowList = getTokenWindowsOnDisplay(token, displayContent);
-        int tokenWindowsPos = 0;
-        if (!tokenWindowList.isEmpty()) {
-            return addAppWindowToTokenListLocked(win, token, windows, tokenWindowList);
-        }
-
-        // No windows from this token on this display
-        if (localLOGV) Slog.v(TAG_WM, "Figuring out where to add app window " + client.asBinder()
-                + " (token=" + token + ")");
-        // Figure out where the window should go, based on the
-        // order of applications.
-        WindowState pos = null;
-
-        final ArrayList<Task> tasks = displayContent.getTasks();
-        int taskNdx;
-        int tokenNdx = -1;
-        for (taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
-            AppTokenList tokens = tasks.get(taskNdx).mAppTokens;
-            for (tokenNdx = tokens.size() - 1; tokenNdx >= 0; --tokenNdx) {
-                final AppWindowToken t = tokens.get(tokenNdx);
-                if (t == token) {
-                    --tokenNdx;
-                    if (tokenNdx < 0) {
-                        --taskNdx;
-                        if (taskNdx >= 0) {
-                            tokenNdx = tasks.get(taskNdx).mAppTokens.size() - 1;
-                        }
-                    }
-                    break;
-                }
-
-                // We haven't reached the token yet; if this token
-                // is not going to the bottom and has windows on this display, we can
-                // use it as an anchor for when we do reach the token.
-                tokenWindowList = getTokenWindowsOnDisplay(t, displayContent);
-                if (!t.sendingToBottom && tokenWindowList.size() > 0) {
-                    pos = tokenWindowList.get(0);
-                }
-            }
-            if (tokenNdx >= 0) {
-                // early exit
-                break;
-            }
-        }
-
-        // We now know the index into the apps.  If we found
-        // an app window above, that gives us the position; else
-        // we need to look some more.
-        if (pos != null) {
-            // Move behind any windows attached to this one.
-            WindowToken atoken = mTokenMap.get(pos.mClient.asBinder());
-            if (atoken != null) {
-                tokenWindowList =
-                        getTokenWindowsOnDisplay(atoken, displayContent);
-                final int NC = tokenWindowList.size();
-                if (NC > 0) {
-                    WindowState bottom = tokenWindowList.get(0);
-                    if (bottom.mSubLayer < 0) {
-                        pos = bottom;
-                    }
-                }
-            }
-            placeWindowBefore(pos, win);
-            return tokenWindowsPos;
-        }
-
-        // Continue looking down until we find the first
-        // token that has windows on this display.
-        for ( ; taskNdx >= 0; --taskNdx) {
-            AppTokenList tokens = tasks.get(taskNdx).mAppTokens;
-            for ( ; tokenNdx >= 0; --tokenNdx) {
-                final AppWindowToken t = tokens.get(tokenNdx);
-                tokenWindowList = getTokenWindowsOnDisplay(t, displayContent);
-                final int NW = tokenWindowList.size();
-                if (NW > 0) {
-                    pos = tokenWindowList.get(NW-1);
-                    break;
-                }
-            }
-            if (tokenNdx >= 0) {
-                // found
-                break;
-            }
-        }
-
-        if (pos != null) {
-            // Move in front of any windows attached to this
-            // one.
-            WindowToken atoken = mTokenMap.get(pos.mClient.asBinder());
-            if (atoken != null) {
-                final int NC = atoken.windows.size();
-                if (NC > 0) {
-                    WindowState top = atoken.windows.get(NC-1);
-                    if (top.mSubLayer >= 0) {
-                        pos = top;
-                    }
-                }
-            }
-            placeWindowAfter(pos, win);
-            return tokenWindowsPos;
-        }
-
-        // Just search for the start of this layer.
-        final int myLayer = win.mBaseLayer;
-        int i;
-        for (i = windows.size() - 1; i >= 0; --i) {
-            WindowState w = windows.get(i);
-            // Dock divider shares the base layer with application windows, but we want to always
-            // keep it above the application windows. The sharing of the base layer is intended
-            // for window animations, which need to be above the dock divider for the duration
-            // of the animation.
-            if (w.mBaseLayer <= myLayer && w.mAttrs.type != TYPE_DOCK_DIVIDER) {
-                break;
-            }
-        }
-        if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
-                "Based on layer: Adding window " + win + " at " + (i + 1) + " of "
-                        + windows.size());
-        windows.add(i + 1, win);
-        mWindowsChanged = true;
-        return tokenWindowsPos;
-    }
-
-    private int addAppWindowToTokenListLocked(WindowState win, WindowToken token,
-            WindowList windows, WindowList tokenWindowList) {
-        int tokenWindowsPos;
-        // If this application has existing windows, we
-        // simply place the new window on top of them... but
-        // keep the starting window on top.
-        if (win.mAttrs.type == TYPE_BASE_APPLICATION) {
-            // Base windows go behind everything else.
-            WindowState lowestWindow = tokenWindowList.get(0);
-            placeWindowBefore(lowestWindow, win);
-            tokenWindowsPos = indexOfWinInWindowList(lowestWindow, token.windows);
-        } else {
-            AppWindowToken atoken = win.mAppToken;
-            final int windowListPos = tokenWindowList.size();
-            WindowState lastWindow = tokenWindowList.get(windowListPos - 1);
-            if (atoken != null && lastWindow == atoken.startingWindow) {
-                placeWindowBefore(lastWindow, win);
-                tokenWindowsPos = indexOfWinInWindowList(lastWindow, token.windows);
-            } else {
-                int newIdx = findIdxBasedOnAppTokens(win);
-                //there is a window above this one associated with the same
-                //apptoken note that the window could be a floating window
-                //that was created later or a window at the top of the list of
-                //windows associated with this token.
-                if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
-                        "not Base app: Adding window " + win + " at " + (newIdx + 1) + " of "
-                                + windows.size());
-                windows.add(newIdx + 1, win);
-                if (newIdx < 0) {
-                    // No window from token found on win's display.
-                    tokenWindowsPos = 0;
-                } else {
-                    tokenWindowsPos = indexOfWinInWindowList(
-                            windows.get(newIdx), token.windows) + 1;
-                }
-                mWindowsChanged = true;
-            }
-        }
-        return tokenWindowsPos;
-    }
-
-    private void addFreeWindowToListLocked(final WindowState win) {
-        final WindowList windows = win.getWindowList();
-
-        // Figure out where window should go, based on layer.
-        final int myLayer = win.mBaseLayer;
-        int i;
-        for (i = windows.size() - 1; i >= 0; i--) {
-            final WindowState otherWin = windows.get(i);
-            if (otherWin.getBaseType() != TYPE_WALLPAPER && otherWin.mBaseLayer <= myLayer) {
-                // Wallpaper wanders through the window list, for example to position itself
-                // directly behind keyguard. Because of this it will break the ordering based on
-                // WindowState.mBaseLayer. There might windows with higher mBaseLayer behind it and
-                // we don't want the new window to appear above them. An example of this is adding
-                // of the docked stack divider. Consider a scenario with the following ordering (top
-                // to bottom): keyguard, wallpaper, assist preview, apps. We want the dock divider
-                // to land below the assist preview, so the dock divider must ignore the wallpaper,
-                // with which it shares the base layer.
-                break;
-            }
-        }
-        i++;
-        if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
-                "Free window: Adding window " + win + " at " + i + " of " + windows.size());
-        windows.add(i, win);
-        mWindowsChanged = true;
-    }
-
-    private void addChildWindowToListLocked(final WindowState win, boolean addToToken) {
-        final WindowToken token = win.mToken;
-        final DisplayContent displayContent = win.getDisplayContent();
-        if (displayContent == null) {
-            return;
-        }
-        final WindowState parentWindow = win.getParentWindow();
-
-        WindowList tokenWindowList = getTokenWindowsOnDisplay(token, displayContent);
-
-        // Figure out this window's ordering relative to the parent window.
-        final int NA = tokenWindowList.size();
-        final int sublayer = win.mSubLayer;
-        int largestSublayer = Integer.MIN_VALUE;
-        WindowState windowWithLargestSublayer = null;
-        int i;
-        for (i = 0; i < NA; i++) {
-            WindowState w = tokenWindowList.get(i);
-            final int wSublayer = w.mSubLayer;
-            if (wSublayer >= largestSublayer) {
-                largestSublayer = wSublayer;
-                windowWithLargestSublayer = w;
-            }
-            if (sublayer < 0) {
-                // For negative sublayers, we go below all windows in the same sublayer.
-                if (wSublayer >= sublayer) {
-                    if (addToToken) {
-                        if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "Adding " + win + " to " + token);
-                        token.windows.add(i, win);
-                    }
-                    placeWindowBefore(wSublayer >= 0 ? parentWindow : w, win);
-                    break;
-                }
-            } else {
-                // For positive sublayers, we go above all windows in the same sublayer.
-                if (wSublayer > sublayer) {
-                    if (addToToken) {
-                        if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "Adding " + win + " to " + token);
-                        token.windows.add(i, win);
-                    }
-                    placeWindowBefore(w, win);
-                    break;
-                }
-            }
-        }
-        if (i >= NA) {
-            if (addToToken) {
-                if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "Adding " + win + " to " + token);
-                token.windows.add(win);
-            }
-            if (sublayer < 0) {
-                placeWindowBefore(parentWindow, win);
-            } else {
-                placeWindowAfter(
-                        largestSublayer >= 0 ? windowWithLargestSublayer : parentWindow, win);
-            }
-        }
-    }
-
-    private void addWindowToListInOrderLocked(final WindowState win, boolean addToToken) {
-        if (DEBUG_FOCUS) Slog.d(TAG_WM, "addWindowToListInOrderLocked: win=" + win +
-                " Callers=" + Debug.getCallers(4));
-        if (!win.isChildWindow()) {
-            final WindowToken token = win.mToken;
-            int tokenWindowsPos = 0;
-            if (token.appWindowToken != null) {
-                tokenWindowsPos = addAppWindowToListLocked(win);
-            } else {
-                addFreeWindowToListLocked(win);
-            }
-            if (addToToken) {
-                if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "Adding " + win + " to " + token);
-                token.windows.add(tokenWindowsPos, win);
-            }
-        } else {
-            addChildWindowToListLocked(win, addToToken);
-        }
-
-        final AppWindowToken appToken = win.mAppToken;
-        if (appToken != null) {
-            if (addToToken) {
-                appToken.addWindow(win);
-            }
-        }
-    }
-
     static boolean canBeImeTarget(WindowState w) {
         final int fl = w.mAttrs.flags
                 & (FLAG_NOT_FOCUSABLE|FLAG_ALT_FOCUSABLE_IM);
@@ -1629,15 +1270,14 @@ public class WindowManagerService extends IWindowManager.Stub
             moveInputMethodDialogsLocked(pos + 1);
             return;
         }
-        addWindowToListInOrderLocked(win, true);
+        win.mToken.addWindowToList(win);
         moveInputMethodDialogsLocked(pos);
     }
 
     private void reAddWindowToListInOrderLocked(WindowState win) {
-        addWindowToListInOrderLocked(win, false);
-        // This is a hack to get all of the child windows added as well
-        // at the right position.  Child windows should be rare and
-        // this case should be rare, so it shouldn't be that big a deal.
+        win.mToken.addWindowToList(win);
+        // This is a hack to get all of the child windows added as well at the right position. Child
+        // windows should be rare and this case should be rare, so it shouldn't be that big a deal.
         WindowList windows = win.getWindowList();
         int wpos = windows.indexOf(win);
         if (wpos >= 0) {
@@ -2039,11 +1679,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 imMayMove = false;
             } else if (type == TYPE_INPUT_METHOD_DIALOG) {
                 mInputMethodDialogs.add(win);
-                addWindowToListInOrderLocked(win, true);
+                win.mToken.addWindowToList(win);
                 moveInputMethodDialogsLocked(findDesiredInputMethodWindowIndexLocked(true));
                 imMayMove = false;
             } else {
-                addWindowToListInOrderLocked(win, true);
+                win.mToken.addWindowToList(win);
                 if (type == TYPE_WALLPAPER) {
                     mWallpaperControllerLocked.clearLastWallpaperTimeoutTime();
                     displayContent.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
@@ -2155,14 +1795,7 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     private boolean prepareWindowReplacementTransition(AppWindowToken atoken) {
         atoken.clearAllDrawn();
-        WindowState replacedWindow = null;
-        for (int i = atoken.windows.size() - 1; i >= 0 && replacedWindow == null; i--) {
-            WindowState candidate = atoken.windows.get(i);
-            if (candidate.mAnimatingExit && candidate.mWillReplaceWindow
-                    && candidate.mAnimateReplacingWindow) {
-                replacedWindow = candidate;
-            }
-        }
+        final WindowState replacedWindow = atoken.getReplacingWindow();
         if (replacedWindow == null) {
             // We expect to already receive a request to remove the old window. If it did not
             // happen, let's just simply add a window.
@@ -2429,14 +2062,11 @@ public class WindowManagerService extends IWindowManager.Stub
         final WindowToken token = win.mToken;
         final AppWindowToken atoken = win.mAppToken;
         if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "Removing " + win + " from " + token);
-        token.windows.remove(win);
+        token.removeWindow(win);
         if (atoken != null) {
             atoken.allAppWindows.remove(win);
         }
-        if (localLOGV) Slog.v(
-                TAG_WM, "**** Removing window " + win + ": count="
-                + token.windows.size());
-        if (token.windows.size() == 0) {
+        if (token.isEmpty()) {
             if (!token.explicit) {
                 mTokenMap.remove(token.token);
             } else if (atoken != null) {
@@ -3296,51 +2926,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
         final long origId = Binder.clearCallingIdentity();
         synchronized(mWindowMap) {
-            DisplayContent displayContent = null;
-            WindowToken wtoken = mTokenMap.remove(token);
+            final WindowToken wtoken = mTokenMap.remove(token);
             if (wtoken != null) {
-                boolean delayed = false;
-                if (!wtoken.hidden) {
-                    final int N = wtoken.windows.size();
-                    boolean changed = false;
-
-                    for (int i=0; i<N; i++) {
-                        WindowState win = wtoken.windows.get(i);
-                        displayContent = win.getDisplayContent();
-
-                        if (win.mWinAnimator.isAnimationSet()) {
-                            delayed = true;
-                        }
-
-                        if (win.isVisibleNow()) {
-                            win.mWinAnimator.applyAnimationLocked(WindowManagerPolicy.TRANSIT_EXIT,
-                                    false);
-                            //TODO (multidisplay): Magnification is supported only for the default
-                            if (mAccessibilityController != null && win.isDefaultDisplay()) {
-                                mAccessibilityController.onWindowTransitionLocked(win,
-                                        WindowManagerPolicy.TRANSIT_EXIT);
-                            }
-                            changed = true;
-                            if (displayContent != null) {
-                                displayContent.layoutNeeded = true;
-                            }
-                        }
-                    }
-
-                    wtoken.hidden = true;
-
-                    if (changed) {
-                        mWindowPlacerLocked.performSurfacePlacement();
-                        updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL,
-                                false /*updateInputWindows*/);
-                    }
-
-                    if (delayed && displayContent != null) {
-                        displayContent.mExitingTokens.add(wtoken);
-                    } else if (wtoken.windowType == TYPE_WALLPAPER) {
-                        mWallpaperControllerLocked.removeWallpaperToken(wtoken);
-                    }
-                } else if (wtoken.windowType == TYPE_WALLPAPER) {
+                wtoken.setExiting();
+                if (wtoken.windowType == TYPE_WALLPAPER) {
                     mWallpaperControllerLocked.removeWallpaperToken(wtoken);
                 }
 
@@ -4152,15 +3741,13 @@ public class WindowManagerService extends IWindowManager.Stub
             mWindowsChanged = true;
             if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
                     "Removing starting " + startingWindow + " from " + ttoken);
-            ttoken.windows.remove(startingWindow);
+            ttoken.removeWindow(startingWindow);
             ttoken.allAppWindows.remove(startingWindow);
-            addWindowToListInOrderLocked(startingWindow, true);
+            wtoken.addWindowToList(startingWindow);
 
-            // Propagate other interesting state between the
-            // tokens.  If the old token is displayed, we should
-            // immediately force the new one to be displayed.  If
-            // it is animating, we need to move that animation to
-            // the new one.
+            // Propagate other interesting state between the tokens. If the old token is displayed,
+            // we should immediately force the new one to be displayed. If it is animating, we need
+            // to move that animation to the new one.
             if (ttoken.allDrawn) {
                 wtoken.allDrawn = true;
                 wtoken.deferClearAllDrawn = ttoken.deferClearAllDrawn;
@@ -4799,21 +4386,6 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
     }
-
-    private final int reAddAppWindowsLocked(final DisplayContent displayContent, int index,
-                                            WindowToken token) {
-        final int NW = token.windows.size();
-        for (int i=0; i<NW; i++) {
-            final WindowState win = token.windows.get(i);
-            final DisplayContent winDisplayContent = win.getDisplayContent();
-            if (winDisplayContent == displayContent || winDisplayContent == null) {
-                win.mDisplayContent = displayContent;
-                index = win.reAddWindowLocked(index);
-            }
-        }
-        return index;
-    }
-
 
     void moveStackWindowsLocked(DisplayContent displayContent) {
         final WindowList windows = displayContent.getWindowList();
@@ -8697,17 +8269,15 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (imFocus != null) {
                     // This may be a starting window, in which case we still want
                     // to count it as okay.
-                    if (imFocus.mAttrs.type == LayoutParams.TYPE_APPLICATION_STARTING
+                    if (imFocus.mAttrs.type == TYPE_APPLICATION_STARTING
                             && imFocus.mAppToken != null) {
                         // The client has definitely started, so it really should
                         // have a window in this app token.  Let's look for it.
-                        for (int i=0; i<imFocus.mAppToken.windows.size(); i++) {
-                            WindowState w = imFocus.mAppToken.windows.get(i);
-                            if (w != imFocus) {
-                                Log.i(TAG_WM, "Switching to real app window: " + w);
-                                imFocus = w;
-                                break;
-                            }
+                        final WindowState w = imFocus.mAppToken.getFirstWindow(imFocus);
+                        if (w != null) {
+                            if (DEBUG_INPUT_METHOD) Slog.i(TAG_WM,
+                                    "Switching to real app window: " + w);
+                            imFocus = w;
                         }
                     }
                     if (DEBUG_INPUT_METHOD) {
@@ -9179,7 +8749,7 @@ public class WindowManagerService extends IWindowManager.Stub
             AppTokenList exitingAppTokens = stacks.get(stackNdx).mExitingAppTokens;
             int NT = exitingAppTokens.size();
             for (int j = 0; j < NT; j++) {
-                i = reAddAppWindowsLocked(displayContent, i, exitingAppTokens.get(j));
+                i = exitingAppTokens.get(j).reAddAppWindows(displayContent, i);
             }
         }
 
@@ -9195,7 +8765,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (wtoken.mIsExiting && !wtoken.waitingForReplacement()) {
                         continue;
                     }
-                    i = reAddAppWindowsLocked(displayContent, i, wtoken);
+                    i = wtoken.reAddAppWindows(displayContent, i);
                 }
             }
         }
