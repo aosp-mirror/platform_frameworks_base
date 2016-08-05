@@ -87,7 +87,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
             WindowState windowState = (WindowState) inputWindowHandle.windowState;
             if (windowState != null) {
                 Slog.i(TAG_WM, "WINDOW DIED " + windowState);
-                mService.removeWindowLocked(windowState);
+                windowState.removeIfPossible();
             }
         }
     }

@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import android.annotation.CallSuper;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.IBinder;
@@ -95,10 +96,16 @@ class WindowToken {
     }
 
     void removeAllWindows() {
-        for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
+        for (int winNdx = windows.size() - 1; winNdx >= 0;
+                // WindowState#removeIfPossible() at bottom of loop may remove multiple entries from
+                // allAppWindows if the window to be removed has child windows. It also may not
+                // remove any windows from allAppWindows at all if win is exiting and currently
+                // animating away. This ensures that winNdx is monotonically decreasing and never
+                // beyond allAppWindows bounds.
+                winNdx = Math.min(winNdx - 1, windows.size() - 1)) {
             WindowState win = windows.get(winNdx);
             if (DEBUG_WINDOW_MOVEMENT) Slog.w(TAG_WM, "removeAllWindows: removing win=" + win);
-            win.mService.removeWindowLocked(win);
+            win.removeIfPossible();
         }
         windows.clear();
     }
@@ -156,6 +163,9 @@ class WindowToken {
                     "adjustAnimLayer win " + w + " anim layer: " + animLayer);
             if (animLayer > highestAnimLayer) {
                 highestAnimLayer = animLayer;
+            }
+            if (w == mService.mInputMethodTarget && !mService.mInputMethodTargetWaitingAnim) {
+                mService.mLayersController.setInputMethodAnimLayerAdjustment(adj);
             }
         }
         return highestAnimLayer;
@@ -258,8 +268,7 @@ class WindowToken {
         }
     }
 
-    // TODO: Rename to addWindow when conflict with AppWindowToken is resolved. The call below.
-    void addWindowToList(final WindowState win) {
+    void addWindow(final WindowState win) {
         if (DEBUG_FOCUS) Slog.d(TAG_WM, "addWindow: win=" + win + " Callers=" + Debug.getCallers(5));
 
         if (!win.isChildWindow()) {
@@ -275,11 +284,6 @@ class WindowToken {
             }
         } else {
             addChildWindow(win);
-        }
-
-        final AppWindowToken appToken = win.mAppToken;
-        if (appToken != null) {
-            appToken.addWindow(win);
         }
     }
 
@@ -452,7 +456,7 @@ class WindowToken {
         for (int i = 0; i < count; i++) {
             final WindowState win = windows.get(i);
             if (win.isChildWindow()) {
-                // The WindowState.reAddWindowLocked below already takes care of re-adding the
+                // The WindowState.reAddWindow below already takes care of re-adding the
                 // child windows for any parent window in this token. This is a side effect of
                 // ensuring child windows are in the same WindowToken as their parent window.
                 //
@@ -464,7 +468,7 @@ class WindowToken {
             final DisplayContent winDisplayContent = win.getDisplayContent();
             if (winDisplayContent == displayContent || winDisplayContent == null) {
                 win.mDisplayContent = displayContent;
-                index = win.reAddWindowLocked(index);
+                index = win.reAddWindow(index);
             }
         }
         return index;
@@ -496,6 +500,7 @@ class WindowToken {
         return null;
     }
 
+    @CallSuper
     void removeWindow(WindowState win) {
         windows.remove(win);
     }
