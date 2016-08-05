@@ -442,7 +442,7 @@
     <string name="dev_logpersist_clear_warning_title">Clear logger persistent storage?</string>
     <!-- Warning text to user about the implications of enabling USB debugging -->
     <string name="dev_logpersist_clear_warning_message">When we no longer are monitoring with the persistent logger, we are required to erase the logger data resident on your device.</string>
-    <!-- Title of checkbox setting to perform package verification on apps installed over USB/ADT/ADB [CHAR LIMIT=32] -->
+    <!-- Title of setting: title for selection of logs to store persistently [CHAR LIMIT=60] -->
     <string name="select_logpersist_title">Store logger data persistently on device</string>
     <!-- UI debug setting: select which logs to store persistently [CHAR LIMIT=80] -->
     <string name="select_logpersist_dialog_title">Select log buffers to store persistently on device</string>
