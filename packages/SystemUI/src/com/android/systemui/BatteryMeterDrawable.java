@@ -473,6 +473,11 @@ public class BatteryMeterDrawable extends Drawable implements
     }
 
     private void loadBatteryDrawables(Resources res, int style) {
+        try {
+            checkBatteryMeterDrawableValid(res, style);
+        } catch (BatteryMeterDrawableException e) {
+            Log.w(TAG, "Invalid themed battery meter drawable, falling back to system", e);
+        }
         final int drawableResId = getBatteryDrawableResourceForStyle(style);
         mBatteryDrawable = (LayerDrawable) res.getDrawable(drawableResId);
         mFrameDrawable = mBatteryDrawable.findDrawableByLayerId(R.id.battery_frame);
