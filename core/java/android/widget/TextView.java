@@ -1677,12 +1677,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Return the text the TextView is displaying. If setText() was called with
-     * an argument of BufferType.SPANNABLE or BufferType.EDITABLE, you can cast
+     * Return the text that TextView is displaying. If {@link #setText(CharSequence)} was called
+     * with an argument of {@link android.widget.TextView.BufferType#SPANNABLE BufferType.SPANNABLE}
+     * or {@link android.widget.TextView.BufferType#EDITABLE BufferType.EDITABLE}, you can cast
      * the return value from this method to Spannable or Editable, respectively.
-     *
-     * Note: The content of the return value should not be modified. If you want
-     * a modifiable one, you should make your own copy first.
+     * <p/>
+     * The content of the return value should not be modified. If you want a modifiable one, you
+     * should make your own copy first.
      *
      * @attr ref android.R.styleable#TextView_text
      */
@@ -1699,8 +1700,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Return the text the TextView is displaying as an Editable object.  If
-     * the text is not editable, null is returned.
+     * Return the text that TextView is displaying as an Editable object. If the text is not
+     * editable, null is returned.
      *
      * @see #getText
      */
@@ -4028,18 +4029,26 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Convenience method: Append the specified text to the TextView's
-     * display buffer, upgrading it to BufferType.EDITABLE if it was
-     * not already editable.
+     * Convenience method to append the specified text to the TextView's
+     * display buffer, upgrading it to {@link android.widget.TextView.BufferType#EDITABLE}
+     * if it was not already editable.
+     *
+     * @param text text to be appended to the already displayed text
      */
     public final void append(CharSequence text) {
         append(text, 0, text.length());
     }
 
     /**
-     * Convenience method: Append the specified text slice to the TextView's
-     * display buffer, upgrading it to BufferType.EDITABLE if it was
-     * not already editable.
+     * Convenience method to append the specified text slice to the TextView's
+     * display buffer, upgrading it to {@link android.widget.TextView.BufferType#EDITABLE}
+     * if it was not already editable.
+     *
+     * @param text text to be appended to the already displayed text
+     * @param start the index of the first character in the {@code text}
+     * @param end the index of the character following the last character in the {@code text}
+     *
+     * @see Appendable#append(CharSequence, int, int)
      */
     public void append(CharSequence text, int start, int end) {
         if (!(mText instanceof Editable)) {
@@ -4283,7 +4292,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     ///////////////////////////////////////////////////////////////////////////
 
     /**
-     * Sets the Factory used to create new Editables.
+     * Sets the Factory used to create new {@link Editable Editables}.
+     *
+     * @param factory {@link android.text.Editable.Factory Editable.Factory} to be used
+     *
+     * @see android.text.Editable.Factory
+     * @see android.widget.TextView.BufferType#EDITABLE
      */
     public final void setEditableFactory(Editable.Factory factory) {
         mEditableFactory = factory;
@@ -4291,7 +4305,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Sets the Factory used to create new Spannables.
+     * Sets the Factory used to create new {@link Spannable Spannables}.
+     *
+     * @param factory {@link android.text.Spannable.Factory Spannable.Factory} to be used
+     *
+     * @see android.text.Spannable.Factory
+     * @see android.widget.TextView.BufferType#SPANNABLE
      */
     public final void setSpannableFactory(Spannable.Factory factory) {
         mSpannableFactory = factory;
@@ -4299,13 +4318,20 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Sets the string value of the TextView. TextView <em>does not</em> accept
+     * Sets the text to be displayed. TextView <em>does not</em> accept
      * HTML-like formatting, which you can do with text strings in XML resource files.
      * To style your strings, attach android.text.style.* objects to a
-     * {@link android.text.SpannableString SpannableString}, or see the
+     * {@link android.text.SpannableString}, or see the
      * <a href="{@docRoot}guide/topics/resources/available-resources.html#stringresources">
      * Available Resource Types</a> documentation for an example of setting
      * formatted text in the XML resource file.
+     * <p/>
+     * When required, TextView will use {@link android.text.Spannable.Factory} to create final or
+     * intermediate {@link Spannable Spannables}. Likewise it will use
+     * {@link android.text.Editable.Factory} to create final or intermediate
+     * {@link Editable Editables}.
+     *
+     * @param text text to be displayed
      *
      * @attr ref android.R.styleable#TextView_text
      */
@@ -4315,10 +4341,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Like {@link #setText(CharSequence)},
-     * except that the cursor position (if any) is retained in the new text.
+     * Sets the text to be displayed but retains the cursor position. Same as
+     * {@link #setText(CharSequence)} except that the cursor position (if any) is retained in the
+     * new text.
+     * <p/>
+     * When required, TextView will use {@link android.text.Spannable.Factory} to create final or
+     * intermediate {@link Spannable Spannables}. Likewise it will use
+     * {@link android.text.Editable.Factory} to create final or intermediate
+     * {@link Editable Editables}.
      *
-     * @param text The new text to place in the text view.
+     * @param text text to be displayed
      *
      * @see #setText(CharSequence)
      */
@@ -4328,9 +4360,21 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Sets the text that this TextView is to display (see
-     * {@link #setText(CharSequence)}) and also sets whether it is stored
-     * in a styleable/spannable buffer and whether it is editable.
+     * Sets the text to be displayed and the {@link android.widget.TextView.BufferType}.
+     * <p/>
+     * When required, TextView will use {@link android.text.Spannable.Factory} to create final or
+     * intermediate {@link Spannable Spannables}. Likewise it will use
+     * {@link android.text.Editable.Factory} to create final or intermediate
+     * {@link Editable Editables}.
+     *
+     * @param text text to be displayed
+     * @param type a {@link android.widget.TextView.BufferType} which defines whether the text is
+     *              stored as a static text, styleable/spannable text, or editable text
+     *
+     * @see #setText(CharSequence)
+     * @see android.widget.TextView.BufferType
+     * @see #setSpannableFactory(Spannable.Factory)
+     * @see #setEditableFactory(Editable.Factory)
      *
      * @attr ref android.R.styleable#TextView_text
      * @attr ref android.R.styleable#TextView_bufferType
@@ -4497,10 +4541,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /**
      * Sets the TextView to display the specified slice of the specified
-     * char array.  You must promise that you will not change the contents
+     * char array. You must promise that you will not change the contents
      * of the array except for right before another call to setText(),
      * since the TextView has no way to know that the text
      * has changed and that it needs to invalidate and re-layout.
+     *
+     * @param text char array to be displayed
+     * @param start start index in the char array
+     * @param len length of char count after {@code start}
      */
     public final void setText(char[] text, int start, int len) {
         int oldlen = 0;
@@ -4531,8 +4579,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Like {@link #setText(CharSequence, android.widget.TextView.BufferType)},
-     * except that the cursor position (if any) is retained in the new text.
+     * Sets the text to be displayed and the {@link android.widget.TextView.BufferType} but retains
+     * the cursor position. Same as
+     * {@link #setText(CharSequence, android.widget.TextView.BufferType)} except that the cursor
+     * position (if any) is retained in the new text.
+     * <p/>
+     * When required, TextView will use {@link android.text.Spannable.Factory} to create final or
+     * intermediate {@link Spannable Spannables}. Likewise it will use
+     * {@link android.text.Editable.Factory} to create final or intermediate
+     * {@link Editable Editables}.
+     *
+     * @param text text to be displayed
+     * @param type a {@link android.widget.TextView.BufferType} which defines whether the text is
+     *              stored as a static text, styleable/spannable text, or editable text
      *
      * @see #setText(CharSequence, android.widget.TextView.BufferType)
      */
@@ -4552,11 +4611,42 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
+    /**
+     * Sets the text to be displayed using a string resource identifier.
+     *
+     * @param resid the resource identifier of the string resource to be displayed
+     *
+     * @see #setText(CharSequence)
+     *
+     * @attr ref android.R.styleable#TextView_text
+     */
     @android.view.RemotableViewMethod
     public final void setText(@StringRes int resid) {
         setText(getContext().getResources().getText(resid));
     }
 
+    /**
+     * Sets the text to be displayed using a string resource identifier and the
+     * {@link android.widget.TextView.BufferType}.
+     * <p/>
+     * When required, TextView will use {@link android.text.Spannable.Factory} to create final or
+     * intermediate {@link Spannable Spannables}. Likewise it will use
+     * {@link android.text.Editable.Factory} to create final or intermediate
+     * {@link Editable Editables}.
+     *
+     * @param resid the resource identifier of the string resource to be displayed
+     * @param type a {@link android.widget.TextView.BufferType} which defines whether the text is
+     *              stored as a static text, styleable/spannable text, or editable text
+     *
+     * @see #setText(int)
+     * @see #setText(CharSequence)
+     * @see android.widget.TextView.BufferType
+     * @see #setSpannableFactory(Spannable.Factory)
+     * @see #setEditableFactory(Editable.Factory)
+     *
+     * @attr ref android.R.styleable#TextView_text
+     * @attr ref android.R.styleable#TextView_bufferType
+     */
     public final void setText(@StringRes int resid, BufferType type) {
         setText(getContext().getResources().getText(resid), type);
     }
@@ -4990,7 +5080,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Set the extra input data of the text, which is the
      * {@link EditorInfo#extras TextBoxAttribute.extras}
      * Bundle that will be filled in when creating an input connection.  The
-     * given integer is the resource ID of an XML resource holding an
+     * given integer is the resource identifier of an XML resource holding an
      * {@link android.R.styleable#InputExtras &lt;input-extras&gt;} XML tree.
      *
      * @see #getInputExtras(boolean)
@@ -8728,8 +8818,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
+    /**
+     * Type of the text buffer that defines the characteristics of the text such as static,
+     * styleable, or editable.
+     */
     public enum BufferType {
-        NORMAL, SPANNABLE, EDITABLE,
+        NORMAL, SPANNABLE, EDITABLE
     }
 
     /**
