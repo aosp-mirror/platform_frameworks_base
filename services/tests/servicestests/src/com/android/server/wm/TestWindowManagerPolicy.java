@@ -100,6 +100,11 @@ public class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
+    public boolean canShowDismissingWindowWhileLockedLw() {
+        return false;
+    }
+
+    @Override
     public void setInitialDisplaySize(Display display, int width, int height, int density) {
 
     }
