@@ -71,7 +71,6 @@ import android.text.ParcelableSpan;
 import android.text.Selection;
 import android.text.SpanWatcher;
 import android.text.Spannable;
-import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.SpannedString;
@@ -4624,7 +4623,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (text instanceof Spannable) {
                 spannable = (Spannable) text;
             } else {
-                spannable = new SpannableString(text);
+                spannable = mSpannableFactory.newSpannable(text);
                 text = spannable;
             }
 
