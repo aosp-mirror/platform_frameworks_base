@@ -3680,18 +3680,23 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Makes the TextView at least this many lines tall.
+     * Sets the height of the TextView to be at least {@code minLines} tall.
+     * <p>
+     * This value is used for height calculation if LayoutParams does not force TextView to have an
+     * exact height. Setting this value overrides other previous minimum height configurations such
+     * as {@link #setMinHeight(int)} or {@link #setHeight(int)}. {@link #setSingleLine()} will set
+     * this value to 1.
      *
-     * Setting this value overrides any other (minimum) height setting. A single line TextView will
-     * set this value to 1.
+     * @param minLines the minimum height of TextView in terms of number of lines
      *
      * @see #getMinLines()
+     * @see #setLines(int)
      *
      * @attr ref android.R.styleable#TextView_minLines
      */
     @android.view.RemotableViewMethod
-    public void setMinLines(int minlines) {
-        mMinimum = minlines;
+    public void setMinLines(int minLines) {
+        mMinimum = minLines;
         mMinMode = LINES;
 
         requestLayout();
@@ -3699,10 +3704,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * @return the minimum number of lines displayed in this TextView, or -1 if the minimum
-     * height was set in pixels instead using {@link #setMinHeight(int) or #setHeight(int)}.
+     * Returns the minimum height of TextView in terms of number of lines or -1 if the minimum
+     * height was set using {@link #setMinHeight(int)} or {@link #setHeight(int)}.
+     *
+     * @return the minimum height of TextView in terms of number of lines or -1 if the minimum
+     *         height is not defined in lines
      *
      * @see #setMinLines(int)
+     * @see #setLines(int)
      *
      * @attr ref android.R.styleable#TextView_minLines
      */
@@ -3711,15 +3720,26 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Makes the TextView at least this many pixels tall.
+     * Sets the height of the TextView to be at least {@code minPixels} tall.
+     * <p>
+     * This value is used for height calculation if LayoutParams does not force TextView to have an
+     * exact height. Setting this value overrides previous minimum height configurations such as
+     * {@link #setMinLines(int)} or {@link #setLines(int)}.
+     * <p>
+     * The value given here is different than {@link #setMinimumHeight(int)}. Between
+     * {@code minHeight} and the value set in {@link #setMinimumHeight(int)}, the greater one is
+     * used to decide the final height.
      *
-     * Setting this value overrides any other (minimum) number of lines setting.
+     * @param minPixels the minimum height of TextView in terms of pixels
+     *
+     * @see #getMinHeight()
+     * @see #setHeight(int)
      *
      * @attr ref android.R.styleable#TextView_minHeight
      */
     @android.view.RemotableViewMethod
-    public void setMinHeight(int minHeight) {
-        mMinimum = minHeight;
+    public void setMinHeight(int minPixels) {
+        mMinimum = minPixels;
         mMinMode = PIXELS;
 
         requestLayout();
@@ -3727,10 +3747,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * @return the minimum height of this TextView expressed in pixels, or -1 if the minimum
-     * height was set in number of lines instead using {@link #setMinLines(int) or #setLines(int)}.
+     * Returns the minimum height of TextView in terms of pixels or -1 if the minimum height was
+     * set using {@link #setMinLines(int)} or {@link #setLines(int)}.
+     *
+     * @return the minimum height of TextView in terms of pixels or -1 if the minimum height is not
+     *         defined in pixels
      *
      * @see #setMinHeight(int)
+     * @see #setHeight(int)
      *
      * @attr ref android.R.styleable#TextView_minHeight
      */
@@ -3739,15 +3763,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Makes the TextView at most this many lines tall.
+     * Sets the height of the TextView to be at most {@code maxLines} tall.
+     * <p>
+     * This value is used for height calculation if LayoutParams does not force TextView to have an
+     * exact height. Setting this value overrides previous maximum height configurations such as
+     * {@link #setMaxHeight(int)} or {@link #setLines(int)}.
      *
-     * Setting this value overrides any other (maximum) height setting.
+     * @param maxLines the maximum height of TextView in terms of number of lines
+     *
+     * @see #getMaxLines()
+     * @see #setLines(int)
      *
      * @attr ref android.R.styleable#TextView_maxLines
      */
     @android.view.RemotableViewMethod
-    public void setMaxLines(int maxlines) {
-        mMaximum = maxlines;
+    public void setMaxLines(int maxLines) {
+        mMaximum = maxLines;
         mMaxMode = LINES;
 
         requestLayout();
@@ -3755,10 +3786,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * @return the maximum number of lines displayed in this TextView, or -1 if the maximum
-     * height was set in pixels instead using {@link #setMaxHeight(int) or #setHeight(int)}.
+     * Returns the maximum height of TextView in terms of number of lines or -1 if the
+     * maximum height was set using {@link #setMaxHeight(int)} or {@link #setHeight(int)}.
+     *
+     * @return the maximum height of TextView in terms of number of lines. -1 if the maximum height
+     *         is not defined in lines.
      *
      * @see #setMaxLines(int)
+     * @see #setLines(int)
      *
      * @attr ref android.R.styleable#TextView_maxLines
      */
@@ -3767,16 +3802,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Makes the TextView at most this many pixels tall.  This option is mutually exclusive with the
-     * {@link #setMaxLines(int)} method.
+     * Sets the height of the TextView to be at most {@code maxPixels} tall.
+     * <p>
+     * This value is used for height calculation if LayoutParams does not force TextView to have an
+     * exact height. Setting this value overrides previous maximum height configurations such as
+     * {@link #setMaxLines(int)} or {@link #setLines(int)}.
      *
-     * Setting this value overrides any other (maximum) number of lines setting.
+     * @param maxPixels the maximum height of TextView in terms of pixels
+     *
+     * @see #getMaxHeight()
+     * @see #setHeight(int)
      *
      * @attr ref android.R.styleable#TextView_maxHeight
      */
     @android.view.RemotableViewMethod
-    public void setMaxHeight(int maxHeight) {
-        mMaximum = maxHeight;
+    public void setMaxHeight(int maxPixels) {
+        mMaximum = maxPixels;
         mMaxMode = PIXELS;
 
         requestLayout();
@@ -3784,10 +3825,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * @return the maximum height of this TextView expressed in pixels, or -1 if the maximum
-     * height was set in number of lines instead using {@link #setMaxLines(int) or #setLines(int)}.
+     * Returns the maximum height of TextView in terms of pixels or -1 if the maximum height was
+     * set using {@link #setMaxLines(int)} or {@link #setLines(int)}.
+     *
+     * @return the maximum height of TextView in terms of pixels or -1 if the maximum height
+     *         is not defined in pixels
      *
      * @see #setMaxHeight(int)
+     * @see #setHeight(int)
      *
      * @attr ref android.R.styleable#TextView_maxHeight
      */
@@ -3796,10 +3841,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Makes the TextView exactly this many lines tall.
+     * Sets the height of the TextView to be exactly {@code lines} tall.
+     * <p>
+     * This value is used for height calculation if LayoutParams does not force TextView to have an
+     * exact height. Setting this value overrides previous minimum/maximum height configurations
+     * such as {@link #setMinLines(int)} or {@link #setMaxLines(int)}. {@link #setSingleLine()} will
+     * set this value to 1.
      *
-     * Note that setting this value overrides any other (minimum / maximum) number of lines or
-     * height setting. A single line TextView will set this value to 1.
+     * @param lines the exact height of the TextView in terms of lines
+     *
+     * @see #setHeight(int)
      *
      * @attr ref android.R.styleable#TextView_lines
      */
@@ -3813,12 +3864,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Makes the TextView exactly this many pixels tall.
-     * You could do the same thing by specifying this number in the
-     * LayoutParams.
+     * Sets the height of the TextView to be exactly <code>pixels</code> tall.
+     * <p>
+     * This value is used for height calculation if LayoutParams does not force TextView to have an
+     * exact height. Setting this value overrides previous minimum/maximum height configurations
+     * such as {@link #setMinHeight(int)} or {@link #setMaxHeight(int)}.
      *
-     * Note that setting this value overrides any other (minimum / maximum) number of lines or
-     * height setting.
+     * @param pixels the exact height of the TextView in terms of pixels
+     *
+     * @see #setLines(int)
      *
      * @attr ref android.R.styleable#TextView_height
      */
@@ -3832,13 +3886,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Makes the TextView at least this many ems wide
+     * Sets the width of the TextView to be at least {@code minEms} wide.
+     * <p>
+     * This value is used for width calculation if LayoutParams does not force TextView to have an
+     * exact width. Setting this value overrides previous minimum width configurations such as
+     * {@link #setMinWidth(int)} or {@link #setWidth(int)}.
+     *
+     * @param minEms the minimum width of TextView in terms of ems
+     *
+     * @see #getMinEms()
+     * @see #setEms(int)
      *
      * @attr ref android.R.styleable#TextView_minEms
      */
     @android.view.RemotableViewMethod
-    public void setMinEms(int minems) {
-        mMinWidth = minems;
+    public void setMinEms(int minEms) {
+        mMinWidth = minEms;
         mMinWidthMode = EMS;
 
         requestLayout();
@@ -3846,8 +3909,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * @return the minimum width of the TextView, expressed in ems or -1 if the minimum width
-     * was set in pixels instead (using {@link #setMinWidth(int)} or {@link #setWidth(int)}).
+     * Returns the minimum width of TextView in terms of ems or -1 if the minimum width was set
+     * using {@link #setMinWidth(int)} or {@link #setWidth(int)}.
+     *
+     * @return the minimum width of TextView in terms of ems. -1 if the minimum width is not
+     *         defined in ems
      *
      * @see #setMinEms(int)
      * @see #setEms(int)
@@ -3859,13 +3925,26 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Makes the TextView at least this many pixels wide
+     * Sets the width of the TextView to be at least {@code minPixels} wide.
+     * <p>
+     * This value is used for width calculation if LayoutParams does not force TextView to have an
+     * exact width. Setting this value overrides previous minimum width configurations such as
+     * {@link #setMinEms(int)} or {@link #setEms(int)}.
+     * <p>
+     * The value given here is different than {@link #setMinimumWidth(int)}. Between
+     * {@code minWidth} and the value set in {@link #setMinimumWidth(int)}, the greater one is used
+     * to decide the final width.
+     *
+     * @param minPixels the minimum width of TextView in terms of pixels
+     *
+     * @see #getMinWidth()
+     * @see #setWidth(int)
      *
      * @attr ref android.R.styleable#TextView_minWidth
      */
     @android.view.RemotableViewMethod
-    public void setMinWidth(int minpixels) {
-        mMinWidth = minpixels;
+    public void setMinWidth(int minPixels) {
+        mMinWidth = minPixels;
         mMinWidthMode = PIXELS;
 
         requestLayout();
@@ -3873,8 +3952,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * @return the minimum width of the TextView, in pixels or -1 if the minimum width
-     * was set in ems instead (using {@link #setMinEms(int)} or {@link #setEms(int)}).
+     * Returns the minimum width of TextView in terms of pixels or -1 if the minimum width was set
+     * using {@link #setMinEms(int)} or {@link #setEms(int)}.
+     *
+     * @return the minimum width of TextView in terms of pixels or -1 if the minimum width is not
+     *         defined in pixels
      *
      * @see #setMinWidth(int)
      * @see #setWidth(int)
@@ -3886,13 +3968,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Makes the TextView at most this many ems wide
+     * Sets the width of the TextView to be at most {@code maxEms} wide.
+     * <p>
+     * This value is used for width calculation if LayoutParams does not force TextView to have an
+     * exact width. Setting this value overrides previous maximum width configurations such as
+     * {@link #setMaxWidth(int)} or {@link #setWidth(int)}.
+     *
+     * @param maxEms the maximum width of TextView in terms of ems
+     *
+     * @see #getMaxEms()
+     * @see #setEms(int)
      *
      * @attr ref android.R.styleable#TextView_maxEms
      */
     @android.view.RemotableViewMethod
-    public void setMaxEms(int maxems) {
-        mMaxWidth = maxems;
+    public void setMaxEms(int maxEms) {
+        mMaxWidth = maxEms;
         mMaxWidthMode = EMS;
 
         requestLayout();
@@ -3900,8 +3991,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * @return the maximum width of the TextView, expressed in ems or -1 if the maximum width
-     * was set in pixels instead (using {@link #setMaxWidth(int)} or {@link #setWidth(int)}).
+     * Returns the maximum width of TextView in terms of ems or -1 if the maximum width was set
+     * using {@link #setMaxWidth(int)} or {@link #setWidth(int)}.
+     *
+     * @return the maximum width of TextView in terms of ems or -1 if the maximum width is not
+     *         defined in ems
      *
      * @see #setMaxEms(int)
      * @see #setEms(int)
@@ -3913,13 +4007,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Makes the TextView at most this many pixels wide
+     * Sets the width of the TextView to be at most {@code maxPixels} wide.
+     * <p>
+     * This value is used for width calculation if LayoutParams does not force TextView to have an
+     * exact width. Setting this value overrides previous maximum width configurations such as
+     * {@link #setMaxEms(int)} or {@link #setEms(int)}.
+     *
+     * @param maxPixels the maximum width of TextView in terms of pixels
+     *
+     * @see #getMaxWidth()
+     * @see #setWidth(int)
      *
      * @attr ref android.R.styleable#TextView_maxWidth
      */
     @android.view.RemotableViewMethod
-    public void setMaxWidth(int maxpixels) {
-        mMaxWidth = maxpixels;
+    public void setMaxWidth(int maxPixels) {
+        mMaxWidth = maxPixels;
         mMaxWidthMode = PIXELS;
 
         requestLayout();
@@ -3927,8 +4030,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * @return the maximum width of the TextView, in pixels or -1 if the maximum width
-     * was set in ems instead (using {@link #setMaxEms(int)} or {@link #setEms(int)}).
+     * Returns the maximum width of TextView in terms of pixels or -1 if the maximum width was set
+     * using {@link #setMaxEms(int)} or {@link #setEms(int)}.
+     *
+     * @return the maximum width of TextView in terms of pixels. -1 if the maximum width is not
+     *         defined in pixels
      *
      * @see #setMaxWidth(int)
      * @see #setWidth(int)
@@ -3940,12 +4046,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Makes the TextView exactly this many ems wide
+     * Sets the width of the TextView to be exactly {@code ems} wide.
      *
-     * @see #setMaxEms(int)
-     * @see #setMinEms(int)
-     * @see #getMinEms()
-     * @see #getMaxEms()
+     * This value is used for width calculation if LayoutParams does not force TextView to have an
+     * exact width. Setting this value overrides previous minimum/maximum configurations such as
+     * {@link #setMinEms(int)} or {@link #setMaxEms(int)}.
+     *
+     * @param ems the exact width of the TextView in terms of ems
+     *
+     * @see #setWidth(int)
      *
      * @attr ref android.R.styleable#TextView_ems
      */
@@ -3959,14 +4068,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Makes the TextView exactly this many pixels wide.
-     * You could do the same thing by specifying this number in the
-     * LayoutParams.
+     * Sets the width of the TextView to be exactly {@code pixels} wide.
+     * <p>
+     * This value is used for width calculation if LayoutParams does not force TextView to have an
+     * exact width. Setting this value overrides previous minimum/maximum width configurations
+     * such as {@link #setMinWidth(int)} or {@link #setMaxWidth(int)}.
      *
-     * @see #setMaxWidth(int)
-     * @see #setMinWidth(int)
-     * @see #getMinWidth()
-     * @see #getMaxWidth()
+     * @param pixels the exact width of the TextView in terms of pixels
+     *
+     * @see #setEms(int)
      *
      * @attr ref android.R.styleable#TextView_width
      */
