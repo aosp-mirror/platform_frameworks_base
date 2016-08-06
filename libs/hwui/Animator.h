@@ -44,6 +44,12 @@ protected:
     ANDROID_API virtual ~AnimationListener() {}
 };
 
+enum class RepeatMode {
+    // These are the same values as the RESTART and REVERSE in ValueAnimator.java.
+    Restart = 1,
+    Reverse = 2
+};
+
 class BaseRenderNodeAnimator : public VirtualLightRefBase {
     PREVENT_COPY_AND_ASSIGN(BaseRenderNodeAnimator);
 public:

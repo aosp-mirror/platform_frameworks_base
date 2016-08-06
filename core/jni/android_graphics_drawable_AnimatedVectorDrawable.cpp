@@ -83,11 +83,13 @@ static AnimationListener* createAnimationListener(JNIEnv* env, jobject finishLis
 }
 
 static void addAnimator(JNIEnv*, jobject, jlong animatorSetPtr, jlong propertyHolderPtr,
-        jlong interpolatorPtr, jlong startDelay, jlong duration, jint repeatCount) {
+        jlong interpolatorPtr, jlong startDelay, jlong duration, jint repeatCount,
+        jint repeatMode) {
     PropertyValuesAnimatorSet* set = reinterpret_cast<PropertyValuesAnimatorSet*>(animatorSetPtr);
     PropertyValuesHolder* holder = reinterpret_cast<PropertyValuesHolder*>(propertyHolderPtr);
     Interpolator* interpolator = reinterpret_cast<Interpolator*>(interpolatorPtr);
-    set->addPropertyAnimator(holder, interpolator, startDelay, duration, repeatCount);
+    RepeatMode mode = static_cast<RepeatMode>(repeatMode);
+    set->addPropertyAnimator(holder, interpolator, startDelay, duration, repeatCount, mode);
 }
 
 static jlong createAnimatorSet(JNIEnv*, jobject) {
@@ -185,7 +187,7 @@ static void reset(JNIEnv*, jobject, jlong animatorSetPtr) {
 static const JNINativeMethod gMethods[] = {
     {"nCreateAnimatorSet", "()J", (void*)createAnimatorSet},
     {"nSetVectorDrawableTarget", "(JJ)V", (void*)setVectorDrawableTarget},
-    {"nAddAnimator", "(JJJJJI)V", (void*)addAnimator},
+    {"nAddAnimator", "(JJJJJII)V", (void*)addAnimator},
     {"nCreateGroupPropertyHolder", "!(JIFF)J", (void*)createGroupPropertyHolder},
     {"nCreatePathDataPropertyHolder", "!(JJJ)J", (void*)createPathDataPropertyHolder},
     {"nCreatePathColorPropertyHolder", "!(JIII)J", (void*)createPathColorPropertyHolder},
