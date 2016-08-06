@@ -1407,7 +1407,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
 
             mStartDelays.add(startDelay);
             nAddAnimator(mSetPtr, propertyPtr, nativeInterpolator, startDelay, duration,
-                    repeatCount);
+                    repeatCount, animator.getRepeatMode());
         }
 
         /**
@@ -1674,7 +1674,8 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
     private static native long nCreateAnimatorSet();
     private static native void nSetVectorDrawableTarget(long animatorPtr, long vectorDrawablePtr);
     private static native void nAddAnimator(long setPtr, long propertyValuesHolder,
-             long nativeInterpolator, long startDelay, long duration, int repeatCount);
+            long nativeInterpolator, long startDelay, long duration, int repeatCount,
+            int repeatMode);
 
     private static native long nCreateGroupPropertyHolder(long nativePtr, int propertyId,
             float startValue, float endValue);
