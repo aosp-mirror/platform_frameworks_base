@@ -23,11 +23,11 @@ namespace android {
 namespace uirenderer {
 
 void PropertyValuesAnimatorSet::addPropertyAnimator(PropertyValuesHolder* propertyValuesHolder,
-            Interpolator* interpolator, nsecs_t startDelay,
-            nsecs_t duration, int repeatCount) {
+        Interpolator* interpolator, nsecs_t startDelay, nsecs_t duration, int repeatCount,
+        RepeatMode repeatMode) {
 
     PropertyAnimator* animator = new PropertyAnimator(propertyValuesHolder,
-            interpolator, startDelay, duration, repeatCount);
+            interpolator, startDelay, duration, repeatCount, repeatMode);
     mAnimators.emplace_back(animator);
 
     // Check whether any child animator is infinite after adding it them to the set.
@@ -66,14 +66,9 @@ void PropertyValuesAnimatorSet::onPlayTimeChanged(nsecs_t playTime) {
             // Note that this set may containing animators modifying the same property, so when we
             // reset the animators, we need to make sure the animators that end the first will
             // have the final say on what the property value should be.
-            (*it)->setFraction(0);
+            (*it)->setFraction(0, 0);
         }
-    } else if (playTime >= mDuration) {
-        // Skip all the animators to end
-        for (auto& anim : mAnimators) {
-            anim->setFraction(1);
-        }
-    } else {
+    } else  {
         for (auto& anim : mAnimators) {
             anim->setCurrentPlayTime(playTime);
         }
@@ -124,7 +119,8 @@ uint32_t PropertyValuesAnimatorSet::dirtyMask() {
 }
 
 PropertyAnimator::PropertyAnimator(PropertyValuesHolder* holder, Interpolator* interpolator,
-        nsecs_t startDelay, nsecs_t duration, int repeatCount)
+        nsecs_t startDelay, nsecs_t duration, int repeatCount,
+        RepeatMode repeatMode)
         : mPropertyValuesHolder(holder), mInterpolator(interpolator), mStartDelay(startDelay),
           mDuration(duration) {
     if (repeatCount < 0) {
@@ -132,24 +128,44 @@ PropertyAnimator::PropertyAnimator(PropertyValuesHolder* holder, Interpolator* i
     } else {
         mRepeatCount = repeatCount;
     }
+    mRepeatMode = repeatMode;
     mTotalDuration = ((nsecs_t) mRepeatCount + 1) * mDuration + mStartDelay;
 }
 
 void PropertyAnimator::setCurrentPlayTime(nsecs_t playTime) {
-    if (playTime >= mStartDelay && playTime < mTotalDuration) {
-         nsecs_t currentIterationPlayTime = (playTime - mStartDelay) % mDuration;
-         float fraction = currentIterationPlayTime / (float) mDuration;
-         setFraction(fraction);
-    } else if (mLatestFraction < 1.0f && playTime >= mTotalDuration) {
-        // This makes sure we only set the fraction = 1 once. It is needed because there might
-        // be another animator modifying the same property after this animator finishes, we need
-        // to make sure we don't set conflicting values on the same property within one frame.
-        setFraction(1.0f);
+    if (playTime < mStartDelay) {
+        return;
     }
+
+    float currentIterationFraction;
+    long iteration;
+    if (playTime >= mTotalDuration) {
+        // Reached the end of the animation.
+        iteration = mRepeatCount;
+        currentIterationFraction = 1.0f;
+    } else {
+        // play time here is in range [mStartDelay, mTotalDuration)
+        iteration = (playTime - mStartDelay) / mDuration;
+        currentIterationFraction = ((playTime - mStartDelay) % mDuration) / (float) mDuration;
+    }
+    setFraction(currentIterationFraction, iteration);
 }
 
-void PropertyAnimator::setFraction(float fraction) {
-    mLatestFraction = fraction;
+void PropertyAnimator::setFraction(float fraction, long iteration) {
+    double totalFraction = fraction + iteration;
+    // This makes sure we only set the fraction = repeatCount + 1 once. It is needed because there
+    // might be another animator modifying the same property after this animator finishes, we need
+    // to make sure we don't set conflicting values on the same property within one frame.
+    if ((mLatestFraction == mRepeatCount + 1) && (totalFraction >= mRepeatCount + 1)) {
+        return;
+    }
+
+    mLatestFraction = totalFraction;
+    // Check the play direction (i.e. reverse or restart) every other iteration, and calculate the
+    // fraction based on the play direction.
+    if (iteration % 2 && mRepeatMode == RepeatMode::Reverse) {
+        fraction = 1.0f - fraction;
+    }
     float interpolatedFraction = mInterpolator->interpolate(fraction);
     mPropertyValuesHolder->setFraction(interpolatedFraction);
 }
