@@ -2229,6 +2229,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     attrs.privateFlags &= ~WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
                 }
                 break;
+            case TYPE_SCREENSHOT:
+                attrs.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+                break;
         }
 
         if (attrs.type != TYPE_STATUS_BAR) {
