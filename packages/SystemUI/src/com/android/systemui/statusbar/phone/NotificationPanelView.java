@@ -189,6 +189,7 @@ public class NotificationPanelView extends PanelView implements
     private boolean mExpandingFromHeadsUp;
     private boolean mCollapsedOnDown;
     private int mPositionMinSideMargin;
+    private int mMaxFadeoutHeight;
     private int mLastOrientation = -1;
     private boolean mClosingWithAlphaFadeOut;
     private boolean mHeadsUpAnimatingAway;
@@ -278,6 +279,8 @@ public class NotificationPanelView extends PanelView implements
                 R.dimen.qs_falsing_threshold);
         mPositionMinSideMargin = getResources().getDimensionPixelSize(
                 R.dimen.notification_panel_min_side_margin);
+        mMaxFadeoutHeight = getResources().getDimensionPixelSize(
+                R.dimen.max_notification_fadeout_height);
     }
 
     public void updateResources() {
@@ -552,7 +555,9 @@ public class NotificationPanelView extends PanelView implements
     protected void flingToHeight(float vel, boolean expand, float target,
             float collapseSpeedUpFactor, boolean expandBecauseOfFalsing) {
         mHeadsUpTouchHelper.notifyFling(!expand);
-        setClosingWithAlphaFadeout(!expand && getFadeoutAlpha() == 1.0f);
+        setClosingWithAlphaFadeout(!expand
+                && mNotificationStackScroller.getFirstChildIntrinsicHeight() <= mMaxFadeoutHeight
+                && getFadeoutAlpha() == 1.0f);
         super.flingToHeight(vel, expand, target, collapseSpeedUpFactor, expandBecauseOfFalsing);
     }
 

@@ -701,7 +701,7 @@ public class NotificationStackScrollLayout extends ViewGroup
      */
     private float getExpandTranslationStart() {
         int startPosition = mTrackingHeadsUp || mHeadsUpManager.hasPinnedHeadsUp()
-                ? 0 : -getFirstChildMinHeight();
+                ? 0 : -getFirstChildIntrinsicHeight();
         return startPosition - mTopPadding;
     }
 
@@ -2142,17 +2142,17 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public int getLayoutMinHeight() {
-        int firstChildMinHeight = getFirstChildMinHeight();
+        int firstChildMinHeight = getFirstChildIntrinsicHeight();
         return Math.min(firstChildMinHeight + mBottomStackPeekSize + mBottomStackSlowDownHeight,
                 mMaxLayoutHeight - mTopPadding);
     }
 
-    private int getFirstChildMinHeight() {
+    public int getFirstChildIntrinsicHeight() {
         final ExpandableView firstChild = getFirstChildNotGone();
         int firstChildMinHeight = firstChild != null
                 ? firstChild.getIntrinsicHeight()
                 : mEmptyShadeView != null
-                        ? mEmptyShadeView.getMinHeight()
+                        ? mEmptyShadeView.getIntrinsicHeight()
                         : mCollapsedSize;
         if (mOwnScrollY > 0) {
             firstChildMinHeight = Math.max(firstChildMinHeight - mOwnScrollY, mCollapsedSize);
