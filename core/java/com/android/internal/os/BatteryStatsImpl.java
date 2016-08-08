@@ -108,7 +108,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 148 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 149 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -1563,6 +1563,186 @@ public class BatteryStatsImpl extends BatteryStats {
             boolean stillActive = mLastAddedTime == now;
             super.reset(!stillActive && detachIfReset);
             return !stillActive;
+        }
+    }
+
+
+    /**
+     * A StopwatchTimer that also tracks the total and max individual
+     * time spent active according to the given timebase.  Whereas
+     * StopwatchTimer apportions the time amongst all in the pool,
+     * the total and max durations are not apportioned.
+     */
+    public static class DurationTimer extends StopwatchTimer {
+        /**
+         * The time (in ms) that the timer was last acquired or the time base
+         * last (re-)started. Increasing the nesting depth does not reset this time.
+         *
+         * -1 if the timer is currently not running or the time base is not running.
+         *
+         * If written to a parcel, the start time is reset, as is mNesting in the base class
+         * StopwatchTimer.
+         */
+        long mStartTimeMs = -1;
+
+        /**
+         * The longest time period (in ms) that the timer has been active.
+         */
+        long mMaxDurationMs;
+
+        /**
+         * The total time (in ms) that that the timer has been active since reset().
+         */
+        long mCurrentDurationMs;
+
+        public DurationTimer(Clocks clocks, Uid uid, int type, ArrayList<StopwatchTimer> timerPool,
+                TimeBase timeBase, Parcel in) {
+            super(clocks, uid, type, timerPool, timeBase, in);
+            mMaxDurationMs = in.readLong();
+        }
+
+        public DurationTimer(Clocks clocks, Uid uid, int type, ArrayList<StopwatchTimer> timerPool,
+                TimeBase timeBase) {
+            super(clocks, uid, type, timerPool, timeBase);
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, long elapsedRealtimeUs) {
+            super.writeToParcel(out, elapsedRealtimeUs);
+            out.writeLong(mMaxDurationMs);
+        }
+
+        /**
+         * Write the summary to the parcel.
+         *
+         * Since the time base is probably meaningless after we come back, reading
+         * from this will have the effect of stopping the timer. So here all we write
+         * is the max duration.
+         */
+        @Override
+        public void writeSummaryFromParcelLocked(Parcel out, long elapsedRealtimeUs) {
+            super.writeSummaryFromParcelLocked(out, elapsedRealtimeUs);
+            out.writeLong(mMaxDurationMs);
+        }
+
+        /**
+         * Read the summary parcel.
+         *
+         * Has the side effect of stopping the timer.
+         */
+        @Override
+        public void readSummaryFromParcelLocked(Parcel in) {
+            super.readSummaryFromParcelLocked(in);
+            mMaxDurationMs = in.readLong();
+            mStartTimeMs = -1;
+            mCurrentDurationMs = 0;
+        }
+
+        /**
+         * The TimeBase time started (again).
+         *
+         * If the timer is also running, store the start time.
+         */
+        public void onTimeStarted(long elapsedRealtimeUs, long baseUptime, long baseRealtime) {
+            super.onTimeStarted(elapsedRealtimeUs, baseUptime, baseRealtime);
+            if (mNesting > 0) {
+                mStartTimeMs = mTimeBase.getRealtime(mClocks.elapsedRealtime()*1000) / 1000;
+            }
+        }
+
+        /**
+         * The TimeBase stopped running.
+         *
+         * If the timer is running, add the duration into mCurrentDurationMs.
+         */
+        @Override
+        public void onTimeStopped(long elapsedRealtimeUs, long baseUptime, long baseRealtime) {
+            super.onTimeStopped(elapsedRealtimeUs, baseUptime, baseRealtime);
+            if (mNesting > 0) {
+                mCurrentDurationMs += (elapsedRealtimeUs / 1000) - mStartTimeMs;
+            }
+            mStartTimeMs = -1;
+        }
+
+        @Override
+        public void logState(Printer pw, String prefix) {
+            super.logState(pw, prefix);
+        }
+
+        @Override
+        public void startRunningLocked(long elapsedRealtimeMs) {
+            super.startRunningLocked(elapsedRealtimeMs);
+            if (mNesting == 1 && mTimeBase.isRunning()) {
+                // Just started
+                mStartTimeMs = mTimeBase.getRealtime(mClocks.elapsedRealtime()*1000) / 1000;
+            }
+        }
+
+        /**
+         * Decrements the mNesting ref-count on this timer.
+         *
+         * If it actually stopped (mNesting went to 0), then possibly update
+         * mMaxDuration if the current duration was the longest ever.
+         */
+        @Override
+        public void stopRunningLocked(long elapsedRealtimeMs) {
+            super.stopRunningLocked(elapsedRealtimeMs);
+            if (mNesting == 0) {
+                final long durationMs = getCurrentDurationMsLocked(elapsedRealtimeMs);
+                if (durationMs > mMaxDurationMs) {
+                    mMaxDurationMs = durationMs;
+                }
+                mStartTimeMs = -1;
+                mCurrentDurationMs = 0;
+            }
+        }
+
+        @Override
+        public boolean reset(boolean detachIfReset) {
+            boolean result = super.reset(detachIfReset);
+            mMaxDurationMs = 0;
+            mCurrentDurationMs = 0;
+            if (mNesting > 0) {
+                mStartTimeMs = mTimeBase.getRealtime(mClocks.elapsedRealtime()*1000) / 1000;
+            } else {
+                mStartTimeMs = -1;
+            }
+            return result;
+        }
+
+        /**
+         * Returns the max duration that this timer has ever seen.
+         *
+         * Note that this time is NOT split between the timers in the timer group that
+         * this timer is attached to.  It is the TOTAL time.
+         */
+        @Override
+        public long getMaxDurationMsLocked(long elapsedRealtimeMs) {
+            if (mNesting > 0) {
+                final long durationMs = getCurrentDurationMsLocked(elapsedRealtimeMs);
+                if (durationMs > mMaxDurationMs) {
+                    return durationMs;
+                }
+            }
+            return mMaxDurationMs;
+        }
+
+        /**
+         * Returns the time since the timer was started.
+         *
+         * Note that this time is NOT split between the timers in the timer group that
+         * this timer is attached to.  It is the TOTAL time.
+         */
+        @Override
+        public long getCurrentDurationMsLocked(long elapsedRealtimeMs) {
+            long durationMs = mCurrentDurationMs;
+            if (mNesting > 0) {
+                if (mTimeBase.isRunning()) {
+                    durationMs += (mTimeBase.getRealtime(elapsedRealtimeMs*1000)/1000)
+                            - mStartTimeMs;
+                }
+            }
+            return durationMs;
         }
     }
 
@@ -6535,7 +6715,7 @@ public class BatteryStatsImpl extends BatteryStats {
             /**
              * How long (in ms) this uid has been keeping the device partially awake.
              */
-            StopwatchTimer mTimerPartial;
+            DurationTimer mTimerPartial;
 
             /**
              * How long (in ms) this uid has been keeping the device fully awake.
@@ -6564,13 +6744,29 @@ public class BatteryStatsImpl extends BatteryStats {
              * @param in the Parcel to be read from.
              * return a new Timer, or null.
              */
-            private StopwatchTimer readTimerFromParcel(int type, ArrayList<StopwatchTimer> pool,
-                    TimeBase timeBase, Parcel in) {
+            private StopwatchTimer readStopwatchTimerFromParcel(int type,
+                    ArrayList<StopwatchTimer> pool, TimeBase timeBase, Parcel in) {
                 if (in.readInt() == 0) {
                     return null;
                 }
 
                 return new StopwatchTimer(mBsi.mClocks, mUid, type, pool, timeBase, in);
+            }
+
+            /**
+             * Reads a possibly null Timer from a Parcel.  The timer is associated with the
+             * proper timer pool from the given BatteryStatsImpl object.
+             *
+             * @param in the Parcel to be read from.
+             * return a new Timer, or null.
+             */
+            private DurationTimer readDurationTimerFromParcel(int type,
+                    ArrayList<StopwatchTimer> pool, TimeBase timeBase, Parcel in) {
+                if (in.readInt() == 0) {
+                    return null;
+                }
+
+                return new DurationTimer(mBsi.mClocks, mUid, type, pool, timeBase, in);
             }
 
             boolean reset() {
@@ -6609,11 +6805,14 @@ public class BatteryStatsImpl extends BatteryStats {
             }
 
             void readFromParcelLocked(TimeBase timeBase, TimeBase screenOffTimeBase, Parcel in) {
-                mTimerPartial = readTimerFromParcel(WAKE_TYPE_PARTIAL,
+                mTimerPartial = readDurationTimerFromParcel(WAKE_TYPE_PARTIAL,
                         mBsi.mPartialTimers, screenOffTimeBase, in);
-                mTimerFull = readTimerFromParcel(WAKE_TYPE_FULL, mBsi.mFullTimers, timeBase, in);
-                mTimerWindow = readTimerFromParcel(WAKE_TYPE_WINDOW, mBsi.mWindowTimers, timeBase, in);
-                mTimerDraw = readTimerFromParcel(WAKE_TYPE_DRAW, mBsi.mDrawTimers, timeBase, in);
+                mTimerFull = readStopwatchTimerFromParcel(WAKE_TYPE_FULL,
+                        mBsi.mFullTimers, timeBase, in);
+                mTimerWindow = readStopwatchTimerFromParcel(WAKE_TYPE_WINDOW,
+                        mBsi.mWindowTimers, timeBase, in);
+                mTimerDraw = readStopwatchTimerFromParcel(WAKE_TYPE_DRAW,
+                        mBsi.mDrawTimers, timeBase, in);
             }
 
             void writeToParcelLocked(Parcel out, long elapsedRealtimeUs) {
@@ -6635,40 +6834,43 @@ public class BatteryStatsImpl extends BatteryStats {
             }
 
             public StopwatchTimer getStopwatchTimer(int type) {
-                StopwatchTimer t;
                 switch (type) {
-                    case WAKE_TYPE_PARTIAL:
-                        t = mTimerPartial;
+                    case WAKE_TYPE_PARTIAL: {
+                        DurationTimer t = mTimerPartial;
                         if (t == null) {
-                            t = new StopwatchTimer(mBsi.mClocks, mUid, WAKE_TYPE_PARTIAL,
+                            t = new DurationTimer(mBsi.mClocks, mUid, WAKE_TYPE_PARTIAL,
                                     mBsi.mPartialTimers, mBsi.mOnBatteryScreenOffTimeBase);
                             mTimerPartial = t;
                         }
                         return t;
-                    case WAKE_TYPE_FULL:
-                        t = mTimerFull;
+                    }
+                    case WAKE_TYPE_FULL: {
+                        StopwatchTimer t = mTimerFull;
                         if (t == null) {
                             t = new StopwatchTimer(mBsi.mClocks, mUid, WAKE_TYPE_FULL,
                                     mBsi.mFullTimers, mBsi.mOnBatteryTimeBase);
                             mTimerFull = t;
                         }
                         return t;
-                    case WAKE_TYPE_WINDOW:
-                        t = mTimerWindow;
+                    }
+                    case WAKE_TYPE_WINDOW: {
+                        StopwatchTimer t = mTimerWindow;
                         if (t == null) {
                             t = new StopwatchTimer(mBsi.mClocks, mUid, WAKE_TYPE_WINDOW,
                                     mBsi.mWindowTimers, mBsi.mOnBatteryTimeBase);
                             mTimerWindow = t;
                         }
                         return t;
-                    case WAKE_TYPE_DRAW:
-                        t = mTimerDraw;
+                    }
+                    case WAKE_TYPE_DRAW: {
+                        StopwatchTimer t = mTimerDraw;
                         if (t == null) {
                             t = new StopwatchTimer(mBsi.mClocks, mUid, WAKE_TYPE_DRAW,
                                     mBsi.mDrawTimers, mBsi.mOnBatteryTimeBase);
                             mTimerDraw = t;
                         }
                         return t;
+                    }
                     default:
                         throw new IllegalArgumentException("type=" + type);
                 }

@@ -30,6 +30,8 @@ import android.content.pm.ApplicationInfo;
 import android.telephony.SignalStrength;
 import android.text.format.DateFormat;
 import android.util.ArrayMap;
+import android.util.Log;
+import android.util.LongSparseArray;
 import android.util.MutableBoolean;
 import android.util.Pair;
 import android.util.Printer;
@@ -47,6 +49,7 @@ import com.android.internal.os.BatteryStatsHelper;
  * @hide
  */
 public abstract class BatteryStats implements Parcelable {
+    private static final String TAG = "BatteryStats";
 
     private static final boolean LOCAL_LOGV = false;
 
@@ -175,8 +178,11 @@ public abstract class BatteryStats implements Parcelable {
 
     /**
      * Current version of checkin data format.
+     *
+     * New in version 19:
+     *   - Wakelock data (wl) gets current and max times.
      */
-    static final String CHECKIN_VERSION = "18";
+    static final String CHECKIN_VERSION = "19";
 
     /**
      * Old version, we hit 9 and ran out of room, need to remove.
@@ -350,6 +356,32 @@ public abstract class BatteryStats implements Parcelable {
          * @return a time in microseconds
          */
         public abstract long getTimeSinceMarkLocked(long elapsedRealtimeUs);
+
+        /**
+         * Returns the max duration if it is being tracked.
+         * Not all Timer subclasses track the max duration and the current duration.
+
+         */
+        public long getMaxDurationMsLocked(long elapsedRealtimeMs) {
+            return -1;
+        }
+
+        /**
+         * Returns the current time the timer has been active, if it is being tracked.
+         * Not all Timer subclasses track the max duration and the current duration.
+         */
+        public long getCurrentDurationMsLocked(long elapsedRealtimeMs) {
+            return -1;
+        }
+
+        /**
+         * Returns whether the timer is currently running.  Some types of timers
+         * (e.g. BatchTimers) don't know whether the event is currently active,
+         * and report false.
+         */
+        public boolean isRunningLocked() {
+            return false;
+        }
 
         /**
          * Temporary for debugging.
@@ -2558,6 +2590,22 @@ public abstract class BatteryStats implements Parcelable {
                 sb.append('(');
                 sb.append(count);
                 sb.append(" times)");
+                final long maxDurationMs = timer.getMaxDurationMsLocked(elapsedRealtimeUs/1000);
+                if (maxDurationMs >= 0) {
+                    sb.append(" max=");
+                    sb.append(maxDurationMs);
+                }
+                if (timer.isRunningLocked()) {
+                    final long currentMs = timer.getCurrentDurationMsLocked(elapsedRealtimeUs/1000);
+                    if (currentMs >= 0) {
+                        sb.append(" (running for ");
+                        sb.append(currentMs);
+                        sb.append("ms)");
+                    } else {
+                        sb.append(" (running)");
+                    }
+                }
+
                 return ", ";
             }
         }
@@ -2565,6 +2613,7 @@ public abstract class BatteryStats implements Parcelable {
     }
 
     /**
+     * Prints details about a timer, if its total time was greater than 0.
      *
      * @param pw a PrintWriter object to print to.
      * @param sb a StringBuilder object.
@@ -2573,24 +2622,40 @@ public abstract class BatteryStats implements Parcelable {
      * @param which which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
      * @param prefix a String to be prepended to each line of output.
      * @param type the name of the timer.
+     * @return true if anything was printed.
      */
     private static final boolean printTimer(PrintWriter pw, StringBuilder sb, Timer timer,
-            long rawRealtime, int which, String prefix, String type) {
+            long rawRealtimeUs, int which, String prefix, String type) {
         if (timer != null) {
             // Convert from microseconds to milliseconds with rounding
-            final long totalTime = (timer.getTotalTimeLocked(
-                    rawRealtime, which) + 500) / 1000;
+            final long totalTimeMs = (timer.getTotalTimeLocked(
+                    rawRealtimeUs, which) + 500) / 1000;
             final int count = timer.getCountLocked(which);
-            if (totalTime != 0) {
+            if (totalTimeMs != 0) {
                 sb.setLength(0);
                 sb.append(prefix);
                 sb.append("    ");
                 sb.append(type);
                 sb.append(": ");
-                formatTimeMs(sb, totalTime);
+                formatTimeMs(sb, totalTimeMs);
                 sb.append("realtime (");
                 sb.append(count);
                 sb.append(" times)");
+                final long maxDurationMs = timer.getMaxDurationMsLocked(rawRealtimeUs/1000);
+                if (maxDurationMs >= 0) {
+                    sb.append(" max=");
+                    sb.append(maxDurationMs);
+                }
+                if (timer.isRunningLocked()) {
+                    final long currentMs = timer.getCurrentDurationMsLocked(rawRealtimeUs/1000);
+                    if (currentMs >= 0) {
+                        sb.append(" (running for ");
+                        sb.append(currentMs);
+                        sb.append("ms)");
+                    } else {
+                        sb.append(" (running)");
+                    }
+                }
                 pw.println(sb.toString());
                 return true;
             }
@@ -2613,15 +2678,23 @@ public abstract class BatteryStats implements Parcelable {
             long elapsedRealtimeUs, String name, int which, String linePrefix) {
         long totalTimeMicros = 0;
         int count = 0;
+        long max = -1;
+        long current = -1;
         if (timer != null) {
             totalTimeMicros = timer.getTotalTimeLocked(elapsedRealtimeUs, which);
             count = timer.getCountLocked(which); 
+            current = timer.getCurrentDurationMsLocked(elapsedRealtimeUs/1000);
+            max = timer.getMaxDurationMsLocked(elapsedRealtimeUs/1000);
         }
         sb.append(linePrefix);
         sb.append((totalTimeMicros + 500) / 1000); // microseconds to milliseconds with rounding
         sb.append(',');
         sb.append(name != null ? name + "," : "");
         sb.append(count);
+        sb.append(',');
+        sb.append(current);
+        sb.append(',');
+        sb.append(max);
         return ",";
     }
     
