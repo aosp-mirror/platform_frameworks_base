@@ -470,10 +470,10 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
 
     /**
      * @param opPackageName name of package for caller
-     * @param foregroundOnly only allow this call while app is in the foreground
+     * @param requireForeground only allow this call while app is in the foreground
      * @return true if caller can use fingerprint API
      */
-    private boolean canUseFingerprint(String opPackageName, boolean foregroundOnly, int uid,
+    private boolean canUseFingerprint(String opPackageName, boolean requireForeground, int uid,
             int pid) {
         checkPermission(USE_FINGERPRINT);
         if (isKeyguard(opPackageName)) {
@@ -488,11 +488,19 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
             Slog.w(TAG, "Rejecting " + opPackageName + " ; permission denied");
             return false;
         }
-        if (foregroundOnly && !isForegroundActivity(uid, pid)) {
+        if (requireForeground && !(isForegroundActivity(uid, pid) || currentClient(opPackageName))){
             Slog.w(TAG, "Rejecting " + opPackageName + " ; not in foreground");
             return false;
         }
         return true;
+    }
+
+    /**
+     * @param opPackageName package of the caller
+     * @return true if this is the same client currently using fingerprint
+     */
+    private boolean currentClient(String opPackageName) {
+        return mCurrentClient != null && mCurrentClient.getOwnerString().equals(opPackageName);
     }
 
     /**
