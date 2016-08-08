@@ -69,6 +69,17 @@ Flags& Flags::optionalFlagList(const StringPiece& name, const StringPiece& descr
     return *this;
 }
 
+Flags& Flags::optionalFlagList(const StringPiece& name, const StringPiece& description,
+                               std::unordered_set<std::string>* value) {
+    auto func = [value](const StringPiece& arg) -> bool {
+        value->insert(arg.toString());
+        return true;
+    };
+
+    mFlags.push_back(Flag{ name.toString(), description.toString(), func, false, 1, false });
+    return *this;
+}
+
 Flags& Flags::optionalSwitch(const StringPiece& name, const StringPiece& description,
                              bool* value) {
     auto func = [value](const StringPiece& arg) -> bool {

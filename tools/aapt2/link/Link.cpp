@@ -73,7 +73,7 @@ struct LinkOptions {
     bool outputToDirectory = false;
     bool autoAddOverlay = false;
     bool doNotCompressAnything = false;
-    std::vector<std::string> extensionsToNotCompress;
+    std::unordered_set<std::string> extensionsToNotCompress;
     Maybe<std::string> privateSymbols;
     ManifestFixerOptions manifestFixerOptions;
     std::unordered_set<std::string> products;
@@ -287,7 +287,7 @@ struct ResourceFileFlattenerOptions {
     bool keepRawValues = false;
     bool doNotCompressAnything = false;
     bool updateProguardSpec = false;
-    std::vector<std::string> extensionsToNotCompress;
+    std::unordered_set<std::string> extensionsToNotCompress;
 };
 
 class ResourceFileFlattener {
@@ -1727,6 +1727,15 @@ int link(const std::vector<StringPiece>& args) {
             return 1;
         }
     }
+
+    // Populate some default no-compress extensions that are already compressed.
+    options.extensionsToNotCompress.insert({
+            ".jpg", ".jpeg", ".png", ".gif",
+            ".wav", ".mp2", ".mp3", ".ogg", ".aac",
+            ".mpg", ".mpeg", ".mid", ".midi", ".smf", ".jet",
+            ".rtttl", ".imy", ".xmf", ".mp4", ".m4a",
+            ".m4v", ".3gp", ".3gpp", ".3g2", ".3gpp2",
+            ".amr", ".awb", ".wma", ".wmv", ".webm", ".mkv"});
 
     // Turn off auto versioning for static-libs.
     if (options.staticLib) {

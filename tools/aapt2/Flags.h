@@ -23,6 +23,7 @@
 #include <functional>
 #include <ostream>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 namespace aapt {
@@ -37,6 +38,8 @@ public:
                         Maybe<std::string>* value);
     Flags& optionalFlagList(const StringPiece& name, const StringPiece& description,
                             std::vector<std::string>* value);
+    Flags& optionalFlagList(const StringPiece& name, const StringPiece& description,
+                            std::unordered_set<std::string>* value);
     Flags& optionalSwitch(const StringPiece& name, const StringPiece& description,
                           bool* value);
 
