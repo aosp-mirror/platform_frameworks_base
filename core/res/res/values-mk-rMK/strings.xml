@@ -1023,8 +1023,7 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android се ажурира…"</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android стартува…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Оптимизирање на складирањето."</string>
-    <!-- no translation found for android_upgrading_notification_title (8428357096969413169) -->
-    <skip />
+    <string name="android_upgrading_notification_title" msgid="8428357096969413169">"Се завршува ажурирањето на Android…"</string>
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Некои апликации може да не работат правилно додека не се заврши надградбата"</string>
     <string name="app_upgrading_toast" msgid="3008139776215597053">"<xliff:g id="APPLICATION">%1$s</xliff:g> се надградува…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Се оптимизира апликација <xliff:g id="NUMBER_0">%1$d</xliff:g> од <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>

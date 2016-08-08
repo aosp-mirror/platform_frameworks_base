@@ -1048,8 +1048,7 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Nadogradnja sistema Android u toku..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android se pokreće..."</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Optimiziranje pohrane."</string>
-    <!-- no translation found for android_upgrading_notification_title (8428357096969413169) -->
-    <skip />
+    <string name="android_upgrading_notification_title" msgid="8428357096969413169">"Dovršava se ažuriranje Androida…"</string>
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Neke aplikacije možda neće raditi ispravno dok traje nadogradnja"</string>
     <string name="app_upgrading_toast" msgid="3008139776215597053">"Aplikacija <xliff:g id="APPLICATION">%1$s</xliff:g> se nadograđuje…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Optimiziranje aplikacije <xliff:g id="NUMBER_0">%1$d</xliff:g> od <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
@@ -1166,8 +1165,8 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB za MIDI"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Uspostavljena veza sa USB pohranom"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Dodirnite za više opcija."</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"Uređaj za USB otklanjanje grešaka povezan"</string>
-    <string name="adb_active_notification_message" msgid="4948470599328424059">"Dodirnite da onemogućite otklanjanje grešaka preko USB veze."</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"Otklanjanje grešaka putem uređaja spojenog na USB je uspostavljeno"</string>
+    <string name="adb_active_notification_message" msgid="4948470599328424059">"Dodirnite da onemogućite otklanjanje grešaka putem uređaja spojenog na USB."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Prijem izvještaja o grešci..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Podijeliti izvještaj o grešci?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Dijeljenje izvještaja o grešci..."</string>

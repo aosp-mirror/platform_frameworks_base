@@ -1069,8 +1069,7 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Prebieha inovácia systému Android..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Systém Android sa spúšťa…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Optimalizuje sa úložisko"</string>
-    <!-- no translation found for android_upgrading_notification_title (8428357096969413169) -->
-    <skip />
+    <string name="android_upgrading_notification_title" msgid="8428357096969413169">"Dokončuje sa aktualizácia Androidu…"</string>
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Niektoré aplikácie môžu správne fungovať až po dokončení inovácie"</string>
     <string name="app_upgrading_toast" msgid="3008139776215597053">"Aplikácia <xliff:g id="APPLICATION">%1$s</xliff:g> sa inovuje…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Prebieha optimalizácia aplikácie <xliff:g id="NUMBER_0">%1$d</xliff:g> z <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>

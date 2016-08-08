@@ -1023,8 +1023,7 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android đang nâng cấp..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android đang khởi động..."</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Tối ưu hóa lưu trữ."</string>
-    <!-- no translation found for android_upgrading_notification_title (8428357096969413169) -->
-    <skip />
+    <string name="android_upgrading_notification_title" msgid="8428357096969413169">"Hoàn tất cập nhật Android…"</string>
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Một số ứng dụng có thể không hoạt động bình thường cho đến khi nâng cấp xong"</string>
     <string name="app_upgrading_toast" msgid="3008139776215597053">"<xliff:g id="APPLICATION">%1$s</xliff:g> đang nâng cấp…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Đang tối ưu hóa ứng dụng <xliff:g id="NUMBER_0">%1$d</xliff:g> trong tổng số <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>

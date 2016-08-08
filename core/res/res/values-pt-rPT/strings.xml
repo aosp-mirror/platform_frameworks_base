@@ -1023,8 +1023,7 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"O Android está a ser atualizado..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"O Android está a iniciar…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"A otimizar o armazenamento."</string>
-    <!-- no translation found for android_upgrading_notification_title (8428357096969413169) -->
-    <skip />
+    <string name="android_upgrading_notification_title" msgid="8428357096969413169">"A terminar a atualização do Android…"</string>
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Algumas aplicações podem não funcionar corretamente enquanto a atualização não for concluída"</string>
     <string name="app_upgrading_toast" msgid="3008139776215597053">"O <xliff:g id="APPLICATION">%1$s</xliff:g> está a ser atualizado…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"A otimizar a aplicação <xliff:g id="NUMBER_0">%1$d</xliff:g> de <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
