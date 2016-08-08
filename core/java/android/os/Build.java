@@ -840,4 +840,16 @@ public class Build {
             return -1;
         }
     }
+
+    /**
+     * Check if the device is running on the Android O release or newer.
+     *
+     * @return {@code true} if O APIs are available for use
+     *
+     * @hide
+     */
+    public static boolean isAtLeastO() {
+        return !"REL".equals(VERSION.CODENAME)
+                && "O".compareTo(VERSION.CODENAME) <= 0;
+    }
 }
