@@ -16,7 +16,7 @@
 <user locales="en-US" last-app-scan-time="3113976673">
     <package name="com.android.test.1" call-count="0" last-reset="1468976368772">
         <package-info version="25" last_udpate_time="1230796800000" />
-        <shortcut id="manifest-shortcut-storage" activity="com.android.test.1/com.android.test.1.Settings" title="Storage" titleid="2131625197" titlename="storage_settings" textid="0" dmessageid="0" intent="#Intent;action=android.settings.INTERNAL_STORAGE_SETTINGS;end" timestamp="1469050672334" rank="4" flags="420" icon-res="2130837747" icon-resname="drawable/ic_shortcut_storage" >
+        <shortcut id="manifest-shortcut-storage" activity="com.android.test.1/com.android.test.1.Settings" title="Storage" intent="#Intent;action=android.settings.INTERNAL_STORAGE_SETTINGS;end" timestamp="1469050672334" flags="1" >
             <intent-extras>
                 <int name="key" value="12345" />
             </intent-extras>
