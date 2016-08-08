@@ -144,7 +144,11 @@
     <item msgid="675719912558941285">"사각형이 아닌 클립 영역을 파란색으로 그립니다."</item>
     <item msgid="1064373276095698656">"테스트한 그림 그리기 명령을 초록색으로 강조표시합니다."</item>
   </string-array>
-    <!-- no translation found for track_frame_time_entries:2 (2355151170975410323) -->
+  <string-array name="track_frame_time_entries">
+    <item msgid="2193584639058893150">"사용 안함"</item>
+    <item msgid="2751513398307949636">"화면에 막대로 표시"</item>
+    <item msgid="2355151170975410323">"설정: <xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g>"</item>
+  </string-array>
   <string-array name="debug_hw_overdraw_entries">
     <item msgid="8190572633763871652">"사용 안함"</item>
     <item msgid="7688197031296835369">"오버드로 영역 표시"</item>

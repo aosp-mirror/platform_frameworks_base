@@ -144,7 +144,11 @@
     <item msgid="675719912558941285">"以藍色畫出非矩形裁剪區域"</item>
     <item msgid="1064373276095698656">"以綠色顯示已測試的繪圖指令"</item>
   </string-array>
-    <!-- no translation found for track_frame_time_entries:2 (2355151170975410323) -->
+  <string-array name="track_frame_time_entries">
+    <item msgid="2193584639058893150">"關閉"</item>
+    <item msgid="2751513398307949636">"在螢幕上以列顯示"</item>
+    <item msgid="2355151170975410323">"於「<xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g>」"</item>
+  </string-array>
   <string-array name="debug_hw_overdraw_entries">
     <item msgid="8190572633763871652">"關閉"</item>
     <item msgid="7688197031296835369">"顯示過度繪製區域"</item>

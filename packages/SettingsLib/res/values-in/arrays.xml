@@ -144,7 +144,11 @@
     <item msgid="675719912558941285">"Gambar wilayah non-kotak biru"</item>
     <item msgid="1064373276095698656">"Sorot perintah gambar teruji hijau"</item>
   </string-array>
-    <!-- no translation found for track_frame_time_entries:2 (2355151170975410323) -->
+  <string-array name="track_frame_time_entries">
+    <item msgid="2193584639058893150">"Nonaktif"</item>
+    <item msgid="2751513398307949636">"Di layar dalam bentuk batang"</item>
+    <item msgid="2355151170975410323">"Dalam <xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g>"</item>
+  </string-array>
   <string-array name="debug_hw_overdraw_entries">
     <item msgid="8190572633763871652">"Nonaktif"</item>
     <item msgid="7688197031296835369">"Tampilkan area overdraw"</item>

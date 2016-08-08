@@ -144,7 +144,11 @@
     <item msgid="675719912558941285">"നീലനിറത്തിൽ ചതുരമല്ലാത്ത ക്ലിപ്പ് ഭാഗം വരയ്‌ക്കുക"</item>
     <item msgid="1064373276095698656">"പരിശോധിച്ച ഡ്രോയിംഗ് കമാൻഡുകൾ പച്ചനിറത്തിൽ ഹൈലൈറ്റുചെയ്യുക"</item>
   </string-array>
-    <!-- no translation found for track_frame_time_entries:2 (2355151170975410323) -->
+  <string-array name="track_frame_time_entries">
+    <item msgid="2193584639058893150">"ഓഫ്"</item>
+    <item msgid="2751513398307949636">"സ്‌ക്രീനിൽ ബാറുകളായി"</item>
+    <item msgid="2355151170975410323">"<xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g> എന്നതിൽ"</item>
+  </string-array>
   <string-array name="debug_hw_overdraw_entries">
     <item msgid="8190572633763871652">"ഓഫ്"</item>
     <item msgid="7688197031296835369">"ഓവർഡ്രോ ഭാഗങ്ങൾ ദൃശ്യമാക്കുക"</item>

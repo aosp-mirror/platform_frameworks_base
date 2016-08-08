@@ -144,7 +144,11 @@
     <item msgid="675719912558941285">"ແຕ້ມຄລິບທີ່ບໍ່ແມ່ນສີ່ຫຼ່ຽມເປັນສີຟ້າ"</item>
     <item msgid="1064373276095698656">"ສະແດງຄຳສັ່ງແຕ້ມທີ່ທົດສອບເປັນສີຂຽວ"</item>
   </string-array>
-    <!-- no translation found for track_frame_time_entries:2 (2355151170975410323) -->
+  <string-array name="track_frame_time_entries">
+    <item msgid="2193584639058893150">"ປິດ"</item>
+    <item msgid="2751513398307949636">"ເປັນແຖບເທິງໜ້າຈໍ"</item>
+    <item msgid="2355151170975410323">"ໃນ <xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g>"</item>
+  </string-array>
   <string-array name="debug_hw_overdraw_entries">
     <item msgid="8190572633763871652">"ປິດ"</item>
     <item msgid="7688197031296835369">"ສະແດງຂອບເຂດການແຕ້ມທັບ"</item>

@@ -144,7 +144,11 @@
     <item msgid="675719912558941285">"ಆಯತಾಕಾರವಲ್ಲದ ಕ್ಲಿಪ್‌ ಸ್ಥಳವನ್ನು ನೀಲಿಯಲ್ಲಿ ಡ್ರಾ ಮಾಡಿ"</item>
     <item msgid="1064373276095698656">"ಪರೀಕ್ಷಿತ ಚಿತ್ರ ಆದೇಶವನ್ನು ಹಸಿರಿನಲ್ಲಿ ಹೈಲೈಟ್‌ ಮಾಡಿ"</item>
   </string-array>
-    <!-- no translation found for track_frame_time_entries:2 (2355151170975410323) -->
+  <string-array name="track_frame_time_entries">
+    <item msgid="2193584639058893150">"ಆಫ್"</item>
+    <item msgid="2751513398307949636">"ಪರದೆಯ ಮೇಲಿನ ಪಟ್ಟಿಗಳು"</item>
+    <item msgid="2355151170975410323">"<xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g> ರಲ್ಲಿ"</item>
+  </string-array>
   <string-array name="debug_hw_overdraw_entries">
     <item msgid="8190572633763871652">"ಆಫ್"</item>
     <item msgid="7688197031296835369">"ಓವರ್‌ಡ್ರಾ ಪ್ರದೇಶಗಳನ್ನು ತೋರಿಸು"</item>

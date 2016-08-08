@@ -144,7 +144,11 @@
     <item msgid="675719912558941285">"Нацртај област за исецање која није правоугаоног облика плавом бојом"</item>
     <item msgid="1064373276095698656">"Истакни зеленом тестиране команде за цртање"</item>
   </string-array>
-    <!-- no translation found for track_frame_time_entries:2 (2355151170975410323) -->
+  <string-array name="track_frame_time_entries">
+    <item msgid="2193584639058893150">"Искључено"</item>
+    <item msgid="2751513398307949636">"На екрану у виду трака"</item>
+    <item msgid="2355151170975410323">"У <xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g>"</item>
+  </string-array>
   <string-array name="debug_hw_overdraw_entries">
     <item msgid="8190572633763871652">"Искључи"</item>
     <item msgid="7688197031296835369">"Прикажи области преклапања"</item>
