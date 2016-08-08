@@ -667,8 +667,8 @@ class ShortcutPackage extends ShortcutPackageItem {
                 // - version code hasn't change
                 // - lastUpdateTime hasn't change
                 // - all target activities are still enabled.
-                if ((getPackageInfo().getVersionCode() >= pi.versionCode)
-                        && (getPackageInfo().getLastUpdateTime() >= pi.lastUpdateTime)
+                if ((getPackageInfo().getVersionCode() == pi.versionCode)
+                        && (getPackageInfo().getLastUpdateTime() == pi.lastUpdateTime)
                         && areAllActivitiesStillEnabled()) {
                     return false;
                 }

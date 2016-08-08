@@ -4149,28 +4149,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
         ArgumentCaptor<List> shortcuts;
 
-        // First, call the event without updating the versions.
-        reset(c0);
-        reset(c10);
-
-                mService.mPackageMonitor.onReceive(getTestContext(),
-                genPackageUpdateIntent(CALLING_PACKAGE_1, USER_0));
-                mService.mPackageMonitor.onReceive(getTestContext(),
-                genPackageUpdateIntent(CALLING_PACKAGE_1, USER_10));
-
-        waitOnMainThread();
-
-        // Version not changed, so no callback.
-        verify(c0, times(0)).onShortcutsChanged(
-                eq(CALLING_PACKAGE_1),
-                any(List.class),
-                any(UserHandle.class));
-        verify(c10, times(0)).onShortcutsChanged(
-                eq(CALLING_PACKAGE_1),
-                any(List.class),
-                any(UserHandle.class));
-
-        // Next, update the version info for package 1.
+        // Update the version info for package 1.
         reset(c0);
         reset(c10);
         updatePackageVersion(CALLING_PACKAGE_1, 1);
