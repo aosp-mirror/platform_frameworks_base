@@ -578,6 +578,9 @@ void CanvasContext::draw() {
                 = swap.queueDuration;
         mHaveNewSurface = false;
         mFrameNumber = -1;
+    } else {
+        mCurrentFrameInfo->set(FrameInfoIndex::DequeueBufferDuration) = 0;
+        mCurrentFrameInfo->set(FrameInfoIndex::QueueBufferDuration) = 0;
     }
 
     // TODO: Use a fence for real completion?
