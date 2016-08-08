@@ -4424,9 +4424,15 @@ public class Notification implements Parcelable
             //          mN.mLargeIcon
             //   2. !mBigLargeIconSet -> mN.mLargeIcon applies
             Icon oldLargeIcon = null;
+            Bitmap largeIconLegacy = null;
             if (mBigLargeIconSet) {
                 oldLargeIcon = mBuilder.mN.mLargeIcon;
                 mBuilder.mN.mLargeIcon = mBigLargeIcon;
+                // The legacy largeIcon might not allow us to clear the image, as it's taken in
+                // replacement if the other one is null. Because we're restoring these legacy icons
+                // for old listeners, this is in general non-null.
+                largeIconLegacy = mBuilder.mN.largeIcon;
+                mBuilder.mN.largeIcon = null;
             }
 
             RemoteViews contentView = getStandardView(mBuilder.getBigPictureLayoutResource());
@@ -4438,6 +4444,7 @@ public class Notification implements Parcelable
 
             if (mBigLargeIconSet) {
                 mBuilder.mN.mLargeIcon = oldLargeIcon;
+                mBuilder.mN.largeIcon = largeIconLegacy;
             }
 
             contentView.setImageViewBitmap(R.id.big_picture, mPicture);
