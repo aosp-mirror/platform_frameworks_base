@@ -3874,8 +3874,7 @@ final class ActivityStack {
         r.finishLaunchTickingLocked();
     }
 
-    private void removeActivityFromHistoryLocked(
-            ActivityRecord r, TaskRecord oldTop, String reason) {
+    private void removeActivityFromHistoryLocked(ActivityRecord r, String reason) {
         mStackSupervisor.removeChildActivityContainers(r);
         finishActivityResultsLocked(r, Activity.RESULT_CANCELED, null);
         r.makeFinishingLocked();
@@ -3894,11 +3893,10 @@ final class ActivityStack {
             validateAppTokensLocked();
         }
         final TaskRecord task = r.task;
-        final TaskRecord topTask = oldTop != null ? oldTop : topTask();
         if (task != null && task.removeActivity(r)) {
             if (DEBUG_STACK) Slog.i(TAG_STACK,
                     "removeActivityFromHistoryLocked: last activity removed from " + this);
-            if (mStackSupervisor.isFocusedStack(this) && task == topTask &&
+            if (mStackSupervisor.isFocusedStack(this) && task == topTask() &&
                     task.isOverHomeStack()) {
                 mStackSupervisor.moveHomeStackTaskToTop(task.getTaskToReturnTo(), reason);
             }
@@ -4034,12 +4032,6 @@ final class ActivityStack {
 
         boolean removedFromHistory = false;
 
-        // If the activity is finishing, it's no longer considered in topRunningActivityLocked,
-        // and cleanUpActivityLocked() may change focus to another activity (or task).
-        // Get the current top task now, as removeActivityFromHistoryLocked() below need this
-        // to decide whether to return to home stack after removal.
-        final TaskRecord topTask = topTask();
-
         cleanUpActivityLocked(r, false, false);
 
         final boolean hadApp = r.app != null;
@@ -4074,8 +4066,7 @@ final class ActivityStack {
                 // up.
                 //Slog.w(TAG, "Exception thrown during finish", e);
                 if (r.finishing) {
-                    removeActivityFromHistoryLocked(
-                            r, topTask, reason + " exceptionInScheduleDestroy");
+                    removeActivityFromHistoryLocked(r, reason + " exceptionInScheduleDestroy");
                     removedFromHistory = true;
                     skipDestroy = true;
                 }
@@ -4106,7 +4097,7 @@ final class ActivityStack {
         } else {
             // remove this record from the history.
             if (r.finishing) {
-                removeActivityFromHistoryLocked(r, topTask, reason + " hadNoApp");
+                removeActivityFromHistoryLocked(r, reason + " hadNoApp");
                 removedFromHistory = true;
             } else {
                 if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to DESTROYED: " + r + " (no app)");
@@ -4137,7 +4128,7 @@ final class ActivityStack {
             if (isInStackLocked(r) != null) {
                 if (r.state == ActivityState.DESTROYING) {
                     cleanUpActivityLocked(r, true, false);
-                    removeActivityFromHistoryLocked(r, null, reason);
+                    removeActivityFromHistoryLocked(r, reason);
                 }
             }
             mStackSupervisor.resumeFocusedStackTopActivityLocked();
@@ -4295,7 +4286,7 @@ final class ActivityStack {
                     }
                     cleanUpActivityLocked(r, true, true);
                     if (remove) {
-                        removeActivityFromHistoryLocked(r, null, "appDied");
+                        removeActivityFromHistoryLocked(r, "appDied");
                     }
                 }
             }
