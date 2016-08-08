@@ -5876,8 +5876,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         updateDeviceOwnerLocked();
         disableSecurityLoggingIfNotCompliant();
         try {
-            // Reactivate backup service.
-            mInjector.getIBackupManager().setBackupServiceActive(UserHandle.USER_SYSTEM, true);
+            if (mInjector.getIBackupManager() != null) {
+                // Reactivate backup service.
+                mInjector.getIBackupManager().setBackupServiceActive(UserHandle.USER_SYSTEM, true);
+            }
         } catch (RemoteException e) {
             throw new IllegalStateException("Failed reactivating backup service.", e);
         }
