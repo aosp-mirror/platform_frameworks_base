@@ -47,13 +47,9 @@ import java.util.ArrayList;
  * Represents the dock regions for each orientation.
  */
 class DockRegion {
-    // The phone landscape dock states correspond to the opposite end of the screen that the nav bar
-    // appears
-    public static TaskStack.DockState[] PHONE_LANDSCAPE_LEFT = {
+    public static TaskStack.DockState[] PHONE_LANDSCAPE = {
+            // We only allow docking to the left in landscape for now on small devices
             TaskStack.DockState.LEFT
-    };
-    public static TaskStack.DockState[] PHONE_LANDSCAPE_RIGHT = {
-            TaskStack.DockState.RIGHT
     };
     public static TaskStack.DockState[] PHONE_PORTRAIT = {
             // We only allow docking to the top for now on small devices
@@ -123,13 +119,7 @@ public class RecentsViewTouchHandler {
         if (config.isLargeScreen) {
             return isLandscape ? DockRegion.TABLET_LANDSCAPE : DockRegion.TABLET_PORTRAIT;
         } else {
-            if (isLandscape) {
-                return mRv.isNavBarOnRight()
-                        ? DockRegion.PHONE_LANDSCAPE_LEFT
-                        : DockRegion.PHONE_LANDSCAPE_RIGHT;
-            } else {
-                return DockRegion.PHONE_PORTRAIT;
-            }
+            return isLandscape ? DockRegion.PHONE_LANDSCAPE : DockRegion.PHONE_PORTRAIT;
         }
     }
 
@@ -244,7 +234,7 @@ public class RecentsViewTouchHandler {
                         // Give priority to the current drop target to retain the touch handling
                         if (mLastDropTarget != null) {
                             if (mLastDropTarget.acceptsDrop((int) evX, (int) evY, width, height,
-                                    true /* isCurrentTarget */)) {
+                                    mRv.mSystemInsets, true /* isCurrentTarget */)) {
                                 currentDropTarget = mLastDropTarget;
                             }
                         }
@@ -253,7 +243,7 @@ public class RecentsViewTouchHandler {
                         if (currentDropTarget == null) {
                             for (DropTarget target : mDropTargets) {
                                 if (target.acceptsDrop((int) evX, (int) evY, width, height,
-                                        false /* isCurrentTarget */)) {
+                                        mRv.mSystemInsets, false /* isCurrentTarget */)) {
                                     currentDropTarget = target;
                                     break;
                                 }
