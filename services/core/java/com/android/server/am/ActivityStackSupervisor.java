@@ -743,9 +743,11 @@ public final class ActivityStackSupervisor implements DisplayListener {
         if (!mService.mUserController.shouldConfirmCredentials(userId)) {
             return false;
         }
-        final ActivityStack fullScreenStack = getStack(FULLSCREEN_WORKSPACE_STACK_ID);
-        final ActivityStack dockedStack = getStack(DOCKED_STACK_ID);
-        final ActivityStack[] activityStacks = new ActivityStack[] {fullScreenStack, dockedStack};
+        final ActivityStack[] activityStacks = {
+            getStack(DOCKED_STACK_ID),
+            getStack(FREEFORM_WORKSPACE_STACK_ID),
+            getStack(FULLSCREEN_WORKSPACE_STACK_ID),
+        };
         for (final ActivityStack activityStack : activityStacks) {
             if (activityStack == null) {
                 continue;
@@ -759,16 +761,35 @@ public final class ActivityStackSupervisor implements DisplayListener {
             if (activityStack.isDockedStack() && mIsDockMinimized) {
                 continue;
             }
-            final TaskRecord topTask = activityStack.topTask();
-            if (topTask == null) {
-                continue;
-            }
-            // To handle the case that work app is in the task but just is not the top one.
-            for (int i = topTask.mActivities.size() - 1; i >= 0; i--) {
-                final ActivityRecord activityRecord = topTask.mActivities.get(i);
-                if (activityRecord.userId == userId) {
+            if (activityStack.mStackId == FREEFORM_WORKSPACE_STACK_ID) {
+                // TODO: Only the topmost task should trigger credential confirmation. But first,
+                //       there needs to be a way to block out locked task window surfaces.
+                final List<TaskRecord> tasks = activityStack.getAllTasks();
+                final int size = tasks.size();
+                for (int i = 0; i < size; i++) {
+                    if (taskContainsActivityFromUser(tasks.get(i), userId)) {
+                        return true;
+                    }
+                }
+            } else {
+                final TaskRecord topTask = activityStack.topTask();
+                if (topTask == null) {
+                    continue;
+                }
+                if (taskContainsActivityFromUser(topTask, userId)) {
                     return true;
                 }
+            }
+        }
+        return false;
+    }
+
+    private boolean taskContainsActivityFromUser(TaskRecord task, @UserIdInt int userId) {
+        // To handle the case that work app is in the task but just is not the top one.
+        for (int i = task.mActivities.size() - 1; i >= 0; i--) {
+            final ActivityRecord activityRecord = task.mActivities.get(i);
+            if (activityRecord.userId == userId) {
+                return true;
             }
         }
         return false;
@@ -2151,6 +2172,32 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
     }
 
+    /**
+     * TODO: remove the need for this method. (b/30693465)
+     *
+     * @param userId user handle for the locked managed profile. Freeform tasks for this user will
+     *        be moved to another stack, so they are not shown in the background.
+     */
+    void moveProfileTasksFromFreeformToFullscreenStackLocked(@UserIdInt int userId) {
+        final ActivityStack stack = getStack(FREEFORM_WORKSPACE_STACK_ID);
+        if (stack == null) {
+            return;
+        }
+        mWindowManager.deferSurfaceLayout();
+        try {
+            final ArrayList<TaskRecord> tasks = stack.getAllTasks();
+            final int size = tasks.size();
+            for (int i = size - 1; i >= 0; i--) {
+                if (taskContainsActivityFromUser(tasks.get(i), userId)) {
+                    positionTaskInStackLocked(tasks.get(i).taskId, FULLSCREEN_WORKSPACE_STACK_ID,
+                            /* position */ 0);
+                }
+            }
+        } finally {
+            mWindowManager.continueSurfaceLayout();
+        }
+    }
+
     void resizeDockedStackLocked(Rect dockedBounds, Rect tempDockedTaskBounds,
             Rect tempDockedTaskInsetBounds,
             Rect tempOtherTaskBounds, Rect tempOtherTaskInsetBounds, boolean preserveWindows) {
@@ -2331,6 +2378,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // Preferred stack is the docked stack, but the task can't go in the docked stack.
             // Put it in the fullscreen stack.
             stackId = FULLSCREEN_WORKSPACE_STACK_ID;
+        } else if (stackId == FREEFORM_WORKSPACE_STACK_ID
+                && mService.mUserController.shouldConfirmCredentials(task.userId)) {
+            // Task is barred from the freeform stack. Put it in the fullscreen stack.
+            stackId = FULLSCREEN_WORKSPACE_STACK_ID;
         }
 
         if (task.stack != null) {
@@ -2402,6 +2453,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
             stackId = (prevStack != null) ? prevStack.mStackId : FULLSCREEN_WORKSPACE_STACK_ID;
             Slog.w(TAG, "Can not move unresizeable task=" + task
                     + " to docked stack. Moving to stackId=" + stackId + " instead.");
+        }
+        if (stackId == FREEFORM_WORKSPACE_STACK_ID
+                && mService.mUserController.shouldConfirmCredentials(task.userId)) {
+            stackId = (prevStack != null) ? prevStack.mStackId : FULLSCREEN_WORKSPACE_STACK_ID;
+            Slog.w(TAG, "Can not move locked profile task=" + task
+                    + " to freeform stack. Moving to stackId=" + stackId + " instead.");
         }
 
         // Temporarily disable resizeablility of task we are moving. We don't want it to be resized

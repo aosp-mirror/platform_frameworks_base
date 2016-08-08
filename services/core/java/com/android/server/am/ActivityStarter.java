@@ -623,10 +623,15 @@ class ActivityStarter {
         ActivityStack targetStack;
         ActivityStack fullscreenStack =
                 mSupervisor.getStack(FULLSCREEN_WORKSPACE_STACK_ID);
+        ActivityStack freeformStack =
+                mSupervisor.getStack(FREEFORM_WORKSPACE_STACK_ID);
         if (fullscreenStack != null &&
                 fullscreenStack.getStackVisibilityLocked(null) != ActivityStack.STACK_INVISIBLE) {
             // Single window case and the case that the docked stack is shown with fullscreen stack.
             targetStack = fullscreenStack;
+        } else if (freeformStack != null &&
+                freeformStack.getStackVisibilityLocked(null) != ActivityStack.STACK_INVISIBLE) {
+            targetStack = freeformStack;
         } else {
             // The case that the docked stack is shown with recent.
             targetStack = mSupervisor.getStack(HOME_STACK_ID);
