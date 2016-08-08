@@ -33,6 +33,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingEnd="@dimen/volume_button_size"
+                android:paddingTop="@dimen/volume_dialog_collapsed_padding_top"
                 android:orientation="vertical" >
             <View android:id="@+id/spacer"
                   android:layout_width="match_parent"
