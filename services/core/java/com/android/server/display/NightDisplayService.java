@@ -20,6 +20,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.TypeEvaluator;
 import android.animation.ValueAnimator;
+import android.annotation.Nullable;
 import android.app.AlarmManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -217,11 +218,11 @@ public final class NightDisplayService extends SystemService
         if (mIsActivated == null || mIsActivated != activated) {
             Slog.i(TAG, activated ? "Turning on night display" : "Turning off night display");
 
-            mIsActivated = activated;
-
             if (mAutoMode != null) {
                 mAutoMode.onActivated(activated);
             }
+
+            mIsActivated = activated;
 
             // Cancel the old animator if still running.
             if (mColorMatrixAnimator != null) {
@@ -395,7 +396,9 @@ public final class NightDisplayService extends SystemService
 
         @Override
         public void onActivated(boolean activated) {
-            mLastActivatedTime = Calendar.getInstance();
+            if (mIsActivated != null) {
+                mLastActivatedTime = Calendar.getInstance();
+            }
             updateNextAlarm();
         }
 
@@ -424,21 +427,29 @@ public final class NightDisplayService extends SystemService
 
         private final TwilightManager mTwilightManager;
 
-        private boolean mIsNight;
+        private Calendar mLastActivatedTime;
 
         public TwilightAutoMode() {
             mTwilightManager = getLocalService(TwilightManager.class);
         }
 
-        private void updateActivated() {
-            final TwilightState state = mTwilightManager.getCurrentState();
+        private void updateActivated(TwilightState state) {
             final boolean isNight = state != null && state.isNight();
-            if (mIsNight != isNight) {
-                mIsNight = isNight;
-
-                if (mIsActivated == null || mIsActivated != isNight) {
-                    mController.setActivated(isNight);
+            boolean setActivated = mIsActivated == null || mIsActivated != isNight;
+            if (setActivated && state != null && mLastActivatedTime != null) {
+                final Calendar sunrise = state.sunrise();
+                final Calendar sunset = state.sunset();
+                if (sunrise.before(sunset)) {
+                    setActivated = mLastActivatedTime.before(sunrise)
+                            || mLastActivatedTime.after(sunset);
+                } else {
+                    setActivated = mLastActivatedTime.before(sunset)
+                            || mLastActivatedTime.after(sunrise);
                 }
+            }
+
+            if (setActivated) {
+                mController.setActivated(isNight);
             }
         }
 
@@ -447,18 +458,26 @@ public final class NightDisplayService extends SystemService
             mTwilightManager.registerListener(this, mHandler);
 
             // Force an update to initialize state.
-            updateActivated();
+            updateActivated(mTwilightManager.getLastTwilightState());
         }
 
         @Override
         public void onStop() {
             mTwilightManager.unregisterListener(this);
+            mLastActivatedTime = null;
         }
 
         @Override
-        public void onTwilightStateChanged() {
+        public void onActivated(boolean activated) {
+            if (mIsActivated != null) {
+                mLastActivatedTime = Calendar.getInstance();
+            }
+        }
+
+        @Override
+        public void onTwilightStateChanged(@Nullable TwilightState state) {
             if (DEBUG) Slog.d(TAG, "onTwilightStateChanged");
-            updateActivated();
+            updateActivated(state);
         }
     }
 
