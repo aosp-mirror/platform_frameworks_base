@@ -454,7 +454,7 @@ public class NetworkStatsTest extends TestCase {
             .addValues(underlyingIface, tunUid, SET_FOREGROUND, TAG_NONE, 0L, 0L, 0L, 0L, 0L);
 
         assertTrue(delta.migrateTun(tunUid, tunIface, underlyingIface));
-        assertEquals(21, delta.size());
+        assertEquals(20, delta.size());
 
         // tunIface and TEST_IFACE entries are not changed.
         assertValues(delta, 0, tunIface, 10100, SET_DEFAULT, TAG_NONE, ROAMING_NO,
@@ -478,36 +478,87 @@ public class NetworkStatsTest extends TestCase {
 
         // Existing underlying Iface entries are updated
         assertValues(delta, 9, underlyingIface, 10100, SET_DEFAULT, TAG_NONE, ROAMING_NO,
-                44783L, 54L, 13829L, 60L, 0L);
+                44783L, 54L, 14178L, 62L, 0L);
         assertValues(delta, 10, underlyingIface, 10100, SET_FOREGROUND, TAG_NONE, ROAMING_NO,
                 0L, 0L, 0L, 0L, 0L);
 
         // VPN underlying Iface entries are updated
         assertValues(delta, 11, underlyingIface, tunUid, SET_DEFAULT, TAG_NONE, ROAMING_NO,
-                28304L, 27L, 1719L, 12L, 0L);
+                28304L, 27L, 1L, 2L, 0L);
         assertValues(delta, 12, underlyingIface, tunUid, SET_FOREGROUND, TAG_NONE, ROAMING_NO,
                 0L, 0L, 0L, 0L, 0L);
 
         // New entries are added for new application's underlying Iface traffic
         assertContains(delta, underlyingIface, 10120, SET_DEFAULT, TAG_NONE, ROAMING_NO,
-                72667L, 197L, 41872L, 219L, 0L);
+                72667L, 197L, 43123L, 227L, 0L);
         assertContains(delta, underlyingIface, 10120, SET_FOREGROUND, TAG_NONE, ROAMING_NO,
-                9297L, 17L, 3936, 19L, 0L);
+                9297L, 17L, 4054, 19L, 0L);
         assertContains(delta, underlyingIface, 10120, SET_DEFAULT, testTag1, ROAMING_NO,
-                21691L, 41L, 13179L, 46L, 0L);
+                21691L, 41L, 13572L, 48L, 0L);
         assertContains(delta, underlyingIface, 10120, SET_FOREGROUND, testTag1, ROAMING_NO,
-                1281L, 2L, 634L, 1L, 0L);
+                1281L, 2L, 653L, 1L, 0L);
 
         // New entries are added for debug purpose
         assertContains(delta, underlyingIface, 10100, SET_DBG_VPN_IN, TAG_NONE, ROAMING_NO,
-                39605L, 46L, 11690, 49, 0);
+                39605L, 46L, 12039, 51, 0);
         assertContains(delta, underlyingIface, 10120, SET_DBG_VPN_IN, TAG_NONE, ROAMING_NO,
-                81964, 214, 45808, 238, 0);
-        assertContains(delta, underlyingIface, tunUid, SET_DBG_VPN_IN, TAG_NONE, ROAMING_NO,
-                4983, 10, 1717, 10, 0);
+                81964, 214, 47177, 246, 0);
         assertContains(delta, underlyingIface, tunUid, SET_DBG_VPN_OUT, TAG_NONE, ROAMING_ALL,
-                126552, 270, 59215, 297, 0);
+                121569, 260, 59216, 297, 0);
 
+    }
+
+    // Tests a case where all of the data received by the tun0 interface is echo back into the tun0
+    // interface by the vpn app before it's sent out of the underlying interface. The VPN app should
+    // not be charged for the echoed data but it should still be charged for any extra data it sends
+    // via the underlying interface.
+    public void testMigrateTun_VpnAsLoopback() {
+        final int tunUid = 10030;
+        final String tunIface = "tun0";
+        final String underlyingIface = "wlan0";
+        NetworkStats delta = new NetworkStats(TEST_START, 9)
+            // 2 different apps sent/receive data via tun0.
+            .addValues(tunIface, 10100, SET_DEFAULT, TAG_NONE, 50000L, 25L, 100000L, 50L, 0L)
+            .addValues(tunIface, 20100, SET_DEFAULT, TAG_NONE, 500L, 2L, 200L, 5L, 0L)
+            // VPN package resends data through the tunnel (with exaggerated overhead)
+            .addValues(tunIface, tunUid, SET_DEFAULT, TAG_NONE, 240000, 100L, 120000L, 60L, 0L)
+            // 1 app already has some traffic on the underlying interface, the other doesn't yet
+            .addValues(underlyingIface, 10100, SET_DEFAULT, TAG_NONE, 1000L, 10L, 2000L, 20L, 0L)
+            // Traffic through the underlying interface via the vpn app.
+            // This test should redistribute this data correctly.
+            .addValues(underlyingIface, tunUid, SET_DEFAULT, TAG_NONE,
+                    75500L, 37L, 130000L, 70L, 0L);
+
+        assertTrue(delta.migrateTun(tunUid, tunIface, underlyingIface));
+        assertEquals(9, delta.size());
+
+        // tunIface entries should not be changed.
+        assertValues(delta, 0, tunIface, 10100, SET_DEFAULT, TAG_NONE, ROAMING_NO,
+                50000L, 25L, 100000L, 50L, 0L);
+        assertValues(delta, 1, tunIface, 20100, SET_DEFAULT, TAG_NONE, ROAMING_NO,
+                500L, 2L, 200L, 5L, 0L);
+        assertValues(delta, 2, tunIface, tunUid, SET_DEFAULT, TAG_NONE, ROAMING_NO,
+                240000L, 100L, 120000L, 60L, 0L);
+
+        // Existing underlying Iface entries are updated
+        assertValues(delta, 3, underlyingIface, 10100, SET_DEFAULT, TAG_NONE, ROAMING_NO,
+                51000L, 35L, 102000L, 70L, 0L);
+
+        // VPN underlying Iface entries are updated
+        assertValues(delta, 4, underlyingIface, tunUid, SET_DEFAULT, TAG_NONE, ROAMING_NO,
+                25000L, 10L, 29800L, 15L, 0L);
+
+        // New entries are added for new application's underlying Iface traffic
+        assertContains(delta, underlyingIface, 20100, SET_DEFAULT, TAG_NONE, ROAMING_NO,
+                500L, 2L, 200L, 5L, 0L);
+
+        // New entries are added for debug purpose
+        assertContains(delta, underlyingIface, 10100, SET_DBG_VPN_IN, TAG_NONE, ROAMING_NO,
+                50000L, 25L, 100000L, 50L, 0L);
+        assertContains(delta, underlyingIface, 20100, SET_DBG_VPN_IN, TAG_NONE, ROAMING_NO,
+                500, 2L, 200L, 5L, 0L);
+        assertContains(delta, underlyingIface, tunUid, SET_DBG_VPN_OUT, TAG_NONE, ROAMING_ALL,
+                50500L, 27L, 100200L, 55, 0);
     }
 
     private static void assertContains(NetworkStats stats,  String iface, int uid, int set,
