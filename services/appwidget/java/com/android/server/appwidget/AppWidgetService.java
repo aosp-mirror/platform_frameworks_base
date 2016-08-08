@@ -40,7 +40,7 @@ public class AppWidgetService extends SystemService {
 
     @Override
     public void onBootPhase(int phase) {
-        if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
+        if (phase == PHASE_ACTIVITY_MANAGER_READY) {
             mImpl.setSafeMode(isSafeMode());
         }
     }
