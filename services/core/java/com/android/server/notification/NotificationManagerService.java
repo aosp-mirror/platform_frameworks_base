@@ -696,9 +696,9 @@ public class NotificationManagerService extends SystemService {
                 int changeUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
                         UserHandle.USER_ALL);
                 String pkgList[] = null;
-                boolean queryReplace = queryRemove &&
-                        intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
-                if (DBG) Slog.i(TAG, "action=" + action + " queryReplace=" + queryReplace);
+                boolean removingPackage = queryRemove &&
+                        !intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
+                if (DBG) Slog.i(TAG, "action=" + action + " removing=" + removingPackage);
                 if (action.equals(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE)) {
                     pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
                 } else if (action.equals(Intent.ACTION_PACKAGES_SUSPENDED)) {
@@ -747,10 +747,10 @@ public class NotificationManagerService extends SystemService {
                         }
                     }
                 }
-                mListeners.onPackagesChanged(queryReplace, pkgList);
-                mRankerServices.onPackagesChanged(queryReplace, pkgList);
-                mConditionProviders.onPackagesChanged(queryReplace, pkgList);
-                mRankingHelper.onPackagesChanged(queryReplace, pkgList);
+                mListeners.onPackagesChanged(removingPackage, pkgList);
+                mRankerServices.onPackagesChanged(removingPackage, pkgList);
+                mConditionProviders.onPackagesChanged(removingPackage, pkgList);
+                mRankingHelper.onPackagesChanged(removingPackage, pkgList);
             }
         }
     };
@@ -3894,14 +3894,14 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void onPackagesChanged(boolean queryReplace, String[] pkgList) {
-            if (DEBUG) Slog.d(TAG, "onPackagesChanged queryReplace=" + queryReplace
+        public void onPackagesChanged(boolean removingPackage, String[] pkgList) {
+            if (DEBUG) Slog.d(TAG, "onPackagesChanged removingPackage=" + removingPackage
                     + " pkgList=" + (pkgList == null ? null : Arrays.asList(pkgList)));
             if (mRankerServicePackageName == null) {
                 return;
             }
 
-            if (pkgList != null && (pkgList.length > 0)) {
+            if (pkgList != null && (pkgList.length > 0) && !removingPackage) {
                 for (String pkgName : pkgList) {
                     if (mRankerServicePackageName.equals(pkgName)) {
                         registerRanker();

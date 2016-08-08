@@ -147,6 +147,7 @@ public class ZenModeConditions implements ConditionProviders.Callback {
             if (mConditionProviders.subscribeIfNecessary(rule.component, rule.conditionId)) {
                 mSubscriptions.put(rule.conditionId, rule.component);
             } else {
+                rule.condition = null;
                 if (DEBUG) Log.d(TAG, "zmc failed to subscribe");
             }
         }
