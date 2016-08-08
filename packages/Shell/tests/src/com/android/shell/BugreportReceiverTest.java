@@ -588,6 +588,10 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
     }
 
     private void cancelExistingNotifications() {
+        // Must kill service first, because notifications from a foreground service cannot be
+        // canceled.
+        killService();
+
         NotificationManager nm = NotificationManager.from(mContext);
         StatusBarNotification[] activeNotifications = nm.getActiveNotifications();
         if (activeNotifications.length == 0) {
@@ -897,6 +901,26 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         }
 
         fail("Service status didn't change to " + expectRunning);
+    }
+
+    private void killService() {
+        String service = BugreportProgressService.class.getName();
+
+        if (!isServiceRunning(service)) return;
+
+        Log.w(TAG, "Service '" + service + "' is still running, killing it");
+        silentlyExecuteShellCommand("am stopservice com.android.shell/.BugreportProgressService");
+
+        waitForService(false);
+    }
+
+    private void silentlyExecuteShellCommand(String cmd) {
+        Log.w(TAG, "silentlyExecuteShellCommand: '" + cmd + "'");
+        try {
+            UiDevice.getInstance(getInstrumentation()).executeShellCommand(cmd);
+        } catch (IOException e) {
+            Log.w(TAG, "error executing shell comamand '" + cmd + "'", e);
+        }
     }
 
     private void createTextFile(String path, String content) throws IOException {
