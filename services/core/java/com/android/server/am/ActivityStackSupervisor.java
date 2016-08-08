@@ -920,9 +920,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
     /**
      * Pause all activities in either all of the stacks or just the back stacks.
      * @param userLeaving Passed to pauseActivity() to indicate whether to call onUserLeaving().
+     * @param resuming The resuming activity.
+     * @param dontWait The resuming activity isn't going to wait for all activities to be paused
+     *                 before resuming.
      * @return true if any activity was paused as a result of this call.
      */
-    boolean pauseBackStacks(boolean userLeaving, boolean resuming, boolean dontWait) {
+    boolean pauseBackStacks(boolean userLeaving, ActivityRecord resuming, boolean dontWait) {
         boolean someActivityPaused = false;
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
             ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
@@ -961,7 +964,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     void pauseChildStacks(ActivityRecord parent, boolean userLeaving, boolean uiSleeping,
-            boolean resuming, boolean dontWait) {
+            ActivityRecord resuming, boolean dontWait) {
         // TODO: Put all stacks in supervisor and iterate through them instead.
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
             ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
@@ -4230,7 +4233,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 mContainerState = CONTAINER_STATE_NO_SURFACE;
                 ((VirtualActivityDisplay) mActivityDisplay).setSurface(null);
                 if (mStack.mPausingActivity == null && mStack.mResumedActivity != null) {
-                    mStack.startPausingLocked(false, true, false, false);
+                    mStack.startPausingLocked(false, true, null, false);
                 }
             }
 
