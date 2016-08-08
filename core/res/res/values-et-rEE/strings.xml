@@ -1023,8 +1023,7 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android viiakse üle uuemale versioonile ..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android käivitub ..."</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Salvestusruumi optimeerimine."</string>
-    <!-- no translation found for android_upgrading_notification_title (8428357096969413169) -->
-    <skip />
+    <string name="android_upgrading_notification_title" msgid="8428357096969413169">"Androidi värskenduse lõpetamine …"</string>
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Mõned rakendused ei pruugi enne uuemale versioonile ülemineku lõpetamist korralikult töötada"</string>
     <string name="app_upgrading_toast" msgid="3008139776215597053">"Rakenduse <xliff:g id="APPLICATION">%1$s</xliff:g> versiooni uuendatakse …"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_0">%1$d</xliff:g>. rakenduse <xliff:g id="NUMBER_1">%2$d</xliff:g>-st optimeerimine."</string>

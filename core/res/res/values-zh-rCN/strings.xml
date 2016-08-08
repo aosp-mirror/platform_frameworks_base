@@ -1023,8 +1023,7 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android正在升级..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android 正在启动…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"正在优化存储空间。"</string>
-    <!-- no translation found for android_upgrading_notification_title (8428357096969413169) -->
-    <skip />
+    <string name="android_upgrading_notification_title" msgid="8428357096969413169">"即将完成 Android 更新…"</string>
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"在升级完成之前，部分应用可能无法正常运行"</string>
     <string name="app_upgrading_toast" msgid="3008139776215597053">"正在升级<xliff:g id="APPLICATION">%1$s</xliff:g>…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"正在优化第<xliff:g id="NUMBER_0">%1$d</xliff:g>个应用（共<xliff:g id="NUMBER_1">%2$d</xliff:g>个）。"</string>
