@@ -1023,8 +1023,7 @@
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android श्रेणीसुधारित होत आहे..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android प्रारंभ करत आहे…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"संचयन ऑप्टिमाइझ करत आहे."</string>
-    <!-- no translation found for android_upgrading_notification_title (8428357096969413169) -->
-    <skip />
+    <string name="android_upgrading_notification_title" msgid="8428357096969413169">"Android अद्यतन समाप्त करीत आहे..."</string>
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"श्रेणीसुधारणा पूर्ण होईपर्यंत काही अॅप्स योग्यरित्या कार्य करणार नाहीत"</string>
     <string name="app_upgrading_toast" msgid="3008139776215597053">"<xliff:g id="APPLICATION">%1$s</xliff:g> श्रेणीसुधारित करीत आहे…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_1">%2$d</xliff:g> पैकी <xliff:g id="NUMBER_0">%1$d</xliff:g> अॅप ऑप्टिमाइझ करत आहे."</string>
@@ -1183,7 +1182,7 @@
     <string name="ext_media_status_removed" msgid="6576172423185918739">"काढले"</string>
     <string name="ext_media_status_unmounted" msgid="2551560878416417752">"बाहेर काढले"</string>
     <string name="ext_media_status_checking" msgid="6193921557423194949">"तपासत आहे..."</string>
-    <string name="ext_media_status_mounted" msgid="7253821726503179202">"सज्ज"</string>
+    <string name="ext_media_status_mounted" msgid="7253821726503179202">"तयार"</string>
     <string name="ext_media_status_mounted_ro" msgid="8020978752406021015">"केवळ-वाचनीय"</string>
     <string name="ext_media_status_bad_removal" msgid="8395398567890329422">"असुरक्षितपणे काढले"</string>
     <string name="ext_media_status_unmountable" msgid="805594039236667894">"दूषित झाले"</string>
