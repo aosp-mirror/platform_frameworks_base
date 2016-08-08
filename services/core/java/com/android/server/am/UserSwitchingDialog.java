@@ -112,7 +112,8 @@ final class UserSwitchingDialog extends AlertDialog
     void startUser() {
         synchronized (this) {
             if (!mStartedUser) {
-                mService.mUserController.startUserInForeground(mUserId, this);
+                mService.mUserController.startUserInForeground(mUserId);
+                dismiss();
                 mStartedUser = true;
                 final View decorView = getWindow().getDecorView();
                 if (decorView != null) {

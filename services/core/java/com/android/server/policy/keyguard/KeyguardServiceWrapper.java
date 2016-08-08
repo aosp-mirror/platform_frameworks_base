@@ -189,6 +189,15 @@ public class KeyguardServiceWrapper implements IKeyguardService {
     }
 
     @Override // Binder interface
+    public void setSwitchingUser(boolean switching) {
+        try {
+            mService.setSwitchingUser(switching);
+        } catch (RemoteException e) {
+            Slog.w(TAG , "Remote Exception", e);
+        }
+    }
+
+    @Override // Binder interface
     public void setCurrentUser(int userId) {
         mKeyguardStateMonitor.setCurrentUser(userId);
         try {

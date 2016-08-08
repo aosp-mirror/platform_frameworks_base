@@ -2540,4 +2540,9 @@
 
     <string name="config_networkOverLimitComponent" translatable="false">com.android.systemui/com.android.systemui.net.NetworkOverLimitActivity</string>
     <string name="config_dataUsageSummaryComponent" translatable="false">com.android.settings/com.android.settings.Settings$DataUsageSummaryActivity</string>
+
+    <!-- Flag specifying whether user-switch operations have custom UI. When false, user-switch
+         UI is handled by ActivityManagerService -->
+    <bool name="config_customUserSwitchUi">false</bool>
+
 </resources>

@@ -346,6 +346,12 @@ public class KeyguardServiceDelegate {
         mKeyguardState.currentUser = newUserId;
     }
 
+    public void setSwitchingUser(boolean switching) {
+        if (mKeyguardService != null) {
+            mKeyguardService.setSwitchingUser(switching);
+        }
+    }
+
     public void startKeyguardExitAnimation(long startTime, long fadeoutDuration) {
         if (mKeyguardService != null) {
             mKeyguardService.startKeyguardExitAnimation(startTime, fadeoutDuration);

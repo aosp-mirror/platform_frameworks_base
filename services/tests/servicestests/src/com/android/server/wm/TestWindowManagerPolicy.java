@@ -663,6 +663,11 @@ public class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
+    public void setSwitchingUser(boolean switching) {
+
+    }
+
+    @Override
     public void dump(String prefix, PrintWriter writer, String[] args) {
 
     }

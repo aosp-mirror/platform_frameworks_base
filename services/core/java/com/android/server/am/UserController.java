@@ -161,6 +161,8 @@ final class UserController {
     private final RemoteCallbackList<IUserSwitchObserver> mUserSwitchObservers
             = new RemoteCallbackList<>();
 
+    boolean mUserSwitchUiEnabled;
+
     /**
      * Currently active user switch callbacks.
      */
@@ -797,7 +799,7 @@ final class UserController {
                     return false;
                 }
 
-                if (foreground) {
+                if (foreground && mUserSwitchUiEnabled) {
                     mInjector.getWindowManager().startFreezingScreen(
                             R.anim.screen_user_exit, R.anim.screen_user_enter);
                 }
@@ -827,7 +829,10 @@ final class UserController {
                     mInjector.getWindowManager().setCurrentUser(userId, mCurrentProfileIds);
                     // Once the internal notion of the active user has switched, we lock the device
                     // with the option to show the user switcher on the keyguard.
-                    mInjector.getWindowManager().lockNow(null);
+                    if (mUserSwitchUiEnabled) {
+                        mInjector.getWindowManager().setSwitchingUser(true);
+                        mInjector.getWindowManager().lockNow(null);
+                    }
                 } else {
                     final Integer currentUserIdInt = mCurrentUserId;
                     updateCurrentProfileIdsLocked();
@@ -920,10 +925,11 @@ final class UserController {
     /**
      * Start user, if its not already running, and bring it to foreground.
      */
-    boolean startUserInForeground(final int userId, Dialog dlg) {
-        boolean result = startUser(userId, /* foreground */ true);
-        dlg.dismiss();
-        return result;
+    void startUserInForeground(final int targetUserId) {
+        boolean success = startUser(targetUserId, /* foreground */ true);
+        if (!success) {
+            mInjector.getWindowManager().setSwitchingUser(false);
+        }
     }
 
     boolean unlockUser(final int userId, byte[] token, byte[] secret, IProgressListener listener) {
@@ -1036,6 +1042,7 @@ final class UserController {
 
     /** Called on handler thread */
     void dispatchUserSwitchComplete(int userId) {
+        mInjector.getWindowManager().setSwitchingUser(false);
         final int observerCount = mUserSwitchObservers.beginBroadcast();
         for (int i = 0; i < observerCount; i++) {
             try {
@@ -1126,8 +1133,10 @@ final class UserController {
 
     void continueUserSwitch(UserState uss, int oldUserId, int newUserId) {
         Slog.d(TAG, "Continue user switch oldUser #" + oldUserId + ", newUser #" + newUserId);
-        synchronized (mLock) {
-            mInjector.getWindowManager().stopFreezingScreen();
+        if (mUserSwitchUiEnabled) {
+            synchronized (mLock) {
+                mInjector.getWindowManager().stopFreezingScreen();
+            }
         }
         uss.switching = false;
         mHandler.removeMessages(REPORT_USER_SWITCH_COMPLETE_MSG);

@@ -892,8 +892,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mLightStatusBarController = new LightStatusBarController(mIconController,
                 mBatteryController);
         mKeyguardMonitor = new KeyguardMonitor(mContext);
-        mUserSwitcherController = new UserSwitcherController(mContext, mKeyguardMonitor,
-                mHandler, this);
+            mUserSwitcherController = createUserSwitcherController();
         if (UserManager.get(mContext).isUserSwitcherEnabled()) {
             createUserSwitcher();
         }
@@ -1094,6 +1093,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mKeyguardUserSwitcher = new KeyguardUserSwitcher(mContext,
                 (ViewStub) mStatusBarWindow.findViewById(R.id.keyguard_user_switcher),
                 mKeyguardStatusBar, mNotificationPanel, mUserSwitcherController);
+    }
+
+    protected UserSwitcherController createUserSwitcherController() {
+        return new UserSwitcherController(mContext, mKeyguardMonitor, mHandler, this);
     }
 
     protected void inflateStatusBarWindow(Context context) {
@@ -3621,6 +3624,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         resetUserSetupObserver();
         setControllerUsers();
         clearCurrentMediaNotification();
+        setLockscreenUser(newUserId);
+    }
+
+    protected void setLockscreenUser(int newUserId) {
         mLockscreenWallpaper.setCurrentUser(newUserId);
         mScrimController.setCurrentUser(newUserId);
         updateMediaMetaData(true, false);

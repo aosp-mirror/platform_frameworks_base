@@ -623,12 +623,14 @@ class WindowToken {
             }
 
             // Now stick it in. For apps over wallpaper keep the wallpaper at the bottommost
-            // layer. For keyguard over wallpaper put the wallpaper under the keyguard.
+            // layer. For keyguard over wallpaper put the wallpaper under the keyguard unless
+            // the keyguard is still animating in.
             int insertionIndex = 0;
             if (visible && wallpaperTarget != null) {
                 final int type = wallpaperTarget.mAttrs.type;
                 final int privateFlags = wallpaperTarget.mAttrs.privateFlags;
-                if ((privateFlags & PRIVATE_FLAG_KEYGUARD) != 0 || type == TYPE_KEYGUARD_SCRIM) {
+                if (((privateFlags & PRIVATE_FLAG_KEYGUARD) != 0 || type == TYPE_KEYGUARD_SCRIM)
+                        && !mService.isKeyguardAnimatingIn()) {
                     insertionIndex = windowList.indexOf(wallpaperTarget);
                 }
             }

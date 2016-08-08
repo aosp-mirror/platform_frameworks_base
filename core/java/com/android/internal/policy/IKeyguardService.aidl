@@ -80,6 +80,7 @@ oneway interface IKeyguardService {
     void setKeyguardEnabled(boolean enabled);
     void onSystemReady();
     void doKeyguardTimeout(in Bundle options);
+    void setSwitchingUser(boolean switching);
     void setCurrentUser(int userId);
     void onBootCompleted();
 

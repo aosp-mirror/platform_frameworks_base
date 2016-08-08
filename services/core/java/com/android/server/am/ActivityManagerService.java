@@ -1533,6 +1533,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int VR_MODE_APPLY_IF_NEEDED_MSG = 69;
     static final int SHOW_UNSUPPORTED_DISPLAY_SIZE_DIALOG_MSG = 70;
     static final int HANDLE_TRUST_STORAGE_UPDATE_MSG = 71;
+    static final int START_USER_SWITCH_FG_MSG = 712;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -1952,6 +1953,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                 };
                 thread.start();
+                break;
+            }
+            case START_USER_SWITCH_FG_MSG: {
+                mUserController.startUserInForeground(msg.arg1);
                 break;
             }
             case REPORT_USER_SWITCH_MSG: {
@@ -13110,6 +13115,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     com.android.internal.R.string.config_defaultPictureInPictureBounds));
             mAppErrors.loadAppsNotReportingCrashesFromConfigLocked(res.getString(
                     com.android.internal.R.string.config_appsNotReportingCrashes));
+            mUserController.mUserSwitchUiEnabled = !res.getBoolean(
+                    com.android.internal.R.bool.config_customUserSwitchUi);
             if ((mConfiguration.uiMode & UI_MODE_TYPE_TELEVISION) == UI_MODE_TYPE_TELEVISION) {
                 mFullscreenThumbnailScale = (float) res
                     .getInteger(com.android.internal.R.integer.thumbnail_width_tv) /
@@ -21526,11 +21533,10 @@ public final class ActivityManagerService extends ActivityManagerNative
     @Override
     public boolean switchUser(final int targetUserId) {
         enforceShellRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES, targetUserId);
-        UserInfo currentUserInfo;
+        int currentUserId;
         UserInfo targetUserInfo;
         synchronized (this) {
-            int currentUserId = mUserController.getCurrentUserIdLocked();
-            currentUserInfo = mUserController.getUserInfo(currentUserId);
+            currentUserId = mUserController.getCurrentUserIdLocked();
             targetUserInfo = mUserController.getUserInfo(targetUserId);
             if (targetUserInfo == null) {
                 Slog.w(TAG, "No user info for user #" + targetUserId);
@@ -21551,9 +21557,17 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             mUserController.setTargetUserIdLocked(targetUserId);
         }
-        Pair<UserInfo, UserInfo> userNames = new Pair<>(currentUserInfo, targetUserInfo);
-        mUiHandler.removeMessages(START_USER_SWITCH_UI_MSG);
-        mUiHandler.sendMessage(mUiHandler.obtainMessage(START_USER_SWITCH_UI_MSG, userNames));
+        if (mUserController.mUserSwitchUiEnabled) {
+            UserInfo currentUserInfo = mUserController.getUserInfo(currentUserId);
+            Pair<UserInfo, UserInfo> userNames = new Pair<>(currentUserInfo, targetUserInfo);
+            mUiHandler.removeMessages(START_USER_SWITCH_UI_MSG);
+            mUiHandler.sendMessage(mHandler.obtainMessage(
+                    START_USER_SWITCH_UI_MSG, userNames));
+        } else {
+            mHandler.removeMessages(START_USER_SWITCH_FG_MSG);
+            mHandler.sendMessage(mHandler.obtainMessage(
+                    START_USER_SWITCH_FG_MSG, targetUserId, 0));
+        }
         return true;
     }
 

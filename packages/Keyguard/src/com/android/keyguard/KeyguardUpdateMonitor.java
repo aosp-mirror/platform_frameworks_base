@@ -1185,9 +1185,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      * Handle {@link #MSG_USER_SWITCHING}
      */
     protected void handleUserSwitching(int userId, IRemoteCallback reply) {
-        mSwitchingUser = true;
-        updateFingerprintListeningState();
-
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -1204,9 +1201,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      * Handle {@link #MSG_USER_SWITCH_COMPLETE}
      */
     protected void handleUserSwitchComplete(int userId) {
-        mSwitchingUser = false;
-        updateFingerprintListeningState();
-
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -1509,6 +1503,15 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         mCallbacks.add(new WeakReference<KeyguardUpdateMonitorCallback>(callback));
         removeCallback(null); // remove unused references
         sendUpdates(callback);
+    }
+
+    public boolean isSwitchingUser() {
+        return mSwitchingUser;
+    }
+
+    public void setSwitchingUser(boolean switching) {
+        mSwitchingUser = switching;
+        updateFingerprintListeningState();
     }
 
     private void sendUpdates(KeyguardUpdateMonitorCallback callback) {
