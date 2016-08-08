@@ -144,7 +144,11 @@
     <item msgid="675719912558941285">"Iguhit sa asul ang di-parihabang clip region"</item>
     <item msgid="1064373276095698656">"I-higlight nang berde ang tested drawing commands"</item>
   </string-array>
-    <!-- no translation found for track_frame_time_entries:2 (2355151170975410323) -->
+  <string-array name="track_frame_time_entries">
+    <item msgid="2193584639058893150">"Naka-off"</item>
+    <item msgid="2751513398307949636">"Sa screen bilang mga bar"</item>
+    <item msgid="2355151170975410323">"Sa <xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g>"</item>
+  </string-array>
   <string-array name="debug_hw_overdraw_entries">
     <item msgid="8190572633763871652">"I-off"</item>
     <item msgid="7688197031296835369">"Tingnan ang mga overdraw na bahagi"</item>

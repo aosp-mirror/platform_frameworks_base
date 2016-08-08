@@ -144,7 +144,11 @@
     <item msgid="675719912558941285">"Desenhar região de corte não retangular em azul"</item>
     <item msgid="1064373276095698656">"Destacar comandos de desenho testados em verde"</item>
   </string-array>
-    <!-- no translation found for track_frame_time_entries:2 (2355151170975410323) -->
+  <string-array name="track_frame_time_entries">
+    <item msgid="2193584639058893150">"Desativado"</item>
+    <item msgid="2751513398307949636">"Na tela em barras"</item>
+    <item msgid="2355151170975410323">"Em <xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g>"</item>
+  </string-array>
   <string-array name="debug_hw_overdraw_entries">
     <item msgid="8190572633763871652">"Desativado"</item>
     <item msgid="7688197031296835369">"Mostrar áreas de overdraw"</item>
