@@ -1955,6 +1955,29 @@ public class NotificationManagerService extends SystemService {
             });
         }
 
+        @Override
+        public void requestUnbindProvider(IConditionProvider provider) {
+            long identity = Binder.clearCallingIdentity();
+            try {
+                // allow bound services to disable themselves
+                final ManagedServiceInfo info = mConditionProviders.checkServiceToken(provider);
+                info.getOwner().setComponentState(info.component, false);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void requestBindProvider(ComponentName component) {
+            checkCallerIsSystemOrSameApp(component.getPackageName());
+            long identity = Binder.clearCallingIdentity();
+            try {
+                mConditionProviders.setComponentState(component, true);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
         private void enforceSystemOrSystemUIOrVolume(String message) {
             if (mAudioManagerInternal != null) {
                 final int vcuid = mAudioManagerInternal.getVolumeControllerUid();
