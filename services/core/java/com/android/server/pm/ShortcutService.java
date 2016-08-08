@@ -2626,7 +2626,7 @@ public class ShortcutService extends IShortcutService.Stub {
         synchronized (mLock) {
             final ShortcutUser user = getUserShortcutsLocked(userId);
             user.attemptToRestoreIfNeededAndSave(this, packageName, userId);
-            user.rescanPackageIfNeeded(packageName, /* forceRescan=*/ false);
+            user.rescanPackageIfNeeded(packageName, /* forceRescan=*/ true);
         }
         verifyStates();
     }
@@ -2641,7 +2641,7 @@ public class ShortcutService extends IShortcutService.Stub {
             user.attemptToRestoreIfNeededAndSave(this, packageName, userId);
 
             if (isPackageInstalled(packageName, userId)) {
-                user.rescanPackageIfNeeded(packageName, /* forceRescan=*/ false);
+                user.rescanPackageIfNeeded(packageName, /* forceRescan=*/ true);
             }
         }
         verifyStates();
@@ -2863,13 +2863,23 @@ public class ShortcutService extends IShortcutService.Stub {
         for (int i = list.size() - 1; i >= 0; i--) {
             final PackageInfo pi = list.get(i);
 
-            if (pi.lastUpdateTime >= lastScanTime) {
+            // If the package has been updated since the last scan time, then scan it.
+            // Also if it's a system app with no update, lastUpdateTime is not reliable, so
+            // just scan it.
+            if (pi.lastUpdateTime >= lastScanTime || isPureSystemApp(pi.applicationInfo)) {
                 if (DEBUG) {
                     Slog.d(TAG, "Found updated package " + pi.packageName);
                 }
                 callback.accept(pi.applicationInfo);
             }
         }
+    }
+
+    /**
+     * @return true if it's a system app with no updates.
+     */
+    private boolean isPureSystemApp(ApplicationInfo ai) {
+        return ai.isSystemApp() && !ai.isUpdatedSystemApp();
     }
 
     private boolean isApplicationFlagSet(@NonNull String packageName, int userId, int flags) {
