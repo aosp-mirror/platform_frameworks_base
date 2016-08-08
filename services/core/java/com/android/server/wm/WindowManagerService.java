@@ -1269,12 +1269,12 @@ public class WindowManagerService extends IWindowManager.Stub
             moveInputMethodDialogsLocked(pos + 1);
             return;
         }
-        win.mToken.addWindowToList(win);
+        win.mToken.addWindow(win);
         moveInputMethodDialogsLocked(pos);
     }
 
     private void reAddWindowToListInOrderLocked(WindowState win) {
-        win.mToken.addWindowToList(win);
+        win.mToken.addWindow(win);
         // This is a hack to get all of the child windows added as well at the right position. Child
         // windows should be rare and this case should be rare, so it shouldn't be that big a deal.
         WindowList windows = win.getWindowList();
@@ -1283,7 +1283,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG_WM, "ReAdd removing from " + wpos + ": " + win);
             windows.remove(wpos);
             mWindowsChanged = true;
-            win.reAddWindowLocked(wpos);
+            win.reAddWindow(wpos);
         }
     }
 
@@ -1325,7 +1325,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_INPUT_METHOD) Slog.v(TAG_WM, "Adding " + N + " dialogs at pos=" + pos);
             for (int i=0; i<N; i++) {
                 WindowState win = dialogs.get(i);
-                pos = win.reAddWindowLocked(pos);
+                pos = win.reAddWindow(pos);
             }
             if (DEBUG_INPUT_METHOD) {
                 Slog.v(TAG_WM, "Final window list:");
@@ -1404,7 +1404,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     Slog.v(TAG_WM, "List after removing with new pos " + imPos + ":");
                     logWindowList(windows, "  ");
                 }
-                imWin.reAddWindowLocked(imPos);
+                imWin.reAddWindow(imPos);
                 if (DEBUG_INPUT_METHOD) {
                     Slog.v(TAG_WM, "List after moving IM to " + imPos + ":");
                     logWindowList(windows, "  ");
@@ -1679,11 +1679,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 imMayMove = false;
             } else if (type == TYPE_INPUT_METHOD_DIALOG) {
                 mInputMethodDialogs.add(win);
-                win.mToken.addWindowToList(win);
+                win.mToken.addWindow(win);
                 moveInputMethodDialogsLocked(findDesiredInputMethodWindowIndexLocked(true));
                 imMayMove = false;
             } else {
-                win.mToken.addWindowToList(win);
+                win.mToken.addWindow(win);
                 if (type == TYPE_WALLPAPER) {
                     mWallpaperControllerLocked.clearLastWallpaperTimeoutTime();
                     displayContent.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
@@ -1878,12 +1878,8 @@ public class WindowManagerService extends IWindowManager.Stub
             if (win == null) {
                 return;
             }
-            removeWindowLocked(win);
+            win.removeIfPossible();
         }
-    }
-
-    void removeWindowLocked(WindowState win) {
-        win.removeIfPossible(false /*keepVisibleDeadWindow*/);
     }
 
     /**

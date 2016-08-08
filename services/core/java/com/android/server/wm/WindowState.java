@@ -1486,6 +1486,10 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         mService.postWindowRemoveCleanupLocked(this);
     }
 
+    void removeIfPossible() {
+        removeIfPossible(false /*keepVisibleDeadWindow*/);
+    }
+
     void removeIfPossible(boolean keepVisibleDeadWindow) {
         mWindowRemovalAllowed = true;
         if (DEBUG_ADD_REMOVE) Slog.v(TAG,
@@ -1949,7 +1953,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
                         }
                     } else if (mHasSurface) {
                         Slog.e(TAG, "!!! LEAK !!! Window removed but surface still valid.");
-                        mService.removeWindowLocked(WindowState.this);
+                        WindowState.this.removeIfPossible();
                     }
                 }
             } catch (IllegalArgumentException ex) {
@@ -3213,7 +3217,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
     // TODO: come-up with a better name for this method that represents what it does.
     // Or, it is probably not going to matter anyways if we are successful in getting rid of
     // the WindowList concept.
-    int reAddWindowLocked(int index) {
+    int reAddWindow(int index) {
         final WindowList windows = getWindowList();
         // Adding child windows relies on child windows being ordered by mSubLayer using
         // {@link #sWindowSubLayerComparator}.
