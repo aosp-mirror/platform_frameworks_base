@@ -956,13 +956,13 @@ class WindowSurfacePlacer {
                 if (gone) Slog.v(TAG, "  GONE: mViewVisibility="
                         + win.mViewVisibility + " mRelayoutCalled="
                         + win.mRelayoutCalled + " hidden="
-                        + win.mRootToken.hidden + " hiddenRequested="
+                        + win.mToken.hidden + " hiddenRequested="
                         + (atoken != null && atoken.hiddenRequested)
                         + " parentHidden=" + win.isParentWindowHidden());
                 else Slog.v(TAG, "  VIS: mViewVisibility="
                         + win.mViewVisibility + " mRelayoutCalled="
                         + win.mRelayoutCalled + " hidden="
-                        + win.mRootToken.hidden + " hiddenRequested="
+                        + win.mToken.hidden + " hiddenRequested="
                         + (atoken != null && atoken.hiddenRequested)
                         + " parentHidden=" + win.isParentWindowHidden());
             }

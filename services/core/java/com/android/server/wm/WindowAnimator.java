@@ -361,7 +361,7 @@ public class WindowAnimator {
                             + " destroying=" + win.mDestroying
                             + " parentHidden=" + win.isParentWindowHidden()
                             + " vis=" + win.mViewVisibility
-                            + " hidden=" + win.mRootToken.hidden
+                            + " hidden=" + win.mToken.hidden
                             + " anim=" + win.mWinAnimator.mAnimation);
                 } else if (canBeForceHidden) {
                     if (shouldBeForceHidden) {

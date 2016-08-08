@@ -451,6 +451,16 @@ class WindowToken {
         final int count = windows.size();
         for (int i = 0; i < count; i++) {
             final WindowState win = windows.get(i);
+            if (win.isChildWindow()) {
+                // The WindowState.reAddWindowLocked below already takes care of re-adding the
+                // child windows for any parent window in this token. This is a side effect of
+                // ensuring child windows are in the same WindowToken as their parent window.
+                //
+                // TODO: Can be removed once WindowToken no longer contains child windows. i.e it is
+                // using WindowContainer which uses the hierarchy to access child windows through
+                // their parent window.
+                continue;
+            }
             final DisplayContent winDisplayContent = win.getDisplayContent();
             if (winDisplayContent == displayContent || winDisplayContent == null) {
                 win.mDisplayContent = displayContent;

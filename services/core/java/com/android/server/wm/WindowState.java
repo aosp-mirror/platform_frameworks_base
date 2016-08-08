@@ -165,7 +165,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
     final int mOwnerUid;
     final IWindowId mWindowId;
     WindowToken mToken;
-    WindowToken mRootToken;
+    // The same object as mToken if this is an app window and null for non-app windows.
     AppWindowToken mAppToken;
 
     // mAttrs.flags is tested in animation without being locked. If the bits tested are ever
@@ -554,6 +554,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         mClient = c;
         mAppOp = appOp;
         mToken = token;
+        mAppToken = mToken.asAppWindowToken();
         mOwnerUid = ownerId;
         mWindowId = new IWindowId.Stub() {
             @Override
@@ -627,8 +628,6 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         }
         mIsFloatingLayer = mIsImWindow || mIsWallpaper;
 
-        mRootToken = getTopParentWindow().mToken;
-        mAppToken = mRootToken.asAppWindowToken();
         if (mAppToken != null) {
             final DisplayContent appDisplay = getDisplayContent();
             mNotOnAppsDisplay = displayContent != appDisplay;
@@ -1192,14 +1191,14 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
      */
     @Override
     public boolean isVisibleOrBehindKeyguardLw() {
-        if (mRootToken.waitingToShow && mService.mAppTransition.isTransitionSet()) {
+        if (mToken.waitingToShow && mService.mAppTransition.isTransitionSet()) {
             return false;
         }
         final AppWindowToken atoken = mAppToken;
         final boolean animating = atoken != null && atoken.mAppAnimator.animation != null;
         return mHasSurface && !mDestroying && !mAnimatingExit
                 && (atoken == null ? mPolicyVisibility : !atoken.hiddenRequested)
-                && ((!isParentWindowHidden() && mViewVisibility == View.VISIBLE && !mRootToken.hidden)
+                && ((!isParentWindowHidden() && mViewVisibility == View.VISIBLE && !mToken.hidden)
                         || mWinAnimator.mAnimation != null || animating);
     }
 
@@ -1217,7 +1216,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
      * not the pending requested hidden state.
      */
     boolean isVisibleNow() {
-        return (!mRootToken.hidden || mAttrs.type == TYPE_APPLICATION_STARTING)
+        return (!mToken.hidden || mAttrs.type == TYPE_APPLICATION_STARTING)
                 && isVisibleUnchecked();
     }
 
@@ -1299,11 +1298,11 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
      * of a transition that has not yet been started.
      */
     boolean isReadyForDisplay() {
-        if (mRootToken.waitingToShow && mService.mAppTransition.isTransitionSet()) {
+        if (mToken.waitingToShow && mService.mAppTransition.isTransitionSet()) {
             return false;
         }
         return mHasSurface && mPolicyVisibility && !mDestroying
-                && ((!isParentWindowHidden() && mViewVisibility == View.VISIBLE && !mRootToken.hidden)
+                && ((!isParentWindowHidden() && mViewVisibility == View.VISIBLE && !mToken.hidden)
                         || mWinAnimator.mAnimation != null
                         || ((mAppToken != null) && (mAppToken.mAppAnimator.animation != null)));
     }
@@ -1313,7 +1312,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
      * to the keyguard.
      */
     boolean isReadyForDisplayIgnoringKeyguard() {
-        if (mRootToken.waitingToShow && mService.mAppTransition.isTransitionSet()) {
+        if (mToken.waitingToShow && mService.mAppTransition.isTransitionSet()) {
             return false;
         }
         final AppWindowToken atoken = mAppToken;
@@ -1323,7 +1322,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
             return false;
         }
         return mHasSurface && !mDestroying
-                && ((!isParentWindowHidden() && mViewVisibility == View.VISIBLE && !mRootToken.hidden)
+                && ((!isParentWindowHidden() && mViewVisibility == View.VISIBLE && !mToken.hidden)
                         || mWinAnimator.mAnimation != null
                         || ((atoken != null) && (atoken.mAppAnimator.animation != null)
                                 && !mWinAnimator.isDummyAnimation()));
@@ -1357,7 +1356,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         final AppWindowToken atoken = mAppToken;
         return mViewVisibility == View.GONE
                 || !mRelayoutCalled
-                || (atoken == null && mRootToken.hidden)
+                || (atoken == null && mToken.hidden)
                 || (atoken != null && atoken.hiddenRequested)
                 || isParentWindowHidden()
                 || (mAnimatingExit && !isAnimatingLw())
@@ -2728,7 +2727,6 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         }
         if (dumpAll) {
             pw.print(prefix); pw.print("mToken="); pw.println(mToken);
-            pw.print(prefix); pw.print("mRootToken="); pw.println(mRootToken);
             if (mAppToken != null) {
                 pw.print(prefix); pw.print("mAppToken="); pw.println(mAppToken);
                 pw.print(prefix); pw.print(" isAnimatingWithSavedSurface()=");
@@ -3020,7 +3018,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
     /** Returns the topmost parent window if this is a child of another window, else this. */
     WindowState getTopParentWindow() {
         WindowState w = this;
-        while (w.mIsChildWindow) {
+        while (w != null && w.mIsChildWindow) {
             w = w.getParentWindow();
         }
         return w;
