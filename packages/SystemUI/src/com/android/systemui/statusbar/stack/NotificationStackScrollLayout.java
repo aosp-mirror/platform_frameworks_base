@@ -41,6 +41,7 @@ import android.util.FloatProperty;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Property;
+import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -1224,6 +1225,39 @@ public class NotificationStackScrollLayout extends ViewGroup
         downEvent.setAction(MotionEvent.ACTION_DOWN);
         onScrollTouch(downEvent);
         downEvent.recycle();
+    }
+
+    @Override
+    public boolean onGenericMotionEvent(MotionEvent event) {
+        if (!isScrollingEnabled() || !mIsExpanded || mSwipingInProgress || mExpandingNotification
+                || mDisallowScrollingInThisMotion) {
+            return false;
+        }
+        if ((event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0) {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_SCROLL: {
+                    if (!mIsBeingDragged) {
+                        final float vscroll = event.getAxisValue(MotionEvent.AXIS_VSCROLL);
+                        if (vscroll != 0) {
+                            final int delta = (int) (vscroll * getVerticalScrollFactor());
+                            final int range = getScrollRange();
+                            int oldScrollY = mOwnScrollY;
+                            int newScrollY = oldScrollY - delta;
+                            if (newScrollY < 0) {
+                                newScrollY = 0;
+                            } else if (newScrollY > range) {
+                                newScrollY = range;
+                            }
+                            if (newScrollY != oldScrollY) {
+                                customScrollTo(newScrollY);
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return super.onGenericMotionEvent(event);
     }
 
     private boolean onScrollTouch(MotionEvent ev) {
