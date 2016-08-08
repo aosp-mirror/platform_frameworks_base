@@ -218,7 +218,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     // The drop targets for a task drag
     private DropTarget mFreeformWorkspaceDropTarget = new DropTarget() {
         @Override
-        public boolean acceptsDrop(int x, int y, int width, int height, boolean isCurrentTarget) {
+        public boolean acceptsDrop(int x, int y, int width, int height, Rect insets,
+                boolean isCurrentTarget) {
             // This drop target has a fixed bounds and should be checked last, so just fall through
             // if it is the current target
             if (!isCurrentTarget) {
@@ -230,7 +231,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     private DropTarget mStackDropTarget = new DropTarget() {
         @Override
-        public boolean acceptsDrop(int x, int y, int width, int height, boolean isCurrentTarget) {
+        public boolean acceptsDrop(int x, int y, int width, int height, Rect insets,
+                boolean isCurrentTarget) {
             // This drop target has a fixed bounds and should be checked last, so just fall through
             // if it is the current target
             if (!isCurrentTarget) {
