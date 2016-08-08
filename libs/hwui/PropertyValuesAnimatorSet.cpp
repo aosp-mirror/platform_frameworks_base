@@ -156,7 +156,7 @@ void PropertyAnimator::setFraction(float fraction, long iteration) {
     // This makes sure we only set the fraction = repeatCount + 1 once. It is needed because there
     // might be another animator modifying the same property after this animator finishes, we need
     // to make sure we don't set conflicting values on the same property within one frame.
-    if ((mLatestFraction == mRepeatCount + 1) && (totalFraction >= mRepeatCount + 1)) {
+    if ((mLatestFraction == mRepeatCount + 1.0) && (totalFraction >= mRepeatCount + 1.0)) {
         return;
     }
 
