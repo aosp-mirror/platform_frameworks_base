@@ -636,7 +636,7 @@ public interface WindowManager extends ViewManager {
 
         /**
          * Window type: shares similar characteristics with {@link #TYPE_DREAM}. The layer is
-         * reserved for screenshot region selection.
+         * reserved for screenshot region selection. These windows must not take input focus.
          * @hide
          */
         public static final int TYPE_SCREENSHOT = FIRST_SYSTEM_WINDOW + 36;
