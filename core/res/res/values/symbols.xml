@@ -1607,6 +1607,9 @@
   <java-symbol type="array" name="config_autoBrightnessKeyboardBacklightValues" />
   <java-symbol type="array" name="config_autoBrightnessLcdBacklightValues" />
   <java-symbol type="array" name="config_autoBrightnessLevels" />
+  <java-symbol type="array" name="config_dynamicHysteresisBrightLevels" />
+  <java-symbol type="array" name="config_dynamicHysteresisDarkLevels" />
+  <java-symbol type="array" name="config_dynamicHysteresisLuxLevels" />
   <java-symbol type="array" name="config_protectedNetworks" />
   <java-symbol type="array" name="config_statusBarIcons" />
   <java-symbol type="array" name="config_tether_bluetooth_regexs" />

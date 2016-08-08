@@ -56,12 +56,6 @@ class AutomaticBrightnessController {
     // Period of time in which to consider light samples in milliseconds.
     private static final int AMBIENT_LIGHT_HORIZON = 10000;
 
-    // Hysteresis constraints for brightening or darkening.
-    // The recent lux must have changed by at least this fraction relative to the
-    // current ambient lux before a change will be considered.
-    private static final float BRIGHTENING_LIGHT_HYSTERESIS = 0.10f;
-    private static final float DARKENING_LIGHT_HYSTERESIS = 0.20f;
-
     // The intercept used for the weighting calculation. This is used in order to keep all possible
     // weighting values positive.
     private static final int WEIGHTING_INTERCEPT = AMBIENT_LIGHT_HORIZON;
@@ -95,7 +89,7 @@ class AutomaticBrightnessController {
     private static final int MSG_UPDATE_AMBIENT_LUX = 1;
     private static final int MSG_BRIGHTNESS_ADJUSTMENT_SAMPLE = 2;
 
-    // Callbacks for requesting updates to the the display's power state
+    // Callbacks for requesting updates to the display's power state
     private final Callbacks mCallbacks;
 
     // The sensor manager.
@@ -131,6 +125,9 @@ class AutomaticBrightnessController {
     // brightness based on the current sensor reads. If false, the controller will collect more data
     // and only then decide whether to change brightness.
     private final boolean mResetAmbientLuxAfterWarmUpConfig;
+
+    // accessor object for determining thresholds to change brightness dynamically
+    private final HysteresisLevels mDynamicHysteresis;
 
     // Amount of time to delay auto-brightness after screen on while waiting for
     // the light sensor to warm-up in milliseconds.
@@ -197,7 +194,8 @@ class AutomaticBrightnessController {
             SensorManager sensorManager, Spline autoBrightnessSpline, int lightSensorWarmUpTime,
             int brightnessMin, int brightnessMax, float dozeScaleFactor,
             int lightSensorRate, long brighteningLightDebounceConfig,
-            long darkeningLightDebounceConfig, boolean resetAmbientLuxAfterWarmUpConfig) {
+            long darkeningLightDebounceConfig, boolean resetAmbientLuxAfterWarmUpConfig,
+            HysteresisLevels dynamicHysteresis) {
         mCallbacks = callbacks;
         mTwilight = LocalServices.getService(TwilightManager.class);
         mSensorManager = sensorManager;
@@ -210,6 +208,7 @@ class AutomaticBrightnessController {
         mBrighteningLightDebounceConfig = brighteningLightDebounceConfig;
         mDarkeningLightDebounceConfig = darkeningLightDebounceConfig;
         mResetAmbientLuxAfterWarmUpConfig = resetAmbientLuxAfterWarmUpConfig;
+        mDynamicHysteresis = dynamicHysteresis;
 
         mHandler = new AutomaticBrightnessHandler(looper);
         mAmbientLightRingBuffer = new AmbientLightRingBuffer(mLightSensorRate);
@@ -327,8 +326,8 @@ class AutomaticBrightnessController {
 
     private void setAmbientLux(float lux) {
         mAmbientLux = lux;
-        mBrighteningLuxThreshold = mAmbientLux * (1.0f + BRIGHTENING_LIGHT_HYSTERESIS);
-        mDarkeningLuxThreshold = mAmbientLux * (1.0f - DARKENING_LIGHT_HYSTERESIS);
+        mBrighteningLuxThreshold = mDynamicHysteresis.getBrighteningThreshold(lux);
+        mDarkeningLuxThreshold = mDynamicHysteresis.getDarkeningThreshold(lux);
     }
 
     private float calculateAmbientLux(long now) {
