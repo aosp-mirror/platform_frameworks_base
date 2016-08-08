@@ -267,8 +267,7 @@ public class ExifInterfaceTest extends AndroidTestCase {
         if (expectedValue.hasThumbnail) {
             byte[] thumbnailBytes = exifInterface.getThumbnail();
             assertNotNull(thumbnailBytes);
-            Bitmap thumbnailBitmap =
-                    BitmapFactory.decodeByteArray(thumbnailBytes, 0, thumbnailBytes.length);
+            Bitmap thumbnailBitmap = exifInterface.getThumbnailBitmap();
             assertNotNull(thumbnailBitmap);
             assertEquals(expectedValue.thumbnailWidth, thumbnailBitmap.getWidth());
             assertEquals(expectedValue.thumbnailHeight, thumbnailBitmap.getHeight());

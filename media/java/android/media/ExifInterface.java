@@ -46,6 +46,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -61,7 +62,7 @@ import libcore.io.Streams;
 /**
  * This is a class for reading and writing Exif tags in a JPEG file or a RAW image file.
  * <p>
- * Supported formats are: JPEG, DNG, CR2, NEF, NRW, ARW, RW2, ORF and RAF.
+ * Supported formats are: JPEG, DNG, CR2, NEF, NRW, ARW, RW2, ORF, PEF, SRW and RAF.
  * <p>
  * Attribute mutation is supported for JPEG image files.
  */
@@ -514,6 +515,12 @@ public class ExifInterface {
     private static final int DATA_DEFLATE_ZIP = 8;
     private static final int DATA_PACK_BITS_COMPRESSED = 32773;
     private static final int DATA_LOSSY_JPEG = 34892;
+
+    /**
+     * Constant used for BitsPerSample tag.
+     * See TIFF 6.0 Spec Section 6: RGB Full Color Images, Differences from Palette Color Images
+     */
+    private static final int[] BITS_PER_SAMPLE_RGB = new int[] {8, 8, 8};
 
     /**
      * Constants used for NewSubfileType tag.
@@ -1261,6 +1268,7 @@ public class ExifInterface {
     private int mThumbnailOffset;
     private int mThumbnailLength;
     private byte[] mThumbnailBytes;
+    private int mThumbnailCompression;
     private int mExifOffset;
     private int mOrfMakerNoteOffset;
     private int mOrfThumbnailOffset;
@@ -1843,11 +1851,23 @@ public class ExifInterface {
     }
 
     /**
-     * Returns the thumbnail inside the image file, or {@code null} if there is no thumbnail.
-     * The returned data is in JPEG format and can be decoded using
+     * Returns the JPEG compressed thumbnail inside the image file, or {@code null} if there is no
+     * JPEG compressed thumbnail.
+     * The returned data can be decoded using
      * {@link android.graphics.BitmapFactory#decodeByteArray(byte[],int,int)}
      */
     public byte[] getThumbnail() {
+        if (mThumbnailCompression == DATA_JPEG || mThumbnailCompression == DATA_JPEG_COMPRESSED) {
+            return getThumbnailBytes();
+        }
+        return null;
+    }
+
+    /**
+     * Returns the thumbnail bytes inside the image file, regardless of the compression type of the
+     * thumbnail image.
+     */
+    public byte[] getThumbnailBytes() {
         if (!mHasThumbnail) {
             return null;
         }
@@ -1879,6 +1899,7 @@ public class ExifInterface {
             if (in.read(buffer) != mThumbnailLength) {
                 throw new IOException("Corrupted image");
             }
+            mThumbnailBytes = buffer;
             return buffer;
         } catch (IOException | ErrnoException e) {
             // Couldn't get a thumbnail image.
@@ -1886,6 +1907,52 @@ public class ExifInterface {
             IoUtils.closeQuietly(in);
         }
         return null;
+    }
+
+    /**
+     * Creates and returns a Bitmap object of the thumbnail image based on the byte array and the
+     * thumbnail compression value, or {@code null} if the compression type is unsupported.
+     */
+    public Bitmap getThumbnailBitmap() {
+        if (!mHasThumbnail) {
+            return null;
+        } else if (mThumbnailBytes == null) {
+            mThumbnailBytes = getThumbnailBytes();
+        }
+
+        if (mThumbnailCompression == DATA_JPEG || mThumbnailCompression == DATA_JPEG_COMPRESSED) {
+            return BitmapFactory.decodeByteArray(mThumbnailBytes, 0, mThumbnailLength);
+        } else if (mThumbnailCompression == DATA_UNCOMPRESSED) {
+            int[] rgbValues = new int[mThumbnailBytes.length / 3];
+            byte alpha = (byte) 0xff000000;
+            for (int i = 0; i < rgbValues.length; i++) {
+                rgbValues[i] = alpha + (mThumbnailBytes[3 * i] << 16)
+                        + (mThumbnailBytes[3 * i + 1] << 8) + mThumbnailBytes[3 * i + 2];
+            }
+
+            ExifAttribute imageLengthAttribute =
+                    (ExifAttribute) mAttributes[IFD_THUMBNAIL_HINT].get(TAG_IMAGE_LENGTH);
+            ExifAttribute imageWidthAttribute =
+                    (ExifAttribute) mAttributes[IFD_THUMBNAIL_HINT].get(TAG_IMAGE_WIDTH);
+            if (imageLengthAttribute != null && imageWidthAttribute != null) {
+                int imageLength = imageLengthAttribute.getIntValue(mExifByteOrder);
+                int imageWidth = imageWidthAttribute.getIntValue(mExifByteOrder);
+                return Bitmap.createBitmap(
+                        rgbValues, imageWidth, imageLength, Bitmap.Config.ARGB_8888);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns true if thumbnail image is JPEG Compressed, or false if either thumbnail image does
+     * not exist or thumbnail image is uncompressed.
+     */
+    public boolean isThumbnailCompressed() {
+        if (mThumbnailCompression == DATA_JPEG || mThumbnailCompression == DATA_JPEG_COMPRESSED) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -2944,33 +3011,27 @@ public class ExifInterface {
         ExifAttribute compressionAttribute =
                 (ExifAttribute) thumbnailData.get(TAG_COMPRESSION);
         if (compressionAttribute != null) {
-            int compressionValue = compressionAttribute.getIntValue(mExifByteOrder);
-            switch (compressionValue) {
-                case DATA_UNCOMPRESSED: {
-                    // TODO: add implementation for reading uncompressed thumbnail data (b/28156704)
-                    Log.d(TAG, "Uncompressed thumbnail data cannot be processed");
-                    break;
-                }
+            mThumbnailCompression = compressionAttribute.getIntValue(mExifByteOrder);
+            switch (mThumbnailCompression) {
                 case DATA_JPEG: {
                     handleThumbnailFromJfif(in, thumbnailData);
                     break;
                 }
+                case DATA_UNCOMPRESSED:
                 case DATA_JPEG_COMPRESSED: {
                     handleThumbnailFromStrips(in, thumbnailData);
-                    break;
-                }
-                default: {
                     break;
                 }
             }
         } else {
             // Thumbnail data may not contain Compression tag value
+            mThumbnailCompression = DATA_JPEG;
             handleThumbnailFromJfif(in, thumbnailData);
         }
     }
 
-    // Check JpegInterchangeFormat(JFIF) tags to retrieve thumbnail offset & length values and
-    // create a bitmap based on those values
+    // Check JpegInterchangeFormat(JFIF) tags to retrieve thumbnail offset & length values
+    // and reads the corresponding bytes if stream does not support seek function
     private void handleThumbnailFromJfif(InputStream in, HashMap thumbnailData) throws IOException {
         ExifAttribute jpegInterchangeFormatAttribute =
                 (ExifAttribute) thumbnailData.get(TAG_JPEG_INTERCHANGE_FORMAT);
@@ -2978,72 +3039,96 @@ public class ExifInterface {
                 (ExifAttribute) thumbnailData.get(TAG_JPEG_INTERCHANGE_FORMAT_LENGTH);
         if (jpegInterchangeFormatAttribute != null
                 && jpegInterchangeFormatLengthAttribute != null) {
-            int jpegInterchangeFormat =
-                    jpegInterchangeFormatAttribute.getIntValue(mExifByteOrder);
-            int jpegInterchangeFormatLength =
-                    jpegInterchangeFormatLengthAttribute.getIntValue(mExifByteOrder);
-            createJpegThumbnailBitmap(in, jpegInterchangeFormat, jpegInterchangeFormatLength);
-        }
-    }
+            int thumbnailOffset = jpegInterchangeFormatAttribute.getIntValue(mExifByteOrder);
+            int thumbnailLength = jpegInterchangeFormatLengthAttribute.getIntValue(mExifByteOrder);
 
-    // Check StripOffsets & StripByteCounts tags to retrieve thumbnail offset & length values and
-    // create a bitmap based on those values
-    private void handleThumbnailFromStrips(InputStream in, HashMap thumbnailData)
-            throws IOException {
-        ExifAttribute stripOffsetsAttribute =
-                (ExifAttribute) thumbnailData.get(TAG_STRIP_OFFSETS);
-        ExifAttribute stripByteCountsAttribute =
-                (ExifAttribute) thumbnailData.get(TAG_STRIP_BYTE_COUNTS);
-        if (stripOffsetsAttribute != null && stripByteCountsAttribute != null) {
-            long[] stripOffsetsArray =
-                    (long[]) stripOffsetsAttribute.getValue(mExifByteOrder);
-            long[] stripByteCountsArray =
-                    (long[]) stripByteCountsAttribute.getValue(mExifByteOrder);
-            if (stripOffsetsArray.length == 1) {
-                int stripOffsetsSum = (int) Arrays.stream(stripOffsetsArray).sum();
-                int stripByteCountsSum = (int) Arrays.stream(stripByteCountsArray).sum();
-                createJpegThumbnailBitmap(in, stripOffsetsSum, stripByteCountsSum);
-            } else {
-                // TODO: implement method to read multiple strips (b/29737797)
-                Log.d(TAG, "Multiple strip thumbnail data cannot be processed");
+            // The following code limits the size of thumbnail size not to overflow EXIF data area.
+            thumbnailLength = Math.min(thumbnailLength, in.available() - thumbnailOffset);
+            if (mMimeType == IMAGE_TYPE_JPEG || mMimeType == IMAGE_TYPE_RAF
+                    || mMimeType == IMAGE_TYPE_RW2) {
+                thumbnailOffset += mExifOffset;
+            } else if (mMimeType == IMAGE_TYPE_ORF) {
+                // Update offset value since RAF files have IFD data preceding MakerNote data.
+                thumbnailOffset += mOrfMakerNoteOffset;
             }
-        }
-    }
-
-    // Creates a bitmap data based on thumbnail offset and length for JPEG Compression
-    private void createJpegThumbnailBitmap(InputStream in, int thumbnailOffset, int thumbnailLength)
-            throws IOException {
-        // The following code limits the size of thumbnail size not to overflow EXIF data area.
-        thumbnailLength = Math.min(thumbnailLength, in.available() - thumbnailOffset);
-        if (mMimeType == IMAGE_TYPE_JPEG || mMimeType == IMAGE_TYPE_RAF
-                || mMimeType == IMAGE_TYPE_RW2) {
-            thumbnailOffset += mExifOffset;
-        } else if (mMimeType == IMAGE_TYPE_ORF) {
-            // Update offset value since RAF files have IFD data preceding MakerNote data.
-            thumbnailOffset += mOrfMakerNoteOffset;
-        }
-        if (DEBUG) {
-            Log.d(TAG, "Creating JPEG Thumbnail with offset: " + thumbnailOffset);
-        }
-        if (thumbnailOffset > 0 && thumbnailLength > 0) {
-            mHasThumbnail = true;
-            mThumbnailOffset = thumbnailOffset;
-            mThumbnailLength = thumbnailLength;
-            if (mFilename == null && mAssetInputStream == null && mSeekableFileDescriptor == null) {
-                // Save the thumbnail in memory if the input doesn't support reading again.
-                byte[] thumbnailBytes = new byte[thumbnailLength];
-                in.skip(thumbnailOffset);
-                in.read(thumbnailBytes);
-                mThumbnailBytes = thumbnailBytes;
-                if (DEBUG) {
-                    Bitmap bitmap = BitmapFactory.decodeByteArray(
-                            thumbnailBytes, 0, thumbnailBytes.length);
-                    Log.d(TAG, "Thumbnail offset: " + mThumbnailOffset + ", length: "
-                            + mThumbnailLength + ", width: " + bitmap.getWidth()
-                            + ", height: "
-                            + bitmap.getHeight());
+            if (DEBUG) {
+                Log.d(TAG, "Setting thumbnail attributes with offset: " + thumbnailOffset);
+            }
+            if (thumbnailOffset > 0 && thumbnailLength > 0) {
+                mHasThumbnail = true;
+                mThumbnailOffset = thumbnailOffset;
+                mThumbnailLength = thumbnailLength;
+                if (mFilename == null && mAssetInputStream == null
+                        && mSeekableFileDescriptor == null) {
+                    // Save the thumbnail in memory if the input doesn't support reading again.
+                    byte[] thumbnailBytes = new byte[thumbnailLength];
+                    in.skip(thumbnailOffset);
+                    in.read(thumbnailBytes);
+                    mThumbnailBytes = thumbnailBytes;
                 }
             }
+        }
+    }
+
+    // Check StripOffsets & StripByteCounts tags to retrieve thumbnail offset & length values
+    private void handleThumbnailFromStrips(InputStream in, HashMap thumbnailData)
+            throws IOException {
+        ExifAttribute bitsPerSampleAttribute =
+                (ExifAttribute) thumbnailData.get(TAG_BITS_PER_SAMPLE);
+
+        if (bitsPerSampleAttribute != null) {
+            int[] bitsPerSampleValue = (int[]) bitsPerSampleAttribute.getValue(mExifByteOrder);
+
+            if (Arrays.equals(BITS_PER_SAMPLE_RGB, bitsPerSampleValue)) {
+                ExifAttribute stripOffsetsAttribute =
+                        (ExifAttribute) thumbnailData.get(TAG_STRIP_OFFSETS);
+                ExifAttribute stripByteCountsAttribute =
+                        (ExifAttribute) thumbnailData.get(TAG_STRIP_BYTE_COUNTS);
+
+                if (stripOffsetsAttribute != null && stripByteCountsAttribute != null) {
+                    long[] stripOffsets =
+                            (long[]) stripOffsetsAttribute.getValue(mExifByteOrder);
+                    long[] stripByteCounts =
+                            (long[]) stripByteCountsAttribute.getValue(mExifByteOrder);
+
+                    // Set thumbnail byte array data for non-consecutive strip bytes
+                    byte[] totalStripBytes =
+                            new byte[(int) Arrays.stream(stripByteCounts).sum()];
+
+                    int bytesRead = 0;
+                    int bytesAdded = 0;
+                    for (int i = 0; i < stripOffsets.length; i++) {
+                        int stripOffset = (int) stripOffsets[i];
+                        int stripByteCount = (int) stripByteCounts[i];
+
+                        // Skip to offset
+                        int skipBytes = stripOffset - bytesRead;
+                        if (skipBytes < 0) {
+                            Log.d(TAG, "Invalid strip offset value");
+                        }
+                        in.skip(skipBytes);
+                        bytesRead += skipBytes;
+
+                        // Read strip bytes
+                        byte[] stripBytes = new byte[stripByteCount];
+                        in.read(stripBytes);
+                        bytesRead += stripByteCount;
+
+                        // Add bytes to array
+                        System.arraycopy(stripBytes, 0, totalStripBytes, bytesAdded,
+                                stripBytes.length);
+                        bytesAdded += stripBytes.length;
+                    }
+
+                    mHasThumbnail = true;
+                    mThumbnailBytes = totalStripBytes;
+                }
+            }
+        } else {
+            if (DEBUG) {
+                Log.d(TAG, "Only Uncompressed RGB data process is supported");
+            }
+            return;
         }
     }
 
