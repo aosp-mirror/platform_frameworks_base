@@ -601,7 +601,7 @@ any business logic inside the callback method that you invoked from the listener
     &lt;import type="com.example.User"/&gt;
     &lt;import type="java.util.List"/&gt;
     &lt;variable name="user" type="User"/&gt;
-    &lt;variable name="userList" type="List&lt;User&gt;"/&gt;
+    &lt;variable name="userList" type="List&amp;lt;User&amp;gt;"/&gt;
 &lt;/data&gt;
 </pre>
 <p class="caution">
@@ -945,9 +945,9 @@ android:transitionName='&commat;{"image_" + id}'
     &lt;import type="android.util.SparseArray"/&gt;
     &lt;import type="java.util.Map"/&gt;
     &lt;import type="java.util.List"/&gt;
-    &lt;variable name="list" type="List&lt;String&gt;"/&gt;
-    &lt;variable name="sparse" type="SparseArray&lt;String&gt;"/&gt;
-    &lt;variable name="map" type="Map&lt;String, String&gt;"/&gt;
+    &lt;variable name="list" type="List&amp;lt;String&amp;gt;"/&gt;
+    &lt;variable name="sparse" type="SparseArray&amp;lt;String&amp;gt;"/&gt;
+    &lt;variable name="map" type="Map&amp;lt;String, String&amp;gt;"/&gt;
     &lt;variable name="index" type="int"/&gt;
     &lt;variable name="key" type="String"/&gt;
 &lt;/data&gt;
@@ -1247,7 +1247,7 @@ user.put("age", 17);
 <pre>
 &lt;data&gt;
     &lt;import type="android.databinding.ObservableMap"/&gt;
-    &lt;variable name="user" type="ObservableMap&lt;String, Object&gt;"/&gt;
+    &lt;variable name="user" type="ObservableMap&amp;lt;String, Object&amp;gt;"/&gt;
 &lt;/data&gt;
 …
 &lt;TextView
@@ -1277,7 +1277,7 @@ user.add(17);
 &lt;data&gt;
     &lt;import type="android.databinding.ObservableList"/&gt;
     &lt;import type="com.example.my.app.Fields"/&gt;
-    &lt;variable name="user" type="ObservableList&lt;Object&gt;"/&gt;
+    &lt;variable name="user" type="ObservableList&amp;lt;Object&amp;gt;"/&gt;
 &lt;/data&gt;
 …
 &lt;TextView
