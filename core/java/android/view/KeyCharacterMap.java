@@ -439,6 +439,7 @@ public class KeyCharacterMap implements Parcelable {
      * @param keyCode The keycode.
      * @param chars The array of matching characters to consider.
      * @return The matching associated character, or 0 if none.
+     * @throws {@link IllegalArgumentException} if the passed array of characters is null.
      */
     public char getMatch(int keyCode, char[] chars) {
         return getMatch(keyCode, chars, 0);
@@ -453,6 +454,7 @@ public class KeyCharacterMap implements Parcelable {
      * @param chars The array of matching characters to consider.
      * @param metaState The preferred meta key modifier state.
      * @return The matching associated character, or 0 if none.
+     * @throws {@link IllegalArgumentException} if the passed array of characters is null.
      */
     public char getMatch(int keyCode, char[] chars, int metaState) {
         if (chars == null) {
@@ -599,6 +601,7 @@ public class KeyCharacterMap implements Parcelable {
      * @param chars The sequence of characters to generate.
      * @return An array of {@link KeyEvent} objects, or null if the given char array
      *         can not be generated using the current key character map.
+     * @throws {@link IllegalArgumentException} if the passed array of characters is null.
      */
     public KeyEvent[] getEvents(char[] chars) {
         if (chars == null) {
