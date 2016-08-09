@@ -388,8 +388,10 @@ bool ResourceFileFlattener::linkAndVersionXmlFile(const ResourceEntry* entry,
 
         // Find the first SDK level used that is higher than this defined config and
         // not superseded by a lower or equal SDK level resource.
+        const int minSdkVersion = mContext->getMinSdkVersion();
         for (int sdkLevel : xmlLinker.getSdkLevels()) {
-            if (sdkLevel > outFileOp->xmlToFlatten->file.config.sdkVersion) {
+            if (sdkLevel > minSdkVersion
+                    && sdkLevel > outFileOp->xmlToFlatten->file.config.sdkVersion) {
                 if (!shouldGenerateVersionedResource(entry, outFileOp->xmlToFlatten->file.config,
                                                      sdkLevel)) {
                     // If we shouldn't generate a versioned resource, stop checking.
@@ -498,7 +500,10 @@ bool ResourceFileFlattener::flatten(ResourceTable* table, IArchiveWriter* archiv
                 if (fileOp.xmlToFlatten) {
                     Maybe<size_t> maxSdkLevel;
                     if (!mOptions.noAutoVersion && !fileOp.skipVersion) {
-                        maxSdkLevel = std::max<size_t>(config.sdkVersion, 1u);
+                        maxSdkLevel =
+                                std::max<size_t>(
+                                        std::max<size_t>(config.sdkVersion, 1u),
+                                        mContext->getMinSdkVersion());
                     }
 
                     bool result = flattenXml(fileOp.xmlToFlatten.get(), fileOp.dstPath, maxSdkLevel,
@@ -1388,6 +1393,17 @@ public:
             return 1;
         }
 
+        // Must come before ResourceFileFlattener as ResourceFileFlattener
+        // relies on the minSdkVersion to properly flatten files.
+        Maybe<AppInfo> maybeAppInfo = extractAppInfoFromManifest(manifestXml.get(),
+                                                                 mContext->getDiagnostics());
+        if (maybeAppInfo && maybeAppInfo.value().minSdkVersion) {
+            if (Maybe<int> maybeMinSdkVersion =
+                    ResourceUtils::tryParseSdkVersion(maybeAppInfo.value().minSdkVersion.value())) {
+                mContext->setMinSdkVersion(maybeMinSdkVersion.value());
+            }
+        }
+
         ResourceFileFlattenerOptions fileFlattenerOptions;
         fileFlattenerOptions.keepRawValues = mOptions.staticLib;
         fileFlattenerOptions.doNotCompressAnything = mOptions.doNotCompressAnything;
@@ -1408,15 +1424,6 @@ public:
             if (!versioner.consume(mContext, &mFinalTable)) {
                 mContext->getDiagnostics()->error(DiagMessage() << "failed versioning styles");
                 return 1;
-            }
-        }
-
-        Maybe<AppInfo> maybeAppInfo = extractAppInfoFromManifest(manifestXml.get(),
-                                                                 mContext->getDiagnostics());
-        if (maybeAppInfo && maybeAppInfo.value().minSdkVersion) {
-            if (Maybe<int> maybeMinSdkVersion =
-                    ResourceUtils::tryParseSdkVersion(maybeAppInfo.value().minSdkVersion.value())) {
-                mContext->setMinSdkVersion(maybeMinSdkVersion.value());
             }
         }
 
