@@ -149,50 +149,53 @@ int RecordingCanvas::saveLayer(float left, float top, float right, float bottom,
 
     // Map visible bounds back to layer space, and intersect with parameter bounds
     Rect layerBounds = visibleBounds;
-    Matrix4 inverse;
-    inverse.loadInverse(*previous.transform);
-    inverse.mapRect(layerBounds);
-    layerBounds.doIntersect(unmappedBounds);
+    if (CC_LIKELY(!layerBounds.isEmpty())) {
+        // if non-empty, can safely map by the inverse transform
+        Matrix4 inverse;
+        inverse.loadInverse(*previous.transform);
+        inverse.mapRect(layerBounds);
+        layerBounds.doIntersect(unmappedBounds);
+    }
 
     int saveValue = mState.save((int) flags);
     Snapshot& snapshot = *mState.writableSnapshot();
 
     // layerBounds is in original bounds space, but clipped by current recording clip
-    if (layerBounds.isEmpty() || unmappedBounds.isEmpty()) {
-        // Don't bother recording layer, since it's been rejected
+    if (!layerBounds.isEmpty() && !unmappedBounds.isEmpty()) {
         if (CC_LIKELY(clippedLayer)) {
-            snapshot.resetClip(0, 0, 0, 0);
+            auto previousClip = getRecordedClip(); // capture before new snapshot clip has changed
+            if (addOp(alloc().create_trivial<BeginLayerOp>(
+                    unmappedBounds,
+                    *previous.transform, // transform to *draw* with
+                    previousClip, // clip to *draw* with
+                    refPaint(paint))) >= 0) {
+                snapshot.flags |= Snapshot::kFlagIsLayer | Snapshot::kFlagIsFboLayer;
+                snapshot.initializeViewport(unmappedBounds.getWidth(), unmappedBounds.getHeight());
+                snapshot.transform->loadTranslate(-unmappedBounds.left, -unmappedBounds.top, 0.0f);
+
+                Rect clip = layerBounds;
+                clip.translate(-unmappedBounds.left, -unmappedBounds.top);
+                snapshot.resetClip(clip.left, clip.top, clip.right, clip.bottom);
+                snapshot.roundRectClipState = nullptr;
+                return saveValue;
+            }
+        } else {
+            if (addOp(alloc().create_trivial<BeginUnclippedLayerOp>(
+                    unmappedBounds,
+                    *mState.currentSnapshot()->transform,
+                    getRecordedClip(),
+                    refPaint(paint))) >= 0) {
+                snapshot.flags |= Snapshot::kFlagIsLayer;
+                return saveValue;
+            }
         }
-        return saveValue;
     }
 
+    // Layer not needed, so skip recording it...
     if (CC_LIKELY(clippedLayer)) {
-        auto previousClip = getRecordedClip(); // note: done before new snapshot's clip has changed
-
-        snapshot.flags |= Snapshot::kFlagIsLayer | Snapshot::kFlagIsFboLayer;
-        snapshot.initializeViewport(unmappedBounds.getWidth(), unmappedBounds.getHeight());
-        snapshot.transform->loadTranslate(-unmappedBounds.left, -unmappedBounds.top, 0.0f);
-
-        Rect clip = layerBounds;
-        clip.translate(-unmappedBounds.left, -unmappedBounds.top);
-        snapshot.resetClip(clip.left, clip.top, clip.right, clip.bottom);
-        snapshot.roundRectClipState = nullptr;
-
-        addOp(alloc().create_trivial<BeginLayerOp>(
-                unmappedBounds,
-                *previous.transform, // transform to *draw* with
-                previousClip, // clip to *draw* with
-                refPaint(paint)));
-    } else {
-        snapshot.flags |= Snapshot::kFlagIsLayer;
-
-        addOp(alloc().create_trivial<BeginUnclippedLayerOp>(
-                unmappedBounds,
-                *mState.currentSnapshot()->transform,
-                getRecordedClip(),
-                refPaint(paint)));
+        // ... and set empty clip to reject inner content, if possible
+        snapshot.resetClip(0, 0, 0, 0);
     }
-
     return saveValue;
 }
 
@@ -619,7 +622,7 @@ void RecordingCanvas::callDrawGLFunction(Functor* functor,
             functor));
 }
 
-size_t RecordingCanvas::addOp(RecordedOp* op) {
+int RecordingCanvas::addOp(RecordedOp* op) {
     // skip op with empty clip
     if (op->localClip && op->localClip->rect.isEmpty()) {
         // NOTE: this rejection happens after op construction/content ref-ing, so content ref'd
