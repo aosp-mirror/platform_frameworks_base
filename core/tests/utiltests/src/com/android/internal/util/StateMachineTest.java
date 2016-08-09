@@ -39,7 +39,6 @@ import junit.framework.TestCase;
 /**
  * Test for StateMachine.
  */
-@Suppress // Failing
 public class StateMachineTest extends TestCase {
     private static final String ENTER = "enter";
     private static final String EXIT = "exit";
@@ -100,7 +99,7 @@ public class StateMachineTest extends TestCase {
 
         @Override
         public void onQuitting() {
-            log("onQuitting");
+            tlog("onQuitting");
             addLogRec(ON_QUITTING);
             mLogRecs = mThisSm.copyLogRecs();
             synchronized (mThisSm) {
@@ -111,7 +110,7 @@ public class StateMachineTest extends TestCase {
         class S1 extends State {
             @Override
             public void exit() {
-                log("S1.exit");
+                tlog("S1.exit");
                 addLogRec(EXIT);
             }
             @Override
@@ -119,13 +118,13 @@ public class StateMachineTest extends TestCase {
                 switch(message.what) {
                     // Sleep and assume the other messages will be queued up.
                     case TEST_CMD_1: {
-                        log("TEST_CMD_1");
+                        tlog("TEST_CMD_1");
                         sleep(500);
                         quit();
                         break;
                     }
                     default: {
-                        log("default what=" + message.what);
+                        tlog("default what=" + message.what);
                         break;
                     }
                 }
@@ -201,7 +200,7 @@ public class StateMachineTest extends TestCase {
 
         @Override
         public void onQuitting() {
-            log("onQuitting");
+            tlog("onQuitting");
             addLogRec(ON_QUITTING);
             // Get a copy of the log records since we're quitting and they will disappear
             mLogRecs = mThisSm.copyLogRecs();
@@ -214,7 +213,7 @@ public class StateMachineTest extends TestCase {
         class S1 extends State {
             @Override
             public void exit() {
-                log("S1.exit");
+                tlog("S1.exit");
                 addLogRec(EXIT);
             }
             @Override
@@ -222,13 +221,13 @@ public class StateMachineTest extends TestCase {
                 switch(message.what) {
                     // Sleep and assume the other messages will be queued up.
                     case TEST_CMD_1: {
-                        log("TEST_CMD_1");
+                        tlog("TEST_CMD_1");
                         sleep(500);
                         quitNow();
                         break;
                     }
                     default: {
-                        log("default what=" + message.what);
+                        tlog("default what=" + message.what);
                         break;
                     }
                 }
@@ -309,12 +308,12 @@ public class StateMachineTest extends TestCase {
                 // Test transitions in enter on the initial state work
                 addLogRec(ENTER);
                 transitionTo(mS2);
-                log("S1.enter");
+                tlog("S1.enter");
             }
             @Override
             public void exit() {
                 addLogRec(EXIT);
-                log("S1.exit");
+                tlog("S1.exit");
             }
         }
 
@@ -322,7 +321,7 @@ public class StateMachineTest extends TestCase {
             @Override
             public void enter() {
                 addLogRec(ENTER);
-                log("S2.enter");
+                tlog("S2.enter");
             }
             @Override
             public void exit() {
@@ -332,14 +331,14 @@ public class StateMachineTest extends TestCase {
                 assertEquals(TEST_CMD_1, getCurrentMessage().what);
                 addLogRec(EXIT);
 
-                log("S2.exit");
+                tlog("S2.exit");
             }
             @Override
             public boolean processMessage(Message message) {
                 // Start a transition to S3 but it will be
                 // changed to a transition to S4 in exit
                 transitionTo(mS3);
-                log("S2.processMessage");
+                tlog("S2.processMessage");
                 return HANDLED;
             }
         }
@@ -348,12 +347,12 @@ public class StateMachineTest extends TestCase {
             @Override
             public void enter() {
                 addLogRec(ENTER);
-                log("S3.enter");
+                tlog("S3.enter");
             }
             @Override
             public void exit() {
                 addLogRec(EXIT);
-                log("S3.exit");
+                tlog("S3.exit");
             }
         }
 
@@ -363,12 +362,12 @@ public class StateMachineTest extends TestCase {
                 addLogRec(ENTER);
                 // Test that we can do halting in an enter/exit
                 transitionToHaltingState();
-                log("S4.enter");
+                tlog("S4.enter");
             }
             @Override
             public void exit() {
                 addLogRec(EXIT);
-                log("S4.exit");
+                tlog("S4.exit");
             }
         }
 
@@ -572,7 +571,7 @@ public class StateMachineTest extends TestCase {
 
             // Set the initial state
             setInitialState(mS1);
-            if (DBG) log("StateMachine1: ctor X");
+            if (DBG) tlog("StateMachine1: ctor X");
         }
 
         class S1 extends State {
@@ -673,7 +672,7 @@ public class StateMachineTest extends TestCase {
 
             // Set the initial state
             setInitialState(mS1);
-            if (DBG) log("StateMachine2: ctor X");
+            if (DBG) tlog("StateMachine2: ctor X");
         }
 
         class S1 extends State {
@@ -782,7 +781,7 @@ public class StateMachineTest extends TestCase {
 
             // Set the initial state will be the child
             setInitialState(mChildState);
-            if (DBG) log("StateMachine3: ctor X");
+            if (DBG) tlog("StateMachine3: ctor X");
         }
 
         class ParentState extends State {
@@ -869,7 +868,7 @@ public class StateMachineTest extends TestCase {
 
             // Set the initial state will be child 1
             setInitialState(mChildState1);
-            if (DBG) log("StateMachine4: ctor X");
+            if (DBG) tlog("StateMachine4: ctor X");
         }
 
         class ParentState extends State {
@@ -969,7 +968,7 @@ public class StateMachineTest extends TestCase {
 
             // Set the initial state will be the child
             setInitialState(mChildState1);
-            if (DBG) log("StateMachine5: ctor X");
+            if (DBG) tlog("StateMachine5: ctor X");
         }
 
         class ParentState1 extends State {
@@ -1296,7 +1295,7 @@ public class StateMachineTest extends TestCase {
 
             // Set the initial state
             setInitialState(mS1);
-            if (DBG) log("StateMachine6: ctor X");
+            if (DBG) tlog("StateMachine6: ctor X");
         }
 
         class S1 extends State {
@@ -1383,7 +1382,7 @@ public class StateMachineTest extends TestCase {
 
             // Set the initial state
             setInitialState(mS1);
-            if (DBG) log("StateMachine7: ctor X");
+            if (DBG) tlog("StateMachine7: ctor X");
         }
 
         class S1 extends State {
@@ -1654,7 +1653,7 @@ public class StateMachineTest extends TestCase {
 
         Hsm1(String name) {
             super(name);
-            log("ctor E");
+            tlog("ctor E");
 
             // Add states, use indentation to show hierarchy
             addState(mP1);
@@ -1664,22 +1663,22 @@ public class StateMachineTest extends TestCase {
 
             // Set the initial state
             setInitialState(mS1);
-            log("ctor X");
+            tlog("ctor X");
         }
 
         class P1 extends State {
             @Override
             public void enter() {
-                log("P1.enter");
+                tlog("P1.enter");
             }
             @Override
             public void exit() {
-                log("P1.exit");
+                tlog("P1.exit");
             }
             @Override
             public boolean processMessage(Message message) {
                 boolean retVal;
-                log("P1.processMessage what=" + message.what);
+                tlog("P1.processMessage what=" + message.what);
                 switch(message.what) {
                 case CMD_2:
                     // CMD_2 will arrive in mS2 before CMD_3
@@ -1700,15 +1699,15 @@ public class StateMachineTest extends TestCase {
         class S1 extends State {
             @Override
             public void enter() {
-                log("S1.enter");
+                tlog("S1.enter");
             }
             @Override
             public void exit() {
-                log("S1.exit");
+                tlog("S1.exit");
             }
             @Override
             public boolean processMessage(Message message) {
-                log("S1.processMessage what=" + message.what);
+                tlog("S1.processMessage what=" + message.what);
                 if (message.what == CMD_1) {
                     // Transition to ourself to show that enter/exit is called
                     transitionTo(mS1);
@@ -1723,16 +1722,16 @@ public class StateMachineTest extends TestCase {
         class S2 extends State {
             @Override
             public void enter() {
-                log("S2.enter");
+                tlog("S2.enter");
             }
             @Override
             public void exit() {
-                log("S2.exit");
+                tlog("S2.exit");
             }
             @Override
             public boolean processMessage(Message message) {
                 boolean retVal;
-                log("S2.processMessage what=" + message.what);
+                tlog("S2.processMessage what=" + message.what);
                 switch(message.what) {
                 case(CMD_2):
                     sendMessage(CMD_4);
@@ -1754,16 +1753,16 @@ public class StateMachineTest extends TestCase {
         class P2 extends State {
             @Override
             public void enter() {
-                log("P2.enter");
+                tlog("P2.enter");
                 sendMessage(CMD_5);
             }
             @Override
             public void exit() {
-                log("P2.exit");
+                tlog("P2.exit");
             }
             @Override
             public boolean processMessage(Message message) {
-                log("P2.processMessage what=" + message.what);
+                tlog("P2.processMessage what=" + message.what);
                 switch(message.what) {
                 case(CMD_3):
                     break;
@@ -1779,7 +1778,7 @@ public class StateMachineTest extends TestCase {
 
         @Override
         protected void onHalting() {
-            log("halting");
+            tlog("halting");
             synchronized (this) {
                 this.notifyAll();
             }
@@ -1852,11 +1851,11 @@ public class StateMachineTest extends TestCase {
         if (DBG) tlog("testStateMachineSharedThread X");
     }
 
-    private void tlog(String s) {
+    private static void tlog(String s) {
         Log.d(TAG, s);
     }
 
-    private void tloge(String s) {
+    private static void tloge(String s) {
         Log.e(TAG, s);
     }
 }
