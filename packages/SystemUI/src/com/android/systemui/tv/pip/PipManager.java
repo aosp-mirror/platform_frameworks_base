@@ -723,10 +723,7 @@ public class PipManager {
         return mPipRecentsOverlayManager;
     }
 
-    private void updatePipVisibility(boolean visible) {
-        TvStatusBar statusBar = ((SystemUIApplication) mContext).getComponent(TvStatusBar.class);
-        if (statusBar != null) {
-            statusBar.updatePipVisibility(visible);
-        }
+    private void updatePipVisibility(final boolean visible) {
+        SystemServicesProxy.getInstance(mContext).setTvPipVisibility(visible);
     }
 }
