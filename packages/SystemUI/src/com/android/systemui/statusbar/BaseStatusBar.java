@@ -2504,8 +2504,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         boolean inUse = mPowerManager.isScreenOn()
                 && (!mStatusBarKeyguardViewManager.isShowing()
-                || mStatusBarKeyguardViewManager.isOccluded())
-                && !mStatusBarKeyguardViewManager.isInputRestricted();
+                || mStatusBarKeyguardViewManager.isOccluded());
         try {
             inUse = inUse && !mDreamManager.isDreaming();
         } catch (RemoteException e) {
