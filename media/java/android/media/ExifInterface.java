@@ -3240,20 +3240,27 @@ public class ExifInterface {
             }
         } else {
             // Update for JPEG image
-            if (imageType == IFD_TIFF_HINT) {
-                ExifAttribute pixelXDimAttribute =
-                        (ExifAttribute) mAttributes[IFD_EXIF_HINT].get(TAG_PIXEL_X_DIMENSION);
-                ExifAttribute pixelYDimAttribute =
-                        (ExifAttribute) mAttributes[IFD_EXIF_HINT].get(TAG_PIXEL_Y_DIMENSION);
-                if (pixelXDimAttribute != null && pixelYDimAttribute != null) {
-                    mAttributes[imageType].put(TAG_IMAGE_WIDTH, pixelXDimAttribute);
-                    mAttributes[imageType].put(TAG_IMAGE_LENGTH, pixelYDimAttribute);
-                } else {
-                    retrieveJpegImageSize(in, imageType);
+            ExifAttribute newSubfileTypeAttribute =
+                    (ExifAttribute) mAttributes[imageType].get(TAG_NEW_SUBFILE_TYPE);
+
+            if (newSubfileTypeAttribute != null) {
+                int newSubfileTypeValue = newSubfileTypeAttribute.getIntValue(mExifByteOrder);
+
+                if (newSubfileTypeValue == ORIGINAL_RESOLUTION_IMAGE) {
+                    // Update only for the primary image (OriginalResolutionImage)
+                    ExifAttribute pixelXDimAttribute =
+                            (ExifAttribute) mAttributes[IFD_EXIF_HINT].get(TAG_PIXEL_X_DIMENSION);
+                    ExifAttribute pixelYDimAttribute =
+                            (ExifAttribute) mAttributes[IFD_EXIF_HINT].get(TAG_PIXEL_Y_DIMENSION);
+
+                    if (pixelXDimAttribute != null && pixelYDimAttribute != null) {
+                        mAttributes[imageType].put(TAG_IMAGE_WIDTH, pixelXDimAttribute);
+                        mAttributes[imageType].put(TAG_IMAGE_LENGTH, pixelYDimAttribute);
+                        return;
+                    }
                 }
-            } else {
-                retrieveJpegImageSize(in, imageType);
             }
+            retrieveJpegImageSize(in, imageType);
         }
     }
 
