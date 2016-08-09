@@ -210,7 +210,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
 
     /**
      * In order to avoid breaking old apps, we only throw exception on invalid VectorDrawable
-     * animations * for apps targeting N and later. For older apps, we ignore (i.e. quietly skip)
+     * animations for apps targeting N and later. For older apps, we ignore (i.e. quietly skip)
      * these animations.
      *
      * @return whether invalid animations for vector drawable should be ignored.
