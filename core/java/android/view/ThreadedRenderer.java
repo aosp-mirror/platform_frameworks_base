@@ -520,16 +520,6 @@ public final class ThreadedRenderer {
     }
 
     /**
-     * This method should be invoked whenever the current hardware renderer
-     * context should be reset.
-     *
-     * @param surface The surface to hardware accelerate
-     */
-    void invalidate(Surface surface) {
-        updateSurface(surface);
-    }
-
-    /**
      * Detaches the layer's surface texture from the GL context and releases
      * the texture id
      */
