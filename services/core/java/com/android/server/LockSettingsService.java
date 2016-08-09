@@ -52,6 +52,7 @@ import android.os.RemoteException;
 import android.os.storage.IMountService;
 import android.os.storage.StorageManager;
 import android.os.ServiceManager;
+import android.os.StrictMode;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -1366,6 +1367,10 @@ public class LockSettingsService extends ILockSettings.Stub {
         if (TextUtils.isEmpty(credential)) {
             return VerifyCredentialResponse.ERROR;
         }
+
+        // We're potentially going to be doing a bunch of disk I/O below as part
+        // of unlocking the user, so yell if calling from the main thread.
+        StrictMode.noteDiskRead();
 
         if (storedHash.version == CredentialHash.VERSION_LEGACY) {
             byte[] hash = credentialUtil.toHash(credential, userId);
