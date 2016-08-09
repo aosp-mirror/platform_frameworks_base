@@ -510,6 +510,14 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
+    public void setKeyguardAnimatingIn(boolean animating) throws RemoteException {
+    }
+
+    @Override
+    public void setSwitchingUser(boolean switching) throws RemoteException {
+    }
+
+    @Override
     public void lockNow(Bundle options) {
         // TODO Auto-generated method stub
     }
