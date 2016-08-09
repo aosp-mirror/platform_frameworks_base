@@ -120,6 +120,7 @@ private:
     void releaseAnimation(Animation*) const;
     bool parseAnimationDesc(Animation&);
     bool preloadZip(Animation &animation);
+    bool playSoundsAllowed() const;
 
     void checkExit();
 
@@ -137,6 +138,7 @@ private:
     sp<Surface> mFlingerSurface;
     bool        mClockEnabled;
     bool        mTimeIsAccurate;
+    bool        mSystemBoot;
     String8     mZipFileName;
     SortedVector<String8> mLoadedFiles;
     sp<TimeCheckThread> mTimeCheckThread;
