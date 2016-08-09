@@ -556,6 +556,7 @@ public class BugreportProgressService extends Service {
     private void cancel(int id) {
         MetricsLogger.action(this, MetricsEvent.ACTION_BUGREPORT_NOTIFICATION_ACTION_CANCEL);
         Log.v(TAG, "cancel: ID=" + id);
+        mInfoDialog.cancel();
         final BugreportInfo info = getInfo(id);
         if (info != null && !info.finished) {
             Log.i(TAG, "Cancelling bugreport service (ID=" + id + ") on user's request");
@@ -563,7 +564,6 @@ public class BugreportProgressService extends Service {
             deleteScreenshots(info);
         }
         stopProgress(id);
-        mInfoDialog.cancel();
     }
 
     /**
