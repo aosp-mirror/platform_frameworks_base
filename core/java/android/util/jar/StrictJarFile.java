@@ -175,6 +175,18 @@ public final class StrictJarFile {
         }
     }
 
+    @Override
+    protected void finalize() throws Throwable {
+        try {
+            if (guard != null) {
+                guard.warnIfOpen();
+            }
+            close();
+        } finally {
+            super.finalize();
+        }
+    }
+
     private InputStream getZipInputStream(ZipEntry ze) {
         if (ze.getMethod() == ZipEntry.STORED) {
             return new RAFStream(raf, ze.getDataOffset(),
