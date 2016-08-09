@@ -250,9 +250,6 @@ public final class BluetoothGatt implements BluetoothProfile {
                 if (VDBG) Log.d(TAG, "onCharacteristicRead() - Device=" + address
                             + " handle=" + handle + " Status=" + status);
 
-                 Log.w(TAG, "onCharacteristicRead() - Device=" + address
-                            + " handle=" + handle + " Status=" + status);
-
                 if (!address.equals(mDevice.getAddress())) {
                     return;
                 }
@@ -422,7 +419,6 @@ public final class BluetoothGatt implements BluetoothProfile {
                     try {
                         mAuthRetry = true;
                         mService.writeDescriptor(mClientIf, address, handle,
-                            BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT,
                             AUTHENTICATION_MITM, descriptor.getValue());
                         return;
                     } catch (RemoteException e) {
@@ -945,8 +941,7 @@ public final class BluetoothGatt implements BluetoothProfile {
 
         try {
             mService.writeDescriptor(mClientIf, device.getAddress(), descriptor.getInstanceId(),
-                BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT, AUTHENTICATION_NONE,
-                descriptor.getValue());
+                AUTHENTICATION_NONE, descriptor.getValue());
         } catch (RemoteException e) {
             Log.e(TAG,"",e);
             mDeviceBusy = false;

@@ -33406,6 +33406,7 @@ package android.system {
     method public static void seteuid(int) throws android.system.ErrnoException;
     method public static void setgid(int) throws android.system.ErrnoException;
     method public static int setsid() throws android.system.ErrnoException;
+    method public static void setsockoptInt(java.io.FileDescriptor, int, int, int) throws android.system.ErrnoException;
     method public static void setuid(int) throws android.system.ErrnoException;
     method public static void shutdown(java.io.FileDescriptor, int) throws android.system.ErrnoException;
     method public static java.io.FileDescriptor socket(int, int, int) throws android.system.ErrnoException;
@@ -33816,6 +33817,7 @@ package android.system {
     field public static final int S_IXOTH;
     field public static final int S_IXUSR;
     field public static final int TCP_NODELAY;
+    field public static final int TCP_USER_TIMEOUT;
     field public static final int WCONTINUED;
     field public static final int WEXITED;
     field public static final int WNOHANG;
@@ -48741,9 +48743,39 @@ package java.lang {
     method public java.io.File directory();
     method public java.lang.ProcessBuilder directory(java.io.File);
     method public java.util.Map<java.lang.String, java.lang.String> environment();
+    method public java.lang.ProcessBuilder inheritIO();
+    method public java.lang.ProcessBuilder redirectError(java.lang.ProcessBuilder.Redirect);
+    method public java.lang.ProcessBuilder redirectError(java.io.File);
+    method public java.lang.ProcessBuilder.Redirect redirectError();
     method public boolean redirectErrorStream();
     method public java.lang.ProcessBuilder redirectErrorStream(boolean);
+    method public java.lang.ProcessBuilder redirectInput(java.lang.ProcessBuilder.Redirect);
+    method public java.lang.ProcessBuilder redirectInput(java.io.File);
+    method public java.lang.ProcessBuilder.Redirect redirectInput();
+    method public java.lang.ProcessBuilder redirectOutput(java.lang.ProcessBuilder.Redirect);
+    method public java.lang.ProcessBuilder redirectOutput(java.io.File);
+    method public java.lang.ProcessBuilder.Redirect redirectOutput();
     method public java.lang.Process start() throws java.io.IOException;
+  }
+
+  public static abstract class ProcessBuilder.Redirect {
+    method public static java.lang.ProcessBuilder.Redirect appendTo(java.io.File);
+    method public java.io.File file();
+    method public static java.lang.ProcessBuilder.Redirect from(java.io.File);
+    method public static java.lang.ProcessBuilder.Redirect to(java.io.File);
+    method public abstract java.lang.ProcessBuilder.Redirect.Type type();
+    field public static final java.lang.ProcessBuilder.Redirect INHERIT;
+    field public static final java.lang.ProcessBuilder.Redirect PIPE;
+  }
+
+  public static final class ProcessBuilder.Redirect.Type extends java.lang.Enum {
+    method public static java.lang.ProcessBuilder.Redirect.Type valueOf(java.lang.String);
+    method public static final java.lang.ProcessBuilder.Redirect.Type[] values();
+    enum_constant public static final java.lang.ProcessBuilder.Redirect.Type APPEND;
+    enum_constant public static final java.lang.ProcessBuilder.Redirect.Type INHERIT;
+    enum_constant public static final java.lang.ProcessBuilder.Redirect.Type PIPE;
+    enum_constant public static final java.lang.ProcessBuilder.Redirect.Type READ;
+    enum_constant public static final java.lang.ProcessBuilder.Redirect.Type WRITE;
   }
 
   public abstract interface Readable {
@@ -49279,6 +49311,7 @@ package java.lang {
     method protected T initialValue();
     method public void remove();
     method public void set(T);
+    method public static java.lang.ThreadLocal<S> withInitial(java.util.function.Supplier<? extends S>);
   }
 
   public class Throwable implements java.io.Serializable {

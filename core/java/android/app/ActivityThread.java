@@ -4294,6 +4294,16 @@ public final class ActivityThread {
         }
     }
 
+    /**
+     * Public entrypoint to stop profiling. This is required to end profiling when the app crashes,
+     * so that profiler data won't be lost.
+     *
+     * @hide
+     */
+    public void stopProfiling() {
+        mProfiler.stopProfiling();
+    }
+
     static final void handleDumpHeap(boolean managed, DumpHeapData dhd) {
         if (managed) {
             try {

@@ -40,6 +40,7 @@ Snapshot::Snapshot()
         , mClipArea(&mClipAreaRoot) {
     transform = &mTransformRoot;
     region = nullptr;
+    mRelativeLightCenter.x = mRelativeLightCenter.y = mRelativeLightCenter.z = 0;
 }
 
 /**

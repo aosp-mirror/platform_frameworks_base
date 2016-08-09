@@ -62,28 +62,54 @@ public class RuntimeInit {
     }
 
     /**
-     * Use this to log a message when a thread exits due to an uncaught
-     * exception.  The framework catches these for the main threads, so
-     * this should only matter for threads created by applications.
+     * Logs a message when a thread encounters an uncaught exception. By
+     * default, {@link KillApplicationHandler} will terminate this process later,
+     * but apps can override that behavior.
      */
-    private static class UncaughtHandler implements Thread.UncaughtExceptionHandler {
+    private static class LoggingHandler implements Thread.UncaughtExceptionHandler {
+        @Override
+        public void uncaughtException(Thread t, Throwable e) {
+            // Don't re-enter if KillApplicationHandler has already run
+            if (mCrashing) return;
+            if (mApplicationObject == null) {
+                // The "FATAL EXCEPTION" string is still used on Android even though
+                // apps can set a custom UncaughtExceptionHandler that renders uncaught
+                // exceptions non-fatal.
+                Clog_e(TAG, "*** FATAL EXCEPTION IN SYSTEM PROCESS: " + t.getName(), e);
+            } else {
+                StringBuilder message = new StringBuilder();
+                // The "FATAL EXCEPTION" string is still used on Android even though
+                // apps can set a custom UncaughtExceptionHandler that renders uncaught
+                // exceptions non-fatal.
+                message.append("FATAL EXCEPTION: ").append(t.getName()).append("\n");
+                final String processName = ActivityThread.currentProcessName();
+                if (processName != null) {
+                    message.append("Process: ").append(processName).append(", ");
+                }
+                message.append("PID: ").append(Process.myPid());
+                Clog_e(TAG, message.toString(), e);
+            }
+        }
+    }
+
+    /**
+     * Handle application death from an uncaught exception.  The framework
+     * catches these for the main threads, so this should only matter for
+     * threads created by applications.  Before this method runs,
+     * {@link LoggingHandler} will already have logged details.
+     */
+    private static class KillApplicationHandler implements Thread.UncaughtExceptionHandler {
         public void uncaughtException(Thread t, Throwable e) {
             try {
                 // Don't re-enter -- avoid infinite loops if crash-reporting crashes.
                 if (mCrashing) return;
                 mCrashing = true;
 
-                if (mApplicationObject == null) {
-                    Clog_e(TAG, "*** FATAL EXCEPTION IN SYSTEM PROCESS: " + t.getName(), e);
-                } else {
-                    StringBuilder message = new StringBuilder();
-                    message.append("FATAL EXCEPTION: ").append(t.getName()).append("\n");
-                    final String processName = ActivityThread.currentProcessName();
-                    if (processName != null) {
-                        message.append("Process: ").append(processName).append(", ");
-                    }
-                    message.append("PID: ").append(Process.myPid());
-                    Clog_e(TAG, message.toString(), e);
+                // Try to end profiling. If a profiler is running at this point, and we kill the
+                // process (below), the in-memory buffer will be lost. So try to stop, which will
+                // flush the buffer. (This makes method trace profiling useful to debug crashes.)
+                if (ActivityThread.currentActivityThread() != null) {
+                    ActivityThread.currentActivityThread().stopProfiling();
                 }
 
                 // Bring up crash dialog, wait for it to be dismissed
@@ -106,8 +132,12 @@ public class RuntimeInit {
     private static final void commonInit() {
         if (DEBUG) Slog.d(TAG, "Entered RuntimeInit!");
 
-        /* set default handler; this applies to all threads in the VM */
-        Thread.setDefaultUncaughtExceptionHandler(new UncaughtHandler());
+        /*
+         * set handlers; these apply to all threads in the VM. Apps can replace
+         * the default handler, but not the pre handler.
+         */
+        Thread.setUncaughtExceptionPreHandler(new LoggingHandler());
+        Thread.setDefaultUncaughtExceptionHandler(new KillApplicationHandler());
 
         /*
          * Install a TimezoneGetter subclass for ZoneInfo.db
