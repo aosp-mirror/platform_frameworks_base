@@ -2266,6 +2266,10 @@ message MetricsEvent {
     // Package: Package of print service
     ACTION_PRINT_RECOMMENDED_SERVICE_INSTALL = 512;
 
+    // ACTION: Settings -> [sub settings activity] -> Options menu -> Help & Support
+    //   SUBTYPE: sub settings classname
+    ACTION_SETTING_HELP_AND_FEEDBACK = 513;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
