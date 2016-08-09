@@ -80,7 +80,7 @@
             android:clipToPadding="false"
             android:clickable="true"
             android:focusable="true"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:background="@drawable/ripple_drawable"
             android:contentDescription="@string/accessibility_quick_settings_expand"
             android:padding="12dp" />
 
