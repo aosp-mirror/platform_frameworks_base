@@ -33365,6 +33365,7 @@ package android.system {
     method public static int gettid();
     method public static int getuid();
     method public static java.lang.String if_indextoname(int);
+    method public static int if_nametoindex(java.lang.String);
     method public static java.net.InetAddress inet_pton(int, java.lang.String);
     method public static boolean isatty(java.io.FileDescriptor);
     method public static void kill(int, int) throws android.system.ErrnoException;
