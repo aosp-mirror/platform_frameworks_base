@@ -2601,22 +2601,32 @@ public class ShortcutService extends IShortcutService.Stub {
                                 /* appStillExists = */ false);
                     }
                 }
-                final long now = injectCurrentTimeMillis();
 
-                // Then for each installed app, publish manifest shortcuts when needed.
-                forUpdatedPackages(ownerUserId, user.getLastAppScanTime(), ai -> {
-                    user.rescanPackageIfNeeded(ai.packageName, /* forceRescan=*/ false);
-                });
-
-                // Write the time just before the scan, because there may be apps that have just
-                // been updated, and we want to catch them in the next time.
-                user.setLastAppScanTime(now);
-                scheduleSaveUser(ownerUserId);
+                rescanUpdatedPackagesLocked(ownerUserId, user.getLastAppScanTime(),
+                        /* forceRescan=*/ false);
             }
         } finally {
             logDurationStat(Stats.CHECK_PACKAGE_CHANGES, start);
         }
         verifyStates();
+    }
+
+    private void rescanUpdatedPackagesLocked(@UserIdInt int userId, long lastScanTime,
+            boolean forceRescan) {
+        final ShortcutUser user = getUserShortcutsLocked(userId);
+
+        final long now = injectCurrentTimeMillis();
+
+        // Then for each installed app, publish manifest shortcuts when needed.
+        forUpdatedPackages(userId, lastScanTime, ai -> {
+            user.attemptToRestoreIfNeededAndSave(this, ai.packageName, userId);
+            user.rescanPackageIfNeeded(ai.packageName, forceRescan);
+        });
+
+        // Write the time just before the scan, because there may be apps that have just
+        // been updated, and we want to catch them in the next time.
+        user.setLastAppScanTime(now);
+        scheduleSaveUser(userId);
     }
 
     private void handlePackageAdded(String packageName, @UserIdInt int userId) {
@@ -3119,12 +3129,10 @@ public class ShortcutService extends IShortcutService.Stub {
             }
             mUsers.put(userId, user);
 
-            // Then purge all the save images.
-            final File bitmapPath = getUserBitmapFilePath(userId);
-            final boolean success = FileUtils.deleteContents(bitmapPath);
-            if (!success) {
-                Slog.w(TAG, "Failed to delete " + bitmapPath);
-            }
+            // Rescan all packages to re-publish manifest shortcuts and do other checks.
+            rescanUpdatedPackagesLocked(userId,
+                    0, // lastScanTime = 0; rescan all packages.
+                    /* forceRescan= */ true);
 
             saveUserLocked(userId);
         }

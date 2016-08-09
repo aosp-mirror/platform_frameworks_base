@@ -57,13 +57,11 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import android.Manifest.permission;
 import android.app.ActivityManager;
@@ -82,6 +80,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Process;
 import android.os.UserHandle;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
@@ -5153,7 +5152,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
     }
 
 
-    public void testBackupAndRestore_manifestNotRestored() {
+    public void testBackupAndRestore_manifestRePublished() {
         // Publish two manifest shortcuts.
         addManifestShortcutResource(
                 new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
@@ -5162,9 +5161,15 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         mService.mPackageMonitor.onReceive(mServiceContext,
                 genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
 
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertTrue(mManager.setDynamicShortcuts(list(
+                    makeShortcut("s1"), makeShortcut("s2"), makeShortcut("s3"))));
+        });
+
         // Pin from launcher 1.
         runWithCaller(LAUNCHER_1, USER_0, () -> {
-            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("ms1", "ms2"), HANDLE_USER_0);
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1,
+                    list("ms1", "ms2", "s1", "s2"), HANDLE_USER_0);
         });
 
         // Update and now ms2 is gone -> disabled.
@@ -5178,9 +5183,18 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         // Make sure the manifest shortcuts have been published.
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
             assertWith(getCallerShortcuts())
-                    .areAllPinned()
-                    .haveIds("ms1", "ms2")
+                    .selectManifest()
+                    .haveIds("ms1")
 
+                    .revertToOriginalList()
+                    .selectDynamic()
+                    .haveIds("s1", "s2", "s3")
+
+                    .revertToOriginalList()
+                    .selectPinned()
+                    .haveIds("ms1", "ms2", "s1", "s2")
+
+                    .revertToOriginalList()
                     .selectByIds("ms1")
                     .areAllManifest()
                     .areAllEnabled()
@@ -5191,10 +5205,130 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     .areAllDisabled();
         });
 
-        // Now do the regular backup & restore test.
-        // The existence of the manifest shortcuts shouldn't affect the result.
-        prepareCrossProfileDataSet();
         backupAndRestore();
+
+        // When re-installing the app, the manifest shortcut should be re-published.
+        mService.mPackageMonitor.onReceive(mServiceContext,
+                genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
+        mService.mPackageMonitor.onReceive(mServiceContext,
+                genPackageAddIntent(LAUNCHER_1, USER_0));
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertWith(getCallerVisibleShortcuts())
+                    .selectPinned()
+                    // ms2 was disabled, so not restored.
+                    .haveIds("ms1", "s1", "s2")
+                    .areAllEnabled()
+
+                    .revertToOriginalList()
+                    .selectByIds("ms1")
+                    .areAllManifest()
+
+                    .revertToOriginalList()
+                    .selectByIds("s1", "s2")
+                    .areAllNotDynamic()
+                    ;
+        });
+    }
+
+    /**
+     * It's the case with preintalled apps -- when applyRestore() is called, the system
+     * apps are already installed, so manifest shortcuts need to be re-published.
+     */
+    public void testBackupAndRestore_appAlreadyInstalledWhenRestored() {
+        // Pre-backup.  Same as testBackupAndRestore_manifestRePublished().
+
+        // Publish two manifest shortcuts.
+        addManifestShortcutResource(
+                new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
+                R.xml.shortcut_2);
+        updatePackageVersion(CALLING_PACKAGE_1, 1);
+        mService.mPackageMonitor.onReceive(mServiceContext,
+                genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertTrue(mManager.setDynamicShortcuts(list(
+                    makeShortcut("s1"), makeShortcut("s2"), makeShortcut("s3"))));
+        });
+
+        // Pin from launcher 1.
+        runWithCaller(LAUNCHER_1, USER_0, () -> {
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1,
+                    list("ms1", "ms2", "s1", "s2"), HANDLE_USER_0);
+        });
+
+        // Update and now ms2 is gone -> disabled.
+        addManifestShortcutResource(
+                new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
+                R.xml.shortcut_1);
+        updatePackageVersion(CALLING_PACKAGE_1, 1);
+        mService.mPackageMonitor.onReceive(mServiceContext,
+                genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
+
+        // Make sure the manifest shortcuts have been published.
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertWith(getCallerShortcuts())
+                    .selectManifest()
+                    .haveIds("ms1")
+
+                    .revertToOriginalList()
+                    .selectDynamic()
+                    .haveIds("s1", "s2", "s3")
+
+                    .revertToOriginalList()
+                    .selectPinned()
+                    .haveIds("ms1", "ms2", "s1", "s2")
+
+                    .revertToOriginalList()
+                    .selectByIds("ms1")
+                    .areAllManifest()
+                    .areAllEnabled()
+
+                    .revertToOriginalList()
+                    .selectByIds("ms2")
+                    .areAllNotManifest()
+                    .areAllDisabled();
+        });
+
+        // Backup and *without restarting the service, just call applyRestore()*.
+        {
+            int prevUid = mInjectedCallingUid;
+            mInjectedCallingUid = Process.SYSTEM_UID; // Only system can call it.
+
+            dumpsysOnLogcat("Before backup");
+
+            final byte[] payload = mService.getBackupPayload(USER_0);
+            if (ENABLE_DUMP) {
+                final String xml = new String(payload);
+                Log.v(TAG, "Backup payload:");
+                for (String line : xml.split("\n")) {
+                    Log.v(TAG, line);
+                }
+            }
+            mService.applyRestore(payload, USER_0);
+
+            dumpsysOnLogcat("After restore");
+
+            mInjectedCallingUid = prevUid;
+        }
+
+        // The check is also the same as testBackupAndRestore_manifestRePublished().
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertWith(getCallerVisibleShortcuts())
+                    .selectPinned()
+                    // ms2 was disabled, so not restored.
+                    .haveIds("ms1", "s1", "s2")
+                    .areAllEnabled()
+
+                    .revertToOriginalList()
+                    .selectByIds("ms1")
+                    .areAllManifest()
+
+                    .revertToOriginalList()
+                    .selectByIds("s1", "s2")
+                    .areAllNotDynamic()
+            ;
+        });
     }
 
     public void testSaveAndLoad_crossProfile() {
