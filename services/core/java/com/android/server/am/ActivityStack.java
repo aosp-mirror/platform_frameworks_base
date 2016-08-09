@@ -4860,6 +4860,11 @@ final class ActivityStack {
         } else {
             mHandler.removeMessages(PAUSE_TIMEOUT_MSG, r);
             r.state = ActivityState.PAUSED;
+            // if the app is relaunched when it's stopped, and we're not resuming,
+            // put it back into stopped state.
+            if (r.stopped) {
+                addToStopping(r, true /* immediate */);
+            }
         }
 
         r.configChangeFlags = 0;

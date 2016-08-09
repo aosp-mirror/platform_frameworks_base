@@ -102,6 +102,7 @@ public interface IActivityManager extends IInterface {
     public void finishSubActivity(IBinder token, String resultWho, int requestCode) throws RemoteException;
     public boolean finishActivityAffinity(IBinder token) throws RemoteException;
     public void finishVoiceTask(IVoiceInteractionSession session) throws RemoteException;
+    public void requestActivityRelaunch(IBinder token) throws RemoteException;
     public boolean releaseActivityInstance(IBinder token) throws RemoteException;
     public void releaseSomeActivities(IApplicationThread app) throws RemoteException;
     public boolean willActivityBeVisible(IBinder token) throws RemoteException;
@@ -958,7 +959,6 @@ public interface IActivityManager extends IInterface {
     int DELETE_ACTIVITY_CONTAINER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+185;
     int SET_PROCESS_MEMORY_TRIM_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+186;
 
-
     // Start of L transactions
     int GET_TAG_FOR_INTENT_SENDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+210;
     int START_USER_IN_BACKGROUND_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+211;
@@ -1062,4 +1062,7 @@ public interface IActivityManager extends IInterface {
     int SET_VR_THREAD_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 377;
     int SET_RENDER_THREAD_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 378;
     int SET_HAS_TOP_UI = IBinder.FIRST_CALL_TRANSACTION + 379;
+
+    // Start of O transactions
+    int REQUEST_ACTIVITY_RELAUNCH = IBinder.FIRST_CALL_TRANSACTION+400;
 }

@@ -5183,8 +5183,10 @@ public class Activity extends ContextThemeWrapper
         if (Looper.myLooper() != mMainThread.getLooper()) {
             throw new IllegalStateException("Must be called from main thread");
         }
-        mMainThread.requestRelaunchActivity(mToken, null, null, 0, false, null, null, false,
-                false /* preserveWindow */);
+        try {
+            ActivityManagerNative.getDefault().requestActivityRelaunch(mToken);
+        } catch (RemoteException e) {
+        }
     }
 
     /**
