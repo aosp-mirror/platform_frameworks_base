@@ -238,7 +238,7 @@ public class WallpaperBackupAgent extends BackupAgent {
                     Slog.v(TAG, "Restored crop hint " + cropHint);
                 }
                 try (FileInputStream in = new FileInputStream(stage)) {
-                    mWm.setStream(in, cropHint, true, which);
+                    mWm.setStream(in, cropHint.isEmpty() ? null : cropHint, true, which);
                 } finally {} // auto-closes 'in'
             }
         }
