@@ -545,6 +545,21 @@ TEST(RecordingCanvas, saveLayer_rotateClipped) {
     EXPECT_EQ(3, count);
 }
 
+TEST(RecordingCanvas, saveLayer_rejectBegin) {
+    auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
+        canvas.save(SaveFlags::MatrixClip);
+        canvas.translate(0, -20); // avoid identity case
+        // empty clip rect should force layer + contents to be rejected
+        canvas.clipRect(0, -20, 200, -20, SkRegion::kIntersect_Op);
+        canvas.saveLayerAlpha(0, 0, 200, 200, 128, SaveFlags::ClipToLayer);
+        canvas.drawRect(0, 0, 200, 200, SkPaint());
+        canvas.restore();
+        canvas.restore();
+    });
+
+    ASSERT_EQ(0u, dl->getOps().size()) << "Begin/Rect/End should all be rejected.";
+}
+
 TEST(RecordingCanvas, drawRenderNode_rejection) {
     auto child = TestUtils::createNode(50, 50, 150, 150,
             [](RenderProperties& props, Canvas& canvas) {
