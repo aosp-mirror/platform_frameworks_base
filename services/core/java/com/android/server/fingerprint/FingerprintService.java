@@ -501,7 +501,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         if (DEBUG) Slog.v(TAG, "startAuthentication(" + opPackageName + ")");
 
         AuthenticationClient client = new AuthenticationClient(getContext(), mHalDeviceId, token,
-                receiver, callingUserId, groupId, opId, restricted, opPackageName) {
+                receiver, mCurrentUserId, groupId, opId, restricted, opPackageName) {
             @Override
             public boolean handleFailedAttempt() {
                 mFailedAttempts++;
