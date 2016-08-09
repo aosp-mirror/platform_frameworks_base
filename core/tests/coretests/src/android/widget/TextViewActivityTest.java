@@ -214,6 +214,16 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
     }
 
     @SmallTest
+    public void testDoubleTapAndDragToSelect_multiLine() throws Exception {
+        final String helloWorld = "abcd\n" + "efg\n" + "hijklm\n" + "nop";
+        onView(withId(R.id.textview)).perform(click());
+        onView(withId(R.id.textview)).perform(replaceText(helloWorld));
+        onView(withId(R.id.textview)).perform(
+                doubleTapAndDragOnText(helloWorld.indexOf("m"), helloWorld.indexOf("a")));
+        onView(withId(R.id.textview)).check(hasSelection("abcd\nefg\nhijklm"));
+    }
+
+    @SmallTest
     public void testSelectBackwordsByTouch() throws Exception {
         final String helloWorld = "Hello king of the Jungle!";
         onView(withId(R.id.textview)).perform(click());
