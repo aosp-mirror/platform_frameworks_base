@@ -147,7 +147,7 @@ public class KeyguardAffordanceView extends ImageView {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        mSupportHardware = false;//canvas.isHardwareAccelerated();
+        mSupportHardware = canvas.isHardwareAccelerated();
         drawBackgroundCircle(canvas);
         canvas.save();
         canvas.scale(mImageScale, mImageScale, getWidth() / 2, getHeight() / 2);
