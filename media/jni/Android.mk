@@ -3,7 +3,6 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
     android_media_AmrInputStream.cpp \
-    android_media_ExifInterface.cpp \
     android_media_ImageWriter.cpp \
     android_media_ImageReader.cpp \
     android_media_MediaCrypto.cpp \
