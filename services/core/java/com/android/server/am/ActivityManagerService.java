@@ -4789,6 +4789,23 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    @Override
+    public final void requestActivityRelaunch(IBinder token) {
+        synchronized(this) {
+            ActivityRecord r = ActivityRecord.isInStackLocked(token);
+            if (r == null) {
+                return;
+            }
+            final long origId = Binder.clearCallingIdentity();
+            try {
+                r.forceNewConfig = true;
+                r.task.stack.ensureActivityConfigurationLocked(r, 0, false);
+            } finally {
+                Binder.restoreCallingIdentity(origId);
+            }
+        }
+    }
+
     /**
      * This is the internal entry point for handling Activity.finish().
      *
