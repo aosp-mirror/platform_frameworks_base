@@ -603,6 +603,8 @@ static void passOnOsResponse(uint32_t hubHandle, uint32_t msgType,
     env->CallIntMethod(db.jniInfo.jContextHubService,
                        db.jniInfo.contextHubServiceMsgReceiptCallback,
                        jheader, jmsg);
+    env->DeleteLocalRef(jmsg);
+    env->DeleteLocalRef(jheader);
 
     delete[] msg;
 }
