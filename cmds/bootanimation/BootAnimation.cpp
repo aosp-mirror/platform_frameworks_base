@@ -75,6 +75,7 @@ static const char ACCURATE_TIME_FLAG_FILE_PATH[] = "/data/system/time/time_is_ac
 // Java timestamp format. Don't show the clock if the date is before 2000-01-01 00:00:00.
 static const long long ACCURATE_TIME_EPOCH = 946684800000;
 static const char EXIT_PROP_NAME[] = "service.bootanim.exit";
+static const char PLAY_SOUND_PROP_NAME[] = "persist.sys.bootanim.play_sound";
 static const int ANIM_ENTRY_NAME_MAX = 256;
 
 // ---------------------------------------------------------------------------
@@ -776,8 +777,12 @@ bool BootAnimation::playAnimation(const Animation& animation)
 
             // only play audio file the first time we animate the part
             if (r == 0 && part.audioData) {
-                ALOGD("playing clip for part%d, size=%d", (int) i, part.audioLength);
-                audioplay::playClip(part.audioData, part.audioLength);
+                // Read the system property to see if we should play the sound.
+                // If not present, default to playing it.
+                if (property_get_bool(PLAY_SOUND_PROP_NAME, 1)) {
+                    ALOGD("playing clip for part%d, size=%d", (int) i, part.audioLength);
+                    audioplay::playClip(part.audioData, part.audioLength);
+                }
             }
 
             glClearColor(
