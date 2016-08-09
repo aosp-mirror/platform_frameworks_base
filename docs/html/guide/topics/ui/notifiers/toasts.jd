@@ -76,16 +76,22 @@ To nudge it down, increase the value of the last parameter.
 
 <h2 id="CustomToastView">Creating a Custom Toast View</h2>
 
-<p>If a simple text message isn't enough, you can create a customized layout for your
-toast notification. To create a custom layout, define a View layout,
-in XML or in your application code, and pass the root {@link android.view.View} object
-to the {@link android.widget.Toast#setView(View)} method.</p>
+<p>
+  If a simple text message isn't enough, you can create a customized layout
+  for your toast notification. To create a custom layout, define a View
+  layout, in XML or in your application code, and pass the root {@link
+  android.view.View} object to the {@link android.widget.Toast#setView(View)}
+  method.
+</p>
 
-<p>For example, you can create the layout for the toast visible in the screenshot to the right
-with the following XML (saved as <em>toast_layout.xml</em>):</p>
+<p>
+  For example, you can create the layout for the toast visible in the
+  screenshot to the right with the following XML (saved as
+  <em>layout/custom_toast.xml</em>):
+</p>
 <pre>
 &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:id="@+id/toast_layout_root"
+              android:id="@+id/custom_toast_container"
               android:orientation="horizontal"
               android:layout_width="fill_parent"
               android:layout_height="fill_parent"
@@ -105,13 +111,16 @@ with the following XML (saved as <em>toast_layout.xml</em>):</p>
 &lt;/LinearLayout>
 </pre>
 
-<p>Notice that the ID of the LinearLayout element is "toast_layout_root". You must use this
-ID to inflate the layout from the XML, as shown here:</p>
+<p>
+  Notice that the ID of the LinearLayout element is "custom_toast_container".
+  You must use this ID and the ID of the XML layout file "custom_toast" to
+  inflate the layout, as shown here:
+</p>
 
 <pre>
 LayoutInflater inflater = getLayoutInflater();
 View layout = inflater.inflate(R.layout.custom_toast,
-                               (ViewGroup) findViewById(R.id.toast_layout_root));
+                (ViewGroup) findViewById(R.id.custom_toast_container));
 
 TextView text = (TextView) layout.findViewById(R.id.text);
 text.setText("This is a custom toast");
