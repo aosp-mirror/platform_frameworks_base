@@ -61,9 +61,6 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
     private static final int HOUR_INDEX = RadialTimePickerView.HOURS;
     private static final int MINUTE_INDEX = RadialTimePickerView.MINUTES;
 
-    // NOT a real index for the purpose of what's showing.
-    private static final int AMPM_INDEX = 2;
-
     private static final int[] ATTRS_TEXT_COLOR = new int[] {R.attr.textColor};
     private static final int[] ATTRS_DISABLED_ALPHA = new int[] {R.attr.disabledAlpha};
 
@@ -701,21 +698,20 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
     /** Listener for RadialTimePickerView interaction. */
     private final OnValueSelectedListener mOnValueSelectedListener = new OnValueSelectedListener() {
         @Override
-        public void onValueSelected(int pickerIndex, int newValue, boolean autoAdvance) {
-            switch (pickerIndex) {
-                case HOUR_INDEX:
+        public void onValueSelected(int pickerType, int newValue, boolean autoAdvance) {
+            switch (pickerType) {
+                case RadialTimePickerView.HOURS:
                     final boolean isTransition = mAllowAutoAdvance && autoAdvance;
                     setHourInternal(newValue, true, !isTransition);
                     if (isTransition) {
                         setCurrentItemShowing(MINUTE_INDEX, true, false);
-                        mDelegator.announceForAccessibility(newValue + ". " + mSelectMinutes);
+
+                        final int localizedHour = getLocalizedHour(newValue);
+                        mDelegator.announceForAccessibility(localizedHour + ". " + mSelectMinutes);
                     }
                     break;
-                case MINUTE_INDEX:
+                case RadialTimePickerView.MINUTES:
                     setMinuteInternal(newValue, true);
-                    break;
-                case AMPM_INDEX:
-                    updateAmPmLabelStates(newValue);
                     break;
             }
 
