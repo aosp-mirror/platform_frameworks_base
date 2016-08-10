@@ -176,7 +176,9 @@ static void SetGids(JNIEnv* env, jintArray javaGids) {
   }
   int rc = setgroups(gids.size(), reinterpret_cast<const gid_t*>(&gids[0]));
   if (rc == -1) {
-    RuntimeAbort(env, __LINE__, "setgroups failed");
+    std::ostringstream oss;
+    oss << "setgroups failed: " << strerror(errno) << ", gids.size=" << gids.size();
+    RuntimeAbort(env, __LINE__, oss.str().c_str());
   }
 }
 
