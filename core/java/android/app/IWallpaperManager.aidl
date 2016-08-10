@@ -128,7 +128,7 @@ interface IWallpaperManager {
     /*
      * Backup: is the current system wallpaper image eligible for off-device backup?
      */
-    boolean isWallpaperBackupEligible(int userId);
+    boolean isWallpaperBackupEligible(int which, int userId);
 
     /*
      * Keyguard: register a callback for being notified that lock-state relevant
