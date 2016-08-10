@@ -552,7 +552,7 @@ public class RouterAdvertisementDaemon {
         for (Inet6Address dns : dnses) {
             // NOTE: If the full of list DNS servers doesn't fit in the packet,
             // this code will cause a buffer overflow and the RA won't include
-            // include this instance of the option at all.
+            // this instance of the option at all.
             //
             // TODO: Consider looking at ra.remaining() to determine how many
             // DNS servers will fit, and adding only those.
