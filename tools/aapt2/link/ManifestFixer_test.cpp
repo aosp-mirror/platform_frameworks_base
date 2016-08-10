@@ -253,4 +253,24 @@ TEST_F(ManifestFixerTest, UseDefaultVersionNameAndCode) {
     EXPECT_EQ(std::string("0x10000000"), attr->value);
 }
 
+TEST_F(ManifestFixerTest, EnsureManifestAttributesAreTyped) {
+    EXPECT_EQ(nullptr, verify("<manifest package=\"android\" coreApp=\"hello\" />"));
+    EXPECT_EQ(nullptr, verify("<manifest package=\"android\" coreApp=\"1dp\" />"));
+
+    std::unique_ptr<xml::XmlResource> doc =
+            verify("<manifest package=\"android\" coreApp=\"true\" />");
+    ASSERT_NE(nullptr, doc);
+
+    xml::Element* el = xml::findRootElement(doc.get());
+    ASSERT_NE(nullptr, el);
+
+    EXPECT_EQ("manifest", el->name);
+
+    xml::Attribute* attr = el->findAttribute("", "coreApp");
+    ASSERT_NE(nullptr, attr);
+
+    EXPECT_NE(nullptr, attr->compiledValue);
+    EXPECT_NE(nullptr, valueCast<BinaryPrimitive>(attr->compiledValue.get()));
+}
+
 } // namespace aapt

@@ -126,8 +126,9 @@ public:
                     mError = true;
 
                 }
-            } else {
-                // We still encode references.
+            } else if (!attr.compiledValue) {
+                // We still encode references, but only if we haven't manually set this to
+                // another compiled value.
                 attr.compiledValue = ResourceUtils::tryParseReference(attr.value);
             }
 

@@ -81,6 +81,22 @@ static bool verifyManifest(xml::Element* el, SourcePathDiagnostics* diag) {
     return true;
 }
 
+/**
+ * The coreApp attribute in <manifest> is not a regular AAPT attribute, so type checking on it
+ * is manual.
+ */
+static bool fixCoreAppAttribute(xml::Element* el, SourcePathDiagnostics* diag) {
+    if (xml::Attribute* attr = el->findAttribute("", "coreApp")) {
+        std::unique_ptr<BinaryPrimitive> result = ResourceUtils::tryParseBool(attr->value);
+        if (!result) {
+            diag->error(DiagMessage(el->lineNumber) << "attribute coreApp must be a boolean");
+            return false;
+        }
+        attr->compiledValue = std::move(result);
+    }
+    return true;
+}
+
 bool ManifestFixer::buildRules(xml::XmlActionExecutor* executor, IDiagnostics* diag) {
     // First verify some options.
     if (mOptions.renameManifestPackage) {
@@ -111,6 +127,7 @@ bool ManifestFixer::buildRules(xml::XmlActionExecutor* executor, IDiagnostics* d
     // Manifest actions.
     xml::XmlNodeAction& manifestAction = (*executor)["manifest"];
     manifestAction.action(verifyManifest);
+    manifestAction.action(fixCoreAppAttribute);
     manifestAction.action([&](xml::Element* el) -> bool {
         if (mOptions.versionNameDefault) {
             if (el->findAttribute(xml::kSchemaAndroid, "versionName") == nullptr) {
