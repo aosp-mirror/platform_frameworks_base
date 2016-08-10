@@ -169,7 +169,9 @@ class IPv6TetheringInterfaceServices {
                 // We need to be able to send unicast RAs, and clients might
                 // like to ping the default router's link-local address.  Note
                 // that we never remove the link-local route from the network
-                // until Tethering disables tethering on the interface.
+                // until Tethering disables tethering on the interface. We
+                // only need to add the link-local prefix once, but in the
+                // event we add it more than once netd silently ignores EEXIST.
                 addedPrefixes.add(LINK_LOCAL_PREFIX);
             }
 
@@ -177,7 +179,9 @@ class IPv6TetheringInterfaceServices {
                 final ArrayList<RouteInfo> toBeAdded = getLocalRoutesFor(addedPrefixes);
                 try {
                     // It's safe to call addInterfaceToLocalNetwork() even if
-                    // the interface is already in the local_network.
+                    // the interface is already in the local_network. Note also
+                    // that adding routes that already exist does not cause an
+                    // error (EEXIST is silently ignored).
                     mNMService.addInterfaceToLocalNetwork(mIfName, toBeAdded);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Failed to add IPv6 routes to local table: ", e);
