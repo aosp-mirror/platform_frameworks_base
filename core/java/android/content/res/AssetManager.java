@@ -222,19 +222,21 @@ public final class AssetManager implements AutoCloseable {
      */
     final boolean getResourceValue(@AnyRes int resId, int densityDpi, @NonNull TypedValue outValue,
             boolean resolveRefs) {
-        final int block = loadResourceValue(resId, (short) densityDpi, outValue, resolveRefs);
-        if (block < 0) {
-            return false;
-        }
+        synchronized (this) {
+            final int block = loadResourceValue(resId, (short) densityDpi, outValue, resolveRefs);
+            if (block < 0) {
+                return false;
+            }
 
-        // Convert the changing configurations flags populated by native code.
-        outValue.changingConfigurations = ActivityInfo.activityInfoConfigNativeToJava(
-                outValue.changingConfigurations);
+            // Convert the changing configurations flags populated by native code.
+            outValue.changingConfigurations = ActivityInfo.activityInfoConfigNativeToJava(
+                    outValue.changingConfigurations);
 
-        if (outValue.type == TypedValue.TYPE_STRING) {
-            outValue.string = mStringBlocks[block].get(outValue.data);
+            if (outValue.type == TypedValue.TYPE_STRING) {
+                outValue.string = mStringBlocks[block].get(outValue.data);
+            }
+            return true;
         }
-        return true;
     }
 
     /**
@@ -244,18 +246,20 @@ public final class AssetManager implements AutoCloseable {
      * @param resId the resource id of the string array
      */
     final CharSequence[] getResourceTextArray(@ArrayRes int resId) {
-        final int[] rawInfoArray = getArrayStringInfo(resId);
-        final int rawInfoArrayLen = rawInfoArray.length;
-        final int infoArrayLen = rawInfoArrayLen / 2;
-        int block;
-        int index;
-        final CharSequence[] retArray = new CharSequence[infoArrayLen];
-        for (int i = 0, j = 0; i < rawInfoArrayLen; i = i + 2, j++) {
-            block = rawInfoArray[i];
-            index = rawInfoArray[i + 1];
-            retArray[j] = index >= 0 ? mStringBlocks[block].get(index) : null;
+        synchronized (this) {
+            final int[] rawInfoArray = getArrayStringInfo(resId);
+            final int rawInfoArrayLen = rawInfoArray.length;
+            final int infoArrayLen = rawInfoArrayLen / 2;
+            int block;
+            int index;
+            final CharSequence[] retArray = new CharSequence[infoArrayLen];
+            for (int i = 0, j = 0; i < rawInfoArrayLen; i = i + 2, j++) {
+                block = rawInfoArray[i];
+                index = rawInfoArray[i + 1];
+                retArray[j] = index >= 0 ? mStringBlocks[block].get(index) : null;
+            }
+            return retArray;
         }
-        return retArray;
     }
 
     /**
@@ -320,8 +324,10 @@ public final class AssetManager implements AutoCloseable {
     }
 
     /*package*/ final CharSequence getPooledStringForCookie(int cookie, int id) {
-        // Cookies map to string blocks starting at 1.
-        return mStringBlocks[cookie - 1].get(id);
+        synchronized (this) {
+            // Cookies map to string blocks starting at 1.
+            return mStringBlocks[cookie - 1].get(id);
+        }
     }
 
     /**
