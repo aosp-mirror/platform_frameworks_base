@@ -36,6 +36,7 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.support.annotation.NonNull;
 import android.text.Spannable;
@@ -43,12 +44,13 @@ import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.style.TtsSpan;
 import android.util.Log;
-import android.util.LruCache;
 
 import com.android.settingslib.R;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 public class AccessPoint implements Comparable<AccessPoint> {
@@ -81,7 +83,9 @@ public class AccessPoint implements Comparable<AccessPoint> {
      *  For now this data is used only with Verbose Logging so as to show the band and number
      *  of BSSIDs on which that network is seen.
      */
-    public LruCache<String, ScanResult> mScanResultCache = new LruCache<String, ScanResult>(32);
+    private final ConcurrentHashMap<String, ScanResult> mScanResultCache =
+            new ConcurrentHashMap<String, ScanResult>(32);
+    private static final long MAX_SCAN_RESULT_AGE_MS = 15000;
 
     private static final String KEY_NETWORKINFO = "key_networkinfo";
     private static final String KEY_WIFIINFO = "key_wifiinfo";
@@ -149,7 +153,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
         if (savedState.containsKey(KEY_SCANRESULTCACHE)) {
             ArrayList<ScanResult> scanResultArrayList =
                     savedState.getParcelableArrayList(KEY_SCANRESULTCACHE);
-            mScanResultCache.evictAll();
+            mScanResultCache.clear();
             for (ScanResult result : scanResultArrayList) {
                 mScanResultCache.put(result.BSSID, result);
             }
@@ -233,6 +237,17 @@ public class AccessPoint implements Comparable<AccessPoint> {
         return builder.append(')').toString();
     }
 
+    private void evictOldScanResults() {
+        long nowMs = SystemClock.elapsedRealtime();
+        for (Iterator<ScanResult> iter = mScanResultCache.values().iterator(); iter.hasNext(); ) {
+            ScanResult result = iter.next();
+            // result timestamp is in microseconds
+            if (nowMs - result.timestamp / 1000 > MAX_SCAN_RESULT_AGE_MS) {
+                iter.remove();
+            }
+        }
+    }
+
     public boolean matches(ScanResult result) {
         return ssid.equals(result.SSID) && security == getSecurity(result);
     }
@@ -268,8 +283,9 @@ public class AccessPoint implements Comparable<AccessPoint> {
     }
 
     public int getRssi() {
+        evictOldScanResults();
         int rssi = Integer.MIN_VALUE;
-        for (ScanResult result : mScanResultCache.snapshot().values()) {
+        for (ScanResult result : mScanResultCache.values()) {
             if (result.level > rssi) {
                 rssi = result.level;
             }
@@ -279,8 +295,9 @@ public class AccessPoint implements Comparable<AccessPoint> {
     }
 
     public long getSeen() {
+        evictOldScanResults();
         long seen = 0;
-        for (ScanResult result : mScanResultCache.snapshot().values()) {
+        for (ScanResult result : mScanResultCache.values()) {
             if (result.timestamp > seen) {
                 seen = result.timestamp;
             }
@@ -505,9 +522,9 @@ public class AccessPoint implements Comparable<AccessPoint> {
         int numBlackListed = 0;
         int n24 = 0; // Number scan results we included in the string
         int n5 = 0; // Number scan results we included in the string
-        Map<String, ScanResult> list = mScanResultCache.snapshot();
+        evictOldScanResults();
         // TODO: sort list by RSSI or age
-        for (ScanResult result : list.values()) {
+        for (ScanResult result : mScanResultCache.values()) {
 
             if (result.frequency >= LOWER_FREQ_5GHZ
                     && result.frequency <= HIGHER_FREQ_5GHZ) {
@@ -684,8 +701,9 @@ public class AccessPoint implements Comparable<AccessPoint> {
         savedState.putInt(KEY_PSKTYPE, pskType);
         if (mConfig != null) savedState.putParcelable(KEY_CONFIG, mConfig);
         savedState.putParcelable(KEY_WIFIINFO, mInfo);
+        evictOldScanResults();
         savedState.putParcelableArrayList(KEY_SCANRESULTCACHE,
-                new ArrayList<ScanResult>(mScanResultCache.snapshot().values()));
+                new ArrayList<ScanResult>(mScanResultCache.values()));
         if (mNetworkInfo != null) {
             savedState.putParcelable(KEY_NETWORKINFO, mNetworkInfo);
         }
@@ -697,9 +715,6 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
     boolean update(ScanResult result) {
         if (matches(result)) {
-            /* Update the LRU timestamp, if BSSID exists */
-            mScanResultCache.get(result.BSSID);
-
             /* Add or update the scan result for the BSSID */
             mScanResultCache.put(result.BSSID, result);
 
