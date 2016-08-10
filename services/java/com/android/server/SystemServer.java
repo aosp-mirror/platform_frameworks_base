@@ -809,10 +809,8 @@ public final class SystemServer {
 
                 traceBeginAndSlog("StartNetworkPolicyManagerService");
                 try {
-                    networkPolicy = new NetworkPolicyManagerService(
-                            context, mActivityManagerService,
-                            (IPowerManager)ServiceManager.getService(Context.POWER_SERVICE),
-                            networkStats, networkManagement);
+                    networkPolicy = new NetworkPolicyManagerService(context,
+                            mActivityManagerService, networkStats, networkManagement);
                     ServiceManager.addService(Context.NETWORK_POLICY_SERVICE, networkPolicy);
                 } catch (Throwable e) {
                     reportWtf("starting NetworkPolicy Service", e);
