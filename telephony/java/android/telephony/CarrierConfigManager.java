@@ -900,6 +900,19 @@ public class CarrierConfigManager {
     public static final String KEY_ENHANCED_4G_LTE_TITLE_VARIANT_BOOL =
             "enhanced_4g_lte_title_variant_bool";
 
+    /**
+     * Indicates whether the carrier wants to notify the user when handover of an LTE video call to
+     * WIFI fails.
+     * <p>
+     * When {@code true}, if a video call starts on LTE and the modem reports a failure to handover
+     * the call to WIFI or if no handover success is reported within 60 seconds of call initiation,
+     * the {@link android.telephony.TelephonyManager#EVENT_HANDOVER_TO_WIFI_FAILED} event is raised
+     * on the connection.
+     * @hide
+     */
+    public static final String KEY_NOTIFY_VT_HANDOVER_TO_WIFI_FAILURE_BOOL =
+            "notify_vt_handover_to_wifi_failure_bool";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -1065,6 +1078,7 @@ public class CarrierConfigManager {
 
         sDefaults.putStringArray(KEY_IMS_REASONINFO_MAPPING_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_ENHANCED_4G_LTE_TITLE_VARIANT_BOOL, false);
+        sDefaults.putBoolean(KEY_NOTIFY_VT_HANDOVER_TO_WIFI_FAILURE_BOOL, false);
     }
 
     /**
