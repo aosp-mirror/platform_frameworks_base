@@ -46,11 +46,6 @@
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"La tarjeta SIM está bloqueada."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"La tarjeta SIM está bloqueada por código PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"Desbloqueando tarjeta SIM…"</string>
-    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Desbloqueo por patrón"</string>
-    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Desbloqueo por PIN"</string>
-    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Desbloqueo por contraseña"</string>
-    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Área de patrón"</string>
-    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Área de deslizamiento"</string>
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"Área de PIN"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"Área de PIN de SIM"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"Área de PUK de SIM"</string>
