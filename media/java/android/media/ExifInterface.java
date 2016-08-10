@@ -1876,11 +1876,16 @@ public class ExifInterface {
         }
 
         // Read the thumbnail.
-        FileInputStream in = null;
+        InputStream in = null;
         try {
             if (mAssetInputStream != null) {
-                return nativeGetThumbnailFromAsset(
-                        mAssetInputStream.getNativeAsset(), mThumbnailOffset, mThumbnailLength);
+                in = mAssetInputStream;
+                if (in.markSupported()) {
+                    in.reset();
+                } else {
+                    Log.d(TAG, "Cannot read thumbnail from inputstream without mark/reset support");
+                    return null;
+                }
             } else if (mFilename != null) {
                 in = new FileInputStream(mFilename);
             } else if (mSeekableFileDescriptor != null) {
@@ -1903,6 +1908,7 @@ public class ExifInterface {
             return buffer;
         } catch (IOException | ErrnoException e) {
             // Couldn't get a thumbnail image.
+            Log.d(TAG, "Encountered exception while getting thumbnail", e);
         } finally {
             IoUtils.closeQuietly(in);
         }
@@ -3052,7 +3058,8 @@ public class ExifInterface {
                 thumbnailOffset += mOrfMakerNoteOffset;
             }
             if (DEBUG) {
-                Log.d(TAG, "Setting thumbnail attributes with offset: " + thumbnailOffset);
+                Log.d(TAG, "Setting thumbnail attributes with offset: " + thumbnailOffset
+                        + ", length: " + thumbnailLength);
             }
             if (thumbnailOffset > 0 && thumbnailLength > 0) {
                 mHasThumbnail = true;
@@ -3122,6 +3129,7 @@ public class ExifInterface {
 
                     mHasThumbnail = true;
                     mThumbnailBytes = totalStripBytes;
+                    mThumbnailLength = totalStripBytes.length;
                 }
             }
         } else {
