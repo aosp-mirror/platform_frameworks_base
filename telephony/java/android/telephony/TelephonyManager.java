@@ -2484,6 +2484,56 @@ public class TelephonyManager {
     }
 
     /**
+     * Enables or disables the visual voicemail client for a phone account.
+     *
+     * <p>Requires that the calling app is the default dialer, or has carrier privileges, or
+     * has permission {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.
+     * @see #hasCarrierPrivileges
+     *
+     * @param phoneAccountHandle the phone account to change the client state
+     * @param enabled the new state of the client
+     * @hide
+     */
+    @SystemApi
+    public void setVisualVoicemailEnabled(PhoneAccountHandle phoneAccountHandle, boolean enabled){
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.setVisualVoicemailEnabled(mContext.getOpPackageName(), phoneAccountHandle,
+                    enabled);
+            }
+        } catch (RemoteException ex) {
+        } catch (NullPointerException ex) {
+            // This could happen before phone restarts due to crashing
+        }
+    }
+
+    /**
+     * Returns whether the visual voicemail client is enabled.
+     *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     *
+     * @param phoneAccountHandle the phone account to check for.
+     * @return {@code true} when the visual voicemail client is enabled for this client
+     * @hide
+     */
+    @SystemApi
+    public boolean isVisualVoicemailEnabled(PhoneAccountHandle phoneAccountHandle){
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.isVisualVoicemailEnabled(
+                    mContext.getOpPackageName(), phoneAccountHandle);
+            }
+        } catch (RemoteException ex) {
+        } catch (NullPointerException ex) {
+            // This could happen before phone restarts due to crashing
+        }
+        return false;
+    }
+
+    /**
      * Enables the visual voicemail SMS filter for a phone account. When the filter is
      * enabled, Incoming SMS messages matching the OMTP VVM SMS interface will be redirected to the
      * visual voicemail client with
