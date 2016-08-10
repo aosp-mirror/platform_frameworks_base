@@ -49,6 +49,8 @@ public class BackupTransport {
     public static final int TRANSPORT_PACKAGE_REJECTED = -1002;
     public static final int AGENT_ERROR = -1003;
     public static final int AGENT_UNKNOWN = -1004;
+    /** @hide */
+    public static final int TRANSPORT_QUOTA_EXCEEDED = -1005;
 
     IBackupTransport mBinderImpl = new TransportImpl();
 
