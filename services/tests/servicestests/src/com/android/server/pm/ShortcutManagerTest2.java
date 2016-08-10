@@ -2005,4 +2005,36 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                     });
         });
     }
+
+    public void testIsUserUnlocked() {
+        mRunningUsers.clear();
+        mUnlockedUsers.clear();
+
+        assertFalse(mService.isUserUnlockedL(USER_0));
+        assertFalse(mService.isUserUnlockedL(USER_10));
+
+        // Start user 0, still locked.
+        mRunningUsers.put(USER_0, true);
+        assertFalse(mService.isUserUnlockedL(USER_0));
+        assertFalse(mService.isUserUnlockedL(USER_10));
+
+        // Unlock user.
+        mUnlockedUsers.put(USER_0, true);
+        assertTrue(mService.isUserUnlockedL(USER_0));
+        assertFalse(mService.isUserUnlockedL(USER_10));
+
+        // Clear again.
+        mRunningUsers.clear();
+        mUnlockedUsers.clear();
+
+        // Directly call the lifecycle event.  Now also locked.
+        mService.handleUnlockUser(USER_0);
+        assertTrue(mService.isUserUnlockedL(USER_0));
+        assertFalse(mService.isUserUnlockedL(USER_10));
+
+        // Directly call the stop lifecycle event.  Goes back to the initial state.
+        mService.handleCleanupUser(USER_0);
+        assertFalse(mService.isUserUnlockedL(USER_0));
+        assertFalse(mService.isUserUnlockedL(USER_10));
+    }
 }
