@@ -16,6 +16,7 @@
 
 package com.android.server.connectivity.tethering;
 
+import android.net.INetd;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
@@ -27,13 +28,16 @@ import android.net.ip.RouterAdvertisementDaemon.RaParams;
 import android.os.INetworkManagementService;
 import android.os.RemoteException;
 import android.util.Log;
+import android.util.Slog;
 
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Objects;
 
 
 /**
@@ -41,13 +45,15 @@ import java.util.HashSet;
  */
 class IPv6TetheringInterfaceServices {
     private static final String TAG = IPv6TetheringInterfaceServices.class.getSimpleName();
+    private static final IpPrefix LINK_LOCAL_PREFIX = new IpPrefix("fe80::/64");
+    private static final int RFC7421_IP_PREFIX_LENGTH = 64;
 
     private final String mIfName;
     private final INetworkManagementService mNMService;
 
     private NetworkInterface mNetworkInterface;
     private byte[] mHwAddr;
-    private ArrayList<RouteInfo> mLastLocalRoutes;
+    private LinkProperties mLastIPv6LinkProperties;
     private RouterAdvertisementDaemon mRaDaemon;
     private RaParams mLastRaParams;
 
@@ -86,8 +92,7 @@ class IPv6TetheringInterfaceServices {
     public void stop() {
         mNetworkInterface = null;
         mHwAddr = null;
-        updateLocalRoutes(null);
-        updateRaParams(null);
+        setRaParams(null);
 
         if (mRaDaemon != null) {
             mRaDaemon.stop();
@@ -104,95 +109,178 @@ class IPv6TetheringInterfaceServices {
     public void updateUpstreamIPv6LinkProperties(LinkProperties v6only) {
         if (mRaDaemon == null) return;
 
-        if (v6only == null) {
-            updateLocalRoutes(null);
-            updateRaParams(null);
+        // Avoid unnecessary work on spurious updates.
+        if (Objects.equals(mLastIPv6LinkProperties, v6only)) {
             return;
         }
 
-        RaParams params = new RaParams();
-        params.mtu = v6only.getMtu();
-        params.hasDefaultRoute = v6only.hasIPv6DefaultRoute();
+        RaParams params = null;
 
-        ArrayList<RouteInfo> localRoutes = new ArrayList<RouteInfo>();
-        for (LinkAddress linkAddr : v6only.getLinkAddresses()) {
-            final IpPrefix prefix = new IpPrefix(linkAddr.getAddress(),
-                                                 linkAddr.getPrefixLength());
+        if (v6only != null) {
+            params = new RaParams();
+            params.mtu = v6only.getMtu();
+            params.hasDefaultRoute = v6only.hasIPv6DefaultRoute();
 
-            // Accumulate routes representing "prefixes to be assigned to the
-            // local interface", for subsequent addition to the local network
-            // in the routing rules.
-            localRoutes.add(new RouteInfo(prefix, null, mIfName));
+            for (LinkAddress linkAddr : v6only.getLinkAddresses()) {
+                if (linkAddr.getPrefixLength() != RFC7421_IP_PREFIX_LENGTH) continue;
 
-            params.prefixes.add(prefix);
+                final IpPrefix prefix = new IpPrefix(
+                        linkAddr.getAddress(), linkAddr.getPrefixLength());
+                params.prefixes.add(prefix);
+
+                final Inet6Address dnsServer = getLocalDnsIpFor(prefix);
+                if (dnsServer != null) {
+                    params.dnses.add(dnsServer);
+                }
+            }
         }
+        // If v6only is null, we pass in null to setRaParams(), which handles
+        // deprecation of any existing RA data.
 
-        // We need to be able to send unicast RAs, and clients might like to
-        // ping the default router's link-local address, so add that as well.
-        localRoutes.add(new RouteInfo(new IpPrefix("fe80::/64"), null, mIfName));
+        setRaParams(params);
+        mLastIPv6LinkProperties = v6only;
+    }
 
-        // TODO: Add a local interface address, update dnsmasq to listen on the
-        // new address, and use only that address as a DNS server.
-        for (InetAddress dnsServer : v6only.getDnsServers()) {
-            if (dnsServer instanceof Inet6Address) {
-                params.dnses.add((Inet6Address) dnsServer);
+
+    private void configureLocalRoutes(
+            HashSet<IpPrefix> deprecatedPrefixes, HashSet<IpPrefix> newPrefixes) {
+        // [1] Remove the routes that are deprecated.
+        if (!deprecatedPrefixes.isEmpty()) {
+            final ArrayList<RouteInfo> toBeRemoved = getLocalRoutesFor(deprecatedPrefixes);
+            try {
+                final int removalFailures = mNMService.removeRoutesFromLocalNetwork(toBeRemoved);
+                if (removalFailures > 0) {
+                    Log.e(TAG, String.format("Failed to remove %d IPv6 routes from local table.",
+                            removalFailures));
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to remove IPv6 routes from local table: ", e);
             }
         }
 
-        updateLocalRoutes(localRoutes);
-        updateRaParams(params);
-    }
+        // [2] Add only the routes that have not previously been added.
+        if (newPrefixes != null && !newPrefixes.isEmpty()) {
+            HashSet<IpPrefix> addedPrefixes = (HashSet) newPrefixes.clone();
+            if (mLastRaParams != null) {
+                addedPrefixes.removeAll(mLastRaParams.prefixes);
+            }
 
-    private void updateLocalRoutes(ArrayList<RouteInfo> localRoutes) {
-        if (localRoutes != null) {
-            // TODO: Compare with mLastLocalRoutes and take appropriate
-            // appropriate action on the difference between the two.
+            if (mLastRaParams == null || mLastRaParams.prefixes.isEmpty()) {
+                // We need to be able to send unicast RAs, and clients might
+                // like to ping the default router's link-local address.  Note
+                // that we never remove the link-local route from the network
+                // until Tethering disables tethering on the interface.
+                addedPrefixes.add(LINK_LOCAL_PREFIX);
+            }
 
-            if (!localRoutes.isEmpty()) {
+            if (!addedPrefixes.isEmpty()) {
+                final ArrayList<RouteInfo> toBeAdded = getLocalRoutesFor(addedPrefixes);
                 try {
-                    mNMService.addInterfaceToLocalNetwork(mIfName, localRoutes);
+                    // It's safe to call addInterfaceToLocalNetwork() even if
+                    // the interface is already in the local_network.
+                    mNMService.addInterfaceToLocalNetwork(mIfName, toBeAdded);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Failed to add IPv6 routes to local table: ", e);
                 }
             }
-        } else {
-            if (mLastLocalRoutes != null && !mLastLocalRoutes.isEmpty()) {
-                try {
-                    final int removalFailures =
-                            mNMService.removeRoutesFromLocalNetwork(mLastLocalRoutes);
-                    if (removalFailures > 0) {
-                        Log.e(TAG,
-                                String.format("Failed to remove %d IPv6 routes from local table.",
-                                removalFailures));
-                    }
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Failed to remove IPv6 routes from local table: ", e);
-                }
-            }
         }
-
-        mLastLocalRoutes = localRoutes;
     }
 
-    private void updateRaParams(RaParams params) {
-        if (mRaDaemon != null) {
-            HashSet<IpPrefix> deprecated = null;
-
-            if (mLastRaParams != null) {
-                deprecated = new HashSet<>();
-
-                for (IpPrefix ipp : mLastRaParams.prefixes) {
-                    if (params == null || !params.prefixes.contains(ipp)) {
-                        deprecated.add(ipp);
-                    }
-                }
-            }
-
-            // Currently, we send spurious RAs (5) whenever there's any update.
-            // TODO: Compare params with mLastParams to avoid spurious updates.
-            mRaDaemon.buildNewRa(params, deprecated);
+    private void configureLocalDns(
+            HashSet<Inet6Address> deprecatedDnses, HashSet<Inet6Address> newDnses) {
+        INetd netd = getNetdServiceOrNull();
+        if (netd == null) {
+            if (newDnses != null) newDnses.clear();
+            Log.e(TAG, "No netd service instance available; not setting local IPv6 addresses");
+            return;
         }
 
-        mLastRaParams = params;
+        // [1] Remove deprecated local DNS IP addresses.
+        if (!deprecatedDnses.isEmpty()) {
+            for (Inet6Address dns : deprecatedDnses) {
+                final String dnsString = dns.getHostAddress();
+                try {
+                    netd.interfaceDelAddress(mIfName, dnsString, RFC7421_IP_PREFIX_LENGTH);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Failed to remove local dns IP: " + dnsString, e);
+                }
+            }
+        }
+
+        // [2] Add only the local DNS IP addresses that have not previously been added.
+        if (newDnses != null && !newDnses.isEmpty()) {
+            final HashSet<Inet6Address> addedDnses = (HashSet) newDnses.clone();
+            if (mLastRaParams != null) {
+                addedDnses.removeAll(mLastRaParams.dnses);
+            }
+
+            for (Inet6Address dns : addedDnses) {
+                final String dnsString = dns.getHostAddress();
+                try {
+                    netd.interfaceAddAddress(mIfName, dnsString, RFC7421_IP_PREFIX_LENGTH);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Failed to add local dns IP: " + dnsString, e);
+                    newDnses.remove(dns);
+                }
+            }
+        }
+
+        try {
+            netd.tetherApplyDnsInterfaces();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to update local DNS caching server");
+            if (newDnses != null) newDnses.clear();
+        }
+    }
+
+    private void setRaParams(RaParams newParams) {
+        if (mRaDaemon != null) {
+            final RaParams deprecatedParams =
+                    RaParams.getDeprecatedRaParams(mLastRaParams, newParams);
+
+            configureLocalRoutes(deprecatedParams.prefixes,
+                    (newParams != null) ? newParams.prefixes : null);
+
+            configureLocalDns(deprecatedParams.dnses,
+                    (newParams != null) ? newParams.dnses : null);
+
+            mRaDaemon.buildNewRa(deprecatedParams, newParams);
+        }
+
+        mLastRaParams = newParams;
+    }
+
+    // Accumulate routes representing "prefixes to be assigned to the local
+    // interface", for subsequent modification of local_network routing.
+    private ArrayList<RouteInfo> getLocalRoutesFor(HashSet<IpPrefix> prefixes) {
+        final ArrayList<RouteInfo> localRoutes = new ArrayList<RouteInfo>();
+        for (IpPrefix ipp : prefixes) {
+            localRoutes.add(new RouteInfo(ipp, null, mIfName));
+        }
+        return localRoutes;
+    }
+
+    private INetd getNetdServiceOrNull() {
+        if (mNMService != null) {
+            try {
+                return mNMService.getNetdService();
+            } catch (RemoteException ignored) {
+                // This blocks until netd can be reached, but it can return
+                // null during a netd crash.
+            }
+        }
+        return null;
+    }
+
+    // Given a prefix like 2001:db8::/64 return 2001:db8::1.
+    private static Inet6Address getLocalDnsIpFor(IpPrefix localPrefix) {
+        final byte[] dnsBytes = localPrefix.getRawAddress();
+        dnsBytes[dnsBytes.length - 1] = 0x1;
+        try {
+            return Inet6Address.getByAddress(null, dnsBytes, 0);
+        } catch (UnknownHostException e) {
+            Slog.wtf(TAG, "Failed to construct Inet6Address from: " + localPrefix);
+            return null;
+        }
     }
 }
