@@ -2341,7 +2341,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                                 Process.SCHED_OTHER, 0);
                                         }
                                     } catch (IllegalArgumentException e) {
-                                        Slog.e(TAG, "Failed to set scheduling policy, thread does"
+                                        Slog.w(TAG, "Failed to set scheduling policy, thread does"
                                                 + " not exist:\n" + e);
                                     }
                                 }
@@ -12572,10 +12572,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                     proc.vrThreadTid = tid;
 
                     // promote to FIFO now if the tid is non-zero
-                    if (proc.curSchedGroup == ProcessList.SCHED_GROUP_TOP_APP
-                            && proc.vrThreadTid > 0) {
-                        Process.setThreadScheduler(proc.vrThreadTid,
+                    try {
+                        if (proc.curSchedGroup == ProcessList.SCHED_GROUP_TOP_APP &&
+                            proc.vrThreadTid > 0) {
+                            Process.setThreadScheduler(proc.vrThreadTid,
                                 Process.SCHED_FIFO | Process.SCHED_RESET_ON_FORK, 1);
+                        }
+                    } catch (IllegalArgumentException e) {
+                        Slog.e(TAG, "Failed to set scheduling policy, thread does"
+                               + " not exist:\n" + e);
                     }
                 }
             }
@@ -20350,17 +20355,29 @@ public final class ActivityManagerService extends ActivityManagerNative
                         if (oldSchedGroup != ProcessList.SCHED_GROUP_TOP_APP) {
                             // Switch VR thread for app to SCHED_FIFO
                             if (mInVrMode && app.vrThreadTid != 0) {
-                                Process.setThreadScheduler(app.vrThreadTid,
-                                    Process.SCHED_FIFO | Process.SCHED_RESET_ON_FORK, 1);
+                                try {
+                                    Process.setThreadScheduler(app.vrThreadTid,
+                                        Process.SCHED_FIFO | Process.SCHED_RESET_ON_FORK, 1);
+                                } catch (IllegalArgumentException e) {
+                                    // thread died, ignore
+                                }
                             }
                             if (mUseFifoUiScheduling) {
                                 // Switch UI pipeline for app to SCHED_FIFO
                                 app.savedPriority = Process.getThreadPriority(app.pid);
-                                Process.setThreadScheduler(app.pid,
-                                    Process.SCHED_FIFO | Process.SCHED_RESET_ON_FORK, 1);
-                                if (app.renderThreadTid != 0) {
-                                    Process.setThreadScheduler(app.renderThreadTid,
+                                try {
+                                    Process.setThreadScheduler(app.pid,
                                         Process.SCHED_FIFO | Process.SCHED_RESET_ON_FORK, 1);
+                                } catch (IllegalArgumentException e) {
+                                    // thread died, ignore
+                                }
+                                if (app.renderThreadTid != 0) {
+                                    try {
+                                        Process.setThreadScheduler(app.renderThreadTid,
+                                            Process.SCHED_FIFO | Process.SCHED_RESET_ON_FORK, 1);
+                                    } catch (IllegalArgumentException e) {
+                                        // thread died, ignore
+                                    }
                                     if (DEBUG_OOM_ADJ) {
                                         Slog.d("UI_FIFO", "Set RenderThread (TID " +
                                             app.renderThreadTid + ") to FIFO");
@@ -20374,7 +20391,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 // Boost priority for top app UI and render threads
                                 Process.setThreadPriority(app.pid, -10);
                                 if (app.renderThreadTid != 0) {
-                                    Process.setThreadPriority(app.renderThreadTid, -10);
+                                    try {
+                                        Process.setThreadPriority(app.renderThreadTid, -10);
+                                    } catch (IllegalArgumentException e) {
+                                        // thread died, ignore
+                                    }
                                 }
                             }
                         }
