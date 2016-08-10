@@ -12566,23 +12566,33 @@ public final class ActivityManagerService extends ActivityManagerNative
             synchronized (mPidsSelfLocked) {
                 final int pid = Binder.getCallingPid();
                 proc = mPidsSelfLocked.get(pid);
+
                 if (proc != null && mInVrMode && tid >= 0) {
                     // ensure the tid belongs to the process
                     if (!Process.isThreadInProcess(pid, tid)) {
                         throw new IllegalArgumentException("VR thread does not belong to process");
                     }
-                    // reset existing VR thread to CFS
-                    if (proc.vrThreadTid != 0) {
-                        Process.setThreadScheduler(proc.vrThreadTid, Process.SCHED_OTHER, 0);
+
+                    // reset existing VR thread to CFS if this thread still exists and belongs to
+                    // the calling process
+                    if (proc.vrThreadTid != 0
+                            && Process.isThreadInProcess(pid, proc.vrThreadTid)) {
+                        try {
+                            Process.setThreadScheduler(proc.vrThreadTid, Process.SCHED_OTHER, 0);
+                        } catch (IllegalArgumentException e) {
+                            // Ignore this.  Only occurs in race condition where previous VR thread
+                            // was destroyed during this method call.
+                        }
                     }
-                    // add check to guarantee that tid belongs to pid?
+
                     proc.vrThreadTid = tid;
+
                     // promote to FIFO now if the tid is non-zero
-                    if (proc.curSchedGroup == ProcessList.SCHED_GROUP_TOP_APP && proc.vrThreadTid > 0) {
-                        Process.setThreadScheduler(proc.vrThreadTid, Process.SCHED_FIFO | Process.SCHED_RESET_ON_FORK, 1);
+                    if (proc.curSchedGroup == ProcessList.SCHED_GROUP_TOP_APP
+                            && proc.vrThreadTid > 0) {
+                        Process.setThreadScheduler(proc.vrThreadTid,
+                                Process.SCHED_FIFO | Process.SCHED_RESET_ON_FORK, 1);
                     }
-                } else {
-                    //Slog.e("VR_FIFO", "Didn't set thread from setVrThread?");
                 }
             }
         }
