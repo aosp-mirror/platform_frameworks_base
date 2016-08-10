@@ -1546,7 +1546,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         switch (action) {
             case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD:
             case R.id.accessibilityActionScrollDown: {
-                if (isEnabled() && getLastVisiblePosition() < getCount() - 1) {
+                if (isEnabled() && canScrollDown()) {
                     final int viewportHeight = getHeight() - mListPadding.top - mListPadding.bottom;
                     smoothScrollBy(viewportHeight, PositionScroller.SCROLL_DURATION);
                     return true;
@@ -1554,7 +1554,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             } return false;
             case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD:
             case R.id.accessibilityActionScrollUp: {
-                if (isEnabled() && mFirstPosition > 0) {
+                if (isEnabled() && canScrollUp()) {
                     final int viewportHeight = getHeight() - mListPadding.top - mListPadding.bottom;
                     smoothScrollBy(-viewportHeight, PositionScroller.SCROLL_DURATION);
                     return true;
