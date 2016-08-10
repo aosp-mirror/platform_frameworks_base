@@ -878,6 +878,9 @@ public class ShortcutService extends IShortcutService.Stub {
             saveUserInternalLocked(userId, os, /* forBackup= */ false);
 
             file.finishWrite(os);
+
+            // Remove all dangling bitmap files.
+            cleanupDanglingBitmapDirectoriesLocked(userId);
         } catch (XmlPullParserException | IOException e) {
             Slog.e(TAG, "Failed to write to file " + file.getBaseFile(), e);
             file.failWrite(os);
@@ -929,7 +932,6 @@ public class ShortcutService extends IShortcutService.Stub {
         }
         try {
             final ShortcutUser ret = loadUserInternal(userId, in, /* forBackup= */ false);
-            cleanupDanglingBitmapDirectoriesLocked(userId, ret);
             return ret;
         } catch (IOException | XmlPullParserException e) {
             Slog.e(TAG, "Failed to read file " + file.getBaseFile(), e);
@@ -1062,9 +1064,22 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
-    // Requires mLock held, but "Locked" prefix would look weired so we jsut say "L".
+    // Requires mLock held, but "Locked" prefix would look weired so we just say "L".
     protected boolean isUserUnlockedL(@UserIdInt int userId) {
-        return mUnlockedUsers.get(userId);
+        // First, check the local copy.
+        if (mUnlockedUsers.get(userId)) {
+            return true;
+        }
+        // If the local copy says the user is locked, check with AM for the actual state, since
+        // the user might just have been unlocked.
+        // Note we just don't use isUserUnlockingOrUnlocked() here, because it'll return false
+        // when the user is STOPPING, which we still want to consider as "unlocked".
+        final long token = injectClearCallingIdentity();
+        try {
+            return mUserManager.isUserUnlockingOrUnlocked(userId);
+        } finally {
+            injectRestoreCallingIdentity(token);
+        }
     }
 
     // Requires mLock held, but "Locked" prefix would look weired so we jsut say "L".
@@ -1125,14 +1140,8 @@ public class ShortcutService extends IShortcutService.Stub {
     // === Caller validation ===
 
     void removeIcon(@UserIdInt int userId, ShortcutInfo shortcut) {
-        if (shortcut.getBitmapPath() != null) {
-            if (DEBUG) {
-                Slog.d(TAG, "Removing " + shortcut.getBitmapPath());
-            }
-            new File(shortcut.getBitmapPath()).delete();
-
-            shortcut.setBitmapPath(null);
-        }
+        // Do not remove the actual bitmap file yet, because if the device crashes before saving
+        // he XML we'd lose the icon.  We just remove all dangling files after saving the XML.
         shortcut.setIconResourceId(0);
         shortcut.setIconResName(null);
         shortcut.clearFlags(ShortcutInfo.FLAG_HAS_ICON_FILE | ShortcutInfo.FLAG_HAS_ICON_RES);
@@ -1148,12 +1157,13 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
-    private void cleanupDanglingBitmapDirectoriesLocked(
-            @UserIdInt int userId, @NonNull ShortcutUser user) {
+    private void cleanupDanglingBitmapDirectoriesLocked(@UserIdInt int userId) {
         if (DEBUG) {
             Slog.d(TAG, "cleanupDanglingBitmaps: userId=" + userId);
         }
         final long start = injectElapsedRealtime();
+
+        final ShortcutUser user = getUserShortcutsLocked(userId);
 
         final File bitmapDir = getUserBitmapFilePath(userId);
         final File[] children = bitmapDir.listFiles();
