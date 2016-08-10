@@ -2348,8 +2348,10 @@ public class DevicePolicyManager {
     public static final int WIPE_RESET_PROTECTION_DATA = 0x0002;
 
     /**
-     * Ask the user data be wiped. Wiping the primary user will cause the device to reboot, erasing
-     * all user data while next booting up.
+     * Ask that all user data be wiped. If called as a secondary user, the user will be removed and
+     * other users will remain unaffected. Calling from the primary user will cause the device to
+     * reboot, erasing all device data - including all the secondary users and their data - while
+     * booting up.
      * <p>
      * The calling device admin must have requested {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA} to
      * be able to call this method; if it has not, a security exception will be thrown.
