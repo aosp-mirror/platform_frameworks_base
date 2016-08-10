@@ -677,9 +677,9 @@ public class Build {
          * <li> {@link android.app.DownloadManager.Request#setAllowedNetworkTypes
          * DownloadManager.Request.setAllowedNetworkTypes}
          * will disable "allow over metered" when specifying only
-         * {@link android.app.DownloadManager.Request#NETWORK_WIFI}.
+         * {@link android.app.DownloadManager.Request#NETWORK_WIFI}.</li>
          * <li> {@link android.app.DownloadManager} no longer allows access to raw
-         * file paths.
+         * file paths.</li>
          * <li> {@link android.app.Notification.Builder#setShowWhen
          * Notification.Builder.setShowWhen}
          * must be called explicitly to have the time shown, and various other changes in
