@@ -161,7 +161,7 @@ final class UserController {
     private final RemoteCallbackList<IUserSwitchObserver> mUserSwitchObservers
             = new RemoteCallbackList<>();
 
-    boolean mUserSwitchUiEnabled;
+    boolean mUserSwitchUiEnabled = true;
 
     /**
      * Currently active user switch callbacks.
