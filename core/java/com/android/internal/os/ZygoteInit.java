@@ -586,21 +586,42 @@ public class ZygoteInit {
                 // System server is fully AOTed and never profiled
                 // for profile guided compilation.
                 // TODO: Make this configurable between INTERPRET_ONLY, SPEED, SPACE and EVERYTHING?
-                final int dexoptNeeded = DexFile.getDexOptNeeded(
+
+                int dexoptNeeded;
+                try {
+                    dexoptNeeded = DexFile.getDexOptNeeded(
                         classPathElement, instructionSet, "speed",
                         false /* newProfile */);
-                if (dexoptNeeded != DexFile.NO_DEXOPT_NEEDED) {
-                    installer.dexopt(classPathElement, Process.SYSTEM_UID, instructionSet,
-                            dexoptNeeded, 0 /*dexFlags*/, "speed", null /*volumeUuid*/,
-                            sharedLibraries);
+                } catch (FileNotFoundException ignored) {
+                    // Do not add to the classpath.
+                    Log.w(TAG, "Missing classpath element for system server: " + classPathElement);
+                    continue;
+                } catch (IOException e) {
+                    // Not fully clear what to do here as we don't know the cause of the
+                    // IO exception. Add to the classpath to be conservative, but don't
+                    // attempt to compile it.
+                    Log.w(TAG, "Error checking classpath element for system server: "
+                            + classPathElement, e);
+                    dexoptNeeded = DexFile.NO_DEXOPT_NEEDED;
                 }
+
+                if (dexoptNeeded != DexFile.NO_DEXOPT_NEEDED) {
+                    try {
+                        installer.dexopt(classPathElement, Process.SYSTEM_UID, instructionSet,
+                                dexoptNeeded, 0 /*dexFlags*/, "speed", null /*volumeUuid*/,
+                                sharedLibraries);
+                    } catch (InstallerException e) {
+                        // Ignore (but log), we need this on the classpath for fallback mode.
+                        Log.w(TAG, "Failed compiling classpath element for system server: "
+                                + classPathElement, e);
+                    }
+                }
+
                 if (!sharedLibraries.isEmpty()) {
                     sharedLibraries += ":";
                 }
                 sharedLibraries += classPathElement;
             }
-        } catch (IOException | InstallerException e) {
-            throw new RuntimeException("Error starting system_server", e);
         } finally {
             installer.disconnect();
         }
