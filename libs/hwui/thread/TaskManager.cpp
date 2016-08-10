@@ -104,7 +104,7 @@ bool TaskManager::WorkerThread::threadLoop() {
     return true;
 }
 
-bool TaskManager::WorkerThread::addTask(TaskWrapper task) {
+bool TaskManager::WorkerThread::addTask(const TaskWrapper& task) {
     if (!isRunning()) {
         run(mName.string(), PRIORITY_DEFAULT);
     } else if (exitPending()) {

@@ -29,7 +29,7 @@ namespace uirenderer {
 // Lifecycle
 ///////////////////////////////////////////////////////////////////////////////
 
-void AssetAtlas::init(sp<GraphicBuffer> buffer, int64_t* map, int count) {
+void AssetAtlas::init(const sp<GraphicBuffer>& buffer, int64_t* map, int count) {
     if (mImage) {
         return;
     }
