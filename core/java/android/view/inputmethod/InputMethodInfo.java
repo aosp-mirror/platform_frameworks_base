@@ -213,7 +213,7 @@ public final class InputMethodInfo implements Parcelable {
                     subtypes.add(subtype);
                 }
             }
-        } catch (NameNotFoundException e) {
+        } catch (NameNotFoundException | IndexOutOfBoundsException | NumberFormatException e) {
             throw new XmlPullParserException(
                     "Unable to create context for: " + si.packageName);
         } finally {
