@@ -454,6 +454,12 @@ interface ITelephony {
      */
     int getVoiceMessageCountForSubscriber(int subId);
 
+    oneway void setVisualVoicemailEnabled(String callingPackage,
+            in PhoneAccountHandle accountHandle, boolean enabled);
+
+    boolean isVisualVoicemailEnabled(String callingPackage,
+            in PhoneAccountHandle accountHandle);
+
     // Not oneway, caller needs to make sure the vaule is set before receiving a SMS
     void enableVisualVoicemailSmsFilter(String callingPackage, int subId,
             in VisualVoicemailSmsFilterSettings settings);
