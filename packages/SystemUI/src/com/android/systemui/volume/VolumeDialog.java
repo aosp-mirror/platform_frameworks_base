@@ -495,7 +495,7 @@ public class VolumeDialog implements TunerService.Tunable {
         mMotion.startDismiss(new Runnable() {
             @Override
             public void run() {
-                updateExpandedH(false);
+                updateExpandedH(false /* expanding */, true /* dismissing */);
             }
         });
         if (mAccessibilityMgr.isEnabled()) {
@@ -541,45 +541,47 @@ public class VolumeDialog implements TunerService.Tunable {
         mHandler.sendEmptyMessageDelayed(H.UPDATE_BOTTOM_MARGIN, getConservativeCollapseDuration());
     }
 
-    private void updateExpandedH(final boolean expanded) {
+    private void updateExpandedH(final boolean expanded, final boolean dismissing) {
         if (mExpanded == expanded) return;
         mExpanded = expanded;
         mExpandButtonAnimationRunning = isAttached();
         if (D.BUG) Log.d(TAG, "updateExpandedH " + expanded);
         updateExpandButtonH();
         updateFooterH();
-        final VolumeRow activeRow = getActiveRow();
-        mWindow.setLayout(mWindow.getAttributes().width, ViewGroup.LayoutParams.MATCH_PARENT);
-        AutoTransition transition = new AutoTransition();
-        transition.setDuration(mExpandButtonAnimationDuration);
-        transition.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
-        transition.addListener(new Transition.TransitionListener() {
-            @Override
-            public void onTransitionStart(Transition transition) {
-            }
-
-            @Override
-            public void onTransitionEnd(Transition transition) {
-                mWindow.setLayout(
-                        mWindow.getAttributes().width, ViewGroup.LayoutParams.WRAP_CONTENT);
-            }
-
-            @Override
-            public void onTransitionCancel(Transition transition) {
-                mWindow.setLayout(
-                        mWindow.getAttributes().width, ViewGroup.LayoutParams.WRAP_CONTENT);
-            }
-
-            @Override
-            public void onTransitionPause(Transition transition) {
-            }
-
-            @Override
-            public void onTransitionResume(Transition transition) {
-            }
-        });
         TransitionManager.endTransitions(mDialogView);
-        TransitionManager.beginDelayedTransition(mDialogView, transition);
+        final VolumeRow activeRow = getActiveRow();
+        if (!dismissing) {
+            mWindow.setLayout(mWindow.getAttributes().width, ViewGroup.LayoutParams.MATCH_PARENT);
+            AutoTransition transition = new AutoTransition();
+            transition.setDuration(mExpandButtonAnimationDuration);
+            transition.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
+            transition.addListener(new Transition.TransitionListener() {
+                @Override
+                public void onTransitionStart(Transition transition) {
+                }
+
+                @Override
+                public void onTransitionEnd(Transition transition) {
+                    mWindow.setLayout(
+                            mWindow.getAttributes().width, ViewGroup.LayoutParams.WRAP_CONTENT);
+                }
+
+                @Override
+                public void onTransitionCancel(Transition transition) {
+                }
+
+                @Override
+                public void onTransitionPause(Transition transition) {
+                    mWindow.setLayout(
+                            mWindow.getAttributes().width, ViewGroup.LayoutParams.WRAP_CONTENT);
+                }
+
+                @Override
+                public void onTransitionResume(Transition transition) {
+                }
+            });
+            TransitionManager.beginDelayedTransition(mDialogView, transition);
+        }
         updateRowsH(activeRow);
         rescheduleTimeoutH();
     }
@@ -1029,7 +1031,7 @@ public class VolumeDialog implements TunerService.Tunable {
             if (mExpandButtonAnimationRunning) return;
             final boolean newExpand = !mExpanded;
             Events.writeEvent(mContext, Events.EVENT_EXPAND, newExpand);
-            updateExpandedH(newExpand);
+            updateExpandedH(newExpand, false /* dismissing */);
         }
     };
 
