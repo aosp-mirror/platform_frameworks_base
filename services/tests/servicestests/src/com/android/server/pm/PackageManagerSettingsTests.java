@@ -522,7 +522,8 @@ public class PackageManagerSettingsTests {
                 pkgFlags,
                 0 /*privateFlags*/,
                 null /*parentPackageName*/,
-                null /*childPackageNames*/);
+                null /*childPackageNames*/,
+                0 /*sharedUserId*/);
     }
 
     private @NonNull List<UserInfo> createFakeUsers() {

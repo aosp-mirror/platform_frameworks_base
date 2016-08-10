@@ -147,51 +147,12 @@ abstract class PackageSettingBase extends SettingBase {
                 secondaryCpuAbiString, cpuAbiOverrideString, pVersionCode);
     }
 
-    /**
-     * New instance of PackageSetting with one-level-deep cloning.
-     */
-    @SuppressWarnings("unchecked")
+    /** New instance of PackageSetting with one-level-deep cloning. */
     PackageSettingBase(PackageSettingBase base) {
         super(base);
-
         name = base.name;
         realName = base.realName;
-        codePath = base.codePath;
-        codePathString = base.codePathString;
-        resourcePath = base.resourcePath;
-        resourcePathString = base.resourcePathString;
-        legacyNativeLibraryPathString = base.legacyNativeLibraryPathString;
-        primaryCpuAbiString = base.primaryCpuAbiString;
-        secondaryCpuAbiString = base.secondaryCpuAbiString;
-        cpuAbiOverrideString = base.cpuAbiOverrideString;
-        timeStamp = base.timeStamp;
-        firstInstallTime = base.firstInstallTime;
-        lastUpdateTime = base.lastUpdateTime;
-        versionCode = base.versionCode;
-
-        uidError = base.uidError;
-
-        signatures = new PackageSignatures(base.signatures);
-
-        installPermissionsFixed = base.installPermissionsFixed;
-        userState.clear();
-        for (int i=0; i<base.userState.size(); i++) {
-            userState.put(base.userState.keyAt(i),
-                    new PackageUserState(base.userState.valueAt(i)));
-        }
-        installStatus = base.installStatus;
-
-        origPackage = base.origPackage;
-
-        installerPackageName = base.installerPackageName;
-        isOrphaned = base.isOrphaned;
-        volumeUuid = base.volumeUuid;
-
-        keySetData = new PackageKeySetData(base.keySetData);
-
-        parentPackageName = base.parentPackageName;
-        childPackageNames = (base.childPackageNames != null)
-                ? new ArrayList<>(base.childPackageNames) : null;
+        doCopy(base);
     }
 
     void init(File codePath, File resourcePath, String legacyNativeLibraryPathString,
@@ -237,27 +198,47 @@ abstract class PackageSettingBase extends SettingBase {
     }
 
     /**
-     * Make a shallow copy of this package settings.
+     * Makes a shallow copy of the given package settings.
+     *
+     * NOTE: For some fields [such as keySetData, signatures, userState, verificationInfo, etc...],
+     * the original object is copied and a new one is not created.
      */
-    public void copyFrom(PackageSettingBase base) {
-        mPermissionsState.copyFrom(base.mPermissionsState);
-        primaryCpuAbiString = base.primaryCpuAbiString;
-        secondaryCpuAbiString = base.secondaryCpuAbiString;
-        cpuAbiOverrideString = base.cpuAbiOverrideString;
-        timeStamp = base.timeStamp;
-        firstInstallTime = base.firstInstallTime;
-        lastUpdateTime = base.lastUpdateTime;
-        signatures = base.signatures;
-        installPermissionsFixed = base.installPermissionsFixed;
+    public void copyFrom(PackageSettingBase orig) {
+        super.copyFrom(orig);
+        doCopy(orig);
+    }
+
+    private void doCopy(PackageSettingBase orig) {
+        childPackageNames = (orig.childPackageNames != null)
+                ? new ArrayList<>(orig.childPackageNames) : null;
+        codePath = orig.codePath;
+        codePathString = orig.codePathString;
+        cpuAbiOverrideString = orig.cpuAbiOverrideString;
+        firstInstallTime = orig.firstInstallTime;
+        installPermissionsFixed = orig.installPermissionsFixed;
+        installStatus = orig.installStatus;
+        installerPackageName = orig.installerPackageName;
+        isOrphaned = orig.isOrphaned;
+        keySetData = orig.keySetData;
+        lastUpdateTime = orig.lastUpdateTime;
+        legacyNativeLibraryPathString = orig.legacyNativeLibraryPathString;
+        // Intentionally skip oldCodePaths; it's not relevant for copies
+        origPackage = orig.origPackage;
+        parentPackageName = orig.parentPackageName;
+        primaryCpuAbiString = orig.primaryCpuAbiString;
+        resourcePath = orig.resourcePath;
+        resourcePathString = orig.resourcePathString;
+        secondaryCpuAbiString = orig.secondaryCpuAbiString;
+        signatures = orig.signatures;
+        timeStamp = orig.timeStamp;
+        uidError = orig.uidError;
         userState.clear();
-        for (int i=0; i<base.userState.size(); i++) {
-            userState.put(base.userState.keyAt(i), base.userState.valueAt(i));
+        for (int i=0; i<orig.userState.size(); i++) {
+            userState.put(orig.userState.keyAt(i), orig.userState.valueAt(i));
         }
-        installStatus = base.installStatus;
-        keySetData = base.keySetData;
-        verificationInfo = base.verificationInfo;
-        installerPackageName = base.installerPackageName;
-        volumeUuid = base.volumeUuid;
+        verificationInfo = orig.verificationInfo;
+        versionCode = orig.versionCode;
+        volumeUuid = orig.volumeUuid;
     }
 
     private PackageUserState modifyUserState(int userId) {
