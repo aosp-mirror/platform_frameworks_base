@@ -539,8 +539,11 @@
          Software implementation will be used if config_hardware_auto_brightness_available is not set -->
     <bool name="config_automatic_brightness_available">false</bool>
 
-    <!-- Fast brightness animation ramp rate -->
+    <!-- Fast brightness animation ramp rate in brightness units per second-->
     <integer translatable="false" name="config_brightness_ramp_rate_fast">200</integer>
+
+    <!-- Slow brightness animation ramp rate in brightness units per second-->
+    <integer translatable="false" name="config_brightness_ramp_rate_slow">40</integer>
 
     <!-- Don't name config resources like this.  It should look like config_annoyDianne -->
     <bool name="config_annoy_dianne">true</bool>
