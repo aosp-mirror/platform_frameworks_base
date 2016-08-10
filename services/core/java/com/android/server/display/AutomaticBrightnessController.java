@@ -22,6 +22,7 @@ import com.android.server.twilight.TwilightListener;
 import com.android.server.twilight.TwilightManager;
 import com.android.server.twilight.TwilightState;
 
+import android.annotation.Nullable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -268,7 +269,7 @@ class AutomaticBrightnessController {
         pw.println();
         pw.println("Automatic Brightness Controller State:");
         pw.println("  mLightSensor=" + mLightSensor);
-        pw.println("  mTwilight.getCurrentState()=" + mTwilight.getCurrentState());
+        pw.println("  mTwilight.getLastTwilightState()=" + mTwilight.getLastTwilightState());
         pw.println("  mLightSensorEnabled=" + mLightSensorEnabled);
         pw.println("  mLightSensorEnableTime=" + TimeUtils.formatUptime(mLightSensorEnableTime));
         pw.println("  mAmbientLux=" + mAmbientLux);
@@ -495,12 +496,14 @@ class AutomaticBrightnessController {
         }
 
         if (mUseTwilight) {
-            TwilightState state = mTwilight.getCurrentState();
+            TwilightState state = mTwilight.getLastTwilightState();
             if (state != null && state.isNight()) {
-                final long now = System.currentTimeMillis();
-                gamma *= 1 + state.getAmount() * TWILIGHT_ADJUSTMENT_MAX_GAMMA;
+                final long duration = state.sunriseTimeMillis() - state.sunsetTimeMillis();
+                final long progress = System.currentTimeMillis() - state.sunsetTimeMillis();
+                final float amount = (float) Math.pow(2.0 * progress / duration - 1.0, 2.0);
+                gamma *= 1 + amount * TWILIGHT_ADJUSTMENT_MAX_GAMMA;
                 if (DEBUG) {
-                    Slog.d(TAG, "updateAutoBrightness: twilight amount=" + state.getAmount());
+                    Slog.d(TAG, "updateAutoBrightness: twilight amount=" + amount);
                 }
             }
         }
@@ -621,7 +624,7 @@ class AutomaticBrightnessController {
 
     private final TwilightListener mTwilightListener = new TwilightListener() {
         @Override
-        public void onTwilightStateChanged() {
+        public void onTwilightStateChanged(@Nullable TwilightState state) {
             updateAutoBrightness(true /*sendUpdate*/);
         }
     };
