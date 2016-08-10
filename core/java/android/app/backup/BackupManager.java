@@ -59,6 +59,68 @@ import android.util.Log;
 public class BackupManager {
     private static final String TAG = "BackupManager";
 
+    // BackupObserver status codes
+    /**
+     * Indicates that backup succeeded.
+     *
+     * @hide
+     */
+    public static final int SUCCESS = 0;
+
+    /**
+     * Indicates that backup is either not enabled at all or
+     * backup for the package was rejected by backup service
+     * or backup transport,
+     *
+     * @hide
+     */
+    public static final int ERROR_BACKUP_NOT_ALLOWED = -2001;
+
+    /**
+     * The requested app is not installed on the device.
+     *
+     * @hide
+     */
+    public static final int ERROR_PACKAGE_NOT_FOUND = -2002;
+
+    /**
+     * The transport for some reason was not in a good state and
+     * aborted the entire backup request. This is a transient
+     * failure and should not be retried immediately.
+     *
+     * @hide
+     */
+    public static final int ERROR_TRANSPORT_ABORTED = BackupTransport.TRANSPORT_ERROR;
+
+    /**
+     * Returned when the transport was unable to process the
+     * backup request for a given package, for example if the
+     * transport hit a transient network failure. The remaining
+     * packages provided to {@link #requestBackup(String[], BackupObserver)}
+     * will still be attempted.
+     *
+     * @hide
+     */
+    public static final int ERROR_TRANSPORT_PACKAGE_REJECTED =
+            BackupTransport.TRANSPORT_PACKAGE_REJECTED;
+
+    /**
+     * Returned when the transport reject the attempt to backup because
+     * backup data size exceeded current quota limit for this package.
+     *
+     * @hide
+     */
+    public static final int ERROR_TRANSPORT_QUOTA_EXCEEDED =
+            BackupTransport.TRANSPORT_QUOTA_EXCEEDED;
+
+    /**
+     * The {@link BackupAgent} for the requested package failed for some reason
+     * and didn't provide appropriate backup data.
+     *
+     * @hide
+     */
+    public static final int ERROR_AGENT_FAILURE = BackupTransport.AGENT_ERROR;
+
     private Context mContext;
     private static IBackupManager sService;
 
