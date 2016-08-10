@@ -324,16 +324,16 @@ final class Session extends IWindowSession.Stub
             }
             Display display = displayContent.getDisplay();
             mService.mDragState.register(display);
-            mService.mInputMonitor.updateInputWindowsLw(true /*force*/);
             if (!mService.mInputManager.transferTouchFocus(callingWin.mInputChannel,
-                    mService.mDragState.mServerChannel)) {
+                    mService.mDragState.getInputChannel())) {
                 Slog.e(TAG_WM, "Unable to transfer touch focus");
                 mService.mDragState.unregister();
+                mService.mDragState.reset();
                 mService.mDragState = null;
-                mService.mInputMonitor.updateInputWindowsLw(true /*force*/);
                 return false;
             }
 
+            mService.mDragState.mDisplayContent = displayContent;
             mService.mDragState.mData = data;
             mService.mDragState.broadcastDragStartedLw(touchX, touchY);
             mService.mDragState.overridePointerIconLw(touchSource);

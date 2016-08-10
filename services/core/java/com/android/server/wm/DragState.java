@@ -94,10 +94,7 @@ class DragState {
     float mOriginalX, mOriginalY;
     float mCurrentX, mCurrentY;
     float mThumbOffsetX, mThumbOffsetY;
-    InputChannel mServerChannel, mClientChannel;
-    DragInputEventReceiver mInputEventReceiver;
-    InputApplicationHandle mDragApplicationHandle;
-    InputWindowHandle mDragWindowHandle;
+    InputInterceptor mInputInterceptor;
     WindowState mTargetWindow;
     ArrayList<WindowState> mNotifiedWindows;
     boolean mDragInProgress;
@@ -130,16 +127,13 @@ class DragState {
         mNotifiedWindows = null;
     }
 
-    /**
-     * @param display The Display that the window being dragged is on.
-     */
-    void register(Display display) {
-        if (DEBUG_DRAG) Slog.d(TAG_WM, "registering drag input channel");
-        if (mClientChannel != null) {
-            Slog.e(TAG_WM, "Duplicate register of drag input channel");
-        } else {
-            mDisplayContent = mService.getDisplayContentLocked(display.getDisplayId());
+    class InputInterceptor {
+        InputChannel mServerChannel, mClientChannel;
+        DragInputEventReceiver mInputEventReceiver;
+        InputApplicationHandle mDragApplicationHandle;
+        InputWindowHandle mDragWindowHandle;
 
+        InputInterceptor(Display display) {
             InputChannel[] channels = InputChannel.openInputChannelPair("drag");
             mServerChannel = channels[0];
             mClientChannel = channels[1];
@@ -188,13 +182,8 @@ class DragState {
             }
             mService.pauseRotationLocked();
         }
-    }
 
-    void unregister() {
-        if (DEBUG_DRAG) Slog.d(TAG_WM, "unregistering drag input channel");
-        if (mClientChannel == null) {
-            Slog.e(TAG_WM, "Unregister of nonexistent drag input channel");
-        } else {
+        void tearDown() {
             mService.mInputManager.unregisterInputChannel(mServerChannel);
             mInputEventReceiver.dispose();
             mInputEventReceiver = null;
@@ -211,6 +200,40 @@ class DragState {
                 Slog.d(TAG_WM, "Resuming rotation after drag");
             }
             mService.resumeRotationLocked();
+        }
+    }
+
+    InputChannel getInputChannel() {
+        return mInputInterceptor == null ? null : mInputInterceptor.mServerChannel;
+    }
+
+    InputWindowHandle getInputWindowHandle() {
+        return mInputInterceptor == null ? null : mInputInterceptor.mDragWindowHandle;
+    }
+
+    /**
+     * @param display The Display that the window being dragged is on.
+     */
+    void register(Display display) {
+        if (DEBUG_DRAG) Slog.d(TAG_WM, "registering drag input channel");
+        if (mInputInterceptor != null) {
+            Slog.e(TAG_WM, "Duplicate register of drag input channel");
+        } else {
+            mInputInterceptor = new InputInterceptor(display);
+            mService.mInputMonitor.updateInputWindowsLw(true /*force*/);
+        }
+    }
+
+    void unregister() {
+        if (DEBUG_DRAG) Slog.d(TAG_WM, "unregistering drag input channel");
+        if (mInputInterceptor == null) {
+            Slog.e(TAG_WM, "Unregister of nonexistent drag input channel");
+        } else {
+            // Input channel should be disposed on the thread where the input is being handled.
+            mService.mH.obtainMessage(
+                    H.TEAR_DOWN_DRAG_AND_DROP_INPUT, mInputInterceptor).sendToTarget();
+            mInputInterceptor = null;
+            mService.mInputMonitor.updateInputWindowsLw(true /*force*/);
         }
     }
 
@@ -397,8 +420,6 @@ class DragState {
         // free our resources and drop all the object references
         reset();
         mService.mDragState = null;
-
-        mService.mInputMonitor.updateInputWindowsLw(true /*force*/);
     }
 
     void notifyMoveLw(float x, float y) {

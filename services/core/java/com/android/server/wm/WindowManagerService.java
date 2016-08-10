@@ -771,9 +771,16 @@ public class WindowManagerService extends IWindowManager.Stub
         public void onInputEvent(InputEvent event) {
             boolean handled = false;
             try {
+                if (mDragState == null) {
+                    // The drag has ended but the clean-up message has not been processed by
+                    // window manager. Drop events that occur after this until window manager
+                    // has a chance to clean-up the input handle.
+                    handled = true;
+                    return;
+                }
                 if (event instanceof MotionEvent
                         && (event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0
-                        && mDragState != null && !mMuteInput) {
+                        && !mMuteInput) {
                     final MotionEvent motionEvent = (MotionEvent)event;
                     boolean endDrag = false;
                     final float newX = motionEvent.getRawX();
@@ -833,6 +840,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         if (DEBUG_DRAG) Slog.d(TAG_WM, "Drag ended; tearing down state");
                         // tell all the windows that the drag has ended
                         synchronized (mWindowMap) {
+                            // endDragLw will post back to looper to dispose the receiver
+                            // since we still need the receiver for the last finishInputEvent.
                             mDragState.endDragLw();
                         }
                         mStylusButtonDownAtStart = false;
@@ -7099,6 +7108,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         public static final int RESIZE_STACK = 42;
         public static final int RESIZE_TASK = 43;
+        public static final int TEAR_DOWN_DRAG_AND_DROP_INPUT = 44;
 
         public static final int WINDOW_REPLACEMENT_TIMEOUT = 46;
 
@@ -7511,7 +7521,6 @@ public class WindowManagerService extends IWindowManager.Stub
                         // !!! TODO: ANR the app that has failed to start the drag in time
                         if (mDragState != null) {
                             mDragState.unregister();
-                            mInputMonitor.updateInputWindowsLw(true /*force*/);
                             mDragState.reset();
                             mDragState = null;
                         }
@@ -7533,6 +7542,17 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                     break;
                 }
+
+                case TEAR_DOWN_DRAG_AND_DROP_INPUT: {
+                    if (DEBUG_DRAG) Slog.d(TAG_WM, "Drag ending; tearing down input channel");
+                    DragState.InputInterceptor interceptor = (DragState.InputInterceptor) msg.obj;
+                    if (interceptor != null) {
+                        synchronized (mWindowMap) {
+                            interceptor.tearDown();
+                        }
+                    }
+                }
+                break;
 
                 case REPORT_HARD_KEYBOARD_STATUS_CHANGE: {
                     notifyHardKeyboardStatusChange();

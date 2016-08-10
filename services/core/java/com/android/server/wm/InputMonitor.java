@@ -249,7 +249,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
             if (DEBUG_DRAG) {
                 Log.d(TAG_WM, "Inserting drag window");
             }
-            final InputWindowHandle dragWindowHandle = mService.mDragState.mDragWindowHandle;
+            final InputWindowHandle dragWindowHandle = mService.mDragState.getInputWindowHandle();
             if (dragWindowHandle != null) {
                 addInputWindowHandleLw(dragWindowHandle);
             } else {
