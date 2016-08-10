@@ -563,6 +563,7 @@ public class UsbDeviceManager {
                             mAccessoryModeRequestTime + ACCESSORY_REQUEST_TIMEOUT;
 
             if (mConfigured && enteringAccessoryMode) {
+                mAccessoryModeRequestTime = 0;
                 // successfully entered accessory mode
 
                 if (mAccessoryStrings != null) {
