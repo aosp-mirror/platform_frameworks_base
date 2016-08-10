@@ -46,11 +46,6 @@
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"SIM txartela blokeatuta dago."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"SIM txartela PUK bidez blokeatuta dago."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"SIM txartela desblokeatzen…"</string>
-    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Ereduaren bidez desblokeatzea."</string>
-    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"PIN kodearen bidez desblokeatzea."</string>
-    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Pasahitzaren bidez desblokeatzea."</string>
-    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Eredua marrazteko eremua."</string>
-    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Hatza lerratzeko eremua."</string>
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"PIN kodearen eremua"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"SIM txartelaren PIN kodearen eremua"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"SIM txartelaren PUK kodearen eremua"</string>
