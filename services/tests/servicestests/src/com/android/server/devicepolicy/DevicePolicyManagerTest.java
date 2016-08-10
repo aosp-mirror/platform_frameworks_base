@@ -27,7 +27,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.wifi.WifiInfo;
 import android.os.Build.VERSION_CODES;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Process;
 import android.os.UserHandle;
@@ -42,7 +41,6 @@ import android.util.Pair;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
-import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -62,7 +60,6 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.validateMockitoUsage;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -454,8 +451,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 .thenReturn(true);
 
         dpm.removeActiveAdmin(admin1);
-
-        assertTrue(dpm.isRemovingAdmin(admin1, DpmMockContext.CALLER_USER_HANDLE));
+        assertFalse(dpm.isAdminActiveAsUser(admin1, DpmMockContext.CALLER_USER_HANDLE));
     }
 
     /**
@@ -479,8 +475,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mContext.binder.callingUid = 1234567;
 
         dpms.removeActiveAdmin(admin1, DpmMockContext.CALLER_USER_HANDLE);
-
-        assertTrue(dpm.isRemovingAdmin(admin1, DpmMockContext.CALLER_USER_HANDLE));
+        assertFalse(dpm.isAdminActiveAsUser(admin1, DpmMockContext.CALLER_USER_HANDLE));
 
         // TODO DO Still can't be removed in this case.
     }
@@ -510,28 +505,18 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mContext.callerPermissions.clear();
         dpm.removeActiveAdmin(admin1);
 
-        final ArgumentCaptor<BroadcastReceiver> brCap =
-                ArgumentCaptor.forClass(BroadcastReceiver.class);
-
-        // Is removing now, but not removed yet.
-        assertTrue(dpm.isAdminActive(admin1));
-        assertTrue(dpm.isRemovingAdmin(admin1, DpmMockContext.CALLER_USER_HANDLE));
-
         verify(mContext.spiedContext).sendOrderedBroadcastAsUser(
                 MockUtils.checkIntentAction(
                         DeviceAdminReceiver.ACTION_DEVICE_ADMIN_DISABLED),
                 MockUtils.checkUserHandle(DpmMockContext.CALLER_USER_HANDLE),
                 isNull(String.class),
-                brCap.capture(),
+                any(BroadcastReceiver.class),
                 eq(dpms.mHandler),
                 eq(Activity.RESULT_OK),
                 isNull(String.class),
                 isNull(Bundle.class));
 
-        brCap.getValue().onReceive(mContext, null);
-
-        assertFalse(dpm.isAdminActive(admin1));
-        assertFalse(dpm.isRemovingAdmin(admin1, DpmMockContext.CALLER_USER_HANDLE));
+        assertFalse(dpm.isAdminActiveAsUser(admin1, DpmMockContext.CALLER_USER_HANDLE));
 
         // Again broadcast from saveSettingsLocked().
         verify(mContext.spiedContext, times(2)).sendBroadcastAsUser(
@@ -853,9 +838,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 MockUtils.checkUserRestrictions()
         );
 
-        assertTrue(dpm.isAdminActive(admin1));
-        assertTrue(dpm.isRemovingAdmin(admin1, UserHandle.USER_SYSTEM));
-
+        assertFalse(dpm.isAdminActiveAsUser(admin1, UserHandle.USER_SYSTEM));
         // TODO Check other calls.
     }
 
@@ -945,7 +928,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // Check
         assertFalse(dpm.isProfileOwnerApp(admin1.getPackageName()));
-        assertTrue(dpm.isRemovingAdmin(admin1, DpmMockContext.CALLER_USER_HANDLE));
+        assertFalse(dpm.isAdminActiveAsUser(admin1, DpmMockContext.CALLER_USER_HANDLE));
     }
 
     public void testSetProfileOwner_failures() throws Exception {
@@ -1477,7 +1460,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // Remove PO.
         dpm.clearProfileOwner(admin1);
-
+        dpm.setActiveAdmin(admin1, false);
         // Test 4, Caller is DO now.
         assertTrue(dpm.setDeviceOwner(admin1, null, UserHandle.USER_SYSTEM));
 
@@ -1526,6 +1509,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // Remove PO and add DO.
         dpm.clearProfileOwner(admin1);
+        dpm.setActiveAdmin(admin1, false);
         assertTrue(dpm.setDeviceOwner(admin1, null, UserHandle.USER_SYSTEM));
 
         // admin1 is DO.
