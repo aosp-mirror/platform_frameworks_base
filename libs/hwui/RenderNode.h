@@ -102,7 +102,7 @@ public:
 
     void computeOrdering();
 
-    ANDROID_API void output(uint32_t level = 0, const char* label = "Root");
+    ANDROID_API void output();
     ANDROID_API int getDebugSize();
     void copyTo(proto::RenderNode* node);
 
@@ -247,6 +247,7 @@ private:
 
     void incParentRefCount() { mParentCount++; }
     void decParentRefCount(TreeObserver* observer, TreeInfo* info = nullptr);
+    void output(std::ostream& output, uint32_t level);
 
     String8 mName;
     sp<VirtualLightRefBase> mUserContext;

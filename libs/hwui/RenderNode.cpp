@@ -23,6 +23,7 @@
 #include "RecordedOp.h"
 #include "TreeInfo.h"
 #include "utils/MathUtils.h"
+#include "utils/StringUtils.h"
 #include "utils/TraceUtils.h"
 #include "VectorDrawable.h"
 #include "renderstate/RenderState.h"
@@ -68,31 +69,36 @@ void RenderNode::setStagingDisplayList(DisplayList* displayList, TreeObserver* o
  * This function is a simplified version of replay(), where we simply retrieve and log the
  * display list. This function should remain in sync with the replay() function.
  */
-void RenderNode::output(uint32_t level, const char* label) {
-    ALOGD("%s (%s %p%s%s%s%s%s)",
-            label,
-            getName(),
-            this,
-            (MathUtils::isZero(properties().getAlpha()) ? ", zero alpha" : ""),
-            (properties().hasShadow() ? ", casting shadow" : ""),
-            (isRenderable() ? "" : ", empty"),
-            (properties().getProjectBackwards() ? ", projected" : ""),
-            (mLayer != nullptr ? ", on HW Layer" : ""));
-    properties().debugOutputProperties(level + 1);
+void RenderNode::output() {
+    LogcatStream strout;
+    strout << "Root";
+    output(strout, 0);
+}
+
+void RenderNode::output(std::ostream& output, uint32_t level) {
+    output << "  (" << getName() << " " << this
+            << (MathUtils::isZero(properties().getAlpha()) ? ", zero alpha" : "")
+            << (properties().hasShadow() ? ", casting shadow" : "")
+            << (isRenderable() ? "" : ", empty")
+            << (properties().getProjectBackwards() ? ", projected" : "")
+            << (mLayer != nullptr ? ", on HW Layer" : "")
+            << ")" << std::endl;
+
+    properties().debugOutputProperties(output, level + 1);
 
     if (mDisplayList) {
         for (auto&& op : mDisplayList->getOps()) {
-            std::stringstream strout;
-            OpDumper::dump(*op, strout, level + 1);
+            OpDumper::dump(*op, output, level + 1);
             if (op->opId == RecordedOpId::RenderNodeOp) {
                 auto rnOp = reinterpret_cast<const RenderNodeOp*>(op);
-                rnOp->renderNode->output(level + 1, strout.str().c_str());
+                rnOp->renderNode->output(output, level + 1);
             } else {
-                ALOGD("%s", strout.str().c_str());
+                output << std::endl;
             }
         }
     }
-    ALOGD("%*s/RenderNode(%s %p)", level * 2, "", getName(), this);
+    output << std::string(level * 2, ' ') << "/RenderNode(" << getName() << " " << this << ")";
+    output << std::endl;
 }
 
 void RenderNode::copyTo(proto::RenderNode *pnode) {

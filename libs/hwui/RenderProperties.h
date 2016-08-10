@@ -35,6 +35,7 @@
 #include <cutils/compiler.h>
 #include <androidfw/ResourceTypes.h>
 #include <utils/Log.h>
+#include <ostream>
 
 class SkBitmap;
 class SkColorFilter;
@@ -574,7 +575,7 @@ public:
         return mPrimitiveFields.mProjectBackwards;
     }
 
-    void debugOutputProperties(const int level) const;
+    void debugOutputProperties(std::ostream& output, const int level) const;
 
     void updateMatrix();
 
