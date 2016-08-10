@@ -3260,7 +3260,8 @@ public class Notification implements Parcelable
          * Resets the notification header to its original state
          */
         private void resetNotificationHeader(RemoteViews contentView) {
-            contentView.setImageViewResource(R.id.icon, 0);
+            // Small icon doesn't need to be reset, as it's always set. Resetting would prevent
+            // re-using the drawable when the notification is updated.
             contentView.setBoolean(R.id.notification_header, "setExpanded", false);
             contentView.setTextViewText(R.id.app_name_text, null);
             contentView.setViewVisibility(R.id.chronometer, View.GONE);
