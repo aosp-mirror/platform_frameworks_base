@@ -3773,9 +3773,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link android.os.Build.VERSION_CODES#N API 24} will be able to participate
      * in the drag operation and receive the dragged content.
      *
-     * If this is the only flag set, then the drag recipient will only have access to text data
+     * <p>If this is the only flag set, then the drag recipient will only have access to text data
      * and intents contained in the {@link ClipData} object. Access to URIs contained in the
-     * {@link ClipData} is determined by other DRAG_FLAG_GLOBAL_* flags.
+     * {@link ClipData} is determined by other DRAG_FLAG_GLOBAL_* flags</p>
      */
     public static final int DRAG_FLAG_GLOBAL = 1 << 8;  // 256
 
