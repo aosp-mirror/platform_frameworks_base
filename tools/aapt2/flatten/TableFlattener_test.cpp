@@ -64,7 +64,7 @@ public:
 
     ::testing::AssertionResult exists(ResTable* table,
                                       const StringPiece& expectedName,
-                                      const ResourceId expectedId,
+                                      const ResourceId& expectedId,
                                       const ConfigDescription& expectedConfig,
                                       const uint8_t expectedDataType, const uint32_t expectedData,
                                       const uint32_t expectedSpecFlags) {

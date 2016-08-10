@@ -135,7 +135,7 @@ bool TableMerger::doMerge(const Source& src,
                           const bool manglePackage,
                           const bool overlay,
                           const bool allowNewResources,
-                          FileMergeCallback callback) {
+                          const FileMergeCallback& callback) {
     bool error = false;
 
     for (auto& srcType : srcPackage->types) {

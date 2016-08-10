@@ -52,7 +52,7 @@ static bool lessEntryId(const std::pair<uint16_t, size_t>& p, uint16_t entryId) 
     return p.first < entryId;
 }
 
-size_t findAttributeSdkLevel(ResourceId id) {
+size_t findAttributeSdkLevel(const ResourceId& id) {
     if (id.packageId() != 0x01 && id.typeId() != 0x01) {
         return 0;
     }

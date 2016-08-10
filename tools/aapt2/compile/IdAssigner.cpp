@@ -28,7 +28,7 @@ namespace aapt {
  * Assigns the intended ID to the ResourceTablePackage, ResourceTableType, and ResourceEntry,
  * as long as there is no existing ID or the ID is the same.
  */
-static bool assignId(IDiagnostics* diag, const ResourceId id, const ResourceName& name,
+static bool assignId(IDiagnostics* diag, const ResourceId& id, const ResourceName& name,
                      ResourceTablePackage* pkg, ResourceTableType* type, ResourceEntry* entry) {
     if (pkg->id.value() == id.packageId()) {
         if (!type->id || type->id.value() == id.typeId()) {

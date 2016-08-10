@@ -528,7 +528,7 @@ bool ResourceFileFlattener::flatten(ResourceTable* table, IArchiveWriter* archiv
 
 static bool writeStableIdMapToPath(IDiagnostics* diag,
                                    const std::unordered_map<ResourceName, ResourceId>& idMap,
-                                   const std::string idMapPath) {
+                                   const std::string& idMapPath) {
     std::ofstream fout(idMapPath, std::ofstream::binary);
     if (!fout) {
         diag->error(DiagMessage(idMapPath) << strerror(errno));
@@ -823,7 +823,7 @@ public:
     }
 
     bool writeJavaFile(ResourceTable* table, const StringPiece& packageNameToGenerate,
-                       const StringPiece& outPackage, JavaClassGeneratorOptions javaOptions) {
+                       const StringPiece& outPackage, const JavaClassGeneratorOptions& javaOptions) {
         if (!mOptions.generateJavaClassPath) {
             return true;
         }
