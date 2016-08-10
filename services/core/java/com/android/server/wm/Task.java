@@ -17,18 +17,14 @@
 package com.android.server.wm;
 
 import static android.app.ActivityManager.RESIZE_MODE_SYSTEM_SCREEN_ROTATION;
-import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_CROP_WINDOWS;
-import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_RESIZE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.RESIZE_TASK;
-import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 
 import android.app.ActivityManager.StackId;
 import android.content.pm.ActivityInfo;
@@ -44,7 +40,6 @@ import android.view.SurfaceControl;
 import com.android.server.EventLogTags;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
 
 class Task implements DimLayer.DimLayerUser {
     static final String TAG = TAG_WITH_CLASS_NAME ? "Task" : TAG_WM;
@@ -311,7 +306,7 @@ class Task implements DimLayer.DimLayerUser {
         if ((boundsChanged & BOUNDS_CHANGE_SIZE) == BOUNDS_CHANGE_SIZE) {
             resizeWindows();
         } else {
-            moveWindows();
+            setMovedByResize();
         }
         return true;
     }
@@ -545,9 +540,9 @@ class Task implements DimLayer.DimLayerUser {
         }
     }
 
-    void moveWindows() {
+    void setMovedByResize() {
         for (int i = mAppTokens.size() - 1; i >= 0; --i) {
-            mAppTokens.get(i).moveWindows();
+            mAppTokens.get(i).setMovedByResize();
         }
     }
 
@@ -614,10 +609,6 @@ class Task implements DimLayer.DimLayerUser {
             }
         }
         return null;
-    }
-
-    AppWindowToken getTopAppToken() {
-        return mAppTokens.size() > 0 ? mAppTokens.get(mAppTokens.size() - 1) : null;
     }
 
     @Override

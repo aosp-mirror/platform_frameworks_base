@@ -28,14 +28,13 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_SCRIM;
-import static android.view.WindowManagerPolicy.TRANSIT_EXIT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYERS;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -96,14 +95,8 @@ class WindowToken {
     }
 
     void removeAllWindows() {
-        for (int winNdx = windows.size() - 1; winNdx >= 0;
-                // WindowState#removeIfPossible() at bottom of loop may remove multiple entries from
-                // allAppWindows if the window to be removed has child windows. It also may not
-                // remove any windows from allAppWindows at all if win is exiting and currently
-                // animating away. This ensures that winNdx is monotonically decreasing and never
-                // beyond allAppWindows bounds.
-                winNdx = Math.min(winNdx - 1, windows.size() - 1)) {
-            WindowState win = windows.get(winNdx);
+        for (int i = windows.size() - 1; i >= 0; --i) {
+            final WindowState win = windows.get(i);
             if (DEBUG_WINDOW_MOVEMENT) Slog.w(TAG_WM, "removeAllWindows: removing win=" + win);
             win.removeIfPossible();
         }
@@ -115,30 +108,20 @@ class WindowToken {
             return;
         }
 
-        boolean delayed = false;
         final int count = windows.size();
         boolean changed = false;
+        boolean delayed = false;
         DisplayContent displayContent = null;
 
         for (int i = 0; i < count; i++) {
             final WindowState win = windows.get(i);
-            displayContent = win.getDisplayContent();
-
             if (win.mWinAnimator.isAnimationSet()) {
                 delayed = true;
+                // TODO: This is technically wrong as a token can have windows on multi-displays
+                // currently. That will change moving forward though.
+                displayContent = win.getDisplayContent();
             }
-
-            if (win.isVisibleNow()) {
-                win.mWinAnimator.applyAnimationLocked(TRANSIT_EXIT, false);
-                //TODO (multidisplay): Magnification is supported only for the default
-                if (mService.mAccessibilityController != null && win.isDefaultDisplay()) {
-                    mService.mAccessibilityController.onWindowTransitionLocked(win, TRANSIT_EXIT);
-                }
-                changed = true;
-                if (displayContent != null) {
-                    displayContent.layoutNeeded = true;
-                }
-            }
+            changed |= win.onSetAppExiting();
         }
 
         hidden = true;
@@ -157,12 +140,9 @@ class WindowToken {
         int highestAnimLayer = -1;
         for (int j = windows.size() - 1; j >= 0; j--) {
             final WindowState w = windows.get(j);
-            w.adjustAnimLayer(adj);
-            final int animLayer = w.mWinAnimator.mAnimLayer;
-            if (DEBUG_LAYERS || DEBUG_WALLPAPER) Slog.v(TAG,
-                    "adjustAnimLayer win " + w + " anim layer: " + animLayer);
-            if (animLayer > highestAnimLayer) {
-                highestAnimLayer = animLayer;
+            final int winHighestAnimLayer = w.adjustAnimLayer(adj);
+            if (winHighestAnimLayer > highestAnimLayer) {
+                highestAnimLayer = winHighestAnimLayer;
             }
             if (w == mService.mInputMethodTarget && !mService.mInputMethodTargetWaitingAnim) {
                 mService.mLayersController.setInputMethodAnimLayerAdjustment(adj);
@@ -175,7 +155,7 @@ class WindowToken {
         if (windows.isEmpty()) {
             return null;
         }
-        return windows.get(windows.size() - 1);
+        return (WindowState) windows.get(windows.size() - 1).getTop();
     }
 
     /**
@@ -198,18 +178,22 @@ class WindowToken {
      * @param displayContent The display we are interested in.
      * @return List of windows from token that are on displayContent.
      */
-    protected WindowList getTokenWindowsOnDisplay(DisplayContent displayContent) {
+    private WindowList getTokenWindowsOnDisplay(DisplayContent displayContent) {
         final WindowList windowList = new WindowList();
-        final int count = windows.size();
+        final WindowList displayWindows = displayContent.getWindowList();
+        final int count = displayWindows.size();
         for (int i = 0; i < count; i++) {
-            final WindowState win = windows.get(i);
-            if (win.getDisplayContent() == displayContent) {
+            final WindowState win = displayWindows.get(i);
+            if (win.mToken == this) {
                 windowList.add(win);
             }
         }
         return windowList;
     }
 
+    // TODO: Now that we are no longer adding child windows to token directly, the rest of the code
+    // in this method doesn't really belong here, but is it difficult to move at the moment. Need to
+    // re-evaluate when figuring-out what to do about display window list.
     private void addChildWindow(final WindowState win) {
         final DisplayContent displayContent = win.getDisplayContent();
         if (displayContent == null) {
@@ -235,30 +219,18 @@ class WindowToken {
             if (sublayer < 0) {
                 // For negative sublayers, we go below all windows in the same sublayer.
                 if (wSublayer >= sublayer) {
-                    if (!windows.contains(win)) {
-                        if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "Adding " + win + " to " + this);
-                        windows.add(i, win);
-                    }
                     win.addWindowToListBefore(wSublayer >= 0 ? parentWindow : w);
                     break;
                 }
             } else {
                 // For positive sublayers, we go above all windows in the same sublayer.
                 if (wSublayer > sublayer) {
-                    if (!windows.contains(win)) {
-                        if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "Adding " + win + " to " + this);
-                        windows.add(i, win);
-                    }
                     win.addWindowToListBefore(w);
                     break;
                 }
             }
         }
         if (i >= wCount) {
-            if (!windows.contains(win)) {
-                if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "Adding " + win + " to " + this);
-                windows.add(win);
-            }
             if (sublayer < 0) {
                 win.addWindowToListBefore(parentWindow);
             } else {
@@ -364,7 +336,7 @@ class WindowToken {
         for ( ; taskNdx >= 0; --taskNdx) {
             AppTokenList tokens = tasks.get(taskNdx).mAppTokens;
             for ( ; tokenNdx >= 0; --tokenNdx) {
-                final AppWindowToken t = tokens.get(tokenNdx);
+                final WindowToken t = tokens.get(tokenNdx);
                 tokenWindowList = t.getTokenWindowsOnDisplay(displayContent);
                 final int NW = tokenWindowList.size();
                 if (NW > 0) {
@@ -455,16 +427,6 @@ class WindowToken {
         final int count = windows.size();
         for (int i = 0; i < count; i++) {
             final WindowState win = windows.get(i);
-            if (win.isChildWindow()) {
-                // The WindowState.reAddWindow below already takes care of re-adding the
-                // child windows for any parent window in this token. This is a side effect of
-                // ensuring child windows are in the same WindowToken as their parent window.
-                //
-                // TODO: Can be removed once WindowToken no longer contains child windows. i.e it is
-                // using WindowContainer which uses the hierarchy to access child windows through
-                // their parent window.
-                continue;
-            }
             final DisplayContent winDisplayContent = win.getDisplayContent();
             if (winDisplayContent == displayContent || winDisplayContent == null) {
                 win.mDisplayContent = displayContent;
@@ -489,11 +451,13 @@ class WindowToken {
         return -1;
     }
 
-    /** Return the first window in the token window list that isn't the exclude window or null. */
-    WindowState getFirstWindow(WindowState exclude) {
-        for (int i = 0; i < windows.size(); i++) {
-            WindowState w = windows.get(i);
-            if (w != exclude) {
+    /** Return the first window in the token window list that isn't a starting window or null. */
+    WindowState getFirstNonStartingWindow() {
+        final int count = windows.size();
+        // We only care about parent windows so no need to loop through child windows.
+        for (int i = 0; i < count; i++) {
+            final WindowState w = windows.get(i);
+            if (w.mAttrs.type != TYPE_APPLICATION_STARTING) {
                 return w;
             }
         }
@@ -513,8 +477,9 @@ class WindowToken {
     WindowState getReplacingWindow() {
         for (int i = windows.size() - 1; i >= 0; i--) {
             final WindowState win = windows.get(i);
-            if (win.mAnimatingExit && win.mWillReplaceWindow && win.mAnimateReplacingWindow) {
-                return win;
+            final WindowState replacing = win.getReplacingWindow();
+            if (replacing != null) {
+                return replacing;
             }
         }
         return null;
@@ -665,7 +630,7 @@ class WindowToken {
     boolean hasVisibleNotDrawnWallpaper() {
         for (int j = windows.size() - 1; j >= 0; --j) {
             final WindowState wallpaper = windows.get(j);
-            if (wallpaper.mWallpaperVisible && !wallpaper.isDrawnLw()) {
+            if (wallpaper.hasVisibleNotDrawnWallpaper()) {
                 return true;
             }
         }
@@ -673,14 +638,15 @@ class WindowToken {
     }
 
     int getHighestAnimLayer() {
-        int layer = -1;
+        int highest = -1;
         for (int j = 0; j < windows.size(); j++) {
-            final WindowState win = windows.get(j);
-            if (win.mWinAnimator.mAnimLayer > layer) {
-                layer = win.mWinAnimator.mAnimLayer;
+            final WindowState w = windows.get(j);
+            final int wLayer = w.getHighestAnimLayer();
+            if (wLayer > highest) {
+                highest = wLayer;
             }
         }
-        return layer;
+        return highest;
     }
 
     AppWindowToken asAppWindowToken() {

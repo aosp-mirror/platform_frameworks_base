@@ -91,4 +91,9 @@ class WindowContainer {
         }
         return false;
     }
+
+    /** Returns the top child container or this container if there are no children. */
+    WindowContainer getTop() {
+        return mChildren.isEmpty() ? this : mChildren.peekLast();
+    }
 }

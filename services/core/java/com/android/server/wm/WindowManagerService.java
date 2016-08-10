@@ -431,7 +431,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * List of app window tokens that are waiting for replacing windows. If the
      * replacement doesn't come in time the stale windows needs to be disposed of.
      */
-    final ArrayList<AppWindowToken> mReplacingWindowTimeouts = new ArrayList<>();
+    final ArrayList<AppWindowToken> mWindowReplacementTimeouts = new ArrayList<>();
 
     /**
      * The input consumer added to the window manager which consumes input events to windows below
@@ -3646,7 +3646,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // If the app is dead while it was visible, we kept its dead window on screen.
                 // Now that the app is going invisible, we can remove it. It will be restarted
                 // if made visible again.
-                wtoken.removeAllDeadWindows();
+                wtoken.removeDeadWindows();
                 wtoken.setVisibleBeforeClientHidden();
             } else if (visible) {
                 if (!mAppTransition.isTransitionSet() && mAppTransition.isReady()) {
@@ -7748,11 +7748,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 break;
                 case WINDOW_REPLACEMENT_TIMEOUT: {
                     synchronized (mWindowMap) {
-                        for (int i = mReplacingWindowTimeouts.size() - 1; i >= 0; i--) {
-                            final AppWindowToken token = mReplacingWindowTimeouts.get(i);
-                            token.clearTimedoutReplacesLocked();
+                        for (int i = mWindowReplacementTimeouts.size() - 1; i >= 0; i--) {
+                            final AppWindowToken token = mWindowReplacementTimeouts.get(i);
+                            token.onWindowReplacementTimeout();
                         }
-                        mReplacingWindowTimeouts.clear();
+                        mWindowReplacementTimeouts.clear();
                     }
                 }
                 case NOTIFY_APP_TRANSITION_STARTING: {
@@ -7877,7 +7877,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             && imFocus.mAppToken != null) {
                         // The client has definitely started, so it really should
                         // have a window in this app token.  Let's look for it.
-                        final WindowState w = imFocus.mAppToken.getFirstWindow(imFocus);
+                        final WindowState w = imFocus.mAppToken.getFirstNonStartingWindow();
                         if (w != null) {
                             if (DEBUG_INPUT_METHOD) Slog.i(TAG_WM,
                                     "Switching to real app window: " + w);
@@ -8519,7 +8519,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // If it's a dead window left on screen, and the configuration changed,
                 // there is nothing we can do about it. Remove the window now.
                 if (w.mAppToken != null && w.mAppDied) {
-                    w.mAppToken.removeAllDeadWindows();
+                    w.mAppToken.removeDeadWindows();
                     return;
                 }
 
@@ -10016,16 +10016,15 @@ public class WindowManagerService extends IWindowManager.Stub
      * a window.
      * @param token Application token for which the activity will be relaunched.
      */
-    public void setReplacingWindow(IBinder token, boolean animate) {
-        AppWindowToken appWindowToken = null;
+    public void setWillReplaceWindow(IBinder token, boolean animate) {
         synchronized (mWindowMap) {
-            appWindowToken = findAppWindowToken(token);
+            final AppWindowToken appWindowToken = findAppWindowToken(token);
             if (appWindowToken == null || !appWindowToken.isVisible()) {
                 Slog.w(TAG_WM, "Attempted to set replacing window on non-existing app token "
                         + token);
                 return;
             }
-            appWindowToken.setReplacingWindows(animate);
+            appWindowToken.setWillReplaceWindows(animate);
         }
     }
 
@@ -10039,10 +10038,11 @@ public class WindowManagerService extends IWindowManager.Stub
      *                     reused rather than replaced).
      *
      */
-    public void setReplacingWindows(IBinder token, boolean childrenOnly) {
-        AppWindowToken appWindowToken = null;
+    // TODO: The s at the end of the method name is the only difference with the name of the method
+    // above. We should combine them or find better names.
+    public void setWillReplaceWindows(IBinder token, boolean childrenOnly) {
         synchronized (mWindowMap) {
-            appWindowToken = findAppWindowToken(token);
+            final AppWindowToken appWindowToken = findAppWindowToken(token);
             if (appWindowToken == null || !appWindowToken.isVisible()) {
                 Slog.w(TAG_WM, "Attempted to set replacing window on non-existing app token "
                         + token);
@@ -10050,12 +10050,12 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             if (childrenOnly) {
-                appWindowToken.setReplacingChildren();
+                appWindowToken.setWillReplaceChildWindows();
             } else {
-                appWindowToken.setReplacingWindows(false /* animate */);
+                appWindowToken.setWillReplaceWindows(false /* animate */);
             }
 
-            scheduleClearReplacingWindowIfNeeded(token, true /* replacing */);
+            scheduleClearWillReplaceWindows(token, true /* replacing */);
         }
     }
 
@@ -10068,26 +10068,25 @@ public class WindowManagerService extends IWindowManager.Stub
      * @param token Application token for the activity whose window might be replaced.
      * @param replacing Whether the window is being replaced or not.
      */
-    public void scheduleClearReplacingWindowIfNeeded(IBinder token, boolean replacing) {
-        AppWindowToken appWindowToken = null;
+    public void scheduleClearWillReplaceWindows(IBinder token, boolean replacing) {
         synchronized (mWindowMap) {
-            appWindowToken = findAppWindowToken(token);
+            final AppWindowToken appWindowToken = findAppWindowToken(token);
             if (appWindowToken == null) {
                 Slog.w(TAG_WM, "Attempted to reset replacing window on non-existing app token "
                         + token);
                 return;
             }
             if (replacing) {
-                scheduleReplacingWindowTimeouts(appWindowToken);
+                scheduleWindowReplacementTimeouts(appWindowToken);
             } else {
-                appWindowToken.resetReplacingWindows();
+                appWindowToken.clearWillReplaceWindows();
             }
         }
     }
 
-    void scheduleReplacingWindowTimeouts(AppWindowToken appWindowToken) {
-        if (!mReplacingWindowTimeouts.contains(appWindowToken)) {
-            mReplacingWindowTimeouts.add(appWindowToken);
+    void scheduleWindowReplacementTimeouts(AppWindowToken appWindowToken) {
+        if (!mWindowReplacementTimeouts.contains(appWindowToken)) {
+            mWindowReplacementTimeouts.add(appWindowToken);
         }
         mH.removeMessages(H.WINDOW_REPLACEMENT_TIMEOUT);
         mH.sendEmptyMessageDelayed(

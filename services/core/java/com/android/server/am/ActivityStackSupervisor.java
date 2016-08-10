@@ -2464,7 +2464,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // entrance of the new window to be properly animated.
             // Note here we always set the replacing window first, as the flags might be needed
             // during the relaunch. If we end up not doing any relaunch, we clear the flags later.
-            mWindowManager.setReplacingWindow(topActivity.appToken, animate);
+            mWindowManager.setWillReplaceWindow(topActivity.appToken, animate);
         }
 
         mWindowManager.deferSurfaceLayout();
@@ -2506,7 +2506,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // If we didn't actual do a relaunch (indicated by kept==true meaning we kept the old
             // window), we need to clear the replace window settings. Otherwise, we schedule a
             // timeout to remove the old window if the replacing window is not coming in time.
-            mWindowManager.scheduleClearReplacingWindowIfNeeded(topActivity.appToken, !kept);
+            mWindowManager.scheduleClearWillReplaceWindows(topActivity.appToken, !kept);
         }
 
         if (!deferResume) {
