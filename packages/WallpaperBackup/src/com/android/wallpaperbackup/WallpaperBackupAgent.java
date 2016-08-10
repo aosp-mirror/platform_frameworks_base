@@ -34,6 +34,8 @@ import android.os.UserHandle;
 import android.util.Slog;
 import android.util.Xml;
 
+import libcore.io.IoUtils;
+
 import org.xmlpull.v1.XmlPullParser;
 
 import java.io.File;
@@ -129,9 +131,16 @@ public class WallpaperBackupAgent extends BackupAgent {
                 final boolean sysChanged = (sysGeneration != lastSysGeneration);
                 final boolean lockChanged = (lockGeneration != lastLockGeneration);
 
+                // There might be a latent lock wallpaper file present but unused: don't
+                // include it in the backup if that's the case.
+                ParcelFileDescriptor lockFd = mWm.getWallpaperFile(FLAG_LOCK, UserHandle.USER_SYSTEM);
+                final boolean hasLockWallpaper = (lockFd != null);
+                IoUtils.closeQuietly(lockFd);
+
                 if (DEBUG) {
                     Slog.v(TAG, "sysGen=" + sysGeneration + " : sysChanged=" + sysChanged);
                     Slog.v(TAG, "lockGen=" + lockGeneration + " : lockChanged=" + lockChanged);
+                    Slog.v(TAG, "hasLockWallpaper=" + hasLockWallpaper);
                 }
                 if (mWallpaperInfo.exists()) {
                     if (sysChanged || lockChanged || !infoStage.exists()) {
@@ -150,7 +159,7 @@ public class WallpaperBackupAgent extends BackupAgent {
                 }
 
                 // Don't try to store the lock image if we overran our quota last time
-                if (mLockWallpaperFile.exists() && !mQuotaExceeded) {
+                if (hasLockWallpaper && mLockWallpaperFile.exists() && !mQuotaExceeded) {
                     if (lockChanged || !lockImageStage.exists()) {
                         if (DEBUG) Slog.v(TAG, "New lock wallpaper; copying");
                         FileUtils.copyFileOrThrow(mLockWallpaperFile, lockImageStage);
@@ -199,15 +208,20 @@ public class WallpaperBackupAgent extends BackupAgent {
         final File imageStage = new File (filesDir, IMAGE_STAGE);
         final File lockImageStage = new File (filesDir, LOCK_IMAGE_STAGE);
 
+        // If we restored separate lock imagery, the system wallpaper should be
+        // applied as system-only; but if there's no separate lock image, make
+        // sure to apply the restored system wallpaper as both.
+        final int sysWhich = FLAG_SYSTEM | (lockImageStage.exists() ? 0 : FLAG_LOCK);
+
         try {
             // First off, revert to the factory state
-            mWm.clear(WallpaperManager.FLAG_SYSTEM | WallpaperManager.FLAG_LOCK);
+            mWm.clear(FLAG_SYSTEM | FLAG_LOCK);
 
             // It is valid for the imagery to be absent; it means that we were not permitted
             // to back up the original image on the source device, or there was no user-supplied
             // wallpaper image present.
-            restoreFromStage(imageStage, infoStage, "wp", WallpaperManager.FLAG_SYSTEM);
-            restoreFromStage(lockImageStage, infoStage, "kwp", WallpaperManager.FLAG_LOCK);
+            restoreFromStage(imageStage, infoStage, "wp", sysWhich);
+            restoreFromStage(lockImageStage, infoStage, "kwp", FLAG_LOCK);
         } catch (Exception e) {
             Slog.e(TAG, "Unable to restore wallpaper: " + e.getMessage());
         } finally {
