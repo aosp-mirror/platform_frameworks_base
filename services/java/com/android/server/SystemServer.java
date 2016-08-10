@@ -1013,6 +1013,10 @@ public final class SystemServer {
             mSystemServiceManager.startService(SoundTriggerService.class);
 
             if (!disableNonCoreServices) {
+                if (!disableTrustManager) {
+                    mSystemServiceManager.startService(TrustManagerService.class);
+                }
+
                 if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_BACKUP)) {
                     mSystemServiceManager.startService(BACKUP_MANAGER_SERVICE_CLASS);
                 }
@@ -1141,10 +1145,6 @@ public final class SystemServer {
                     reportWtf("starting MediaRouterService", e);
                 }
                 Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
-
-                if (!disableTrustManager) {
-                    mSystemServiceManager.startService(TrustManagerService.class);
-                }
 
                 if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
                     mSystemServiceManager.startService(FingerprintService.class);

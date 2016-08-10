@@ -141,9 +141,6 @@ import java.util.HashMap;
 final class SystemServiceRegistry {
     private static final String TAG = "SystemServiceRegistry";
 
-    // When set, include stack traces when services aren't published
-    private static final boolean DEBUG_EARLY_CALLERS = true;
-
     // Service registry information.
     // This information is never changed once static initialization has completed.
     private static final HashMap<Class<?>, String> SYSTEM_SERVICE_NAMES =
@@ -385,9 +382,6 @@ final class SystemServiceRegistry {
             public PowerManager createService(ContextImpl ctx) throws ServiceNotFoundException {
                 IBinder b = ServiceManager.getServiceOrThrow(Context.POWER_SERVICE);
                 IPowerManager service = IPowerManager.Stub.asInterface(b);
-                if (service == null) {
-                    Log.wtf(TAG, "Failed to get power manager service.");
-                }
                 return new PowerManager(ctx.getOuterContext(),
                         service, ctx.mMainThread.getHandler());
             }});
@@ -398,9 +392,6 @@ final class SystemServiceRegistry {
             public RecoverySystem createService(ContextImpl ctx) throws ServiceNotFoundException {
                 IBinder b = ServiceManager.getServiceOrThrow(Context.RECOVERY_SERVICE);
                 IRecoverySystem service = IRecoverySystem.Stub.asInterface(b);
-                if (service == null) {
-                    Log.wtf(TAG, "Failed to get recovery service.");
-                }
                 return new RecoverySystem(service);
             }});
 
@@ -525,9 +516,6 @@ final class SystemServiceRegistry {
             public WifiNanManager createService() throws ServiceNotFoundException {
                 IBinder b = ServiceManager.getServiceOrThrow(Context.WIFI_NAN_SERVICE);
                 IWifiNanManager service = IWifiNanManager.Stub.asInterface(b);
-                if (service == null) {
-                    return null;
-                }
                 return new WifiNanManager(service);
             }});
 
@@ -840,7 +828,7 @@ final class SystemServiceRegistry {
                         service = createService(ctx);
                         cache[mCacheIndex] = service;
                     } catch (ServiceNotFoundException e) {
-                        Log.w(TAG, e.getMessage(), DEBUG_EARLY_CALLERS ? e : null);
+                        Log.wtf(TAG, e.getMessage(), e);
                     }
                 }
                 return (T)service;
@@ -864,7 +852,7 @@ final class SystemServiceRegistry {
                     try {
                         mCachedInstance = createService();
                     } catch (ServiceNotFoundException e) {
-                        Log.w(TAG, e.getMessage(), DEBUG_EARLY_CALLERS ? e : null);
+                        Log.wtf(TAG, e.getMessage(), e);
                     }
                 }
                 return mCachedInstance;
@@ -897,7 +885,7 @@ final class SystemServiceRegistry {
                     try {
                         mCachedInstance = createService(appContext != null ? appContext : ctx);
                     } catch (ServiceNotFoundException e) {
-                        Log.w(TAG, e.getMessage(), DEBUG_EARLY_CALLERS ? e : null);
+                        Log.wtf(TAG, e.getMessage(), e);
                     }
                 }
                 return mCachedInstance;
