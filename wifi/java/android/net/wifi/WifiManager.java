@@ -19,6 +19,7 @@ package android.net.wifi;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.DhcpInfo;
@@ -559,6 +560,28 @@ public class WifiManager {
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_PICK_WIFI_NETWORK = "android.net.wifi.PICK_WIFI_NETWORK";
+
+    /**
+     * Activity Action: Show UI to get user approval to enable WiFi.
+     * <p>Input: {@link android.content.Intent#EXTRA_PACKAGE_NAME} string extra with
+     *           the name of the app requesting the action.
+     * <p>Output: Nothing.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_REQUEST_ENABLE = "android.net.wifi.action.REQUEST_ENABLE";
+
+    /**
+     * Activity Action: Show UI to get user approval to disable WiFi.
+     * <p>Input: {@link android.content.Intent#EXTRA_PACKAGE_NAME} string extra with
+     *           the name of the app requesting the action.
+     * <p>Output: Nothing.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_REQUEST_DISABLE = "android.net.wifi.action.REQUEST_DISABLE";
 
     /**
      * Internally used Wi-Fi lock mode representing the case were no locks are held.
@@ -1443,7 +1466,7 @@ public class WifiManager {
      */
     public boolean setWifiEnabled(boolean enabled) {
         try {
-            return mService.setWifiEnabled(enabled);
+            return mService.setWifiEnabled(mContext.getOpPackageName(), enabled);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
