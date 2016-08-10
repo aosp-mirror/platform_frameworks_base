@@ -349,6 +349,8 @@ public class ExifInterface {
     /** Type is int. */
     public static final String TAG_THUMBNAIL_IMAGE_WIDTH = "ThumbnailImageWidth";
     /** Type is int. DNG Specification 1.4.0.0. Section 4 */
+    public static final String TAG_DNG_VERSION = "DNGVersion";
+    /** Type is int. DNG Specification 1.4.0.0. Section 4 */
     public static final String TAG_DEFAULT_CROP_SIZE = "DefaultCropSize";
     /** Type is undefined. See Olympus MakerNote tags in http://www.exiv2.org/tags-olympus.html. */
     public static final String TAG_ORF_THUMBNAIL_IMAGE = "ThumbnailImage";
@@ -517,10 +519,23 @@ public class ExifInterface {
     private static final int DATA_LOSSY_JPEG = 34892;
 
     /**
-     * Constant used for BitsPerSample tag.
-     * See TIFF 6.0 Spec Section 6: RGB Full Color Images, Differences from Palette Color Images
+     * Constants used for BitsPerSample tag.
+     * For RGB, see TIFF 6.0 Spec Section 6, Differences from Palette Color Images
+     * For Greyscale, see TIFF 6.0 Spec Section 4, Differences from Bilevel Images
      */
-    private static final int[] BITS_PER_SAMPLE_RGB = new int[] {8, 8, 8};
+    private static final int[] BITS_PER_SAMPLE_RGB = new int[] { 8, 8, 8 };
+    private static final int[] BITS_PER_SAMPLE_GREYSCALE_1 = new int[] { 4 };
+    private static final int[] BITS_PER_SAMPLE_GREYSCALE_2 = new int[] { 8 };
+
+    /**
+     * Constants used for PhotometricInterpretation tag.
+     * For White/Black, see Section 3, Color.
+     * See TIFF 6.0 Spec Section 22, Minimum Requirements for TIFF with JPEG Compression.
+     */
+    private static final int PHOTOMETRIC_INTERPRETATION_WHITE_IS_ZERO = 0;
+    private static final int PHOTOMETRIC_INTERPRETATION_BLACK_IS_ZERO = 1;
+    private static final int PHOTOMETRIC_INTERPRETATION_RGB = 2;
+    private static final int PHOTOMETRIC_INTERPRETATION_YCBCR = 6;
 
     /**
      * Constants used for NewSubfileType tag.
@@ -1041,6 +1056,7 @@ public class ExifInterface {
             new ExifTag(TAG_DEVICE_SETTING_DESCRIPTION, 41995, IFD_FORMAT_UNDEFINED),
             new ExifTag(TAG_SUBJECT_DISTANCE_RANGE, 41996, IFD_FORMAT_USHORT),
             new ExifTag(TAG_IMAGE_UNIQUE_ID, 42016, IFD_FORMAT_STRING),
+            new ExifTag(TAG_DNG_VERSION, 50706, IFD_FORMAT_BYTE),
             new ExifTag(TAG_DEFAULT_CROP_SIZE, 50720, IFD_FORMAT_USHORT, IFD_FORMAT_ULONG)
     };
 
@@ -1120,7 +1136,9 @@ public class ExifInterface {
             new ExifTag(TAG_REFERENCE_BLACK_WHITE, 532, IFD_FORMAT_URATIONAL),
             new ExifTag(TAG_COPYRIGHT, 33432, IFD_FORMAT_STRING),
             new ExifTag(TAG_EXIF_IFD_POINTER, 34665, IFD_FORMAT_ULONG),
-            new ExifTag(TAG_GPS_INFO_IFD_POINTER, 34853, IFD_FORMAT_ULONG)
+            new ExifTag(TAG_GPS_INFO_IFD_POINTER, 34853, IFD_FORMAT_ULONG),
+            new ExifTag(TAG_DNG_VERSION, 50706, IFD_FORMAT_BYTE),
+            new ExifTag(TAG_DEFAULT_CROP_SIZE, 50720, IFD_FORMAT_USHORT, IFD_FORMAT_ULONG)
     };
 
     // RAF file tag (See piex.cc line 372)
@@ -2948,6 +2966,13 @@ public class ExifInterface {
             ExifAttribute attribute = new ExifAttribute(dataFormat, numberOfComponents, bytes);
             mAttributes[hint].put(tag.name, attribute);
 
+            // DNG files have a DNG Version tag specifying the version of specifications that the
+            // image file is following.
+            // See http://fileformats.archiveteam.org/wiki/DNG
+            if (tag.name == TAG_DNG_VERSION) {
+                mMimeType = IMAGE_TYPE_DNG;
+            }
+
             // PEF files have a Make or Model tag that begins with "PENTAX" or a compression tag
             // that is 65535.
             // See http://fileformats.archiveteam.org/wiki/Pentax_PEF
@@ -3025,7 +3050,9 @@ public class ExifInterface {
                 }
                 case DATA_UNCOMPRESSED:
                 case DATA_JPEG_COMPRESSED: {
-                    handleThumbnailFromStrips(in, thumbnailData);
+                    if (isSupportedDataType(thumbnailData)) {
+                        handleThumbnailFromStrips(in, thumbnailData);
+                    }
                     break;
                 }
             }
@@ -3080,64 +3107,85 @@ public class ExifInterface {
     // Check StripOffsets & StripByteCounts tags to retrieve thumbnail offset & length values
     private void handleThumbnailFromStrips(InputStream in, HashMap thumbnailData)
             throws IOException {
+        ExifAttribute stripOffsetsAttribute =
+                (ExifAttribute) thumbnailData.get(TAG_STRIP_OFFSETS);
+        ExifAttribute stripByteCountsAttribute =
+                (ExifAttribute) thumbnailData.get(TAG_STRIP_BYTE_COUNTS);
+
+        if (stripOffsetsAttribute != null && stripByteCountsAttribute != null) {
+            long[] stripOffsets =
+                    (long[]) stripOffsetsAttribute.getValue(mExifByteOrder);
+            long[] stripByteCounts =
+                    (long[]) stripByteCountsAttribute.getValue(mExifByteOrder);
+
+            // Set thumbnail byte array data for non-consecutive strip bytes
+            byte[] totalStripBytes =
+                    new byte[(int) Arrays.stream(stripByteCounts).sum()];
+
+            int bytesRead = 0;
+            int bytesAdded = 0;
+            for (int i = 0; i < stripOffsets.length; i++) {
+                int stripOffset = (int) stripOffsets[i];
+                int stripByteCount = (int) stripByteCounts[i];
+
+                // Skip to offset
+                int skipBytes = stripOffset - bytesRead;
+                if (skipBytes < 0) {
+                    Log.d(TAG, "Invalid strip offset value");
+                }
+                in.skip(skipBytes);
+                bytesRead += skipBytes;
+
+                // Read strip bytes
+                byte[] stripBytes = new byte[stripByteCount];
+                in.read(stripBytes);
+                bytesRead += stripByteCount;
+
+                // Add bytes to array
+                System.arraycopy(stripBytes, 0, totalStripBytes, bytesAdded,
+                        stripBytes.length);
+                bytesAdded += stripBytes.length;
+            }
+
+            mHasThumbnail = true;
+            mThumbnailBytes = totalStripBytes;
+            mThumbnailLength = totalStripBytes.length;
+        }
+    }
+
+    // Check if thumbnail data type is currently supported or not
+    private boolean isSupportedDataType(HashMap thumbnailData) throws IOException {
         ExifAttribute bitsPerSampleAttribute =
                 (ExifAttribute) thumbnailData.get(TAG_BITS_PER_SAMPLE);
-
         if (bitsPerSampleAttribute != null) {
             int[] bitsPerSampleValue = (int[]) bitsPerSampleAttribute.getValue(mExifByteOrder);
 
             if (Arrays.equals(BITS_PER_SAMPLE_RGB, bitsPerSampleValue)) {
-                ExifAttribute stripOffsetsAttribute =
-                        (ExifAttribute) thumbnailData.get(TAG_STRIP_OFFSETS);
-                ExifAttribute stripByteCountsAttribute =
-                        (ExifAttribute) thumbnailData.get(TAG_STRIP_BYTE_COUNTS);
+                return true;
+            }
 
-                if (stripOffsetsAttribute != null && stripByteCountsAttribute != null) {
-                    long[] stripOffsets =
-                            (long[]) stripOffsetsAttribute.getValue(mExifByteOrder);
-                    long[] stripByteCounts =
-                            (long[]) stripByteCountsAttribute.getValue(mExifByteOrder);
-
-                    // Set thumbnail byte array data for non-consecutive strip bytes
-                    byte[] totalStripBytes =
-                            new byte[(int) Arrays.stream(stripByteCounts).sum()];
-
-                    int bytesRead = 0;
-                    int bytesAdded = 0;
-                    for (int i = 0; i < stripOffsets.length; i++) {
-                        int stripOffset = (int) stripOffsets[i];
-                        int stripByteCount = (int) stripByteCounts[i];
-
-                        // Skip to offset
-                        int skipBytes = stripOffset - bytesRead;
-                        if (skipBytes < 0) {
-                            Log.d(TAG, "Invalid strip offset value");
-                        }
-                        in.skip(skipBytes);
-                        bytesRead += skipBytes;
-
-                        // Read strip bytes
-                        byte[] stripBytes = new byte[stripByteCount];
-                        in.read(stripBytes);
-                        bytesRead += stripByteCount;
-
-                        // Add bytes to array
-                        System.arraycopy(stripBytes, 0, totalStripBytes, bytesAdded,
-                                stripBytes.length);
-                        bytesAdded += stripBytes.length;
+            // See DNG Specification 1.4.0.0. Section 3, Compression.
+            if (mMimeType == IMAGE_TYPE_DNG) {
+                ExifAttribute photometricInterpretationAttribute =
+                        (ExifAttribute) thumbnailData.get(TAG_PHOTOMETRIC_INTERPRETATION);
+                if (photometricInterpretationAttribute != null) {
+                    int photometricInterpretationValue
+                            = photometricInterpretationAttribute.getIntValue(mExifByteOrder);
+                    if ((photometricInterpretationValue == PHOTOMETRIC_INTERPRETATION_BLACK_IS_ZERO
+                            && Arrays.equals(bitsPerSampleValue, BITS_PER_SAMPLE_GREYSCALE_2))
+                            || ((photometricInterpretationValue == PHOTOMETRIC_INTERPRETATION_YCBCR)
+                            && (Arrays.equals(bitsPerSampleValue, BITS_PER_SAMPLE_RGB)))) {
+                        return true;
+                    } else {
+                        // TODO: Add support for lossless Huffman JPEG data
                     }
-
-                    mHasThumbnail = true;
-                    mThumbnailBytes = totalStripBytes;
-                    mThumbnailLength = totalStripBytes.length;
                 }
             }
-        } else {
-            if (DEBUG) {
-                Log.d(TAG, "Only Uncompressed RGB data process is supported");
-            }
-            return;
         }
+        if (DEBUG) {
+            Log.d(TAG, "Unsupported data type value");
+        }
+        return false;
     }
 
     // Returns true if the image length and width values are <= 512.
