@@ -95,7 +95,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.am.UserState;
-
+import com.android.server.storage.DeviceStorageMonitorInternal;
 import libcore.io.IoUtils;
 import libcore.util.Objects;
 
@@ -2182,6 +2182,12 @@ public class UserManagerService extends IUserManager.Stub {
     private UserInfo createUserInternal(String name, int flags, int parentId) {
         if (hasUserRestriction(UserManager.DISALLOW_ADD_USER, UserHandle.getCallingUserId())) {
             Log.w(LOG_TAG, "Cannot add user. DISALLOW_ADD_USER is enabled.");
+            return null;
+        }
+        DeviceStorageMonitorInternal dsm = LocalServices
+                .getService(DeviceStorageMonitorInternal.class);
+        if (dsm.isMemoryLow()) {
+            Log.w(LOG_TAG, "Cannot add user. Not enough space on disk.");
             return null;
         }
         return createUserInternalUnchecked(name, flags, parentId);
