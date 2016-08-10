@@ -46,11 +46,6 @@
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"SIM-карту заблоковано."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"SIM-карту заблоковано PUK-кодом."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"Розблокування SIM-карти…"</string>
-    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Розблокування ключем."</string>
-    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Розблокування PIN-кодом."</string>
-    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Розблокування паролем."</string>
-    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Область ключа."</string>
-    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Область повзунка."</string>
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"PIN-код"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"PIN-код SIM-карти"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"PUK-код SIM-карти"</string>
