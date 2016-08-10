@@ -69,7 +69,6 @@ import android.net.NetworkStats;
 import android.net.NetworkTemplate;
 import android.os.Binder;
 import android.os.INetworkManagementService;
-import android.os.IPowerManager;
 import android.os.MessageQueue.IdleHandler;
 import android.os.UserHandle;
 import android.test.AndroidTestCase;
@@ -115,7 +114,6 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
     private File mPolicyDir;
 
     private IActivityManager mActivityManager;
-    private IPowerManager mPowerManager;
     private INetworkStatsService mStatsService;
     private INetworkManagementService mNetworkManager;
     private INetworkPolicyListener mPolicyListener;
@@ -187,7 +185,6 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         }
 
         mActivityManager = createMock(IActivityManager.class);
-        mPowerManager = createMock(IPowerManager.class);
         mStatsService = createMock(INetworkStatsService.class);
         mNetworkManager = createMock(INetworkManagementService.class);
         mPolicyListener = createMock(INetworkPolicyListener.class);
@@ -195,7 +192,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         mConnManager = createMock(IConnectivityManager.class);
         mNotifManager = createMock(INotificationManager.class);
 
-        mService = new NetworkPolicyManagerService(mServiceContext, mActivityManager, mPowerManager,
+        mService = new NetworkPolicyManagerService(mServiceContext, mActivityManager,
                 mStatsService, mNetworkManager, mTime, mPolicyDir, true);
         mService.bindConnectivityManager(mConnManager);
         mService.bindNotificationManager(mNotifManager);
@@ -217,8 +214,6 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         mNetworkManager.registerObserver(capture(networkObserver));
         expectLastCall().atLeastOnce();
 
-        // expect to answer screen status during systemReady()
-        expect(mPowerManager.isInteractive()).andReturn(true).atLeastOnce();
         expect(mNetworkManager.isBandwidthControlEnabled()).andReturn(true).atLeastOnce();
         expectCurrentTime();
 
@@ -240,7 +235,6 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         mPolicyDir = null;
 
         mActivityManager = null;
-        mPowerManager = null;
         mStatsService = null;
         mPolicyListener = null;
         mTime = null;
@@ -310,48 +304,6 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         mProcessObserver.onForegroundActivitiesChanged(PID_2, UID_A, false);
         idle.get();
         assertFalse(mService.isUidForeground(UID_A));
-    }
-
-    @Suppress
-    public void testScreenChangesRules() throws Exception {
-        Future<Void> future;
-
-        expectSetUidMeteredNetworkBlacklist(UID_A, false);
-        expectSetUidForeground(UID_A, true);
-        future = expectRulesChanged(UID_A, RULE_ALLOW_ALL);
-        replay();
-        mProcessObserver.onForegroundActivitiesChanged(PID_1, UID_A, true);
-        future.get();
-        verifyAndReset();
-
-        // push strict policy for foreground uid, verify ALLOW rule
-        expectSetUidMeteredNetworkBlacklist(UID_A, false);
-        expectSetUidForeground(UID_A, true);
-        future = expectRulesChanged(UID_A, RULE_ALLOW_ALL);
-        replay();
-        mService.setUidPolicy(APP_ID_A, POLICY_REJECT_METERED_BACKGROUND);
-        future.get();
-        verifyAndReset();
-
-        // now turn screen off and verify REJECT rule
-        expect(mPowerManager.isInteractive()).andReturn(false).atLeastOnce();
-        expectSetUidMeteredNetworkBlacklist(UID_A, true);
-        expectSetUidForeground(UID_A, false);
-        future = expectRulesChanged(UID_A, RULE_REJECT_METERED);
-        replay();
-        mServiceContext.sendBroadcast(new Intent(Intent.ACTION_SCREEN_OFF));
-        future.get();
-        verifyAndReset();
-
-        // and turn screen back on, verify ALLOW rule restored
-        expect(mPowerManager.isInteractive()).andReturn(true).atLeastOnce();
-        expectSetUidMeteredNetworkBlacklist(UID_A, false);
-        expectSetUidForeground(UID_A, true);
-        future = expectRulesChanged(UID_A, RULE_ALLOW_ALL);
-        replay();
-        mServiceContext.sendBroadcast(new Intent(Intent.ACTION_SCREEN_ON));
-        future.get();
-        verifyAndReset();
     }
 
     @Suppress
@@ -1049,14 +1001,14 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
     }
 
     private void replay() {
-        EasyMock.replay(mActivityManager, mPowerManager, mStatsService, mPolicyListener,
-                mNetworkManager, mTime, mConnManager, mNotifManager);
+        EasyMock.replay(mActivityManager, mStatsService, mPolicyListener, mNetworkManager, mTime,
+                mConnManager, mNotifManager);
     }
 
     private void verifyAndReset() {
-        EasyMock.verify(mActivityManager, mPowerManager, mStatsService, mPolicyListener,
-                mNetworkManager, mTime, mConnManager, mNotifManager);
-        EasyMock.reset(mActivityManager, mPowerManager, mStatsService, mPolicyListener,
-                mNetworkManager, mTime, mConnManager, mNotifManager);
+        EasyMock.verify(mActivityManager, mStatsService, mPolicyListener, mNetworkManager, mTime,
+                mConnManager, mNotifManager);
+        EasyMock.reset(mActivityManager, mStatsService, mPolicyListener, mNetworkManager, mTime,
+                mConnManager, mNotifManager);
     }
 }
