@@ -55,7 +55,7 @@ public class IPv6TetheringCoordinator {
         if (VDBG) {
             Log.d(TAG, "updateUpstreamNetworkState: " + toDebugString(ns));
         }
-        if (ns == null || ns.network == null) {
+        if (!canTetherIPv6(ns)) {
             stopIPv6TetheringOnAllInterfaces();
             setUpstreamNetworkState(null);
             return;
@@ -65,8 +65,9 @@ public class IPv6TetheringCoordinator {
             !ns.network.equals(mUpstreamNetworkState.network)) {
             stopIPv6TetheringOnAllInterfaces();
         }
+
         setUpstreamNetworkState(ns);
-        maybeUpdateIPv6TetheringInterfaces();
+        updateIPv6TetheringInterfaces();
     }
 
     private void stopIPv6TetheringOnAllInterfaces() {
@@ -77,9 +78,10 @@ public class IPv6TetheringCoordinator {
     }
 
     private void setUpstreamNetworkState(NetworkState ns) {
-        if (!canTetherIPv6(ns)) {
+        if (ns == null) {
             mUpstreamNetworkState = null;
         } else {
+            // Make a deep copy of the parts we need.
             mUpstreamNetworkState = new NetworkState(
                     null,
                     new LinkProperties(ns.linkProperties),
@@ -94,19 +96,17 @@ public class IPv6TetheringCoordinator {
         }
     }
 
-    private void maybeUpdateIPv6TetheringInterfaces() {
-        if (mUpstreamNetworkState == null) return;
-
+    private void updateIPv6TetheringInterfaces() {
         for (TetherInterfaceStateMachine sm : mNotifyList) {
             final LinkProperties lp = getInterfaceIPv6LinkProperties(sm.interfaceType());
-            if (lp != null) {
-                sm.sendMessage(TetherInterfaceStateMachine.CMD_IPV6_TETHER_UPDATE, 0, 0, lp);
-            }
+            sm.sendMessage(TetherInterfaceStateMachine.CMD_IPV6_TETHER_UPDATE, 0, 0, lp);
             break;
         }
     }
 
     private LinkProperties getInterfaceIPv6LinkProperties(int interfaceType) {
+        if (mUpstreamNetworkState == null) return null;
+
         // NOTE: Here, in future, we would have policies to decide how to divvy
         // up the available dedicated prefixes among downstream interfaces.
         // At this time we have no such mechanism--we only support tethering
