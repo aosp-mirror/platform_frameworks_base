@@ -47,7 +47,7 @@ namespace aapt {
  */
 class ScopedXmlPullParser : public XmlPullParser {
 public:
-    ScopedXmlPullParser(XmlPullParser* parser);
+    explicit ScopedXmlPullParser(XmlPullParser* parser);
     ScopedXmlPullParser(const ScopedXmlPullParser&) = delete;
     ScopedXmlPullParser& operator=(const ScopedXmlPullParser&) = delete;
     ~ScopedXmlPullParser();

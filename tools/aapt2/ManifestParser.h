@@ -33,10 +33,10 @@ public:
     ManifestParser() = default;
     ManifestParser(const ManifestParser&) = delete;
 
-    bool parse(const Source& source, std::shared_ptr<XmlPullParser> parser, AppInfo* outInfo);
+    bool parse(const Source& source, const std::shared_ptr<XmlPullParser>& parser, AppInfo* outInfo);
 
 private:
-    bool parseManifest(SourceLogger& logger, std::shared_ptr<XmlPullParser> parser,
+    bool parseManifest(SourceLogger& logger, const std::shared_ptr<XmlPullParser>& parser,
                        AppInfo* outInfo);
 };
 

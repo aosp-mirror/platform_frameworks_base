@@ -24,7 +24,7 @@
 
 namespace aapt {
 
-bool ManifestParser::parse(const Source& source, std::shared_ptr<XmlPullParser> parser,
+bool ManifestParser::parse(const Source& source, const std::shared_ptr<XmlPullParser>& parser,
                            AppInfo* outInfo) {
     SourceLogger logger = { source };
 
@@ -70,7 +70,7 @@ bool ManifestParser::parse(const Source& source, std::shared_ptr<XmlPullParser> 
     return true;
 }
 
-bool ManifestParser::parseManifest(SourceLogger& logger, std::shared_ptr<XmlPullParser> parser,
+bool ManifestParser::parseManifest(SourceLogger& logger, const std::shared_ptr<XmlPullParser>& parser,
                                    AppInfo* outInfo) {
     auto attrIter = parser->findAttribute(u"", u"package");
     if (attrIter == parser->endAttributes() || attrIter->value.empty()) {

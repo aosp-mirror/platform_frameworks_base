@@ -4023,7 +4023,7 @@ status_t ResourceTable::Type::applyPublicEntryOrder()
     
     j = 0;
     for (i=0; i<N; i++) {
-        sp<ConfigList> e = origOrder.itemAt(i);
+        const sp<ConfigList>& e = origOrder.itemAt(i);
         // There will always be enough room for the remaining entries.
         while (mOrderedConfigs.itemAt(j) != NULL) {
             j++;
@@ -4145,7 +4145,7 @@ status_t ResourceTable::Package::applyPublicTypeOrder()
 
     size_t j=0;
     for (i=0; i<N; i++) {
-        sp<Type> t = origOrder.itemAt(i);
+        const sp<Type>& t = origOrder.itemAt(i);
         // There will always be enough room for the remaining types.
         while (mOrderedTypes.itemAt(j) != NULL) {
             j++;
@@ -4577,7 +4577,7 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle) {
                         c->getEntries();
                 const size_t entryCount = entries.size();
                 for (size_t ei = 0; ei < entryCount; ei++) {
-                    sp<Entry> e = entries.valueAt(ei);
+                    const sp<Entry>& e = entries.valueAt(ei);
                     if (e == NULL || e->getType() != Entry::TYPE_BAG) {
                         continue;
                     }

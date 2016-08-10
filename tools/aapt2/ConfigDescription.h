@@ -46,7 +46,7 @@ struct ConfigDescription : public android::ResTable_config {
     static void applyVersionForCompatibility(ConfigDescription* config);
 
     ConfigDescription();
-    ConfigDescription(const android::ResTable_config& o);
+    ConfigDescription(const android::ResTable_config& o);  // NOLINT(implicit)
     ConfigDescription(const ConfigDescription& o);
     ConfigDescription(ConfigDescription&& o);
 

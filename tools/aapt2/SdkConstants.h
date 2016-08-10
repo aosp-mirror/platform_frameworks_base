@@ -44,7 +44,7 @@ enum {
     SDK_LOLLIPOP_MR1 = 22,
 };
 
-size_t findAttributeSdkLevel(ResourceId id);
+size_t findAttributeSdkLevel(const ResourceId& id);
 size_t findAttributeSdkLevel(const ResourceName& name);
 
 } // namespace aapt

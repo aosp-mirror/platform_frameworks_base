@@ -391,7 +391,7 @@ uint32_t ResourceParser::androidTypeToAttributeTypeMask(uint16_t type) {
 
 std::unique_ptr<Item> ResourceParser::parseItemForAttribute(
         const StringPiece16& value, uint32_t typeMask,
-        std::function<void(const ResourceName&)> onCreateReference) {
+        const std::function<void(const ResourceName&)>& onCreateReference) {
     std::unique_ptr<BinaryPrimitive> nullOrEmpty = tryParseNullOrEmpty(value);
     if (nullOrEmpty) {
         return std::move(nullOrEmpty);
@@ -451,7 +451,7 @@ std::unique_ptr<Item> ResourceParser::parseItemForAttribute(
  */
 std::unique_ptr<Item> ResourceParser::parseItemForAttribute(
         const StringPiece16& str, const Attribute& attr,
-        std::function<void(const ResourceName&)> onCreateReference) {
+        const std::function<void(const ResourceName&)>& onCreateReference) {
     const uint32_t typeMask = attr.typeMask;
     std::unique_ptr<Item> value = parseItemForAttribute(str, typeMask, onCreateReference);
     if (value) {

@@ -311,7 +311,7 @@ Maybe<std::u16string> extractPackageFromNamespace(const std::u16string& namespac
  * In the aapt namespace for lookup.
  */
 inline ::std::ostream& operator<<(::std::ostream& out,
-                                  ::std::function<::std::ostream&(::std::ostream&)> f) {
+                                  const ::std::function<::std::ostream&(::std::ostream&)>& f) {
     return f(out);
 }
 

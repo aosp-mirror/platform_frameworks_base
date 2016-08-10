@@ -52,7 +52,7 @@ struct Node {
     std::u16string comment;
     std::vector<std::unique_ptr<Node>> children;
 
-    Node(NodeType type);
+    explicit Node(NodeType type);
     void addChild(std::unique_ptr<Node> child);
     virtual std::unique_ptr<Node> clone() const = 0;
     virtual void accept(Visitor* visitor) = 0;
@@ -65,7 +65,7 @@ struct Node {
  */
 template <typename Derived>
 struct BaseNode : public Node {
-    BaseNode(NodeType t);
+    explicit BaseNode(NodeType t);
     virtual void accept(Visitor* visitor) override;
 };
 

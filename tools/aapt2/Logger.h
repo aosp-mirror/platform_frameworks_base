@@ -56,7 +56,7 @@ private:
 
 class SourceLogger {
 public:
-    SourceLogger(const Source& source);
+    SourceLogger(const Source& source);  // NOLINT(implicit)
 
     std::ostream& error();
     std::ostream& error(size_t line);

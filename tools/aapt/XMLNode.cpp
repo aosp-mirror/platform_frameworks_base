@@ -67,7 +67,7 @@ static const String16 RESOURCES_PREFIX_AUTO_PACKAGE(RESOURCES_AUTO_PACKAGE_NAMES
 static const String16 RESOURCES_PRV_PREFIX(RESOURCES_ROOT_PRV_NAMESPACE);
 static const String16 RESOURCES_TOOLS_NAMESPACE("http://schemas.android.com/tools");
 
-String16 getNamespaceResourcePackage(String16 appPackage, String16 namespaceUri, bool* outIsPublic)
+String16 getNamespaceResourcePackage(const String16& appPackage, const String16& namespaceUri, bool* outIsPublic)
 {
     //printf("%s starts with %s?\n", String8(namespaceUri).string(),
     //       String8(RESOURCES_PREFIX).string());
@@ -98,7 +98,7 @@ String16 getNamespaceResourcePackage(String16 appPackage, String16 namespaceUri,
 
 status_t hasSubstitutionErrors(const char* fileName,
                                ResXMLTree* inXml,
-                               String16 str16)
+                               const String16& str16)
 {
     const char16_t* str = str16.string();
     const char16_t* p = str;

@@ -30,7 +30,7 @@ namespace aapt {
 
 class SourceXmlPullParser : public XmlPullParser {
 public:
-    SourceXmlPullParser(std::istream& in);
+    explicit SourceXmlPullParser(std::istream& in);
     SourceXmlPullParser(const SourceXmlPullParser& rhs) = delete;
     ~SourceXmlPullParser();
 

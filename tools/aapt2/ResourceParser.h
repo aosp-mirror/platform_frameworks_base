@@ -133,11 +133,11 @@ public:
      */
     static std::unique_ptr<Item> parseItemForAttribute(
             const StringPiece16& value, const Attribute& attr,
-            std::function<void(const ResourceName&)> onCreateReference = {});
+            const std::function<void(const ResourceName&)>& onCreateReference = {});
 
     static std::unique_ptr<Item> parseItemForAttribute(
             const StringPiece16& value, uint32_t typeMask,
-            std::function<void(const ResourceName&)> onCreateReference = {});
+            const std::function<void(const ResourceName&)>& onCreateReference = {});
 
     static uint32_t androidTypeToAttributeTypeMask(uint16_t type);
 

@@ -30,7 +30,7 @@ namespace aapt {
  */
 class XliffXmlPullParser : public XmlPullParser {
 public:
-    XliffXmlPullParser(const std::shared_ptr<XmlPullParser>& parser);
+    explicit XliffXmlPullParser(const std::shared_ptr<XmlPullParser>& parser);
     XliffXmlPullParser(const XliffXmlPullParser& rhs) = delete;
 
     Event getEvent() const override;

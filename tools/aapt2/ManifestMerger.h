@@ -15,7 +15,7 @@ public:
     struct Options {
     };
 
-    ManifestMerger(const Options& options);
+    explicit ManifestMerger(const Options& options);
 
     bool setAppManifest(const Source& source, const std::u16string& package,
                         std::unique_ptr<xml::Node> root);
