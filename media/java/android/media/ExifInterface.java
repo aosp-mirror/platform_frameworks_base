@@ -69,7 +69,6 @@ import libcore.io.Streams;
 public class ExifInterface {
     private static final String TAG = "ExifInterface";
     private static final boolean DEBUG = false;
-    private static final boolean HANDLE_RAW = false;
 
     // The Exif tag names. See Tiff 6.0 Section 3 and Section 8.
     /** Type is String. */
@@ -1257,8 +1256,6 @@ public class ExifInterface {
     private static final int IMAGE_TYPE_SRW = 11;
 
     static {
-        System.loadLibrary("media_jni");
-        nativeInitRaw();
         sFormatter = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
         sFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
 
@@ -1277,7 +1274,6 @@ public class ExifInterface {
     private final FileDescriptor mSeekableFileDescriptor;
     private final AssetManager.AssetInputStream mAssetInputStream;
     private final boolean mIsInputStream;
-    private boolean mIsRaw;
     private int mMimeType;
     private final HashMap[] mAttributes = new HashMap[EXIF_TAGS.length];
     private ByteOrder mExifByteOrder = ByteOrder.BIG_ENDIAN;
@@ -1660,71 +1656,44 @@ public class ExifInterface {
                 mAttributes[i] = new HashMap();
             }
 
-            if (HANDLE_RAW) {
-                // Check file type
-                in = new BufferedInputStream(in, SIGNATURE_CHECK_SIZE);
-                mMimeType = getMimeType((BufferedInputStream) in);
+            // Check file type
+            in = new BufferedInputStream(in, SIGNATURE_CHECK_SIZE);
+            mMimeType = getMimeType((BufferedInputStream) in);
 
-                switch (mMimeType) {
-                    case IMAGE_TYPE_JPEG: {
-                        getJpegAttributes(in, 0, IFD_TIFF_HINT); // 0 is offset
-                        break;
-                    }
-                    case IMAGE_TYPE_RAF: {
-                        getRafAttributes(in);
-                        break;
-                    }
-                    case IMAGE_TYPE_ORF: {
-                        getOrfAttributes(in);
-                        break;
-                    }
-                    case IMAGE_TYPE_RW2: {
-                        getRw2Attributes(in);
-                        break;
-                    }
-                    case IMAGE_TYPE_ARW:
-                    case IMAGE_TYPE_CR2:
-                    case IMAGE_TYPE_DNG:
-                    case IMAGE_TYPE_NEF:
-                    case IMAGE_TYPE_NRW:
-                    case IMAGE_TYPE_PEF:
-                    case IMAGE_TYPE_SRW:
-                    case IMAGE_TYPE_UNKNOWN: {
-                        getRawAttributes(in);
-                        break;
-                    }
-                    default: {
-                        break;
-                    }
+            switch (mMimeType) {
+                case IMAGE_TYPE_JPEG: {
+                    getJpegAttributes(in, 0, IFD_TIFF_HINT); // 0 is offset
+                    break;
                 }
-                // Set thumbnail image offset and length
-                setThumbnailData(in);
-            } else {
-                if (mAssetInputStream != null) {
-                    long asset = mAssetInputStream.getNativeAsset();
-                    if (handleRawResult(nativeGetRawAttributesFromAsset(asset))) {
-                        return;
-                    }
-                } else if (mSeekableFileDescriptor != null) {
-                    if (handleRawResult(nativeGetRawAttributesFromFileDescriptor(
-                            mSeekableFileDescriptor))) {
-                        return;
-                    }
-                } else {
-                    in.mark(JPEG_SIGNATURE.length);
-                    byte[] signatureBytes = new byte[JPEG_SIGNATURE.length];
-                    if (in.read(signatureBytes) != JPEG_SIGNATURE.length) {
-                        throw new EOFException();
-                    }
-                    in.reset();
-                    if (!isJpegFormat(signatureBytes) && handleRawResult(
-                            nativeGetRawAttributesFromInputStream(in))) {
-                        return;
-                    }
+                case IMAGE_TYPE_RAF: {
+                    getRafAttributes(in);
+                    break;
                 }
-                // Process JPEG input stream
-                getJpegAttributes(in, 0, IFD_TIFF_HINT);
+                case IMAGE_TYPE_ORF: {
+                    getOrfAttributes(in);
+                    break;
+                }
+                case IMAGE_TYPE_RW2: {
+                    getRw2Attributes(in);
+                    break;
+                }
+                case IMAGE_TYPE_ARW:
+                case IMAGE_TYPE_CR2:
+                case IMAGE_TYPE_DNG:
+                case IMAGE_TYPE_NEF:
+                case IMAGE_TYPE_NRW:
+                case IMAGE_TYPE_PEF:
+                case IMAGE_TYPE_SRW:
+                case IMAGE_TYPE_UNKNOWN: {
+                    getRawAttributes(in);
+                    break;
+                }
+                default: {
+                    break;
+                }
             }
+            // Set thumbnail image offset and length
+            setThumbnailData(in);
         } catch (IOException e) {
             // Ignore exceptions in order to keep the compatibility with the old versions of
             // ExifInterface.
@@ -1740,36 +1709,6 @@ public class ExifInterface {
                 printAttributes();
             }
         }
-    }
-
-    private boolean handleRawResult(HashMap map) {
-        if (map == null) {
-            if (DEBUG) {
-                Log.d(TAG, "Raw image file not detected");
-            }
-            return false;
-        }
-
-        // Mark for disabling the save feature.
-        mIsRaw = true;
-
-        String value = (String) map.remove(TAG_HAS_THUMBNAIL);
-        mHasThumbnail = value != null && value.equalsIgnoreCase("true");
-        value = (String) map.remove(TAG_THUMBNAIL_OFFSET);
-        if (value != null) {
-            mThumbnailOffset = Integer.parseInt(value);
-        }
-        value = (String) map.remove(TAG_THUMBNAIL_LENGTH);
-        if (value != null) {
-            mThumbnailLength = Integer.parseInt(value);
-        }
-        mThumbnailBytes = (byte[]) map.remove(TAG_THUMBNAIL_DATA);
-
-        for (Map.Entry entry : (Set<Map.Entry>) map.entrySet()) {
-            setAttribute((String) entry.getKey(), (String) entry.getValue());
-        }
-
-        return true;
     }
 
     private static boolean isSeekableFD(FileDescriptor fd) throws IOException {
@@ -1800,9 +1739,9 @@ public class ExifInterface {
      * and make a single call rather than multiple calls for each attribute.
      */
     public void saveAttributes() throws IOException {
-        if (mIsRaw) {
+        if (mMimeType != IMAGE_TYPE_JPEG) {
             throw new UnsupportedOperationException(
-                    "ExifInterface does not support saving attributes on RAW formats.");
+                    "ExifInterface only supports saving attributes on JPEG formats.");
         }
         if (mIsInputStream || (mSeekableFileDescriptor == null && mFilename == null)) {
             throw new UnsupportedOperationException(
@@ -3864,12 +3803,4 @@ public class ExifInterface {
         }
         return false;
     }
-
-    // JNI methods for RAW formats.
-    private static native void nativeInitRaw();
-    private static native byte[] nativeGetThumbnailFromAsset(
-            long asset, int thumbnailOffset, int thumbnailLength);
-    private static native HashMap nativeGetRawAttributesFromAsset(long asset);
-    private static native HashMap nativeGetRawAttributesFromFileDescriptor(FileDescriptor fd);
-    private static native HashMap nativeGetRawAttributesFromInputStream(InputStream in);
 }
