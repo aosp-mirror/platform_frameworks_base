@@ -77,12 +77,23 @@ static const long long ACCURATE_TIME_EPOCH = 946684800000;
 static const char EXIT_PROP_NAME[] = "service.bootanim.exit";
 static const char PLAY_SOUND_PROP_NAME[] = "persist.sys.bootanim.play_sound";
 static const int ANIM_ENTRY_NAME_MAX = 256;
+static const char BOOT_COMPLETED_PROP_NAME[] = "sys.boot_completed";
+static const char BOOTREASON_PROP_NAME[] = "ro.boot.bootreason";
+// bootreasons list in "system/core/bootstat/bootstat.cpp".
+static const std::vector<std::string> PLAY_SOUND_BOOTREASON_BLACKLIST {
+  "kernel_panic",
+  "Panic",
+  "Watchdog",
+};
 
 // ---------------------------------------------------------------------------
 
 BootAnimation::BootAnimation() : Thread(false), mClockEnabled(true), mTimeIsAccurate(false),
         mTimeCheckThread(NULL) {
     mSession = new SurfaceComposerClient();
+
+    // If the system has already booted, the animation is not being used for a boot.
+    mSystemBoot = !property_get_bool(BOOT_COMPLETED_PROP_NAME, 0);
 }
 
 BootAnimation::~BootAnimation() {}
@@ -776,13 +787,9 @@ bool BootAnimation::playAnimation(const Animation& animation)
                 break;
 
             // only play audio file the first time we animate the part
-            if (r == 0 && part.audioData) {
-                // Read the system property to see if we should play the sound.
-                // If not present, default to playing it.
-                if (property_get_bool(PLAY_SOUND_PROP_NAME, 1)) {
-                    ALOGD("playing clip for part%d, size=%d", (int) i, part.audioLength);
-                    audioplay::playClip(part.audioData, part.audioLength);
-                }
+            if (r == 0 && part.audioData && playSoundsAllowed()) {
+                ALOGD("playing clip for part%d, size=%d", (int) i, part.audioLength);
+                audioplay::playClip(part.audioData, part.audioLength);
             }
 
             glClearColor(
@@ -916,6 +923,30 @@ BootAnimation::Animation* BootAnimation::loadAnimation(const String8& fn)
 
     mLoadedFiles.remove(fn);
     return animation;
+}
+
+bool BootAnimation::playSoundsAllowed() const {
+    // Only play sounds for system boots, not runtime restarts.
+    if (!mSystemBoot) {
+        return false;
+    }
+
+    // Read the system property to see if we should play the sound.
+    // If it's not present, default to allowed.
+    if (!property_get_bool(PLAY_SOUND_PROP_NAME, 1)) {
+        return false;
+    }
+
+    // Don't play sounds if this is a reboot due to an error.
+    char bootreason[PROPERTY_VALUE_MAX];
+    if (property_get(BOOTREASON_PROP_NAME, bootreason, nullptr) > 0) {
+        for (const auto& str : PLAY_SOUND_BOOTREASON_BLACKLIST) {
+            if (strcasecmp(str.c_str(), bootreason) == 0) {
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
 bool BootAnimation::updateIsTimeAccurate() {
