@@ -517,6 +517,11 @@ class AppWindowToken extends WindowToken {
                 // placement for this window during this period, one or more frame will
                 // show up with wrong position or scale.
                 win.mWinAnimator.mAnimating = false;
+
+                if (win.mDestroying) {
+                    win.mDestroying = false;
+                    service.mDestroySurface.remove(win);
+                }
             }
         }
         requestUpdateWallpaperIfNeeded();
