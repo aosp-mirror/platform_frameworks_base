@@ -520,7 +520,7 @@ class AppWindowToken extends WindowToken {
 
                 if (win.mDestroying) {
                     win.mDestroying = false;
-                    service.mDestroySurface.remove(win);
+                    mService.mDestroySurface.remove(win);
                 }
             }
         }
