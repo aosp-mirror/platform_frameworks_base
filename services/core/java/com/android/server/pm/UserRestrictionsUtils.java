@@ -26,11 +26,9 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.RemoteException;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.service.persistentdata.PersistentDataBlockManager;
@@ -188,8 +186,7 @@ public class UserRestrictionsUtils {
         serializer.endTag(null, tag);
     }
 
-    public static void readRestrictions(XmlPullParser parser, Bundle restrictions)
-            throws IOException {
+    public static void readRestrictions(XmlPullParser parser, Bundle restrictions) {
         for (String key : USER_RESTRICTIONS) {
             final String value = parser.getAttributeValue(null, key);
             if (value != null) {
@@ -437,7 +434,13 @@ public class UserRestrictionsUtils {
                     if (newValue) {
                         PersistentDataBlockManager manager = (PersistentDataBlockManager) context
                                 .getSystemService(Context.PERSISTENT_DATA_BLOCK_SERVICE);
-                        if (manager != null && manager.getOemUnlockEnabled()) {
+                        if (manager != null
+                                && manager.getOemUnlockEnabled()
+                                && manager.getFlashLockState()
+                                        != PersistentDataBlockManager.FLASH_LOCK_UNLOCKED) {
+                            // Only disable OEM unlock if the bootloader is locked. If it's already
+                            // unlocked, setting the OEM unlock enabled flag to false has no effect
+                            // (the bootloader would remain unlocked).
                             manager.setOemUnlockEnabled(false);
                         }
                     }
