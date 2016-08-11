@@ -162,6 +162,9 @@ public class AppTransition implements Dump {
     private final WindowManagerService mService;
 
     private int mNextAppTransition = TRANSIT_UNSET;
+    private int mLastUsedAppTransition = TRANSIT_UNSET;
+    private String mLastOpeningApp;
+    private String mLastClosingApp;
 
     private static final int NEXT_TRANSIT_TYPE_NONE = 0;
     private static final int NEXT_TRANSIT_TYPE_CUSTOM = 1;
@@ -285,6 +288,13 @@ public class AppTransition implements Dump {
 
     private void setAppTransition(int transit) {
         mNextAppTransition = transit;
+        setLastAppTransition(TRANSIT_UNSET, null, null);
+    }
+
+    void setLastAppTransition(int transit, AppWindowToken openingApp, AppWindowToken closingApp) {
+        mLastUsedAppTransition = transit;
+        mLastOpeningApp = "" + openingApp;
+        mLastClosingApp = "" + closingApp;
     }
 
     boolean isReady() {
@@ -1903,6 +1913,14 @@ public class AppTransition implements Dump {
         if (mNextAppTransitionCallback != null) {
             pw.print(prefix); pw.print("mNextAppTransitionCallback=");
                     pw.println(mNextAppTransitionCallback);
+        }
+        if (mLastUsedAppTransition != TRANSIT_NONE) {
+            pw.print(prefix); pw.print("mLastUsedAppTransition=");
+                    pw.println(appTransitionToString(mLastUsedAppTransition));
+            pw.print(prefix); pw.print("mLastOpeningApp=");
+                    pw.println(mLastOpeningApp);
+            pw.print(prefix); pw.print("mLastClosingApp=");
+                    pw.println(mLastClosingApp);
         }
     }
 
