@@ -226,10 +226,12 @@ public final class MidiDeviceServer implements Closeable {
                 ParcelFileDescriptor[] pair = ParcelFileDescriptor.createSocketPair(
                                                     OsConstants.SOCK_SEQPACKET);
                 MidiInputPort inputPort = new MidiInputPort(pair[0], portNumber);
-                // Configure the server-side socket in non-blocking mode to avoid stalling
-                // the entire MIDI framework if client app code gets stuck inside 'onSend'
-                // handler.
-                IoUtils.setBlocking(pair[0].getFileDescriptor(), false);
+                // Undo the default blocking-mode of the server-side socket for
+                // physical devices to avoid stalling the Java device handler if
+                // client app code gets stuck inside 'onSend' handler.
+                if (mDeviceInfo.getType() != MidiDeviceInfo.TYPE_VIRTUAL) {
+                    IoUtils.setBlocking(pair[0].getFileDescriptor(), false);
+                }
                 MidiDispatcher dispatcher = mOutputPortDispatchers[portNumber];
                 synchronized (dispatcher) {
                     dispatcher.getSender().connect(inputPort);
