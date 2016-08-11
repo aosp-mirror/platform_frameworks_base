@@ -38,7 +38,7 @@ interface IWifiNanManager
     boolean isUsageEnabled();
 
     // client API
-    int connect(in IBinder binder, in IWifiNanEventCallback callback,
+    int connect(in IBinder binder, in String callingPackage, in IWifiNanEventCallback callback,
             in ConfigRequest configRequest);
     void disconnect(int clientId, in IBinder binder);
 

@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
+import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkRequest;
 import android.net.wifi.RttManager;
@@ -220,6 +221,7 @@ public class WifiNanManager {
 
     public static final int WIFI_NAN_DATA_PATH_ROLE_RESPONDER = 1;
 
+    private final Context mContext;
     private final IWifiNanManager mService;
 
     private final Object mLock = new Object(); // lock access to the following vars
@@ -239,7 +241,8 @@ public class WifiNanManager {
     /**
      * {@hide}
      */
-    public WifiNanManager(IWifiNanManager service) {
+    public WifiNanManager(Context context, IWifiNanManager service) {
+        mContext = context;
         mService = service;
     }
 
@@ -324,7 +327,7 @@ public class WifiNanManager {
             mLooper = looper;
 
             try {
-                mClientId = mService.connect(mBinder,
+                mClientId = mService.connect(mBinder, mContext.getOpPackageName(),
                         new WifiNanEventCallbackProxy(this, looper, callback), configRequest);
             } catch (RemoteException e) {
                 mClientId = INVALID_CLIENT_ID;
