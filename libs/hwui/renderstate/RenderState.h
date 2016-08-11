@@ -101,7 +101,7 @@ private:
     void resumeFromFunctorInvoke();
     void assertOnGLThread();
 
-    RenderState(renderthread::RenderThread& thread);
+    explicit RenderState(renderthread::RenderThread& thread);
     ~RenderState();
 
 

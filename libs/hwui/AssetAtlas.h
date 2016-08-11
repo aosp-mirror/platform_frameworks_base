@@ -111,7 +111,7 @@ public:
      * initialized. To re-initialize the atlas, you must
      * first call terminate().
      */
-    ANDROID_API void init(sp<GraphicBuffer> buffer, int64_t* map, int count);
+    ANDROID_API void init(const sp<GraphicBuffer>& buffer, int64_t* map, int count);
 
     /**
      * Destroys the atlas texture. This object can be

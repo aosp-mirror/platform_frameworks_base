@@ -77,7 +77,7 @@ public:
     void forceEndNow(AnimationContext& context);
 
 protected:
-    BaseRenderNodeAnimator(float finalValue);
+    explicit BaseRenderNodeAnimator(float finalValue);
     virtual ~BaseRenderNodeAnimator();
 
     virtual float getValue(RenderNode* target) const = 0;

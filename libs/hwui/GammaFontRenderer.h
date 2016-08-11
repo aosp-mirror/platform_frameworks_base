@@ -91,7 +91,7 @@ public:
     void endPrecaching() override;
 
 private:
-    ShaderGammaFontRenderer(bool multiGamma);
+    explicit ShaderGammaFontRenderer(bool multiGamma);
 
     FontRenderer* mRenderer;
     bool mMultiGamma;
