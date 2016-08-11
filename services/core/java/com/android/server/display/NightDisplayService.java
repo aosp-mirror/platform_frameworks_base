@@ -20,6 +20,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.TypeEvaluator;
 import android.animation.ValueAnimator;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AlarmManager;
 import android.content.BroadcastReceiver;
@@ -361,13 +362,12 @@ public final class NightDisplayService extends SystemService
             if (setActivated) {
                 mController.setActivated(activated);
             }
-            updateNextAlarm();
+            updateNextAlarm(mIsActivated, now);
         }
 
-        private void updateNextAlarm() {
-            if (mIsActivated != null) {
-                final Calendar now = Calendar.getInstance();
-                final Calendar next = mIsActivated ? mEndTime.getDateTimeAfter(now)
+        private void updateNextAlarm(@Nullable Boolean activated, @NonNull Calendar now) {
+            if (activated != null) {
+                final Calendar next = activated ? mEndTime.getDateTimeAfter(now)
                         : mStartTime.getDateTimeAfter(now);
                 mAlarmManager.setExact(AlarmManager.RTC, next.getTimeInMillis(), TAG, this, null);
             }
@@ -396,10 +396,11 @@ public final class NightDisplayService extends SystemService
 
         @Override
         public void onActivated(boolean activated) {
+            final Calendar now = Calendar.getInstance();
             if (mIsActivated != null) {
-                mLastActivatedTime = Calendar.getInstance();
+                mLastActivatedTime = now;
             }
-            updateNextAlarm();
+            updateNextAlarm(activated, now);
         }
 
         @Override
