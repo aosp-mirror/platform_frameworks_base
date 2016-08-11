@@ -34,6 +34,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.ServiceManager.ServiceNotFoundException;
 import android.util.Log;
 
 /**
@@ -95,10 +96,10 @@ public class NetworkStatsManager {
     /**
      * {@hide}
      */
-    public NetworkStatsManager(Context context) {
+    public NetworkStatsManager(Context context) throws ServiceNotFoundException {
         mContext = context;
         mService = INetworkStatsService.Stub.asInterface(
-                ServiceManager.getService(Context.NETWORK_STATS_SERVICE));
+                ServiceManager.getServiceOrThrow(Context.NETWORK_STATS_SERVICE));
     }
 
     /**

@@ -31,6 +31,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -536,7 +537,7 @@ public class SearchManager
     /**
      * Reference to the shared system search service.
      */
-    private static ISearchManager mService;
+    private final ISearchManager mService;
 
     private final Context mContext;
 
@@ -547,11 +548,11 @@ public class SearchManager
 
     private SearchDialog mSearchDialog;
 
-    /*package*/ SearchManager(Context context, Handler handler)  {
+    /*package*/ SearchManager(Context context, Handler handler) throws ServiceNotFoundException {
         mContext = context;
         mHandler = handler;
         mService = ISearchManager.Stub.asInterface(
-                ServiceManager.getService(Context.SEARCH_SERVICE));
+                ServiceManager.getServiceOrThrow(Context.SEARCH_SERVICE));
     }
 
     /**
@@ -620,7 +621,7 @@ public class SearchManager
             return;
         }
 
-        UiModeManager uiModeManager = new UiModeManager();
+        final UiModeManager uiModeManager = mContext.getSystemService(UiModeManager.class);
         // Don't show search dialog on televisions.
         if (uiModeManager.getCurrentModeType() != Configuration.UI_MODE_TYPE_TELEVISION) {
             ensureSearchDialog();

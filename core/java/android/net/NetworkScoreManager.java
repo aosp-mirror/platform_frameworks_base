@@ -23,9 +23,9 @@ import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.Intent;
 import android.net.NetworkScorerAppManager.NetworkScorerAppData;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.UserHandle;
 
 /**
@@ -127,10 +127,10 @@ public class NetworkScoreManager {
     private final INetworkScoreService mService;
 
     /** @hide */
-    public NetworkScoreManager(Context context) {
+    public NetworkScoreManager(Context context) throws ServiceNotFoundException {
         mContext = context;
-        IBinder iBinder = ServiceManager.getService(Context.NETWORK_SCORE_SERVICE);
-        mService = INetworkScoreService.Stub.asInterface(iBinder);
+        mService = INetworkScoreService.Stub
+                .asInterface(ServiceManager.getServiceOrThrow(Context.NETWORK_SCORE_SERVICE));
     }
 
     /**

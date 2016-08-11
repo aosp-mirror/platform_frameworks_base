@@ -154,6 +154,9 @@ public class ContextHubService extends IContextHubService.Stub {
             Log.e(TAG, "Invalid contextHubhandle " + contextHubHandle);
             return -1;
         }
+        if (app == null) {
+            return -1;
+        }
 
         int[] msgHeader = new int[MSG_LOAD_APP_HEADER_SIZE];
         msgHeader[HEADER_FIELD_HUB_HANDLE] = contextHubHandle;
@@ -239,6 +242,11 @@ public class ContextHubService extends IContextHubService.Stub {
     public int sendMessage(int hubHandle, int nanoAppHandle, ContextHubMessage msg)
                            throws RemoteException {
         checkPermissions();
+
+        if (msg == null || msg.getData() == null) {
+            Log.w(TAG, "null ptr");
+            return -1;
+        }
 
         int[] msgHeader = new int[MSG_HEADER_SIZE];
         msgHeader[HEADER_FIELD_HUB_HANDLE] = hubHandle;

@@ -46,6 +46,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.ServiceManager.ServiceNotFoundException;
 import android.provider.ContactsContract.Directory;
 import android.provider.Settings;
 import android.security.Credentials;
@@ -99,26 +100,18 @@ public class DevicePolicyManager {
     private final IDevicePolicyManager mService;
     private final boolean mParentInstance;
 
-    private DevicePolicyManager(Context context, boolean parentInstance) {
-        this(context,
-                IDevicePolicyManager.Stub.asInterface(
-                        ServiceManager.getService(Context.DEVICE_POLICY_SERVICE)),
-                parentInstance);
+    /** @hide */
+    public DevicePolicyManager(Context context, IDevicePolicyManager service) {
+        this(context, service, false);
     }
 
     /** @hide */
     @VisibleForTesting
-    protected DevicePolicyManager(
-            Context context, IDevicePolicyManager service, boolean parentInstance) {
+    protected DevicePolicyManager(Context context, IDevicePolicyManager service,
+            boolean parentInstance) {
         mContext = context;
         mService = service;
         mParentInstance = parentInstance;
-    }
-
-    /** @hide */
-    public static DevicePolicyManager create(Context context) {
-        DevicePolicyManager me = new DevicePolicyManager(context, false);
-        return me.mService != null ? me : null;
     }
 
     /** @hide test will override it. */
@@ -6054,7 +6047,7 @@ public class DevicePolicyManager {
             if (!mService.isManagedProfile(admin)) {
                 throw new SecurityException("The current user does not have a parent profile.");
             }
-            return new DevicePolicyManager(mContext, true);
+            return new DevicePolicyManager(mContext, mService, true);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -6146,7 +6139,7 @@ public class DevicePolicyManager {
             throw new SecurityException("The user " + uInfo.id
                     + " does not have a parent profile.");
         }
-        return new DevicePolicyManager(mContext, true);
+        return new DevicePolicyManager(mContext, mService, true);
     }
 
     /**
