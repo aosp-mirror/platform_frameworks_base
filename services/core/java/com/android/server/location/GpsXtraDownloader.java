@@ -44,6 +44,7 @@ public class GpsXtraDownloader {
 
     private static final String TAG = "GpsXtraDownloader";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final long MAXIMUM_CONTENT_LENGTH_BYTES = 1000000;  // 1MB.
     private static final String DEFAULT_USER_AGENT = "Android";
 
     private final Context mContext;
@@ -150,8 +151,9 @@ public class GpsXtraDownloader {
             byte[] body = null;
             if (entity != null) {
                 try {
-                    if (entity.getContentLength() > 0) {
-                        body = new byte[(int) entity.getContentLength()];
+                    long contentLength = entity.getContentLength();
+                    if (contentLength > 0 && contentLength <= MAXIMUM_CONTENT_LENGTH_BYTES) {
+                        body = new byte[(int) contentLength];
                         DataInputStream dis = new DataInputStream(entity.getContent());
                         try {
                             dis.readFully(body);
