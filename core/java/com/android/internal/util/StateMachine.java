@@ -750,6 +750,14 @@ public class StateMachine {
         /** The destination state when transitionTo has been invoked */
         private State mDestState;
 
+        /**
+         * Indicates if a transition is in progress
+         *
+         * This will be true for all calls of State.exit and all calls of State.enter except for the
+         * last enter call for the current destination state.
+         */
+        private boolean mTransitionInProgress = false;
+
         /** The list of deferred messages */
         private ArrayList<Message> mDeferredMessages = new ArrayList<Message>();
 
@@ -862,6 +870,8 @@ public class StateMachine {
                      * invoke the exit methods then the enter methods.
                      */
                     StateInfo commonStateInfo = setupTempStateStackWithStatesToEnter(destState);
+                    // flag is cleared in invokeEnterMethods before entering the target state
+                    mTransitionInProgress = true;
                     invokeExitMethods(commonStateInfo);
                     int stateStackEnteringIndex = moveTempStateStackToStateStack();
                     invokeEnterMethods(stateStackEnteringIndex);
@@ -1017,10 +1027,15 @@ public class StateMachine {
          */
         private final void invokeEnterMethods(int stateStackEnteringIndex) {
             for (int i = stateStackEnteringIndex; i <= mStateStackTopIndex; i++) {
+                if (stateStackEnteringIndex == mStateStackTopIndex) {
+                    // Last enter state for transition
+                    mTransitionInProgress = false;
+                }
                 if (mDbg) mSm.log("invokeEnterMethods: " + mStateStack[i].state.getName());
                 mStateStack[i].state.enter();
                 mStateStack[i].active = true;
             }
+            mTransitionInProgress = false; // ensure flag set to false if no methods called
         }
 
         /**
@@ -1196,6 +1211,10 @@ public class StateMachine {
 
         /** @see StateMachine#transitionTo(IState) */
         private final void transitionTo(IState destState) {
+            if (mTransitionInProgress) {
+                Log.wtf(mSm.mName, "transitionTo called while transition already in progress to " +
+                        mDestState + ", new target state=" + destState);
+            }
             mDestState = (State) destState;
             if (mDbg) mSm.log("transitionTo: destState=" + mDestState.getName());
         }
