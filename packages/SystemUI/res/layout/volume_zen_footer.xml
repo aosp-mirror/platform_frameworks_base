@@ -18,7 +18,8 @@
     android:id="@+id/volume_zen_footer"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical" > <!-- extends LinearLayout -->
+    android:orientation="vertical"
+    android:paddingBottom="8dp" > <!-- extends LinearLayout -->
 
     <View
         android:id="@+id/zen_embedded_divider"
