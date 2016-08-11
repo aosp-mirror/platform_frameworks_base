@@ -828,7 +828,7 @@ final class SystemServiceRegistry {
                         service = createService(ctx);
                         cache[mCacheIndex] = service;
                     } catch (ServiceNotFoundException e) {
-                        Log.wtf(TAG, e.getMessage(), e);
+                        Log.w(TAG, e.getMessage(), e);
                     }
                 }
                 return (T)service;
@@ -852,7 +852,7 @@ final class SystemServiceRegistry {
                     try {
                         mCachedInstance = createService();
                     } catch (ServiceNotFoundException e) {
-                        Log.wtf(TAG, e.getMessage(), e);
+                        Log.w(TAG, e.getMessage(), e);
                     }
                 }
                 return mCachedInstance;
@@ -885,7 +885,7 @@ final class SystemServiceRegistry {
                     try {
                         mCachedInstance = createService(appContext != null ? appContext : ctx);
                     } catch (ServiceNotFoundException e) {
-                        Log.wtf(TAG, e.getMessage(), e);
+                        Log.w(TAG, e.getMessage(), e);
                     }
                 }
                 return mCachedInstance;
