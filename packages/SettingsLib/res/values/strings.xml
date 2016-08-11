@@ -863,4 +863,7 @@
     <!-- Label for Help and feedback menu item -->
     <string name="help_feedback_label">Help &amp; feedback</string>
 
+    <!-- Content description for drawer menu button [CHAR_LIMIT=30]-->
+    <string name="content_description_menu_button">Menu</string>
+
 </resources>
