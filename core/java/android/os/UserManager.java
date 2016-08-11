@@ -615,7 +615,8 @@ public class UserManager {
 
     /**
      * Specifies if a user is not allowed to enable the oem unlock setting. The default value is
-     * <code>false</code>.
+     * <code>false</code>. Setting this restriction has no effect if the bootloader is already
+     * unlocked.
      *
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
