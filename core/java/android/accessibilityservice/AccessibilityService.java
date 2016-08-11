@@ -628,8 +628,8 @@ public abstract class AccessibilityService extends Service {
         if (connection == null) {
             return false;
         }
-        List<MotionEvent> events = MotionEventGenerator.getMotionEventsFromGestureDescription(
-                gesture, 100);
+        List<GestureDescription.GestureStep> steps =
+                MotionEventGenerator.getGestureStepsFromGestureDescription(gesture, 100);
         try {
             synchronized (mLock) {
                 mGestureStatusCallbackSequence++;
@@ -641,8 +641,8 @@ public abstract class AccessibilityService extends Service {
                             callback, handler);
                     mGestureStatusCallbackInfos.put(mGestureStatusCallbackSequence, callbackInfo);
                 }
-                connection.sendMotionEvents(mGestureStatusCallbackSequence,
-                        new ParceledListSlice<>(events));
+                connection.sendGesture(mGestureStatusCallbackSequence,
+                        new ParceledListSlice<>(steps));
             }
         } catch (RemoteException re) {
             throw new RuntimeException(re);
