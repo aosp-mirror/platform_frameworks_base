@@ -558,35 +558,7 @@ public class VolumeDialog implements TunerService.Tunable {
         final VolumeRow activeRow = getActiveRow();
         if (!dismissing) {
             mWindow.setLayout(mWindow.getAttributes().width, ViewGroup.LayoutParams.MATCH_PARENT);
-            AutoTransition transition = new AutoTransition();
-            transition.setDuration(mExpandButtonAnimationDuration);
-            transition.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
-            transition.addListener(new Transition.TransitionListener() {
-                @Override
-                public void onTransitionStart(Transition transition) {
-                }
-
-                @Override
-                public void onTransitionEnd(Transition transition) {
-                    mWindow.setLayout(
-                            mWindow.getAttributes().width, ViewGroup.LayoutParams.WRAP_CONTENT);
-                }
-
-                @Override
-                public void onTransitionCancel(Transition transition) {
-                }
-
-                @Override
-                public void onTransitionPause(Transition transition) {
-                    mWindow.setLayout(
-                            mWindow.getAttributes().width, ViewGroup.LayoutParams.WRAP_CONTENT);
-                }
-
-                @Override
-                public void onTransitionResume(Transition transition) {
-                }
-            });
-            TransitionManager.beginDelayedTransition(mDialogView, transition);
+            TransitionManager.beginDelayedTransition(mDialogView, getTransistion());
         }
         updateRowsH(activeRow);
         rescheduleTimeoutH();
@@ -702,6 +674,7 @@ public class VolumeDialog implements TunerService.Tunable {
         final boolean visible = mState.zenMode != Global.ZEN_MODE_OFF
                 && (mAudioManager.isStreamAffectedByRingerMode(mActiveStream) || mExpanded)
                 && !mZenPanel.isEditing();
+        TransitionManager.beginDelayedTransition(mDialogView, getTransistion());
         if (wasVisible != visible && !visible) {
             prepareForCollapse();
         }
@@ -945,6 +918,38 @@ public class VolumeDialog implements TunerService.Tunable {
             recheckH(null);
         }
         rescheduleTimeoutH();
+    }
+
+    private AutoTransition getTransistion() {
+        AutoTransition transition = new AutoTransition();
+        transition.setDuration(mExpandButtonAnimationDuration);
+        transition.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
+        transition.addListener(new Transition.TransitionListener() {
+            @Override
+            public void onTransitionStart(Transition transition) {
+            }
+
+            @Override
+            public void onTransitionEnd(Transition transition) {
+                mWindow.setLayout(
+                        mWindow.getAttributes().width, ViewGroup.LayoutParams.WRAP_CONTENT);
+            }
+
+            @Override
+            public void onTransitionCancel(Transition transition) {
+            }
+
+            @Override
+            public void onTransitionPause(Transition transition) {
+                mWindow.setLayout(
+                        mWindow.getAttributes().width, ViewGroup.LayoutParams.WRAP_CONTENT);
+            }
+
+            @Override
+            public void onTransitionResume(Transition transition) {
+            }
+        });
+        return transition;
     }
 
     private boolean hasTouchFeature() {
