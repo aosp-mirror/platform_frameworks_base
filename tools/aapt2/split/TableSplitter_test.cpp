@@ -52,6 +52,71 @@ TEST(TableSplitterTest, NoSplitPreferredDensity) {
     EXPECT_NE(nullptr, test::getValue<Id>(table.get(), "android:string/one"));
 }
 
+TEST(TableSplitterTest, SplitTableByDensity) {
+    std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
+            .addFileReference("android:drawable/foo", "res/drawable-mdpi/foo.png",
+                              test::parseConfigOrDie("mdpi"))
+            .addFileReference("android:drawable/foo", "res/drawable-hdpi/foo.png",
+                              test::parseConfigOrDie("hdpi"))
+            .addFileReference("android:drawable/foo", "res/drawable-xhdpi/foo.png",
+                              test::parseConfigOrDie("xhdpi"))
+            .addFileReference("android:drawable/foo", "res/drawable-xxhdpi/foo.png",
+                              test::parseConfigOrDie("xxhdpi"))
+            .build();
+
+    std::vector<SplitConstraints> constraints;
+    constraints.push_back(SplitConstraints{ { test::parseConfigOrDie("mdpi") } });
+    constraints.push_back(SplitConstraints{ { test::parseConfigOrDie("hdpi") } });
+    constraints.push_back(SplitConstraints{ { test::parseConfigOrDie("xhdpi") } });
+
+    TableSplitter splitter(constraints, TableSplitterOptions{});
+    splitter.splitTable(table.get());
+
+    ASSERT_EQ(3u, splitter.getSplits().size());
+
+    ResourceTable* splitOne = splitter.getSplits()[0].get();
+    ResourceTable* splitTwo = splitter.getSplits()[1].get();
+    ResourceTable* splitThree = splitter.getSplits()[2].get();
+
+    // Just xxhdpi should be in the base.
+    EXPECT_EQ(nullptr, test::getValueForConfig<FileReference>(table.get(), "android:drawable/foo",
+                                                              test::parseConfigOrDie("mdpi")));
+    EXPECT_EQ(nullptr, test::getValueForConfig<FileReference>(table.get(), "android:drawable/foo",
+                                                              test::parseConfigOrDie("hdpi")));
+    EXPECT_EQ(nullptr, test::getValueForConfig<FileReference>(table.get(), "android:drawable/foo",
+                                                              test::parseConfigOrDie("xhdpi")));
+    EXPECT_NE(nullptr, test::getValueForConfig<FileReference>(table.get(), "android:drawable/foo",
+                                                              test::parseConfigOrDie("xxhdpi")));
+
+    // Each split should have one and only one drawable.
+    EXPECT_NE(nullptr, test::getValueForConfig<FileReference>(splitOne, "android:drawable/foo",
+                                                              test::parseConfigOrDie("mdpi")));
+    EXPECT_EQ(nullptr, test::getValueForConfig<FileReference>(splitOne, "android:drawable/foo",
+                                                              test::parseConfigOrDie("hdpi")));
+    EXPECT_EQ(nullptr, test::getValueForConfig<FileReference>(splitOne, "android:drawable/foo",
+                                                              test::parseConfigOrDie("xhdpi")));
+    EXPECT_EQ(nullptr, test::getValueForConfig<FileReference>(splitOne, "android:drawable/foo",
+                                                              test::parseConfigOrDie("xxhdpi")));
+
+    EXPECT_EQ(nullptr, test::getValueForConfig<FileReference>(splitTwo, "android:drawable/foo",
+                                                              test::parseConfigOrDie("mdpi")));
+    EXPECT_NE(nullptr, test::getValueForConfig<FileReference>(splitTwo, "android:drawable/foo",
+                                                              test::parseConfigOrDie("hdpi")));
+    EXPECT_EQ(nullptr, test::getValueForConfig<FileReference>(splitTwo, "android:drawable/foo",
+                                                              test::parseConfigOrDie("xhdpi")));
+    EXPECT_EQ(nullptr, test::getValueForConfig<FileReference>(splitTwo, "android:drawable/foo",
+                                                              test::parseConfigOrDie("xxhdpi")));
+
+    EXPECT_EQ(nullptr, test::getValueForConfig<FileReference>(splitThree, "android:drawable/foo",
+                                                              test::parseConfigOrDie("mdpi")));
+    EXPECT_EQ(nullptr, test::getValueForConfig<FileReference>(splitThree, "android:drawable/foo",
+                                                              test::parseConfigOrDie("hdpi")));
+    EXPECT_NE(nullptr, test::getValueForConfig<FileReference>(splitThree, "android:drawable/foo",
+                                                              test::parseConfigOrDie("xhdpi")));
+    EXPECT_EQ(nullptr, test::getValueForConfig<FileReference>(splitThree, "android:drawable/foo",
+                                                              test::parseConfigOrDie("xxhdpi")));
+}
+
 TEST(TableSplitterTest, SplitTableByConfigAndDensity) {
     ResourceTable table;
 
@@ -78,12 +143,12 @@ TEST(TableSplitterTest, SplitTableByConfigAndDensity) {
     ResourceTable* splitOne = splitter.getSplits()[0].get();
     ResourceTable* splitTwo = splitter.getSplits()[1].get();
 
-    // Since a split was defined, all densities should be gone from base.
+    // All but the xxhdpi resource should be gone, since there were closer matches in land-xhdpi.
     EXPECT_EQ(nullptr, test::getValueForConfig<Id>(&table, "android:string/foo",
                                                    test::parseConfigOrDie("land-hdpi")));
     EXPECT_EQ(nullptr, test::getValueForConfig<Id>(&table, "android:string/foo",
                                                    test::parseConfigOrDie("land-xhdpi")));
-    EXPECT_EQ(nullptr, test::getValueForConfig<Id>(&table, "android:string/foo",
+    EXPECT_NE(nullptr, test::getValueForConfig<Id>(&table, "android:string/foo",
                                                    test::parseConfigOrDie("land-xxhdpi")));
 
     EXPECT_NE(nullptr, test::getValueForConfig<Id>(splitOne, "android:string/foo",

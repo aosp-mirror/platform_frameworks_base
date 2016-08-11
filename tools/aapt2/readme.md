@@ -1,5 +1,14 @@
 # Android Asset Packaging Tool 2.0 (AAPT2) release notes
 
+## Version 2.1
+### `aapt2 link ...`
+- Configuration Split APK support: supports splitting resources that match a set of
+  configurations to a separate APK which can be loaded alongside the base APK on
+  API 21+ devices. This is done using the flag
+  `--split path/to/split.apk:<config1>[,<config2>,...]`.
+- SDK version resource filtering: Resources with an SDK version qualifier that is unreachable
+  at runtime due to the minimum SDK level declared by the AndroidManifest.xml are stripped.
+
 ## Version 2.0
 ### `aapt2 compile ...`
 - Pseudo-localization: generates pseudolocalized versions of default strings when the

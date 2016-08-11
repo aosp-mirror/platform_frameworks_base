@@ -101,12 +101,16 @@ std::unique_ptr<T> make_unique(Args&&... args) {
  * Writes a set of items to the std::ostream, joining the times with the provided
  * separator.
  */
-template <typename Iterator>
-::std::function<::std::ostream&(::std::ostream&)> joiner(Iterator begin, Iterator end,
-        const char* sep) {
-    return [begin, end, sep](::std::ostream& out) -> ::std::ostream& {
-        for (auto iter = begin; iter != end; ++iter) {
-            if (iter != begin) {
+template <typename Container>
+::std::function<::std::ostream&(::std::ostream&)> joiner(const Container& container,
+                                                         const char* sep) {
+    using std::begin;
+    using std::end;
+    const auto beginIter = begin(container);
+    const auto endIter = end(container);
+    return [beginIter, endIter, sep](::std::ostream& out) -> ::std::ostream& {
+        for (auto iter = beginIter; iter != endIter; ++iter) {
+            if (iter != beginIter) {
                 out << sep;
             }
             out << *iter;

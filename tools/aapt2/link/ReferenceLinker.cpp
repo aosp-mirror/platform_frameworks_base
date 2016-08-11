@@ -138,7 +138,7 @@ private:
                                                   const Attribute* attr) {
         if (RawString* rawString = valueCast<RawString>(value.get())) {
             std::unique_ptr<Item> transformed =
-                    ResourceUtils::parseItemForAttribute(*rawString->value, attr);
+                    ResourceUtils::tryParseItemForAttribute(*rawString->value, attr);
 
             // If we could not parse as any specific type, try a basic STRING.
             if (!transformed && (attr->typeMask & android::ResTable_map::TYPE_STRING)) {

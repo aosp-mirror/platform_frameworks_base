@@ -28,11 +28,6 @@
 namespace aapt {
 namespace ResourceUtils {
 
-/**
- * Convert an android::ResTable::resource_name to an aapt::ResourceName struct.
- */
-Maybe<ResourceName> toResourceName(const android::ResTable::resource_name& name);
-
 /*
  * Extracts the package, type, and name from a string of the format:
  *
@@ -60,8 +55,8 @@ bool parseResourceName(const StringPiece& str, ResourceNameRef* outResource,
  * If '+' was present in the reference, `outCreate` is set to true.
  * If '*' was present in the reference, `outPrivate` is set to true.
  */
-bool tryParseReference(const StringPiece& str, ResourceNameRef* outReference,
-                       bool* outCreate = nullptr, bool* outPrivate = nullptr);
+bool parseReference(const StringPiece& str, ResourceNameRef* outReference,
+                    bool* outCreate = nullptr, bool* outPrivate = nullptr);
 
 /*
  * Returns true if the string is in the form of a resource reference (@[+][package:]type/name).
@@ -72,7 +67,7 @@ bool isReference(const StringPiece& str);
  * Returns true if the string was parsed as an attribute reference (?[package:][type/]name),
  * with `outReference` set to the parsed reference.
  */
-bool tryParseAttributeReference(const StringPiece& str, ResourceNameRef* outReference);
+bool parseAttributeReference(const StringPiece& str, ResourceNameRef* outReference);
 
 /**
  * Returns true if the string is in the form of an attribute reference(?[package:][type/]name).
@@ -80,19 +75,29 @@ bool tryParseAttributeReference(const StringPiece& str, ResourceNameRef* outRefe
 bool isAttributeReference(const StringPiece& str);
 
 /**
- * Returns true if the value is a boolean, putting the result in `outValue`.
+ * Convert an android::ResTable::resource_name to an aapt::ResourceName struct.
  */
-bool tryParseBool(const StringPiece& str, bool* outValue);
+Maybe<ResourceName> toResourceName(const android::ResTable::resource_name& name);
+
+/**
+ * Returns a boolean value if the string is equal to TRUE, true, True, FALSE, false, or False.
+ */
+Maybe<bool> parseBool(const StringPiece& str);
+
+/**
+ * Returns a uint32_t if the string is an integer.
+ */
+Maybe<uint32_t> parseInt(const StringPiece& str);
 
 /**
  * Returns an ID if it the string represented a valid ID.
  */
-Maybe<ResourceId> tryParseResourceId(const StringPiece& str);
+Maybe<ResourceId> parseResourceId(const StringPiece& str);
 
 /**
  * Parses an SDK version, which can be an integer, or a letter from A-Z.
  */
-Maybe<int> tryParseSdkVersion(const StringPiece& str);
+Maybe<int> parseSdkVersion(const StringPiece& str);
 
 /*
  * Returns a Reference, or None Maybe instance if the string `str` was parsed as a
@@ -161,11 +166,11 @@ std::unique_ptr<BinaryPrimitive> tryParseFlagSymbol(const Attribute* enumAttr,
  * The callback function onCreateReference is called when the parsed item is a
  * reference to an ID that must be created (@+id/foo).
  */
-std::unique_ptr<Item> parseItemForAttribute(
+std::unique_ptr<Item> tryParseItemForAttribute(
         const StringPiece& value, const Attribute* attr,
         std::function<void(const ResourceName&)> onCreateReference = {});
 
-std::unique_ptr<Item> parseItemForAttribute(
+std::unique_ptr<Item> tryParseItemForAttribute(
         const StringPiece& value, uint32_t typeMask,
         std::function<void(const ResourceName&)> onCreateReference = {});
 

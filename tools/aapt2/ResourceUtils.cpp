@@ -124,7 +124,7 @@ bool parseResourceName(const StringPiece& str, ResourceNameRef* outRef, bool* ou
     return true;
 }
 
-bool tryParseReference(const StringPiece& str, ResourceNameRef* outRef, bool* outCreate,
+bool parseReference(const StringPiece& str, ResourceNameRef* outRef, bool* outCreate,
                        bool* outPrivate) {
     StringPiece trimmedStr(util::trimWhitespace(str));
     if (trimmedStr.empty()) {
@@ -171,10 +171,10 @@ bool tryParseReference(const StringPiece& str, ResourceNameRef* outRef, bool* ou
 }
 
 bool isReference(const StringPiece& str) {
-    return tryParseReference(str, nullptr, nullptr, nullptr);
+    return parseReference(str, nullptr, nullptr, nullptr);
 }
 
-bool tryParseAttributeReference(const StringPiece& str, ResourceNameRef* outRef) {
+bool parseAttributeReference(const StringPiece& str, ResourceNameRef* outRef) {
     StringPiece trimmedStr(util::trimWhitespace(str));
     if (trimmedStr.empty()) {
         return false;
@@ -208,7 +208,7 @@ bool tryParseAttributeReference(const StringPiece& str, ResourceNameRef* outRef)
 }
 
 bool isAttributeReference(const StringPiece& str) {
-    return tryParseAttributeReference(str, nullptr);
+    return parseAttributeReference(str, nullptr);
 }
 
 /*
@@ -271,13 +271,13 @@ Maybe<Reference> parseStyleParentReference(const StringPiece& str, std::string* 
 std::unique_ptr<Reference> tryParseReference(const StringPiece& str, bool* outCreate) {
     ResourceNameRef ref;
     bool privateRef = false;
-    if (tryParseReference(str, &ref, outCreate, &privateRef)) {
+    if (parseReference(str, &ref, outCreate, &privateRef)) {
         std::unique_ptr<Reference> value = util::make_unique<Reference>(ref);
         value->privateReference = privateRef;
         return value;
     }
 
-    if (tryParseAttributeReference(str, &ref)) {
+    if (parseAttributeReference(str, &ref)) {
         if (outCreate) {
             *outCreate = false;
         }
@@ -420,23 +420,26 @@ std::unique_ptr<BinaryPrimitive> tryParseColor(const StringPiece& str) {
     return error ? std::unique_ptr<BinaryPrimitive>() : util::make_unique<BinaryPrimitive>(value);
 }
 
-bool tryParseBool(const StringPiece& str, bool* outValue) {
+Maybe<bool> parseBool(const StringPiece& str) {
     StringPiece trimmedStr(util::trimWhitespace(str));
     if (trimmedStr == "true" || trimmedStr == "TRUE" || trimmedStr == "True") {
-        if (outValue) {
-            *outValue = true;
-        }
-        return true;
+        return Maybe<bool>(true);
     } else if (trimmedStr == "false" || trimmedStr == "FALSE" || trimmedStr == "False") {
-        if (outValue) {
-            *outValue = false;
-        }
-        return true;
+        return Maybe<bool>(false);
     }
-    return false;
+    return {};
 }
 
-Maybe<ResourceId> tryParseResourceId(const StringPiece& str) {
+Maybe<uint32_t> parseInt(const StringPiece& str) {
+    std::u16string str16 = util::utf8ToUtf16(str);
+    android::Res_value value;
+    if (android::ResTable::stringToInt(str16.data(), str16.size(), &value)) {
+        return value.data;
+    }
+    return {};
+}
+
+Maybe<ResourceId> parseResourceId(const StringPiece& str) {
     StringPiece trimmedStr(util::trimWhitespace(str));
 
     std::u16string str16 = util::utf8ToUtf16(trimmedStr);
@@ -452,7 +455,7 @@ Maybe<ResourceId> tryParseResourceId(const StringPiece& str) {
     return {};
 }
 
-Maybe<int> tryParseSdkVersion(const StringPiece& str) {
+Maybe<int> parseSdkVersion(const StringPiece& str) {
     StringPiece trimmedStr(util::trimWhitespace(str));
 
     std::u16string str16 = util::utf8ToUtf16(trimmedStr);
@@ -470,12 +473,11 @@ Maybe<int> tryParseSdkVersion(const StringPiece& str) {
 }
 
 std::unique_ptr<BinaryPrimitive> tryParseBool(const StringPiece& str) {
-    bool result = false;
-    if (tryParseBool(str, &result)) {
+    if (Maybe<bool> maybeResult = parseBool(str)) {
         android::Res_value value = {};
         value.dataType = android::Res_value::TYPE_INT_BOOLEAN;
 
-        if (result) {
+        if (maybeResult.value()) {
             value.data = 0xffffffffu;
         } else {
             value.data = 0;
@@ -542,7 +544,7 @@ uint32_t androidTypeToAttributeTypeMask(uint16_t type) {
     };
 }
 
-std::unique_ptr<Item> parseItemForAttribute(
+std::unique_ptr<Item> tryParseItemForAttribute(
         const StringPiece& value,
         uint32_t typeMask,
         std::function<void(const ResourceName&)> onCreateReference) {
@@ -602,11 +604,11 @@ std::unique_ptr<Item> parseItemForAttribute(
  * We successively try to parse the string as a resource type that the Attribute
  * allows.
  */
-std::unique_ptr<Item> parseItemForAttribute(
+std::unique_ptr<Item> tryParseItemForAttribute(
         const StringPiece& str, const Attribute* attr,
         std::function<void(const ResourceName&)> onCreateReference) {
     const uint32_t typeMask = attr->typeMask;
-    std::unique_ptr<Item> value = parseItemForAttribute(str, typeMask, onCreateReference);
+    std::unique_ptr<Item> value = tryParseItemForAttribute(str, typeMask, onCreateReference);
     if (value) {
         return value;
     }

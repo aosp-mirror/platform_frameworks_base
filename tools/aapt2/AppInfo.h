@@ -37,6 +37,16 @@ struct AppInfo {
      * The App's minimum SDK version.
      */
     Maybe<std::string> minSdkVersion;
+
+    /**
+     * The Version code of the app.
+     */
+    Maybe<uint32_t> versionCode;
+
+    /**
+     * The revision code of the app.
+     */
+    Maybe<uint32_t> revisionCode;
 };
 
 } // namespace aapt

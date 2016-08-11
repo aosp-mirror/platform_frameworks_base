@@ -42,7 +42,7 @@ struct IdCollector : public xml::Visitor {
         for (xml::Attribute& attr : element->attributes) {
             ResourceNameRef name;
             bool create = false;
-            if (ResourceUtils::tryParseReference(attr.value, &name, &create, nullptr)) {
+            if (ResourceUtils::parseReference(attr.value, &name, &create, nullptr)) {
                 if (create && name.type == ResourceType::kId) {
                     auto iter = std::lower_bound(mOutSymbols->begin(), mOutSymbols->end(),
                                                  name, cmpName);
