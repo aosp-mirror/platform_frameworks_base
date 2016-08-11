@@ -1191,6 +1191,12 @@ public:
                                                                      mContext->getDiagnostics())) {
             AppInfo& appInfo = maybeAppInfo.value();
             mContext->setCompilationPackage(appInfo.package);
+            if (appInfo.minSdkVersion) {
+                if (Maybe<int> maybeMinSdkVersion =
+                        ResourceUtils::tryParseSdkVersion(appInfo.minSdkVersion.value())) {
+                    mContext->setMinSdkVersion(maybeMinSdkVersion.value());
+                }
+            }
         } else {
             return 1;
         }
@@ -1393,32 +1399,6 @@ public:
             return 1;
         }
 
-        // Must come before ResourceFileFlattener as ResourceFileFlattener
-        // relies on the minSdkVersion to properly flatten files.
-        Maybe<AppInfo> maybeAppInfo = extractAppInfoFromManifest(manifestXml.get(),
-                                                                 mContext->getDiagnostics());
-        if (maybeAppInfo && maybeAppInfo.value().minSdkVersion) {
-            if (Maybe<int> maybeMinSdkVersion =
-                    ResourceUtils::tryParseSdkVersion(maybeAppInfo.value().minSdkVersion.value())) {
-                mContext->setMinSdkVersion(maybeMinSdkVersion.value());
-            }
-        }
-
-        ResourceFileFlattenerOptions fileFlattenerOptions;
-        fileFlattenerOptions.keepRawValues = mOptions.staticLib;
-        fileFlattenerOptions.doNotCompressAnything = mOptions.doNotCompressAnything;
-        fileFlattenerOptions.extensionsToNotCompress = mOptions.extensionsToNotCompress;
-        fileFlattenerOptions.noAutoVersion = mOptions.noAutoVersion;
-        fileFlattenerOptions.noVersionVectors = mOptions.noVersionVectors;
-        fileFlattenerOptions.updateProguardSpec =
-                static_cast<bool>(mOptions.generateProguardRulesPath);
-        ResourceFileFlattener fileFlattener(fileFlattenerOptions, mContext, &proguardKeepSet);
-
-        if (!fileFlattener.flatten(&mFinalTable, archiveWriter.get())) {
-            mContext->getDiagnostics()->error(DiagMessage() << "failed linking file resources");
-            return 1;
-        }
-
         if (!mOptions.noAutoVersion) {
             AutoVersioner versioner;
             if (!versioner.consume(mContext, &mFinalTable)) {
@@ -1438,6 +1418,23 @@ public:
             if (!collapser.consume(mContext, &mFinalTable)) {
                 return 1;
             }
+        }
+
+        // Write out the table to an archive. Optimizations to the table should come before this
+        // step.
+        ResourceFileFlattenerOptions fileFlattenerOptions;
+        fileFlattenerOptions.keepRawValues = mOptions.staticLib;
+        fileFlattenerOptions.doNotCompressAnything = mOptions.doNotCompressAnything;
+        fileFlattenerOptions.extensionsToNotCompress = mOptions.extensionsToNotCompress;
+        fileFlattenerOptions.noAutoVersion = mOptions.noAutoVersion;
+        fileFlattenerOptions.noVersionVectors = mOptions.noVersionVectors;
+        fileFlattenerOptions.updateProguardSpec =
+                static_cast<bool>(mOptions.generateProguardRulesPath);
+        ResourceFileFlattener fileFlattener(fileFlattenerOptions, mContext, &proguardKeepSet);
+
+        if (!fileFlattener.flatten(&mFinalTable, archiveWriter.get())) {
+            mContext->getDiagnostics()->error(DiagMessage() << "failed linking file resources");
+            return 1;
         }
 
         if (mOptions.staticLib) {
