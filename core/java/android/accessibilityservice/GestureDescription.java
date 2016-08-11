@@ -21,6 +21,8 @@ import android.annotation.NonNull;
 import android.graphics.Path;
 import android.graphics.PathMeasure;
 import android.graphics.RectF;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.MotionEvent.PointerCoords;
@@ -303,12 +305,36 @@ public final class GestureDescription {
         }
     }
 
-    private static class TouchPoint {
+    /**
+     * The location of a finger for gesture dispatch
+     *
+     * @hide
+     */
+    public static class TouchPoint implements Parcelable {
+        private static final int FLAG_IS_START_OF_PATH = 0x01;
+        private static final int FLAG_IS_END_OF_PATH = 0x02;
+
         int mPathIndex;
         boolean mIsStartOfPath;
         boolean mIsEndOfPath;
         float mX;
         float mY;
+
+        public TouchPoint() {
+        }
+
+        public TouchPoint(TouchPoint pointToCopy) {
+            copyFrom(pointToCopy);
+        }
+
+        public TouchPoint(Parcel parcel) {
+            mPathIndex = parcel.readInt();
+            int startEnd = parcel.readInt();
+            mIsStartOfPath = (startEnd & FLAG_IS_START_OF_PATH) != 0;
+            mIsEndOfPath = (startEnd & FLAG_IS_END_OF_PATH) != 0;
+            mX = parcel.readFloat();
+            mY = parcel.readFloat();
+        }
 
         void copyFrom(TouchPoint other) {
             mPathIndex = other.mPathIndex;
@@ -317,12 +343,94 @@ public final class GestureDescription {
             mX = other.mX;
             mY = other.mY;
         }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(mPathIndex);
+            int startEnd = mIsStartOfPath ? FLAG_IS_START_OF_PATH : 0;
+            startEnd |= mIsEndOfPath ? FLAG_IS_END_OF_PATH : 0;
+            dest.writeInt(startEnd);
+            dest.writeFloat(mX);
+            dest.writeFloat(mY);
+        }
+
+        public static final Parcelable.Creator<TouchPoint> CREATOR
+                = new Parcelable.Creator<TouchPoint>() {
+            public TouchPoint createFromParcel(Parcel in) {
+                return new TouchPoint(in);
+            }
+
+            public TouchPoint[] newArray(int size) {
+                return new TouchPoint[size];
+            }
+        };
+    }
+
+    /**
+     * A step along a gesture. Contains all of the touch points at a particular time
+     *
+     * @hide
+     */
+    public static class GestureStep implements Parcelable {
+        public long timeSinceGestureStart;
+        public int numTouchPoints;
+        public TouchPoint[] touchPoints;
+
+        public GestureStep(long timeSinceGestureStart, int numTouchPoints,
+                TouchPoint[] touchPointsToCopy) {
+            this.timeSinceGestureStart = timeSinceGestureStart;
+            this.numTouchPoints = numTouchPoints;
+            this.touchPoints = new TouchPoint[numTouchPoints];
+            for (int i = 0; i < numTouchPoints; i++) {
+                this.touchPoints[i] = new TouchPoint(touchPointsToCopy[i]);
+            }
+        }
+
+        public GestureStep(Parcel parcel) {
+            timeSinceGestureStart = parcel.readLong();
+            Parcelable[] parcelables =
+                    parcel.readParcelableArray(TouchPoint.class.getClassLoader());
+            numTouchPoints = (parcelables == null) ? 0 : parcelables.length;
+            touchPoints = new TouchPoint[numTouchPoints];
+            for (int i = 0; i < numTouchPoints; i++) {
+                touchPoints[i] = (TouchPoint) parcelables[i];
+            }
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeLong(timeSinceGestureStart);
+            dest.writeParcelableArray(touchPoints, flags);
+        }
+
+        public static final Parcelable.Creator<GestureStep> CREATOR
+                = new Parcelable.Creator<GestureStep>() {
+            public GestureStep createFromParcel(Parcel in) {
+                return new GestureStep(in);
+            }
+
+            public GestureStep[] newArray(int size) {
+                return new GestureStep[size];
+            }
+        };
     }
 
     /**
      * Class to convert a GestureDescription to a series of MotionEvents.
+     *
+     * @hide
      */
-    static class MotionEventGenerator {
+    public static class MotionEventGenerator {
         /**
          * Constants used to initialize all MotionEvents
          */
@@ -341,38 +449,52 @@ public final class GestureDescription {
         private static PointerCoords[] sPointerCoords;
         private static PointerProperties[] sPointerProps;
 
-        static List<MotionEvent> getMotionEventsFromGestureDescription(
+        static List<GestureStep> getGestureStepsFromGestureDescription(
                 GestureDescription description, int sampleTimeMs) {
-            final List<MotionEvent> motionEvents = new ArrayList<>();
+            final List<GestureStep> gestureSteps = new ArrayList<>();
 
             // Point data at each time we generate an event for
             final TouchPoint[] currentTouchPoints =
                     getCurrentTouchPoints(description.getStrokeCount());
-            // Point data sent in last touch event
-            int lastTouchPointSize = 0;
-            final TouchPoint[] lastTouchPoints =
-                    getLastTouchPoints(description.getStrokeCount());
-
+            int currentTouchPointSize = 0;
             /* Loop through each time slice where there are touch points */
             long timeSinceGestureStart = 0;
             long nextKeyPointTime = description.getNextKeyPointAtLeast(timeSinceGestureStart);
             while (nextKeyPointTime >= 0) {
-                timeSinceGestureStart = (lastTouchPointSize == 0) ? nextKeyPointTime
+                timeSinceGestureStart = (currentTouchPointSize == 0) ? nextKeyPointTime
                         : Math.min(nextKeyPointTime, timeSinceGestureStart + sampleTimeMs);
-                int currentTouchPointSize = description.getPointsForTime(timeSinceGestureStart,
+                currentTouchPointSize = description.getPointsForTime(timeSinceGestureStart,
                         currentTouchPoints);
-
-                appendMoveEventIfNeeded(motionEvents, lastTouchPoints, lastTouchPointSize,
-                        currentTouchPoints, currentTouchPointSize, timeSinceGestureStart);
-                lastTouchPointSize = appendUpEvents(motionEvents, lastTouchPoints,
-                        lastTouchPointSize, currentTouchPoints, currentTouchPointSize,
-                        timeSinceGestureStart);
-                lastTouchPointSize = appendDownEvents(motionEvents, lastTouchPoints,
-                        lastTouchPointSize, currentTouchPoints, currentTouchPointSize,
-                        timeSinceGestureStart);
+                gestureSteps.add(new GestureStep(timeSinceGestureStart, currentTouchPointSize,
+                        currentTouchPoints));
 
                 /* Move to next time slice */
                 nextKeyPointTime = description.getNextKeyPointAtLeast(timeSinceGestureStart + 1);
+            }
+            return gestureSteps;
+        }
+
+        public static List<MotionEvent> getMotionEventsFromGestureSteps(List<GestureStep> steps) {
+            final List<MotionEvent> motionEvents = new ArrayList<>();
+
+            // Number of points in last touch event
+            int lastTouchPointSize = 0;
+            TouchPoint[] lastTouchPoints;
+
+            for (int i = 0; i < steps.size(); i++) {
+                GestureStep step = steps.get(i);
+                int currentTouchPointSize = step.numTouchPoints;
+                lastTouchPoints = getLastTouchPoints(
+                        Math.max(lastTouchPointSize, currentTouchPointSize));
+
+                appendMoveEventIfNeeded(motionEvents, lastTouchPoints, lastTouchPointSize,
+                        step.touchPoints, currentTouchPointSize, step.timeSinceGestureStart);
+                lastTouchPointSize = appendUpEvents(motionEvents, lastTouchPoints,
+                        lastTouchPointSize, step.touchPoints, currentTouchPointSize,
+                        step.timeSinceGestureStart);
+                lastTouchPointSize = appendDownEvents(motionEvents, lastTouchPoints,
+                        lastTouchPointSize, step.touchPoints, currentTouchPointSize,
+                        step.timeSinceGestureStart);
             }
             return motionEvents;
         }
