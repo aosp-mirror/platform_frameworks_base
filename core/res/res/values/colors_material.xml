@@ -61,7 +61,10 @@
     <color name="secondary_text_default_material_dark">#b3ffffff</color>
 
     <item name="hint_alpha_material_dark" format="float" type="dimen">0.50</item>
-    <item name="hint_alpha_material_light" format="float" type="dimen">0.54</item>
+    <item name="hint_alpha_material_light" format="float" type="dimen">0.38</item>
+
+    <item name="hint_pressed_alpha_material_dark" format="float" type="dimen">0.70</item>
+    <item name="hint_pressed_alpha_material_light" format="float" type="dimen">0.54</item>
 
     <item name="disabled_alpha_material_light" format="float" type="dimen">0.26</item>
     <item name="disabled_alpha_material_dark" format="float" type="dimen">0.30</item>
