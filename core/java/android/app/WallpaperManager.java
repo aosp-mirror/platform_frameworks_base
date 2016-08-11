@@ -1680,13 +1680,13 @@ public class WallpaperManager {
      * Only the OS itself may use this method.
      * @hide
      */
-    public boolean isWallpaperBackupEligible() {
+    public boolean isWallpaperBackupEligible(int which) {
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
             throw new RuntimeException(new DeadSystemException());
         }
         try {
-            return sGlobals.mService.isWallpaperBackupEligible(mContext.getUserId());
+            return sGlobals.mService.isWallpaperBackupEligible(which, mContext.getUserId());
         } catch (RemoteException e) {
             Log.e(TAG, "Exception querying wallpaper backup eligibility: " + e.getMessage());
         }

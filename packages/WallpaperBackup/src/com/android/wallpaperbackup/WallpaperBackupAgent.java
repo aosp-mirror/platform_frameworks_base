@@ -114,22 +114,19 @@ public class WallpaperBackupAgent extends BackupAgent {
             touch.close();
             fullBackupFile(empty, data);
 
-            // only back up the wallpaper if we've been told it's allowed
-            if (mWm.isWallpaperBackupEligible()) {
-                if (DEBUG) {
-                    Slog.v(TAG, "Wallpaper is backup-eligible");
-                }
+            SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+            final int lastSysGeneration = prefs.getInt(SYSTEM_GENERATION, -1);
+            final int lastLockGeneration = prefs.getInt(LOCK_GENERATION, -1);
 
-                SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-                final int lastSysGeneration = prefs.getInt(SYSTEM_GENERATION, -1);
-                final int lastLockGeneration = prefs.getInt(LOCK_GENERATION, -1);
+            final int sysGeneration =
+                    mWm.getWallpaperIdForUser(FLAG_SYSTEM, UserHandle.USER_SYSTEM);
+            final int lockGeneration =
+                    mWm.getWallpaperIdForUser(FLAG_LOCK, UserHandle.USER_SYSTEM);
+            final boolean sysChanged = (sysGeneration != lastSysGeneration);
+            final boolean lockChanged = (lockGeneration != lastLockGeneration);
 
-                final int sysGeneration =
-                        mWm.getWallpaperIdForUser(FLAG_SYSTEM, UserHandle.USER_SYSTEM);
-                final int lockGeneration =
-                        mWm.getWallpaperIdForUser(FLAG_LOCK, UserHandle.USER_SYSTEM);
-                final boolean sysChanged = (sysGeneration != lastSysGeneration);
-                final boolean lockChanged = (lockGeneration != lastLockGeneration);
+            final boolean sysEligible = mWm.isWallpaperBackupEligible(FLAG_SYSTEM);
+            final boolean lockEligible = mWm.isWallpaperBackupEligible(FLAG_LOCK);
 
                 // There might be a latent lock wallpaper file present but unused: don't
                 // include it in the backup if that's the case.
@@ -137,40 +134,38 @@ public class WallpaperBackupAgent extends BackupAgent {
                 final boolean hasLockWallpaper = (lockFd != null);
                 IoUtils.closeQuietly(lockFd);
 
-                if (DEBUG) {
-                    Slog.v(TAG, "sysGen=" + sysGeneration + " : sysChanged=" + sysChanged);
-                    Slog.v(TAG, "lockGen=" + lockGeneration + " : lockChanged=" + lockChanged);
-                    Slog.v(TAG, "hasLockWallpaper=" + hasLockWallpaper);
-                }
-                if (mWallpaperInfo.exists()) {
-                    if (sysChanged || lockChanged || !infoStage.exists()) {
-                        if (DEBUG) Slog.v(TAG, "New wallpaper configuration; copying");
-                        FileUtils.copyFileOrThrow(mWallpaperInfo, infoStage);
-                    }
-                    fullBackupFile(infoStage, data);
-                }
-                if (mWallpaperFile.exists()) {
-                    if (sysChanged || !imageStage.exists()) {
-                        if (DEBUG) Slog.v(TAG, "New system wallpaper; copying");
-                        FileUtils.copyFileOrThrow(mWallpaperFile, imageStage);
-                    }
-                    fullBackupFile(imageStage, data);
-                    prefs.edit().putInt(SYSTEM_GENERATION, sysGeneration).apply();
-                }
+            if (DEBUG) {
+                Slog.v(TAG, "sysGen=" + sysGeneration + " : sysChanged=" + sysChanged);
+                Slog.v(TAG, "lockGen=" + lockGeneration + " : lockChanged=" + lockChanged);
+                Slog.v(TAG, "sysEligble=" + sysEligible);
+                Slog.v(TAG, "lockEligible=" + lockEligible);
+            }
 
-                // Don't try to store the lock image if we overran our quota last time
-                if (hasLockWallpaper && mLockWallpaperFile.exists() && !mQuotaExceeded) {
-                    if (lockChanged || !lockImageStage.exists()) {
-                        if (DEBUG) Slog.v(TAG, "New lock wallpaper; copying");
-                        FileUtils.copyFileOrThrow(mLockWallpaperFile, lockImageStage);
-                    }
-                    fullBackupFile(lockImageStage, data);
-                    prefs.edit().putInt(LOCK_GENERATION, lockGeneration).apply();
+            // only back up the wallpapers if we've been told they're eligible
+            if ((sysEligible || lockEligible) && mWallpaperInfo.exists()) {
+                if (sysChanged || lockChanged || !infoStage.exists()) {
+                    if (DEBUG) Slog.v(TAG, "New wallpaper configuration; copying");
+                    FileUtils.copyFileOrThrow(mWallpaperInfo, infoStage);
                 }
-            } else {
-                if (DEBUG) {
-                    Slog.v(TAG, "Wallpaper not backup-eligible; writing no data");
+                fullBackupFile(infoStage, data);
+            }
+            if (sysEligible && mWallpaperFile.exists()) {
+                if (sysChanged || !imageStage.exists()) {
+                    if (DEBUG) Slog.v(TAG, "New system wallpaper; copying");
+                    FileUtils.copyFileOrThrow(mWallpaperFile, imageStage);
                 }
+                fullBackupFile(imageStage, data);
+                prefs.edit().putInt(SYSTEM_GENERATION, sysGeneration).apply();
+            }
+
+            // Don't try to store the lock image if we overran our quota last time
+            if (lockEligible && hasLockWallpaper && mLockWallpaperFile.exists() && !mQuotaExceeded) {
+                if (lockChanged || !lockImageStage.exists()) {
+                    if (DEBUG) Slog.v(TAG, "New lock wallpaper; copying");
+                    FileUtils.copyFileOrThrow(mLockWallpaperFile, lockImageStage);
+                }
+                fullBackupFile(lockImageStage, data);
+                prefs.edit().putInt(LOCK_GENERATION, lockGeneration).apply();
             }
         } catch (Exception e) {
             Slog.e(TAG, "Unable to back up wallpaper", e);
