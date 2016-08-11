@@ -746,9 +746,8 @@ public class AudioService extends IAudioService.Stub {
                                     BluetoothProfile.A2DP);
         }
 
-        mHdmiManager =
-                (HdmiControlManager) mContext.getSystemService(Context.HDMI_CONTROL_SERVICE);
-        if (mHdmiManager != null) {
+        if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_HDMI_CEC)) {
+            mHdmiManager = mContext.getSystemService(HdmiControlManager.class);
             synchronized (mHdmiManager) {
                 mHdmiTvClient = mHdmiManager.getTvClient();
                 if (mHdmiTvClient != null) {

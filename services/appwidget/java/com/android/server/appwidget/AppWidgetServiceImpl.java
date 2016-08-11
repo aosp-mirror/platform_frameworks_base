@@ -201,21 +201,21 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
     private final SparseArray<ArraySet<String>> mWidgetPackages = new SparseArray<>();
 
-    private final BackupRestoreController mBackupRestoreController;
+    private BackupRestoreController mBackupRestoreController;
 
     private final Context mContext;
 
-    private final IPackageManager mPackageManager;
-    private final AlarmManager mAlarmManager;
-    private final UserManager mUserManager;
-    private final AppOpsManager mAppOpsManager;
-    private final KeyguardManager mKeyguardManager;
-    private final DevicePolicyManagerInternal mDevicePolicyManagerInternal;
+    private IPackageManager mPackageManager;
+    private AlarmManager mAlarmManager;
+    private UserManager mUserManager;
+    private AppOpsManager mAppOpsManager;
+    private KeyguardManager mKeyguardManager;
+    private DevicePolicyManagerInternal mDevicePolicyManagerInternal;
 
-    private final SecurityPolicy mSecurityPolicy;
+    private SecurityPolicy mSecurityPolicy;
 
-    private final Handler mSaveStateHandler;
-    private final Handler mCallbackHandler;
+    private Handler mSaveStateHandler;
+    private Handler mCallbackHandler;
 
     private Locale mLocale;
 
@@ -224,10 +224,13 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     private boolean mSafeMode;
     private int mMaxWidgetBitmapMemory;
 
-    private final IconUtilities mIconUtilities;
+    private IconUtilities mIconUtilities;
 
     AppWidgetServiceImpl(Context context) {
         mContext = context;
+    }
+
+    public void onStart() {
         mPackageManager = AppGlobals.getPackageManager();
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
@@ -238,7 +241,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         mCallbackHandler = new CallbackHandler(mContext.getMainLooper());
         mBackupRestoreController = new BackupRestoreController();
         mSecurityPolicy = new SecurityPolicy();
-        mIconUtilities = new IconUtilities(context);
+        mIconUtilities = new IconUtilities(mContext);
 
         computeMaximumWidgetBitmapMemory();
         registerBroadcastReceiver();
