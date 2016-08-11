@@ -49,11 +49,6 @@ public interface KeyguardSecurityView {
     int PROMPT_REASON_AFTER_LOCKOUT = 5;
 
     /**
-     * Some auth is required because a single wrong credential has been tried.
-     */
-    int PROMPT_REASON_WRONG_CREDENTIAL = 6;
-
-    /**
      * Interface back to keyguard to tell it when security
      * @param callback
      */
