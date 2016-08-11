@@ -106,7 +106,7 @@ private:
     void interruptForFunctorInvoke();
     void resumeFromFunctorInvoke();
 
-    RenderState(renderthread::RenderThread& thread);
+    explicit RenderState(renderthread::RenderThread& thread);
     ~RenderState();
 
 
