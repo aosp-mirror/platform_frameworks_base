@@ -86,7 +86,6 @@ import java.util.List;
 
 import static android.provider.Settings.System.SCREEN_OFF_TIMEOUT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST;
-import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_WRONG_CREDENTIAL;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
 
@@ -626,10 +625,7 @@ public class KeyguardViewMediator extends SystemUI {
                 return KeyguardSecurityView.PROMPT_REASON_USER_REQUEST;
             } else if (any && (strongAuth & STRONG_AUTH_REQUIRED_AFTER_LOCKOUT) != 0) {
                 return KeyguardSecurityView.PROMPT_REASON_AFTER_LOCKOUT;
-            } else if (trust && (strongAuth & SOME_AUTH_REQUIRED_AFTER_WRONG_CREDENTIAL) != 0) {
-                return KeyguardSecurityView.PROMPT_REASON_WRONG_CREDENTIAL;
             }
-
             return KeyguardSecurityView.PROMPT_REASON_NONE;
         }
     };

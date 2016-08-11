@@ -288,7 +288,6 @@ public class LockPatternUtils {
     public void reportFailedPasswordAttempt(int userId) {
         getDevicePolicyManager().reportFailedPasswordAttempt(userId);
         getTrustManager().reportUnlockAttempt(false /* authenticated */, userId);
-        requireStrongAuth(StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_WRONG_CREDENTIAL, userId);
     }
 
     public void reportSuccessfulPasswordAttempt(int userId) {
@@ -1550,7 +1549,8 @@ public class LockPatternUtils {
                 value = { STRONG_AUTH_NOT_REQUIRED,
                         STRONG_AUTH_REQUIRED_AFTER_BOOT,
                         STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW,
-                        SOME_AUTH_REQUIRED_AFTER_USER_REQUEST})
+                        SOME_AUTH_REQUIRED_AFTER_USER_REQUEST,
+                        STRONG_AUTH_REQUIRED_AFTER_LOCKOUT})
         @Retention(RetentionPolicy.SOURCE)
         public @interface StrongAuthFlags {}
 
@@ -1581,13 +1581,12 @@ public class LockPatternUtils {
         public static final int STRONG_AUTH_REQUIRED_AFTER_LOCKOUT = 0x8;
 
         /**
-         * Some authentication is required because the user has entered a wrong credential.
+         * Strong auth flags that do not prevent fingerprint from being accepted as auth.
+         *
+         * If any other flags are set, fingerprint is disabled.
          */
-        public static final int SOME_AUTH_REQUIRED_AFTER_WRONG_CREDENTIAL = 0x10;
-
         private static final int ALLOWING_FINGERPRINT = STRONG_AUTH_NOT_REQUIRED
-                | SOME_AUTH_REQUIRED_AFTER_USER_REQUEST
-                | SOME_AUTH_REQUIRED_AFTER_WRONG_CREDENTIAL;
+                | SOME_AUTH_REQUIRED_AFTER_USER_REQUEST;
 
         private final SparseIntArray mStrongAuthRequiredForUser = new SparseIntArray();
         private final H mHandler;
