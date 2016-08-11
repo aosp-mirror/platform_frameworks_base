@@ -164,6 +164,63 @@ TEST_F(TableMergerTest, OverrideResourceWithOverlay) {
     EXPECT_EQ(0x0u, foo->value.data);
 }
 
+TEST_F(TableMergerTest, OverrideSameResourceIdsWithOverlay) {
+    std::unique_ptr<ResourceTable> base = test::ResourceTableBuilder()
+            .setPackageId("", 0x7f)
+            .setSymbolState("bool/foo", ResourceId(0x7f, 0x01, 0x0001), SymbolState::kPublic)
+            .build();
+    std::unique_ptr<ResourceTable> overlay = test::ResourceTableBuilder()
+            .setPackageId("", 0x7f)
+            .setSymbolState("bool/foo", ResourceId(0x7f, 0x01, 0x0001), SymbolState::kPublic)
+            .build();
+
+    ResourceTable finalTable;
+    TableMergerOptions tableMergerOptions;
+    tableMergerOptions.autoAddOverlay = false;
+    TableMerger merger(mContext.get(), &finalTable, tableMergerOptions);
+
+    ASSERT_TRUE(merger.merge({}, base.get()));
+    ASSERT_TRUE(merger.mergeOverlay({}, overlay.get()));
+}
+
+TEST_F(TableMergerTest, FailToOverrideConflictingTypeIdsWithOverlay) {
+    std::unique_ptr<ResourceTable> base = test::ResourceTableBuilder()
+            .setPackageId("", 0x7f)
+            .setSymbolState("bool/foo", ResourceId(0x7f, 0x01, 0x0001), SymbolState::kPublic)
+            .build();
+    std::unique_ptr<ResourceTable> overlay = test::ResourceTableBuilder()
+            .setPackageId("", 0x7f)
+            .setSymbolState("bool/foo", ResourceId(0x7f, 0x02, 0x0001), SymbolState::kPublic)
+            .build();
+
+    ResourceTable finalTable;
+    TableMergerOptions tableMergerOptions;
+    tableMergerOptions.autoAddOverlay = false;
+    TableMerger merger(mContext.get(), &finalTable, tableMergerOptions);
+
+    ASSERT_TRUE(merger.merge({}, base.get()));
+    ASSERT_FALSE(merger.mergeOverlay({}, overlay.get()));
+}
+
+TEST_F(TableMergerTest, FailToOverrideConflictingEntryIdsWithOverlay) {
+    std::unique_ptr<ResourceTable> base = test::ResourceTableBuilder()
+            .setPackageId("", 0x7f)
+            .setSymbolState("bool/foo", ResourceId(0x7f, 0x01, 0x0001), SymbolState::kPublic)
+            .build();
+    std::unique_ptr<ResourceTable> overlay = test::ResourceTableBuilder()
+            .setPackageId("", 0x7f)
+            .setSymbolState("bool/foo", ResourceId(0x7f, 0x01, 0x0002), SymbolState::kPublic)
+            .build();
+
+    ResourceTable finalTable;
+    TableMergerOptions tableMergerOptions;
+    tableMergerOptions.autoAddOverlay = false;
+    TableMerger merger(mContext.get(), &finalTable, tableMergerOptions);
+
+    ASSERT_TRUE(merger.merge({}, base.get()));
+    ASSERT_FALSE(merger.mergeOverlay({}, overlay.get()));
+}
+
 TEST_F(TableMergerTest, MergeAddResourceFromOverlay) {
     std::unique_ptr<ResourceTable> tableA = test::ResourceTableBuilder()
             .setPackageId("", 0x7f)
