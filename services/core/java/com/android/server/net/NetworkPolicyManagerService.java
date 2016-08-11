@@ -133,7 +133,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IDeviceIdleController;
 import android.os.INetworkManagementService;
-import android.os.IPowerManager;
 import android.os.Message;
 import android.os.MessageQueue.IdleHandler;
 import android.os.PowerManager;
@@ -287,7 +286,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final int MSG_LIMIT_REACHED = 5;
     private static final int MSG_RESTRICT_BACKGROUND_CHANGED = 6;
     private static final int MSG_ADVISE_PERSIST_THRESHOLD = 7;
-    private static final int MSG_SCREEN_ON_CHANGED = 8;
     private static final int MSG_RESTRICT_BACKGROUND_WHITELIST_CHANGED = 9;
     private static final int MSG_UPDATE_INTERFACE_QUOTA = 10;
     private static final int MSG_REMOVE_INTERFACE_QUOTA = 11;
@@ -295,7 +293,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private final Context mContext;
     private final IActivityManager mActivityManager;
-    private final IPowerManager mPowerManager;
     private final INetworkStatsService mNetworkStats;
     private final INetworkManagementService mNetworkManager;
     private UsageStatsManagerInternal mUsageStats;
@@ -313,7 +310,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     @GuardedBy("allLocks") volatile boolean mSystemReady;
 
-    @GuardedBy("mUidRulesFirstLock") volatile boolean mScreenOn;
     @GuardedBy("mUidRulesFirstLock") volatile boolean mRestrictBackground;
     @GuardedBy("mUidRulesFirstLock") volatile boolean mRestrictPower;
     @GuardedBy("mUidRulesFirstLock") volatile boolean mDeviceIdleMode;
@@ -419,9 +415,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     // TODO: migrate notifications to SystemUI
 
     public NetworkPolicyManagerService(Context context, IActivityManager activityManager,
-            IPowerManager powerManager, INetworkStatsService networkStats,
-            INetworkManagementService networkManagement) {
-        this(context, activityManager, powerManager, networkStats, networkManagement,
+            INetworkStatsService networkStats, INetworkManagementService networkManagement) {
+        this(context, activityManager, networkStats, networkManagement,
                 NtpTrustedTime.getInstance(context), getSystemDir(), false);
     }
 
@@ -430,12 +425,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     public NetworkPolicyManagerService(Context context, IActivityManager activityManager,
-            IPowerManager powerManager, INetworkStatsService networkStats,
-            INetworkManagementService networkManagement, TrustedTime time, File systemDir,
-            boolean suppressDefaultPolicy) {
+            INetworkStatsService networkStats, INetworkManagementService networkManagement,
+            TrustedTime time, File systemDir, boolean suppressDefaultPolicy) {
         mContext = checkNotNull(context, "missing context");
         mActivityManager = checkNotNull(activityManager, "missing activityManager");
-        mPowerManager = checkNotNull(powerManager, "missing powerManager");
         mNetworkStats = checkNotNull(networkStats, "missing networkStats");
         mNetworkManager = checkNotNull(networkManagement, "missing networkManagement");
         mDeviceIdleController = IDeviceIdleController.Stub.asInterface(ServiceManager.getService(
@@ -619,8 +612,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
         }
 
-        updateScreenOn();
-
         try {
             mActivityManager.registerUidObserver(mUidObserver,
                     ActivityManager.UID_OBSERVER_PROCSTATE|ActivityManager.UID_OBSERVER_GONE);
@@ -628,14 +619,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         } catch (RemoteException e) {
             // ignored; both services live in system_server
         }
-
-        // TODO: traverse existing processes to know foreground state, or have
-        // activitymanager dispatch current state when new observer attached.
-
-        final IntentFilter screenFilter = new IntentFilter();
-        screenFilter.addAction(Intent.ACTION_SCREEN_ON);
-        screenFilter.addAction(Intent.ACTION_SCREEN_OFF);
-        mContext.registerReceiver(mScreenReceiver, screenFilter);
 
         // listen for changes to power save whitelist
         final IntentFilter whitelistFilter = new IntentFilter(
@@ -732,15 +715,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 updateRulesForTempWhitelistChangeUL();
                 purgePowerSaveTempWhitelistUL();
             }
-        }
-    };
-
-    final private BroadcastReceiver mScreenReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // screen-related broadcasts are protected by system, no need
-            // for permissions check.
-            mHandler.obtainMessage(MSG_SCREEN_ON_CHANGED).sendToTarget();
         }
     };
 
@@ -2524,7 +2498,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private boolean isUidStateForegroundUL(int state) {
         // only really in foreground when screen is also on
-        return mScreenOn && state <= ActivityManager.PROCESS_STATE_TOP;
+        return state <= ActivityManager.PROCESS_STATE_TOP;
     }
 
     /**
@@ -2592,31 +2566,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 isProcStateAllowedWhileOnRestrictBackground(newUidState);
         if (oldForeground != newForeground) {
             updateRulesForDataUsageRestrictionsUL(uid);
-        }
-    }
-
-    private void updateScreenOn() {
-        synchronized (mUidRulesFirstLock) {
-            try {
-                mScreenOn = mPowerManager.isInteractive();
-            } catch (RemoteException e) {
-                // ignored; service lives in system_server
-            }
-            updateRulesForScreenUL();
-        }
-    }
-
-    /**
-     * Update rules that might be changed by {@link #mScreenOn} value.
-     */
-    private void updateRulesForScreenUL() {
-        // only update rules for anyone with foreground activities
-        final int size = mUidState.size();
-        for (int i = 0; i < size; i++) {
-            if (mUidState.valueAt(i) <= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE) {
-                final int uid = mUidState.keyAt(i);
-                updateRestrictionRulesForUidUL(uid);
-            }
         }
     }
 
@@ -3001,12 +2950,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             mUidRules.put(uid, newUidRules);
         }
 
-        boolean changed = false;
-
         // Second step: apply bw changes based on change of state.
         if (newRule != oldRule) {
-            changed = true;
-
             if ((newRule & RULE_TEMPORARY_ALLOW_METERED) != 0) {
                 // Temporarily whitelist foreground app, removing from blacklist if necessary
                 // (since bw_penalty_box prevails over bw_happy_box).
@@ -3086,7 +3031,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         final boolean isIdle = isUidIdle(uid);
         final boolean restrictMode = isIdle || mRestrictPower || mDeviceIdleMode;
-        final int uidPolicy = mUidPolicy.get(uid, POLICY_NONE);
         final int oldUidRules = mUidRules.get(uid, RULE_NONE);
         final boolean isForeground = isUidForegroundOnRestrictPowerUL(uid);
 
@@ -3109,7 +3053,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         final int newUidRules = (oldUidRules & MASK_METERED_NETWORKS) | newRule;
 
         if (LOGV) {
-            Log.v(TAG, "updateRulesForNonMeteredNetworksUL(" + uid + ")"
+            Log.v(TAG, "updateRulesForPowerRestrictionsUL(" + uid + ")"
                     + ", isIdle: " + isIdle
                     + ", mRestrictPower: " + mRestrictPower
                     + ", mDeviceIdleMode: " + mDeviceIdleMode
@@ -3349,10 +3293,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     } catch (RemoteException e) {
                         // ignored; service lives in system_server
                     }
-                    return true;
-                }
-                case MSG_SCREEN_ON_CHANGED: {
-                    updateScreenOn();
                     return true;
                 }
                 case MSG_UPDATE_INTERFACE_QUOTA: {
