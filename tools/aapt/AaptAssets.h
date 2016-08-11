@@ -103,7 +103,7 @@ struct AaptGroupEntry
 {
 public:
     AaptGroupEntry() {}
-    AaptGroupEntry(const ConfigDescription& config) : mParams(config) {}
+    explicit AaptGroupEntry(const ConfigDescription& config) : mParams(config) {}
 
     bool initFromDirName(const char* dir, String8* resType);
 
@@ -312,7 +312,7 @@ public:
         : isPublic(false), isJavaSymbol(false), typeCode(TYPE_UNKNOWN)
     {
     }
-    AaptSymbolEntry(const String8& _name)
+    explicit AaptSymbolEntry(const String8& _name)
         : name(_name), isPublic(false), isJavaSymbol(false), typeCode(TYPE_UNKNOWN)
     {
     }

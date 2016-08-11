@@ -38,7 +38,7 @@ public:
      * cannot be created, getTexture() will return 0 and getImage() will
      * return EGL_NO_IMAGE_KHR.
      */
-    Image(sp<GraphicBuffer> buffer);
+    explicit Image(sp<GraphicBuffer> buffer);
     ~Image();
 
     /**
