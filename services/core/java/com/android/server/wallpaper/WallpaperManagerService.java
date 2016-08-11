@@ -1753,12 +1753,14 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     }
 
     @Override
-    public boolean isWallpaperBackupEligible(int userId) {
+    public boolean isWallpaperBackupEligible(int which, int userId) {
         if (Binder.getCallingUid() != Process.SYSTEM_UID) {
             throw new SecurityException("Only the system may call isWallpaperBackupEligible");
         }
 
-        WallpaperData wallpaper = getWallpaperSafeLocked(userId, FLAG_SYSTEM);
+        WallpaperData wallpaper = (which == FLAG_LOCK)
+                ? mWallpaperMap.get(userId)
+                : mLockWallpaperMap.get(userId);
         return (wallpaper != null) ? wallpaper.allowBackup : false;
     }
 
