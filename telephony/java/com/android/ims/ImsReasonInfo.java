@@ -298,6 +298,16 @@ public class ImsReasonInfo implements Parcelable {
     public static final int CODE_REMOTE_CALL_DECLINE = 1404;
 
     /**
+     * Indicates the call was disconnected due to the user reaching their data limit.
+     */
+    public static final int CODE_DATA_LIMIT_REACHED = 1405;
+
+    /**
+     * Indicates the call was disconnected due to the user disabling cellular data.
+     */
+    public static final int CODE_DATA_DISABLED = 1406;
+
+    /**
      * Network string error messages.
      * mExtraMessage may have these values.
      */
