@@ -15,6 +15,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <VectorDrawable.h>
 
 #include "AnimationContext.h"
 #include "DamageAccumulator.h"
@@ -130,5 +131,40 @@ RENDERTHREAD_TEST(RenderNode, prepareTree_nullableDisplayList) {
         nullDLNode->prepareTree(info);
     }
 
+    canvasContext->destroy(nullptr);
+}
+
+RENDERTHREAD_TEST(RenderNode, prepareTree_HwLayer_AVD_enqueueDamage) {
+
+    VectorDrawable::Group* group = new VectorDrawable::Group();
+    VectorDrawableRoot* vectorDrawable = new VectorDrawableRoot(group);
+    auto rootNode = TestUtils::createNode(0, 0, 200, 400,
+            [&](RenderProperties& props, Canvas& canvas) {
+        canvas.drawVectorDrawable(vectorDrawable);
+    });
+    ContextFactory contextFactory;
+    std::unique_ptr<CanvasContext> canvasContext(CanvasContext::create(
+            renderThread, false, rootNode.get(), &contextFactory));
+    TreeInfo info(TreeInfo::MODE_RT_ONLY, *canvasContext.get());
+    DamageAccumulator damageAccumulator;
+    LayerUpdateQueue layerUpdateQueue;
+    info.damageAccumulator = &damageAccumulator;
+    info.layerUpdateQueue = &layerUpdateQueue;
+    info.observer = nullptr;
+
+    // Put node on HW layer
+    rootNode->mutateStagingProperties().mutateLayerProperties().setType(LayerType::RenderLayer);
+
+    TestUtils::syncHierarchyPropertiesAndDisplayList(rootNode);
+    rootNode->prepareTree(info);
+
+    // Check that the VD is in the dislay list, and the layer update queue contains the correct
+    // damage rect.
+    EXPECT_FALSE(rootNode->getDisplayList()->getVectorDrawables().empty());
+    EXPECT_FALSE(info.layerUpdateQueue->entries().empty());
+    EXPECT_EQ(rootNode.get(), info.layerUpdateQueue->entries().at(0).renderNode);
+    EXPECT_EQ(uirenderer::Rect(0, 0, 200, 400), info.layerUpdateQueue->entries().at(0).damage);
+
+    delete vectorDrawable;
     canvasContext->destroy(nullptr);
 }

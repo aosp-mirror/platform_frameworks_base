@@ -101,7 +101,7 @@ public:
 
     const LsaVector<const SkBitmap*>& getBitmapResources() const { return bitmapResources; }
     const LsaVector<FunctorContainer>& getFunctors() const { return functors; }
-    const LsaVector<VectorDrawableRoot*>& getVectorDrawables() { return vectorDrawables; }
+    const LsaVector<VectorDrawableRoot*>& getVectorDrawables() const { return vectorDrawables; }
 
     size_t addChild(NodeOpType* childOp);
 
