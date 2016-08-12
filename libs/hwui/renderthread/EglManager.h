@@ -86,7 +86,7 @@ public:
 private:
     friend class RenderThread;
 
-    EglManager(RenderThread& thread);
+    explicit EglManager(RenderThread& thread);
     // EglContext is never destroyed, method is purposely not implemented
     ~EglManager();
 

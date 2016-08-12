@@ -111,7 +111,7 @@ public:
 class DrawOp : public DisplayListOp {
 friend class MergingDrawBatch;
 public:
-    DrawOp(const SkPaint* paint)
+    explicit DrawOp(const SkPaint* paint)
             : mPaint(paint), mQuickRejected(false) {}
 
     virtual void defer(DeferStateStruct& deferStruct, int saveCount, int level,
@@ -244,7 +244,7 @@ public:
     }
 
     // default empty constructor for bounds, to be overridden in child constructor body
-    DrawBoundedOp(const SkPaint* paint): DrawOp(paint) { }
+    explicit DrawBoundedOp(const SkPaint* paint): DrawOp(paint) { }
 
     virtual bool getLocalBounds(Rect& localBounds) override {
         localBounds.set(mLocalBounds);
@@ -269,7 +269,7 @@ protected:
 
 class SaveOp : public StateOp {
 public:
-    SaveOp(int flags)
+    explicit SaveOp(int flags)
             : mFlags(flags) {}
 
     virtual void defer(DeferStateStruct& deferStruct, int saveCount, int level,
@@ -295,7 +295,7 @@ private:
 
 class RestoreToCountOp : public StateOp {
 public:
-    RestoreToCountOp(int count)
+    explicit RestoreToCountOp(int count)
             : mCount(count) {}
 
     virtual void defer(DeferStateStruct& deferStruct, int saveCount, int level,
@@ -408,7 +408,7 @@ private:
 
 class RotateOp : public StateOp {
 public:
-    RotateOp(float degrees)
+    explicit RotateOp(float degrees)
             : mDegrees(degrees) {}
 
     virtual void applyState(OpenGLRenderer& renderer, int saveCount) const override {
@@ -467,7 +467,7 @@ private:
 
 class SetMatrixOp : public StateOp {
 public:
-    SetMatrixOp(const SkMatrix& matrix)
+    explicit SetMatrixOp(const SkMatrix& matrix)
             : mMatrix(matrix) {}
 
     virtual void applyState(OpenGLRenderer& renderer, int saveCount) const override {
@@ -492,7 +492,7 @@ private:
 
 class ConcatMatrixOp : public StateOp {
 public:
-    ConcatMatrixOp(const SkMatrix& matrix)
+    explicit ConcatMatrixOp(const SkMatrix& matrix)
             : mMatrix(matrix) {}
 
     virtual void applyState(OpenGLRenderer& renderer, int saveCount) const override {
@@ -511,7 +511,7 @@ private:
 
 class ClipOp : public StateOp {
 public:
-    ClipOp(SkRegion::Op op) : mOp(op) {}
+    explicit ClipOp(SkRegion::Op op) : mOp(op) {}
 
     virtual void defer(DeferStateStruct& deferStruct, int saveCount, int level,
             bool useQuickReject) override {
@@ -1384,7 +1384,7 @@ private:
 
 class DrawFunctorOp : public DrawOp {
 public:
-    DrawFunctorOp(Functor* functor)
+    explicit DrawFunctorOp(Functor* functor)
             : DrawOp(nullptr), mFunctor(functor) {}
 
     virtual void applyDraw(OpenGLRenderer& renderer, Rect& dirty) override {

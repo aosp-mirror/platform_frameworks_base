@@ -22,7 +22,7 @@
 #define TIME_METHOD() MethodTimer __method_timer(__func__)
 class MethodTimer {
 public:
-    MethodTimer(const char* name)
+    explicit MethodTimer(const char* name)
             : mMethodName(name) {
         gettimeofday(&mStart, nullptr);
     }
