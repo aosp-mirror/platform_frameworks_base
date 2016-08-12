@@ -1462,7 +1462,7 @@ class WindowSurfacePlacer {
             mObscured = true;
         }
 
-        if (w.mHasSurface) {
+        if (w.mHasSurface && canBeSeen) {
             if ((attrFlags&FLAG_KEEP_SCREEN_ON) != 0) {
                 mHoldScreen = w.mSession;
                 mHoldScreenWindow = w;
@@ -1485,43 +1485,39 @@ class WindowSurfacePlacer {
             }
 
             final int type = attrs.type;
-            if (canBeSeen
-                    && (type == TYPE_SYSTEM_DIALOG
-                     || type == TYPE_SYSTEM_ERROR
-                     || (attrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0)) {
+            if (type == TYPE_SYSTEM_DIALOG || type == TYPE_SYSTEM_ERROR
+                    || (attrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
                 mSyswin = true;
             }
 
-            if (canBeSeen) {
-                // This function assumes that the contents of the default display are
-                // processed first before secondary displays.
-                final DisplayContent displayContent = w.getDisplayContent();
-                if (displayContent != null && displayContent.isDefaultDisplay) {
-                    // While a dream or keyguard is showing, obscure ordinary application
-                    // content on secondary displays (by forcibly enabling mirroring unless
-                    // there is other content we want to show) but still allow opaque
-                    // keyguard dialogs to be shown.
-                    if (type == TYPE_DREAM || (attrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
-                        mObscureApplicationContentOnSecondaryDisplays = true;
-                    }
-                    mDisplayHasContent = true;
-                } else if (displayContent != null &&
-                        (!mObscureApplicationContentOnSecondaryDisplays
-                        || (mObscured && type == TYPE_KEYGUARD_DIALOG))) {
-                    // Allow full screen keyguard presentation dialogs to be seen.
-                    mDisplayHasContent = true;
+            // This function assumes that the contents of the default display are
+            // processed first before secondary displays.
+            final DisplayContent displayContent = w.getDisplayContent();
+            if (displayContent != null && displayContent.isDefaultDisplay) {
+                // While a dream or keyguard is showing, obscure ordinary application
+                // content on secondary displays (by forcibly enabling mirroring unless
+                // there is other content we want to show) but still allow opaque
+                // keyguard dialogs to be shown.
+                if (type == TYPE_DREAM || (attrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
+                    mObscureApplicationContentOnSecondaryDisplays = true;
                 }
-                if (mPreferredRefreshRate == 0
-                        && w.mAttrs.preferredRefreshRate != 0) {
-                    mPreferredRefreshRate = w.mAttrs.preferredRefreshRate;
-                }
-                if (mPreferredModeId == 0
-                        && w.mAttrs.preferredDisplayModeId != 0) {
-                    mPreferredModeId = w.mAttrs.preferredDisplayModeId;
-                }
-                if ((privateflags & PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE) != 0) {
-                    mSustainedPerformanceModeCurrent = true;
-                }
+                mDisplayHasContent = true;
+            } else if (displayContent != null &&
+                    (!mObscureApplicationContentOnSecondaryDisplays
+                            || (mObscured && type == TYPE_KEYGUARD_DIALOG))) {
+                // Allow full screen keyguard presentation dialogs to be seen.
+                mDisplayHasContent = true;
+            }
+            if (mPreferredRefreshRate == 0
+                    && w.mAttrs.preferredRefreshRate != 0) {
+                mPreferredRefreshRate = w.mAttrs.preferredRefreshRate;
+            }
+            if (mPreferredModeId == 0
+                    && w.mAttrs.preferredDisplayModeId != 0) {
+                mPreferredModeId = w.mAttrs.preferredDisplayModeId;
+            }
+            if ((privateflags & PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE) != 0) {
+                mSustainedPerformanceModeCurrent = true;
             }
         }
     }
