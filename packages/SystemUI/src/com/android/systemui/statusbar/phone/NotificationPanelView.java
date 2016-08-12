@@ -1617,6 +1617,9 @@ public class NotificationPanelView extends PanelView implements
         if (mQsExpanded) {
             onQsExpansionStarted();
         }
+        // Since there are QS tiles in the header now, we need to make sure we start listening
+        // immediately so they can be up to date.
+        mQsContainer.setHeaderListening(true);
     }
 
     @Override

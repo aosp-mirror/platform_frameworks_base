@@ -251,10 +251,12 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
         if (mListening) {
             refreshAllTiles();
         }
-        if (listening) {
-            mBrightnessController.registerCallbacks();
-        } else {
-            mBrightnessController.unregisterCallbacks();
+        if (mBrightnessView.getVisibility() == View.VISIBLE) {
+            if (listening) {
+                mBrightnessController.registerCallbacks();
+            } else {
+                mBrightnessController.unregisterCallbacks();
+            }
         }
     }
 
