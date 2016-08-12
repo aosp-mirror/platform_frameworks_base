@@ -1050,6 +1050,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 builder.setTicker(title);
                 builder.setContentTitle(title);
                 builder.setContentText(body);
+                builder.setDefaults(Notification.DEFAULT_ALL);
+                builder.setPriority(Notification.PRIORITY_HIGH);
 
                 final Intent snoozeIntent = buildSnoozeWarningIntent(policy.template);
                 builder.setDeleteIntent(PendingIntent.getBroadcast(
