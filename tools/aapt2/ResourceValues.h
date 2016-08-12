@@ -181,7 +181,7 @@ struct Id : public BaseItem<Id> {
 struct RawString : public BaseItem<RawString> {
     StringPool::Ref value;
 
-    RawString(const StringPool::Ref& ref);
+    explicit RawString(const StringPool::Ref& ref);
 
     bool flatten(android::Res_value* outValue) const override;
     RawString* clone(StringPool* newPool) const override;
@@ -191,7 +191,7 @@ struct RawString : public BaseItem<RawString> {
 struct String : public BaseItem<String> {
     StringPool::Ref value;
 
-    String(const StringPool::Ref& ref);
+    explicit String(const StringPool::Ref& ref);
 
     // Whether the string is marked as translateable. This does not persist when flattened.
     // It is only used during compilation phase.
@@ -209,7 +209,7 @@ private:
 struct StyledString : public BaseItem<StyledString> {
     StringPool::StyleRef value;
 
-    StyledString(const StringPool::StyleRef& ref);
+    explicit StyledString(const StringPool::StyleRef& ref);
 
     // Whether the string is marked as translateable. This does not persist when flattened.
     // It is only used during compilation phase.
@@ -233,7 +233,7 @@ struct FileReference : public BaseItem<FileReference> {
     io::IFile* file = nullptr;
 
     FileReference() = default;
-    FileReference(const StringPool::Ref& path);
+    explicit FileReference(const StringPool::Ref& path);
 
     bool flatten(android::Res_value* outValue) const override;
     FileReference* clone(StringPool* newPool) const override;
@@ -247,7 +247,7 @@ struct BinaryPrimitive : public BaseItem<BinaryPrimitive> {
     android::Res_value value;
 
     BinaryPrimitive() = default;
-    BinaryPrimitive(const android::Res_value& val);
+    explicit BinaryPrimitive(const android::Res_value& val);
     BinaryPrimitive(uint8_t dataType, uint32_t data);
 
     bool flatten(android::Res_value* outValue) const override;
@@ -266,7 +266,7 @@ struct Attribute : public BaseValue<Attribute> {
     int32_t maxInt;
     std::vector<Symbol> symbols;
 
-    Attribute(bool w, uint32_t t = 0u);
+    explicit Attribute(bool w, uint32_t t = 0u);
 
     Attribute* clone(StringPool* newPool) const override;
     void printMask(std::ostream* out) const;

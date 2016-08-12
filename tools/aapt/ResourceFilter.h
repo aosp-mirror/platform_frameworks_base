@@ -78,7 +78,7 @@ private:
 class StrongResourceFilter : public ResourceFilter {
 public:
     StrongResourceFilter() {}
-    StrongResourceFilter(const std::set<ConfigDescription>& configs)
+    explicit StrongResourceFilter(const std::set<ConfigDescription>& configs)
         : mConfigs(configs) {}
 
     android::status_t parse(const android::String8& str);
@@ -106,7 +106,7 @@ private:
  */
 class InverseResourceFilter : public ResourceFilter {
 public:
-    InverseResourceFilter(const android::sp<ResourceFilter>& filter)
+    explicit InverseResourceFilter(const android::sp<ResourceFilter>& filter)
         : mFilter(filter) {}
 
     bool match(const android::ResTable_config& config) const {
