@@ -34,6 +34,12 @@ import static com.android.server.net.NetworkPolicyManagerService.TYPE_LIMIT;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_LIMIT_SNOOZED;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_WARNING;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
@@ -74,7 +80,8 @@ import android.os.Binder;
 import android.os.INetworkManagementService;
 import android.os.PowerManagerInternal;
 import android.os.UserHandle;
-import android.test.AndroidTestCase;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.runner.AndroidJUnit4;
 import android.text.format.Time;
 import android.util.Log;
 import android.util.TrustedTime;
@@ -86,6 +93,11 @@ import libcore.io.IoUtils;
 
 import com.google.common.util.concurrent.AbstractFuture;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -105,7 +117,8 @@ import java.util.concurrent.TimeoutException;
 /**
  * Tests for {@link NetworkPolicyManagerService}.
  */
-public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+public class NetworkPolicyManagerServiceTest {
     private static final String TAG = "NetworkPolicyManagerServiceTest";
 
     private static final long TEST_START = 1194220800000L;
@@ -116,7 +129,6 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
     private BroadcastInterceptingContext mServiceContext;
     private File mPolicyDir;
-    private List<Class<?>> mLocalServices = new ArrayList<>();
 
     private @Mock IActivityManager mActivityManager;
     private @Mock INetworkStatsService mStatsService;
@@ -124,7 +136,6 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
     private @Mock TrustedTime mTime;
     private @Mock IConnectivityManager mConnManager;
     private @Mock INotificationManager mNotifManager;
-    private @Mock UsageStatsManagerInternal mUsageStats;
     private @Mock PackageManager mPackageManager;
 
     private IUidObserver mUidObserver;
@@ -146,12 +157,20 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
     private static final String PKG_NAME_A = "name.is.A,pkg.A";
 
-    public void setUp() throws Exception {
-        super.setUp();
+    @BeforeClass
+    public static void registerLocalServices() {
+        addLocalServiceMock(PowerManagerInternal.class);
+        addLocalServiceMock(DeviceIdleController.LocalService.class);
+        final UsageStatsManagerInternal usageStats =
+                addLocalServiceMock(UsageStatsManagerInternal.class);
+        when(usageStats.getIdleUidsForUser(anyInt())).thenReturn(new int[]{});
+    }
 
+    @Before
+    public void callSystemReady() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        final Context context = getContext();
+        final Context context = InstrumentationRegistry.getContext();
 
         setCurrentTimeMillis(TEST_START);
 
@@ -183,10 +202,6 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
             }
         }).when(mActivityManager).registerUidObserver(any(), anyInt());
 
-        addLocalServiceMock(PowerManagerInternal.class);
-        addLocalServiceMock(DeviceIdleController.LocalService.class);
-        addLocalServiceMock(UsageStatsManagerInternal.class, mUsageStats);
-
         mService = new NetworkPolicyManagerService(mServiceContext, mActivityManager, mStatsService,
                 mNetworkManager, mTime, mPolicyDir, true);
         mService.bindConnectivityManager(mConnManager);
@@ -216,7 +231,6 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         when(mPackageManager.getApplicationInfoAsUser(anyString(), anyInt(), anyInt()))
                 .thenReturn(new ApplicationInfo());
         when(mPackageManager.getPackagesForUid(UID_A)).thenReturn(new String[] {PKG_NAME_A});
-        when(mUsageStats.getIdleUidsForUser(anyInt())).thenReturn(new int[]{});
         when(mNetworkManager.isBandwidthControlEnabled()).thenReturn(true);
         expectCurrentTime();
 
@@ -230,28 +244,17 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         mNetworkObserver = networkObserver.getValue();
     }
 
-    public void tearDown() throws Exception {
+    @After
+    public void removeFiles() throws Exception {
         for (File file : mPolicyDir.listFiles()) {
             file.delete();
         }
+    }
 
-        mServiceContext = null;
-        mPolicyDir = null;
-
-        mActivityManager = null;
-        mStatsService = null;
-        mTime = null;
-
-        mService = null;
-
-        // TODO: must remove services, otherwise next test will fail.
-        // JUnit4 would avoid that hack by using a static setup.
-        removeLocalServiceMocks();
-
-        // Added by NetworkPolicyManagerService's constructor.
+    @After
+    public void unregisterLocalServices() throws Exception {
+        // Registered by NetworkPolicyManagerService's constructor.
         LocalServices.removeServiceForTest(NetworkPolicyManagerInternal.class);
-
-        super.tearDown();
     }
 
     // NOTE: testPolicyChangeTriggersListener() and testUidForeground() are too superficial, they
@@ -259,6 +262,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
     // different modes (Data Saver, Battery Saver, Doze, App idle, etc...).
     // These scenarios are extensively tested on CTS' HostsideRestrictBackgroundNetworkTests.
 
+    @Test
     public void testPolicyChangeTriggersListener() throws Exception {
         mPolicyListener.expect().onRestrictBackgroundBlacklistChanged(anyInt(), anyBoolean());
 
@@ -268,6 +272,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         mPolicyListener.waitAndVerify().onRestrictBackgroundBlacklistChanged(APP_ID_A, true);
     }
 
+    @Test
     public void testUidForeground() throws Exception {
         // push all uids into background
         mUidObserver.onUidStateChanged(UID_A, ActivityManager.PROCESS_STATE_SERVICE);
@@ -287,6 +292,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         assertTrue(mService.isUidForeground(UID_B));
     }
 
+    @Test
     public void testLastCycleBoundaryThisMonth() throws Exception {
         // assume cycle day of "5th", which should be in same month
         final long currentTime = parseTime("2007-11-14T00:00:00.000Z");
@@ -298,6 +304,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         assertTimeEquals(expectedCycle, actualCycle);
     }
 
+    @Test
     public void testLastCycleBoundaryLastMonth() throws Exception {
         // assume cycle day of "20th", which should be in last month
         final long currentTime = parseTime("2007-11-14T00:00:00.000Z");
@@ -309,6 +316,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         assertTimeEquals(expectedCycle, actualCycle);
     }
 
+    @Test
     public void testLastCycleBoundaryThisMonthFebruary() throws Exception {
         // assume cycle day of "30th" in february; should go to january
         final long currentTime = parseTime("2007-02-14T00:00:00.000Z");
@@ -320,6 +328,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         assertTimeEquals(expectedCycle, actualCycle);
     }
 
+    @Test
     public void testLastCycleBoundaryLastMonthFebruary() throws Exception {
         // assume cycle day of "30th" in february, which should clamp
         final long currentTime = parseTime("2007-03-14T00:00:00.000Z");
@@ -331,6 +340,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         assertTimeEquals(expectedCycle, actualCycle);
     }
 
+    @Test
     public void testCycleBoundaryLeapYear() throws Exception {
         final NetworkPolicy policy = new NetworkPolicy(
                 sTemplateWifi, 29, TIMEZONE_UTC, 1024L, 1024L, false);
@@ -354,6 +364,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
                 computeNextCycleBoundary(parseTime("2007-03-14T00:00:00.000Z"), policy));
     }
 
+    @Test
     public void testNextCycleTimezoneAfterUtc() throws Exception {
         // US/Central is UTC-6
         final NetworkPolicy policy = new NetworkPolicy(
@@ -362,6 +373,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
                 computeNextCycleBoundary(parseTime("2012-01-05T00:00:00.000Z"), policy));
     }
 
+    @Test
     public void testNextCycleTimezoneBeforeUtc() throws Exception {
         // Israel is UTC+2
         final NetworkPolicy policy = new NetworkPolicy(
@@ -370,6 +382,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
                 computeNextCycleBoundary(parseTime("2012-01-05T00:00:00.000Z"), policy));
     }
 
+    @Test
     public void testNextCycleSane() throws Exception {
         final NetworkPolicy policy = new NetworkPolicy(
                 sTemplateWifi, 31, TIMEZONE_UTC, WARNING_DISABLED, LIMIT_DISABLED, false);
@@ -385,6 +398,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         }
     }
 
+    @Test
     public void testLastCycleSane() throws Exception {
         final NetworkPolicy policy = new NetworkPolicy(
                 sTemplateWifi, 31, TIMEZONE_UTC, WARNING_DISABLED, LIMIT_DISABLED, false);
@@ -400,6 +414,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         }
     }
 
+    @Test
     public void testCycleTodayJanuary() throws Exception {
         final NetworkPolicy policy = new NetworkPolicy(
                 sTemplateWifi, 14, "US/Pacific", 1024L, 1024L, false);
@@ -419,6 +434,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
                 computeLastCycleBoundary(parseTime("2013-01-14T15:11:00.000-08:00"), policy));
     }
 
+    @Test
     public void testLastCycleBoundaryDST() throws Exception {
         final long currentTime = parseTime("1989-01-02T07:30:00.000");
         final long expectedCycle = parseTime("1988-12-03T02:00:00.000Z");
@@ -429,6 +445,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         assertTimeEquals(expectedCycle, actualCycle);
     }
 
+    @Test
     public void testNetworkPolicyAppliedCycleLastMonth() throws Exception {
         NetworkState[] state = null;
         NetworkStats stats = null;
@@ -471,6 +488,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         verifySetInterfaceQuota(TEST_IFACE, (2 * MB_IN_BYTES) - 512);
     }
 
+    @Test
     public void testOverWarningLimitNotification() throws Exception {
         NetworkState[] state = null;
         NetworkStats stats = null;
@@ -579,6 +597,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         }
     }
 
+    @Test
     public void testMeteredNetworkWithoutLimit() throws Exception {
         NetworkState[] state = null;
         NetworkStats stats = null;
@@ -740,29 +759,10 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
     /**
      * Creates a mock and registers it to {@link LocalServices}.
      */
-    private <T> T addLocalServiceMock(Class<T> clazz) {
+    private static <T> T addLocalServiceMock(Class<T> clazz) {
         final T mock = mock(clazz);
-        return addLocalServiceMock(clazz, mock);
-    }
-
-    /**
-     * Registers a mock to {@link LocalServices}.
-     */
-    private <T> T addLocalServiceMock(Class<T> clazz, T mock) {
         LocalServices.addService(clazz, mock);
-        mLocalServices.add(clazz);
         return mock;
-    }
-
-    /**
-     * Unregisters all mocks from {@link LocalServices}.
-     */
-    private void removeLocalServiceMocks() {
-        for (Class<?> clazz : mLocalServices) {
-            Log.d(TAG, "removeLocalServiceMock(): " + clazz.getName());
-            LocalServices.removeServiceForTest(clazz);
-        }
-        mLocalServices.clear();
     }
 
     /**
