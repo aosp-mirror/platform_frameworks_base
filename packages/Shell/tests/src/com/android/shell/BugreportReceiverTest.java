@@ -36,6 +36,13 @@ import static com.android.shell.BugreportProgressService.INTENT_BUGREPORT_STARTE
 import static com.android.shell.BugreportProgressService.POLLING_FREQUENCY;
 import static com.android.shell.BugreportProgressService.SCREENSHOT_DELAY_SECONDS;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
@@ -56,6 +63,13 @@ import java.util.zip.ZipOutputStream;
 
 import libcore.io.Streams;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TestName;
+import org.junit.runner.RunWith;
+
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
 import android.app.Instrumentation;
@@ -68,11 +82,12 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.service.notification.StatusBarNotification;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.filters.LargeTest;
+import android.support.test.runner.AndroidJUnit4;
 import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObject;
 import android.support.test.uiautomator.UiObjectNotFoundException;
-import android.test.InstrumentationTestCase;
-import android.test.suitebuilder.annotation.LargeTest;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
@@ -96,7 +111,8 @@ import com.android.shell.ActionSendMultipleConsumerActivity.CustomActionSendMult
  * <strong>NOTE</strong>: these tests only work if the device is unlocked.
  */
 @LargeTest
-public class BugreportReceiverTest extends InstrumentationTestCase {
+@RunWith(AndroidJUnit4.class)
+public class BugreportReceiverTest {
     private static final String TAG = "BugreportReceiverTest";
 
     // Timeout for UI operations, in milliseconds.
@@ -149,9 +165,10 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
     private UiBot mUiBot;
     private CustomActionSendMultipleListener mListener;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Rule public TestName mName = new TestName();
+
+    @Before
+    public void setUp() throws Exception {
         Log.i(TAG, getName() + ".setup()");
         Instrumentation instrumentation = getInstrumentation();
         mContext = instrumentation.getTargetContext();
@@ -181,13 +198,13 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         mUiBot.turnScreenOn();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         Log.i(TAG, getName() + ".tearDown()");
         cancelExistingNotifications();
-        super.tearDown();
     }
 
+    @Test
     public void testProgress() throws Exception {
         resetProperties();
         sendBugreportStarted(1000);
@@ -233,6 +250,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         assertServiceNotRunning();
     }
 
+    @Test
     public void testProgress_cancel() throws Exception {
         resetProperties();
         sendBugreportStarted(1000);
@@ -249,6 +267,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         waitForService(false);
     }
 
+    @Test
     public void testProgress_takeExtraScreenshot() throws Exception {
         resetProperties();
         sendBugreportStarted(1000);
@@ -267,6 +286,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         assertServiceNotRunning();
     }
 
+    @Test
     public void testScreenshotFinishesAfterBugreport() throws Exception {
         resetProperties();
 
@@ -286,6 +306,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         assertServiceNotRunning();
     }
 
+    @Test
     public void testProgress_changeDetailsInvalidInput() throws Exception {
         resetProperties();
         sendBugreportStarted(1000);
@@ -331,6 +352,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         assertServiceNotRunning();
     }
 
+    @Test
     public void testProgress_cancelBugClosesDetailsDialog() throws Exception {
         resetProperties();
         sendBugreportStarted(1000);
@@ -346,10 +368,12 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         assertServiceNotRunning();
     }
 
+    @Test
     public void testProgress_changeDetailsPlainBugreport() throws Exception {
         changeDetailsTest(true);
     }
 
+    @Test
     public void testProgress_changeDetailsZippedBugreport() throws Exception {
         changeDetailsTest(false);
     }
@@ -383,10 +407,12 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         assertServiceNotRunning();
     }
 
+    @Test
     public void testProgress_changeJustDetailsTouchingDetails() throws Exception {
         changeJustDetailsTest(true);
     }
 
+    @Test
     public void testProgress_changeJustDetailsTouchingNotification() throws Exception {
         changeJustDetailsTest(false);
     }
@@ -410,6 +436,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         assertServiceNotRunning();
     }
 
+    @Test
     public void testProgress_changeJustDetailsIsClearedOnSecondBugreport() throws Exception {
         resetProperties();
         sendBugreportStarted(ID, PID, NAME, 1000);
@@ -453,6 +480,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
      * Tests the scenario where the initial screenshot and dumpstate are finished while the user
      * is changing the info in the details screen.
      */
+    @Test
     public void testProgress_bugreportAndScreenshotFinishedWhileChangingDetails() throws Exception {
         bugreportFinishedWhileChangingDetailsTest(false);
     }
@@ -461,6 +489,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
      * Tests the scenario where dumpstate is finished while the user is changing the info in the
      * details screen, but the initial screenshot finishes afterwards.
      */
+    @Test
     public void testProgress_bugreportFinishedWhileChangingDetails() throws Exception {
         bugreportFinishedWhileChangingDetailsTest(true);
     }
@@ -500,14 +529,17 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         assertServiceNotRunning();
     }
 
+    @Test
     public void testBugreportFinished_withWarningFirstTime() throws Exception {
         bugreportFinishedWithWarningTest(null);
     }
 
+    @Test
     public void testBugreportFinished_withWarningUnknownState() throws Exception {
         bugreportFinishedWithWarningTest(STATE_UNKNOWN);
     }
 
+    @Test
     public void testBugreportFinished_withWarningShowAgain() throws Exception {
         bugreportFinishedWithWarningTest(STATE_SHOW);
     }
@@ -560,6 +592,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         assertEquals("Didn't change state", STATE_HIDE, newState);
     }
 
+    @Test
     public void testShareBugreportAfterServiceDies() throws Exception {
         sendBugreportFinished(NO_ID, mPlainTextPath, NO_SCREENSHOT);
         waitForService(false);
@@ -567,21 +600,25 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         assertActionSendMultiple(extras, BUGREPORT_CONTENT, NO_SCREENSHOT);
     }
 
+    @Test
     public void testBugreportFinished_plainBugreportAndScreenshot() throws Exception {
         Bundle extras = sendBugreportFinishedAndGetSharedIntent(mPlainTextPath, mScreenshotPath);
         assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT);
     }
 
+    @Test
     public void testBugreportFinished_zippedBugreportAndScreenshot() throws Exception {
         Bundle extras = sendBugreportFinishedAndGetSharedIntent(mZipPath, mScreenshotPath);
         assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT);
     }
 
+    @Test
     public void testBugreportFinished_plainBugreportAndNoScreenshot() throws Exception {
         Bundle extras = sendBugreportFinishedAndGetSharedIntent(mPlainTextPath, NO_SCREENSHOT);
         assertActionSendMultiple(extras, BUGREPORT_CONTENT, NO_SCREENSHOT);
     }
 
+    @Test
     public void testBugreportFinished_zippedBugreportAndNoScreenshot() throws Exception {
         Bundle extras = sendBugreportFinishedAndGetSharedIntent(mZipPath, NO_SCREENSHOT);
         assertActionSendMultiple(extras, BUGREPORT_CONTENT, NO_SCREENSHOT);
@@ -999,6 +1036,14 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
     private void assertDetailsUiClosed() {
         // TODO: unhardcode resource ids
         mUiBot.assertNotVisibleById("android:id/alertTitle");
+    }
+
+    private String getName() {
+        return mName.getMethodName();
+    }
+
+    private Instrumentation getInstrumentation() {
+        return InstrumentationRegistry.getInstrumentation();
     }
 
     private static void sleep(long ms) {
