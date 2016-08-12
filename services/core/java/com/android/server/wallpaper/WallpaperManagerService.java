@@ -1400,9 +1400,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                     wallpaper.whichPending = which;
                     wallpaper.setComplete = completion;
                     wallpaper.cropHint.set(cropHint);
-                    if ((which & FLAG_SYSTEM) != 0) {
-                        wallpaper.allowBackup = allowBackup;
-                    }
+                    wallpaper.allowBackup = allowBackup;
                 }
                 return pfd;
             } finally {
