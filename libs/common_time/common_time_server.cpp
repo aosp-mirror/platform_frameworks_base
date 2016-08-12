@@ -615,12 +615,11 @@ bool CommonTimeServer::handlePacket() {
 
     ssize_t recvBytes = recvfrom(
             mSocket, buf, sizeof(buf), 0,
-            reinterpret_cast<const sockaddr *>(&srcAddr), &srcAddrLen);
+            reinterpret_cast<sockaddr *>(&srcAddr), &srcAddrLen);
 
     if (recvBytes < 0) {
-        mBadPktLog.log(ANDROID_LOG_ERROR, LOG_TAG,
-                       "recvfrom failed (res %d, errno %d)",
-                       recvBytes, errno);
+        mBadPktLog.log(ANDROID_LOG_ERROR, LOG_TAG, "recvfrom failed (%s)",
+                       strerror(errno));
         return false;
     }
 
