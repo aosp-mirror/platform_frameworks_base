@@ -20674,6 +20674,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             Log.w(VIEW_LOG_TAG, "startDragAndDrop called on a detached view.");
             return false;
         }
+
+        data.prepareToLeaveProcess((flags & View.DRAG_FLAG_GLOBAL) != 0);
+
         boolean okay = false;
 
         Point shadowSize = new Point();
