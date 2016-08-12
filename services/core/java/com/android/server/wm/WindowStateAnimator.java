@@ -1906,12 +1906,13 @@ class WindowStateAnimator {
         if (mDeferTransactionUntilFrame < 0) {
             return;
         }
+        final WindowState parentWindow = mWin.getParentWindow();
         long time = System.currentTimeMillis();
         if (time > mDeferTransactionTime + PENDING_TRANSACTION_FINISH_WAIT_TIME) {
             mDeferTransactionTime = -1;
             mDeferTransactionUntilFrame = -1;
-        } else if (mWin.mAttachedWindow != null &&
-                mWin.mAttachedWindow.mWinAnimator.hasSurface()) {
+        } else if (parentWindow != null &&
+                parentWindow.mWinAnimator.hasSurface()) {
             mSurfaceController.deferTransactionUntil(
                     mWin.getParentWindow().mWinAnimator.mSurfaceController.getHandle(),
                     mDeferTransactionUntilFrame);
