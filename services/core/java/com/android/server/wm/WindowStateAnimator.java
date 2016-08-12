@@ -845,6 +845,22 @@ class WindowStateAnimator {
         mPendingDestroySurface = null;
     }
 
+    void applyMagnificationSpec(MagnificationSpec spec, Matrix transform) {
+        final int surfaceInsetLeft = mWin.mAttrs.surfaceInsets.left;
+        final int surfaceInsetTop = mWin.mAttrs.surfaceInsets.top;
+
+        if (spec != null && !spec.isNop()) {
+            float scale = spec.scale;
+            transform.postScale(scale, scale);
+            transform.postTranslate(spec.offsetX, spec.offsetY);
+
+            // As we are scaling the whole surface, to keep the content
+            // in the same position we will also have to scale the surfaceInsets.
+            transform.postTranslate(-(surfaceInsetLeft*scale - surfaceInsetLeft),
+                    -(surfaceInsetTop*scale - surfaceInsetTop));
+        }
+    }
+
     void computeShownFrameLocked() {
         final boolean selfTransformation = mHasLocalTransformation;
         Transformation attachedTransformation =
@@ -935,10 +951,7 @@ class WindowStateAnimator {
             if (mService.mAccessibilityController != null && displayId == DEFAULT_DISPLAY) {
                 MagnificationSpec spec = mService.mAccessibilityController
                         .getMagnificationSpecForWindowLocked(mWin);
-                if (spec != null && !spec.isNop()) {
-                    tmpMatrix.postScale(spec.scale, spec.scale);
-                    tmpMatrix.postTranslate(spec.offsetX, spec.offsetY);
-                }
+                applyMagnificationSpec(spec, tmpMatrix);
             }
 
             // "convert" it into SurfaceFlinger's format
@@ -1037,10 +1050,7 @@ class WindowStateAnimator {
             tmpMatrix.setScale(mWin.mGlobalScale, mWin.mGlobalScale);
             tmpMatrix.postTranslate(frame.left + mWin.mXOffset, frame.top + mWin.mYOffset);
 
-            if (spec != null && !spec.isNop()) {
-                tmpMatrix.postScale(spec.scale, spec.scale);
-                tmpMatrix.postTranslate(spec.offsetX, spec.offsetY);
-            }
+            applyMagnificationSpec(spec, tmpMatrix);
 
             tmpMatrix.getValues(tmpFloats);
 
