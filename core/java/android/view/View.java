@@ -20651,7 +20651,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *         <li>{@link #DRAG_FLAG_GLOBAL}</li>
      *         <li>{@link #DRAG_FLAG_GLOBAL_PERSISTABLE_URI_PERMISSION}</li>
      *         <li>{@link #DRAG_FLAG_GLOBAL_PREFIX_URI_PERMISSION}</li>
-     *         <li>{@link #DRAG_FLAG_GLOBAL_PREFIX_URI_PERMISSION}</li>
      *         <li>{@link #DRAG_FLAG_GLOBAL_URI_READ}</li>
      *         <li>{@link #DRAG_FLAG_GLOBAL_URI_WRITE}</li>
      *         <li>{@link #DRAG_FLAG_OPAQUE}</li>
