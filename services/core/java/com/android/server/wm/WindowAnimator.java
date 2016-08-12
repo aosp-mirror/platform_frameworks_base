@@ -119,6 +119,8 @@ public class WindowAnimator {
     // check if some got replaced and can be removed.
     private boolean mRemoveReplacedWindows = false;
 
+    private final AppTokenList mTmpExitingAppTokens = new AppTokenList();
+
     private String forceHidingToString() {
         switch (mForceHiding) {
             case KEYGUARD_NOT_SHOWN:    return "KEYGUARD_NOT_SHOWN";
@@ -189,10 +191,19 @@ public class WindowAnimator {
                 }
             }
 
-            final AppTokenList exitingAppTokens = stack.mExitingAppTokens;
-            final int exitingCount = exitingAppTokens.size();
+            mTmpExitingAppTokens.clear();
+            mTmpExitingAppTokens.addAll(stack.mExitingAppTokens);
+
+            final int exitingCount = mTmpExitingAppTokens.size();
             for (int i = 0; i < exitingCount; i++) {
-                final AppWindowAnimator appAnimator = exitingAppTokens.get(i).mAppAnimator;
+                final AppWindowAnimator appAnimator = mTmpExitingAppTokens.get(i).mAppAnimator;
+                // stepAnimation can trigger finishExit->removeWindowInnerLocked
+                // ->performSurfacePlacement
+                // performSurfacePlacement will directly manipulate the mExitingAppTokens list
+                // so we need to iterate over a copy and check for modifications.
+                if (!stack.mExitingAppTokens.contains(appAnimator)) {
+                    continue;
+                }
                 appAnimator.wasAnimating = appAnimator.animating;
                 if (appAnimator.stepAnimationLocked(mCurrentTime, displayId)) {
                     setAnimating(true);
