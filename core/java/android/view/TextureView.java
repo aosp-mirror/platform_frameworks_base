@@ -229,7 +229,6 @@ public class TextureView extends View {
     @Override
     protected void destroyHardwareResources() {
         destroyHardwareLayer();
-        mUpdateSurface = mSurface != null;
     }
 
     private void destroyHardwareLayer() {
@@ -376,17 +375,17 @@ public class TextureView extends View {
             }
 
             mLayer = mAttachInfo.mThreadedRenderer.createTextureLayer();
-            if (!mUpdateSurface) {
+            boolean createNewSurface = (mSurface == null);
+            if (createNewSurface) {
                 // Create a new SurfaceTexture for the layer.
                 mSurface = new SurfaceTexture(false);
                 mLayer.setSurfaceTexture(mSurface);
                 nCreateNativeWindow(mSurface);
             }
             mSurface.setDefaultBufferSize(getWidth(), getHeight());
-
             mSurface.setOnFrameAvailableListener(mUpdateListener, mAttachInfo.mHandler);
 
-            if (mListener != null && !mUpdateSurface) {
+            if (mListener != null && createNewSurface) {
                 mListener.onSurfaceTextureAvailable(mSurface, getWidth(), getHeight());
             }
             mLayer.setLayerPaint(mLayerPaint);
@@ -745,9 +744,11 @@ public class TextureView extends View {
                     "released SurfaceTexture");
         }
         if (mSurface != null) {
+            nDestroyNativeWindow();
             mSurface.release();
         }
         mSurface = surfaceTexture;
+        nCreateNativeWindow(mSurface);
 
         /*
          * If the view is visible and we already made a layer, update the
