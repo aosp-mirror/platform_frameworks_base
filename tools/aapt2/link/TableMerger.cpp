@@ -142,7 +142,7 @@ bool TableMerger::doMerge(const Source& src,
         ResourceTableType* dstType = mMasterPackage->findOrCreateType(srcType->type);
         if (srcType->symbolStatus.state == SymbolState::kPublic) {
             if (dstType->symbolStatus.state == SymbolState::kPublic && dstType->id && srcType->id
-                    && dstType->id.value() == srcType->id.value()) {
+                    && dstType->id.value() != srcType->id.value()) {
                 // Both types are public and have different IDs.
                 mContext->getDiagnostics()->error(DiagMessage(src)
                                                   << "can not merge type '"
