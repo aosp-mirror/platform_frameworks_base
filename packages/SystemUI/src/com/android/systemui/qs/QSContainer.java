@@ -237,6 +237,10 @@ public class QSContainer extends FrameLayout {
         mQSPanel.setListening(mListening && mQsExpanded);
     }
 
+    public void setHeaderListening(boolean listening) {
+        mHeader.setListening(listening);
+    }
+
     public void setQsExpansion(float expansion, float headerTranslation) {
         if (DEBUG) Log.d(TAG, "setQSExpansion " + expansion + " " + headerTranslation);
         mQsExpansion = expansion;
