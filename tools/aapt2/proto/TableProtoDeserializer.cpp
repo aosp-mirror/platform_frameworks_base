@@ -228,7 +228,7 @@ private:
             }
 
         } else if (pbValue.has_compound_value()) {
-            const pb::CompoundValue pbCompoundValue = pbValue.compound_value();
+            const pb::CompoundValue& pbCompoundValue = pbValue.compound_value();
             if (pbCompoundValue.has_attr()) {
                 const pb::Attribute& pbAttr = pbCompoundValue.attr();
                 std::unique_ptr<Attribute> attr = util::make_unique<Attribute>(isWeak);

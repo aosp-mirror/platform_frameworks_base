@@ -94,7 +94,7 @@ void CrunchCache::loadFiles()
     delete dw;
 }
 
-bool CrunchCache::needsUpdating(String8 relativePath) const
+bool CrunchCache::needsUpdating(const String8& relativePath) const
 {
     // Retrieve modification dates for this file entry under the source and
     // cache directory trees. The vectors will return a modification date of 0

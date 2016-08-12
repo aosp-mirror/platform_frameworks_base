@@ -65,7 +65,7 @@ public:
     private:
         friend class StringPool;
 
-        Ref(Entry* entry);
+        explicit Ref(Entry* entry);
 
         Entry* mEntry;
     };
@@ -88,7 +88,7 @@ public:
     private:
         friend class StringPool;
 
-        StyleRef(StyleEntry* entry);
+        explicit StyleRef(StyleEntry* entry);
 
         StyleEntry* mEntry;
     };

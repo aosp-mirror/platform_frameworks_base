@@ -274,7 +274,7 @@ bool ResourceTable::addResource(const ResourceNameRef& name,
 }
 
 bool ResourceTable::addResource(const ResourceNameRef& name,
-                                const ResourceId resId,
+                                const ResourceId& resId,
                                 const ConfigDescription& config,
                                 const StringPiece& product,
                                 std::unique_ptr<Value> value,
@@ -325,7 +325,7 @@ bool ResourceTable::addResourceAllowMangled(const ResourceNameRef& name,
 }
 
 bool ResourceTable::addResourceAllowMangled(const ResourceNameRef& name,
-                                            const ResourceId id,
+                                            const ResourceId& id,
                                             const ConfigDescription& config,
                                             const StringPiece& product,
                                             std::unique_ptr<Value> value,
@@ -335,12 +335,12 @@ bool ResourceTable::addResourceAllowMangled(const ResourceNameRef& name,
 }
 
 bool ResourceTable::addResourceImpl(const ResourceNameRef& name,
-                                    const ResourceId resId,
+                                    const ResourceId& resId,
                                     const ConfigDescription& config,
                                     const StringPiece& product,
                                     std::unique_ptr<Value> value,
                                     const char* validChars,
-                                    std::function<int(Value*,Value*)> conflictResolver,
+                                    const std::function<int(Value*,Value*)>& conflictResolver,
                                     IDiagnostics* diag) {
     assert(value && "value can't be nullptr");
     assert(diag && "diagnostics can't be nullptr");
@@ -426,18 +426,18 @@ bool ResourceTable::addResourceImpl(const ResourceNameRef& name,
     return true;
 }
 
-bool ResourceTable::setSymbolState(const ResourceNameRef& name, const ResourceId resId,
+bool ResourceTable::setSymbolState(const ResourceNameRef& name, const ResourceId& resId,
                                    const Symbol& symbol, IDiagnostics* diag) {
     return setSymbolStateImpl(name, resId, symbol, kValidNameChars, diag);
 }
 
 bool ResourceTable::setSymbolStateAllowMangled(const ResourceNameRef& name,
-                                               const ResourceId resId,
+                                               const ResourceId& resId,
                                                const Symbol& symbol, IDiagnostics* diag) {
     return setSymbolStateImpl(name, resId, symbol, kValidNameMangledChars, diag);
 }
 
-bool ResourceTable::setSymbolStateImpl(const ResourceNameRef& name, const ResourceId resId,
+bool ResourceTable::setSymbolStateImpl(const ResourceNameRef& name, const ResourceId& resId,
                                        const Symbol& symbol, const char* validChars,
                                        IDiagnostics* diag) {
     assert(diag && "diagnostics can't be nullptr");

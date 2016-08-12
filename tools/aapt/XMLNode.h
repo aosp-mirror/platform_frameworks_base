@@ -178,7 +178,7 @@ private:
     XMLNode(const String8& filename, const String16& s1, const String16& s2, bool isNamespace);
     
     // Creating a CDATA node.
-    XMLNode(const String8& filename);
+    explicit XMLNode(const String8& filename);
     
     status_t collect_strings(StringPool* dest, Vector<uint32_t>* outResIds,
             bool stripComments, bool stripRawValues) const;

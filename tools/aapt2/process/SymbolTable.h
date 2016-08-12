@@ -86,7 +86,7 @@ public:
      * are typically stored in a cache which may evict entries.
      */
     const Symbol* findByName(const ResourceName& name);
-    const Symbol* findById(ResourceId id);
+    const Symbol* findById(const ResourceId& id);
 
     /**
      * Let's the ISymbolSource decide whether looking up by name or ID is faster, if both

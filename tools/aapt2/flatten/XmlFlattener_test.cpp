@@ -43,7 +43,7 @@ public:
     }
 
     ::testing::AssertionResult flatten(xml::XmlResource* doc, android::ResXMLTree* outTree,
-                                       XmlFlattenerOptions options = {}) {
+                                       const XmlFlattenerOptions& options = {}) {
         using namespace android; // For NO_ERROR on windows because it is a macro.
 
         BigBuffer buffer(1024);

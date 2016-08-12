@@ -163,11 +163,11 @@ std::unique_ptr<BinaryPrimitive> tryParseFlagSymbol(const Attribute* enumAttr,
  */
 std::unique_ptr<Item> parseItemForAttribute(
         const StringPiece& value, const Attribute* attr,
-        std::function<void(const ResourceName&)> onCreateReference = {});
+        const std::function<void(const ResourceName&)>& onCreateReference = {});
 
 std::unique_ptr<Item> parseItemForAttribute(
         const StringPiece& value, uint32_t typeMask,
-        std::function<void(const ResourceName&)> onCreateReference = {});
+        const std::function<void(const ResourceName&)>& onCreateReference = {});
 
 uint32_t androidTypeToAttributeTypeMask(uint16_t type);
 

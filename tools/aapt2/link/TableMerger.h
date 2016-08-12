@@ -115,7 +115,7 @@ private:
                  const bool manglePackage,
                  const bool overlay,
                  const bool allowNewResources,
-                 FileMergeCallback callback);
+                 const FileMergeCallback& callback);
 
     std::unique_ptr<FileReference> cloneAndMangleFile(const std::string& package,
                                                       const FileReference& value);

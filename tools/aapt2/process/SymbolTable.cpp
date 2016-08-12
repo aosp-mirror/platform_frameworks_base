@@ -63,7 +63,7 @@ const SymbolTable::Symbol* SymbolTable::findByName(const ResourceName& name) {
     return nullptr;
 }
 
-const SymbolTable::Symbol* SymbolTable::findById(ResourceId id) {
+const SymbolTable::Symbol* SymbolTable::findById(const ResourceId& id) {
     if (const std::shared_ptr<Symbol>& s = mIdCache.get(id)) {
         return s.get();
     }
