@@ -248,7 +248,7 @@ bail:
 }
 
 static void printResolvedResourceAttribute(const ResTable& resTable, const ResXMLTree& tree,
-        uint32_t attrRes, String8 attrLabel, String8* outError)
+        uint32_t attrRes, const String8& attrLabel, String8* outError)
 {
     Res_value value;
     AaptXml::getResolvedResourceAttribute(resTable, tree, attrRes, &value, outError);
@@ -399,7 +399,7 @@ static void printUsesImpliedPermission(const String8& name, const String8& reaso
             ResTable::normalizeForOutput(reason.string()).string());
 }
 
-Vector<String8> getNfcAidCategories(AssetManager& assets, String8 xmlPath, bool offHost,
+Vector<String8> getNfcAidCategories(AssetManager& assets, const String8& xmlPath, bool offHost,
         String8 *outError = NULL)
 {
     Asset* aidAsset = assets.openNonAsset(xmlPath, Asset::ACCESS_BUFFER);

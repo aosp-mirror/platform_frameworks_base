@@ -72,7 +72,7 @@ private:
      *    time as the value.
      *
      */
-    static void checkAndAddFile(String8 path, const struct stat* stats,
+    static void checkAndAddFile(const String8& path, const struct stat* stats,
                                 Vector<String8>& extensions,
                                 KeyedVector<String8,time_t>& fileStore);
 

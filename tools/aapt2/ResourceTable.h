@@ -103,7 +103,7 @@ public:
      */
     std::vector<std::unique_ptr<ResourceConfigValue>> values;
 
-    ResourceEntry(const StringPiece16& name) : name(name.toString()) { }
+    explicit ResourceEntry(const StringPiece16& name) : name(name.toString()) { }
 
     ResourceConfigValue* findValue(const ConfigDescription& config);
     ResourceConfigValue* findValue(const ConfigDescription& config, const StringPiece& product);
@@ -200,7 +200,7 @@ public:
                      IDiagnostics* diag);
 
     bool addResource(const ResourceNameRef& name,
-                     const ResourceId resId,
+                     const ResourceId& resId,
                      const ConfigDescription& config,
                      const StringPiece& product,
                      std::unique_ptr<Value> value,
@@ -231,19 +231,19 @@ public:
                                  IDiagnostics* diag);
 
     bool addResourceAllowMangled(const ResourceNameRef& name,
-                                 const ResourceId id,
+                                 const ResourceId& id,
                                  const ConfigDescription& config,
                                  const StringPiece& product,
                                  std::unique_ptr<Value> value,
                                  IDiagnostics* diag);
 
     bool setSymbolState(const ResourceNameRef& name,
-                        const ResourceId resId,
+                        const ResourceId& resId,
                         const Symbol& symbol,
                         IDiagnostics* diag);
 
     bool setSymbolStateAllowMangled(const ResourceNameRef& name,
-                                    const ResourceId resId,
+                                    const ResourceId& resId,
                                     const Symbol& symbol,
                                     IDiagnostics* diag);
 
@@ -294,7 +294,7 @@ private:
                               IDiagnostics* diag);
 
     bool addResourceImpl(const ResourceNameRef& name,
-                         ResourceId resId,
+                         const ResourceId& resId,
                          const ConfigDescription& config,
                          const StringPiece& product,
                          std::unique_ptr<Value> value,
@@ -303,7 +303,7 @@ private:
                          IDiagnostics* diag);
 
     bool setSymbolStateImpl(const ResourceNameRef& name,
-                            ResourceId resId,
+                            const ResourceId& resId,
                             const Symbol& symbol,
                             const char16_t* validChars,
                             IDiagnostics* diag);

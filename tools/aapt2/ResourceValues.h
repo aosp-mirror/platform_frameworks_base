@@ -198,7 +198,7 @@ struct Id : public BaseItem<Id> {
 struct RawString : public BaseItem<RawString> {
     StringPool::Ref value;
 
-    RawString(const StringPool::Ref& ref);
+    explicit RawString(const StringPool::Ref& ref);
 
     bool equals(const Value* value) const override;
     bool flatten(android::Res_value* outValue) const override;
@@ -209,7 +209,7 @@ struct RawString : public BaseItem<RawString> {
 struct String : public BaseItem<String> {
     StringPool::Ref value;
 
-    String(const StringPool::Ref& ref);
+    explicit String(const StringPool::Ref& ref);
 
     bool equals(const Value* value) const override;
     bool flatten(android::Res_value* outValue) const override;
@@ -220,7 +220,7 @@ struct String : public BaseItem<String> {
 struct StyledString : public BaseItem<StyledString> {
     StringPool::StyleRef value;
 
-    StyledString(const StringPool::StyleRef& ref);
+    explicit StyledString(const StringPool::StyleRef& ref);
 
     bool equals(const Value* value) const override;
     bool flatten(android::Res_value* outValue) const override;
@@ -237,7 +237,7 @@ struct FileReference : public BaseItem<FileReference> {
     io::IFile* file = nullptr;
 
     FileReference() = default;
-    FileReference(const StringPool::Ref& path);
+    explicit FileReference(const StringPool::Ref& path);
 
     bool equals(const Value* value) const override;
     bool flatten(android::Res_value* outValue) const override;
@@ -252,7 +252,7 @@ struct BinaryPrimitive : public BaseItem<BinaryPrimitive> {
     android::Res_value value;
 
     BinaryPrimitive() = default;
-    BinaryPrimitive(const android::Res_value& val);
+    explicit BinaryPrimitive(const android::Res_value& val);
     BinaryPrimitive(uint8_t dataType, uint32_t data);
 
     bool equals(const Value* value) const override;
@@ -272,7 +272,7 @@ struct Attribute : public BaseValue<Attribute> {
     int32_t maxInt;
     std::vector<Symbol> symbols;
 
-    Attribute(bool w, uint32_t t = 0u);
+    explicit Attribute(bool w, uint32_t t = 0u);
 
     bool equals(const Value* value) const override;
     Attribute* clone(StringPool* newPool) const override;
