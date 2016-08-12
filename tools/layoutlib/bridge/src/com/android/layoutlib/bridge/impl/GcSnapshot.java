@@ -40,6 +40,7 @@ import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
+import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -867,6 +868,35 @@ public class GcSnapshot {
 
         dst.top = Math.min(Math.min(corners[1], corners[3]), Math.min(corners[5], corners[7]));
         dst.bottom = Math.max(Math.max(corners[1], corners[3]), Math.max(corners[5], corners[7]));
+    }
+
+    /**
+     * Returns the clip of the oldest snapshot of the stack, appropriately translated to be
+     * expressed in the coordinate system of the latest snapshot.
+     */
+    public Rectangle getOriginalClip() {
+        GcSnapshot originalSnapshot = this;
+        while (originalSnapshot.mPrevious != null) {
+            originalSnapshot = originalSnapshot.mPrevious;
+        }
+        if (originalSnapshot.mLayers.isEmpty()) {
+            return null;
+        }
+        Graphics2D graphics2D = originalSnapshot.mLayers.get(0).getGraphics();
+        Rectangle bounds = graphics2D.getClipBounds();
+        if (bounds == null) {
+            return null;
+        }
+        try {
+            AffineTransform originalTransform =
+                    ((Graphics2D) graphics2D.create()).getTransform().createInverse();
+            AffineTransform latestTransform = getTransform().createInverse();
+            bounds.x += latestTransform.getTranslateX() - originalTransform.getTranslateX();
+            bounds.y += latestTransform.getTranslateY() - originalTransform.getTranslateY();
+        } catch (NoninvertibleTransformException e) {
+            Bridge.getLog().warning(null, "Non invertible transformation", null);
+        }
+        return bounds;
     }
 
 }

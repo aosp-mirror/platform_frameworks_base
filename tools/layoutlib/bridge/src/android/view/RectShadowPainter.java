@@ -16,6 +16,7 @@
 
 package android.view;
 
+import com.android.layoutlib.bridge.impl.GcSnapshot;
 import com.android.layoutlib.bridge.impl.ResourceHelper;
 
 import android.graphics.Canvas;
@@ -31,6 +32,8 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region.Op;
 import android.graphics.Shader.TileMode;
+
+import java.awt.Rectangle;
 
 /**
  * Paints shadow for rounded rectangles. Inspiration from CardView. Couldn't use that directly,
@@ -127,9 +130,16 @@ public class RectShadowPainter {
         int saved = canvas.save();
         // Usually canvas has been translated to the top left corner of the view when this is
         // called. So, setting a clip rect at 0,0 will clip the top left part of the shadow.
-        // Thus, we just expand in each direction by width and height of the canvas.
-        canvas.clipRect(-canvas.getWidth(), -canvas.getHeight(), canvas.getWidth(),
-                canvas.getHeight(), Op.REPLACE);
+        // Thus, we just expand in each direction by width and height of the canvas, while staying
+        // inside the original drawing region.
+        GcSnapshot snapshot = Canvas_Delegate.getDelegate(canvas).getSnapshot();
+        Rectangle originalClip = snapshot.getOriginalClip();
+        if (originalClip != null) {
+            canvas.clipRect(originalClip.x, originalClip.y, originalClip.x + originalClip.width,
+              originalClip.y + originalClip.height, Op.REPLACE);
+            canvas.clipRect(-canvas.getWidth(), -canvas.getHeight(), canvas.getWidth(),
+              canvas.getHeight(), Op.INTERSECT);
+        }
         canvas.translate(0, shadowSize / 2f);
         return saved;
     }
