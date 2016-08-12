@@ -58,21 +58,19 @@ static pthread_key_t gBgKey = -1;
 #endif
 
 // For both of these, err should be in the errno range (positive), not a status_t (negative)
-
-static void signalExceptionForPriorityError(JNIEnv* env, int err)
-{
+static void signalExceptionForError(JNIEnv* env, int err, int tid) {
     switch (err) {
         case EINVAL:
-            jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+            jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
+                                 "Invalid argument: %d", tid);
             break;
         case ESRCH:
-            jniThrowException(env, "java/lang/IllegalArgumentException", "Given thread does not exist");
+            jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
+                                 "Given thread %d does not exist", tid);
             break;
         case EPERM:
-            jniThrowException(env, "java/lang/SecurityException", "No permission to modify given thread");
-            break;
-        case EACCES:
-            jniThrowException(env, "java/lang/SecurityException", "No permission to set to given priority");
+            jniThrowExceptionFmt(env, "java/lang/SecurityException",
+                                 "No permission to modify given thread %d", tid);
             break;
         default:
             jniThrowException(env, "java/lang/RuntimeException", "Unknown error");
@@ -80,23 +78,27 @@ static void signalExceptionForPriorityError(JNIEnv* env, int err)
     }
 }
 
-static void signalExceptionForGroupError(JNIEnv* env, int err)
-{
+static void signalExceptionForPriorityError(JNIEnv* env, int err, int tid) {
     switch (err) {
-        case EINVAL:
-            jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
-            break;
-        case ESRCH:
-            jniThrowException(env, "java/lang/IllegalArgumentException", "Given thread does not exist");
-            break;
-        case EPERM:
-            jniThrowException(env, "java/lang/SecurityException", "No permission to modify given thread");
-            break;
         case EACCES:
-            jniThrowException(env, "java/lang/SecurityException", "No permission to set to given group");
+            jniThrowExceptionFmt(env, "java/lang/SecurityException",
+                                 "No permission to set the priority of %d", tid);
             break;
         default:
-            jniThrowException(env, "java/lang/RuntimeException", "Unknown error");
+            signalExceptionForError(env, err, tid);
+            break;
+    }
+
+}
+
+static void signalExceptionForGroupError(JNIEnv* env, int err, int tid) {
+    switch (err) {
+        case EACCES:
+            jniThrowExceptionFmt(env, "java/lang/SecurityException",
+                                 "No permission to set the group of %d", tid);
+            break;
+        default:
+            signalExceptionForError(env, err, tid);
             break;
     }
 }
@@ -171,7 +173,7 @@ void android_os_Process_setThreadGroup(JNIEnv* env, jobject clazz, int tid, jint
     SchedPolicy sp = (SchedPolicy) grp;
     int res = set_sched_policy(tid, sp);
     if (res != NO_ERROR) {
-        signalExceptionForGroupError(env, -res);
+        signalExceptionForGroupError(env, -res, tid);
     }
 }
 
@@ -183,7 +185,7 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
     struct dirent *de;
 
     if ((grp == SP_FOREGROUND) || (grp > SP_MAX)) {
-        signalExceptionForGroupError(env, EINVAL);
+        signalExceptionForGroupError(env, EINVAL, pid);
         return;
     }
 
@@ -219,7 +221,7 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
     if (!(d = opendir(proc_path))) {
         // If the process exited on us, don't generate an exception
         if (errno != ENOENT)
-            signalExceptionForGroupError(env, errno);
+            signalExceptionForGroupError(env, errno, pid);
         return;
     }
 
@@ -254,7 +256,7 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
 #ifdef ENABLE_CPUSETS
                 int err = set_cpuset_policy(t_pid, sp);
                 if (err != NO_ERROR) {
-                    signalExceptionForGroupError(env, -err);
+                    signalExceptionForGroupError(env, -err, t_pid);
                     break;
                 }
 #endif
@@ -266,14 +268,14 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
         // set both cpuset and cgroup for general threads
         err = set_cpuset_policy(t_pid, sp);
         if (err != NO_ERROR) {
-            signalExceptionForGroupError(env, -err);
+            signalExceptionForGroupError(env, -err, t_pid);
             break;
         }
 #endif
 
         err = set_sched_policy(t_pid, sp);
         if (err != NO_ERROR) {
-            signalExceptionForGroupError(env, -err);
+            signalExceptionForGroupError(env, -err, t_pid);
             break;
         }
 
@@ -285,7 +287,7 @@ jint android_os_Process_getProcessGroup(JNIEnv* env, jobject clazz, jint pid)
 {
     SchedPolicy sp;
     if (get_sched_policy(pid, &sp) != 0) {
-        signalExceptionForGroupError(env, errno);
+        signalExceptionForGroupError(env, errno, pid);
     }
     return (int) sp;
 }
@@ -400,7 +402,7 @@ jintArray android_os_Process_getExclusiveCores(JNIEnv* env, jobject clazz) {
     jintArray cpus;
     int pid = getpid();
     if (get_sched_policy(pid, &sp) != 0) {
-        signalExceptionForGroupError(env, errno);
+        signalExceptionForGroupError(env, errno, pid);
         return NULL;
     }
     get_exclusive_cpuset_cores(sp, &cpu_set);
@@ -449,10 +451,10 @@ jint android_os_Process_getThreadScheduler(JNIEnv* env, jclass clazz,
     errno = 0;
     policy = sched_getscheduler(tid);
     if (errno != 0) {
-        signalExceptionForPriorityError(env, errno);
+        signalExceptionForPriorityError(env, errno, tid);
     }
 #else
-    signalExceptionForPriorityError(env, ENOSYS);
+    signalExceptionForPriorityError(env, ENOSYS, tid);
 #endif
     return policy;
 }
@@ -466,10 +468,10 @@ void android_os_Process_setThreadScheduler(JNIEnv* env, jclass clazz,
     param.sched_priority = pri;
     int rc = sched_setscheduler(tid, policy, &param);
     if (rc) {
-        signalExceptionForPriorityError(env, errno);
+        signalExceptionForPriorityError(env, errno, tid);
     }
 #else
-    signalExceptionForPriorityError(env, ENOSYS);
+    signalExceptionForPriorityError(env, ENOSYS, tid);
 #endif
 }
 
@@ -494,9 +496,9 @@ void android_os_Process_setThreadPriority(JNIEnv* env, jobject clazz,
     int rc = androidSetThreadPriority(pid, pri);
     if (rc != 0) {
         if (rc == INVALID_OPERATION) {
-            signalExceptionForPriorityError(env, errno);
+            signalExceptionForPriorityError(env, errno, pid);
         } else {
-            signalExceptionForGroupError(env, errno);
+            signalExceptionForGroupError(env, errno, pid);
         }
     }
 
@@ -516,7 +518,7 @@ jint android_os_Process_getThreadPriority(JNIEnv* env, jobject clazz,
     errno = 0;
     jint pri = getpriority(PRIO_PROCESS, pid);
     if (errno != 0) {
-        signalExceptionForPriorityError(env, errno);
+        signalExceptionForPriorityError(env, errno, pid);
     }
     //ALOGI("Returning priority of %" PRId32 ": %" PRId32 "\n", pid, pri);
     return pri;
