@@ -625,8 +625,12 @@ public final class InputMethodManager {
     final InputConnection mDummyInputConnection = new BaseInputConnection(this, false);
 
     InputMethodManager(Looper looper) throws ServiceNotFoundException {
-        mService = IInputMethodManager.Stub.asInterface(
-                ServiceManager.getServiceOrThrow(Context.INPUT_METHOD_SERVICE));
+        this(IInputMethodManager.Stub.asInterface(
+                ServiceManager.getServiceOrThrow(Context.INPUT_METHOD_SERVICE)), looper);
+    }
+
+    InputMethodManager(IInputMethodManager service, Looper looper) {
+        mService = service;
         mMainLooper = looper;
         mH = new H(looper);
         mIInputContext = new ControlledInputConnectionWrapper(looper,
