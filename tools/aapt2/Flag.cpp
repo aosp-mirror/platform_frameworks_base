@@ -32,20 +32,20 @@ static std::function<bool(const StringPiece&, std::string*)> wrap(
 }
 
 void optionalFlag(const StringPiece& name, const StringPiece& description,
-                  std::function<void(const StringPiece&)> action) {
+                  const std::function<void(const StringPiece&)>& action) {
     sFlags.push_back(Flag{
             name.toString(), description.toString(), wrap(action),
             false, nullptr, false, false });
 }
 
 void requiredFlag(const StringPiece& name, const StringPiece& description,
-                  std::function<void(const StringPiece&)> action) {
+                  const std::function<void(const StringPiece&)>& action) {
     sFlags.push_back(Flag{ name.toString(), description.toString(), wrap(action),
             true, nullptr, false, false });
 }
 
 void requiredFlag(const StringPiece& name, const StringPiece& description,
-                  std::function<bool(const StringPiece&, std::string*)> action) {
+                  const std::function<bool(const StringPiece&, std::string*)>& action) {
     sFlags.push_back(Flag{ name.toString(), description.toString(), action,
             true, nullptr, false, false });
 }

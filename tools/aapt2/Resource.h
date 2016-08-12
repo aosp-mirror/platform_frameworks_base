@@ -94,7 +94,7 @@ struct ResourceNameRef {
     ResourceNameRef() = default;
     ResourceNameRef(const ResourceNameRef&) = default;
     ResourceNameRef(ResourceNameRef&&) = default;
-    ResourceNameRef(const ResourceName& rhs);
+    ResourceNameRef(const ResourceName& rhs);  // NOLINT(implicit)
     ResourceNameRef(const StringPiece16& p, ResourceType t, const StringPiece16& e);
     ResourceNameRef& operator=(const ResourceNameRef& rhs) = default;
     ResourceNameRef& operator=(ResourceNameRef&& rhs) = default;
@@ -124,7 +124,7 @@ struct ResourceId {
 
     ResourceId();
     ResourceId(const ResourceId& rhs);
-    ResourceId(uint32_t resId);
+    ResourceId(uint32_t resId);  // NOLINT(implicit)
     ResourceId(size_t p, size_t t, size_t e);
 
     bool isValid() const;

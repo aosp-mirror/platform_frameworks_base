@@ -41,7 +41,7 @@ class StringPool
 public:
     struct entry {
         entry() : offset(0) { }
-        entry(const String16& _value) : value(_value), offset(0), hasStyles(false) { }
+        explicit entry(const String16& _value) : value(_value), offset(0), hasStyles(false) { }
         entry(const entry& o) : value(o.value), offset(o.offset),
                 hasStyles(o.hasStyles), indices(o.indices),
                 configTypeName(o.configTypeName), configs(o.configs) { }

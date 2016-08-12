@@ -47,7 +47,7 @@ public:
     };
 
     /* Creates a work queue with the specified maximum number of work threads. */
-    WorkQueue(size_t maxThreads, bool canCallJava = true);
+    explicit WorkQueue(size_t maxThreads, bool canCallJava = true);
 
     /* Destroys the work queue.
      * Cancels pending work and waits for all remaining threads to complete.

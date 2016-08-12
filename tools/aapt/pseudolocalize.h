@@ -43,7 +43,7 @@ class PseudoMethodAccent : public PseudoMethodImpl {
 
 class Pseudolocalizer {
  public:
-  Pseudolocalizer(PseudolocalizationMethod m);
+  explicit Pseudolocalizer(PseudolocalizationMethod m);
   ~Pseudolocalizer() { if (mImpl) delete mImpl; }
   void setMethod(PseudolocalizationMethod m);
   String16 start() { return mImpl->start(); }

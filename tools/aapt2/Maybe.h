@@ -41,12 +41,12 @@ public:
     Maybe(const Maybe& rhs);
 
     template <typename U>
-    Maybe(const Maybe<U>& rhs);
+    Maybe(const Maybe<U>& rhs);  // NOLINT(implicit)
 
     Maybe(Maybe&& rhs);
 
     template <typename U>
-    Maybe(Maybe<U>&& rhs);
+    Maybe(Maybe<U>&& rhs);  // NOLINT(implicit)
 
     Maybe& operator=(const Maybe& rhs);
 
@@ -61,12 +61,12 @@ public:
     /**
      * Construct a Maybe holding a value.
      */
-    Maybe(const T& value);
+    Maybe(const T& value);  // NOLINT(implicit)
 
     /**
      * Construct a Maybe holding a value.
      */
-    Maybe(T&& value);
+    Maybe(T&& value);  // NOLINT(implicit)
 
     /**
      * True if this holds a value, false if

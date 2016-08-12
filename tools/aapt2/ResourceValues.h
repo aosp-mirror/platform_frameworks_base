@@ -128,8 +128,8 @@ struct Reference : public BaseItem<Reference> {
     bool privateReference = false;
 
     Reference();
-    Reference(const ResourceNameRef& n, Type type = Type::kResource);
-    Reference(const ResourceId& i, Type type = Type::kResource);
+    Reference(const ResourceNameRef& n, Type type = Type::kResource);  // NOLINT(implicit)
+    explicit Reference(const ResourceId& i, Type type = Type::kResource);
 
     bool flatten(android::Res_value& outValue) const override;
     Reference* clone(StringPool* newPool) const override;
@@ -154,7 +154,7 @@ struct Id : public BaseItem<Id> {
 struct RawString : public BaseItem<RawString> {
     StringPool::Ref value;
 
-    RawString(const StringPool::Ref& ref);
+    explicit RawString(const StringPool::Ref& ref);
 
     bool flatten(android::Res_value& outValue) const override;
     RawString* clone(StringPool* newPool) const override;
@@ -164,7 +164,7 @@ struct RawString : public BaseItem<RawString> {
 struct String : public BaseItem<String> {
     StringPool::Ref value;
 
-    String(const StringPool::Ref& ref);
+    explicit String(const StringPool::Ref& ref);
 
     bool flatten(android::Res_value& outValue) const override;
     String* clone(StringPool* newPool) const override;
@@ -174,7 +174,7 @@ struct String : public BaseItem<String> {
 struct StyledString : public BaseItem<StyledString> {
     StringPool::StyleRef value;
 
-    StyledString(const StringPool::StyleRef& ref);
+    explicit StyledString(const StringPool::StyleRef& ref);
 
     bool flatten(android::Res_value& outValue) const override;
     StyledString* clone(StringPool* newPool) const override;
@@ -185,7 +185,7 @@ struct FileReference : public BaseItem<FileReference> {
     StringPool::Ref path;
 
     FileReference() = default;
-    FileReference(const StringPool::Ref& path);
+    explicit FileReference(const StringPool::Ref& path);
 
     bool flatten(android::Res_value& outValue) const override;
     FileReference* clone(StringPool* newPool) const override;
@@ -199,7 +199,7 @@ struct BinaryPrimitive : public BaseItem<BinaryPrimitive> {
     android::Res_value value;
 
     BinaryPrimitive() = default;
-    BinaryPrimitive(const android::Res_value& val);
+    explicit BinaryPrimitive(const android::Res_value& val);
 
     bool flatten(android::Res_value& outValue) const override;
     BinaryPrimitive* clone(StringPool* newPool) const override;
@@ -218,7 +218,7 @@ struct Attribute : public BaseValue<Attribute> {
     uint32_t maxInt;
     std::vector<Symbol> symbols;
 
-    Attribute(bool w, uint32_t t = 0u);
+    explicit Attribute(bool w, uint32_t t = 0u);
 
     bool isWeak() const override;
     virtual Attribute* clone(StringPool* newPool) const override;
@@ -388,7 +388,7 @@ template <typename T, typename TFunc>
 struct ValueVisitorFunc : ValueVisitor {
     TFunc func;
 
-    ValueVisitorFunc(TFunc f) : func(f) {
+    explicit ValueVisitorFunc(TFunc f) : func(f) {
     }
 
     void visit(T& value, ValueVisitorArgs&) override {
@@ -403,7 +403,7 @@ template <typename T, typename TFunc>
 struct ConstValueVisitorFunc : ConstValueVisitor {
     TFunc func;
 
-    ConstValueVisitorFunc(TFunc f) : func(f) {
+    explicit ConstValueVisitorFunc(TFunc f) : func(f) {
     }
 
     void visit(const T& value, ValueVisitorArgs&) override {

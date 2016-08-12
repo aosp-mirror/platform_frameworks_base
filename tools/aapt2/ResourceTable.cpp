@@ -151,7 +151,7 @@ bool ResourceTable::addResource(const ResourceNameRef& name, const ConfigDescrip
     return addResourceImpl(name, ResourceId{}, config, source, std::move(value), kValidNameChars);
 }
 
-bool ResourceTable::addResource(const ResourceNameRef& name, const ResourceId resId,
+bool ResourceTable::addResource(const ResourceNameRef& name, const ResourceId& resId,
                                 const ConfigDescription& config, const SourceLine& source,
                                 std::unique_ptr<Value> value) {
     return addResourceImpl(name, resId, config, source, std::move(value), kValidNameChars);
@@ -165,7 +165,7 @@ bool ResourceTable::addResourceAllowMangled(const ResourceNameRef& name,
                            kValidNameMangledChars);
 }
 
-bool ResourceTable::addResourceImpl(const ResourceNameRef& name, const ResourceId resId,
+bool ResourceTable::addResourceImpl(const ResourceNameRef& name, const ResourceId& resId,
                                     const ConfigDescription& config, const SourceLine& source,
                                     std::unique_ptr<Value> value, const char16_t* validChars) {
     if (!name.package.empty() && name.package != mPackage) {
@@ -255,17 +255,17 @@ bool ResourceTable::addResourceImpl(const ResourceNameRef& name, const ResourceI
     return true;
 }
 
-bool ResourceTable::markPublic(const ResourceNameRef& name, const ResourceId resId,
+bool ResourceTable::markPublic(const ResourceNameRef& name, const ResourceId& resId,
                                const SourceLine& source) {
     return markPublicImpl(name, resId, source, kValidNameChars);
 }
 
-bool ResourceTable::markPublicAllowMangled(const ResourceNameRef& name, const ResourceId resId,
+bool ResourceTable::markPublicAllowMangled(const ResourceNameRef& name, const ResourceId& resId,
                                            const SourceLine& source) {
     return markPublicImpl(name, resId, source, kValidNameMangledChars);
 }
 
-bool ResourceTable::markPublicImpl(const ResourceNameRef& name, const ResourceId resId,
+bool ResourceTable::markPublicImpl(const ResourceNameRef& name, const ResourceId& resId,
                                    const SourceLine& source, const char16_t* validChars) {
     if (!name.package.empty() && name.package != mPackage) {
         Logger::error(source)

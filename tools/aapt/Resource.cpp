@@ -394,7 +394,7 @@ static void collect_files(const sp<AaptDir>& dir,
     const DefaultKeyedVector<String8, sp<AaptGroup> >& groups = dir->getFiles();
     int N = groups.size();
     for (int i=0; i<N; i++) {
-        String8 leafName = groups.keyAt(i);
+        const String8& leafName = groups.keyAt(i);
         const sp<AaptGroup>& group = groups.valueAt(i);
 
         const DefaultKeyedVector<AaptGroupEntry, sp<AaptFile> >& files
@@ -417,7 +417,7 @@ static void collect_files(const sp<AaptDir>& dir,
             set->add(leafName, group);
             resources->add(resType, set);
         } else {
-            sp<ResourceTypeSet> set = resources->valueAt(index);
+            const sp<ResourceTypeSet>& set = resources->valueAt(index);
             index = set->indexOfKey(leafName);
             if (index < 0) {
                 if (kIsDebug) {
@@ -452,7 +452,7 @@ static void collect_files(const sp<AaptAssets>& ass,
     int N = dirs.size();
 
     for (int i=0; i<N; i++) {
-        sp<AaptDir> d = dirs.itemAt(i);
+        const sp<AaptDir>& d = dirs.itemAt(i);
         if (kIsDebug) {
             printf("Collecting dir #%d %p: %s, leaf %s\n", i, d.get(), d->getPath().string(),
                     d->getLeaf().string());
@@ -610,7 +610,7 @@ static bool applyFileOverlay(Bundle *bundle,
         // get the overlay resources of the requested type
         ssize_t index = overlayRes->indexOfKey(resTypeString);
         if (index >= 0) {
-            sp<ResourceTypeSet> overlaySet = overlayRes->valueAt(index);
+            const sp<ResourceTypeSet>& overlaySet = overlayRes->valueAt(index);
 
             // for each of the resources, check for a match in the previously built
             // non-overlay "baseset".
@@ -760,7 +760,7 @@ bool addTagAttribute(const sp<XMLNode>& node, const char* ns8,
     return addTagAttribute(node, ns8, attr8, value, errorOnFailedInsert, false);
 }
 
-static void fullyQualifyClassName(const String8& package, sp<XMLNode> node,
+static void fullyQualifyClassName(const String8& package, const sp<XMLNode>& node,
         const String16& attrName) {
     XMLNode::attribute_entry* attr = node->editAttribute(
             String16("http://schemas.android.com/apk/res/android"), attrName);
@@ -1339,7 +1339,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
             ResourceDirIterator it(resources->valueAt(index), String8("values"));
             ssize_t res;
             while ((res=it.next()) == NO_ERROR) {
-                sp<AaptFile> file = it.getFile();
+                const sp<AaptFile>& file = it.getFile();
                 res = compileResourceFile(bundle, assets, file, it.getParams(), 
                                           (current!=assets), &table);
                 if (res != NO_ERROR) {
@@ -2674,7 +2674,7 @@ status_t writeResourceSymbols(Bundle* bundle, const sp<AaptAssets>& assets,
         String8 dest(bundle->getRClassDir());
 
         if (bundle->getMakePackageDirs()) {
-            String8 pkg(package);
+            const String8& pkg(package);
             const char* last = pkg.string();
             const char* s = last-1;
             do {

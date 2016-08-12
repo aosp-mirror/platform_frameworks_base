@@ -35,7 +35,7 @@ struct JavaClassGeneratorTest : public ::testing::Test {
         mTable->setPackageId(0x01);
     }
 
-    bool addResource(const ResourceNameRef& name, ResourceId id) {
+    bool addResource(const ResourceNameRef& name, const ResourceId& id) {
         return mTable->addResource(name, id, {}, SourceLine{ "test.xml", 21 },
                                    util::make_unique<Id>());
     }

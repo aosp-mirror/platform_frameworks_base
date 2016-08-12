@@ -46,7 +46,7 @@ struct TableFlattener {
         bool useExtendedChunks = true;
     };
 
-    TableFlattener(Options options);
+    explicit TableFlattener(Options options);
 
     bool flatten(BigBuffer* out, const ResourceTable& table);
 

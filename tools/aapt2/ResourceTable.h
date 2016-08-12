@@ -81,8 +81,8 @@ struct ResourceEntry {
      */
     std::vector<ResourceConfigValue> values;
 
-    inline ResourceEntry(const StringPiece16& _name);
-    inline ResourceEntry(const ResourceEntry* rhs);
+    inline explicit ResourceEntry(const StringPiece16& _name);
+    inline explicit ResourceEntry(const ResourceEntry* rhs);
 };
 
 /**
@@ -115,8 +115,8 @@ struct ResourceTableType {
      */
     std::vector<std::unique_ptr<ResourceEntry>> entries;
 
-    ResourceTableType(const ResourceType _type);
-    ResourceTableType(const ResourceTableType* rhs);
+    explicit ResourceTableType(const ResourceType _type);
+    explicit ResourceTableType(const ResourceTableType* rhs);
 };
 
 /**
@@ -151,12 +151,12 @@ public:
     bool addResourceAllowMangled(const ResourceNameRef& name, const ConfigDescription& config,
                                  const SourceLine& source, std::unique_ptr<Value> value);
 
-    bool addResource(const ResourceNameRef& name, const ResourceId resId,
+    bool addResource(const ResourceNameRef& name, const ResourceId& resId,
                      const ConfigDescription& config, const SourceLine& source,
                      std::unique_ptr<Value> value);
 
-    bool markPublic(const ResourceNameRef& name, const ResourceId resId, const SourceLine& source);
-    bool markPublicAllowMangled(const ResourceNameRef& name, const ResourceId resId,
+    bool markPublic(const ResourceNameRef& name, const ResourceId& resId, const SourceLine& source);
+    bool markPublicAllowMangled(const ResourceNameRef& name, const ResourceId& resId,
                                 const SourceLine& source);
 
     /*
@@ -186,10 +186,10 @@ private:
     std::unique_ptr<ResourceEntry>& findOrCreateEntry(std::unique_ptr<ResourceTableType>& type,
                                                       const StringPiece16& name);
 
-    bool addResourceImpl(const ResourceNameRef& name, const ResourceId resId,
+    bool addResourceImpl(const ResourceNameRef& name, const ResourceId& resId,
                          const ConfigDescription& config, const SourceLine& source,
                          std::unique_ptr<Value> value, const char16_t* validChars);
-    bool markPublicImpl(const ResourceNameRef& name, const ResourceId resId,
+    bool markPublicImpl(const ResourceNameRef& name, const ResourceId& resId,
                         const SourceLine& source, const char16_t* validChars);
 
     std::u16string mPackage;

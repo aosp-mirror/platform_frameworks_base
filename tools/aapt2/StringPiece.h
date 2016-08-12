@@ -39,8 +39,8 @@ public:
 
     BasicStringPiece();
     BasicStringPiece(const BasicStringPiece<TChar>& str);
-    BasicStringPiece(const std::basic_string<TChar>& str);
-    BasicStringPiece(const TChar* str);
+    BasicStringPiece(const std::basic_string<TChar>& str);  // NOLINT(implicit)
+    BasicStringPiece(const TChar* str);  // NOLINT(implicit)
     BasicStringPiece(const TChar* str, size_t len);
 
     BasicStringPiece<TChar>& operator=(const BasicStringPiece<TChar>& rhs);

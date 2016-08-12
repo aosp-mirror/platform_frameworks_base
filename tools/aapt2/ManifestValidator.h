@@ -28,7 +28,7 @@ namespace aapt {
 
 class ManifestValidator {
 public:
-    ManifestValidator(const android::ResTable& table);
+    explicit ManifestValidator(const android::ResTable& table);
     ManifestValidator(const ManifestValidator&) = delete;
 
     bool validate(const Source& source, android::ResXMLParser* parser);

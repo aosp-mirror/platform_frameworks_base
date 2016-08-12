@@ -27,7 +27,7 @@ namespace aapt {
 
 class BindingXmlPullParser : public XmlPullParser {
 public:
-    BindingXmlPullParser(const std::shared_ptr<XmlPullParser>& parser);
+    explicit BindingXmlPullParser(const std::shared_ptr<XmlPullParser>& parser);
     BindingXmlPullParser(const BindingXmlPullParser& rhs) = delete;
 
     Event getEvent() const override;

@@ -81,7 +81,7 @@ private:
      *          // Recrunch sourceFile out to destFile.
      *
      */
-    bool needsUpdating(String8 relativePath) const;
+    bool needsUpdating(const String8& relativePath) const;
 
     // DATA MEMBERS ====================================================
 
