@@ -2619,10 +2619,11 @@ i
             <enum name="viewEnd" value="6" />
         </attr>
 
-        <!-- Controls how this View is important for accessibility which is if it fires
-             accessibility events and if it is reported to accessibility services that
-             query the screen. Note: While not recommended, an accessibility service may
-             decide to ignore this attribute and operate on all views in the view tree. -->
+        <!-- Describes whether or not this view is important for accessibility.
+             If it is important, the view fires accessibility events and is
+             reported to accessibility services that query the screen. Note:
+             While not recommended, an accessibility service may decide to
+             ignore this attribute and operate on all views in the view tree. -->
         <attr name="importantForAccessibility" format="integer">
             <!-- The system determines whether the view is important for accessibility - default
                  (recommended). -->
