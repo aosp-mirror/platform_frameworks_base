@@ -42,16 +42,21 @@ import java.util.List;
  * Displays an alphanumeric (latin-1) key entry for the user to enter
  * an unlock password
  */
-
 public class KeyguardPasswordView extends KeyguardAbsKeyInputView
         implements KeyguardSecurityView, OnEditorActionListener, TextWatcher {
 
     private final boolean mShowImeAtScreenOn;
     private final int mDisappearYTranslation;
 
+    // A delay constant to be used in a workaround for the situation where InputMethodManagerService
+    // is not switched to the new user yet.
+    // TODO: Remove this by ensuring such a race condition never happens.
+    private static final int DELAY_MILLIS_TO_REEVALUATE_IME_SWITCH_ICON = 500;  // 500ms
+
     InputMethodManager mImm;
     private TextView mPasswordEntry;
     private TextViewInputDisabler mPasswordEntryDisabler;
+    private View mSwitchImeButton;
 
     private Interpolator mLinearOutSlowInInterpolator;
     private Interpolator mFastOutLinearInInterpolator;
@@ -141,11 +146,30 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
         mPasswordEntry.requestFocus();
     }
 
+    private void updateSwitchImeButton() {
+        // If there's more than one IME, enable the IME switcher button
+        final boolean wasVisible = mSwitchImeButton.getVisibility() == View.VISIBLE;
+        final boolean shouldBeVisible = hasMultipleEnabledIMEsOrSubtypes(mImm, false);
+        if (wasVisible != shouldBeVisible) {
+            mSwitchImeButton.setVisibility(shouldBeVisible ? View.VISIBLE : View.GONE);
+        }
+
+        // TODO: Check if we still need this hack.
+        // If no icon is visible, reset the start margin on the password field so the text is
+        // still centered.
+        if (mSwitchImeButton.getVisibility() != View.VISIBLE) {
+            android.view.ViewGroup.LayoutParams params = mPasswordEntry.getLayoutParams();
+            if (params instanceof MarginLayoutParams) {
+                final MarginLayoutParams mlp = (MarginLayoutParams) params;
+                mlp.setMarginStart(0);
+                mPasswordEntry.setLayoutParams(params);
+            }
+        }
+    }
+
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-
-        boolean imeOrDeleteButtonVisible = false;
 
         mImm = (InputMethodManager) getContext().getSystemService(
                 Context.INPUT_METHOD_SERVICE);
@@ -171,31 +195,29 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
 
         mPasswordEntry.requestFocus();
 
-        // If there's more than one IME, enable the IME switcher button
-        View switchImeButton = findViewById(R.id.switch_ime_button);
-        if (switchImeButton != null && hasMultipleEnabledIMEsOrSubtypes(mImm, false)) {
-            switchImeButton.setVisibility(View.VISIBLE);
-            imeOrDeleteButtonVisible = true;
-            switchImeButton.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mCallback.userActivity(); // Leave the screen on a bit longer
-                    // Do not show auxiliary subtypes in password lock screen.
-                    mImm.showInputMethodPicker(false /* showAuxiliarySubtypes */);
-                }
-            });
-        }
-
-        // If no icon is visible, reset the start margin on the password field so the text is
-        // still centered.
-        if (!imeOrDeleteButtonVisible) {
-            android.view.ViewGroup.LayoutParams params = mPasswordEntry.getLayoutParams();
-            if (params instanceof MarginLayoutParams) {
-                final MarginLayoutParams mlp = (MarginLayoutParams) params;
-                mlp.setMarginStart(0);
-                mPasswordEntry.setLayoutParams(params);
+        mSwitchImeButton = findViewById(R.id.switch_ime_button);
+        mSwitchImeButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mCallback.userActivity(); // Leave the screen on a bit longer
+                // Do not show auxiliary subtypes in password lock screen.
+                mImm.showInputMethodPicker(false /* showAuxiliarySubtypes */);
             }
-        }
+        });
+
+        // If there's more than one IME, enable the IME switcher button
+        updateSwitchImeButton();
+
+        // When we the current user is switching, InputMethodManagerService sometimes has not
+        // switched internal state yet here. As a quick workaround, we check the keyboard state
+        // again.
+        // TODO: Remove this workaround by ensuring such a race condition never happens.
+        postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                updateSwitchImeButton();
+            }
+        }, DELAY_MILLIS_TO_REEVALUATE_IME_SWITCH_ICON);
     }
 
     @Override
