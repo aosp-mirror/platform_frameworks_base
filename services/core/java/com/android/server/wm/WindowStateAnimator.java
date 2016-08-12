@@ -2076,7 +2076,8 @@ class WindowStateAnimator {
         if (time > mDeferTransactionTime + PENDING_TRANSACTION_FINISH_WAIT_TIME) {
             mDeferTransactionTime = -1;
             mDeferTransactionUntilFrame = -1;
-        } else {
+        } else if (mWin.mAttachedWindow != null &&
+                mWin.mAttachedWindow.mWinAnimator.hasSurface()) {
             mSurfaceController.deferTransactionUntil(
                     mWin.mAttachedWindow.mWinAnimator.mSurfaceController.getHandle(),
                     mDeferTransactionUntilFrame);
