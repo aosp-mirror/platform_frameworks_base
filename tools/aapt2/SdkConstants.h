@@ -45,7 +45,7 @@ enum {
     SDK_MARSHMALLOW = 23,
 };
 
-size_t findAttributeSdkLevel(ResourceId id);
+size_t findAttributeSdkLevel(const ResourceId& id);
 size_t findAttributeSdkLevel(const ResourceName& name);
 
 } // namespace aapt

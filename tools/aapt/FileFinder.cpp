@@ -77,7 +77,7 @@ bool SystemFileFinder::findFiles(String8 basePath, Vector<String8>& extensions,
     return true;
 }
 
-void SystemFileFinder::checkAndAddFile(String8 path, const struct stat* stats,
+void SystemFileFinder::checkAndAddFile(const String8& path, const struct stat* stats,
                                        Vector<String8>& extensions,
                                        KeyedVector<String8,time_t>& fileStore)
 {
