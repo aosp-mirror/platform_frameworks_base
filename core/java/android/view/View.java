@@ -23867,7 +23867,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * on the screen.
      */
     private boolean shouldDrawRoundScrollbar() {
-        if (!mResources.getConfiguration().isScreenRound()) {
+        if (!mResources.getConfiguration().isScreenRound() || mAttachInfo == null) {
             return false;
         }
 
