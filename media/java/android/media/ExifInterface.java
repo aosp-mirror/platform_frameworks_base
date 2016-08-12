@@ -25,6 +25,7 @@ import android.system.Os;
 import android.system.OsConstants;
 import android.util.Log;
 import android.util.Pair;
+import android.annotation.IntDef;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -55,6 +56,8 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 import libcore.io.IoUtils;
 import libcore.io.Streams;
@@ -1166,16 +1169,24 @@ public class ExifInterface {
     // The following values are used for indicating pointers to the other Image File Directories.
 
     // Indices of Exif Ifd tag groups
-    private static final int IFD_TIFF_HINT = 0;
-    private static final int IFD_EXIF_HINT = 1;
-    private static final int IFD_GPS_HINT = 2;
-    private static final int IFD_INTEROPERABILITY_HINT = 3;
-    private static final int IFD_THUMBNAIL_HINT = 4;
-    private static final int IFD_PREVIEW_HINT = 5;
-    private static final int ORF_MAKER_NOTE_HINT = 6;
-    private static final int ORF_CAMERA_SETTINGS_HINT = 7;
-    private static final int ORF_IMAGE_PROCESSING_HINT = 8;
-    private static final int PEF_HINT = 9;
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({IFD_TYPE_PRIMARY, IFD_TYPE_EXIF, IFD_TYPE_GPS, IFD_TYPE_INTEROPERABILITY,
+            IFD_TYPE_THUMBNAIL, IFD_TYPE_PREVIEW, IFD_TYPE_ORF_MAKER_NOTE,
+            IFD_TYPE_ORF_CAMERA_SETTINGS, IFD_TYPE_ORF_IMAGE_PROCESSING, IFD_TYPE_PEF})
+    public @interface IfdType {}
+
+    private static final int IFD_TYPE_PRIMARY = 0;
+    private static final int IFD_TYPE_EXIF = 1;
+    private static final int IFD_TYPE_GPS = 2;
+    private static final int IFD_TYPE_INTEROPERABILITY = 3;
+    private static final int IFD_TYPE_THUMBNAIL = 4;
+    private static final int IFD_TYPE_PREVIEW = 5;
+    private static final int IFD_TYPE_ORF_MAKER_NOTE = 6;
+    private static final int IFD_TYPE_ORF_CAMERA_SETTINGS = 7;
+    private static final int IFD_TYPE_ORF_IMAGE_PROCESSING = 8;
+    private static final int IFD_TYPE_PEF = 9;
+
     // List of Exif tag groups
     private static final ExifTag[][] EXIF_TAGS = new ExifTag[][] {
             IFD_TIFF_TAGS, IFD_EXIF_TAGS, IFD_GPS_TAGS, IFD_INTEROPERABILITY_TAGS,
@@ -1191,11 +1202,7 @@ public class ExifInterface {
             new ExifTag(TAG_ORF_CAMERA_SETTINGS_IFD_POINTER, 8224, IFD_FORMAT_BYTE),
             new ExifTag(TAG_ORF_IMAGE_PROCESSING_IFD_POINTER, 8256, IFD_FORMAT_BYTE)
     };
-    // List of indices of the indicated tag groups according to the EXIF_POINTER_TAGS
-    private static final int[] EXIF_POINTER_TAG_HINTS = new int[] {
-            IFD_PREVIEW_HINT, IFD_EXIF_HINT, IFD_GPS_HINT, IFD_INTEROPERABILITY_HINT,
-            ORF_CAMERA_SETTINGS_HINT, ORF_IMAGE_PROCESSING_HINT
-    };
+
     // Tags for indicating the thumbnail offset and length
     private static final ExifTag JPEG_INTERCHANGE_FORMAT_TAG =
             new ExifTag(TAG_JPEG_INTERCHANGE_FORMAT, 513, IFD_FORMAT_ULONG);
@@ -1209,6 +1216,8 @@ public class ExifInterface {
     private static final HashSet<String> sTagSetForCompatibility = new HashSet<>(Arrays.asList(
             TAG_F_NUMBER, TAG_DIGITAL_ZOOM_RATIO, TAG_EXPOSURE_TIME, TAG_SUBJECT_DISTANCE,
             TAG_GPS_TIMESTAMP));
+    // Mappings from tag number to IFD type for pointer tags.
+    private static final HashMap sExifPointerTagMap = new HashMap();
 
     // See JPEG File Interchange Format Version 1.02.
     // The following values are defined for handling JPEG streams. In this implementation, we are
@@ -1260,14 +1269,22 @@ public class ExifInterface {
         sFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
 
         // Build up the hash tables to look up Exif tags for reading Exif tags.
-        for (int hint = 0; hint < EXIF_TAGS.length; ++hint) {
-            sExifTagMapsForReading[hint] = new HashMap();
-            sExifTagMapsForWriting[hint] = new HashMap();
-            for (ExifTag tag : EXIF_TAGS[hint]) {
-                sExifTagMapsForReading[hint].put(tag.number, tag);
-                sExifTagMapsForWriting[hint].put(tag.name, tag);
+        for (int ifdType = 0; ifdType < EXIF_TAGS.length; ++ifdType) {
+            sExifTagMapsForReading[ifdType] = new HashMap();
+            sExifTagMapsForWriting[ifdType] = new HashMap();
+            for (ExifTag tag : EXIF_TAGS[ifdType]) {
+                sExifTagMapsForReading[ifdType].put(tag.number, tag);
+                sExifTagMapsForWriting[ifdType].put(tag.name, tag);
             }
         }
+
+        // Build up the hash table to look up Exif pointer tags.
+        sExifPointerTagMap.put(EXIF_POINTER_TAGS[0].number, IFD_TYPE_PREVIEW); // 330
+        sExifPointerTagMap.put(EXIF_POINTER_TAGS[1].number, IFD_TYPE_EXIF); // 34665
+        sExifPointerTagMap.put(EXIF_POINTER_TAGS[2].number, IFD_TYPE_GPS); // 34853
+        sExifPointerTagMap.put(EXIF_POINTER_TAGS[3].number, IFD_TYPE_INTEROPERABILITY); // 40965
+        sExifPointerTagMap.put(EXIF_POINTER_TAGS[4].number, IFD_TYPE_ORF_CAMERA_SETTINGS); // 8224
+        sExifPointerTagMap.put(EXIF_POINTER_TAGS[5].number, IFD_TYPE_ORF_IMAGE_PROCESSING); // 8256
     }
 
     private final String mFilename;
@@ -1503,7 +1520,7 @@ public class ExifInterface {
         }
 
         for (int i = 0 ; i < EXIF_TAGS.length; ++i) {
-            if (i == IFD_THUMBNAIL_HINT && !mHasThumbnail) {
+            if (i == IFD_TYPE_THUMBNAIL && !mHasThumbnail) {
                 continue;
             }
             final Object obj = sExifTagMapsForWriting[i].get(tag);
@@ -1662,7 +1679,7 @@ public class ExifInterface {
 
             switch (mMimeType) {
                 case IMAGE_TYPE_JPEG: {
-                    getJpegAttributes(in, 0, IFD_TIFF_HINT); // 0 is offset
+                    getJpegAttributes(in, 0, IFD_TYPE_PRIMARY); // 0 is offset
                     break;
                 }
                 case IMAGE_TYPE_RAF: {
@@ -1894,9 +1911,9 @@ public class ExifInterface {
             }
 
             ExifAttribute imageLengthAttribute =
-                    (ExifAttribute) mAttributes[IFD_THUMBNAIL_HINT].get(TAG_IMAGE_LENGTH);
+                    (ExifAttribute) mAttributes[IFD_TYPE_THUMBNAIL].get(TAG_IMAGE_LENGTH);
             ExifAttribute imageWidthAttribute =
-                    (ExifAttribute) mAttributes[IFD_THUMBNAIL_HINT].get(TAG_IMAGE_WIDTH);
+                    (ExifAttribute) mAttributes[IFD_TYPE_THUMBNAIL].get(TAG_IMAGE_WIDTH);
             if (imageLengthAttribute != null && imageWidthAttribute != null) {
                 int imageLength = imageLengthAttribute.getIntValue(mExifByteOrder);
                 int imageWidth = imageWidthAttribute.getIntValue(mExifByteOrder);
@@ -2165,9 +2182,9 @@ public class ExifInterface {
      *
      * @param inputStream The input stream that starts with the JPEG data.
      * @param jpegOffset The offset value in input stream for JPEG data.
-     * @param imageTypes The image type from which to retrieve metadata. Use IFD_TIFF_HINT for
-     *                   primary image, IFD_PREVIEW_HINT for preview image, and
-     *                   IFD_THUMBNAIL_HINT for thumbnail image.
+     * @param imageTypes The image type from which to retrieve metadata. Use IFD_TYPE_PRIMARY for
+     *                   primary image, IFD_TYPE_PREVIEW for preview image, and
+     *                   IFD_TYPE_THUMBNAIL for thumbnail image.
      * @throws IOException If the data contains invalid JPEG markers, offsets, or length values.
      */
     private void getJpegAttributes(InputStream inputStream, int jpegOffset, int imageType)
@@ -2268,7 +2285,7 @@ public class ExifInterface {
                     }
                     length = 0;
                     if (getAttribute(TAG_USER_COMMENT) == null) {
-                        mAttributes[IFD_EXIF_HINT].put(TAG_USER_COMMENT, ExifAttribute.createString(
+                        mAttributes[IFD_TYPE_EXIF].put(TAG_USER_COMMENT, ExifAttribute.createString(
                                 new String(bytes, ASCII)));
                     }
                     break;
@@ -2328,12 +2345,12 @@ public class ExifInterface {
         parseTiffHeaders(dataInputStream, exifBytes.length);
 
         // Read TIFF image file directories. See JEITA CP-3451C Section 4.5.2. Figure 6.
-        readImageFileDirectory(dataInputStream, IFD_TIFF_HINT);
+        readImageFileDirectory(dataInputStream, IFD_TYPE_PRIMARY);
 
         // Update ImageLength/Width tags for all image data.
-        updateImageSizeValues(in, IFD_TIFF_HINT);
-        updateImageSizeValues(in, IFD_PREVIEW_HINT);
-        updateImageSizeValues(in, IFD_THUMBNAIL_HINT);
+        updateImageSizeValues(in, IFD_TYPE_PRIMARY);
+        updateImageSizeValues(in, IFD_TYPE_PREVIEW);
+        updateImageSizeValues(in, IFD_TYPE_THUMBNAIL);
 
         // Check if each image data is in valid position.
         validateImages(in);
@@ -2342,7 +2359,7 @@ public class ExifInterface {
             // PEF files contain a MakerNote data, which contains the data for ColorSpace tag.
             // See http://lclevy.free.fr/raw/ and piex.cc PefGetPreviewData()
             ExifAttribute makerNoteAttribute =
-                    (ExifAttribute) mAttributes[IFD_EXIF_HINT].get(TAG_MAKER_NOTE);
+                    (ExifAttribute) mAttributes[IFD_TYPE_EXIF].get(TAG_MAKER_NOTE);
             if (makerNoteAttribute != null) {
                 // Create an ordered DataInputStream for MakerNote
                 ByteOrderAwarenessDataInputStream makerNoteDataInputStream =
@@ -2353,13 +2370,13 @@ public class ExifInterface {
                 makerNoteDataInputStream.seek(PEF_MAKER_NOTE_SKIP_SIZE);
 
                 // Read IFD data from MakerNote
-                readImageFileDirectory(makerNoteDataInputStream, PEF_HINT);
+                readImageFileDirectory(makerNoteDataInputStream, IFD_TYPE_PEF);
 
                 // Update ColorSpace tag
                 ExifAttribute colorSpaceAttribute =
-                        (ExifAttribute) mAttributes[PEF_HINT].get(TAG_COLOR_SPACE);
+                        (ExifAttribute) mAttributes[IFD_TYPE_PEF].get(TAG_COLOR_SPACE);
                 if (colorSpaceAttribute != null) {
-                    mAttributes[IFD_EXIF_HINT].put(TAG_COLOR_SPACE, colorSpaceAttribute);
+                    mAttributes[IFD_TYPE_EXIF].put(TAG_COLOR_SPACE, colorSpaceAttribute);
                 }
             }
         }
@@ -2392,7 +2409,7 @@ public class ExifInterface {
         in.reset();
 
         // Retrieve JPEG image metadata
-        getJpegAttributes(in, rafJpegOffset, IFD_PREVIEW_HINT);
+        getJpegAttributes(in, rafJpegOffset, IFD_TYPE_PREVIEW);
 
         // Skip to CFA header offset.
         // A while loop is used because the skip method may not be able to skip the requested amount
@@ -2429,8 +2446,8 @@ public class ExifInterface {
                         ExifAttribute.createUShort(imageLength, mExifByteOrder);
                 ExifAttribute imageWidthAttribute =
                         ExifAttribute.createUShort(imageWidth, mExifByteOrder);
-                mAttributes[IFD_TIFF_HINT].put(TAG_IMAGE_LENGTH, imageLengthAttribute);
-                mAttributes[IFD_TIFF_HINT].put(TAG_IMAGE_WIDTH, imageWidthAttribute);
+                mAttributes[IFD_TYPE_PRIMARY].put(TAG_IMAGE_LENGTH, imageLengthAttribute);
+                mAttributes[IFD_TYPE_PRIMARY].put(TAG_IMAGE_WIDTH, imageWidthAttribute);
                 if (DEBUG) {
                     Log.d(TAG, "Updated to length: " + imageLength + ", width: " + imageWidth);
                 }
@@ -2459,7 +2476,7 @@ public class ExifInterface {
         // proprietary tags and therefore does not have offical documentation
         // See GetOlympusPreviewImage() in piex.cc & http://www.exiv2.org/tags-olympus.html
         ExifAttribute makerNoteAttribute =
-                (ExifAttribute) mAttributes[IFD_EXIF_HINT].get(TAG_MAKER_NOTE);
+                (ExifAttribute) mAttributes[IFD_TYPE_EXIF].get(TAG_MAKER_NOTE);
         if (makerNoteAttribute != null) {
             // Create an ordered DataInputStream for MakerNote
             ByteOrderAwarenessDataInputStream makerNoteDataInputStream =
@@ -2481,18 +2498,18 @@ public class ExifInterface {
             }
 
             // Read IFD data from MakerNote
-            readImageFileDirectory(makerNoteDataInputStream, ORF_MAKER_NOTE_HINT);
+            readImageFileDirectory(makerNoteDataInputStream, IFD_TYPE_ORF_MAKER_NOTE);
 
             // Retrieve & update preview image offset & length values
             ExifAttribute imageLengthAttribute = (ExifAttribute)
-                    mAttributes[ORF_CAMERA_SETTINGS_HINT].get(TAG_ORF_PREVIEW_IMAGE_START);
+                    mAttributes[IFD_TYPE_ORF_CAMERA_SETTINGS].get(TAG_ORF_PREVIEW_IMAGE_START);
             ExifAttribute bitsPerSampleAttribute = (ExifAttribute)
-                    mAttributes[ORF_CAMERA_SETTINGS_HINT].get(TAG_ORF_PREVIEW_IMAGE_LENGTH);
+                    mAttributes[IFD_TYPE_ORF_CAMERA_SETTINGS].get(TAG_ORF_PREVIEW_IMAGE_LENGTH);
 
             if (imageLengthAttribute != null && bitsPerSampleAttribute != null) {
-                mAttributes[IFD_PREVIEW_HINT].put(TAG_JPEG_INTERCHANGE_FORMAT,
+                mAttributes[IFD_TYPE_PREVIEW].put(TAG_JPEG_INTERCHANGE_FORMAT,
                         imageLengthAttribute);
-                mAttributes[IFD_PREVIEW_HINT].put(TAG_JPEG_INTERCHANGE_FORMAT_LENGTH,
+                mAttributes[IFD_TYPE_PREVIEW].put(TAG_JPEG_INTERCHANGE_FORMAT_LENGTH,
                         bitsPerSampleAttribute);
             }
 
@@ -2500,7 +2517,7 @@ public class ExifInterface {
             // Retrieve primary image length & width values
             // See piex.cc GetOlympusPreviewImage()
             ExifAttribute aspectFrameAttribute = (ExifAttribute)
-                    mAttributes[ORF_IMAGE_PROCESSING_HINT].get(TAG_ORF_ASPECT_FRAME);
+                    mAttributes[IFD_TYPE_ORF_IMAGE_PROCESSING].get(TAG_ORF_ASPECT_FRAME);
             if (aspectFrameAttribute != null) {
                 int[] aspectFrameValues = new int[4];
                 aspectFrameValues = (int[]) aspectFrameAttribute.getValue(mExifByteOrder);
@@ -2519,8 +2536,8 @@ public class ExifInterface {
                     ExifAttribute primaryImageLengthAttribute =
                             ExifAttribute.createUShort(primaryImageLength, mExifByteOrder);
 
-                    mAttributes[IFD_TIFF_HINT].put(TAG_IMAGE_WIDTH, primaryImageWidthAttribute);
-                    mAttributes[IFD_TIFF_HINT].put(TAG_IMAGE_LENGTH, primaryImageLengthAttribute);
+                    mAttributes[IFD_TYPE_PRIMARY].put(TAG_IMAGE_WIDTH, primaryImageWidthAttribute);
+                    mAttributes[IFD_TYPE_PRIMARY].put(TAG_IMAGE_LENGTH, primaryImageLengthAttribute);
                 }
             }
         }
@@ -2535,47 +2552,19 @@ public class ExifInterface {
 
         // Retrieve preview and/or thumbnail image data
         ExifAttribute jpgFromRawAttribute =
-                (ExifAttribute) mAttributes[IFD_TIFF_HINT].get(TAG_RW2_JPG_FROM_RAW);
+                (ExifAttribute) mAttributes[IFD_TYPE_PRIMARY].get(TAG_RW2_JPG_FROM_RAW);
         if (jpgFromRawAttribute != null) {
-            getJpegAttributes(in, mRw2JpgFromRawOffset, IFD_PREVIEW_HINT);
+            getJpegAttributes(in, mRw2JpgFromRawOffset, IFD_TYPE_PREVIEW);
         }
 
         // Set ISO tag value if necessary
         ExifAttribute rw2IsoAttribute =
-                (ExifAttribute) mAttributes[IFD_TIFF_HINT].get(TAG_RW2_ISO);
+                (ExifAttribute) mAttributes[IFD_TYPE_PRIMARY].get(TAG_RW2_ISO);
         ExifAttribute exifIsoAttribute =
-                (ExifAttribute) mAttributes[IFD_EXIF_HINT].get(TAG_ISO_SPEED_RATINGS);
+                (ExifAttribute) mAttributes[IFD_TYPE_EXIF].get(TAG_ISO_SPEED_RATINGS);
         if (rw2IsoAttribute != null && exifIsoAttribute == null) {
             // Place this attribute only if it doesn't exist
-            mAttributes[IFD_EXIF_HINT].put(TAG_ISO_SPEED_RATINGS, rw2IsoAttribute);
-        }
-    }
-
-    // PEF is TIFF-based and contains 3 IFDs. It also contains a MakerNote data, which contains the
-    // ColorSpace tag data.
-    // See http://lclevy.free.fr/raw/ and piex.cc PefGetPreviewData()
-    private void getPefAttributes(InputStream in) throws IOException {
-        // Retrieve ColorSpace tag
-        ExifAttribute makerNoteAttribute =
-                (ExifAttribute) mAttributes[IFD_EXIF_HINT].get(TAG_MAKER_NOTE);
-        if (makerNoteAttribute != null) {
-            // Create an ordered DataInputStream for MakerNote
-            ByteOrderAwarenessDataInputStream makerNoteDataInputStream =
-                    new ByteOrderAwarenessDataInputStream(makerNoteAttribute.bytes);
-            makerNoteDataInputStream.setByteOrder(mExifByteOrder);
-
-            // Seek to MakerNote data
-            makerNoteDataInputStream.seek(PEF_MAKER_NOTE_SKIP_SIZE);
-
-            // Read IFD data from MakerNote
-            readImageFileDirectory(makerNoteDataInputStream, PEF_HINT);
-
-            // Update ColorSpace tag
-            ExifAttribute colorSpaceAttribute =
-                    (ExifAttribute) mAttributes[PEF_HINT].get(TAG_COLOR_SPACE);
-            if (colorSpaceAttribute != null) {
-                mAttributes[IFD_EXIF_HINT].put(TAG_COLOR_SPACE, colorSpaceAttribute);
-            }
+            mAttributes[IFD_TYPE_EXIF].put(TAG_ISO_SPEED_RATINGS, rw2IsoAttribute);
         }
     }
 
@@ -2693,25 +2682,25 @@ public class ExifInterface {
         // The value of DATETIME tag has the same value of DATETIME_ORIGINAL tag.
         String valueOfDateTimeOriginal = getAttribute(TAG_DATETIME_ORIGINAL);
         if (valueOfDateTimeOriginal != null) {
-            mAttributes[IFD_TIFF_HINT].put(TAG_DATETIME,
+            mAttributes[IFD_TYPE_PRIMARY].put(TAG_DATETIME,
                     ExifAttribute.createString(valueOfDateTimeOriginal));
         }
 
         // Add the default value.
         if (getAttribute(TAG_IMAGE_WIDTH) == null) {
-            mAttributes[IFD_TIFF_HINT].put(TAG_IMAGE_WIDTH,
+            mAttributes[IFD_TYPE_PRIMARY].put(TAG_IMAGE_WIDTH,
                     ExifAttribute.createULong(0, mExifByteOrder));
         }
         if (getAttribute(TAG_IMAGE_LENGTH) == null) {
-            mAttributes[IFD_TIFF_HINT].put(TAG_IMAGE_LENGTH,
+            mAttributes[IFD_TYPE_PRIMARY].put(TAG_IMAGE_LENGTH,
                     ExifAttribute.createULong(0, mExifByteOrder));
         }
         if (getAttribute(TAG_ORIENTATION) == null) {
-            mAttributes[IFD_TIFF_HINT].put(TAG_ORIENTATION,
+            mAttributes[IFD_TYPE_PRIMARY].put(TAG_ORIENTATION,
                     ExifAttribute.createULong(0, mExifByteOrder));
         }
         if (getAttribute(TAG_LIGHT_SOURCE) == null) {
-            mAttributes[IFD_EXIF_HINT].put(TAG_LIGHT_SOURCE,
+            mAttributes[IFD_TYPE_EXIF].put(TAG_LIGHT_SOURCE,
                     ExifAttribute.createULong(0, mExifByteOrder));
         }
     }
@@ -2763,8 +2752,8 @@ public class ExifInterface {
     }
 
     // Reads image file directory, which is a tag group in EXIF.
-    private void readImageFileDirectory(ByteOrderAwarenessDataInputStream dataInputStream, int hint)
-            throws IOException {
+    private void readImageFileDirectory(ByteOrderAwarenessDataInputStream dataInputStream,
+            @IfdType int ifdType) throws IOException {
         if (dataInputStream.peek() + 2 > dataInputStream.mLength) {
             // Return if there is no data from the offset.
             return;
@@ -2789,12 +2778,12 @@ public class ExifInterface {
             long nextEntryOffset = dataInputStream.peek() + 4;
 
             // Look up a corresponding tag from tag number
-            ExifTag tag = (ExifTag) sExifTagMapsForReading[hint].get(tagNumber);
+            ExifTag tag = (ExifTag) sExifTagMapsForReading[ifdType].get(tagNumber);
 
             if (DEBUG) {
-                Log.d(TAG, String.format("hint: %d, tagNumber: %d, tagName: %s, dataFormat: %d, " +
-                        "numberOfComponents: %d", hint, tagNumber, tag != null ? tag.name : null,
-                        dataFormat, numberOfComponents));
+                Log.d(TAG, String.format("ifdType: %d, tagNumber: %d, tagName: %s, dataFormat: %d, "
+                        + "numberOfComponents: %d", ifdType, tagNumber,
+                        tag != null ? tag.name : null, dataFormat, numberOfComponents));
             }
 
             if (tag == null || dataFormat <= 0 ||
@@ -2821,7 +2810,8 @@ public class ExifInterface {
                     if (tag.name == TAG_MAKER_NOTE) {
                         // Save offset value for reading thumbnail
                         mOrfMakerNoteOffset = offset;
-                    } else if (hint == ORF_MAKER_NOTE_HINT && tag.name == TAG_ORF_THUMBNAIL_IMAGE) {
+                    } else if (ifdType == IFD_TYPE_ORF_MAKER_NOTE
+                            && tag.name == TAG_ORF_THUMBNAIL_IMAGE) {
                         // Retrieve & update values for thumbnail offset and length values for ORF
                         mOrfThumbnailOffset = offset;
                         mOrfThumbnailLength = numberOfComponents;
@@ -2833,10 +2823,10 @@ public class ExifInterface {
                         ExifAttribute jpegInterchangeFormatLengthAttribute =
                                 ExifAttribute.createULong(mOrfThumbnailLength, mExifByteOrder);
 
-                        mAttributes[IFD_THUMBNAIL_HINT].put(TAG_COMPRESSION, compressionAttribute);
-                        mAttributes[IFD_THUMBNAIL_HINT].put(TAG_JPEG_INTERCHANGE_FORMAT,
+                        mAttributes[IFD_TYPE_THUMBNAIL].put(TAG_COMPRESSION, compressionAttribute);
+                        mAttributes[IFD_TYPE_THUMBNAIL].put(TAG_JPEG_INTERCHANGE_FORMAT,
                                 jpegInterchangeFormatAttribute);
-                        mAttributes[IFD_THUMBNAIL_HINT].put(TAG_JPEG_INTERCHANGE_FORMAT_LENGTH,
+                        mAttributes[IFD_TYPE_THUMBNAIL].put(TAG_JPEG_INTERCHANGE_FORMAT_LENGTH,
                                 jpegInterchangeFormatLengthAttribute);
                     }
                 } else if (mMimeType == IMAGE_TYPE_RW2) {
@@ -2855,12 +2845,12 @@ public class ExifInterface {
             }
 
             // Recursively parse IFD when a IFD pointer tag appears.
-            int innerIfdHint = getIfdHintFromTagNumber(tagNumber);
+            Object nextIfdType = sExifPointerTagMap.get(tagNumber);
             if (DEBUG) {
-                Log.d(TAG, "innerIfdHint: " + innerIfdHint + " byteCount: " + byteCount);
+                Log.d(TAG, "nextIfdType: " + nextIfdType + " byteCount: " + byteCount);
             }
 
-            if (innerIfdHint >= 0) {
+            if (nextIfdType != null) {
                 long offset = -1L;
                 // Get offset from data field
                 switch (dataFormat) {
@@ -2891,7 +2881,7 @@ public class ExifInterface {
                 }
                 if (offset > 0L && offset < dataInputStream.mLength) {
                     dataInputStream.seek(offset);
-                    readImageFileDirectory(dataInputStream, innerIfdHint);
+                    readImageFileDirectory(dataInputStream, (int) nextIfdType);
                 } else {
                     Log.w(TAG, "Skip jump into the IFD since its offset is invalid: " + offset);
                 }
@@ -2903,7 +2893,7 @@ public class ExifInterface {
             byte[] bytes = new byte[byteCount];
             dataInputStream.readFully(bytes);
             ExifAttribute attribute = new ExifAttribute(dataFormat, numberOfComponents, bytes);
-            mAttributes[hint].put(tag.name, attribute);
+            mAttributes[ifdType].put(tag.name, attribute);
 
             // DNG files have a DNG Version tag specifying the version of specifications that the
             // image file is following.
@@ -2937,11 +2927,11 @@ public class ExifInterface {
             // since the first IFD offset is at least 8.
             if (nextIfdOffset > 8 && nextIfdOffset < dataInputStream.mLength) {
                 dataInputStream.seek(nextIfdOffset);
-                if (mAttributes[IFD_THUMBNAIL_HINT].isEmpty()) {
+                if (mAttributes[IFD_TYPE_THUMBNAIL].isEmpty()) {
                     // Do not overwrite thumbnail IFD data if it alreay exists.
-                    readImageFileDirectory(dataInputStream, IFD_THUMBNAIL_HINT);
-                } else if (mAttributes[IFD_PREVIEW_HINT].isEmpty()) {
-                    readImageFileDirectory(dataInputStream, IFD_PREVIEW_HINT);
+                    readImageFileDirectory(dataInputStream, IFD_TYPE_THUMBNAIL);
+                } else if (mAttributes[IFD_TYPE_PREVIEW].isEmpty()) {
+                    readImageFileDirectory(dataInputStream, IFD_TYPE_PREVIEW);
                 }
             }
         }
@@ -2976,7 +2966,7 @@ public class ExifInterface {
 
     // Sets thumbnail offset & length attributes based on JpegInterchangeFormat or StripOffsets tags
     private void setThumbnailData(InputStream in) throws IOException {
-        HashMap thumbnailData = mAttributes[IFD_THUMBNAIL_HINT];
+        HashMap thumbnailData = mAttributes[IFD_TYPE_THUMBNAIL];
 
         ExifAttribute compressionAttribute =
                 (ExifAttribute) thumbnailData.get(TAG_COMPRESSION);
@@ -3146,21 +3136,21 @@ public class ExifInterface {
     // Validate primary, preview, thumbnail image data by comparing image size
     private void validateImages(InputStream in) throws IOException {
         // Swap images based on size (primary > preview > thumbnail)
-        swapBasedOnImageSize(IFD_TIFF_HINT, IFD_PREVIEW_HINT);
-        swapBasedOnImageSize(IFD_TIFF_HINT, IFD_THUMBNAIL_HINT);
-        swapBasedOnImageSize(IFD_PREVIEW_HINT, IFD_THUMBNAIL_HINT);
+        swapBasedOnImageSize(IFD_TYPE_PRIMARY, IFD_TYPE_PREVIEW);
+        swapBasedOnImageSize(IFD_TYPE_PRIMARY, IFD_TYPE_THUMBNAIL);
+        swapBasedOnImageSize(IFD_TYPE_PREVIEW, IFD_TYPE_THUMBNAIL);
 
         // Check whether thumbnail image exists and whether preview image satisfies the thumbnail
         // image requirements
-        if (mAttributes[IFD_THUMBNAIL_HINT].isEmpty()) {
-            if (isThumbnail(mAttributes[IFD_PREVIEW_HINT])) {
-                mAttributes[IFD_THUMBNAIL_HINT] = mAttributes[IFD_PREVIEW_HINT];
-                mAttributes[IFD_PREVIEW_HINT] = new HashMap();
+        if (mAttributes[IFD_TYPE_THUMBNAIL].isEmpty()) {
+            if (isThumbnail(mAttributes[IFD_TYPE_PREVIEW])) {
+                mAttributes[IFD_TYPE_THUMBNAIL] = mAttributes[IFD_TYPE_PREVIEW];
+                mAttributes[IFD_TYPE_PREVIEW] = new HashMap();
             }
         }
 
         // Check if the thumbnail image satisfies the thumbnail size requirements
-        if (!isThumbnail(mAttributes[IFD_THUMBNAIL_HINT])) {
+        if (!isThumbnail(mAttributes[IFD_TYPE_THUMBNAIL])) {
             Log.d(TAG, "No image meets the size requirements of a thumbnail image.");
         }
     }
@@ -3244,9 +3234,9 @@ public class ExifInterface {
                 if (newSubfileTypeValue == ORIGINAL_RESOLUTION_IMAGE) {
                     // Update only for the primary image (OriginalResolutionImage)
                     ExifAttribute pixelXDimAttribute =
-                            (ExifAttribute) mAttributes[IFD_EXIF_HINT].get(TAG_PIXEL_X_DIMENSION);
+                            (ExifAttribute) mAttributes[IFD_TYPE_EXIF].get(TAG_PIXEL_X_DIMENSION);
                     ExifAttribute pixelYDimAttribute =
-                            (ExifAttribute) mAttributes[IFD_EXIF_HINT].get(TAG_PIXEL_Y_DIMENSION);
+                            (ExifAttribute) mAttributes[IFD_TYPE_EXIF].get(TAG_PIXEL_Y_DIMENSION);
 
                     if (pixelXDimAttribute != null && pixelYDimAttribute != null) {
                         mAttributes[imageType].put(TAG_IMAGE_WIDTH, pixelXDimAttribute);
@@ -3257,16 +3247,6 @@ public class ExifInterface {
             }
             retrieveJpegImageSize(in, imageType);
         }
-    }
-
-    // Gets the corresponding IFD group index of the given tag number for writing Exif Tags.
-    private static int getIfdHintFromTagNumber(int tagNumber) {
-        for (int i = 0; i < EXIF_POINTER_TAG_HINTS.length; ++i) {
-            if (EXIF_POINTER_TAGS[i].number == tagNumber) {
-                return EXIF_POINTER_TAG_HINTS[i];
-            }
-        }
-        return -1;
     }
 
     // Writes an Exif segment into the given output stream.
@@ -3285,33 +3265,33 @@ public class ExifInterface {
         removeAttribute(JPEG_INTERCHANGE_FORMAT_LENGTH_TAG.name);
 
         // Remove null value tags.
-        for (int hint = 0; hint < EXIF_TAGS.length; ++hint) {
-            for (Object obj : mAttributes[hint].entrySet().toArray()) {
+        for (int ifdType = 0; ifdType < EXIF_TAGS.length; ++ifdType) {
+            for (Object obj : mAttributes[ifdType].entrySet().toArray()) {
                 final Map.Entry entry = (Map.Entry) obj;
                 if (entry.getValue() == null) {
-                    mAttributes[hint].remove(entry.getKey());
+                    mAttributes[ifdType].remove(entry.getKey());
                 }
             }
         }
 
         // Add IFD pointer tags. The next offset of primary image TIFF IFD will have thumbnail IFD
         // offset when there is one or more tags in the thumbnail IFD.
-        if (!mAttributes[IFD_EXIF_HINT].isEmpty()) {
-            mAttributes[IFD_TIFF_HINT].put(EXIF_POINTER_TAGS[1].name,
+        if (!mAttributes[IFD_TYPE_EXIF].isEmpty()) {
+            mAttributes[IFD_TYPE_PRIMARY].put(EXIF_POINTER_TAGS[1].name,
                     ExifAttribute.createULong(0, mExifByteOrder));
         }
-        if (!mAttributes[IFD_GPS_HINT].isEmpty()) {
-            mAttributes[IFD_TIFF_HINT].put(EXIF_POINTER_TAGS[2].name,
+        if (!mAttributes[IFD_TYPE_GPS].isEmpty()) {
+            mAttributes[IFD_TYPE_PRIMARY].put(EXIF_POINTER_TAGS[2].name,
                     ExifAttribute.createULong(0, mExifByteOrder));
         }
-        if (!mAttributes[IFD_INTEROPERABILITY_HINT].isEmpty()) {
-            mAttributes[IFD_EXIF_HINT].put(EXIF_POINTER_TAGS[3].name,
+        if (!mAttributes[IFD_TYPE_INTEROPERABILITY].isEmpty()) {
+            mAttributes[IFD_TYPE_EXIF].put(EXIF_POINTER_TAGS[3].name,
                     ExifAttribute.createULong(0, mExifByteOrder));
         }
         if (mHasThumbnail) {
-            mAttributes[IFD_THUMBNAIL_HINT].put(JPEG_INTERCHANGE_FORMAT_TAG.name,
+            mAttributes[IFD_TYPE_THUMBNAIL].put(JPEG_INTERCHANGE_FORMAT_TAG.name,
                     ExifAttribute.createULong(0, mExifByteOrder));
-            mAttributes[IFD_THUMBNAIL_HINT].put(JPEG_INTERCHANGE_FORMAT_LENGTH_TAG.name,
+            mAttributes[IFD_TYPE_THUMBNAIL].put(JPEG_INTERCHANGE_FORMAT_LENGTH_TAG.name,
                     ExifAttribute.createULong(mThumbnailLength, mExifByteOrder));
         }
 
@@ -3331,15 +3311,15 @@ public class ExifInterface {
 
         // Calculate IFD offsets.
         int position = 8;
-        for (int hint = 0; hint < EXIF_TAGS.length; ++hint) {
-            if (!mAttributes[hint].isEmpty()) {
-                ifdOffsets[hint] = position;
-                position += 2 + mAttributes[hint].size() * 12 + 4 + ifdDataSizes[hint];
+        for (int ifdType = 0; ifdType < EXIF_TAGS.length; ++ifdType) {
+            if (!mAttributes[ifdType].isEmpty()) {
+                ifdOffsets[ifdType] = position;
+                position += 2 + mAttributes[ifdType].size() * 12 + 4 + ifdDataSizes[ifdType];
             }
         }
         if (mHasThumbnail) {
             int thumbnailOffset = position;
-            mAttributes[IFD_THUMBNAIL_HINT].put(JPEG_INTERCHANGE_FORMAT_TAG.name,
+            mAttributes[IFD_TYPE_THUMBNAIL].put(JPEG_INTERCHANGE_FORMAT_TAG.name,
                     ExifAttribute.createULong(thumbnailOffset, mExifByteOrder));
             mThumbnailOffset = exifOffsetFromBeginning + thumbnailOffset;
             position += mThumbnailLength;
@@ -3356,17 +3336,17 @@ public class ExifInterface {
         }
 
         // Update IFD pointer tags with the calculated offsets.
-        if (!mAttributes[IFD_EXIF_HINT].isEmpty()) {
-            mAttributes[IFD_TIFF_HINT].put(EXIF_POINTER_TAGS[1].name,
-                    ExifAttribute.createULong(ifdOffsets[IFD_EXIF_HINT], mExifByteOrder));
+        if (!mAttributes[IFD_TYPE_EXIF].isEmpty()) {
+            mAttributes[IFD_TYPE_PRIMARY].put(EXIF_POINTER_TAGS[1].name,
+                    ExifAttribute.createULong(ifdOffsets[IFD_TYPE_EXIF], mExifByteOrder));
         }
-        if (!mAttributes[IFD_GPS_HINT].isEmpty()) {
-            mAttributes[IFD_TIFF_HINT].put(EXIF_POINTER_TAGS[2].name,
-                    ExifAttribute.createULong(ifdOffsets[IFD_GPS_HINT], mExifByteOrder));
+        if (!mAttributes[IFD_TYPE_GPS].isEmpty()) {
+            mAttributes[IFD_TYPE_PRIMARY].put(EXIF_POINTER_TAGS[2].name,
+                    ExifAttribute.createULong(ifdOffsets[IFD_TYPE_GPS], mExifByteOrder));
         }
-        if (!mAttributes[IFD_INTEROPERABILITY_HINT].isEmpty()) {
-            mAttributes[IFD_EXIF_HINT].put(EXIF_POINTER_TAGS[3].name, ExifAttribute.createULong(
-                    ifdOffsets[IFD_INTEROPERABILITY_HINT], mExifByteOrder));
+        if (!mAttributes[IFD_TYPE_INTEROPERABILITY].isEmpty()) {
+            mAttributes[IFD_TYPE_EXIF].put(EXIF_POINTER_TAGS[3].name, ExifAttribute.createULong(
+                    ifdOffsets[IFD_TYPE_INTEROPERABILITY], mExifByteOrder));
         }
 
         // Write TIFF Headers. See JEITA CP-3451C Section 4.5.2. Table 1.
@@ -3379,17 +3359,18 @@ public class ExifInterface {
         dataOutputStream.writeUnsignedInt(IFD_OFFSET);
 
         // Write IFD groups. See JEITA CP-3451C Section 4.5.8. Figure 9.
-        for (int hint = 0; hint < EXIF_TAGS.length; ++hint) {
-            if (!mAttributes[hint].isEmpty()) {
+        for (int ifdType = 0; ifdType < EXIF_TAGS.length; ++ifdType) {
+            if (!mAttributes[ifdType].isEmpty()) {
                 // See JEITA CP-3451C Section 4.6.2: IFD structure.
                 // Write entry count
-                dataOutputStream.writeUnsignedShort(mAttributes[hint].size());
+                dataOutputStream.writeUnsignedShort(mAttributes[ifdType].size());
 
                 // Write entry info
-                int dataOffset = ifdOffsets[hint] + 2 + mAttributes[hint].size() * 12 + 4;
-                for (Map.Entry entry : (Set<Map.Entry>) mAttributes[hint].entrySet()) {
+                int dataOffset = ifdOffsets[ifdType] + 2 + mAttributes[ifdType].size() * 12 + 4;
+                for (Map.Entry entry : (Set<Map.Entry>) mAttributes[ifdType].entrySet()) {
                     // Convert tag name to tag number.
-                    final ExifTag tag = (ExifTag) sExifTagMapsForWriting[hint].get(entry.getKey());
+                    final ExifTag tag =
+                            (ExifTag) sExifTagMapsForWriting[ifdType].get(entry.getKey());
                     final int tagNumber = tag.number;
                     final ExifAttribute attribute = (ExifAttribute) entry.getValue();
                     final int size = attribute.size();
@@ -3414,14 +3395,14 @@ public class ExifInterface {
                 // Write the next offset. It writes the offset of thumbnail IFD if there is one or
                 // more tags in the thumbnail IFD when the current IFD is the primary image TIFF
                 // IFD; Otherwise 0.
-                if (hint == 0 && !mAttributes[IFD_THUMBNAIL_HINT].isEmpty()) {
-                    dataOutputStream.writeUnsignedInt(ifdOffsets[IFD_THUMBNAIL_HINT]);
+                if (ifdType == 0 && !mAttributes[IFD_TYPE_THUMBNAIL].isEmpty()) {
+                    dataOutputStream.writeUnsignedInt(ifdOffsets[IFD_TYPE_THUMBNAIL]);
                 } else {
                     dataOutputStream.writeUnsignedInt(0);
                 }
 
                 // Write values of data field exceeding 4 bytes after the next offset.
-                for (Map.Entry entry : (Set<Map.Entry>) mAttributes[hint].entrySet()) {
+                for (Map.Entry entry : (Set<Map.Entry>) mAttributes[ifdType].entrySet()) {
                     ExifAttribute attribute = (ExifAttribute) entry.getValue();
 
                     if (attribute.bytes.length > 4) {
@@ -3748,9 +3729,9 @@ public class ExifInterface {
     }
 
     // Swaps image data based on image size
-    private void swapBasedOnImageSize(int firstImageHint, int secondImageHint)
+    private void swapBasedOnImageSize(@IfdType int firstIfdType, @IfdType int secondIfdType)
             throws IOException {
-        if (mAttributes[firstImageHint].isEmpty() || mAttributes[secondImageHint].isEmpty()) {
+        if (mAttributes[firstIfdType].isEmpty() || mAttributes[secondIfdType].isEmpty()) {
             if (DEBUG) {
                 Log.d(TAG, "Cannot perform swap since only one image data exists");
             }
@@ -3758,13 +3739,13 @@ public class ExifInterface {
         }
 
         ExifAttribute firstImageLengthAttribute =
-                (ExifAttribute) mAttributes[firstImageHint].get(TAG_IMAGE_LENGTH);
+                (ExifAttribute) mAttributes[firstIfdType].get(TAG_IMAGE_LENGTH);
         ExifAttribute firstImageWidthAttribute =
-                (ExifAttribute) mAttributes[firstImageHint].get(TAG_IMAGE_WIDTH);
+                (ExifAttribute) mAttributes[firstIfdType].get(TAG_IMAGE_WIDTH);
         ExifAttribute secondImageLengthAttribute =
-                (ExifAttribute) mAttributes[secondImageHint].get(TAG_IMAGE_LENGTH);
+                (ExifAttribute) mAttributes[secondIfdType].get(TAG_IMAGE_LENGTH);
         ExifAttribute secondImageWidthAttribute =
-                (ExifAttribute) mAttributes[secondImageHint].get(TAG_IMAGE_WIDTH);
+                (ExifAttribute) mAttributes[secondIfdType].get(TAG_IMAGE_WIDTH);
 
         if (firstImageLengthAttribute == null || firstImageWidthAttribute == null) {
             if (DEBUG) {
@@ -3782,9 +3763,9 @@ public class ExifInterface {
 
             if (firstImageLengthValue < secondImageLengthValue &&
                     firstImageWidthValue < secondImageWidthValue) {
-                HashMap tempMap = mAttributes[firstImageHint];
-                mAttributes[firstImageHint] = mAttributes[secondImageHint];
-                mAttributes[secondImageHint] = tempMap;
+                HashMap tempMap = mAttributes[firstIfdType];
+                mAttributes[firstIfdType] = mAttributes[secondIfdType];
+                mAttributes[secondIfdType] = tempMap;
             }
         }
     }
