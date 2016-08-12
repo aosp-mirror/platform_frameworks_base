@@ -19,6 +19,7 @@ package com.android.server.pm;
 import android.content.pm.PackageParser;
 import android.content.pm.Signature;
 import android.os.Environment;
+import android.os.SystemProperties;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -63,6 +64,8 @@ public final class SELinuxMMAC {
     // All policy stanzas read from mac_permissions.xml. This is also the lock
     // to synchronize access during policy load and access attempts.
     private static List<Policy> sPolicies = new ArrayList<>();
+
+    private static final String PROP_FORCE_RESTORECON = "sys.force_restorecon";
 
     /** Path to version on rootfs */
     private static final File VERSION_FILE = new File("/selinux_version");
@@ -322,6 +325,11 @@ public final class SELinuxMMAC {
      * @return Returns true if the restorecon should occur or false otherwise.
      */
     public static boolean isRestoreconNeeded(File file) {
+        // To investigate boot timing, allow a property to always force restorecon
+        if (SystemProperties.getBoolean(PROP_FORCE_RESTORECON, false)) {
+            return true;
+        }
+
         try {
             final byte[] buf = new byte[20];
             final int len = Os.getxattr(file.getAbsolutePath(), XATTR_SEAPP_HASH, buf);
