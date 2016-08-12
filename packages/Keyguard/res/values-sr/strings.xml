@@ -46,11 +46,6 @@
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"SIM картица је закључана."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"SIM картица је закључана PUK кодом."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"Откључавање SIM картице…"</string>
-    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Откључавање шаблоном."</string>
-    <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Откључавање PIN-ом."</string>
-    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Откључавање лозинком."</string>
-    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Област шаблона."</string>
-    <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Област превлачења."</string>
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"Област за PIN"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"Област за PIN за SIM"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"Област за PUK за SIM"</string>
