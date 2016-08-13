@@ -108,7 +108,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 149 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 150 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -1414,22 +1414,6 @@ public class BatteryStatsImpl extends BatteryStats {
             mUnpluggedReportedTotalTime = 0;
             mUnpluggedReportedCount = 0;
             return true;
-        }
-
-        @Override
-        public void writeSummaryFromParcelLocked(Parcel out, long batteryRealtime) {
-            super.writeSummaryFromParcelLocked(out, batteryRealtime);
-            out.writeLong(mCurrentReportedTotalTime);
-            out.writeInt(mCurrentReportedCount);
-            out.writeInt(mTrackingReportedValues ? 1 : 0);
-        }
-
-        @Override
-        public void readSummaryFromParcelLocked(Parcel in) {
-            super.readSummaryFromParcelLocked(in);
-            mUnpluggedReportedTotalTime = mCurrentReportedTotalTime = in.readLong();
-            mUnpluggedReportedCount = mCurrentReportedCount = in.readInt();
-            mTrackingReportedValues = in.readInt() == 1;
         }
     }
 
