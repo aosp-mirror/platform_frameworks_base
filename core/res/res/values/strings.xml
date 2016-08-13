@@ -484,6 +484,10 @@
     <!-- label for item that turns off power in phone options dialog -->
     <string name="global_action_power_off">Power off</string>
 
+    <!-- label for item that restarts phone in phone options dialog -->
+    <!-- TODO: promote to separate string-->
+    <string name="global_action_restart" translatable="false">@string/sim_restart_button</string>
+
     <!-- label for item that generates a bug report in the phone options dialog -->
     <string name="global_action_bug_report">Bug report</string>
 
