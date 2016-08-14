@@ -26,6 +26,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
+import android.graphics.Xfermode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.DrawableWrapper;
@@ -221,6 +222,12 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
         private WallpaperDrawable(Resources r, ConstantState state) {
             super(new BitmapDrawable(r, state.mBackground));
             mState = state;
+        }
+
+        @Override
+        public void setXfermode(@Nullable Xfermode mode) {
+            // DrawableWrapper does not call this for us.
+            getDrawable().setXfermode(mode);
         }
 
         @Override
