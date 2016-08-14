@@ -46,6 +46,7 @@ import android.util.Slog;
 import android.view.IWindowManager;
 import android.view.WindowManager;
 
+import com.android.internal.app.AssistUtils;
 import com.android.internal.app.IAssistScreenshotReceiver;
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.internal.app.IVoiceInteractor;
@@ -301,7 +302,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
             } else {
                 mScreenshot = null;
             }
-            if (needDisclosure) {
+            if (needDisclosure && AssistUtils.shouldDisclose(mContext, mSessionComponentName)) {
                 mHandler.post(mShowAssistDisclosureRunnable);
             }
             if (mSession != null) {

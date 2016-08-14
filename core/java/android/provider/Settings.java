@@ -6026,6 +6026,17 @@ public final class Settings {
         public static final String ASSIST_SCREENSHOT_ENABLED = "assist_screenshot_enabled";
 
         /**
+         * Specifies whether the screen will show an animation if screen contents are sent to the
+         * assist application (active voice interaction service).
+         *
+         * Note that the disclosure will be forced for third-party assistants or if the device
+         * does not support disabling it.
+         *
+         * @hide
+         */
+        public static final String ASSIST_DISCLOSURE_ENABLED = "assist_disclosure_enabled";
+
+        /**
          * Names of the service components that the current user has explicitly allowed to
          * see all of the user's notifications, separated by ':'.
          *
