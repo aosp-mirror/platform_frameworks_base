@@ -413,7 +413,10 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     @Override
     protected void onDraw(Canvas canvas) {
-        canvas.drawRect(0, mCurrentBounds.top, getWidth(), mCurrentBounds.bottom, mBackgroundPaint);
+        if (mCurrentBounds.top < mCurrentBounds.bottom) {
+            canvas.drawRect(0, mCurrentBounds.top, getWidth(), mCurrentBounds.bottom,
+                    mBackgroundPaint);
+        }
         if (DEBUG) {
             int y = mTopPadding;
             canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
@@ -2049,11 +2052,12 @@ public class NotificationStackScrollLayout extends ViewGroup
             bottom = top;
         }
         if (mPhoneStatusBar.getBarState() != StatusBarState.KEYGUARD) {
-            mBackgroundBounds.top = (int) Math.max(mTopPadding + mStackTranslation, top);
+            top = (int) Math.max(mTopPadding + mStackTranslation, top);
         } else {
             // otherwise the animation from the shade to the keyguard will jump as it's maxed
-            mBackgroundBounds.top = Math.max(0, top);
+            top = Math.max(0, top);
         }
+        mBackgroundBounds.top = top;
         mBackgroundBounds.bottom = Math.min(getHeight(), Math.max(bottom, top));
     }
 
