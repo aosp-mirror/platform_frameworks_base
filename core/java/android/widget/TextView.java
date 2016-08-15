@@ -114,6 +114,7 @@ import android.view.ActionMode;
 import android.view.Choreographer;
 import android.view.ContextMenu;
 import android.view.DragEvent;
+import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.KeyCharacterMap;
@@ -649,6 +650,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * See {@link #createEditorIfNeeded()}.
      */
     private Editor mEditor;
+
+    private final GestureDetector mClickableSpanOnClickGestureDetector;
 
     private static final int DEVICE_PROVISIONED_UNKNOWN = 0;
     private static final int DEVICE_PROVISIONED_NO = 1;
@@ -1488,6 +1491,24 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (getImportantForAccessibility() == IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
             setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
         }
+
+        mClickableSpanOnClickGestureDetector = new GestureDetector(context,
+                new GestureDetector.SimpleOnGestureListener() {
+                    @Override
+                    public boolean onSingleTapConfirmed(MotionEvent e) {
+                        if (mLinksClickable && (mMovement != null) &&
+                                (mMovement instanceof LinkMovementMethod
+                                || (mAutoLinkMask != 0 && isTextSelectable()))) {
+                            ClickableSpan[] links = ((Spannable) mText).getSpans(
+                                    getSelectionStart(), getSelectionEnd(), ClickableSpan.class);
+                            if (links.length > 0) {
+                                links[0].onClick(TextView.this);
+                                return true;
+                            }
+                        }
+                        return false;
+                    }
+                });
     }
 
     private int[] parseDimensionArray(TypedArray dimens) {
@@ -8515,21 +8536,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (mMovement != null) {
                 handled |= mMovement.onTouchEvent(this, (Spannable) mText, event);
             }
+            handled |= mClickableSpanOnClickGestureDetector.onTouchEvent(event);
 
             final boolean textIsSelectable = isTextSelectable();
-            if (touchIsFinished && mLinksClickable && mAutoLinkMask != 0 && textIsSelectable) {
-                // The LinkMovementMethod which should handle taps on links has not been installed
-                // on non editable text that support text selection.
-                // We reproduce its behavior here to open links for these.
-                ClickableSpan[] links = ((Spannable) mText).getSpans(getSelectionStart(),
-                        getSelectionEnd(), ClickableSpan.class);
-
-                if (links.length > 0) {
-                    links[0].onClick(this);
-                    handled = true;
-                }
-            }
-
             if (touchIsFinished && (isTextEditable() || textIsSelectable)) {
                 // Show the IME, except when selecting in read-only text.
                 final InputMethodManager imm = InputMethodManager.peekInstance();
