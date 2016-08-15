@@ -714,7 +714,7 @@ public class Build {
         public static final int N = 24;
 
         /**
-         * N MR1: Still ¯\_(シ)_/¯.
+         * N MR1: Nougat++.
          */
         public static final int N_MR1 = 25;
     }
