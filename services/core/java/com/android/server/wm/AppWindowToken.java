@@ -17,7 +17,9 @@
 package com.android.server.wm;
 
 import static android.app.ActivityManager.StackId;
+import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
+import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
@@ -357,8 +359,14 @@ class AppWindowToken extends WindowToken {
                 // placement for this window during this period, one or more frame will
                 // show up with wrong position or scale.
                 win.mWinAnimator.mAnimating = false;
+
+                if (win.mDestroying) {
+                    win.mDestroying = false;
+                    service.mDestroySurface.remove(win);
+                }
             }
         }
+        requestUpdateWallpaperIfNeeded();
     }
 
     void destroySurfaces() {
@@ -405,6 +413,9 @@ class AppWindowToken extends WindowToken {
             final DisplayContent displayContent = win.getDisplayContent();
             if (displayContent != null && !displayList.contains(displayContent)) {
                 displayList.add(displayContent);
+            }
+            if (cleanupOnResume) {
+                win.requestUpdateWallpaperIfNeeded();
             }
             win.mDestroying = false;
         }
