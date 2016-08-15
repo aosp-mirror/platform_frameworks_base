@@ -340,6 +340,7 @@ class AppWindowToken extends WindowToken {
     }
 
     void clearAnimatingFlags() {
+        boolean wallpaperMightChange = false;
         for (int i = allAppWindows.size() - 1; i >= 0; i--) {
             final WindowState win = allAppWindows.get(i);
             // We don't want to clear it out for windows that get replaced, because the
@@ -350,7 +351,6 @@ class AppWindowToken extends WindowToken {
             // by the client. We should let animation proceed and not clear this flag or
             // they won't eventually be removed by WindowStateAnimator#finishExit.
             if (!win.mWillReplaceWindow && !win.mRemoveOnExit) {
-                win.mAnimatingExit = false;
                 // Clear mAnimating flag together with mAnimatingExit. When animation
                 // changes from exiting to entering, we need to clear this flag until the
                 // new animation gets applied, so that isAnimationStarting() becomes true
@@ -358,15 +358,24 @@ class AppWindowToken extends WindowToken {
                 // Otherwise applySurfaceChangesTransaction will faill to skip surface
                 // placement for this window during this period, one or more frame will
                 // show up with wrong position or scale.
-                win.mWinAnimator.mAnimating = false;
-
+                if (win.mAnimatingExit) {
+                    win.mAnimatingExit = false;
+                    wallpaperMightChange = true;
+                }
+                if (win.mWinAnimator.mAnimating) {
+                    win.mWinAnimator.mAnimating = false;
+                    wallpaperMightChange = true;
+                }
                 if (win.mDestroying) {
                     win.mDestroying = false;
                     service.mDestroySurface.remove(win);
+                    wallpaperMightChange = true;
                 }
             }
         }
-        requestUpdateWallpaperIfNeeded();
+        if (wallpaperMightChange) {
+            requestUpdateWallpaperIfNeeded();
+        }
     }
 
     void destroySurfaces() {
