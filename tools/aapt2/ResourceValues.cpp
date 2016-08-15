@@ -449,9 +449,7 @@ void Attribute::print(std::ostream* out) const {
     printMask(out);
 
     if (!symbols.empty()) {
-        *out << " ["
-            << util::joiner(symbols.begin(), symbols.end(), ", ")
-            << "]";
+        *out << " [" << util::joiner(symbols, ", ") << "]";
     }
 
     if (minInt != std::numeric_limits<int32_t>::min()) {
@@ -600,7 +598,7 @@ void Style::print(std::ostream* out) const {
         *out << parent.value().name.value();
     }
     *out << " ["
-        << util::joiner(entries.begin(), entries.end(), ", ")
+        << util::joiner(entries, ", ")
         << "]";
 }
 
@@ -645,7 +643,7 @@ Array* Array::clone(StringPool* newPool) const {
 
 void Array::print(std::ostream* out) const {
     *out << "(array) ["
-        << util::joiner(items.begin(), items.end(), ", ")
+        << util::joiner(items, ", ")
         << "]";
 }
 
@@ -730,7 +728,7 @@ Styleable* Styleable::clone(StringPool* /*newPool*/) const {
 
 void Styleable::print(std::ostream* out) const {
     *out << "(styleable) " << " ["
-        << util::joiner(entries.begin(), entries.end(), ", ")
+        << util::joiner(entries, ", ")
         << "]";
 }
 

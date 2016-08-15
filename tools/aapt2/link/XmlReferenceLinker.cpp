@@ -106,7 +106,7 @@ public:
                     }
 
                     const Attribute* attribute = &attr.compiledAttribute.value().attribute;
-                    attr.compiledValue = ResourceUtils::parseItemForAttribute(attr.value,
+                    attr.compiledValue = ResourceUtils::tryParseItemForAttribute(attr.value,
                                                                               attribute);
                     if (!attr.compiledValue &&
                             !(attribute->typeMask & android::ResTable_map::TYPE_STRING)) {

@@ -59,11 +59,14 @@ struct LinkOptions {
     std::string manifestPath;
     std::vector<std::string> includePaths;
     std::vector<std::string> overlayFiles;
+
+    // Java/Proguard options.
     Maybe<std::string> generateJavaClassPath;
     Maybe<std::string> customJavaPackage;
     std::set<std::string> extraJavaPackages;
     Maybe<std::string> generateProguardRulesPath;
     Maybe<std::string> generateMainDexProguardRulesPath;
+
     bool noAutoVersion = false;
     bool noVersionVectors = false;
     bool staticLib = false;
@@ -77,7 +80,13 @@ struct LinkOptions {
     Maybe<std::string> privateSymbols;
     ManifestFixerOptions manifestFixerOptions;
     std::unordered_set<std::string> products;
+
+    // Split APK options.
     TableSplitterOptions tableSplitterOptions;
+    std::vector<SplitConstraints> splitConstraints;
+    std::vector<std::string> splitPaths;
+
+    // Stable ID options.
     std::unordered_map<ResourceName, ResourceId> stableIdMap;
     Maybe<std::string> resourceIdMapPath;
 };
@@ -585,7 +594,7 @@ static bool loadStableIdMap(IDiagnostics* diag, const std::string& path,
         const size_t resIdStrLen = line.size() - resIdStartIdx;
         StringPiece resIdStr = util::trimWhitespace(line.substr(resIdStartIdx, resIdStrLen));
 
-        Maybe<ResourceId> maybeId = ResourceUtils::tryParseResourceId(resIdStr);
+        Maybe<ResourceId> maybeId = ResourceUtils::parseResourceId(resIdStr);
         if (!maybeId) {
             diag->error(DiagMessage(Source(path, lineNo)) << "invalid resource ID '"
                         << resIdStr << "'");
@@ -594,6 +603,28 @@ static bool loadStableIdMap(IDiagnostics* diag, const std::string& path,
 
         (*outIdMap)[name.toResourceName()] = maybeId.value();
     }
+    return true;
+}
+
+static bool parseSplitParameter(const StringPiece& arg, IDiagnostics* diag,
+                                std::string* outPath, SplitConstraints* outSplit) {
+    std::vector<std::string> parts = util::split(arg, ':');
+    if (parts.size() != 2) {
+        diag->error(DiagMessage() << "invalid split parameter '" << arg << "'");
+        diag->note(DiagMessage() << "should be --split path/to/output.apk:<config>[,<config>...]");
+        return false;
+    }
+    *outPath = parts[0];
+    std::vector<ConfigDescription> configs;
+    for (const StringPiece& configStr : util::tokenize(parts[1], ',')) {
+        configs.push_back({});
+        if (!ConfigDescription::parse(configStr, &configs.back())) {
+            diag->error(DiagMessage() << "invalid config '" << configStr
+                        << "' in split parameter '" << arg << "'");
+            return false;
+        }
+    }
+    outSplit->configs.insert(configs.begin(), configs.end());
     return true;
 }
 
@@ -675,6 +706,30 @@ public:
             }
 
             appInfo.package = packageAttr->value;
+
+            if (xml::Attribute* versionCodeAttr =
+                    manifestEl->findAttribute(xml::kSchemaAndroid, "versionCode")) {
+                Maybe<uint32_t> maybeCode = ResourceUtils::parseInt(versionCodeAttr->value);
+                if (!maybeCode) {
+                    diag->error(DiagMessage(xmlRes->file.source.withLine(manifestEl->lineNumber))
+                                << "invalid android:versionCode '"
+                                << versionCodeAttr->value << "'");
+                    return {};
+                }
+                appInfo.versionCode = maybeCode.value();
+            }
+
+            if (xml::Attribute* revisionCodeAttr =
+                    manifestEl->findAttribute(xml::kSchemaAndroid, "revisionCode")) {
+                Maybe<uint32_t> maybeCode = ResourceUtils::parseInt(revisionCodeAttr->value);
+                if (!maybeCode) {
+                    diag->error(DiagMessage(xmlRes->file.source.withLine(manifestEl->lineNumber))
+                                << "invalid android:revisionCode '"
+                                << revisionCodeAttr->value << "'");
+                    return {};
+                }
+                appInfo.revisionCode = maybeCode.value();
+            }
 
             if (xml::Element* usesSdkEl = manifestEl->findChild({}, "uses-sdk")) {
                 if (xml::Attribute* minSdk =
@@ -767,11 +822,11 @@ public:
         return true;
     }
 
-    std::unique_ptr<IArchiveWriter> makeArchiveWriter() {
+    std::unique_ptr<IArchiveWriter> makeArchiveWriter(const StringPiece& out) {
         if (mOptions.outputToDirectory) {
-            return createDirectoryArchiveWriter(mContext->getDiagnostics(), mOptions.outputPath);
+            return createDirectoryArchiveWriter(mContext->getDiagnostics(), out);
         } else {
-            return createZipFileArchiveWriter(mContext->getDiagnostics(), mOptions.outputPath);
+            return createZipFileArchiveWriter(mContext->getDiagnostics(), out);
         }
     }
 
@@ -1179,6 +1234,94 @@ public:
         return true;
     }
 
+    std::unique_ptr<xml::XmlResource> generateSplitManifest(const AppInfo& appInfo,
+                                                            const SplitConstraints& constraints) {
+        std::unique_ptr<xml::XmlResource> doc = util::make_unique<xml::XmlResource>();
+
+        std::unique_ptr<xml::Namespace> namespaceAndroid = util::make_unique<xml::Namespace>();
+        namespaceAndroid->namespaceUri = xml::kSchemaAndroid;
+        namespaceAndroid->namespacePrefix = "android";
+
+        std::unique_ptr<xml::Element> manifestEl = util::make_unique<xml::Element>();
+        manifestEl->name = "manifest";
+        manifestEl->attributes.push_back(
+                xml::Attribute{ "", "package", appInfo.package });
+
+        if (appInfo.versionCode) {
+            manifestEl->attributes.push_back(xml::Attribute{
+                    xml::kSchemaAndroid,
+                    "versionCode",
+                    std::to_string(appInfo.versionCode.value()) });
+        }
+
+        if (appInfo.revisionCode) {
+            manifestEl->attributes.push_back(xml::Attribute{
+                    xml::kSchemaAndroid,
+                    "revisionCode", std::to_string(appInfo.revisionCode.value()) });
+        }
+
+        std::stringstream splitName;
+        splitName << "config." << util::joiner(constraints.configs, "_");
+
+        manifestEl->attributes.push_back(
+                xml::Attribute{ "", "split", splitName.str() });
+
+        std::unique_ptr<xml::Element> applicationEl = util::make_unique<xml::Element>();
+        applicationEl->name = "application";
+        applicationEl->attributes.push_back(
+                xml::Attribute{ xml::kSchemaAndroid, "hasCode", "false" });
+
+        manifestEl->addChild(std::move(applicationEl));
+        namespaceAndroid->addChild(std::move(manifestEl));
+        doc->root = std::move(namespaceAndroid);
+        return doc;
+    }
+
+    /**
+     * Writes the AndroidManifest, ResourceTable, and all XML files referenced by the ResourceTable
+     * to the IArchiveWriter.
+     */
+    bool writeApk(IArchiveWriter* writer, proguard::KeepSet* keepSet, xml::XmlResource* manifest,
+                  ResourceTable* table) {
+        const bool keepRawValues = mOptions.staticLib;
+        bool result = flattenXml(manifest, "AndroidManifest.xml", {}, keepRawValues, writer,
+                                 mContext);
+        if (!result) {
+            return false;
+        }
+
+        ResourceFileFlattenerOptions fileFlattenerOptions;
+        fileFlattenerOptions.keepRawValues = keepRawValues;
+        fileFlattenerOptions.doNotCompressAnything = mOptions.doNotCompressAnything;
+        fileFlattenerOptions.extensionsToNotCompress = mOptions.extensionsToNotCompress;
+        fileFlattenerOptions.noAutoVersion = mOptions.noAutoVersion;
+        fileFlattenerOptions.noVersionVectors = mOptions.noVersionVectors;
+        fileFlattenerOptions.updateProguardSpec =
+                static_cast<bool>(mOptions.generateProguardRulesPath);
+
+        ResourceFileFlattener fileFlattener(fileFlattenerOptions, mContext, keepSet);
+
+        if (!fileFlattener.flatten(table, writer)) {
+            mContext->getDiagnostics()->error(DiagMessage() << "failed linking file resources");
+            return false;
+        }
+
+        if (mOptions.staticLib) {
+            if (!flattenTableToPb(table, writer)) {
+                mContext->getDiagnostics()->error(DiagMessage()
+                                                  << "failed to write resources.arsc.flat");
+                return false;
+            }
+        } else {
+            if (!flattenTable(table, writer)) {
+                mContext->getDiagnostics()->error(DiagMessage()
+                                                  << "failed to write resources.arsc");
+                return false;
+            }
+        }
+        return true;
+    }
+
     int run(const std::vector<std::string>& inputFiles) {
         // Load the AndroidManifest.xml
         std::unique_ptr<xml::XmlResource> manifestXml = loadXml(mOptions.manifestPath,
@@ -1187,30 +1330,33 @@ public:
             return 1;
         }
 
+        // First extract the Package name without modifying it (via --rename-manifest-package).
         if (Maybe<AppInfo> maybeAppInfo = extractAppInfoFromManifest(manifestXml.get(),
                                                                      mContext->getDiagnostics())) {
-            AppInfo& appInfo = maybeAppInfo.value();
+            const AppInfo& appInfo = maybeAppInfo.value();
             mContext->setCompilationPackage(appInfo.package);
-            if (appInfo.minSdkVersion) {
-                if (Maybe<int> maybeMinSdkVersion =
-                        ResourceUtils::tryParseSdkVersion(appInfo.minSdkVersion.value())) {
-                    mContext->setMinSdkVersion(maybeMinSdkVersion.value());
-                }
-            }
-        } else {
+        }
+
+        ManifestFixer manifestFixer(mOptions.manifestFixerOptions);
+        if (!manifestFixer.consume(mContext, manifestXml.get())) {
             return 1;
         }
 
-        if (!util::isJavaPackageName(mContext->getCompilationPackage())) {
-            mContext->getDiagnostics()->error(DiagMessage(mOptions.manifestPath)
-                                             << "invalid package name '"
-                                             << mContext->getCompilationPackage()
-                                             << "'");
+        Maybe<AppInfo> maybeAppInfo = extractAppInfoFromManifest(manifestXml.get(),
+                                                                 mContext->getDiagnostics());
+        if (!maybeAppInfo) {
             return 1;
+        }
+
+        const AppInfo& appInfo = maybeAppInfo.value();
+        if (appInfo.minSdkVersion) {
+            if (Maybe<int> maybeMinSdkVersion =
+                    ResourceUtils::parseSdkVersion(appInfo.minSdkVersion.value())) {
+                mContext->setMinSdkVersion(maybeMinSdkVersion.value());
+            }
         }
 
         mContext->setNameManglerPolicy(NameManglerPolicy{ mContext->getCompilationPackage() });
-
         if (mContext->getCompilationPackage() == "android") {
             mContext->setPackageId(0x01);
         } else {
@@ -1258,9 +1404,7 @@ public:
                         DiagMessage() << "failed moving private attributes");
                 return 1;
             }
-        }
 
-        if (!mOptions.staticLib) {
             // Assign IDs if we are building a regular app.
             IdAssigner idAssigner(&mOptions.stableIdMap);
             if (!idAssigner.consume(mContext, &mFinalTable)) {
@@ -1304,45 +1448,118 @@ public:
         mContext->getExternalSymbols()->prependSource(
                         util::make_unique<ResourceTableSymbolSource>(&mFinalTable));
 
-        {
-            ReferenceLinker linker;
-            if (!linker.consume(mContext, &mFinalTable)) {
-                mContext->getDiagnostics()->error(DiagMessage() << "failed linking references");
+        ReferenceLinker linker;
+        if (!linker.consume(mContext, &mFinalTable)) {
+            mContext->getDiagnostics()->error(DiagMessage() << "failed linking references");
+            return 1;
+        }
+
+        if (mOptions.staticLib) {
+            if (!mOptions.products.empty()) {
+                mContext->getDiagnostics()->warn(
+                        DiagMessage() << "can't select products when building static library");
+            }
+        } else {
+            ProductFilter productFilter(mOptions.products);
+            if (!productFilter.consume(mContext, &mFinalTable)) {
+                mContext->getDiagnostics()->error(DiagMessage() << "failed stripping products");
                 return 1;
             }
+        }
 
-            if (mOptions.staticLib) {
-                if (!mOptions.products.empty()) {
-                    mContext->getDiagnostics()->warn(
-                            DiagMessage() << "can't select products when building static library");
-                }
+        if (!mOptions.noAutoVersion) {
+            AutoVersioner versioner;
+            if (!versioner.consume(mContext, &mFinalTable)) {
+                mContext->getDiagnostics()->error(DiagMessage() << "failed versioning styles");
+                return 1;
+            }
+        }
 
-                if (mOptions.tableSplitterOptions.configFilter != nullptr ||
-                        mOptions.tableSplitterOptions.preferredDensity) {
-                    mContext->getDiagnostics()->warn(
-                            DiagMessage() << "can't strip resources when building static library");
-                }
-            } else {
-                ProductFilter productFilter(mOptions.products);
-                if (!productFilter.consume(mContext, &mFinalTable)) {
-                    mContext->getDiagnostics()->error(DiagMessage() << "failed stripping products");
-                    return 1;
-                }
+        if (!mOptions.staticLib && mContext->getMinSdkVersion() > 0) {
+            if (mContext->verbose()) {
+                mContext->getDiagnostics()->note(
+                        DiagMessage() << "collapsing resource versions for minimum SDK "
+                        << mContext->getMinSdkVersion());
+            }
 
-                // TODO(adamlesinski): Actually pass in split constraints and handle splits at the file
-                // level.
-                TableSplitter tableSplitter({}, mOptions.tableSplitterOptions);
-                if (!tableSplitter.verifySplitConstraints(mContext)) {
-                    return 1;
-                }
-                tableSplitter.splitTable(&mFinalTable);
+            VersionCollapser collapser;
+            if (!collapser.consume(mContext, &mFinalTable)) {
+                return 1;
             }
         }
 
         proguard::KeepSet proguardKeepSet;
         proguard::KeepSet proguardMainDexKeepSet;
 
-        std::unique_ptr<IArchiveWriter> archiveWriter = makeArchiveWriter();
+        if (mOptions.staticLib) {
+            if (mOptions.tableSplitterOptions.configFilter != nullptr ||
+                    mOptions.tableSplitterOptions.preferredDensity) {
+                mContext->getDiagnostics()->warn(
+                        DiagMessage() << "can't strip resources when building static library");
+            }
+        } else {
+            // Adjust the SplitConstraints so that their SDK version is stripped if it is less
+            // than or equal to the minSdk. Otherwise the resources that have had their SDK version
+            // stripped due to minSdk won't ever match.
+            std::vector<SplitConstraints> adjustedConstraintsList;
+            adjustedConstraintsList.reserve(mOptions.splitConstraints.size());
+            for (const SplitConstraints& constraints : mOptions.splitConstraints) {
+                SplitConstraints adjustedConstraints;
+                for (const ConfigDescription& config : constraints.configs) {
+                    if (config.sdkVersion <= mContext->getMinSdkVersion()) {
+                        adjustedConstraints.configs.insert(config.copyWithoutSdkVersion());
+                    } else {
+                        adjustedConstraints.configs.insert(config);
+                    }
+                }
+                adjustedConstraintsList.push_back(std::move(adjustedConstraints));
+            }
+
+            TableSplitter tableSplitter(adjustedConstraintsList, mOptions.tableSplitterOptions);
+            if (!tableSplitter.verifySplitConstraints(mContext)) {
+                return 1;
+            }
+            tableSplitter.splitTable(&mFinalTable);
+
+            // Now we need to write out the Split APKs.
+            auto pathIter = mOptions.splitPaths.begin();
+            auto splitConstraintsIter = adjustedConstraintsList.begin();
+            for (std::unique_ptr<ResourceTable>& splitTable : tableSplitter.getSplits()) {
+                if (mContext->verbose()) {
+                    mContext->getDiagnostics()->note(
+                            DiagMessage(*pathIter) << "generating split with configurations '"
+                            << util::joiner(splitConstraintsIter->configs, ", ") << "'");
+                }
+
+                std::unique_ptr<IArchiveWriter> archiveWriter = makeArchiveWriter(*pathIter);
+                if (!archiveWriter) {
+                    mContext->getDiagnostics()->error(DiagMessage() << "failed to create archive");
+                    return 1;
+                }
+
+                // Generate an AndroidManifest.xml for each split.
+                std::unique_ptr<xml::XmlResource> splitManifest =
+                        generateSplitManifest(appInfo, *splitConstraintsIter);
+
+                XmlReferenceLinker linker;
+                if (!linker.consume(mContext, splitManifest.get())) {
+                    mContext->getDiagnostics()->error(
+                            DiagMessage() << "failed to create Split AndroidManifest.xml");
+                    return 1;
+                }
+
+                if (!writeApk(archiveWriter.get(), &proguardKeepSet, splitManifest.get(),
+                              splitTable.get())) {
+                    return 1;
+                }
+
+                ++pathIter;
+                ++splitConstraintsIter;
+            }
+        }
+
+        // Start writing the base APK.
+        std::unique_ptr<IArchiveWriter> archiveWriter = makeArchiveWriter(mOptions.outputPath);
         if (!archiveWriter) {
             mContext->getDiagnostics()->error(DiagMessage() << "failed to create archive");
             return 1;
@@ -1350,11 +1567,6 @@ public:
 
         bool error = false;
         {
-            ManifestFixer manifestFixer(mOptions.manifestFixerOptions);
-            if (!manifestFixer.consume(mContext, manifestXml.get())) {
-                error = true;
-            }
-
             // AndroidManifest.xml has no resource name, but the CallSite is built from the name
             // (aka, which package the AndroidManifest.xml is coming from).
             // So we give it a package name so it can see local resources.
@@ -1382,13 +1594,6 @@ public:
                         error = true;
                     }
                 }
-
-                const bool keepRawValues = mOptions.staticLib;
-                bool result = flattenXml(manifestXml.get(), "AndroidManifest.xml", {},
-                                         keepRawValues, archiveWriter.get(), mContext);
-                if (!result) {
-                    error = true;
-                }
             } else {
                 error = true;
             }
@@ -1399,56 +1604,8 @@ public:
             return 1;
         }
 
-        if (!mOptions.noAutoVersion) {
-            AutoVersioner versioner;
-            if (!versioner.consume(mContext, &mFinalTable)) {
-                mContext->getDiagnostics()->error(DiagMessage() << "failed versioning styles");
-                return 1;
-            }
-        }
-
-        if (!mOptions.staticLib && mContext->getMinSdkVersion() > 0) {
-            if (mContext->verbose()) {
-                mContext->getDiagnostics()->note(
-                        DiagMessage() << "collapsing resource versions for minimum SDK "
-                        << mContext->getMinSdkVersion());
-            }
-
-            VersionCollapser collapser;
-            if (!collapser.consume(mContext, &mFinalTable)) {
-                return 1;
-            }
-        }
-
-        // Write out the table to an archive. Optimizations to the table should come before this
-        // step.
-        ResourceFileFlattenerOptions fileFlattenerOptions;
-        fileFlattenerOptions.keepRawValues = mOptions.staticLib;
-        fileFlattenerOptions.doNotCompressAnything = mOptions.doNotCompressAnything;
-        fileFlattenerOptions.extensionsToNotCompress = mOptions.extensionsToNotCompress;
-        fileFlattenerOptions.noAutoVersion = mOptions.noAutoVersion;
-        fileFlattenerOptions.noVersionVectors = mOptions.noVersionVectors;
-        fileFlattenerOptions.updateProguardSpec =
-                static_cast<bool>(mOptions.generateProguardRulesPath);
-        ResourceFileFlattener fileFlattener(fileFlattenerOptions, mContext, &proguardKeepSet);
-
-        if (!fileFlattener.flatten(&mFinalTable, archiveWriter.get())) {
-            mContext->getDiagnostics()->error(DiagMessage() << "failed linking file resources");
+        if (!writeApk(archiveWriter.get(), &proguardKeepSet, manifestXml.get(), &mFinalTable)) {
             return 1;
-        }
-
-        if (mOptions.staticLib) {
-            if (!flattenTableToPb(&mFinalTable, archiveWriter.get())) {
-                mContext->getDiagnostics()->error(DiagMessage()
-                                                  << "failed to write resources.arsc.flat");
-                return 1;
-            }
-        } else {
-            if (!flattenTable(&mFinalTable, archiveWriter.get())) {
-                mContext->getDiagnostics()->error(DiagMessage()
-                                                  << "failed to write resources.arsc");
-                return 1;
-            }
         }
 
         if (mOptions.generateJavaClassPath) {
@@ -1538,6 +1695,7 @@ int link(const std::vector<StringPiece>& args) {
     bool requireLocalization = false;
     bool verbose = false;
     Maybe<std::string> stableIdFilePath;
+    std::vector<std::string> splitArgs;
     Flags flags = Flags()
             .requiredFlag("-o", "Output path", &options.outputPath)
             .requiredFlag("--manifest", "Path to the Android manifest to build",
@@ -1623,6 +1781,9 @@ int link(const std::vector<StringPiece>& args) {
                           &options.manifestFixerOptions.renameInstrumentationTargetPackage)
             .optionalFlagList("-0", "File extensions not to compress",
                               &options.extensionsToNotCompress)
+            .optionalFlagList("--split", "Split resources matching a set of configs out to a "
+                              "Split APK.\nSyntax: path/to/output.apk:<config>[,<config>[...]]",
+                              &splitArgs)
             .optionalSwitch("-v", "Enables verbose logging",
                             &verbose);
 
@@ -1740,6 +1901,16 @@ int link(const std::vector<StringPiece>& args) {
             ".rtttl", ".imy", ".xmf", ".mp4", ".m4a",
             ".m4v", ".3gp", ".3gpp", ".3g2", ".3gpp2",
             ".amr", ".awb", ".wma", ".wmv", ".webm", ".mkv"});
+
+    // Parse the split parameters.
+    for (const std::string& splitArg : splitArgs) {
+        options.splitPaths.push_back({});
+        options.splitConstraints.push_back({});
+        if (!parseSplitParameter(splitArg, context.getDiagnostics(), &options.splitPaths.back(),
+                                 &options.splitConstraints.back())) {
+            return 1;
+        }
+    }
 
     // Turn off auto versioning for static-libs.
     if (options.staticLib) {

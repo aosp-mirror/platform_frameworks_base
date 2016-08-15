@@ -500,8 +500,8 @@ std::unique_ptr<Item> ResourceParser::parseXml(xml::XmlPullParser* parser, const
     };
 
     // Process the raw value.
-    std::unique_ptr<Item> processedItem = ResourceUtils::parseItemForAttribute(rawValue, typeMask,
-                                                                               onCreateReference);
+    std::unique_ptr<Item> processedItem = ResourceUtils::tryParseItemForAttribute(
+            rawValue, typeMask, onCreateReference);
     if (processedItem) {
         // Fix up the reference.
         if (Reference* ref = valueCast<Reference>(processedItem.get())) {
@@ -528,20 +528,24 @@ std::unique_ptr<Item> ResourceParser::parseXml(xml::XmlPullParser* parser, const
 bool ResourceParser::parseString(xml::XmlPullParser* parser, ParsedResource* outResource) {
     bool formatted = true;
     if (Maybe<StringPiece> formattedAttr = xml::findAttribute(parser, "formatted")) {
-        if (!ResourceUtils::tryParseBool(formattedAttr.value(), &formatted)) {
+        Maybe<bool> maybeFormatted = ResourceUtils::parseBool(formattedAttr.value());
+        if (!maybeFormatted) {
             mDiag->error(DiagMessage(outResource->source)
                          << "invalid value for 'formatted'. Must be a boolean");
             return false;
         }
+        formatted = maybeFormatted.value();
     }
 
     bool translateable = mOptions.translatable;
     if (Maybe<StringPiece> translateableAttr = xml::findAttribute(parser, "translatable")) {
-        if (!ResourceUtils::tryParseBool(translateableAttr.value(), &translateable)) {
+        Maybe<bool> maybeTranslateable = ResourceUtils::parseBool(translateableAttr.value());
+        if (!maybeTranslateable) {
             mDiag->error(DiagMessage(outResource->source)
                          << "invalid value for 'translatable'. Must be a boolean");
             return false;
         }
+        translateable = maybeTranslateable.value();
     }
 
     outResource->value = parseXml(parser, android::ResTable_map::TYPE_STRING, kNoRawString);
@@ -590,7 +594,7 @@ bool ResourceParser::parsePublic(xml::XmlPullParser* parser, ParsedResource* out
     outResource->name.type = *parsedType;
 
     if (Maybe<StringPiece> maybeIdStr = xml::findNonEmptyAttribute(parser, "id")) {
-        Maybe<ResourceId> maybeId = ResourceUtils::tryParseResourceId(maybeIdStr.value());
+        Maybe<ResourceId> maybeId = ResourceUtils::parseResourceId(maybeIdStr.value());
         if (!maybeId) {
             mDiag->error(DiagMessage(outResource->source)
                          << "invalid resource ID '" << maybeId.value() << "' in <public>");
@@ -630,7 +634,7 @@ bool ResourceParser::parsePublicGroup(xml::XmlPullParser* parser, ParsedResource
         return false;
     }
 
-    Maybe<ResourceId> maybeId = ResourceUtils::tryParseResourceId(maybeIdStr.value());
+    Maybe<ResourceId> maybeId = ResourceUtils::parseResourceId(maybeIdStr.value());
     if (!maybeId) {
         mDiag->error(DiagMessage(outResource->source)
                      << "invalid resource ID '" << maybeIdStr.value() << "' in <public-group>");
@@ -1058,13 +1062,16 @@ bool ResourceParser::parseArrayImpl(xml::XmlPullParser* parser, ParsedResource* 
 
     bool translateable = mOptions.translatable;
     if (Maybe<StringPiece> translateableAttr = xml::findAttribute(parser, "translatable")) {
-        if (!ResourceUtils::tryParseBool(translateableAttr.value(), &translateable)) {
+        Maybe<bool> maybeTranslateable = ResourceUtils::parseBool(translateableAttr.value());
+        if (!maybeTranslateable) {
             mDiag->error(DiagMessage(outResource->source)
                          << "invalid value for 'translatable'. Must be a boolean");
             return false;
         }
+        translateable = maybeTranslateable.value();
     }
     array->setTranslateable(translateable);
+
 
     bool error = false;
     const size_t depth = parser->getDepth();

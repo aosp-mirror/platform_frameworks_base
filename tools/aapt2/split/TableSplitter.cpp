@@ -17,6 +17,7 @@
 #include "ConfigDescription.h"
 #include "ResourceTable.h"
 #include "split/TableSplitter.h"
+#include "util/Util.h"
 
 #include <algorithm>
 #include <map>
@@ -76,7 +77,6 @@ public:
             // in multiple splits.
             const ConfigDescription& config = entry.first;
             const std::vector<ResourceConfigValue*>& relatedValues = entry.second;
-
             auto densityValueIter = mDensityDependentConfigToDensityMap.find(config);
             if (densityValueIter != mDensityDependentConfigToDensityMap.end()) {
                 // Select the best one!
@@ -89,12 +89,12 @@ public:
                             thisValue->config.isBetterThan(bestValue->config, &targetDensity)) {
                         bestValue = thisValue;
                     }
-
-                    // When we select one of these, they are all claimed such that the base
-                    // doesn't include any anymore.
-                    (*claimedValues)[thisValue] = true;
                 }
                 assert(bestValue);
+
+                // When we select one of these, they are all claimed such that the base
+                // doesn't include any anymore.
+                (*claimedValues)[bestValue] = true;
                 selected.push_back(bestValue);
             }
         }
@@ -135,7 +135,6 @@ static void markNonPreferredDensitiesAsClaimed(uint16_t preferredDensity,
         assert(bestValue);
     }
 }
-
 bool TableSplitter::verifySplitConstraints(IAaptContext* context) {
     bool error = false;
     for (size_t i = 0; i < mSplitConstraints.size(); i++) {

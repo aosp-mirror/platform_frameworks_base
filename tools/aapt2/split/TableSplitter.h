@@ -60,7 +60,7 @@ public:
 
     void splitTable(ResourceTable* originalTable);
 
-    const std::vector<std::unique_ptr<ResourceTable>>& getSplits() {
+    std::vector<std::unique_ptr<ResourceTable>>& getSplits() {
         return mSplits;
     }
 

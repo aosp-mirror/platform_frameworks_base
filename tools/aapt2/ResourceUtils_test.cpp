@@ -21,24 +21,12 @@
 namespace aapt {
 
 TEST(ResourceUtilsTest, ParseBool) {
-    bool val = false;
-    EXPECT_TRUE(ResourceUtils::tryParseBool("true", &val));
-    EXPECT_TRUE(val);
-
-    EXPECT_TRUE(ResourceUtils::tryParseBool("TRUE", &val));
-    EXPECT_TRUE(val);
-
-    EXPECT_TRUE(ResourceUtils::tryParseBool("True", &val));
-    EXPECT_TRUE(val);
-
-    EXPECT_TRUE(ResourceUtils::tryParseBool("false", &val));
-    EXPECT_FALSE(val);
-
-    EXPECT_TRUE(ResourceUtils::tryParseBool("FALSE", &val));
-    EXPECT_FALSE(val);
-
-    EXPECT_TRUE(ResourceUtils::tryParseBool("False", &val));
-    EXPECT_FALSE(val);
+    EXPECT_EQ(Maybe<bool>(true), ResourceUtils::parseBool("true"));
+    EXPECT_EQ(Maybe<bool>(true), ResourceUtils::parseBool("TRUE"));
+    EXPECT_EQ(Maybe<bool>(true), ResourceUtils::parseBool("True"));
+    EXPECT_EQ(Maybe<bool>(false), ResourceUtils::parseBool("false"));
+    EXPECT_EQ(Maybe<bool>(false), ResourceUtils::parseBool("FALSE"));
+    EXPECT_EQ(Maybe<bool>(false), ResourceUtils::parseBool("False"));
 }
 
 TEST(ResourceUtilsTest, ParseResourceName) {
@@ -64,7 +52,7 @@ TEST(ResourceUtilsTest, ParseReferenceWithNoPackage) {
     ResourceNameRef actual;
     bool create = false;
     bool privateRef = false;
-    EXPECT_TRUE(ResourceUtils::tryParseReference("@color/foo", &actual, &create, &privateRef));
+    EXPECT_TRUE(ResourceUtils::parseReference("@color/foo", &actual, &create, &privateRef));
     EXPECT_EQ(expected, actual);
     EXPECT_FALSE(create);
     EXPECT_FALSE(privateRef);
@@ -75,7 +63,7 @@ TEST(ResourceUtilsTest, ParseReferenceWithPackage) {
     ResourceNameRef actual;
     bool create = false;
     bool privateRef = false;
-    EXPECT_TRUE(ResourceUtils::tryParseReference("@android:color/foo", &actual, &create,
+    EXPECT_TRUE(ResourceUtils::parseReference("@android:color/foo", &actual, &create,
                                                  &privateRef));
     EXPECT_EQ(expected, actual);
     EXPECT_FALSE(create);
@@ -87,7 +75,7 @@ TEST(ResourceUtilsTest, ParseReferenceWithSurroundingWhitespace) {
     ResourceNameRef actual;
     bool create = false;
     bool privateRef = false;
-    EXPECT_TRUE(ResourceUtils::tryParseReference("\t @android:color/foo\n \n\t", &actual,
+    EXPECT_TRUE(ResourceUtils::parseReference("\t @android:color/foo\n \n\t", &actual,
                                                  &create, &privateRef));
     EXPECT_EQ(expected, actual);
     EXPECT_FALSE(create);
@@ -99,7 +87,7 @@ TEST(ResourceUtilsTest, ParseAutoCreateIdReference) {
     ResourceNameRef actual;
     bool create = false;
     bool privateRef = false;
-    EXPECT_TRUE(ResourceUtils::tryParseReference("@+android:id/foo", &actual, &create,
+    EXPECT_TRUE(ResourceUtils::parseReference("@+android:id/foo", &actual, &create,
                                                  &privateRef));
     EXPECT_EQ(expected, actual);
     EXPECT_TRUE(create);
@@ -111,7 +99,7 @@ TEST(ResourceUtilsTest, ParsePrivateReference) {
     ResourceNameRef actual;
     bool create = false;
     bool privateRef = false;
-    EXPECT_TRUE(ResourceUtils::tryParseReference("@*android:id/foo", &actual, &create,
+    EXPECT_TRUE(ResourceUtils::parseReference("@*android:id/foo", &actual, &create,
                                                  &privateRef));
     EXPECT_EQ(expected, actual);
     EXPECT_FALSE(create);
@@ -122,7 +110,7 @@ TEST(ResourceUtilsTest, FailToParseAutoCreateNonIdReference) {
     bool create = false;
     bool privateRef = false;
     ResourceNameRef actual;
-    EXPECT_FALSE(ResourceUtils::tryParseReference("@+android:color/foo", &actual, &create,
+    EXPECT_FALSE(ResourceUtils::parseReference("@+android:color/foo", &actual, &create,
                                                   &privateRef));
 }
 
