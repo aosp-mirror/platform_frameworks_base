@@ -1033,7 +1033,6 @@ static ssize_t extractPlatformBuildVersion(AssetManager& assets, Bundle* bundle)
         return NO_ERROR;
     }
 
-    ResXMLTree tree;
     Asset* asset = assets.openNonAsset(cookie, "AndroidManifest.xml", Asset::ACCESS_STREAMING);
     if (asset == NULL) {
         fprintf(stderr, "ERROR: Platform AndroidManifest.xml not found\n");
@@ -1041,11 +1040,17 @@ static ssize_t extractPlatformBuildVersion(AssetManager& assets, Bundle* bundle)
     }
 
     ssize_t result = NO_ERROR;
-    if (tree.setTo(asset->getBuffer(true), asset->getLength()) != NO_ERROR) {
-        fprintf(stderr, "ERROR: Platform AndroidManifest.xml is corrupt\n");
-        result = UNKNOWN_ERROR;
-    } else {
-        result = extractPlatformBuildVersion(tree, bundle);
+
+    // Create a new scope so that ResXMLTree is destroyed before we delete the memory over
+    // which it iterates (asset).
+    {
+        ResXMLTree tree;
+        if (tree.setTo(asset->getBuffer(true), asset->getLength()) != NO_ERROR) {
+            fprintf(stderr, "ERROR: Platform AndroidManifest.xml is corrupt\n");
+            result = UNKNOWN_ERROR;
+        } else {
+            result = extractPlatformBuildVersion(tree, bundle);
+        }
     }
 
     delete asset;
