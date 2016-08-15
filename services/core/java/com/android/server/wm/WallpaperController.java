@@ -508,9 +508,14 @@ class WallpaperController {
                     if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
                             "New i: " + wallpaperTargetIndex + " old i: " + oldI);
                     if (oldI >= 0) {
-                        if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
-                                "Animating wallpapers: old#" + oldI + "=" + oldW + "; new#"
-                                + wallpaperTargetIndex + "=" + wallpaperTarget);
+                        final boolean newTargetHidden =
+                                wallpaperTarget.mAppToken != null && wallpaperTarget.mAppToken.hiddenRequested;
+                        final boolean oldTargetHidden =
+                                oldW.mAppToken != null && oldW.mAppToken.hiddenRequested;
+                        if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG, "Animating wallpapers:"
+                                + " old#" + oldI + "=" + oldW + " hidden=" + oldTargetHidden
+                                + " new#" + wallpaperTargetIndex + "=" + wallpaperTarget
+                                + " hidden=" + newTargetHidden);
 
                         // Set the upper and lower wallpaper targets correctly,
                         // and make sure that we are positioning the wallpaper below the lower.
@@ -520,6 +525,7 @@ class WallpaperController {
                                     "Found target above old target.");
                             mUpperWallpaperTarget = wallpaperTarget;
                             mLowerWallpaperTarget = oldW;
+
                             wallpaperTarget = oldW;
                             wallpaperTargetIndex = oldI;
                         } else {
@@ -529,15 +535,21 @@ class WallpaperController {
                             mUpperWallpaperTarget = oldW;
                             mLowerWallpaperTarget = wallpaperTarget;
                         }
-
-                        // If the new target is going hidden, set it back to the old target.
-                        if (wallpaperTarget.mAppToken != null
-                                && wallpaperTarget.mAppToken.hiddenRequested) {
+                        if (newTargetHidden && !oldTargetHidden) {
                             if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
                                     "Old wallpaper still the target.");
+                            // Use the old target if new target is hidden but old target
+                            // is not. If they're both hidden, still use the new target.
                             mWallpaperTarget = oldW;
-                            wallpaperTarget = oldW;
-                            wallpaperTargetIndex = oldI;
+                        } else if (newTargetHidden == oldTargetHidden
+                                && !mService.mOpeningApps.contains(wallpaperTarget.mAppToken)
+                                    && (mService.mOpeningApps.contains(oldW.mAppToken)
+                                    || mService.mClosingApps.contains(oldW.mAppToken))) {
+                            // If they're both hidden (or both not hidden), prefer the one that's
+                            // currently in opening or closing app list, this allows transition
+                            // selection logic to better determine the wallpaper status of
+                            // opening/closing apps.
+                            mWallpaperTarget = oldW;
                         }
                     }
                 }
