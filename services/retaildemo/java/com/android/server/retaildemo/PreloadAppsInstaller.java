@@ -136,6 +136,10 @@ class PreloadAppsInstaller {
                         mApkToPackageMap.put(apkName, basePackageName);
                     }
                     installExistingPackage(basePackageName, userId, counter);
+                } else {
+                    Log.e(TAG, "Package " + basePackageName + " cannot be installed from "
+                            + apkName + ": " + msg + " (returnCode " + returnCode + ")");
+                    counter.appInstallFinished();
                 }
             }
         }.getBinder(), 0, SYSTEM_SERVER_PACKAGE_NAME, userId);
