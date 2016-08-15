@@ -242,7 +242,7 @@ private:
     const iterator mEnd;
 };
 
-inline Tokenizer tokenize(StringPiece str, char sep) {
+inline Tokenizer tokenize(const StringPiece& str, char sep) {
     return Tokenizer(str, sep);
 }
 
@@ -281,7 +281,7 @@ bool extractResFilePathParts(const StringPiece& path, StringPiece* outPrefix,
  * In the aapt namespace for lookup.
  */
 inline ::std::ostream& operator<<(::std::ostream& out,
-                                  ::std::function<::std::ostream&(::std::ostream&)> f) {
+                                  const ::std::function<::std::ostream&(::std::ostream&)>& f) {
     return f(out);
 }
 

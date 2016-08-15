@@ -43,7 +43,7 @@ private:
     NameManglerPolicy mPolicy;
 
 public:
-    NameMangler(NameManglerPolicy policy) : mPolicy(policy) {
+    explicit NameMangler(NameManglerPolicy policy) : mPolicy(policy) {
     }
 
     Maybe<ResourceName> mangleName(const ResourceName& name) {

@@ -60,7 +60,7 @@ public:
     static bool skipCurrentElement(XmlPullParser* parser);
     static bool isGoodEvent(Event event);
 
-    XmlPullParser(std::istream& in);
+    explicit XmlPullParser(std::istream& in);
     ~XmlPullParser();
 
     /**

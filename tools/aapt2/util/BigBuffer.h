@@ -63,7 +63,7 @@ public:
      * Create a BigBuffer with block allocation sizes
      * of blockSize.
      */
-    BigBuffer(size_t blockSize);
+    explicit BigBuffer(size_t blockSize);
 
     BigBuffer(const BigBuffer&) = delete; // No copying.
 

@@ -45,8 +45,9 @@ struct RawValueVisitor {
     virtual void visit(Styleable* value) {}
 };
 
+// NOLINT, do not add parentheses around T.
 #define DECL_VISIT_COMPOUND_VALUE(T) \
-    virtual void visit(T* value) { \
+    virtual void visit(T* value) { /* NOLINT */ \
         visitSubValues(value); \
     }
 

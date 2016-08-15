@@ -54,7 +54,7 @@ public:
         Symbol() : Symbol(Maybe<ResourceId>{}) {
         }
 
-        Symbol(const Maybe<ResourceId>& i) : Symbol(i, nullptr) {
+        explicit Symbol(const Maybe<ResourceId>& i) : Symbol(i, nullptr) {
         }
 
         Symbol(const Maybe<ResourceId>& i, const std::shared_ptr<Attribute>& attr) :

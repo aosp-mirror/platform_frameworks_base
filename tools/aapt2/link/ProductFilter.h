@@ -29,7 +29,7 @@ class ProductFilter {
 public:
     using ResourceConfigValueIter = std::vector<std::unique_ptr<ResourceConfigValue>>::iterator;
 
-    ProductFilter(std::unordered_set<std::string> products) : mProducts(products) { }
+    explicit ProductFilter(std::unordered_set<std::string> products) : mProducts(products) { }
 
     ResourceConfigValueIter selectProductToKeep(const ResourceNameRef& name,
                                                 const ResourceConfigValueIter begin,

@@ -29,7 +29,7 @@ namespace io {
  */
 class RegularFile : public IFile {
 public:
-    RegularFile(const Source& source);
+    explicit RegularFile(const Source& source);
 
     std::unique_ptr<IData> openAsData() override;
     const Source& getSource() const override;
@@ -42,7 +42,7 @@ class FileCollection;
 
 class FileCollectionIterator : public IFileCollectionIterator {
 public:
-    FileCollectionIterator(FileCollection* collection);
+    explicit FileCollectionIterator(FileCollection* collection);
 
     bool hasNext() override;
     io::IFile* next() override;

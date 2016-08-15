@@ -32,7 +32,7 @@ struct PngOptions {
 
 class Png {
 public:
-    Png(IDiagnostics* diag) : mDiag(diag) {
+    explicit Png(IDiagnostics* diag) : mDiag(diag) {
     }
 
     bool process(const Source& source, std::istream* input, BigBuffer* outBuffer,

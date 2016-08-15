@@ -26,7 +26,7 @@ class ResourceTable;
 
 class TableFlattener : public IResourceTableConsumer {
 public:
-    TableFlattener(BigBuffer* buffer) : mBuffer(buffer) {
+    explicit TableFlattener(BigBuffer* buffer) : mBuffer(buffer) {
     }
 
     bool consume(IAaptContext* context, ResourceTable* table) override;
