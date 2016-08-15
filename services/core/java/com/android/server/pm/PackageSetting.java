@@ -30,15 +30,23 @@ final class PackageSetting extends PackageSettingBase {
     int appId;
     PackageParser.Package pkg;
     SharedUserSetting sharedUser;
+    /**
+     * Temporary holding space for the shared user ID. While parsing package settings, the
+     * shared users tag may be after the packages. In this case, we must delay linking the
+     * shared user setting with the package setting. The shared user ID lets us link the
+     * two objects.
+     */
+    private int sharedUserId;
 
     PackageSetting(String name, String realName, File codePath, File resourcePath,
             String legacyNativeLibraryPathString, String primaryCpuAbiString,
             String secondaryCpuAbiString, String cpuAbiOverrideString,
             int pVersionCode, int pkgFlags, int privateFlags, String parentPackageName,
-            List<String> childPackageNames) {
+            List<String> childPackageNames, int sharedUserId) {
         super(name, realName, codePath, resourcePath, legacyNativeLibraryPathString,
                 primaryCpuAbiString, secondaryCpuAbiString, cpuAbiOverrideString,
                 pVersionCode, pkgFlags, privateFlags, parentPackageName, childPackageNames);
+        this.sharedUserId = sharedUserId;
     }
 
     /**
@@ -47,10 +55,14 @@ final class PackageSetting extends PackageSettingBase {
      */
     PackageSetting(PackageSetting orig) {
         super(orig);
+        doCopy(orig);
+    }
 
-        appId = orig.appId;
-        pkg = orig.pkg;
-        sharedUser = orig.sharedUser;
+    public int getSharedUserId() {
+        if (sharedUser != null) {
+            return sharedUser.userId;
+        }
+        return sharedUserId;
     }
 
     @Override
@@ -58,6 +70,18 @@ final class PackageSetting extends PackageSettingBase {
         return "PackageSetting{"
             + Integer.toHexString(System.identityHashCode(this))
             + " " + name + "/" + appId + "}";
+    }
+
+    public void copyFrom(PackageSetting orig) {
+        super.copyFrom(orig);
+        doCopy(orig);
+    }
+
+    private void doCopy(PackageSetting orig) {
+        appId = orig.appId;
+        pkg = orig.pkg;
+        sharedUser = orig.sharedUser;
+        sharedUserId = orig.sharedUserId;
     }
 
     public PermissionsState getPermissionsState() {

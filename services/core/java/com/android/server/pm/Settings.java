@@ -166,6 +166,7 @@ final class Settings {
     private static final boolean DEBUG_STOPPED = false;
     private static final boolean DEBUG_MU = false;
     private static final boolean DEBUG_KERNEL = false;
+    private static final boolean DEBUG_PARSER = false;
 
     private static final String RUNTIME_PERMISSIONS_FILE_NAME = "runtime-permissions.xml";
 
@@ -393,7 +394,7 @@ final class Settings {
      * TODO: make this just a local variable that is passed in during package
      * scanning to make it less confusing.
      */
-    private final ArrayList<PendingPackage> mPendingPackages = new ArrayList<PendingPackage>();
+    private final ArrayList<PackageSetting> mPendingPackages = new ArrayList<>();
 
     private final File mSystemDir;
 
@@ -427,18 +428,22 @@ final class Settings {
         mBackupStoppedPackagesFilename = new File(mSystemDir, "packages-stopped-backup.xml");
     }
 
-    PackageSetting getPackageLPw(PackageParser.Package pkg, PackageSetting origPackage,
+    PackageSetting getPackageLPw(String pkgName) {
+        return peekPackageLPr(pkgName);
+    }
+
+    PackageSetting getPackageWithBenefitsLPw(PackageParser.Package pkg, PackageSetting origPackage,
             String realName, SharedUserSetting sharedUser, File codePath, File resourcePath,
             String legacyNativeLibraryPathString, String primaryCpuAbi, String secondaryCpuAbi,
-            int pkgFlags, int pkgPrivateFlags, UserHandle user, boolean add)
+            int pkgFlags, int pkgPrivateFlags, UserHandle user)
                     throws PackageManagerException {
         final String name = pkg.packageName;
         final String parentPackageName = (pkg.parentPackage != null)
                 ? pkg.parentPackage.packageName : null;
-        PackageSetting p = getPackageLPw(name, origPackage, realName, sharedUser, codePath,
-                resourcePath, legacyNativeLibraryPathString, primaryCpuAbi, secondaryCpuAbi,
-                pkg.mVersionCode, pkgFlags, pkgPrivateFlags, user, add, true /*allowInstall*/,
-                parentPackageName, pkg.getChildPackageNames());
+        PackageSetting p = getPackageWithBenefitsLPw(name, origPackage, realName, sharedUser,
+                codePath, resourcePath, legacyNativeLibraryPathString, primaryCpuAbi,
+                secondaryCpuAbi, pkg.mVersionCode, pkgFlags, pkgPrivateFlags, user,
+                true /*allowInstall*/, parentPackageName, pkg.getChildPackageNames());
         return p;
     }
 
@@ -602,7 +607,7 @@ final class Settings {
         p = new PackageSetting(name, realName, codePath, resourcePath,
                 legacyNativeLibraryPathString, primaryCpuAbiString, secondaryCpuAbiString,
                 cpuAbiOverrideString, vc, pkgFlags, pkgPrivateFlags, parentPackageName,
-                childPackageNames);
+                childPackageNames, 0 /*userId*/);
         p.appId = uid;
         if (addUserIdLPw(uid, p, name)) {
             mPackages.put(name, p);
@@ -679,11 +684,11 @@ final class Settings {
         }
     }
 
-    private PackageSetting getPackageLPw(String name, PackageSetting origPackage,
+    private PackageSetting getPackageWithBenefitsLPw(String name, PackageSetting origPackage,
             String realName, SharedUserSetting sharedUser, File codePath, File resourcePath,
             String legacyNativeLibraryPathString, String primaryCpuAbiString,
             String secondaryCpuAbiString, int vc, int pkgFlags, int pkgPrivateFlags,
-            UserHandle installUser, boolean add, boolean allowInstall, String parentPackage,
+            UserHandle installUser, boolean allowInstall, String parentPackage,
             List<String> childPackageNames) throws PackageManagerException {
         final UserManagerService userManager = UserManagerService.getInstance();
         final PackageSetting disabledPackage = getDisabledSystemPkgLPr(name);
@@ -713,11 +718,6 @@ final class Settings {
                         "Package " + name + " could not be assigned a valid uid");
                 throw new PackageManagerException(INSTALL_FAILED_INSUFFICIENT_STORAGE,
                         "Creating application package " + name + " failed");
-            }
-            if (add) {
-                // Finish adding new package by adding it and updating shared
-                // user preferences
-                addPackageSettingLPw(p, name, sharedUser);
             }
         }
         if (peekPackageLPr(name) != null) {
@@ -857,7 +857,7 @@ final class Settings {
                 pkgSetting = new PackageSetting(originalPkg.name, pkgName, codePath, resourcePath,
                         legacyNativeLibraryPath, primaryCpuAbi, secondaryCpuAbi,
                         null /*cpuAbiOverrideString*/, versionCode, pkgFlags, pkgPrivateFlags,
-                        parentPkgName, childPkgNames);
+                        parentPkgName, childPkgNames, 0 /*sharedUserId*/);
                 if (PackageManagerService.DEBUG_UPGRADE) Log.v(PackageManagerService.TAG, "Package "
                         + pkgName + " is adopting original package " + originalPkg.name);
                 // Note that we will retain the new package's signature so
@@ -876,7 +876,7 @@ final class Settings {
                 pkgSetting = new PackageSetting(pkgName, realPkgName, codePath, resourcePath,
                         legacyNativeLibraryPath, primaryCpuAbi, secondaryCpuAbi,
                         null /*cpuAbiOverrideString*/, versionCode, pkgFlags, pkgPrivateFlags,
-                        parentPkgName, childPkgNames);
+                        parentPkgName, childPkgNames, 0 /*sharedUserId*/);
                 pkgSetting.setTimeStamp(codePath.lastModified());
                 pkgSetting.sharedUser = sharedUser;
                 // If this is not a system app, it starts out stopped.
@@ -1025,15 +1025,14 @@ final class Settings {
         if (p.sharedUser != null && p.sharedUser.signatures.mSignatures == null) {
             p.sharedUser.signatures.assignSignatures(pkg.mSignatures);
         }
-        addPackageSettingLPw(p, pkg.packageName, p.sharedUser);
+        addPackageSettingLPw(p, p.sharedUser);
     }
 
     // Utility method that adds a PackageSetting to mPackages and
     // completes updating the shared user attributes and any restored
     // app link verification state
-    private void addPackageSettingLPw(PackageSetting p, String name,
-            SharedUserSetting sharedUser) {
-        mPackages.put(name, p);
+    private void addPackageSettingLPw(PackageSetting p, SharedUserSetting sharedUser) {
+        mPackages.put(p.name, p);
         if (sharedUser != null) {
             if (p.sharedUser != null && p.sharedUser != sharedUser) {
                 PackageManagerService.reportSettingsProblem(Log.ERROR,
@@ -1067,12 +1066,12 @@ final class Settings {
             }
         }
 
-        IntentFilterVerificationInfo ivi = mRestoredIntentFilterVerifications.get(name);
+        IntentFilterVerificationInfo ivi = mRestoredIntentFilterVerifications.get(p.name);
         if (ivi != null) {
             if (DEBUG_DOMAIN_VERIFICATION) {
-                Slog.i(TAG, "Applying restored IVI for " + name + " : " + ivi.getStatusString());
+                Slog.i(TAG, "Applying restored IVI for " + p.name + " : " + ivi.getStatusString());
             }
-            mRestoredIntentFilterVerifications.remove(name);
+            mRestoredIntentFilterVerifications.remove(p.name);
             p.setIntentFilterVerificationInfo(ivi);
         }
     }
@@ -1320,7 +1319,7 @@ final class Settings {
 
     /* package protected */
     IntentFilterVerificationInfo createIntentFilterVerificationIfNeededLPw(String packageName,
-            ArrayList<String> domains) {
+            ArraySet<String> domains) {
         PackageSetting ps = mPackages.get(packageName);
         if (ps == null) {
             if (DEBUG_DOMAIN_VERIFICATION) {
@@ -1595,7 +1594,9 @@ final class Settings {
             throws XmlPullParserException, IOException {
         IntentFilterVerificationInfo ivi = new IntentFilterVerificationInfo(parser);
         packageSetting.setIntentFilterVerificationInfo(ivi);
-        Log.d(TAG, "Read domain verification for package: " + ivi.getPackageName());
+        if (DEBUG_PARSER) {
+            Log.d(TAG, "Read domain verification for package: " + ivi.getPackageName());
+        }
     }
 
     private void readRestoredIntentFilterVerifications(XmlPullParser parser)
@@ -3039,30 +3040,22 @@ final class Settings {
         final int N = mPendingPackages.size();
 
         for (int i = 0; i < N; i++) {
-            final PendingPackage pp = mPendingPackages.get(i);
-            Object idObj = getUserIdLPr(pp.sharedId);
-            if (idObj != null && idObj instanceof SharedUserSetting) {
-                try {
-                    PackageSetting p = getPackageLPw(pp.name, null, pp.realName,
-                            (SharedUserSetting) idObj, pp.codePath, pp.resourcePath,
-                            pp.legacyNativeLibraryPathString, pp.primaryCpuAbiString,
-                            pp.secondaryCpuAbiString, pp.versionCode, pp.pkgFlags,
-                            pp.pkgPrivateFlags, null /*installUser*/, true /*add*/,
-                            false /*allowInstall*/, pp.parentPackageName, pp.childPackageNames);
-                    p.copyFrom(pp);
-                } catch (PackageManagerException e) {
-                    PackageManagerService.reportSettingsProblem(Log.WARN,
-                            "Unable to create application package for " + pp.name);
-                    continue;
-                }
+            final PackageSetting p = mPendingPackages.get(i);
+            final int sharedUserId = p.getSharedUserId();
+            final Object idObj = getUserIdLPr(sharedUserId);
+            if (idObj instanceof SharedUserSetting) {
+                final SharedUserSetting sharedUser = (SharedUserSetting) idObj;
+                p.sharedUser = sharedUser;
+                p.appId = sharedUser.userId;
+                addPackageSettingLPw(p, sharedUser);
             } else if (idObj != null) {
-                String msg = "Bad package setting: package " + pp.name + " has shared uid "
-                        + pp.sharedId + " that is not a shared uid\n";
+                String msg = "Bad package setting: package " + p.name + " has shared uid "
+                        + sharedUserId + " that is not a shared uid\n";
                 mReadMessages.append(msg);
                 PackageManagerService.reportSettingsProblem(Log.ERROR, msg);
             } else {
-                String msg = "Bad package setting: package " + pp.name + " has shared uid "
-                        + pp.sharedId + " that is not defined\n";
+                String msg = "Bad package setting: package " + p.name + " has shared uid "
+                        + sharedUserId + " that is not defined\n";
                 mReadMessages.append(msg);
                 PackageManagerService.reportSettingsProblem(Log.ERROR, msg);
             }
@@ -3535,7 +3528,7 @@ final class Settings {
         PackageSetting ps = new PackageSetting(name, realName, codePathFile,
                 new File(resourcePathStr), legacyNativeLibraryPathStr, primaryCpuAbiStr,
                 secondaryCpuAbiStr, cpuAbiOverrideStr, versionCode, pkgFlags, pkgPrivateFlags,
-                parentPackageName, null);
+                parentPackageName, null /*childPackageNames*/, 0 /*sharedUserId*/);
         String timeStampStr = parser.getAttributeValue(null, "ft");
         if (timeStampStr != null) {
             try {
@@ -3627,7 +3620,7 @@ final class Settings {
         long timeStamp = 0;
         long firstInstallTime = 0;
         long lastUpdateTime = 0;
-        PackageSettingBase packageSetting = null;
+        PackageSetting packageSetting = null;
         String version = null;
         int versionCode = 0;
         String parentPackageName;
@@ -3746,7 +3739,8 @@ final class Settings {
             if (PackageManagerService.DEBUG_SETTINGS)
                 Log.v(PackageManagerService.TAG, "Reading package: " + name + " userId=" + idStr
                         + " sharedUserId=" + sharedIdStr);
-            int userId = idStr != null ? Integer.parseInt(idStr) : 0;
+            final int userId = idStr != null ? Integer.parseInt(idStr) : 0;
+            final int sharedUserId = sharedIdStr != null ? Integer.parseInt(sharedIdStr) : 0;
             if (resourcePathStr == null) {
                 resourcePathStr = codePathStr;
             }
@@ -3765,7 +3759,7 @@ final class Settings {
                 packageSetting = addPackageLPw(name.intern(), realName, new File(codePathStr),
                         new File(resourcePathStr), legacyNativeLibraryPathStr, primaryCpuAbiString,
                         secondaryCpuAbiString, cpuAbiOverrideString, userId, versionCode, pkgFlags,
-                        pkgPrivateFlags, parentPackageName, null);
+                        pkgPrivateFlags, parentPackageName, null /*childPackageNames*/);
                 if (PackageManagerService.DEBUG_SETTINGS)
                     Log.i(PackageManagerService.TAG, "Reading package " + name + ": userId="
                             + userId + " pkg=" + packageSetting);
@@ -3779,20 +3773,19 @@ final class Settings {
                     packageSetting.lastUpdateTime = lastUpdateTime;
                 }
             } else if (sharedIdStr != null) {
-                userId = sharedIdStr != null ? Integer.parseInt(sharedIdStr) : 0;
-                if (userId > 0) {
-                    packageSetting = new PendingPackage(name.intern(), realName, new File(
+                if (sharedUserId > 0) {
+                    packageSetting = new PackageSetting(name.intern(), realName, new File(
                             codePathStr), new File(resourcePathStr), legacyNativeLibraryPathStr,
                             primaryCpuAbiString, secondaryCpuAbiString, cpuAbiOverrideString,
-                            userId, versionCode, pkgFlags, pkgPrivateFlags, parentPackageName,
-                            null);
+                            versionCode, pkgFlags, pkgPrivateFlags, parentPackageName,
+                            null /*childPackageNames*/, sharedUserId);
                     packageSetting.setTimeStamp(timeStamp);
                     packageSetting.firstInstallTime = firstInstallTime;
                     packageSetting.lastUpdateTime = lastUpdateTime;
-                    mPendingPackages.add((PendingPackage) packageSetting);
+                    mPendingPackages.add(packageSetting);
                     if (PackageManagerService.DEBUG_SETTINGS)
                         Log.i(PackageManagerService.TAG, "Reading package " + name
-                                + ": sharedUserId=" + userId + " pkg=" + packageSetting);
+                                + ": sharedUserId=" + sharedUserId + " pkg=" + packageSetting);
                 } else {
                     PackageManagerService.reportSettingsProblem(Log.WARN,
                             "Error in package manager settings: package " + name

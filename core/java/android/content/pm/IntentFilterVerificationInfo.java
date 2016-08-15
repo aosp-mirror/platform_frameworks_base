@@ -60,9 +60,9 @@ public final class IntentFilterVerificationInfo implements Parcelable {
         mMainStatus = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
     }
 
-    public IntentFilterVerificationInfo(String packageName, ArrayList<String> domains) {
+    public IntentFilterVerificationInfo(String packageName, ArraySet<String> domains) {
         mPackageName = packageName;
-        mDomains.addAll(domains);
+        mDomains = domains;
         mMainStatus = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
     }
 
@@ -96,8 +96,8 @@ public final class IntentFilterVerificationInfo implements Parcelable {
         return mDomains;
     }
 
-    public void setDomains(ArrayList<String> list) {
-        mDomains = new ArraySet<>(list);
+    public void setDomains(ArraySet<String> list) {
+        mDomains = list;
     }
 
     public String getDomainsString() {

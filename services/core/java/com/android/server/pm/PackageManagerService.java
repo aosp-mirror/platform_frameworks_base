@@ -364,6 +364,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     private static final boolean DEBUG_TRIAGED_MISSING = false;
     private static final boolean DEBUG_APP_DATA = false;
 
+    /** REMOVE. According to Svet, this was only used to reset permissions during development. */
     static final boolean CLEAR_RUNTIME_PERMISSIONS_ON_UPGRADE = false;
 
     private static final boolean DISABLE_EPHEMERAL_APPS = !Build.IS_DEBUGGABLE;
@@ -801,10 +802,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                     PackageParser.ActivityIntentInfo filter = filters.get(m);
                     domainsSet.addAll(filter.getHostsList());
                 }
-                ArrayList<String> domainsList = new ArrayList<>(domainsSet);
                 synchronized (mPackages) {
                     if (mSettings.createIntentFilterVerificationIfNeededLPw(
-                            packageName, domainsList) != null) {
+                            packageName, domainsSet) != null) {
                         scheduleWriteSettingsLocked();
                     }
                 }
@@ -2873,7 +2873,6 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         SystemConfig systemConfig = SystemConfig.getInstance();
         ArraySet<String> packages = systemConfig.getLinkedApps();
-        ArraySet<String> domains = new ArraySet<String>();
 
         for (String packageName : packages) {
             PackageParser.Package pkg = mPackages.get(packageName);
@@ -2883,16 +2882,19 @@ public class PackageManagerService extends IPackageManager.Stub {
                     continue;
                 }
 
-                domains.clear();
+                ArraySet<String> domains = null;
                 for (PackageParser.Activity a : pkg.activities) {
                     for (ActivityIntentInfo filter : a.intents) {
                         if (hasValidDomains(filter)) {
+                            if (domains == null) {
+                                domains = new ArraySet<String>();
+                            }
                             domains.addAll(filter.getHostsList());
                         }
                     }
                 }
 
-                if (domains.size() > 0) {
+                if (domains != null && domains.size() > 0) {
                     if (DEBUG_DOMAIN_VERIFICATION) {
                         Slog.v(TAG, "      + " + packageName);
                     }
@@ -2900,8 +2902,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     // state w.r.t. the formal app-linkage "no verification attempted" state;
                     // and then 'always' in the per-user state actually used for intent resolution.
                     final IntentFilterVerificationInfo ivi;
-                    ivi = mSettings.createIntentFilterVerificationIfNeededLPw(packageName,
-                            new ArrayList<String>(domains));
+                    ivi = mSettings.createIntentFilterVerificationIfNeededLPw(packageName, domains);
                     ivi.setStatus(INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED);
                     mSettings.updateIntentFilterVerificationStatusLPw(packageName,
                             INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS, userId);
@@ -8164,12 +8165,12 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             // Just create the setting, don't add it yet. For already existing packages
             // the PkgSetting exists already and doesn't have to be created.
-            pkgSetting = mSettings.getPackageLPw(pkg, origPackage, realName, suid, destCodeFile,
-                    destResourceFile, pkg.applicationInfo.nativeLibraryRootDir,
+            pkgSetting = mSettings.getPackageWithBenefitsLPw(pkg, origPackage, realName, suid,
+                    destCodeFile, destResourceFile, pkg.applicationInfo.nativeLibraryRootDir,
                     pkg.applicationInfo.primaryCpuAbi,
                     pkg.applicationInfo.secondaryCpuAbi,
                     pkg.applicationInfo.flags, pkg.applicationInfo.privateFlags,
-                    user, false);
+                    user);
             if (pkgSetting == null) {
                 throw new PackageManagerException(INSTALL_FAILED_INSUFFICIENT_STORAGE,
                         "Creating application package " + pkg.packageName + " failed");
