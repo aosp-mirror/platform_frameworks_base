@@ -42,7 +42,6 @@
             android:singleLine="true"
             android:ellipsize="start"
             android:inputType="textShortMessage|textAutoCorrect|textCapSentences"
-            android:textIsSelectable="true"
             android:imeOptions="actionNone|flagNoExtractUi" />
 
     <FrameLayout
