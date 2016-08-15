@@ -224,6 +224,7 @@ final class RemoteConnectionService {
 
             conference.setState(parcel.getState());
             conference.setConnectionCapabilities(parcel.getConnectionCapabilities());
+            conference.setConnectionProperties(parcel.getConnectionProperties());
             mConferenceById.put(callId, conference);
             conference.registerCallback(new RemoteConference.Callback() {
                 @Override
