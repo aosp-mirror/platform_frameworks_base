@@ -1334,7 +1334,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 && ((!mAttachedHidden && mViewVisibility == View.VISIBLE && !mRootToken.hidden)
                         || mWinAnimator.mAnimation != null
                         || ((atoken != null) && (atoken.mAppAnimator.animation != null)
-                                && !mWinAnimator.isDummyAnimation()));
+                                && !mWinAnimator.isDummyAnimation())
+                        || isAnimatingWithSavedSurface());
     }
 
     /**
