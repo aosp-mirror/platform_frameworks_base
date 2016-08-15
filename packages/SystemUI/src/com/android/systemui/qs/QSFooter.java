@@ -126,8 +126,8 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
                 ? R.drawable.ic_qs_branded_vpn
                 : R.drawable.ic_qs_vpn);
             if (mFooterIconId != footerIconId) {
-                mFooterIcon.setImageResource(footerIconId);
                 mFooterIconId = footerIconId;
+                mMainHandler.post(mUpdateIcon);
             }
             mIsVisible = mIsIconVisible;
         }
@@ -206,6 +206,13 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
             return R.string.monitoring_title;
         }
     }
+
+    private final Runnable mUpdateIcon = new Runnable() {
+        @Override
+        public void run() {
+            mFooterIcon.setImageResource(mFooterIconId);
+        }
+    };
 
     private final Runnable mUpdateDisplayState = new Runnable() {
         @Override
