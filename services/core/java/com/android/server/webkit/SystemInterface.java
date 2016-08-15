@@ -48,4 +48,6 @@ public interface SystemInterface {
     public boolean systemIsDebuggable();
     public PackageInfo getPackageInfoForProvider(WebViewProviderInfo configInfo)
             throws NameNotFoundException;
+
+    public void setMultiprocessEnabled(boolean enabled);
 }

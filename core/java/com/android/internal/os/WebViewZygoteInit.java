@@ -16,6 +16,15 @@
 
 package com.android.internal.os;
 
+import android.net.LocalSocket;
+import android.os.Build;
+import android.system.ErrnoException;
+import android.system.Os;
+import android.text.TextUtils;
+import android.util.Log;
+
+import java.io.IOException;
+
 /**
  * Startup class for the WebView zygote process.
  *
@@ -26,7 +35,48 @@ package com.android.internal.os;
 class WebViewZygoteInit {
     public static final String TAG = "WebViewZygoteInit";
 
+    private static ZygoteServer sServer;
+
+    private static class WebViewZygoteServer extends ZygoteServer {
+        @Override
+        protected ZygoteConnection createNewConnection(LocalSocket socket, String abiList)
+                throws IOException {
+            return new WebViewZygoteConnection(socket, abiList);
+        }
+    }
+
+    private static class WebViewZygoteConnection extends ZygoteConnection {
+        WebViewZygoteConnection(LocalSocket socket, String abiList) throws IOException {
+            super(socket, abiList);
+        }
+
+        @Override
+        protected boolean handlePreloadPackage(String packagePath, String libsPath) {
+            // TODO: Use preload information to setup the ClassLoader.
+            return false;
+        }
+    }
+
     public static void main(String argv[]) {
-        throw new RuntimeException("Not implemented yet");
+        sServer = new WebViewZygoteServer();
+
+        // Zygote goes into its own process group.
+        try {
+            Os.setpgid(0, 0);
+        } catch (ErrnoException ex) {
+            throw new RuntimeException("Failed to setpgid(0,0)", ex);
+        }
+
+        try {
+            sServer.registerServerSocket("webview_zygote");
+            sServer.runSelectLoop(TextUtils.join(",", Build.SUPPORTED_ABIS));
+            sServer.closeServerSocket();
+        } catch (Zygote.MethodAndArgsCaller caller) {
+            caller.run();
+        } catch (RuntimeException e) {
+            Log.e(TAG, "Fatal exception:", e);
+        }
+
+        System.exit(0);
     }
 }
