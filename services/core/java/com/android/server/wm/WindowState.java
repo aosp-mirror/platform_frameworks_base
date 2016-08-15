@@ -1325,7 +1325,8 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
                 && ((!isParentWindowHidden() && mViewVisibility == View.VISIBLE && !mToken.hidden)
                         || mWinAnimator.mAnimation != null
                         || ((atoken != null) && (atoken.mAppAnimator.animation != null)
-                                && !mWinAnimator.isDummyAnimation()));
+                                && !mWinAnimator.isDummyAnimation())
+                        || isAnimatingWithSavedSurface());
     }
 
     /**
