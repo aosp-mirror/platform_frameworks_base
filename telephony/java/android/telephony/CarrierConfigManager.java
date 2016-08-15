@@ -913,6 +913,15 @@ public class CarrierConfigManager {
     public static final String KEY_NOTIFY_VT_HANDOVER_TO_WIFI_FAILURE_BOOL =
             "notify_vt_handover_to_wifi_failure_bool";
 
+    /**
+     * A upper case list of CNAP names that are unhelpful to the user for distinguising calls and
+     * should be filtered out of the CNAP information. This includes CNAP names such as "WIRELESS
+     * CALLER" or "UNKNOWN NAME". By default, if there are no filtered names for this carrier, null
+     * is returned.
+     * @hide
+     */
+    public static final String FILTERED_CNAP_NAMES_STRING_ARRAY = "filtered_cnap_names_string_array";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -1079,6 +1088,7 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_IMS_REASONINFO_MAPPING_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_ENHANCED_4G_LTE_TITLE_VARIANT_BOOL, false);
         sDefaults.putBoolean(KEY_NOTIFY_VT_HANDOVER_TO_WIFI_FAILURE_BOOL, false);
+        sDefaults.putStringArray(FILTERED_CNAP_NAMES_STRING_ARRAY, null);
     }
 
     /**
