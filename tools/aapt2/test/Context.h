@@ -87,7 +87,7 @@ public:
         return *this;
     }
 
-    ContextBuilder& setNameManglerPolicy(NameManglerPolicy policy) {
+    ContextBuilder& setNameManglerPolicy(const NameManglerPolicy& policy) {
         mContext->mNameMangler = NameMangler(policy);
         return *this;
     }

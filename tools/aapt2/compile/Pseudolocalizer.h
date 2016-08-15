@@ -43,7 +43,7 @@ public:
         kBidi,
     };
 
-    Pseudolocalizer(Method method);
+    explicit Pseudolocalizer(Method method);
     void setMethod(Method method);
     std::string start() { return mImpl->start(); }
     std::string end() { return mImpl->end(); }

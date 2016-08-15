@@ -35,7 +35,7 @@ struct Source {
 
     Source() = default;
 
-    inline Source(const StringPiece& path) : path(path.toString()) {
+    inline Source(const StringPiece& path) : path(path.toString()) {  // NOLINT(implicit)
     }
 
     inline Source(const StringPiece& path, size_t line) : path(path.toString()), line(line) {

@@ -41,13 +41,13 @@ private:
 public:
     DiagMessage() = default;
 
-    DiagMessage(const StringPiece& src) : mSource(src) {
+    explicit DiagMessage(const StringPiece& src) : mSource(src) {
     }
 
-    DiagMessage(const Source& src) : mSource(src) {
+    explicit DiagMessage(const Source& src) : mSource(src) {
     }
 
-    DiagMessage(size_t line) : mSource(Source().withLine(line)) {
+    explicit DiagMessage(size_t line) : mSource(Source().withLine(line)) {
     }
 
     template <typename T>

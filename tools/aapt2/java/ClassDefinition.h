@@ -110,7 +110,7 @@ using StringMember = PrimitiveMember<std::string>;
 template <typename T>
 class PrimitiveArrayMember : public ClassMember {
 public:
-    PrimitiveArrayMember(const StringPiece& name) :
+    explicit PrimitiveArrayMember(const StringPiece& name) :
             mName(name.toString()) {
     }
 

@@ -104,7 +104,7 @@ private:
     Source mSource;
 
 public:
-    TestFile(const StringPiece& path) : mSource(path) {}
+    explicit TestFile(const StringPiece& path) : mSource(path) {}
 
     std::unique_ptr<io::IData> openAsData() override {
         return {};

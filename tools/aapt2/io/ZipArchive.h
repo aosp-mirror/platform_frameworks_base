@@ -47,7 +47,7 @@ class ZipFileCollection;
 
 class ZipFileCollectionIterator : public IFileCollectionIterator {
 public:
-    ZipFileCollectionIterator(ZipFileCollection* collection);
+    explicit ZipFileCollectionIterator(ZipFileCollection* collection);
 
     bool hasNext() override;
     io::IFile* next() override;

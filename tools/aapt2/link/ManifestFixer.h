@@ -41,7 +41,7 @@ struct ManifestFixerOptions {
  */
 class ManifestFixer : public IXmlResourceConsumer {
 public:
-    ManifestFixer(const ManifestFixerOptions& options) : mOptions(options) {
+    explicit ManifestFixer(const ManifestFixerOptions& options) : mOptions(options) {
     }
 
     bool consume(IAaptContext* context, xml::XmlResource* doc) override;

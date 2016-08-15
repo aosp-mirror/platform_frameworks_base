@@ -46,12 +46,12 @@ public:
         return *this;
     }
 
-    ResourceTableBuilder& addSimple(const StringPiece& name, const ResourceId id = {}) {
+    ResourceTableBuilder& addSimple(const StringPiece& name, const ResourceId& id = {}) {
         return addValue(name, id, util::make_unique<Id>());
     }
 
     ResourceTableBuilder& addSimple(const StringPiece& name, const ConfigDescription& config,
-                                    const ResourceId id = {}) {
+                                    const ResourceId& id = {}) {
         return addValue(name, config, id, util::make_unique<Id>());
     }
 
@@ -59,7 +59,7 @@ public:
         return addReference(name, {}, ref);
     }
 
-    ResourceTableBuilder& addReference(const StringPiece& name, const ResourceId id,
+    ResourceTableBuilder& addReference(const StringPiece& name, const ResourceId& id,
                                        const StringPiece& ref) {
         return addValue(name, id, util::make_unique<Reference>(parseNameOrDie(ref)));
     }
@@ -68,12 +68,12 @@ public:
         return addString(name, {}, str);
     }
 
-    ResourceTableBuilder& addString(const StringPiece& name, const ResourceId id,
+    ResourceTableBuilder& addString(const StringPiece& name, const ResourceId& id,
                                     const StringPiece& str) {
         return addValue(name, id, util::make_unique<String>(mTable->stringPool.makeRef(str)));
     }
 
-    ResourceTableBuilder& addString(const StringPiece& name, const ResourceId id,
+    ResourceTableBuilder& addString(const StringPiece& name, const ResourceId& id,
                                     const ConfigDescription& config, const StringPiece& str) {
         return addValue(name, config, id,
                         util::make_unique<String>(mTable->stringPool.makeRef(str)));
@@ -83,7 +83,7 @@ public:
         return addFileReference(name, {}, path);
     }
 
-    ResourceTableBuilder& addFileReference(const StringPiece& name, const ResourceId id,
+    ResourceTableBuilder& addFileReference(const StringPiece& name, const ResourceId& id,
                                            const StringPiece& path) {
         return addValue(name, id,
                         util::make_unique<FileReference>(mTable->stringPool.makeRef(path)));
@@ -100,13 +100,13 @@ public:
         return addValue(name, {}, std::move(value));
     }
 
-    ResourceTableBuilder& addValue(const StringPiece& name, const ResourceId id,
+    ResourceTableBuilder& addValue(const StringPiece& name, const ResourceId& id,
                                    std::unique_ptr<Value> value) {
         return addValue(name, {}, id, std::move(value));
     }
 
     ResourceTableBuilder& addValue(const StringPiece& name, const ConfigDescription& config,
-                                   const ResourceId id, std::unique_ptr<Value> value) {
+                                   const ResourceId& id, std::unique_ptr<Value> value) {
         ResourceName resName = parseNameOrDie(name);
         bool result = mTable->addResourceAllowMangled(resName, id, config, {},
                                                       std::move(value), &mDiagnostics);
@@ -114,7 +114,7 @@ public:
         return *this;
     }
 
-    ResourceTableBuilder& setSymbolState(const StringPiece& name, ResourceId id,
+    ResourceTableBuilder& setSymbolState(const StringPiece& name, const ResourceId& id,
                                          SymbolState state) {
         ResourceName resName = parseNameOrDie(name);
         Symbol symbol;
@@ -130,7 +130,7 @@ public:
 };
 
 inline std::unique_ptr<Reference> buildReference(const StringPiece& ref,
-                                                 Maybe<ResourceId> id = {}) {
+                                                 const Maybe<ResourceId>& id = {}) {
     std::unique_ptr<Reference> reference = util::make_unique<Reference>(parseNameOrDie(ref));
     reference->id = id;
     return reference;
@@ -151,7 +151,7 @@ private:
 
 public:
     template <typename... Args>
-    ValueBuilder(Args&&... args) : mValue(new T{ std::forward<Args>(args)... }) {
+    explicit ValueBuilder(Args&&... args) : mValue(new T{ std::forward<Args>(args)... }) {
     }
 
     template <typename... Args>
@@ -175,7 +175,7 @@ private:
     std::unique_ptr<Attribute> mAttr;
 
 public:
-    AttributeBuilder(bool weak = false) : mAttr(util::make_unique<Attribute>(weak)) {
+    explicit AttributeBuilder(bool weak = false) : mAttr(util::make_unique<Attribute>(weak)) {
         mAttr->typeMask = android::ResTable_map::TYPE_ANY;
     }
 
@@ -211,7 +211,7 @@ public:
         return *this;
     }
 
-    StyleBuilder& addItem(const StringPiece& str, ResourceId id, std::unique_ptr<Item> value) {
+    StyleBuilder& addItem(const StringPiece& str, const ResourceId& id, std::unique_ptr<Item> value) {
         addItem(str, std::move(value));
         mStyle->entries.back().key.id = id;
         return *this;
@@ -227,7 +227,7 @@ private:
     std::unique_ptr<Styleable> mStyleable = util::make_unique<Styleable>();
 
 public:
-    StyleableBuilder& addItem(const StringPiece& str, Maybe<ResourceId> id = {}) {
+    StyleableBuilder& addItem(const StringPiece& str, const Maybe<ResourceId>& id = {}) {
         mStyleable->entries.push_back(Reference(parseNameOrDie(str)));
         mStyleable->entries.back().id = id;
         return *this;

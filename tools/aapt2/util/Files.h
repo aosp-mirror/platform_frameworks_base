@@ -109,7 +109,7 @@ bool appendArgsFromFile(const StringPiece& path, std::vector<std::string>* outAr
  */
 class FileFilter {
 public:
-    FileFilter(IDiagnostics* diag) : mDiag(diag) {
+    explicit FileFilter(IDiagnostics* diag) : mDiag(diag) {
     }
 
     /*
