@@ -9131,4 +9131,28 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return policy.mDeviceProvisioningConfigApplied;
         }
     }
+
+    /**
+     * Force update internal persistent state from Settings.Secure.USER_SETUP_COMPLETE.
+     *
+     * It's added for testing only. Please use this API carefully if it's used by other system app
+     * and bare in mind Settings.Secure.USER_SETUP_COMPLETE can be modified by user and other system
+     * apps.
+     */
+    @Override
+    public void forceUpdateUserSetupComplete() {
+        enforceCanManageProfileAndDeviceOwners();
+        List<UserInfo> users = mUserManager.getUsers(true);
+        final int N = users.size();
+        for (int i = 0; i < N; i++) {
+            int userHandle = users.get(i).id;
+            boolean isUserCompleted = mInjector.settingsSecureGetIntForUser(
+                    Settings.Secure.USER_SETUP_COMPLETE, 0, userHandle) != 0;
+            DevicePolicyData policy = getUserData(userHandle);
+            policy.mUserSetupComplete = isUserCompleted;
+            synchronized (this) {
+                saveSettingsLocked(userHandle);
+            }
+        }
+    }
 }

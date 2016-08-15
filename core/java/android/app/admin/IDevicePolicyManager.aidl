@@ -305,4 +305,6 @@ interface IDevicePolicyManager {
     boolean isDeviceProvisioned();
     boolean isDeviceProvisioningConfigApplied();
     void setDeviceProvisioningConfigApplied();
+
+    void forceUpdateUserSetupComplete();
 }
