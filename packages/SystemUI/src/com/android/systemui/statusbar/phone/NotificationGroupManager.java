@@ -42,7 +42,7 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
     private int mBarState = -1;
     private HashMap<String, StatusBarNotification> mIsolatedEntries = new HashMap<>();
     private HeadsUpManager mHeadsUpManager;
-    private boolean mUpdatingSuppressionBlocked;
+    private boolean mIsUpdatingUnchangedGroup;
 
     public void setOnGroupChangeListener(OnGroupChangeListener listener) {
         mListener = listener;
@@ -141,7 +141,7 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
     }
 
     private void updateSuppression(NotificationGroup group) {
-        if (group == null || mUpdatingSuppressionBlocked) {
+        if (group == null) {
             return;
         }
         boolean prevSuppressed = group.suppressed;
@@ -154,7 +154,9 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
             if (group.suppressed) {
                 handleSuppressedSummaryHeadsUpped(group.summary);
             }
-            mListener.onGroupsChanged();
+            if (!mIsUpdatingUnchangedGroup) {
+                mListener.onGroupsChanged();
+            }
         }
     }
 
@@ -188,12 +190,12 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
         boolean groupKeysChanged = !oldKey.equals(newKey);
         boolean wasGroupChild = isGroupChild(oldNotification);
         boolean isGroupChild = isGroupChild(entry.notification);
-        mUpdatingSuppressionBlocked = !groupKeysChanged && wasGroupChild == isGroupChild;
+        mIsUpdatingUnchangedGroup = !groupKeysChanged && wasGroupChild == isGroupChild;
         if (mGroupMap.get(getGroupKey(oldNotification)) != null) {
             onEntryRemovedInternal(entry, oldNotification);
         }
         onEntryAdded(entry);
-        mUpdatingSuppressionBlocked = false;
+        mIsUpdatingUnchangedGroup = false;
         if (isIsolated(entry.notification)) {
             mIsolatedEntries.put(entry.key, entry.notification);
             if (groupKeysChanged) {
