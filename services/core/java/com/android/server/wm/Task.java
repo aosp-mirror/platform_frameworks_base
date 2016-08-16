@@ -624,8 +624,8 @@ class Task implements DimLayer.DimLayerUser {
                     //
                     // As we use this flag as a hint to freeze surface boundary updates,
                     // we'd like to only apply this to TYPE_BASE_APPLICATION,
-                    // windows of TYPE_APPLICATION like dialogs, could appear
-                    // to not be drag resizing while they resize, but we'd
+                    // windows of TYPE_APPLICATION (or TYPE_DRAWN_APPLICATION) like dialogs,
+                    // could appear to not be drag resizing while they resize, but we'd
                     // still like to manipulate their frame to update crop, etc...
                     //
                     // Anyway we don't need to synchronize position and content updates for these
