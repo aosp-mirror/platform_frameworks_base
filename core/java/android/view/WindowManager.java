@@ -1581,6 +1581,15 @@ public interface WindowManager extends ViewManager {
         public static final int ROTATION_ANIMATION_JUMPCUT = 2;
 
         /**
+         * Value for {@link #rotationAnimation} to specify seamless rotation mode.
+         * This works like JUMPCUT but will fall back to CROSSFADE if rotation
+         * can't be applied without pausing the screen.
+         *
+         * @hide
+         */
+        public static final int ROTATION_ANIMATION_SEAMLESS = 3;
+
+        /**
          * Define the exit and entry animations used on this window when the device is rotated.
          * This only has an affect if the incoming and outgoing topmost
          * opaque windows have the #FLAG_FULLSCREEN bit set and are not covered
