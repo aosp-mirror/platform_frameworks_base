@@ -1888,6 +1888,12 @@ results."
           >Managing Your App's Memory</a>
       </li>
       <li>
+        <a href="<?cs var:toroot ?>training/articles/memory-overview.html"
+          description=
+          "How Android manages app process and memory allocation."
+          >Overview of Android Memory Management</a>
+      </li>
+      <li>
         <a href="<?cs var:toroot ?>training/articles/perf-tips.html"
            description=
            "How to optimize your app's performance in various ways to improve its
