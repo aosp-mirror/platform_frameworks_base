@@ -1001,6 +1001,7 @@ public final class ActivityManagerService extends ActivityManagerNative
      * For example, references to the commonly used services.
      */
     HashMap<String, IBinder> mAppBindArgs;
+    HashMap<String, IBinder> mIsolatedAppBindArgs;
 
     /**
      * Temporary to avoid allocations.  Protected by main lock.
@@ -2626,18 +2627,24 @@ public final class ActivityManagerService extends ActivityManagerNative
      * lazily setup to make sure the services are running when they're asked for.
      */
     private HashMap<String, IBinder> getCommonServicesLocked(boolean isolated) {
+        // Isolated processes won't get this optimization, so that we don't
+        // violate the rules about which services they have access to.
+        if (isolated) {
+            if (mIsolatedAppBindArgs == null) {
+                mIsolatedAppBindArgs = new HashMap<>();
+                mIsolatedAppBindArgs.put("package", ServiceManager.getService("package"));
+            }
+            return mIsolatedAppBindArgs;
+        }
+
         if (mAppBindArgs == null) {
             mAppBindArgs = new HashMap<>();
 
-            // Isolated processes won't get this optimization, so that we don't
-            // violate the rules about which services they have access to.
-            if (!isolated) {
-                // Setup the application init args
-                mAppBindArgs.put("package", ServiceManager.getService("package"));
-                mAppBindArgs.put("window", ServiceManager.getService("window"));
-                mAppBindArgs.put(Context.ALARM_SERVICE,
-                        ServiceManager.getService(Context.ALARM_SERVICE));
-            }
+            // Setup the application init args
+            mAppBindArgs.put("package", ServiceManager.getService("package"));
+            mAppBindArgs.put("window", ServiceManager.getService("window"));
+            mAppBindArgs.put(Context.ALARM_SERVICE,
+                    ServiceManager.getService(Context.ALARM_SERVICE));
         }
         return mAppBindArgs;
     }
