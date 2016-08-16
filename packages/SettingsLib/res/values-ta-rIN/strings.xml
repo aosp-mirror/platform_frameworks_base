@@ -341,4 +341,6 @@
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"மிகப் பெரியது"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"தனிப்பயன் (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"உதவி &amp; கருத்து"</string>
+    <!-- no translation found for content_description_menu_button (8182594799812351266) -->
+    <skip />
 </resources>
