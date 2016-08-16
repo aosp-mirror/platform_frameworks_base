@@ -1,0 +1,1897 @@
+<?xml version="1.0" encoding="iso-8859-1" standalone="no"?>
+<comments
+  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+  xsi:noNamespaceSchemaLocation='comments.xsd'
+  name="24.1.0_to_24.2.0"
+  jdversion="1.1.0">
+
+<!-- Use this file to enter an API change description. For example, when you remove a class, 
+     you can enter a comment for that class that points developers to the replacement class. 
+     You can also provide a change summary for modified API, to give an overview of the changes 
+     why they were made, workarounds, etc.  -->
+
+<!-- When the API diffs report is generated, the comments in this file get added to the tables of 
+     removed, added, and modified packages, classes, methods, and fields. This file does not ship 
+     with the final report. -->
+
+<!-- The id attribute in an identifier element identifies the change as noted in the report. 
+     An id has the form package[.class[.[ctor|method|field].signature]], where [] indicates optional 
+     text. A comment element can have multiple identifier elements, which will will cause the same 
+     text to appear at each place in the report, but will be converted to separate comments when the 
+     comments file is used. -->
+
+<!-- HTML tags in the text field will appear in the report. You also need to close p HTML elements, 
+     used for paragraphs - see the top-level documentation. -->
+
+<!-- You can include standard javadoc links in your change descriptions. You can use the @first command  
+     to cause jdiff to include the first line of the API documentation. You also need to close p HTML 
+     elements, used for paragraphs - see the top-level documentation. -->
+
+<comment>
+  <identifier id="android.support.customtabs"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.customtabs.CustomTabsIntent"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.customtabs.CustomTabsIntent.Builder"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.customtabs.CustomTabsIntent.Builder.setInstantAppsEnabled_added(boolean)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.customtabs.CustomTabsIntent.EXTRA_ENABLE_INSTANT_APPS"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.customtabs.CustomTabsIntent.setAlwaysUseBrowserUI_added(android.content.Intent)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.customtabs.CustomTabsIntent.shouldAlwaysUseBrowserUI_added(android.content.Intent)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.customtabs.CustomTabsSession"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.customtabs.CustomTabsSession.setSecondaryToolbarViews_added(android.widget.RemoteViews, int[], android.app.PendingIntent)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.customtabs.CustomTabsSession.setToolbarItem_changed(int, android.graphics.Bitmap, java.lang.String)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget.AppBarLayout.ScrollingViewBehavior"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget.AppBarLayout.ScrollingViewBehavior.onRequestChildRectangleOnScreen_added(android.support.design.widget.CoordinatorLayout, android.view.View, android.graphics.Rect, boolean)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget.BottomSheetBehavior"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget.BottomSheetBehavior.PEEK_HEIGHT_AUTO"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget.CollapsingToolbarLayout"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget.CollapsingToolbarLayout.setCollapsedTitleTextColor_added(android.content.res.ColorStateList)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget.CollapsingToolbarLayout.setExpandedTitleTextColor_added(android.content.res.ColorStateList)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget.CoordinatorLayout"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget.CoordinatorLayout.Behavior"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget.CoordinatorLayout.Behavior.getInsetDodgeRect_added(android.support.design.widget.CoordinatorLayout, V, android.graphics.Rect)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget.CoordinatorLayout.Behavior.isDirty_changed(android.support.design.widget.CoordinatorLayout, V)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget.CoordinatorLayout.Behavior.onAttachedToLayoutParams_added(android.support.design.widget.CoordinatorLayout.LayoutParams)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget.CoordinatorLayout.Behavior.onDetachedFromLayoutParams_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget.CoordinatorLayout.Behavior.onRequestChildRectangleOnScreen_added(android.support.design.widget.CoordinatorLayout, V, android.graphics.Rect, boolean)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget.CoordinatorLayout.LayoutParams"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget.CoordinatorLayout.LayoutParams.dodgeInsetEdges"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget.CoordinatorLayout.LayoutParams.insetEdge"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget.CoordinatorLayout.getDependents_added(android.view.View)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget.FloatingActionButton.Behavior"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget.FloatingActionButton.Behavior.getInsetDodgeRect_added(android.support.design.widget.CoordinatorLayout, android.support.design.widget.FloatingActionButton, android.graphics.Rect)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget.FloatingActionButton.Behavior.isAutoHideEnabled_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget.FloatingActionButton.Behavior.layoutDependsOn_removed(android.support.design.widget.CoordinatorLayout, android.support.design.widget.FloatingActionButton, android.view.View)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget.FloatingActionButton.Behavior.onDependentViewRemoved_removed(android.support.design.widget.CoordinatorLayout, android.support.design.widget.FloatingActionButton, android.view.View)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget.FloatingActionButton.Behavior.setAutoHideEnabled_added(boolean)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget.TabLayout"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget.TabLayout.clearOnTabSelectedListeners_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget.TextInputLayout"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget.TextInputLayout.getPasswordVisibilityToggleContentDescription_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget.TextInputLayout.getPasswordVisibilityToggleDrawable_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget.TextInputLayout.isPasswordVisibilityToggleEnabled_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget.TextInputLayout.setPasswordVisibilityToggleContentDescription_added(int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget.TextInputLayout.setPasswordVisibilityToggleContentDescription_added(java.lang.CharSequence)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget.TextInputLayout.setPasswordVisibilityToggleDrawable_added(android.graphics.drawable.Drawable)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget.TextInputLayout.setPasswordVisibilityToggleDrawable_added(int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget.TextInputLayout.setPasswordVisibilityToggleEnabled_added(boolean)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget.TextInputLayout.setPasswordVisibilityToggleTintList_added(android.content.res.ColorStateList)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.design.widget.TextInputLayout.setPasswordVisibilityToggleTintMode_added(android.graphics.PorterDuff.Mode)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.transition"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v14.preference"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v14.preference.PreferenceFragment"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v17.leanback.widget"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v17.leanback.widget.AbstractMediaItemPresenter"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v17.leanback.widget.AbstractMediaItemPresenter.PLAY_STATE_INITIAL"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v17.leanback.widget.AbstractMediaItemPresenter.PLAY_STATE_PAUSED"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v17.leanback.widget.AbstractMediaItemPresenter.PLAY_STATE_PLAYING"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v17.leanback.widget.AbstractMediaItemPresenter.ViewHolder"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v17.leanback.widget.AbstractMediaItemPresenter.ViewHolder.getMediaItemNumberViewFlipper_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v17.leanback.widget.AbstractMediaItemPresenter.ViewHolder.getMediaItemPausedView_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v17.leanback.widget.AbstractMediaItemPresenter.ViewHolder.getMediaItemPlayingView_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v17.leanback.widget.AbstractMediaItemPresenter.ViewHolder.notifyPlayStateChanged_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v17.leanback.widget.AbstractMediaItemPresenter.ViewHolder.setSelectedMediaItemNumberView_added(int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v17.leanback.widget.AbstractMediaItemPresenter.getMediaPlayState_added(java.lang.Object)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v17.leanback.widget.AbstractMediaItemPresenter.onBindMediaPlayState_added(android.support.v17.leanback.widget.AbstractMediaItemPresenter.ViewHolder)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v17.leanback.widget.AbstractMediaItemPresenter.onUnbindMediaPlayState_added(android.support.v17.leanback.widget.AbstractMediaItemPresenter.ViewHolder)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v17.leanback.widget.ObjectAdapter"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v17.leanback.widget.ObjectAdapter.isImmediateNotifySupported_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v17.preference"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v17.preference.LeanbackSettingsFragment"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.accessibilityservice"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.accessibilityservice.AccessibilityServiceInfoCompat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.accessibilityservice.AccessibilityServiceInfoCompat.getDescription_changed(android.accessibilityservice.AccessibilityServiceInfo)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.accessibilityservice.AccessibilityServiceInfoCompat.loadDescription_added(android.accessibilityservice.AccessibilityServiceInfo, android.content.pm.PackageManager)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.app"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.app.ActivityCompat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.app.ActivityCompat.ctor_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.app.ActivityCompat.getReferrer_changed(android.app.Activity)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.app.ActivityOptionsCompat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.app.ActivityOptionsCompat.EXTRA_USAGE_TIME_REPORT"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.app.ActivityOptionsCompat.EXTRA_USAGE_TIME_REPORT_PACKAGES"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.app.ActivityOptionsCompat.getLaunchBounds_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.app.ActivityOptionsCompat.makeBasic_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.app.ActivityOptionsCompat.makeClipRevealAnimation_added(android.view.View, int, int, int, int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.app.ActivityOptionsCompat.makeTaskLaunchBehind_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.app.ActivityOptionsCompat.requestUsageTimeReport_added(android.app.PendingIntent)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.app.ActivityOptionsCompat.setLaunchBounds_added(android.graphics.Rect)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.app.FragmentController"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.app.FragmentController.findFragmentByWho_added(java.lang.String)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.app.ServiceCompat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.app.ServiceCompat.STOP_FOREGROUND_DETACH"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.app.ServiceCompat.STOP_FOREGROUND_REMOVE"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.app.ServiceCompat.stopForeground_added(android.app.Service, int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.app.SharedElementCallback"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.app.SharedElementCallback.OnSharedElementsReadyListener"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.app.SharedElementCallback.onSharedElementsArrived_added(java.util.List&lt;java.lang.String&gt;, java.util.List&lt;android.view.View&gt;, android.support.v4.app.SharedElementCallback.OnSharedElementsReadyListener)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.content"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.content.ContextCompat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.content.ContextCompat.ctor_changed()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.graphics.drawable"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.graphics.drawable.DrawableCompat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.graphics.drawable.DrawableCompat.clearColorFilter_added(android.graphics.drawable.Drawable)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.media"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.media.MediaBrowserCompat.MediaItem"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.media.MediaBrowserCompat.MediaItem.fromMediaItemList_added(java.util.List&lt;?&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.media.MediaBrowserCompat.MediaItem.fromMediaItem_added(java.lang.Object)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.media.MediaBrowserServiceCompat.BrowserRoot"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.media.MediaBrowserServiceCompat.BrowserRoot.EXTRA_SUGGESTION_KEYWORDS"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.media.MediaDescriptionCompat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.media.MediaDescriptionCompat.BT_FOLDER_TYPE_ALBUMS"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.media.MediaDescriptionCompat.BT_FOLDER_TYPE_ARTISTS"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.media.MediaDescriptionCompat.BT_FOLDER_TYPE_GENRES"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.media.MediaDescriptionCompat.BT_FOLDER_TYPE_MIXED"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.media.MediaDescriptionCompat.BT_FOLDER_TYPE_PLAYLISTS"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.media.MediaDescriptionCompat.BT_FOLDER_TYPE_TITLES"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.media.MediaDescriptionCompat.BT_FOLDER_TYPE_YEARS"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.media.MediaDescriptionCompat.EXTRA_BT_FOLDER_TYPE"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.media.MediaMetadataCompat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.media.MediaMetadataCompat.METADATA_KEY_BT_FOLDER_TYPE"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.media.MediaMetadataCompat.METADATA_KEY_MEDIA_URI"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.media.session"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.media.session.MediaButtonReceiver"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.media.session.MediaButtonReceiver.buildMediaButtonPendingIntent_added(android.content.Context, android.content.ComponentName, long)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.media.session.MediaButtonReceiver.buildMediaButtonPendingIntent_added(android.content.Context, long)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.media.session.MediaSessionCompat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.media.session.MediaSessionCompat.QueueItem"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.media.session.MediaSessionCompat.QueueItem.fromQueueItemList_added(java.util.List&lt;?&gt;)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.media.session.MediaSessionCompat.QueueItem.fromQueueItem_added(java.lang.Object)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.media.session.MediaSessionCompat.QueueItem.obtain_changed(java.lang.Object)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.media.session.MediaSessionCompat.fromMediaSession_added(android.content.Context, java.lang.Object)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.media.session.MediaSessionCompat.obtain_changed(android.content.Context, java.lang.Object)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.media.session.PlaybackStateCompat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.media.session.PlaybackStateCompat.toKeyCode_added(long)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.os"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.os.BuildCompat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.os.BuildCompat.isAtLeastNMR1_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.text.util"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.util"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.util.PatternsCompat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.KeyEventCompat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.KeyEventCompat.dispatch_changed(android.view.KeyEvent, android.view.KeyEvent.Callback, java.lang.Object, java.lang.Object)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.KeyEventCompat.getKeyDispatcherState_changed(android.view.View)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.KeyEventCompat.isTracking_changed(android.view.KeyEvent)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.KeyEventCompat.startTracking_changed(android.view.KeyEvent)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.MotionEventCompat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.MotionEventCompat.findPointerIndex_changed(android.view.MotionEvent, int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.MotionEventCompat.getPointerCount_changed(android.view.MotionEvent)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.MotionEventCompat.getPointerId_changed(android.view.MotionEvent, int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.MotionEventCompat.getSource_changed(android.view.MotionEvent)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.MotionEventCompat.getX_changed(android.view.MotionEvent, int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.MotionEventCompat.getY_changed(android.view.MotionEvent, int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.ViewCompat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.ViewCompat.OVER_SCROLL_ALWAYS"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.ViewCompat.OVER_SCROLL_IF_CONTENT_SCROLLS"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.ViewCompat.OVER_SCROLL_NEVER"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.ViewCompat.getOverScrollMode_changed(android.view.View)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.ViewCompat.isImportantForAccessibility_added(android.view.View)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.ViewCompat.isOpaque_changed(android.view.View)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.ViewCompat.setOverScrollMode_changed(android.view.View, int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.ViewConfigurationCompat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.ViewConfigurationCompat.getScaledPagingTouchSlop_changed(android.view.ViewConfiguration)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.WindowInsetsCompat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.WindowInsetsCompat.ctor_added(android.support.v4.view.WindowInsetsCompat)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityEventCompat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityEventCompat.TYPE_ASSIST_READING_CONTEXT"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityEventCompat.TYPE_VIEW_CONTEXT_CLICKED"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityEventCompat.TYPE_WINDOWS_CHANGED"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityEventCompat.getAction_added(android.view.accessibility.AccessibilityEvent)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityEventCompat.getMovementGranularity_added(android.view.accessibility.AccessibilityEvent)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityEventCompat.setAction_added(android.view.accessibility.AccessibilityEvent, int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityEventCompat.setMovementGranularity_added(android.view.accessibility.AccessibilityEvent, int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityManagerCompat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityManagerCompat.AccessibilityStateChangeListener"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityManagerCompat.AccessibilityStateChangeListenerCompat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityManagerCompat.AccessibilityStateChangeListenerCompat.onAccessibilityStateChanged_removed(boolean)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityManagerCompat.TouchExplorationStateChangeListener"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityManagerCompat.addAccessibilityStateChangeListener_changed(android.view.accessibility.AccessibilityManager, android.support.v4.view.accessibility.AccessibilityManagerCompat.AccessibilityStateChangeListener)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityManagerCompat.addTouchExplorationStateChangeListener_added(android.view.accessibility.AccessibilityManager, android.support.v4.view.accessibility.AccessibilityManagerCompat.TouchExplorationStateChangeListener)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityManagerCompat.removeAccessibilityStateChangeListener_changed(android.view.accessibility.AccessibilityManager, android.support.v4.view.accessibility.AccessibilityManagerCompat.AccessibilityStateChangeListener)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityManagerCompat.removeTouchExplorationStateChangeListener_added(android.view.accessibility.AccessibilityManager, android.support.v4.view.accessibility.AccessibilityManagerCompat.TouchExplorationStateChangeListener)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityNodeInfoCompat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityNodeInfoCompat.ACTION_ARGUMENT_COLUMN_INT"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityNodeInfoCompat.ACTION_ARGUMENT_PROGRESS_VALUE"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityNodeInfoCompat.ACTION_ARGUMENT_ROW_INT"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_CONTEXT_CLICK"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_SCROLL_DOWN"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_SCROLL_LEFT"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_SCROLL_RIGHT"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_SCROLL_TO_POSITION"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_SCROLL_UP"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_SET_PROGRESS"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_SHOW_ON_SCREEN"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityNodeInfoCompat.CollectionInfoCompat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityNodeInfoCompat.CollectionInfoCompat.getSelectionMode_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityNodeInfoCompat.CollectionInfoCompat.obtain_added(int, int, boolean)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityNodeInfoCompat.CollectionItemInfoCompat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityNodeInfoCompat.CollectionItemInfoCompat.obtain_added(int, int, int, int, boolean)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityNodeInfoCompat.RangeInfoCompat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityNodeInfoCompat.RangeInfoCompat.obtain_added(int, float, float, float)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityNodeInfoCompat.isContextClickable_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityNodeInfoCompat.setContextClickable_added(boolean)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityNodeProviderCompat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityNodeProviderCompat.HOST_VIEW_ID"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityWindowInfoCompat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.view.accessibility.AccessibilityWindowInfoCompat.TYPE_SPLIT_SCREEN_DIVIDER"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.widget"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.widget.SearchViewCompat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.widget.SearchViewCompat.OnCloseListener"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.widget.SearchViewCompat.OnCloseListenerCompat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.widget.SearchViewCompat.OnQueryTextListener"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.widget.SearchViewCompat.OnQueryTextListenerCompat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.widget.SearchViewCompat.setOnCloseListener_changed(android.view.View, android.support.v4.widget.SearchViewCompat.OnCloseListener)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.widget.SearchViewCompat.setOnQueryTextListener_changed(android.view.View, android.support.v4.widget.SearchViewCompat.OnQueryTextListener)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.widget.SwipeRefreshLayout"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.widget.SwipeRefreshLayout.OnChildScrollUpCallback"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.widget.SwipeRefreshLayout.setOnChildScrollUpCallback_added(android.support.v4.widget.SwipeRefreshLayout.OnChildScrollUpCallback)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.widget.TextViewCompat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v4.widget.TextViewCompat.getCompoundDrawablesRelative_added(android.widget.TextView)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.app"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.app.ActionBarActivity"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.app.ActionBarDrawerToggle"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.app.ActionBarDrawerToggle.getDrawerArrowDrawable_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.app.ActionBarDrawerToggle.setDrawerArrowDrawable_added(android.support.v7.graphics.drawable.DrawerArrowDrawable)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.app.AppCompatActivity"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.app.AppCompatDelegate"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.app.AppCompatDelegate.onStart_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.app.AppCompatDialogFragment"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.app.NotificationCompat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.app.NotificationCompat.Builder"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.app.NotificationCompat.MediaStyle"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.appcompat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.content.res"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.content.res.AppCompatResources"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.content.res.AppCompatResources.getDrawable_added(android.content.Context, int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.graphics"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.graphics.Palette"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.graphics.Palette.getDominantColor_added(int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.graphics.Palette.getDominantSwatch_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.preference"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.preference.MultiSelectListPreferenceDialogFragmentCompat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.recyclerview"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.util"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.util.BatchingListUpdateCallback"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.util.DiffUtil"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.util.DiffUtil.Callback"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.util.DiffUtil.DiffResult"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.util.ListUpdateCallback"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.util.SortedList.Callback"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.util.SortedList.Callback.onChanged_added(int, int, java.lang.Object)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.util.SortedList.Callback.onInserted_removed(int, int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.util.SortedList.Callback.onMoved_removed(int, int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.util.SortedList.Callback.onRemoved_removed(int, int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.ActionMenuView"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.ActionMenuView.LayoutParams"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.ActionMenuView.OnMenuItemClickListener"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.AppCompatAutoCompleteTextView"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.AppCompatButton"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.AppCompatCheckBox"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.AppCompatCheckedTextView"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.AppCompatEditText"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.AppCompatImageButton"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.AppCompatImageView"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.AppCompatMultiAutoCompleteTextView"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.AppCompatRadioButton"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.AppCompatRatingBar"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.AppCompatSeekBar"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.AppCompatSpinner"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.AppCompatTextView"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.CardView"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.GridLayout"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.GridLayout.Alignment"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.GridLayout.LayoutParams"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.GridLayout.Spec"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.LinearLayoutCompat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.LinearLayoutCompat.LayoutParams"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.LinearLayoutManager"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.LinearLayoutManager.prepareForDrop_removed(android.view.View, android.view.View, int, int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.LinearSmoothScroller"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.LinearSmoothScroller.computeScrollVectorForPosition_changed(int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.LinearSnapHelper"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.ListPopupWindow"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.PopupMenu"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.PopupMenu.OnDismissListener"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.PopupMenu.OnMenuItemClickListener"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.RecyclerView"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.RecyclerView.OnFlingListener"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.RecyclerView.SmoothScroller.ScrollVectorProvider"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.RecyclerView.getOnFlingListener_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.RecyclerView.setOnFlingListener_added(android.support.v7.widget.RecyclerView.OnFlingListener)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.SearchView"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.SearchView.OnCloseListener"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.SearchView.OnQueryTextListener"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.SearchView.OnSuggestionListener"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.ShareActionProvider"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.ShareActionProvider.OnShareTargetSelectedListener"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.SnapHelper"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.Space"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.StaggeredGridLayoutManager"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.StaggeredGridLayoutManager.TAG"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.StaggeredGridLayoutManager.computeScrollVectorForPosition_added(int)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.SwitchCompat"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.ThemedSpinnerAdapter"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.ThemedSpinnerAdapter.Helper"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.Toolbar"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.Toolbar.LayoutParams"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.Toolbar.OnMenuItemClickListener"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v7.widget.Toolbar.SavedState"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.support.v8.renderscript"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+
+</comments>
