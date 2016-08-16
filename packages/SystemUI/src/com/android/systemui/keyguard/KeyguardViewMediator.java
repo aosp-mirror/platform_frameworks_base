@@ -16,7 +16,11 @@
 
 package com.android.systemui.keyguard;
 
-import android.annotation.UserIdInt;
+import static android.provider.Settings.System.SCREEN_OFF_TIMEOUT;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
+
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
@@ -82,12 +86,6 @@ import com.android.systemui.statusbar.phone.StatusBarWindowManager;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.List;
-
-import static android.provider.Settings.System.SCREEN_OFF_TIMEOUT;
-import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST;
-import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
-import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
 
 /**
  * Mediates requests related to the keyguard.  This includes queries about the
@@ -509,7 +507,12 @@ public class KeyguardViewMediator extends SystemUI {
             }
         }
 
-
+        @Override
+        public void onHasLockscreenWallpaperChanged(boolean hasLockscreenWallpaper) {
+            synchronized (KeyguardViewMediator.this) {
+                notifyHasLockscreenWallpaperChanged(hasLockscreenWallpaper);
+            }
+        }
     };
 
     ViewMediatorCallback mViewMediatorCallback = new ViewMediatorCallback() {
@@ -2014,6 +2017,21 @@ public class KeyguardViewMediator extends SystemUI {
         }
     }
 
+    private void notifyHasLockscreenWallpaperChanged(boolean hasLockscreenWallpaper) {
+        int size = mKeyguardStateCallbacks.size();
+        for (int i = size - 1; i >= 0; i--) {
+            try {
+                mKeyguardStateCallbacks.get(i).onHasLockscreenWallpaperChanged(
+                        hasLockscreenWallpaper);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to call onHasLockscreenWallpaperChanged", e);
+                if (e instanceof DeadObjectException) {
+                    mKeyguardStateCallbacks.remove(i);
+                }
+            }
+        }
+    }
+
     public void addStateMonitorCallback(IKeyguardStateCallback callback) {
         synchronized (this) {
             mKeyguardStateCallbacks.add(callback);
@@ -2023,6 +2041,7 @@ public class KeyguardViewMediator extends SystemUI {
                 callback.onInputRestrictedStateChanged(mInputRestricted);
                 callback.onTrustedChanged(mUpdateMonitor.getUserHasTrust(
                         KeyguardUpdateMonitor.getCurrentUser()));
+                callback.onHasLockscreenWallpaperChanged(mUpdateMonitor.hasLockscreenWallpaper());
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed to call to IKeyguardStateCallback", e);
             }

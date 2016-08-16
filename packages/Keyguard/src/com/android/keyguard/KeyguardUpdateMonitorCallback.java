@@ -240,4 +240,9 @@ public class KeyguardUpdateMonitorCallback {
      * has changed.
      */
     public void onStrongAuthStateChanged(int userId) { }
+
+    /**
+     * Called when the state whether we have a lockscreen wallpaper has changed.
+     */
+    public void onHasLockscreenWallpaperChanged(boolean hasLockscreenWallpaper) { }
 }
