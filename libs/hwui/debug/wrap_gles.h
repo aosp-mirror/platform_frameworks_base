@@ -20,7 +20,16 @@
 #endif
 #define HWUI_GLES_WRAP_ENABLED
 
-#include "GlesDriver.h"
+#include <GLES/gl.h>
+#include <GLES/glext.h>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+#include <GLES3/gl3.h>
+#include <GLES3/gl31.h>
+#include <GLES3/gl32.h>
+
+// Generate stubs that route all the calls to our function table
+#include "gles_redefine.h"
 
 #define GL_ENTRY(ret, api, ...) ret api(__VA_ARGS__);
 
