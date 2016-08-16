@@ -992,6 +992,8 @@ public class Notification implements Parcelable
     private Icon mSmallIcon;
     private Icon mLargeIcon;
 
+    private String mChannelId;
+
     /**
      * Structure to encapsulate a named action that can be shown as part of this notification.
      * It must include an icon, a label, and a {@link PendingIntent} to be fired when the action is
@@ -1675,6 +1677,10 @@ public class Notification implements Parcelable
         }
 
         color = parcel.readInt();
+
+        if (parcel.readInt() != 0) {
+            mChannelId = parcel.readString();
+        }
     }
 
     @Override
@@ -1779,6 +1785,8 @@ public class Notification implements Parcelable
         }
 
         that.color = this.color;
+
+        that.mChannelId = this.mChannelId;
 
         if (!heavy) {
             that.lightenPayload(); // will clean out extras
@@ -2028,6 +2036,13 @@ public class Notification implements Parcelable
         }
 
         parcel.writeInt(color);
+
+        if (mChannelId != null) {
+            parcel.writeInt(1);
+            parcel.writeString(mChannelId);
+        } else {
+            parcel.writeInt(0);
+        }
     }
 
     /**
@@ -2218,6 +2233,13 @@ public class Notification implements Parcelable
     }
 
     /**
+     * Returns the id of the channel this notification posts to.
+     */
+    public String getNotificationChannel() {
+        return mChannelId;
+    }
+
+    /**
      * The small icon representing this notification in the status bar and content view.
      *
      * @return the small icon representing this notification.
@@ -2403,6 +2425,14 @@ public class Notification implements Parcelable
                 }
             }
             return mColorUtil;
+        }
+
+        /**
+         * Specifies the channel the notification should be delivered on.
+         */
+        public Builder setChannel(String channelId) {
+            mN.mChannelId = channelId;
+            return this;
         }
 
         /**

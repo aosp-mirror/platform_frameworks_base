@@ -19,6 +19,7 @@ package android.app;
 
 import android.app.ITransientNotification;
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -56,6 +57,15 @@ interface INotificationManager
     void setImportance(String pkg, int uid, int importance);
     int getImportance(String pkg, int uid);
     int getPackageImportance(String pkg);
+
+    void createNotificationChannel(String pkg, in NotificationChannel channel);
+    void updateNotificationChannel(String pkg, in NotificationChannel channel);
+    void updateNotificationChannelForPackage(String pkg, int uid, in NotificationChannel channel);
+    NotificationChannel getNotificationChannel(String pkg, String channelId);
+    NotificationChannel getNotificationChannelForPackage(String pkg, int uid, String channelId);
+    void deleteNotificationChannel(String pkg, String channelId);
+    ParceledListSlice getNotificationChannels(String pkg);
+    ParceledListSlice getNotificationChannelsForPackage(String pkg, int uid);
 
     // TODO: Remove this when callers have been migrated to the equivalent
     // INotificationListener method.

@@ -23,12 +23,14 @@ import static android.service.notification.NotificationListenerService.Ranking.I
 import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_MAX;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Icon;
 import android.media.AudioAttributes;
+import android.net.Uri;
 import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
@@ -101,8 +103,11 @@ public final class NotificationRecord {
     private String mUserExplanation;
     private String mPeopleExplanation;
 
+    private NotificationChannel mNotificationChannel;
+
     @VisibleForTesting
-    public NotificationRecord(Context context, StatusBarNotification sbn)
+    public NotificationRecord(Context context, StatusBarNotification sbn,
+            NotificationChannel channel)
     {
         this.sbn = sbn;
         mOriginalFlags = sbn.getNotification().flags;
@@ -111,6 +116,7 @@ public final class NotificationRecord {
         mUpdateTimeMs = mCreationTimeMs;
         mContext = context;
         stats = new NotificationUsageStats.SingleNotificationStats();
+        mNotificationChannel = channel;
         mImportance = defaultImportance();
     }
 
@@ -145,7 +151,9 @@ public final class NotificationRecord {
         boolean isNoisy = (n.defaults & Notification.DEFAULT_SOUND) != 0
                 || (n.defaults & Notification.DEFAULT_VIBRATE) != 0
                 || n.sound != null
-                || n.vibrate != null;
+                || n.vibrate != null
+                || mNotificationChannel.shouldVibrate()
+                || mNotificationChannel.getDefaultRingtone() != null;
         stats.isNoisy = isNoisy;
 
         if (!isNoisy && importance > IMPORTANCE_LOW) {
@@ -283,6 +291,7 @@ public final class NotificationRecord {
         pw.println(prefix + "  mVisibleSinceMs=" + mVisibleSinceMs);
         pw.println(prefix + "  mUpdateTimeMs=" + mUpdateTimeMs);
         pw.println(prefix + "  mSuppressedVisualEffects= " + mSuppressedVisualEffects);
+        pw.println(prefix + "  mNotificationChannel= " + mNotificationChannel);
     }
 
 
@@ -526,5 +535,9 @@ public final class NotificationRecord {
 
     public boolean isImportanceFromUser() {
         return mImportance == mUserImportance;
+    }
+
+    public NotificationChannel getChannel() {
+        return mNotificationChannel;
     }
 }

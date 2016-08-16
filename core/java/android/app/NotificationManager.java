@@ -378,6 +378,66 @@ public class NotificationManager
     }
 
     /**
+     * Creates a notification channel that notifications can be posted to.
+     */
+    public void createNotificationChannel(NotificationChannel channel) {
+        INotificationManager service = getService();
+        try {
+            service.createNotificationChannel(mContext.getPackageName(), channel);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the notification channel settings for a given channel id.
+     */
+    public NotificationChannel getNotificationChannel(String channelId) {
+        INotificationManager service = getService();
+        try {
+            return service.getNotificationChannel(mContext.getPackageName(), channelId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns all notification channels created by the calling app.
+     */
+    public List<NotificationChannel> getNotificationChannels() {
+        INotificationManager service = getService();
+        try {
+            return service.getNotificationChannels(mContext.getPackageName()).getList();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Updates settings for a given channel.
+     */
+    public void updateNotificationChannel(NotificationChannel channel) {
+        INotificationManager service = getService();
+        try {
+            service.updateNotificationChannel(mContext.getPackageName(), channel);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Deletes the given notification channel.
+     */
+    public void deleteNotificationChannel(String channelId) {
+        INotificationManager service = getService();
+        try {
+            service.deleteNotificationChannel(mContext.getPackageName(), channelId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * @hide
      */
     public ComponentName getEffectsSuppressor() {
