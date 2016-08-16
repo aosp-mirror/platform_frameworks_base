@@ -434,7 +434,7 @@ public final class BroadcastQueue {
                 // but are on a queue that would like to wait for services to finish before moving
                 // on.  If there are background services currently starting, then we will go into a
                 // special state where we hold off on continuing this broadcast until they are done.
-                if (mService.mServices.hasBackgroundServices(r.userId)) {
+                if (mService.mServices.hasBackgroundServicesLocked(r.userId)) {
                     Slog.i(TAG, "Delay finish: " + r.curComponent.flattenToShortString());
                     r.state = BroadcastRecord.WAITING_SERVICES;
                     return false;
