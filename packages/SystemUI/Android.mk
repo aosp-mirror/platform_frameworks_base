@@ -23,6 +23,7 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_SRC_FILES := $(call all-java-files-under, src) $(call all-Iaidl-files-under, src)
 
 LOCAL_STATIC_ANDROID_LIBRARIES := \
+    SystemUIPluginLib \
     Keyguard \
     android-support-v7-recyclerview \
     android-support-v7-preference \

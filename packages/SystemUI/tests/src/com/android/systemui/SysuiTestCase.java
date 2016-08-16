@@ -17,13 +17,17 @@ package com.android.systemui;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
-import android.test.AndroidTestCase;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.MessageQueue;
 import org.junit.Before;
 
 /**
  * Base class that does System UI specific setup.
  */
 public class SysuiTestCase {
+
+    private Handler mHandler;
     protected Context mContext;
 
     @Before
@@ -33,5 +37,66 @@ public class SysuiTestCase {
 
     protected Context getContext() {
         return mContext;
+    }
+
+    protected void waitForIdleSync() {
+        if (mHandler == null) {
+            mHandler = new Handler(Looper.getMainLooper());
+        }
+        waitForIdleSync(mHandler);
+    }
+
+    protected void waitForIdleSync(Handler h) {
+        validateThread(h.getLooper());
+        Idler idler = new Idler(null);
+        h.getLooper().getQueue().addIdleHandler(idler);
+        // Ensure we are non-idle, so the idle handler can run.
+        h.post(new EmptyRunnable());
+        idler.waitForIdle();
+    }
+
+    private static final void validateThread(Looper l) {
+        if (Looper.myLooper() == l) {
+            throw new RuntimeException(
+                "This method can not be called from the looper being synced");
+        }
+    }
+
+    public static final class EmptyRunnable implements Runnable {
+        public void run() {
+        }
+    }
+
+    public static final class Idler implements MessageQueue.IdleHandler {
+        private final Runnable mCallback;
+        private boolean mIdle;
+
+        public Idler(Runnable callback) {
+            mCallback = callback;
+            mIdle = false;
+        }
+
+        @Override
+        public boolean queueIdle() {
+            if (mCallback != null) {
+                mCallback.run();
+            }
+            synchronized (this) {
+                mIdle = true;
+                notifyAll();
+            }
+            return false;
+        }
+
+        public void waitForIdle() {
+            synchronized (this) {
+                while (!mIdle) {
+                    try {
+                        wait();
+                    } catch (InterruptedException e) {
+                    }
+                }
+            }
+        }
     }
 }
