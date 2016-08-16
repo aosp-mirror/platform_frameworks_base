@@ -6772,6 +6772,20 @@ public class WindowManagerService extends IWindowManager.Stub
                     rotateSeamlessly = false;
                     break;
                 }
+                // In what can only be called an unfortunate workaround we require
+                // seamlessly rotated child windows to have the TRANSFORM_TO_DISPLAY_INVERSE
+                // flag. Due to limitations in the client API, there is no way for
+                // the client to set this flag in a race free fashion. If we seamlessly rotate
+                // a window which does not have this flag, but then gains it, we will get
+                // an incorrect visual result (rotated viewfinder). This means if we want to
+                // support seamlessly rotating windows which could gain this flag, we can't
+                // rotate windows without it. This limits seamless rotation in N to camera framework
+                // users, windows without children, and native code. This is unfortunate but
+                // having the camera work is our primary goal.
+                if (w.isChildWindow() & w.isVisibleNow() &&
+                        !w.mWinAnimator.mSurfaceController.getTransformToDisplayInverse()) {
+                    rotateSeamlessly = false;
+                }
             }
         }
 
