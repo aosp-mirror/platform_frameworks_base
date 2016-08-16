@@ -173,7 +173,7 @@ android.app.Fragment} into the main content view (the
 <pre>
 private class DrawerItemClickListener implements ListView.OnItemClickListener {
     &#64;Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+    public void onItemClick(AdapterView&lt;?> parent, View view, int position, long id) {
         selectItem(position);
     }
 }
