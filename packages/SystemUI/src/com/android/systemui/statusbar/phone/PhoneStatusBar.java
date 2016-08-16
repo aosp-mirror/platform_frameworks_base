@@ -3419,7 +3419,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     // force the crossfade animation if an orientation change
                     // happens to occur during the launch.
                     options.setRotationAnimationHint(
-                            WindowManager.LayoutParams.ROTATION_ANIMATION_CROSSFADE);
+                            WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS);
                 }
                 try {
                     result = ActivityManagerNative.getDefault().startActivityAsUser(

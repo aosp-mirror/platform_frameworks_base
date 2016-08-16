@@ -2972,6 +2972,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
             switch (animationHint) {
                 case ROTATION_ANIMATION_CROSSFADE:
+                case ROTATION_ANIMATION_SEAMLESS: // Crossfade is fallback for seamless.
                     anim[0] = R.anim.rotation_animation_xfade_exit;
                     anim[1] = R.anim.rotation_animation_enter;
                     break;
@@ -7823,14 +7824,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return false;
         }
 
+        final WindowState w = mTopFullscreenOpaqueWindowState;
+
         // We only enable seamless rotation if the top window has requested
         // it and is in the fullscreen opaque state. Seamless rotation
         // requires freezing various Surface states and won't work well
         // with animations, so we disable it in the animation case for now.
-        if (mTopFullscreenOpaqueWindowState != null && mTopIsFullscreen &&
-                !mTopFullscreenOpaqueWindowState.isAnimatingLw() &&
-                mTopFullscreenOpaqueWindowState.getAttrs().rotationAnimation ==
-                ROTATION_ANIMATION_JUMPCUT) {
+        if (w != null  && mTopIsFullscreen && !w.isAnimatingLw() &&
+                ((w.getAttrs().rotationAnimation == ROTATION_ANIMATION_JUMPCUT) ||
+                        (w.getAttrs().rotationAnimation == ROTATION_ANIMATION_SEAMLESS))) {
             return true;
         }
         return false;

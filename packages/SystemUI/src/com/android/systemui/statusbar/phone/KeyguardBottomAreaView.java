@@ -461,7 +461,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                     // happens to occur during the launch.
                     ActivityOptions o = ActivityOptions.makeBasic();
                     o.setRotationAnimationHint(
-                            WindowManager.LayoutParams.ROTATION_ANIMATION_CROSSFADE);
+                            WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS);
                     try {
                         result = ActivityManagerNative.getDefault().startActivityAsUser(
                                 null, getContext().getBasePackageName(),
