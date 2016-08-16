@@ -3455,7 +3455,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                         notifyHeightChangeListener(mEmptyShadeView);
                     }
                 };
-                if (mAnimationsEnabled) {
+                if (mAnimationsEnabled && mIsExpanded) {
                     mEmptyShadeView.setWillBeGone(true);
                     mEmptyShadeView.performVisibilityAnimation(false, onFinishedRunnable);
                 } else {
