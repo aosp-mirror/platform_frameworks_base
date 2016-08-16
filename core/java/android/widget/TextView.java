@@ -1310,6 +1310,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             createEditorIfNeeded();
             mEditor.mKeyListener = TextKeyListener.getInstance(autotext, cap);
             mEditor.mInputType = inputType;
+        } else if (editable) {
+            createEditorIfNeeded();
+            mEditor.mKeyListener = TextKeyListener.getInstance();
+            mEditor.mInputType = EditorInfo.TYPE_CLASS_TEXT;
         } else if (isTextSelectable()) {
             // Prevent text changes from keyboard.
             if (mEditor != null) {
@@ -1319,10 +1323,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             bufferType = BufferType.SPANNABLE;
             // So that selection can be changed using arrow keys and touch is handled.
             setMovementMethod(ArrowKeyMovementMethod.getInstance());
-        } else if (editable) {
-            createEditorIfNeeded();
-            mEditor.mKeyListener = TextKeyListener.getInstance();
-            mEditor.mInputType = EditorInfo.TYPE_CLASS_TEXT;
         } else {
             if (mEditor != null) mEditor.mKeyListener = null;
 
@@ -8538,13 +8538,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
             handled |= mClickableSpanOnClickGestureDetector.onTouchEvent(event);
 
-            final boolean textIsSelectable = isTextSelectable();
-            if (touchIsFinished && (isTextEditable() || textIsSelectable)) {
+            if (touchIsFinished && (isTextEditable() || isTextSelectable())) {
                 // Show the IME, except when selecting in read-only text.
                 final InputMethodManager imm = InputMethodManager.peekInstance();
                 viewClicked(imm);
-                if (!textIsSelectable && mEditor.mShowSoftInputOnFocus) {
-                    handled |= imm != null && imm.showSoftInput(this, 0);
+                if (isTextEditable() && mEditor.mShowSoftInputOnFocus && imm != null) {
+                    imm.showSoftInput(this, 0);
                 }
 
                 // The above condition ensures that the mEditor is not null
