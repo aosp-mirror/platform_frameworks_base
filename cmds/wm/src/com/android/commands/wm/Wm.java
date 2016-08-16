@@ -21,16 +21,22 @@ package com.android.commands.wm;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.util.AndroidException;
 import android.util.DisplayMetrics;
+import android.system.Os;
 import android.view.Display;
 import android.view.IWindowManager;
 import com.android.internal.os.BaseCommand;
 
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.DataInputStream;
 import java.io.PrintStream;
+import java.lang.Runtime;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -69,7 +75,9 @@ public class Wm extends BaseCommand {
                 "wm screen-capture: enable/disable screen capture.\n" +
                 "\n" +
                 "wm dismiss-keyguard: dismiss the keyguard, prompting the user for auth if " +
-                "necessary.\n"
+                "necessary.\n" +
+                "\n" +
+                "wm surface-trace: log surface commands to stdout.\n"
                 );
     }
 
@@ -96,9 +104,57 @@ public class Wm extends BaseCommand {
             runSetScreenCapture();
         } else if (op.equals("dismiss-keyguard")) {
             runDismissKeyguard();
+        } else if (op.equals("surface-trace")) {
+            runSurfaceTrace();
         } else {
             showError("Error: unknown command '" + op + "'");
             return;
+        }
+    }
+
+    private void parseTrace(String next, DataInputStream is) throws Exception {
+        switch (next) {
+        case "Alpha":
+            System.out.println(is.readFloat());
+            break;
+        case "Layer":
+            System.out.println(is.readInt());
+            break;
+        case "Position":
+            System.out.println(is.readFloat() + ", " + is.readFloat());
+            break;
+        case "Size":
+            System.out.println(is.readInt() + ", " + is.readInt());
+            break;
+        case "LayerStack":
+            System.out.println(is.readInt());
+            break;
+        case "Matrix":
+            System.out.println(is.readFloat() + "," + is.readFloat() + "," + is.readFloat() + "," +
+                    is.readFloat());
+            break;
+        case "Hide":
+        case "Show":
+        case "GeometryAppliesWithResize":
+            break;
+        }
+    }
+
+    private void runSurfaceTrace() throws Exception {
+        ParcelFileDescriptor[] fds = ParcelFileDescriptor.createPipe();
+
+        mWm.enableSurfaceTrace(fds[1]);
+        DataInputStream is = new DataInputStream(new FileInputStream(fds[0].getFileDescriptor()));
+
+        try {
+            while (true) {
+                String cmd = is.readUTF();
+                String window = is.readUTF();
+                System.out.print(cmd + "(" + window + "): ");
+                parseTrace(cmd, is);
+            }
+        } finally {
+            mWm.disableSurfaceTrace();
         }
     }
 

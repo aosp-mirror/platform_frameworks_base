@@ -308,6 +308,17 @@ public class SurfaceControl {
         mCloseGuard.open("release");
     }
 
+    // This is a transfer constructor, useful for transferring a live SurfaceControl native
+    // object to another Java wrapper which could have some different behavior, e.g.
+    // event logging.
+    public SurfaceControl(SurfaceControl other) {
+        mName = other.mName;
+        mNativeObject = other.mNativeObject;
+        other.mCloseGuard.close();
+        other.mNativeObject = 0;
+        mCloseGuard.open("release");
+    }
+
     @Override
     protected void finalize() throws Throwable {
         try {

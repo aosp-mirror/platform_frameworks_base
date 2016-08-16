@@ -70,6 +70,7 @@ import android.view.animation.Transformation;
 import com.android.server.wm.WindowManagerService.H;
 
 import java.io.PrintWriter;
+import java.io.FileDescriptor;
 
 /**
  * Keep track of animations and surface operations for a single WindowState.
@@ -2004,6 +2005,22 @@ class WindowStateAnimator {
                     DtDx * w.mVScale,
                     DsDy * w.mHScale,
                     DtDy * w.mVScale, false);
+        }
+    }
+
+    void enableSurfaceTrace(FileDescriptor fd) {
+        if (mSurfaceController != null) {
+            mSurfaceController.installRemoteTrace(fd);
+        }
+    }
+
+    void disableSurfaceTrace() {
+        if (mSurfaceController != null) {
+            try {
+                mSurfaceController.removeRemoteTrace();
+            } catch (ClassCastException e) {
+                Slog.e(TAG, "Disable surface trace for " + this + " but its not enabled");
+            }
         }
     }
 }

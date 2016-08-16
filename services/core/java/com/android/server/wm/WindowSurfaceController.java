@@ -41,6 +41,7 @@ import android.view.Surface.OutOfResourcesException;
 
 import android.util.Slog;
 
+import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -95,6 +96,19 @@ class WindowSurfaceController {
             mSurfaceControl = new SurfaceControl(
                     s, name, w, h, format, flags);
         }
+
+        if (animator.mService.mSurfaceTraceEnabled) {
+            mSurfaceControl = new RemoteSurfaceTrace(animator.mService.mSurfaceTraceFd.getFileDescriptor(),
+                    mSurfaceControl, animator.mWin);
+        }
+    }
+
+    void installRemoteTrace(FileDescriptor fd) {
+        mSurfaceControl = new RemoteSurfaceTrace(fd, mSurfaceControl, mAnimator.mWin);
+    }
+
+    void removeRemoteTrace() {
+        mSurfaceControl = new SurfaceControl(mSurfaceControl);
     }
 
 

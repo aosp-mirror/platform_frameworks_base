@@ -893,6 +893,12 @@ public class WindowManagerService extends IWindowManager.Stub
     // current configuration.
     private final DisplayContentList mReconfigureOnConfigurationChanged = new DisplayContentList();
 
+    // State for the RemoteSurfaceTrace system used in testing. If this is enabled SurfaceControl
+    // instances will be replaced with an instance that writes a binary representation of all
+    // commands to mSurfaceTraceFd.
+    boolean mSurfaceTraceEnabled;
+    ParcelFileDescriptor mSurfaceTraceFd;
+
     /** Listener to notify activity manager about app transitions. */
     final WindowManagerInternal.AppTransitionListener mActivityManagerAppTransitionNotifier
             = new WindowManagerInternal.AppTransitionListener() {
@@ -1933,6 +1939,42 @@ public class WindowManagerService extends IWindowManager.Stub
             return true;
         }
         return false;
+    }
+
+    @Override
+    public void enableSurfaceTrace(ParcelFileDescriptor pfd) {
+        int callingUid = Binder.getCallingUid();
+        if (callingUid != Process.SHELL_UID && callingUid != Process.ROOT_UID) {
+            throw new SecurityException("Only shell can call enableSurfaceTrace");
+        }
+        final FileDescriptor fd = pfd.getFileDescriptor();
+
+        synchronized (mWindowMap) {
+            if (mSurfaceTraceEnabled) {
+                disableSurfaceTrace();
+            }
+            mSurfaceTraceEnabled = true;
+            mSurfaceTraceFd = pfd;
+            for (int displayNdx = mDisplayContents.size() - 1; displayNdx >= 0; --displayNdx) {
+                DisplayContent dc = mDisplayContents.valueAt(displayNdx);
+                dc.enableSurfaceTrace(fd);
+            }
+        }
+    }
+
+    @Override
+    public void disableSurfaceTrace() {
+        int callingUid = Binder.getCallingUid();
+        if (callingUid != Process.SHELL_UID && callingUid != Process.ROOT_UID &&
+            callingUid != Process.SYSTEM_UID) {
+            throw new SecurityException("Only shell can call disableSurfaceTrace");
+        }
+        mSurfaceTraceEnabled = false;
+        mSurfaceTraceFd = null;
+        for (int displayNdx = mDisplayContents.size() - 1; displayNdx >= 0; --displayNdx) {
+            DisplayContent dc = mDisplayContents.valueAt(displayNdx);
+            dc.disableSurfaceTrace();
+        }
     }
 
     /**
