@@ -344,7 +344,7 @@
     <string name="description_target_search" msgid="3091587249776033139">"ค้นหา"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"เลื่อนขึ้นเพื่อ <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"เลื่อนไปทางซ้ายเพื่อ <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>"</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"คุณจะไม่ถูกรบกวนจากเสียงและการสั่น ยกเว้นการปลุก การเตือนความจำ กิจกรรม และผู้โทรที่คุณระบุ"</string>
+    <string name="zen_priority_introduction" msgid="3070506961866919502">"คุณจะไม่ถูกรบกวนจากเสียงและการสั่น ยกเว้นการปลุก การช่วยเตือน กิจกรรม และผู้โทรที่คุณระบุ"</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"กำหนดค่า"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"การใช้โหมดนี้จะบล็อกเสียงและการสั่นทั้งหมด ซึ่งรวมถึงเสียงปลุก เพลง วิดีโอ และเกม คุณจะยังโทรออกได้อยู่"</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"การใช้โหมดนี้จะบล็อกเสียงและการสั่นทั้งหมด ซึ่งรวมถึงเสียงปลุก เพลง วิดีโอ และเกม"</string>
