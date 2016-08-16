@@ -3180,7 +3180,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         // reader
         synchronized (mPackages) {
             for (int i=names.length-1; i>=0; i--) {
-                String cur = mSettings.getRenamedPackage(names[i]);
+                String cur = mSettings.getRenamedPackageLPr(names[i]);
                 out[i] = cur != null ? cur : names[i];
             }
         }
@@ -6845,7 +6845,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         // reader
         synchronized (mPackages) {
             // Look to see if we already know about this package.
-            String oldName = mSettings.getRenamedPackage(pkg.packageName);
+            String oldName = mSettings.getRenamedPackageLPr(pkg.packageName);
             if (pkg.mOriginalPackages != null && pkg.mOriginalPackages.contains(oldName)) {
                 // This package has been renamed to its original name.  Let's
                 // use that.
@@ -8174,7 +8174,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (pkg.mOriginalPackages != null) {
                 // This package may need to be renamed to a previously
                 // installed name.  Let's check on that...
-                final String renamed = mSettings.getRenamedPackage(pkg.mRealPackage);
+                final String renamed = mSettings.getRenamedPackageLPr(pkg.mRealPackage);
                 if (pkg.mOriginalPackages.contains(renamed)) {
                     // This package had originally been installed as the
                     // original name, and we have already taken care of
@@ -8232,18 +8232,42 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             }
 
-            // Just create the setting, don't add it yet. For already existing packages
-            // the PkgSetting exists already and doesn't have to be created.
-            pkgSetting = mSettings.getPackageWithBenefitsLPw(pkg, origPackage, realName, suid,
-                    destCodeFile, destResourceFile, pkg.applicationInfo.nativeLibraryRootDir,
-                    pkg.applicationInfo.primaryCpuAbi,
-                    pkg.applicationInfo.secondaryCpuAbi,
-                    pkg.applicationInfo.flags, pkg.applicationInfo.privateFlags,
-                    user);
-            if (pkgSetting == null) {
-                throw new PackageManagerException(INSTALL_FAILED_INSUFFICIENT_STORAGE,
-                        "Creating application package " + pkg.packageName + " failed");
+            pkgSetting = mSettings.getPackageLPr(pkg.packageName);
+            if (pkgSetting != null && pkgSetting.sharedUser != suid) {
+                PackageManagerService.reportSettingsProblem(Log.WARN,
+                        "Package " + pkg.packageName + " shared user changed from "
+                        + (pkgSetting.sharedUser != null ? pkgSetting.sharedUser.name : "<nothing>")
+                        + " to "
+                        + (suid != null ? suid.name : "<nothing>")
+                        + "; replacing with new");
+                pkgSetting = null;
             }
+            final PackageSetting oldPkgSetting =
+                    pkgSetting == null ? null : new PackageSetting(pkgSetting);
+            final PackageSetting disabledPkgSetting =
+                    mSettings.getDisabledSystemPkgLPr(pkg.packageName);
+            if (pkgSetting == null) {
+                final String parentPackageName = (pkg.parentPackage != null)
+                        ? pkg.parentPackage.packageName : null;
+                pkgSetting = Settings.createNewSetting(pkg.packageName, origPackage,
+                        disabledPkgSetting, realName, suid, destCodeFile, destResourceFile,
+                        pkg.applicationInfo.nativeLibraryRootDir, pkg.applicationInfo.primaryCpuAbi,
+                        pkg.applicationInfo.secondaryCpuAbi, pkg.mVersionCode,
+                        pkg.applicationInfo.flags, pkg.applicationInfo.privateFlags, user,
+                        true /*allowInstall*/, parentPackageName, pkg.getChildPackageNames(),
+                        UserManagerService.getInstance());
+                if (origPackage != null) {
+                    mSettings.addRenamedPackageLPw(pkg.packageName, origPackage.name);
+                }
+                mSettings.addUserToSettingLPw(pkgSetting);
+            } else {
+                Settings.updatePackageSetting(pkgSetting, disabledPkgSetting, suid, destCodeFile,
+                        pkg.applicationInfo.nativeLibraryDir, pkg.applicationInfo.primaryCpuAbi,
+                        pkg.applicationInfo.secondaryCpuAbi, pkg.applicationInfo.flags,
+                        pkg.applicationInfo.privateFlags, pkg.getChildPackageNames(),
+                        UserManagerService.getInstance());
+            }
+            mSettings.writeUserRestrictions(pkgSetting, oldPkgSetting);
 
             if (pkgSetting.origPackage != null) {
                 // If we are first transitioning from an original package,
@@ -14127,7 +14151,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (DEBUG_INSTALL) Slog.d(TAG, "installNewPackageLI: " + pkg);
 
         synchronized(mPackages) {
-            final String renamedPackage = mSettings.getRenamedPackage(pkgName);
+            final String renamedPackage = mSettings.getRenamedPackageLPr(pkgName);
             if (renamedPackage != null) {
                 // A package with the same name is already installed, though
                 // it has been renamed to an older name.  The package we
@@ -14994,7 +15018,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             // Check if installing already existing package
             if ((installFlags & PackageManager.INSTALL_REPLACE_EXISTING) != 0) {
-                String oldName = mSettings.getRenamedPackage(pkgName);
+                String oldName = mSettings.getRenamedPackageLPr(pkgName);
                 if (pkg.mOriginalPackages != null
                         && pkg.mOriginalPackages.contains(oldName)
                         && mPackages.containsKey(oldName)) {
