@@ -178,8 +178,9 @@ public class NetworkPolicyEditor {
     public void setPolicyWarningBytes(NetworkTemplate template, long warningBytes) {
         long limitBytes = getPolicyLimitBytes(template);
 
-        // If the warningBytes are larger than limitBytes, set the warningBytes to limitBytes
-        warningBytes = Math.min(warningBytes, limitBytes);
+        warningBytes =
+            (limitBytes == LIMIT_DISABLED) ? warningBytes : Math.min(warningBytes, limitBytes);
+
         setPolicyWarningBytesInner(template, warningBytes);
     }
 
@@ -192,8 +193,7 @@ public class NetworkPolicyEditor {
     public void setPolicyLimitBytes(NetworkTemplate template, long limitBytes) {
         long warningBytes = getPolicyWarningBytes(template);
 
-        // If the warningBytes are larger than limitBytes, set the warningBytes to limitBytes
-        if (warningBytes > limitBytes) {
+        if (warningBytes > limitBytes && limitBytes != LIMIT_DISABLED) {
             setPolicyWarningBytesInner(template, limitBytes);
         }
 
