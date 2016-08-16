@@ -7758,7 +7758,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // it and is in the fullscreen opaque state. Seamless rotation
         // requires freezing various Surface states and won't work well
         // with animations, so we disable it in the animation case for now.
-        if (w != null  && mTopIsFullscreen && !w.isAnimatingLw() &&
+        if (w != null && !w.isAnimatingLw() &&
                 ((w.getAttrs().rotationAnimation == ROTATION_ANIMATION_JUMPCUT) ||
                         (w.getAttrs().rotationAnimation == ROTATION_ANIMATION_SEAMLESS))) {
             return true;
