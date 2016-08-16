@@ -74,6 +74,7 @@ struct LinkOptions {
     bool generateNonFinalIds = false;
     std::vector<std::string> javadocAnnotations;
     bool outputToDirectory = false;
+    bool noXmlNamespaces = false;
     bool autoAddOverlay = false;
     bool doNotCompressAnything = false;
     std::unordered_set<std::string> extensionsToNotCompress;
@@ -293,6 +294,7 @@ static std::unique_ptr<ResourceFile> loadFileExportHeader(const Source& source,
 struct ResourceFileFlattenerOptions {
     bool noAutoVersion = false;
     bool noVersionVectors = false;
+    bool noXmlNamespaces = false;
     bool keepRawValues = false;
     bool doNotCompressAnything = false;
     bool updateProguardSpec = false;
@@ -380,6 +382,13 @@ bool ResourceFileFlattener::linkAndVersionXmlFile(const ResourceEntry* entry,
     if (mOptions.updateProguardSpec && !proguard::collectProguardRules(
             outFileOp->xmlToFlatten->file.source, outFileOp->xmlToFlatten.get(), mKeepSet)) {
         return false;
+    }
+
+    if (mOptions.noXmlNamespaces) {
+        XmlNamespaceRemover namespaceRemover;
+        if (!namespaceRemover.consume(mContext, outFileOp->xmlToFlatten.get())) {
+            return false;
+        }
     }
 
     if (!mOptions.noAutoVersion) {
@@ -1296,6 +1305,7 @@ public:
         fileFlattenerOptions.extensionsToNotCompress = mOptions.extensionsToNotCompress;
         fileFlattenerOptions.noAutoVersion = mOptions.noAutoVersion;
         fileFlattenerOptions.noVersionVectors = mOptions.noVersionVectors;
+        fileFlattenerOptions.noXmlNamespaces = mOptions.noXmlNamespaces;
         fileFlattenerOptions.updateProguardSpec =
                 static_cast<bool>(mOptions.generateProguardRulesPath);
 
@@ -1594,6 +1604,14 @@ public:
                         error = true;
                     }
                 }
+
+                if (mOptions.noXmlNamespaces) {
+                    // PackageParser will fail if URIs are removed from AndroidManifest.xml.
+                    XmlNamespaceRemover namespaceRemover(true /* keepUris */);
+                    if (!namespaceRemover.consume(mContext, manifestXml.get())) {
+                        error = true;
+                    }
+                }
             } else {
                 error = true;
             }
@@ -1732,6 +1750,9 @@ int link(const std::vector<StringPiece>& args) {
             .optionalSwitch("--output-to-dir", "Outputs the APK contents to a directory specified "
                             "by -o",
                             &options.outputToDirectory)
+            .optionalSwitch("--no-xml-namespaces", "Removes XML namespace prefix and URI "
+                            "information from AndroidManifest.xml\nand XML binaries in res/*.",
+                            &options.noXmlNamespaces)
             .optionalFlag("--min-sdk-version", "Default minimum SDK version to use for "
                           "AndroidManifest.xml",
                           &options.manifestFixerOptions.minSdkVersionDefault)

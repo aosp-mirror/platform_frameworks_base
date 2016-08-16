@@ -86,6 +86,23 @@ struct PrivateAttributeMover : public IResourceTableConsumer {
 };
 
 /**
+ * Removes namespace nodes and URI information from the XmlResource.
+ *
+ * Once an XmlResource is processed by this consumer, it is no longer able to have its attributes
+ * parsed. As such, this XmlResource must have already been processed by XmlReferenceLinker.
+ */
+class XmlNamespaceRemover : public IXmlResourceConsumer {
+private:
+    bool mKeepUris;
+
+public:
+    XmlNamespaceRemover(bool keepUris = false) : mKeepUris(keepUris) {
+    };
+
+    bool consume(IAaptContext* context, xml::XmlResource* resource) override;
+};
+
+/**
  * Resolves attributes in the XmlResource and compiles string values to resource values.
  * Once an XmlResource is processed by this linker, it is ready to be flattened.
  */
