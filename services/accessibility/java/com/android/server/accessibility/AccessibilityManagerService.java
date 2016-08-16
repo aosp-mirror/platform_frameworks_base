@@ -279,6 +279,31 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             }
 
             @Override
+            public void onPackageUpdateFinished(String packageName, int uid) {
+                // Unbind all services from this package, and then update the user state to
+                // re-bind new versions of them.
+                synchronized (mLock) {
+                    final int userId = getChangingUserId();
+                    if (userId != mCurrentUserId) {
+                        return;
+                    }
+                    UserState userState = getUserStateLocked(userId);
+                    boolean unboundAService = false;
+                    for (int i = userState.mBoundServices.size() - 1; i >= 0; i--) {
+                        Service boundService = userState.mBoundServices.get(i);
+                        String servicePkg = boundService.mComponentName.getPackageName();
+                        if (servicePkg.equals(packageName)) {
+                            boundService.unbindLocked();
+                            unboundAService = true;
+                        }
+                    }
+                    if (unboundAService) {
+                        onUserStateChangedLocked(userState);
+                    }
+                }
+            }
+
+            @Override
             public void onPackageRemoved(String packageName, int uid) {
                 synchronized (mLock) {
                     final int userId = getChangingUserId();
