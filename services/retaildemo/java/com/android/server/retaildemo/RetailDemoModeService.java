@@ -89,8 +89,8 @@ public class RetailDemoModeService extends SystemService {
 
     private static final long SCREEN_WAKEUP_DELAY = 2500;
     private static final long USER_INACTIVITY_TIMEOUT_MIN = 10000;
-    private static final long USER_INACTIVITY_TIMEOUT_DEFAULT = 30000;
-    private static final long WARNING_DIALOG_TIMEOUT_DEFAULT = 6000;
+    private static final long USER_INACTIVITY_TIMEOUT_DEFAULT = 90000;
+    private static final long WARNING_DIALOG_TIMEOUT_DEFAULT = 0;
     private static final long MILLIS_PER_SECOND = 1000;
 
     private static final int[] VOLUME_STREAMS_TO_MUTE = {
