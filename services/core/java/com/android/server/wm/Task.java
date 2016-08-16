@@ -304,9 +304,9 @@ class Task implements DimLayer.DimLayerUser {
             return false;
         }
         if ((boundsChanged & BOUNDS_CHANGE_SIZE) == BOUNDS_CHANGE_SIZE) {
-            resizeWindows();
+            onResize();
         } else {
-            setMovedByResize();
+            onMovedByResize();
         }
         return true;
     }
@@ -469,14 +469,14 @@ class Task implements DimLayer.DimLayerUser {
         }
     }
 
-    void resetDragResizingChangeReported() {
+    private void resetDragResizingChangeReported() {
         for (int activityNdx = mAppTokens.size() - 1; activityNdx >= 0; --activityNdx) {
             mAppTokens.get(activityNdx).resetDragResizingChangeReported();
         }
     }
 
     boolean isDragResizing() {
-        return mDragResizing || (mStack != null && mStack.isDragResizing());
+        return mDragResizing;
     }
 
     int getDragResizeMode() {
@@ -493,10 +493,12 @@ class Task implements DimLayer.DimLayerUser {
         }
     }
 
-    void detachDisplay() {
+    boolean detachFromDisplay() {
+        boolean didSomething = false;
         for (int i = mAppTokens.size() - 1; i >= 0; --i) {
-            mAppTokens.get(i).detachDisplay();
+            didSomething |= mAppTokens.get(i).detachFromDisplay();
         }
+        return didSomething;
     }
 
     void updateDisplayInfo(final DisplayContent displayContent) {
@@ -534,15 +536,15 @@ class Task implements DimLayer.DimLayerUser {
         }
     }
 
-    void resizeWindows() {
+    private void onResize() {
         for (int activityNdx = mAppTokens.size() - 1; activityNdx >= 0; --activityNdx) {
-            mAppTokens.get(activityNdx).resizeWindows();
+            mAppTokens.get(activityNdx).onResize();
         }
     }
 
-    void setMovedByResize() {
+    private void onMovedByResize() {
         for (int i = mAppTokens.size() - 1; i >= 0; --i) {
-            mAppTokens.get(i).setMovedByResize();
+            mAppTokens.get(i).onMovedByResize();
         }
     }
 

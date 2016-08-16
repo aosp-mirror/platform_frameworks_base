@@ -113,9 +113,6 @@ public class TaskStack implements DimLayer.DimLayerUser,
     /** Detach this stack from its display when animation completes. */
     boolean mDeferDetach;
 
-    // Whether the stack and all its tasks is currently being drag-resized
-    private boolean mDragResizing;
-
     private final Rect mTmpAdjustedBounds = new Rect();
     private boolean mAdjustedForIme;
     private boolean mImeGoingAway;
@@ -656,7 +653,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
             throw new IllegalStateException(
                     "Calling getStackDockedModeBoundsLocked() when there is no docked stack.");
         }
-        if (!ignoreVisibility && !dockedStack.isVisibleLocked()) {
+        if (!ignoreVisibility && !dockedStack.isVisible()) {
             // The docked stack is being dismissed, but we caught before it finished being
             // dismissed. In that case we want to treat it as if it is not occupying any space and
             // let others occupy the whole display.
@@ -762,14 +759,16 @@ public class TaskStack implements DimLayer.DimLayerUser,
                 1 /*allowResizeInDockedMode*/, bounds).sendToTarget();
     }
 
-    void detachDisplay() {
+    boolean detachFromDisplay() {
         EventLog.writeEvent(EventLogTags.WM_STACK_REMOVED, mStackId);
 
+        boolean didSomething = false;
         for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
-            mTasks.get(taskNdx).detachDisplay();
+            didSomething |= mTasks.get(taskNdx).detachFromDisplay();
         }
 
         close();
+        return didSomething;
     }
 
     void resetAnimationBackgroundAnimator() {
@@ -846,7 +845,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
             mAdjustImeAmount = adjustAmount;
             mAdjustDividerAmount = adjustDividerAmount;
             updateAdjustedBounds();
-            return isVisibleLocked(true /* ignoreKeyguard */);
+            return isVisible(true /* ignoreKeyguard */);
         } else {
             return false;
         }
@@ -882,7 +881,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
         if (minimizeAmount != mMinimizeAmount) {
             mMinimizeAmount = minimizeAmount;
             updateAdjustedBounds();
-            return isVisibleLocked(true /* ignoreKeyguard*/);
+            return isVisible(true /* ignoreKeyguard */);
         } else {
             return false;
         }
@@ -1188,11 +1187,11 @@ public class TaskStack implements DimLayer.DimLayerUser,
         }
     }
 
-    boolean isVisibleLocked() {
-        return isVisibleLocked(false /* ignoreKeyguard */);
+    boolean isVisible() {
+        return isVisible(false /* ignoreKeyguard */);
     }
 
-    boolean isVisibleLocked(boolean ignoreKeyguard) {
+    boolean isVisible(boolean ignoreKeyguard) {
         final boolean keyguardOn = mService.mPolicy.isKeyguardShowingOrOccluded()
                 && !mService.mAnimator.mKeyguardGoingAway;
         if (!ignoreKeyguard && keyguardOn && !StackId.isAllowedOverLockscreen(mStackId)) {
@@ -1210,20 +1209,6 @@ public class TaskStack implements DimLayer.DimLayerUser,
         }
 
         return false;
-    }
-
-    boolean isDragResizing() {
-        return mDragResizing;
-    }
-
-    void setDragResizingLocked(boolean resizing) {
-        if (mDragResizing == resizing) {
-            return;
-        }
-        mDragResizing = resizing;
-        for (int i = mTasks.size() - 1; i >= 0 ; i--) {
-            mTasks.get(i).resetDragResizingChangeReported();
-        }
     }
 
     @Override  // AnimatesBounds

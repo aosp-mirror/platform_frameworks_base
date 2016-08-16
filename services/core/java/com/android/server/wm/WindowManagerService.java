@@ -4011,7 +4011,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     boolean isStackVisibleLocked(int stackId) {
         final TaskStack stack = mStackIdToStack.get(stackId);
-        return (stack != null && stack.isVisibleLocked());
+        return (stack != null && stack.isVisible());
     }
 
     public void setDockedStackCreateState(int mode, Rect bounds) {
@@ -4081,7 +4081,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
     void detachStackLocked(DisplayContent displayContent, TaskStack stack) {
         displayContent.detachStack(stack);
-        stack.detachDisplay();
+        if (stack.detachFromDisplay()) {
+            mWindowPlacerLocked.requestTraversal();
+        }
         if (stack.mStackId == DOCKED_STACK_ID) {
             getDefaultDisplayContentLocked().mDividerControllerLocked
                     .notifyDockedStackExistsChanged(false);
@@ -4225,7 +4227,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         + " not found.");
             }
             if (stack.setBounds(bounds, configs, taskBounds, taskTempInsetBounds)
-                    && stack.isVisibleLocked()) {
+                    && stack.isVisible()) {
                 stack.getDisplayContent().layoutNeeded = true;
                 mWindowPlacerLocked.performSurfacePlacement();
             }
@@ -6792,7 +6794,7 @@ public class WindowManagerService extends IWindowManager.Stub
             for (int i = stacks.size() - 1; i >= 0; --i) {
                 final TaskStack stack = stacks.get(i);
                 final boolean isDockedOnBottom = stack.getDockSide() == DOCKED_BOTTOM;
-                if (stack.isVisibleLocked() && (imeOnBottom || isDockedOnBottom)) {
+                if (stack.isVisible() && (imeOnBottom || isDockedOnBottom)) {
                     stack.setAdjustedForIme(imeWin, imeOnBottom && imeHeightChanged);
                 } else {
                     stack.resetAdjustedForIme(false);

@@ -32,7 +32,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
  * Tests for the {@link WindowState} class.
  *
  * Build: mmma -j32 frameworks/base/services/tests/servicestests
- * Install: adb install -r out/target/product/angler/data/app/FrameworksServicesTests/FrameworksServicesTests.apk
+ * Install: adb install -r out/target/product/$TARGET_PRODUCT/data/app/FrameworksServicesTests/FrameworksServicesTests.apk
  * Run: adb shell am instrument -w -e class com.android.server.wm.WindowStateTests com.android.frameworks.servicestests/android.support.test.runner.AndroidJUnitRunner
  */
 @SmallTest

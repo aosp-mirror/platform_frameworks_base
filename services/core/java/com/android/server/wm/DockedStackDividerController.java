@@ -541,7 +541,7 @@ public class DockedStackDividerController implements DimLayerUser {
         final ArrayList<Task> homeStackTasks = homeStack.getTasks();
         final Task topHomeStackTask = homeStackTasks.get(homeStackTasks.size() - 1);
         final boolean homeVisible = homeTask.getTopVisibleAppToken() != null;
-        final boolean homeBehind = (fullscreenStack != null && fullscreenStack.isVisibleLocked())
+        final boolean homeBehind = (fullscreenStack != null && fullscreenStack.isVisible())
                 || (homeStackTasks.size() > 1 && topHomeStackTask != homeTask);
         // If the home task is an on-top launcher, we don't want to minimize the docked stack.
         // Instead we want everything underneath that was visible to remain visible.
@@ -639,7 +639,7 @@ public class DockedStackDividerController implements DimLayerUser {
         final ArrayList<TaskStack> stacks = mDisplayContent.getStacks();
         for (int i = stacks.size() - 1; i >= 0; --i) {
             final TaskStack stack = stacks.get(i);
-            if (stack.isVisibleLocked() && stack.isAdjustedForIme()) {
+            if (stack.isVisible() && stack.isAdjustedForIme()) {
                 stack.beginImeAdjustAnimation();
             }
         }

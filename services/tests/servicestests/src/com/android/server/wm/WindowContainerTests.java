@@ -20,33 +20,35 @@ import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import java.util.Comparator;
+import java.util.LinkedList;
 
 /**
  * Test class for {@link WindowContainer}.
  *
  * Build: mmma -j32 frameworks/base/services/tests/servicestests
- * Install: adb install -r out/target/product/marlin/data/app/FrameworksServicesTests/FrameworksServicesTests.apk
+ * Install: adb install -r out/target/product/$TARGET_PRODUCT/data/app/FrameworksServicesTests/FrameworksServicesTests.apk
  * Run: adb shell am instrument -w -e class com.android.server.wm.WindowContainerTests com.android.frameworks.servicestests/android.support.test.runner.AndroidJUnitRunner
  */
 @SmallTest
 public class WindowContainerTests extends AndroidTestCase {
 
     public void testCreation() throws Exception {
-        final TestWindowContainer w = new TestWindowContainer();
+        final TestWindowContainer w = new TestWindowContainerBuilder().setLayer(0).build();
         assertNull("window must have no parent", w.getParentWindow());
         assertEquals("window must have no children", 0, w.getChildrenCount());
     }
 
     public void testAdd() throws Exception {
-        final TestWindowContainer root = new TestWindowContainer();
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+        final TestWindowContainer root = builder.setLayer(0).build();
 
-        final TestWindowContainer layer1 = root.addChildWindow(1);
-        final TestWindowContainer secondLayer1 = root.addChildWindow(1);
-        final TestWindowContainer layer2 = root.addChildWindow(2);
-        final TestWindowContainer layerNeg1 = root.addChildWindow(-1);
-        final TestWindowContainer layerNeg2 = root.addChildWindow(-2);
-        final TestWindowContainer secondLayerNeg1 = root.addChildWindow(-1);
-        final TestWindowContainer layer0 = root.addChildWindow(0);
+        final TestWindowContainer layer1 = root.addChildWindow(builder.setLayer(1));
+        final TestWindowContainer secondLayer1 = root.addChildWindow(builder.setLayer(1));
+        final TestWindowContainer layer2 = root.addChildWindow(builder.setLayer(2));
+        final TestWindowContainer layerNeg1 = root.addChildWindow(builder.setLayer(-1));
+        final TestWindowContainer layerNeg2 = root.addChildWindow(builder.setLayer(-2));
+        final TestWindowContainer secondLayerNeg1 = root.addChildWindow(builder.setLayer(-1));
+        final TestWindowContainer layer0 = root.addChildWindow(builder.setLayer(0));
 
         assertEquals(7, root.getChildrenCount());
 
@@ -68,13 +70,14 @@ public class WindowContainerTests extends AndroidTestCase {
     }
 
     public void testHasChild() throws Exception {
-        final TestWindowContainer root = new TestWindowContainer();
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+        final TestWindowContainer root = builder.setLayer(0).build();
 
-        final TestWindowContainer child1 = root.addChildWindow(1);
-        final TestWindowContainer child2 = root.addChildWindow(1);
-        final TestWindowContainer child11 = child1.addChildWindow(1);
-        final TestWindowContainer child12 = child1.addChildWindow(1);
-        final TestWindowContainer child21 = child2.addChildWindow(1);
+        final TestWindowContainer child1 = root.addChildWindow();
+        final TestWindowContainer child2 = root.addChildWindow();
+        final TestWindowContainer child11 = child1.addChildWindow();
+        final TestWindowContainer child12 = child1.addChildWindow();
+        final TestWindowContainer child21 = child2.addChildWindow();
 
         assertEquals(2, root.getChildrenCount());
         assertEquals(2, child1.getChildrenCount());
@@ -96,13 +99,14 @@ public class WindowContainerTests extends AndroidTestCase {
    }
 
     public void testRemove() throws Exception {
-        final TestWindowContainer root = new TestWindowContainer();
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+        final TestWindowContainer root = builder.setLayer(0).build();
 
-        final TestWindowContainer child1 = root.addChildWindow(1);
-        final TestWindowContainer child2 = root.addChildWindow(1);
-        final TestWindowContainer child11 = child1.addChildWindow(1);
-        final TestWindowContainer child12 = child1.addChildWindow(1);
-        final TestWindowContainer child21 = child2.addChildWindow(1);
+        final TestWindowContainer child1 = root.addChildWindow();
+        final TestWindowContainer child2 = root.addChildWindow();
+        final TestWindowContainer child11 = child1.addChildWindow();
+        final TestWindowContainer child12 = child1.addChildWindow();
+        final TestWindowContainer child21 = child2.addChildWindow();
 
         child12.remove();
         assertNull(child12.getParentWindow());
@@ -125,9 +129,67 @@ public class WindowContainerTests extends AndroidTestCase {
         assertEquals(0, root.getChildrenCount());
     }
 
+    public void testDetachFromDisplay() throws Exception {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+        final TestWindowContainer root = builder.setLayer(0).build();
+
+        final TestWindowContainer child1 = root.addChildWindow(builder.setCanDetach(true));
+        final TestWindowContainer child2 = root.addChildWindow();
+        final TestWindowContainer child11 = child1.addChildWindow();
+        final TestWindowContainer child12 = child1.addChildWindow(builder.setCanDetach(true));
+        final TestWindowContainer child21 = child2.addChildWindow();
+
+        assertTrue(root.detachFromDisplay());
+        assertTrue(child1.detachFromDisplay());
+        assertFalse(child11.detachFromDisplay());
+        assertTrue(child12.detachFromDisplay());
+        assertFalse(child2.detachFromDisplay());
+        assertFalse(child21.detachFromDisplay());
+    }
+
+    public void testIsAnimating() throws Exception {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+        final TestWindowContainer root = builder.setLayer(0).build();
+
+        final TestWindowContainer child1 = root.addChildWindow(builder.setIsAnimating(true));
+        final TestWindowContainer child2 = root.addChildWindow();
+        final TestWindowContainer child11 = child1.addChildWindow();
+        final TestWindowContainer child12 = child1.addChildWindow(builder.setIsAnimating(true));
+        final TestWindowContainer child21 = child2.addChildWindow();
+
+        assertTrue(root.isAnimating());
+        assertTrue(child1.isAnimating());
+        assertFalse(child11.isAnimating());
+        assertTrue(child12.isAnimating());
+        assertFalse(child2.isAnimating());
+        assertFalse(child21.isAnimating());
+    }
+
+    public void testIsVisible() throws Exception {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+        final TestWindowContainer root = builder.setLayer(0).build();
+
+        final TestWindowContainer child1 = root.addChildWindow(builder.setIsVisible(true));
+        final TestWindowContainer child2 = root.addChildWindow();
+        final TestWindowContainer child11 = child1.addChildWindow();
+        final TestWindowContainer child12 = child1.addChildWindow(builder.setIsVisible(true));
+        final TestWindowContainer child21 = child2.addChildWindow();
+
+        assertTrue(root.isVisible());
+        assertTrue(child1.isVisible());
+        assertFalse(child11.isVisible());
+        assertTrue(child12.isVisible());
+        assertFalse(child2.isVisible());
+        assertFalse(child21.isVisible());
+    }
+
     /* Used so we can gain access to some protected members of the {@link WindowContainer} class */
     private class TestWindowContainer extends WindowContainer {
         private final int mLayer;
+        private final LinkedList<String> mUsers = new LinkedList();
+        private final boolean mCanDetach;
+        private boolean mIsAnimating;
+        private boolean mIsVisible;
 
         /**
          * Compares 2 window layers and returns -1 if the first is lesser than the second in terms
@@ -145,12 +207,13 @@ public class WindowContainerTests extends AndroidTestCase {
             return 1;
         };
 
-        TestWindowContainer() {
-            mLayer = 0;
-        }
-
-        TestWindowContainer(int layer) {
+        TestWindowContainer(int layer, LinkedList<String> users, boolean canDetach,
+                boolean isAnimating, boolean isVisible) {
             mLayer = layer;
+            mUsers.addAll(users);
+            mCanDetach = canDetach;
+            mIsAnimating = isAnimating;
+            mIsVisible = isVisible;
         }
 
         TestWindowContainer getParentWindow() {
@@ -161,15 +224,79 @@ public class WindowContainerTests extends AndroidTestCase {
             return mChildren.size();
         }
 
-        TestWindowContainer addChildWindow(int layer) {
-            TestWindowContainer child = new TestWindowContainer(layer);
+        TestWindowContainer addChildWindow(TestWindowContainerBuilder childBuilder) {
+            TestWindowContainer child = childBuilder.build();
             addChild(child, mWindowSubLayerComparator);
             return child;
+        }
+
+        TestWindowContainer addChildWindow() {
+            return addChildWindow(new TestWindowContainerBuilder().setLayer(1));
         }
 
         TestWindowContainer getChildAt(int index) {
             return (TestWindowContainer) mChildren.get(index);
         }
+
+        @Override
+        boolean detachFromDisplay() {
+            return super.detachFromDisplay() || mCanDetach;
+        }
+
+        @Override
+        boolean isAnimating() {
+            return mIsAnimating || super.isAnimating();
+        }
+
+        @Override
+        boolean isVisible() {
+            return mIsVisible || super.isVisible();
+        }
     }
 
+    private class TestWindowContainerBuilder {
+        private int mLayer;
+        private LinkedList<String> mUsers = new LinkedList();
+        private boolean mCanDetach;
+        private boolean mIsAnimating;
+        private boolean mIsVisible;
+
+        TestWindowContainerBuilder setLayer(int layer) {
+            mLayer = layer;
+            return this;
+        }
+
+        TestWindowContainerBuilder addUser(String user) {
+            mUsers.add(user);
+            return this;
+        }
+
+        TestWindowContainerBuilder setCanDetach(boolean canDetach) {
+            mCanDetach = canDetach;
+            return this;
+        }
+
+        TestWindowContainerBuilder setIsAnimating(boolean isAnimating) {
+            mIsAnimating = isAnimating;
+            return this;
+        }
+
+        TestWindowContainerBuilder setIsVisible(boolean isVisible) {
+            mIsVisible = isVisible;
+            return this;
+        }
+
+        TestWindowContainerBuilder reset() {
+            mLayer = 0;
+            mUsers.clear();
+            mCanDetach = false;
+            mIsAnimating = false;
+            mIsVisible = false;
+            return this;
+        }
+
+        TestWindowContainer build() {
+            return new TestWindowContainer(mLayer, mUsers, mCanDetach, mIsAnimating, mIsVisible);
+        }
+    }
 }

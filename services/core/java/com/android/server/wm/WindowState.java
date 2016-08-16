@@ -1172,6 +1172,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
 
     // TODO: Sigh...another is visible method...tried to consolidate with other isVisible methods
     // below, but failed. Need to figure-out a good way to handle this long term...
+    @Override
     boolean isVisible() {
         // If we're animating with a saved surface, we're already visible.
         // Return true so that the alpha doesn't get cleared.
@@ -1181,13 +1182,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
             return true;
         }
 
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState c = (WindowState) mChildren.get(i);
-            if (c.isVisible()) {
-                return true;
-            }
-        }
-        return false;
+        return super.isVisible();
     }
 
     /**
@@ -1427,14 +1422,11 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
                 && (mAppToken == null || mAppToken.mAppAnimator.animation == null);
     }
 
-    void setMovedByResize() {
-        if (DEBUG_RESIZE) Slog.d(TAG, "setMovedByResize: Moving " + this);
+    @Override
+    void onMovedByResize() {
+        if (DEBUG_RESIZE) Slog.d(TAG, "onMovedByResize: Moving " + this);
         mMovedByResize = true;
-
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState c = (WindowState) mChildren.get(i);
-            c.setMovedByResize();
-        }
+        super.onMovedByResize();
     }
 
     boolean onAppVisibilityChanged(boolean visible, boolean runningAppAnimation) {
@@ -1499,14 +1491,15 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         return changed;
     }
 
-    void addToResizingList() {
+    @Override
+    void onResize() {
         // Some windows won't go through the resizing process, if they don't have a surface, so
         // destroy all saved surfaces here.
         destroySavedSurface();
 
         final ArrayList<WindowState> resizingWindows = mService.mResizingWindows;
         if (mHasSurface && !resizingWindows.contains(this)) {
-            if (DEBUG_RESIZE) Slog.d(TAG, "resizeWindows: Resizing " + this);
+            if (DEBUG_RESIZE) Slog.d(TAG, "onResize: Resizing " + this);
             resizingWindows.add(this);
 
             // If we are not drag resizing, force recreating of a new surface so updating
@@ -1529,10 +1522,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
             mResizedWhileGone = true;
         }
 
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState c = (WindowState) mChildren.get(i);
-            c.addToResizingList();
-        }
+        super.onResize();
     }
 
     void onUnfreezeBounds() {
@@ -1618,15 +1608,13 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         }
     }
 
+    @Override
     void forceWindowsScaleableInTransaction(boolean force) {
         if (mWinAnimator != null && mWinAnimator.hasSurface()) {
             mWinAnimator.mSurfaceController.forceScaleableInTransaction(force);
         }
 
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState c = (WindowState) mChildren.get(i);
-            c.forceWindowsScaleableInTransaction(force);
-        }
+        super.forceWindowsScaleableInTransaction(force);
     }
 
     @Override
@@ -1813,6 +1801,15 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         }
         mService.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, true /*updateInputWindows*/);
         Binder.restoreCallingIdentity(origId);
+    }
+
+    @Override
+    boolean detachFromDisplay() {
+        // We are in the middle of changing the state of displays/stacks/tasks. We need
+        // to finish that, before we let layout interfere with it.
+        // Also removes child windows.
+        removeIfPossible();
+        return true;
     }
 
     private void setupWindowForRemoveOnExit() {
@@ -2376,17 +2373,12 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         return mAnimatingWithSavedSurface;
     }
 
+    @Override
     boolean isAnimating() {
         if (mWinAnimator.isAnimationSet() || mAnimatingExit) {
             return true;
         }
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState c = (WindowState) mChildren.get(i);
-            if (c.isAnimating()) {
-                return true;
-            }
-        }
-        return false;
+        return super.isAnimating();
     }
 
     boolean isAnimatingInvisibleWithSavedSurface() {
@@ -2440,12 +2432,10 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         }
     }
 
-    void sendAppVisibilityToClients(boolean clientHidden) {
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState c = (WindowState) mChildren.get(i);
-            c.sendAppVisibilityToClients(clientHidden);
-        }
+    void sendAppVisibilityToClients() {
+        super.sendAppVisibilityToClients();
 
+        final boolean clientHidden = mAppToken.clientHidden;
         if (mAttrs.type == TYPE_APPLICATION_STARTING && clientHidden) {
             // Don't hide the starting window.
             return;
@@ -2463,10 +2453,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         mWasVisibleBeforeClientHidden |=
                 (mViewVisibility == View.VISIBLE || mAnimatingWithSavedSurface);
 
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState c = (WindowState) mChildren.get(i);
-            c.setVisibleBeforeClientHidden();
-        }
+        super.setVisibleBeforeClientHidden();
     }
 
     public void clearWasVisibleBeforeClientHidden() {
@@ -3028,14 +3015,12 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         return mDragResizing != computeDragResizing();
     }
 
+    @Override
     void setWaitingForDrawnIfResizingChanged() {
         if (isDragResizeChanged()) {
             mService.mWaitingForDrawn.add(this);
         }
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState c = (WindowState) mChildren.get(i);
-            c.setWaitingForDrawnIfResizingChanged();
-        }
+        super.setWaitingForDrawnIfResizingChanged();
     }
 
     /**
@@ -3048,12 +3033,10 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
     /**
      * Resets the state whether we reported a drag resize change to the app.
      */
+    @Override
     void resetDragResizingChangeReported() {
         mDragResizingChangeReported = false;
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState c = (WindowState) mChildren.get(i);
-            c.resetDragResizingChangeReported();
-        }
+        super.resetDragResizingChangeReported();
     }
 
     /**

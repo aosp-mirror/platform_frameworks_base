@@ -42,12 +42,11 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 
 /**
- * Container of a set of related windows in the window manager.  Often this
- * is an AppWindowToken, which is the handle for an Activity that it uses
- * to display windows.  For nested windows, there is a WindowToken created for
- * the parent window to manage its children.
+ * Container of a set of related windows in the window manager. Often this is an AppWindowToken,
+ * which is the handle for an Activity that it uses to display windows. For nested windows, there is
+ * a WindowToken created for the parent window to manage its children.
  */
-class WindowToken {
+class WindowToken extends WindowContainer {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "WindowToken" : TAG_WM;
 
     // The window manager!
@@ -65,9 +64,6 @@ class WindowToken {
 
     // For printing.
     String stringName;
-
-    // All of the windows associated with this token.
-    protected final WindowList windows = new WindowList();
 
     // Is key dispatching paused for this token?
     boolean paused = false;
@@ -95,12 +91,12 @@ class WindowToken {
     }
 
     void removeAllWindows() {
-        for (int i = windows.size() - 1; i >= 0; --i) {
-            final WindowState win = windows.get(i);
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final WindowState win = (WindowState) mChildren.get(i);
             if (DEBUG_WINDOW_MOVEMENT) Slog.w(TAG_WM, "removeAllWindows: removing win=" + win);
             win.removeIfPossible();
         }
-        windows.clear();
+        mChildren.clear();
     }
 
     void setExiting() {
@@ -108,13 +104,13 @@ class WindowToken {
             return;
         }
 
-        final int count = windows.size();
+        final int count = mChildren.size();
         boolean changed = false;
         boolean delayed = false;
         DisplayContent displayContent = null;
 
         for (int i = 0; i < count; i++) {
-            final WindowState win = windows.get(i);
+            final WindowState win = (WindowState) mChildren.get(i);
             if (win.mWinAnimator.isAnimationSet()) {
                 delayed = true;
                 // TODO: This is technically wrong as a token can have windows on multi-displays
@@ -138,8 +134,8 @@ class WindowToken {
 
     int adjustAnimLayer(int adj) {
         int highestAnimLayer = -1;
-        for (int j = windows.size() - 1; j >= 0; j--) {
-            final WindowState w = windows.get(j);
+        for (int j = mChildren.size() - 1; j >= 0; j--) {
+            final WindowState w = (WindowState) mChildren.get(j);
             final int winHighestAnimLayer = w.adjustAnimLayer(adj);
             if (winHighestAnimLayer > highestAnimLayer) {
                 highestAnimLayer = winHighestAnimLayer;
@@ -151,11 +147,12 @@ class WindowToken {
         return highestAnimLayer;
     }
 
-    private WindowState getTopWindow() {
-        if (windows.isEmpty()) {
+    /* package level access for test. */
+    WindowState getTopWindow() {
+        if (mChildren.isEmpty()) {
             return null;
         }
-        return (WindowState) windows.get(windows.size() - 1).getTop();
+        return (WindowState) mChildren.get(mChildren.size() - 1).getTop();
     }
 
     /**
@@ -163,9 +160,10 @@ class WindowToken {
      * @param target The window to search for.
      * @return The index of win in windows or of the window that is an ancestor of win.
      */
-    private int getWindowIndex(WindowState target) {
-        for (int i = windows.size() - 1; i >= 0; --i) {
-            final WindowState w = windows.get(i);
+    /* package level access for test. */
+    int getWindowIndex(WindowState target) {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final WindowState w = (WindowState) mChildren.get(i);
             if (w == target || w.hasChild(target)) {
                 return i;
             }
@@ -250,9 +248,9 @@ class WindowToken {
             } else {
                 win.addNonAppWindowToList();
             }
-            if (!windows.contains(win)) {
+            if (!mChildren.contains(win)) {
                 if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "Adding " + win + " to " + this);
-                windows.add(tokenWindowsPos, win);
+                mChildren.add(tokenWindowsPos, win);
             }
         } else {
             addChildWindow(win);
@@ -424,9 +422,9 @@ class WindowToken {
     }
 
     int reAddAppWindows(DisplayContent displayContent, int index) {
-        final int count = windows.size();
+        final int count = mChildren.size();
         for (int i = 0; i < count; i++) {
-            final WindowState win = windows.get(i);
+            final WindowState win = (WindowState) mChildren.get(i);
             final DisplayContent winDisplayContent = win.getDisplayContent();
             if (winDisplayContent == displayContent || winDisplayContent == null) {
                 win.mDisplayContent = displayContent;
@@ -441,9 +439,9 @@ class WindowToken {
      * ordering the windows in mWindows
      */
     private int findIdxBasedOnAppTokens(WindowState win) {
-        WindowList windows = win.getWindowList();
+        final WindowList windows = win.getWindowList();
         for(int j = windows.size() - 1; j >= 0; j--) {
-            WindowState wentry = windows.get(j);
+            final WindowState wentry = windows.get(j);
             if(wentry.mAppToken == win.mAppToken) {
                 return j;
             }
@@ -453,10 +451,10 @@ class WindowToken {
 
     /** Return the first window in the token window list that isn't a starting window or null. */
     WindowState getFirstNonStartingWindow() {
-        final int count = windows.size();
+        final int count = mChildren.size();
         // We only care about parent windows so no need to loop through child windows.
         for (int i = 0; i < count; i++) {
-            final WindowState w = windows.get(i);
+            final WindowState w = (WindowState) mChildren.get(i);
             if (w.mAttrs.type != TYPE_APPLICATION_STARTING) {
                 return w;
             }
@@ -466,17 +464,17 @@ class WindowToken {
 
     @CallSuper
     void removeWindow(WindowState win) {
-        windows.remove(win);
+        mChildren.remove(win);
     }
 
     /** Returns true if the token windows list is empty. */
     boolean isEmpty() {
-        return windows.isEmpty();
+        return mChildren.isEmpty();
     }
 
     WindowState getReplacingWindow() {
-        for (int i = windows.size() - 1; i >= 0; i--) {
-            final WindowState win = windows.get(i);
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            final WindowState win = (WindowState) mChildren.get(i);
             final WindowState replacing = win.getReplacingWindow();
             if (replacing != null) {
                 return replacing;
@@ -486,8 +484,8 @@ class WindowToken {
     }
 
     void hideWallpaperToken(boolean wasDeferred, String reason) {
-        for (int j = windows.size() - 1; j >= 0; j--) {
-            final WindowState wallpaper = windows.get(j);
+        for (int j = mChildren.size() - 1; j >= 0; j--) {
+            final WindowState wallpaper = (WindowState) mChildren.get(j);
             wallpaper.hideWallpaperWindow(wasDeferred, reason);
         }
         hidden = true;
@@ -495,8 +493,8 @@ class WindowToken {
 
     void sendWindowWallpaperCommand(
             String action, int x, int y, int z, Bundle extras, boolean sync) {
-        for (int wallpaperNdx = windows.size() - 1; wallpaperNdx >= 0; wallpaperNdx--) {
-            WindowState wallpaper = windows.get(wallpaperNdx);
+        for (int wallpaperNdx = mChildren.size() - 1; wallpaperNdx >= 0; wallpaperNdx--) {
+            final WindowState wallpaper = (WindowState) mChildren.get(wallpaperNdx);
             try {
                 wallpaper.mClient.dispatchWallpaperCommand(action, x, y, z, extras, sync);
                 // We only want to be synchronous with one wallpaper.
@@ -508,8 +506,8 @@ class WindowToken {
 
     void updateWallpaperOffset(int dw, int dh, boolean sync) {
         final WallpaperController wallpaperController = mService.mWallpaperControllerLocked;
-        for (int wallpaperNdx = windows.size() - 1; wallpaperNdx >= 0; wallpaperNdx--) {
-            WindowState wallpaper = windows.get(wallpaperNdx);
+        for (int wallpaperNdx = mChildren.size() - 1; wallpaperNdx >= 0; wallpaperNdx--) {
+            final WindowState wallpaper = (WindowState) mChildren.get(wallpaperNdx);
             if (wallpaperController.updateWallpaperOffset(wallpaper, dw, dh, sync)) {
                 final WindowStateAnimator winAnimator = wallpaper.mWinAnimator;
                 winAnimator.computeShownFrameLocked();
@@ -529,8 +527,8 @@ class WindowToken {
         }
 
         final WallpaperController wallpaperController = mService.mWallpaperControllerLocked;
-        for (int wallpaperNdx = windows.size() - 1; wallpaperNdx >= 0; wallpaperNdx--) {
-            WindowState wallpaper = windows.get(wallpaperNdx);
+        for (int wallpaperNdx = mChildren.size() - 1; wallpaperNdx >= 0; wallpaperNdx--) {
+            final WindowState wallpaper = (WindowState) mChildren.get(wallpaperNdx);
             if (visible) {
                 wallpaperController.updateWallpaperOffset(wallpaper, dw, dh, false);
             }
@@ -552,8 +550,8 @@ class WindowToken {
         }
 
         final WallpaperController wallpaperController = mService.mWallpaperControllerLocked;
-        for (int wallpaperNdx = windows.size() - 1; wallpaperNdx >= 0; wallpaperNdx--) {
-            final WindowState wallpaper = windows.get(wallpaperNdx);
+        for (int wallpaperNdx = mChildren.size() - 1; wallpaperNdx >= 0; wallpaperNdx--) {
+            final WindowState wallpaper = (WindowState) mChildren.get(wallpaperNdx);
 
             if (visible) {
                 wallpaperController.updateWallpaperOffset(wallpaper, dw, dh, false);
@@ -628,8 +626,8 @@ class WindowToken {
     }
 
     boolean hasVisibleNotDrawnWallpaper() {
-        for (int j = windows.size() - 1; j >= 0; --j) {
-            final WindowState wallpaper = windows.get(j);
+        for (int j = mChildren.size() - 1; j >= 0; --j) {
+            final WindowState wallpaper = (WindowState) mChildren.get(j);
             if (wallpaper.hasVisibleNotDrawnWallpaper()) {
                 return true;
             }
@@ -639,8 +637,8 @@ class WindowToken {
 
     int getHighestAnimLayer() {
         int highest = -1;
-        for (int j = 0; j < windows.size(); j++) {
-            final WindowState w = windows.get(j);
+        for (int j = 0; j < mChildren.size(); j++) {
+            final WindowState w = (WindowState) mChildren.get(j);
             final int wLayer = w.getHighestAnimLayer();
             if (wLayer > highest) {
                 highest = wLayer;
@@ -656,7 +654,7 @@ class WindowToken {
     }
 
     void dump(PrintWriter pw, String prefix) {
-        pw.print(prefix); pw.print("windows="); pw.println(windows);
+        pw.print(prefix); pw.print("windows="); pw.println(mChildren);
         pw.print(prefix); pw.print("windowType="); pw.print(windowType);
                 pw.print(" hidden="); pw.print(hidden);
                 pw.print(" hasVisible="); pw.println(hasVisible);
