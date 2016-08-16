@@ -257,7 +257,7 @@ public class WifiNanManager {
         try {
             mService.enableUsage();
         } catch (RemoteException e) {
-            e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -272,7 +272,7 @@ public class WifiNanManager {
         try {
             mService.disableUsage();
         } catch (RemoteException e) {
-            e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -286,10 +286,8 @@ public class WifiNanManager {
         try {
             return mService.isUsageEnabled();
         } catch (RemoteException e) {
-            e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
-
-        return false;
     }
 
     /**
@@ -578,7 +576,7 @@ public class WifiNanManager {
             rangingKey = mService.startRanging(clientId, sessionId,
                     new RttManager.ParcelableRttParams(params));
         } catch (RemoteException e) {
-            e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
 
         synchronized (mLock) {
