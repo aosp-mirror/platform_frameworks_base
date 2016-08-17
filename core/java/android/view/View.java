@@ -830,7 +830,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     protected static boolean sPreserveMarginParamsInLayoutParamConversion;
 
-
     /**
      * This view does not want keystrokes. Use with TAKES_FOCUS_MASK when
      * calling setFlags.
@@ -9852,6 +9851,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Tells whether the {@link View} is in the state between {@link #onStartTemporaryDetach()}
+     * and {@link #onFinishTemporaryDetach()}.
+     *
+     * <p>This method always returns {@code true} when called directly or indirectly from
+     * {@link #onStartTemporaryDetach()}. The return value when called directly or indirectly from
+     * {@link #onFinishTemporaryDetach()}, however, depends on the OS version.
+     * <ul>
+     *     <li>{@code true} on {@link android.os.Build.VERSION_CODES#N API 24}</li>
+     *     <li>{@code false} on {@link android.os.Build.VERSION_CODES#N_MR1 API 25}} and later</li>
+     * </ul>
+     * </p>
+     *
      * @return {@code true} when the View is in the state between {@link #onStartTemporaryDetach()}
      * and {@link #onFinishTemporaryDetach()}.
      */
@@ -9886,8 +9897,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @CallSuper
     public void dispatchFinishTemporaryDetach() {
-        onFinishTemporaryDetach();
         mPrivateFlags3 &= ~PFLAG3_TEMPORARY_DETACH;
+        onFinishTemporaryDetach();
         if (hasWindowFocus() && hasFocus()) {
             InputMethodManager.getInstance().focusIn(this);
         }
