@@ -19,6 +19,7 @@ package android.media.midi;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -41,6 +42,7 @@ public final class MidiDevice implements Closeable {
     private final IMidiManager mMidiManager;
     private final IBinder mClientToken;
     private final IBinder mDeviceToken;
+    private boolean mIsDeviceClosed;
 
     private final CloseGuard mGuard = CloseGuard.get();
 
@@ -122,6 +124,9 @@ public final class MidiDevice implements Closeable {
      *         or null in case of failure.
      */
     public MidiInputPort openInputPort(int portNumber) {
+        if (mIsDeviceClosed) {
+            return null;
+        }
         try {
             IBinder token = new Binder();
             ParcelFileDescriptor pfd = mDeviceServer.openInputPort(token, portNumber);
@@ -145,6 +150,9 @@ public final class MidiDevice implements Closeable {
      *         or null in case of failure.
      */
     public MidiOutputPort openOutputPort(int portNumber) {
+        if (mIsDeviceClosed) {
+            return null;
+        }
         try {
             IBinder token = new Binder();
             ParcelFileDescriptor pfd = mDeviceServer.openOutputPort(token, portNumber);
@@ -174,16 +182,26 @@ public final class MidiDevice implements Closeable {
         if (outputPortNumber < 0 || outputPortNumber >= mDeviceInfo.getOutputPortCount()) {
             throw new IllegalArgumentException("outputPortNumber out of range");
         }
+        if (mIsDeviceClosed) {
+            return null;
+        }
 
         ParcelFileDescriptor pfd = inputPort.claimFileDescriptor();
         if (pfd == null) {
             return null;
         }
-         try {
+        try {
             IBinder token = new Binder();
-            mDeviceServer.connectPorts(token, pfd, outputPortNumber);
-            // close our copy of the file descriptor
-            IoUtils.closeQuietly(pfd);
+            int calleePid = mDeviceServer.connectPorts(token, pfd, outputPortNumber);
+            // If the service is a different Process then it will duplicate the pfd
+            // and we can safely close this one.
+            // But if the service is in the same Process then closing the pfd will
+            // kill the connection. So don't do that.
+            if (calleePid != Process.myPid()) {
+                // close our copy of the file descriptor
+                IoUtils.closeQuietly(pfd);
+            }
+
             return new MidiConnection(token, inputPort);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in connectPorts");
@@ -194,11 +212,14 @@ public final class MidiDevice implements Closeable {
     @Override
     public void close() throws IOException {
         synchronized (mGuard) {
-            mGuard.close();
-            try {
-                mMidiManager.closeDevice(mClientToken, mDeviceToken);
-            } catch (RemoteException e) {
-                Log.e(TAG, "RemoteException in closeDevice");
+            if (!mIsDeviceClosed) {
+                mGuard.close();
+                mIsDeviceClosed = true;
+                try {
+                    mMidiManager.closeDevice(mClientToken, mDeviceToken);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "RemoteException in closeDevice");
+                }
             }
         }
     }

@@ -28,7 +28,8 @@ interface IMidiDeviceServer
     void closeDevice();
 
     // connects the input port pfd to the specified output port
-    void connectPorts(IBinder token, in ParcelFileDescriptor pfd, int outputPortNumber);
+    // Returns the PID of the called process.
+    int connectPorts(IBinder token, in ParcelFileDescriptor pfd, int outputPortNumber);
 
     MidiDeviceInfo getDeviceInfo();
     void setDeviceInfo(in MidiDeviceInfo deviceInfo);
