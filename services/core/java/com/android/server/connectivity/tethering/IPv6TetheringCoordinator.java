@@ -29,6 +29,7 @@ import android.util.Log;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 
 /**
@@ -45,10 +46,28 @@ public class IPv6TetheringCoordinator {
     private static final boolean VDBG = false;
 
     private final ArrayList<TetherInterfaceStateMachine> mNotifyList;
+    private final LinkedList<TetherInterfaceStateMachine> mActiveDownstreams;
     private NetworkState mUpstreamNetworkState;
 
     public IPv6TetheringCoordinator(ArrayList<TetherInterfaceStateMachine> notifyList) {
         mNotifyList = notifyList;
+        mActiveDownstreams = new LinkedList<>();
+    }
+
+    public void addActiveDownstream(TetherInterfaceStateMachine downstream) {
+        if (mActiveDownstreams.indexOf(downstream) == -1) {
+            // Adding a new downstream appends it to the list. Adding a
+            // downstream a second time without first removing it has no effect.
+            mActiveDownstreams.offer(downstream);
+            updateIPv6TetheringInterfaces();
+        }
+    }
+
+    public void removeActiveDownstream(TetherInterfaceStateMachine downstream) {
+        stopIPv6TetheringOn(downstream);
+        if (mActiveDownstreams.remove(downstream)) {
+            updateIPv6TetheringInterfaces();
+        }
     }
 
     public void updateUpstreamNetworkState(NetworkState ns) {
@@ -72,8 +91,7 @@ public class IPv6TetheringCoordinator {
 
     private void stopIPv6TetheringOnAllInterfaces() {
         for (TetherInterfaceStateMachine sm : mNotifyList) {
-            sm.sendMessage(TetherInterfaceStateMachine.CMD_IPV6_TETHER_UPDATE,
-                    0, 0, null);
+            stopIPv6TetheringOn(sm);
         }
     }
 
@@ -98,28 +116,32 @@ public class IPv6TetheringCoordinator {
 
     private void updateIPv6TetheringInterfaces() {
         for (TetherInterfaceStateMachine sm : mNotifyList) {
-            final LinkProperties lp = getInterfaceIPv6LinkProperties(sm.interfaceType());
+            final LinkProperties lp = getInterfaceIPv6LinkProperties(sm);
             sm.sendMessage(TetherInterfaceStateMachine.CMD_IPV6_TETHER_UPDATE, 0, 0, lp);
             break;
         }
     }
 
-    private LinkProperties getInterfaceIPv6LinkProperties(int interfaceType) {
+    private LinkProperties getInterfaceIPv6LinkProperties(TetherInterfaceStateMachine sm) {
         if (mUpstreamNetworkState == null) return null;
+
+        if (sm.interfaceType() == ConnectivityManager.TETHERING_BLUETOOTH) {
+            // TODO: Figure out IPv6 support on PAN interfaces.
+            return null;
+        }
 
         // NOTE: Here, in future, we would have policies to decide how to divvy
         // up the available dedicated prefixes among downstream interfaces.
         // At this time we have no such mechanism--we only support tethering
-        // IPv6 toward Wi-Fi interfaces.
+        // IPv6 toward the oldest (first requested) active downstream.
 
-        switch (interfaceType) {
-            case ConnectivityManager.TETHERING_WIFI:
-                final LinkProperties lp = getIPv6OnlyLinkProperties(
-                        mUpstreamNetworkState.linkProperties);
-                if (lp.hasIPv6DefaultRoute() && lp.hasGlobalIPv6Address()) {
-                    return lp;
-                }
-                break;
+        final TetherInterfaceStateMachine currentActive = mActiveDownstreams.peek();
+        if (currentActive != null && currentActive == sm) {
+            final LinkProperties lp = getIPv6OnlyLinkProperties(
+                    mUpstreamNetworkState.linkProperties);
+            if (lp.hasIPv6DefaultRoute() && lp.hasGlobalIPv6Address()) {
+                return lp;
+            }
         }
 
         return null;
@@ -249,5 +271,9 @@ public class IPv6TetheringCoordinator {
                 ns.network,
                 ns.networkCapabilities,
                 ns.linkProperties);
+    }
+
+    private static void stopIPv6TetheringOn(TetherInterfaceStateMachine sm) {
+        sm.sendMessage(TetherInterfaceStateMachine.CMD_IPV6_TETHER_UPDATE, 0, 0, null);
     }
 }
