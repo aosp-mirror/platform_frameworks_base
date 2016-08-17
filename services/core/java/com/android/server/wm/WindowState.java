@@ -2272,6 +2272,8 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
             mWinAnimator.mDrawState = READY_TO_SHOW;
             mAnimatingWithSavedSurface = true;
 
+            requestUpdateWallpaperIfNeeded();
+
             if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) {
                 Slog.v(TAG, "Restoring saved surface: " + this);
             }
