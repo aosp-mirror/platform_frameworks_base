@@ -416,8 +416,7 @@ class ActivityStarter {
         // If permissions need a review before any of the app components can run, we
         // launch the review activity and pass a pending intent to start the activity
         // we are to launching now after the review is completed.
-        if ((mService.mPermissionReviewRequired
-                || Build.PERMISSIONS_REVIEW_REQUIRED) && aInfo != null) {
+        if (mService.mPermissionReviewRequired && aInfo != null) {
             if (mService.getPackageManagerInternalLocked().isPermissionsReviewRequired(
                     aInfo.packageName, userId)) {
                 IIntentSender target = mService.getIntentSenderLocked(

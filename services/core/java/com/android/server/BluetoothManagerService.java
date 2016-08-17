@@ -28,6 +28,7 @@ import android.bluetooth.IBluetoothManager;
 import android.bluetooth.IBluetoothManagerCallback;
 import android.bluetooth.IBluetoothProfileServiceConnection;
 import android.bluetooth.IBluetoothStateChangeCallback;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -248,8 +249,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
 
         mContext = context;
 
-        mPermissionReviewRequired = Build.PERMISSIONS_REVIEW_REQUIRED
-                    || context.getResources().getBoolean(
+        mPermissionReviewRequired = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_permissionReviewRequired);
 
         mBluetooth = null;
@@ -742,7 +742,15 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             // Legacy apps in permission review mode trigger a user prompt
             if (applicationInfo.targetSdkVersion < Build.VERSION_CODES.M) {
                 Intent intent = new Intent(intentAction);
-                mContext.startActivity(intent);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                        | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+                try {
+                    mContext.startActivity(intent);
+                } catch (ActivityNotFoundException e) {
+                    // Shouldn't happen
+                    Slog.e(TAG, "Intent to handle action " + intentAction + " missing");
+                    return false;
+                }
                 return true;
             }
         } catch (PackageManager.NameNotFoundException e) {

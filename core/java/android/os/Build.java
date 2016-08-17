@@ -847,6 +847,7 @@ public class Build {
      * is installed.
      *
      * @hide
+     * @removed
      */
     @SystemApi
     public static final boolean PERMISSIONS_REVIEW_REQUIRED =
