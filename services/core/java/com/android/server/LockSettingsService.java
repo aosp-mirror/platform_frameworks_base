@@ -1222,6 +1222,9 @@ public class LockSettingsService extends ILockSettings.Stub {
             long challenge, int userId, ICheckCredentialProgressCallback progressCallback)
             throws RemoteException {
        checkPasswordReadPermission(userId);
+       if (TextUtils.isEmpty(pattern)) {
+           throw new IllegalArgumentException("Pattern can't be null or empty");
+       }
        CredentialHash storedHash = mStorage.readPatternHash(userId);
        return doVerifyPattern(pattern, storedHash, hasChallenge, challenge, userId,
                progressCallback);
@@ -1323,6 +1326,9 @@ public class LockSettingsService extends ILockSettings.Stub {
             long challenge, int userId, ICheckCredentialProgressCallback progressCallback)
             throws RemoteException {
        checkPasswordReadPermission(userId);
+       if (TextUtils.isEmpty(password)) {
+           throw new IllegalArgumentException("Password can't be null or empty");
+       }
        CredentialHash storedHash = mStorage.readPasswordHash(userId);
        return doVerifyPassword(password, storedHash, hasChallenge, challenge, userId,
                progressCallback);
