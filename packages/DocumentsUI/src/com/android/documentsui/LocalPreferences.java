@@ -22,6 +22,7 @@ import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.os.UserHandle;
 import android.preference.PreferenceManager;
 
@@ -85,6 +86,15 @@ public class LocalPreferences {
     public @interface PermissionStatus {}
 
     /**
+     * Clears all preferences associated with a given package.
+     *
+     * <p>Typically called when a package is removed or when user asked to clear its data.
+     */
+    static void clearPackagePreferences(Context context, String packageName) {
+        clearScopedAccessPreferences(context, packageName);
+    }
+
+    /**
      * Methods below are used to keep track of denied user requests on scoped directory access so
      * the dialog is not offered when user checked the 'Do not ask again' box
      *
@@ -106,6 +116,23 @@ public class LocalPreferences {
             @Nullable String uuid, String directory, @PermissionStatus int status) {
       final String key = getScopedAccessDenialsKey(packageName, uuid, directory);
       getPrefs(context).edit().putInt(key, status).apply();
+    }
+
+    private static void clearScopedAccessPreferences(Context context, String packageName) {
+        final String keySubstring = "|" + packageName + "|";
+        final SharedPreferences prefs = getPrefs(context);
+        Editor editor = null;
+        for (final String key : prefs.getAll().keySet()) {
+            if (key.contains(keySubstring)) {
+                if (editor == null) {
+                    editor = prefs.edit();
+                }
+                editor.remove(key);
+            }
+        }
+        if (editor != null) {
+            editor.apply();
+        }
     }
 
     private static String getScopedAccessDenialsKey(String packageName, String uuid,
