@@ -127,6 +127,14 @@ public final class UsbMidiDevice implements Closeable {
         public void setReceiver(MidiReceiver receiver) {
             mReceiver = receiver;
         }
+
+        @Override
+        public void onFlush() throws IOException {
+            MidiReceiver receiver = mReceiver;
+            if (receiver != null) {
+                receiver.flush();
+            }
+        }
     }
 
     public static UsbMidiDevice create(Context context, Bundle properties, int card, int device) {
