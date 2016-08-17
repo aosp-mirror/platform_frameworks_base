@@ -48,11 +48,9 @@ animate changes between view hierarchies. This class also covers how to create c
 animations.</p>
 
 <p class="note"><strong>Note:</strong> For Android versions earlier than 4.4.2 (API level 19)
-but greater than or equal to Android 4.0 (API level 14), use the <code>animateLayoutChanges</code>
-attribute to animate layouts. To learn more, see
-<a href="{@docRoot}guide/topics/graphics/prop-animation.html">Property Animation</a> and
-<a href="{@docRoot}training/animation/layout.html">Animating Layout Changes</a>.</p>
-
+but greater than or equal to Android 4.0 (API level 14), use the Android Support
+Library's <a href="/reference/android/support/transitions/package-summary.html"
+><code>android.support.transition</code></a> package.</p>
 
 <h2>Lessons</h2>
 
