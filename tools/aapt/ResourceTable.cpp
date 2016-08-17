@@ -4860,24 +4860,39 @@ void ResourceTable::getDensityVaryingResources(
         const Vector<sp<Type> >& types = mOrderedPackages[p]->getOrderedTypes();
         const size_t typeCount = types.size();
         for (size_t t = 0; t < typeCount; t++) {
-            const Vector<sp<ConfigList> >& configs = types[t]->getOrderedConfigs();
+            const sp<Type>& type = types[t];
+            if (type == NULL) {
+                continue;
+            }
+
+            const Vector<sp<ConfigList> >& configs = type->getOrderedConfigs();
             const size_t configCount = configs.size();
             for (size_t c = 0; c < configCount; c++) {
+                const sp<ConfigList>& configList = configs[c];
+                if (configList == NULL) {
+                    continue;
+                }
+
                 const DefaultKeyedVector<ConfigDescription, sp<Entry> >& configEntries
-                        = configs[c]->getEntries();
+                        = configList->getEntries();
                 const size_t configEntryCount = configEntries.size();
                 for (size_t ce = 0; ce < configEntryCount; ce++) {
+                    const sp<Entry>& entry = configEntries.valueAt(ce);
+                    if (entry == NULL) {
+                        continue;
+                    }
+
                     const ConfigDescription& config = configEntries.keyAt(ce);
                     if (AaptConfig::isDensityOnly(config)) {
                         // This configuration only varies with regards to density.
                         const Symbol symbol(
                                 mOrderedPackages[p]->getName(),
-                                types[t]->getName(),
-                                configs[c]->getName(),
+                                type->getName(),
+                                configList->getName(),
                                 getResId(mOrderedPackages[p], types[t],
-                                         configs[c]->getEntryIndex()));
+                                         configList->getEntryIndex()));
 
-                        const sp<Entry>& entry = configEntries.valueAt(ce);
+
                         AaptUtil::appendValue(resources, symbol,
                                               SymbolDefinition(symbol, config, entry->getPos()));
                     }
