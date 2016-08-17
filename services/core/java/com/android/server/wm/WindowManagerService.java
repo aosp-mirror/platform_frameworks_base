@@ -191,6 +191,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_DRAWN_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
@@ -5886,7 +5887,8 @@ public class WindowManagerService extends IWindowManager.Stub
             if (w.isDrawnLw()) {
                 if (w.mAttrs.type == TYPE_BOOT_PROGRESS) {
                     haveBootMsg = true;
-                } else if (w.mAttrs.type == TYPE_APPLICATION) {
+                } else if (w.mAttrs.type == TYPE_APPLICATION
+                        || w.mAttrs.type == TYPE_DRAWN_APPLICATION) {
                     haveApp = true;
                 } else if (w.mAttrs.type == TYPE_WALLPAPER) {
                     haveWallpaper = true;
