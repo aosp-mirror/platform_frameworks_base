@@ -99,7 +99,6 @@ page.tags="IntentFilter"
     </ol>
   </li>
   <li><a href="#AdbIntents">Verify Intents with the Android Debug Bridge</a></li>
-  <li><a href="#Now">Intents Fired by Google Now</a></li>
 </ol>
 
   <h2>See also</h2>
@@ -110,9 +109,9 @@ Filters</a></li>
 </div>
 </div>
 
-<!-- Google Now box styles -->
+<!-- Google Voice Actions box styles -->
 <style type="text/css">
-.now-box {
+.voice-box {
   border-color: rgb(204,204,204);
   border-style: solid;
   border-width: 1px;
@@ -121,99 +120,120 @@ Filters</a></li>
   padding: 17px;
   width: 200px;
 }
-.now-box li {
+.voice-box li {
   font-size: 13px;
   font-style: italic;
   margin-top: 0px;
 }
-.now-box ul {
+.voice-box ul {
   margin-bottom: 0px;
 }
-.now-img {
+.voice-img {
   width: 30px;
   margin-bottom: 0px !important;
 }
-.now-img-cont {
+.voice-img-cont {
   float: left;
   margin-right: 10px;
 }
-.now-title {
+.voice-title {
   font-weight: bold;
   margin-top: 7px;
 }
-.now-list {
+.voice-list {
   font-size: 13px;
   margin-bottom: 10px !important;
   list-style-type: none;
 }
-.now-list li {
+.voice-list li {
   font-style: italic;
 }
 </style>
 
-<p>An intent allows you to start an activity in another app by describing a simple
-action you'd like to perform (such as "view a map" or "take a picture")
-in an {@link android.content.Intent} object. This type of intent is
-called an <em>implicit</em> intent because it does not specify the app component
-to start, but instead specifies an <em>action</em> and provides some
-<em>data</em> with which to perform the action.</p>
+<p>
+  An intent allows you to start an activity in another app by describing a
+  simple action you'd like to perform (such as "view a map" or "take a
+  picture") in an {@link android.content.Intent} object. This type of intent
+  is called an <em>implicit</em> intent because it does not specify the app
+  component to start, but instead specifies an <em>action</em> and provides
+  some <em>data</em> with which to perform the action.
+</p>
 
-<p>When you call
-{@link android.content.Context#startActivity startActivity()} or
-{@link android.app.Activity#startActivityForResult startActivityForResult()} and pass it an
-implicit intent, the system <a href="{@docRoot}guide/components/intents-filters.html#Resolution"
->resolves the intent</a> to an app that can handle the intent
-and starts its corresponding {@link android.app.Activity}. If there's more than one app
-that can handle the intent, the system presents the user with a dialog to pick which app
-to use.</p>
+<p>
+  When you call {@link android.content.Context#startActivity startActivity()}
+  or {@link android.app.Activity#startActivityForResult
+  startActivityForResult()} and pass it an implicit intent, the system
+  <a href="{@docRoot}guide/components/intents-filters.html#Resolution">resolves
+  the intent</a> to an app that can handle the intent and starts its
+  corresponding {@link android.app.Activity}. If there's more than one app
+  that can handle the intent, the system presents the user with a dialog to
+  pick which app to use.
+</p>
 
-<p>This page describes several implicit intents that you can use to perform common actions,
-organized by the type of app that handles the intent. Each section also shows how you can
-create an <a href="{@docRoot}guide/components/intents-filters.html#Receiving">intent filter</a> to
-advertise your app's ability to perform the same action.</p>
+<p>
+  This page describes several implicit intents that you can use to perform
+  common actions, organized by the type of app that handles the intent. Each
+  section also shows how you can create an <a href=
+  "{@docRoot}guide/components/intents-filters.html#Receiving">intent
+  filter</a> to advertise your app's ability to perform the same action.
+</p>
 
-<p class="caution"><strong>Caution:</strong> If there are no apps on the device that can receive
-the implicit intent, your app will crash when it calls {@link android.content.Context#startActivity
-startActivity()}. To first verify that an app exists to receive the intent, call {@link
-android.content.Intent#resolveActivity resolveActivity()} on your {@link android.content.Intent}
-object. If the result is non-null, there is at least one app that can handle the intent and
-it's safe to call {@link android.content.Context#startActivity startActivity()}. If the result is
-null, you should not use the intent and, if possible, you should disable the feature that invokes
-the intent.</p>
+<p class="caution">
+  <strong>Caution:</strong> If there are no apps on the device that can
+  receive the implicit intent, your app will crash when it calls {@link
+  android.content.Context#startActivity startActivity()}. To first verify that
+  an app exists to receive the intent, call {@link
+  android.content.Intent#resolveActivity resolveActivity()} on your {@link
+  android.content.Intent} object. If the result is non-null, there is at least
+  one app that can handle the intent and it's safe to call {@link
+  android.content.Context#startActivity startActivity()}. If the result is
+  null, you should not use the intent and, if possible, you should disable the
+  feature that invokes the intent.
+</p>
 
-<p>If you're not familiar with how to create intents or intent filters, you should first read
-<a href="{@docRoot}guide/components/intents-filters.html">Intents and Intent Filters</a>.</p>
+<p>
+  If you're not familiar with how to create intents or intent filters, you
+  should first read <a href=
+  "{@docRoot}guide/components/intents-filters.html">Intents and Intent
+  Filters</a>.
+</p>
 
-<p>To learn how to fire the intents listed on this page from your development host, see
-<a href="#AdbIntents">Verify Intents with the Android Debug Bridge</a>.</p>
+<p>
+  To learn how to fire the intents listed on this page from your development
+  host, see <a href="#AdbIntents">Verify Intents with the Android Debug
+  Bridge</a>.
+</p>
 
-<h4>Google Now</h4>
+<h4>Google Voice Actions</h4>
 
-<p><a href="http://www.google.com/landing/now/">Google Now</a> fires some of the intents listed
-on this page in response to voice commands. For more information, see
-<a href="#Now">Intents Fired by Google Now</a>.</p>
-
-
-
-
-
+<p>
+  <a href="https://developers.google.com/voice-actions/">Google Voice
+  Actions</a> fires some of the intents listed on this page in response to
+  voice commands. For more information, see <a href=
+  "https://developers.google.com/voice-actions/system/#system_actions_reference">
+  Intents fired by Google Voice Actions</a>.
+</p>
 
 <h2 id="Clock">Alarm Clock</h2>
 
-
 <h3 id="CreateAlarm">Create an alarm</h3>
 
-<!-- Google Now box -->
-<div class="now-box">
-  <div class="now-img-cont">
-    <a href="#Now">
-      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img" width="30"
-           height="30" alt=""/>
-    </a>
+<!-- Google Voice Actions box -->
+<div class="voice-box">
+  <div class="voice-img-cont">
+    <a href=
+    "https://developers.google.com/voice-actions/system/#system_actions_reference">
+    <img src="{@docRoot}guide/components/images/voice-icon.png" class=
+    "voice-img" width="30" height="30" alt=""></a>
   </div>
-  <p class="now-title">Google Now</p>
+
+  <p class="voice-title">
+    Google Voice Actions
+  </p>
+
   <ul>
-    <li>"set an alarm for 7 am"</li>
+    <li>"set an alarm for 7 am"
+    </li>
   </ul>
 </div>
 
@@ -301,22 +321,30 @@ android.provider.AlarmClock#ACTION_SET_ALARM} intent, your app must have the
 
 <h3 id="CreateTimer">Create a timer</h3>
 
-<!-- Google Now box -->
-<div class="now-box">
-  <div class="now-img-cont">
-    <a href="#Now">
-      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img"
-           width="30" height="30" alt=""/>
-    </a>
+<!-- Google Voice Actions box -->
+<div class="voice-box">
+  <div class="voice-img-cont">
+    <a href=
+    "https://developers.google.com/voice-actions/system/#system_actions_reference">
+    <img src="{@docRoot}guide/components/images/voice-icon.png" class=
+    "voice-img" width="30" height="30" alt=""></a>
   </div>
-  <p class="now-title">Google Now</p>
+
+  <p class="voice-title">
+    Google Voice Actions
+  </p>
+
   <ul>
-    <li>"set timer for 5 minutes"</li>
+    <li>"set timer for 5 minutes"
+    </li>
   </ul>
 </div>
 
-<p>To create a countdown timer, use the {@link android.provider.AlarmClock#ACTION_SET_TIMER}
-action and specify timer details such as the duration using extras defined below.</p>
+<p>
+  To create a countdown timer, use the {@link
+  android.provider.AlarmClock#ACTION_SET_TIMER} action and specify timer
+  details such as the duration using extras defined below.
+</p>
 
 <p class="note"><strong>Note:</strong> This intent was added
 in Android 4.4 (API level 19).</p>
@@ -594,28 +622,36 @@ how to create an appropriate {@link android.net.Uri} for the output location, re
 &lt;/activity>
 </pre>
 
-<p>When handling this intent, your activity should check for the {@link
-android.provider.MediaStore#EXTRA_OUTPUT} extra in the incoming {@link android.content.Intent},
-then save the captured image or video at the location specified by that extra and call {@link
-android.app.Activity#setResult(int,Intent) setResult()} with an
-{@link android.content.Intent} that includes a compressed thumbnail
-in an extra named <code>"data"</code>.</p>
+<p>
+  When handling this intent, your activity should check for the {@link
+  android.provider.MediaStore#EXTRA_OUTPUT} extra in the incoming {@link
+  android.content.Intent}, then save the captured image or video at the
+  location specified by that extra and call {@link
+  android.app.Activity#setResult(int,Intent) setResult()} with an {@link
+  android.content.Intent} that includes a compressed thumbnail in an extra
+  named <code>"data"</code>.
+</p>
 
 
 
 <h3 id="CameraStill">Start a camera app in still image mode</h3>
 
-<!-- Google Now box -->
-<div class="now-box">
-  <div class="now-img-cont">
-    <a href="#Now">
-      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img"
-           width="30" height="30" alt=""/>
-    </a>
+<!-- Google Voice Actions box -->
+<div class="voice-box">
+  <div class="voice-img-cont">
+    <a href=
+    "https://developers.google.com/voice-actions/system/#system_actions_reference">
+    <img src="{@docRoot}guide/components/images/voice-icon.png" class=
+    "voice-img" width="30" height="30" alt=""></a>
   </div>
-  <p class="now-title">Google Now</p>
+
+  <p class="voice-title">
+    Google Voice Actions
+  </p>
+
   <ul>
-    <li>"take a picture"</li>
+    <li>"take a picture"
+    </li>
   </ul>
 </div>
 
@@ -661,17 +697,22 @@ public void capturePhoto() {
 
 <h3 id="CameraVideo">Start a camera app in video mode</h3>
 
-<!-- Google Now box -->
-<div class="now-box">
-  <div class="now-img-cont">
-    <a href="#Now">
-      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img"
-           width="30" height="30" alt=""/>
-    </a>
+<!-- Google Voice Actions box -->
+<div class="voice-box">
+  <div class="voice-img-cont">
+    <a href=
+    "https://developers.google.com/voice-actions/system/#system_actions_reference">
+    <img src="{@docRoot}guide/components/images/voice-icon.png" class=
+    "voice-img" width="30" height="30" alt=""></a>
   </div>
-  <p class="now-title">Google Now</p>
+
+  <p class="voice-title">
+    Google Voice Actions
+  </p>
+
   <ul>
-    <li>"record a video"</li>
+    <li>"record a video"
+    </li>
   </ul>
 </div>
 
@@ -1348,20 +1389,30 @@ Framework</a> guide.</p>
 
 <h3 id="CallCar">Call a car</h3>
 
-<!-- Google Now box -->
-<div class="now-box">
-  <div class="now-img-cont">
-    <a href="#Now">
-      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img"
-           width="30" height="30" alt=""/>
-    </a>
+<!-- Google Voice Actions box -->
+<div class="voice-box">
+  <div class="voice-img-cont">
+    <a href=
+    "https://developers.google.com/voice-actions/system/#system_actions_reference">
+    <img src="{@docRoot}guide/components/images/voice-icon.png" class=
+    "voice-img" width="30" height="30" alt=""></a>
   </div>
-  <p class="now-title">Google Now</p>
+
+  <p class="voice-title">
+    Google Voice Actions
+  </p>
+
   <ul>
-    <li>"get me a taxi"</li>
-    <li>"call me a car"</li>
+    <li>"get me a taxi"
+    </li>
+
+    <li>"call me a car"
+    </li>
   </ul>
-  <p style="font-size:13px;margin-bottom:0px;margin-top:10px">(Android Wear only)</p>
+
+  <p style="font-size:13px;margin-bottom:0px;margin-top:10px">
+    (Android Wear only)
+  </p>
 </div>
 
 <p>To call a taxi, use the
@@ -1548,17 +1599,22 @@ public void playMedia(Uri file) {
 
 <h3 id="PlaySearch">Play music based on a search query</h3>
 
-<!-- Google Now box -->
-<div class="now-box">
-  <div class="now-img-cont">
-    <a href="#Now">
-      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img"
-           width="30" height="30" alt=""/>
-    </a>
+<!-- Google Voice Actions box -->
+<div class="voice-box">
+  <div class="voice-img-cont">
+    <a href=
+    "https://developers.google.com/voice-actions/system/#system_actions_reference">
+    <img src="{@docRoot}guide/components/images/voice-icon.png" class=
+    "voice-img" width="30" height="30" alt=""></a>
   </div>
-  <p class="now-title">Google Now</p>
+
+  <p class="voice-title">
+    Google Voice Actions
+  </p>
+
   <ul>
-    <li>"play michael jackson billie jean"</li>
+    <li>"play michael jackson billie jean"
+    </li>
   </ul>
 </div>
 
@@ -1861,19 +1917,28 @@ android.content.Intent#ACTION_DIAL} action and specify a phone number using
 the URI scheme defined below. When the phone app opens, it displays the phone number
 but the user must press the <em>Call</em> button to begin the phone call.</p>
 
-<!-- Google Now box -->
-<div class="now-box">
-  <div class="now-img-cont">
-    <a href="#Now">
-      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img"
-           width="30" height="30" alt=""/>
-    </a>
+<!-- Google Voice Actions box -->
+<div class="voice-box">
+  <div class="voice-img-cont">
+    <a href=
+    "https://developers.google.com/voice-actions/system/#system_actions_reference">
+    <img src="{@docRoot}guide/components/images/voice-icon.png" class=
+    "voice-img" width="30" height="30" alt=""></a>
   </div>
-  <p class="now-title">Google Now</p>
+
+  <p class="voice-title">
+    Google Voice Actions
+  </p>
+
   <ul>
-    <li>"call 555-5555"</li>
-    <li>"call bob"</li>
-    <li>"call voicemail"</li>
+    <li>"call 555-5555"
+    </li>
+
+    <li>"call bob"
+    </li>
+
+    <li>"call voicemail"
+    </li>
   </ul>
 </div>
 
@@ -1947,16 +2012,22 @@ public void dialPhoneNumber(String phoneNumber) {
 
 <h3 id="SearchOnApp">Search using a specific app</h3>
 
-<!-- Google Now box -->
-<div class="now-box">
-  <div class="now-img-cont">
-    <a href="#Now">
-      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img"
-           width="30" height="30"/></a>
+<!-- Google Voice Actions box -->
+<div class="voice-box">
+  <div class="voice-img-cont">
+    <a href=
+    "https://developers.google.com/voice-actions/system/#system_actions_reference">
+    <img src="{@docRoot}guide/components/images/voice-icon.png" class=
+    "voice-img" width="30" height="30" alt=""></a>
   </div>
-  <p class="now-title">Google Now</p>
+
+  <p class="voice-title">
+    Google Voice Actions
+  </p>
+
   <ul>
-    <li>"search for cat videos on myvideoapp"</li>
+    <li>"search for cat videos on myvideoapp"
+    </li>
   </ul>
 </div>
 <!-- Video box -->
@@ -1976,7 +2047,7 @@ the <code>SEARCH_ACTION</code> action, as shown in the example intent filter bel
 <dd>
   <dl>
     <dt><code>"com.google.android.gms.actions.SEARCH_ACTION"</code></dt>
-    <dd>Support search queries from Google Now.</dd>
+    <dd>Support search queries from Google Voice Actions.</dd>
   </dl>
 </dd>
 
@@ -2207,17 +2278,22 @@ at {@link android.provider.Telephony}.</p>
 
 <h3 id="ViewUrl">Load a web URL</h3>
 
-<!-- Google Now box -->
-<div class="now-box">
-  <div class="now-img-cont">
-    <a href="#Now">
-      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img"
-           width="30" height="30" alt=""/>
-    </a>
+<!-- Google Voice Actions box -->
+<div class="voice-box">
+  <div class="voice-img-cont">
+    <a href=
+    "https://developers.google.com/voice-actions/system/#system_actions_reference">
+    <img src="{@docRoot}guide/components/images/voice-icon.png" class=
+    "voice-img" width="30" height="30" alt=""></a>
   </div>
-  <p class="now-title">Google Now</p>
+
+  <p class="voice-title">
+    Google Voice Actions
+  </p>
+
   <ul>
-    <li>"open example.com"</li>
+    <li>"open example.com"
+    </li>
   </ul>
 </div>
 
@@ -2308,127 +2384,3 @@ adb shell am start -a android.intent.action.DIAL \
 
 <p>For more information, see
 <a href="{@docRoot}tools/help/shell.html#am">ADB Shell Commands</a>.</p>
-
-
-
-
-
-
-<h2 id="Now">Intents Fired by Google Now</h2>
-
-<p><a href="http://www.google.com/landing/now/">Google Now</a> recognizes many voice commands
-and fires intents for them. As such, users may launch your app with a Google Now voice command
-if your app declares the corresponding intent filter. For example, if your app can
-<a href="#CreateAlarm">set an alarm</a> and you add the corresponding intent filter to your
-manifest file, Google Now lets users choose your app when they request to set an alarm, as
-shown in figure 1.</p>
-
-<img src="{@docRoot}guide/components/images/google-action.png"
-     srcset="{@docRoot}guide/components/images/google-action_2x.png 2x"
-     width="700" height="241" alt=""/>
-<p class="img-caption"><strong>Figure 1.</strong> Google Now lets users choose from installed
-apps that support a given action.</p>
-
-<p>Google Now recognizes voice commands for the actions listed in table 1. For more information
-about declaring each intent filter, click on the action description.</p>
-
-<p class="table-caption"><strong>Table 1.</strong> Voice commands recognized by Google Now
-(Google Search app v3.6).</p>
-<table>
-<tr>
-  <th>Category</th>
-  <th>Details and Examples</th>
-  <th>Action Name</th>
-</tr>
-<tr>
-  <td rowspan="2" style="vertical-align:middle">Alarm</td>
-  <td>
-    <p><a href="#CreateAlarm">Set alarm</a></p>
-    <ul class="now-list">
-      <li>"set an alarm for 7 am"</li>
-    </ul>
-  </td>
-  <td>{@link android.provider.AlarmClock#ACTION_SET_ALARM AlarmClock.ACTION_SET_ALARM}</td>
-</tr>
-<tr>
-  <td>
-    <p><a href="#CreateTimer">Set timer</a></p>
-    <ul class="now-list">
-      <li>"set a timer for 5 minutes"</li>
-    </ul>
-  </td>
-  <td>{@link android.provider.AlarmClock#ACTION_SET_TIMER AlarmClock.ACTION_SET_TIMER}</td>
-</tr>
-<tr>
-  <td style="vertical-align:middle">Communication</td>
-  <td>
-    <p><a href="#DialPhone">Call a number</a></p>
-    <ul class="now-list">
-      <li>"call 555-5555"</li>
-      <li>"call bob"</li>
-      <li>"call voicemail"</li>
-    </ul>
-  </td>
-  <td>{@link android.content.Intent#ACTION_CALL Intent.ACTION_CALL}</td>
-</tr>
-<tr>
-  <td style="vertical-align:middle">Local</td>
-  <td>
-    <p><a href="#CallCar">Book a car</a></p>
-    <ul class="now-list">
-      <li>"call me a car"</li>
-      <li>"book me a taxi"</li>
-    </ul>
-  </td>
-  <td><a href="{@docRoot}reference/com/google/android/gms/actions/ReserveIntents.html#ACTION_RESERVE_TAXI_RESERVATION">
-      <code>ReserveIntents<br/>.ACTION_RESERVE_TAXI_RESERVATION</code></a></td>
-</tr>
-<tr>
-  <td rowspan="3" style="vertical-align:middle">Media</td>
-  <td>
-    <p><a href="#PlaySearch">Play music from search</a></p>
-    <ul class="now-list">
-      <li>"play michael jackson billie jean"</li>
-    </ul>
-  </td>
-  <td>{@link android.provider.MediaStore#INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH MediaStore<br/>.INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH}</td>
-</tr>
-<tr>
-  <td>
-    <p><a href="#CameraStill">Take a picture</a></p>
-    <ul class="now-list">
-      <li>"take a picture"</li>
-    </ul>
-  </td>
-  <td>{@link android.provider.MediaStore#INTENT_ACTION_STILL_IMAGE_CAMERA MediaStore<br/>.INTENT_ACTION_STILL_IMAGE_CAMERA}</td>
-</tr>
-<tr>
-  <td>
-    <p><a href="#CameraVideo">Record a video</a></p>
-    <ul class="now-list">
-      <li>"record a video"</li>
-    </ul>
-  </td>
-  <td>{@link android.provider.MediaStore#INTENT_ACTION_VIDEO_CAMERA MediaStore<br/>.INTENT_ACTION_VIDEO_CAMERA}</td>
-</tr>
-<tr>
-  <td style="vertical-align:middle">Search</td>
-  <td>
-    <p><a href="#SearchOnApp">Search using a specific app</a></p>
-    <ul class="now-list">
-      <li>"search for cat videos <br/>on myvideoapp"</li>
-    </ul>
-  </td>
-  <td><code>"com.google.android.gms.actions<br/>.SEARCH_ACTION"</code></td>
-</tr>
-<tr>
-  <td style="vertical-align:middle">Web browser</td>
-  <td>
-    <p><a href="#ViewUrl">Open URL</a></p>
-    <ul class="now-list">
-      <li>"open example.com"</li>
-    </ul>
-  </td>
-  <td>{@link android.content.Intent#ACTION_VIEW Intent.ACTION_VIEW}</td>
-</tr>
-</table>
