@@ -205,7 +205,7 @@ Intent notifyIntent =
 notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
         Intent.FLAG_ACTIVITY_CLEAR_TASK);
 // Creates the PendingIntent
-PendingIntent notifyIntent =
+PendingIntent pendingIntent =
         PendingIntent.getActivity(
         this,
         0,
@@ -214,7 +214,7 @@ PendingIntent notifyIntent =
 );
 
 // Puts the PendingIntent into the notification builder
-builder.setContentIntent(notifyIntent);
+builder.setContentIntent(pendingIntent);
 // Notifications are issued by sending them to the
 // NotificationManager system service.
 NotificationManager mNotificationManager =
