@@ -85,16 +85,23 @@ Android Support Repository selected.</p>
       <li>Make sure you have downloaded the <strong>Android Support Repository</strong>
         using the <a href="#download">SDK Manager</a>.</li>
       <li>Open the {@code build.gradle} file for your application.</li>
-      <li>Add the support library to the {@code dependencies} section. For example, to add the v4
-        support library, add the following lines:
+      <li>Add the support library to the {@code dependencies} section. For
+        example, to add the v4 core-utils library, add the following lines:
 <pre>
 dependencies {
     ...
-    <b>compile "com.android.support:support-v4:24.1.1"</b>
+    <b>compile "com.android.support:support-core-utils:24.2.0"</b>
 }
 </pre>
       </li>
     </ol>
+
+<p class="caution">
+  <strong>Caution:</strong> Using dynamic dependencies (for example,
+  <code>palette-v7:23.0.+</code>) can cause unexpected version updates and
+  regression incompatibilities. We recommend that you explicitly specify a
+  library version (for example, <code>palette-v7:24.2.0</code>).
+</p>
 
 <h2 id="using-apis">Using Support Library APIs</h2>
 
@@ -141,12 +148,12 @@ dependencies {
 
 <pre>
   &lt;uses-sdk
-      android:minSdkVersion="<b>7</b>"
-      android:targetSdkVersion="17" /&gt;
+      android:minSdkVersion="<b>14</b>"
+      android:targetSdkVersion="23" /&gt;
 </pre>
 
 <p>The manifest setting tells Google Play that your application can be installed on devices with Android
-  2.1 (API level 7) and higher.  </p>
+  4.0 (API level 14) and higher.  </p>
 
 <p>If you are using Gradle build files, the <code>minSdkVersion</code> setting in the build file
   overrides the manifest settings.  </p>
@@ -158,7 +165,7 @@ android {
     ...
 
     defaultConfig {
-        minSdkVersion 8
+        minSdkVersion 16
         ...
     }
     ...
@@ -166,13 +173,15 @@ android {
 </pre>
 
 <p>In this case, the build file setting tells Google Play that the default build variant of your
-  application can be installed on devices with Android 2.2 (API level 8) and higher. For more
+  application can be installed on devices with Android 4.1 (API level 16) and higher. For more
   information about build variants, see
   <a href="{@docRoot}studio/build/index.html">Build System Overview</a>. </p>
 
 <p class="note">
-  <strong>Note:</strong> If you are including the v4 support and v7 appcompat libraries in your
-  application, you should specify a minimum SDK version of <code>"7"</code> (and not
-  <code>"4"</code>). The highest support library level you include in your application determines
-  the lowest API version in which it can operate.
+  <strong>Note:</strong> If you are including several support libraries, the
+  minimum SDK version must be the <em>highest</em> version required by any of
+  the specified libraries. For example, if your app includes both the <a href=
+  "features.html#v14-preference">v14 Preference Support library</a> and the
+  <a href="features.html#v17-leanback">v17 Leanback library</a>, your minimum
+  SDK version must be 17 or higher.
 </p>
