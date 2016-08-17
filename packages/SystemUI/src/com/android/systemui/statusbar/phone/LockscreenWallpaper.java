@@ -38,6 +38,8 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.util.Log;
 
+import com.android.keyguard.KeyguardUpdateMonitor;
+
 import libcore.io.IoUtils;
 
 import java.util.Objects;
@@ -52,6 +54,7 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
     private final PhoneStatusBar mBar;
     private final WallpaperManager mWallpaperManager;
     private final Handler mH;
+    private final KeyguardUpdateMonitor mUpdateMonitor;
 
     private boolean mCached;
     private Bitmap mCache;
@@ -66,6 +69,7 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
         mH = h;
         mWallpaperManager = (WallpaperManager) ctx.getSystemService(Context.WALLPAPER_SERVICE);
         mCurrentUserId = ActivityManager.getCurrentUser();
+        mUpdateMonitor = KeyguardUpdateMonitor.getInstance(ctx);
 
         IWallpaperManager service = IWallpaperManager.Stub.asInterface(
                 ServiceManager.getService(Context.WALLPAPER_SERVICE));
@@ -89,6 +93,7 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
         LoaderResult result = loadBitmap(mCurrentUserId, mSelectedUser);
         if (result.success) {
             mCached = true;
+            mUpdateMonitor.setHasLockscreenWallpaper(result.bitmap != null);
             mCache = result.bitmap;
         }
         return mCache;
@@ -181,6 +186,7 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
                 if (result.success) {
                     mCached = true;
                     mCache = result.bitmap;
+                    mUpdateMonitor.setHasLockscreenWallpaper(result.bitmap != null);
                     mBar.updateMediaMetaData(
                             true /* metaDataChanged */, true /* allowEnterAnimation */);
                 }

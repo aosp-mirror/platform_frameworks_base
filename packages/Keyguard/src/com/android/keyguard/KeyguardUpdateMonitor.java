@@ -178,6 +178,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private boolean mBouncer;
     private boolean mBootCompleted;
     private boolean mUserUnlocked;
+    private boolean mHasLockscreenWallpaper;
 
     // Device provisioning state
     private boolean mDeviceProvisioned;
@@ -1170,6 +1171,30 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 mHandler.sendEmptyMessage(MSG_DEVICE_PROVISIONED);
             }
         }
+    }
+
+    /**
+     * Update the state whether Keyguard currently has a lockscreen wallpaper.
+     *
+     * @param hasLockscreenWallpaper Whether Keyguard has a lockscreen wallpaper.
+     */
+    public void setHasLockscreenWallpaper(boolean hasLockscreenWallpaper) {
+        if (hasLockscreenWallpaper != mHasLockscreenWallpaper) {
+            mHasLockscreenWallpaper = hasLockscreenWallpaper;
+            for (int i = mCallbacks.size() - 1; i >= 0; i--) {
+                KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+                if (cb != null) {
+                    cb.onHasLockscreenWallpaperChanged(hasLockscreenWallpaper);
+                }
+            }
+        }
+    }
+
+    /**
+     * @return Whether Keyguard has a lockscreen wallpaper.
+     */
+    public boolean hasLockscreenWallpaper() {
+        return mHasLockscreenWallpaper;
     }
 
     /**
