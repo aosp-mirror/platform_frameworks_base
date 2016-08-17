@@ -26,11 +26,23 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * Utility class for dispatching MIDI data to a list of {@link android.media.midi.MidiReceiver}s.
  * This class subclasses {@link android.media.midi.MidiReceiver} and dispatches any data it receives
  * to its receiver list. Any receivers that throw an exception upon receiving data will
- * be automatically removed from the receiver list, but no IOException will be returned
- * from the dispatcher's {@link android.media.midi.MidiReceiver#onSend} in that case.
+ * be automatically removed from the receiver list. If a MidiReceiverFailureHandler has been
+ * provided to the MidiDispatcher, it will be notified about the failure, but the exception
+ * itself will be swallowed.
  */
 public final class MidiDispatcher extends MidiReceiver {
 
+    // MidiDispatcher's client and MidiReceiver's owner can be different
+    // classes (e.g. MidiDeviceService is a client, but MidiDeviceServer is
+    // the owner), and errors occuring during sending need to be reported
+    // to the owner rather than to the sender.
+    //
+    // Note that the callbacks will be called on the sender's thread.
+    public interface MidiReceiverFailureHandler {
+        void onReceiverFailure(MidiReceiver receiver, IOException failure);
+    }
+
+    private final MidiReceiverFailureHandler mFailureHandler;
     private final CopyOnWriteArrayList<MidiReceiver> mReceivers
             = new CopyOnWriteArrayList<MidiReceiver>();
 
@@ -45,6 +57,14 @@ public final class MidiDispatcher extends MidiReceiver {
             mReceivers.remove(receiver);
         }
     };
+
+    public MidiDispatcher() {
+        this(null);
+    }
+
+    public MidiDispatcher(MidiReceiverFailureHandler failureHandler) {
+        mFailureHandler = failureHandler;
+    }
 
     /**
      * Returns the number of {@link android.media.midi.MidiReceiver}s this dispatcher contains.
@@ -70,8 +90,13 @@ public final class MidiDispatcher extends MidiReceiver {
             try {
                 receiver.send(msg, offset, count, timestamp);
             } catch (IOException e) {
-                // if the receiver fails we remove the receiver but do not propagate the exception
+                // If the receiver fails we remove the receiver but do not propagate the exception.
+                // Note that this may also happen if the client code stalls, and thus underlying
+                // MidiInputPort.onSend has raised IOException for EAGAIN / EWOULDBLOCK error.
                 mReceivers.remove(receiver);
+                if (mFailureHandler != null) {
+                    mFailureHandler.onReceiverFailure(receiver, e);
+                }
             }
         }
     }
@@ -79,7 +104,15 @@ public final class MidiDispatcher extends MidiReceiver {
     @Override
     public void onFlush() throws IOException {
        for (MidiReceiver receiver : mReceivers) {
-            receiver.flush();
+            try {
+                receiver.flush();
+            } catch (IOException e) {
+                // This is just a special case of 'send' thus handle in the same way.
+                mReceivers.remove(receiver);
+                if (mFailureHandler != null) {
+                    mFailureHandler.onReceiverFailure(receiver, e);
+                }
+            }
        }
     }
 }
