@@ -53,7 +53,7 @@ class CommonClockService : public BnCommonClock,
     void notifyOnTimelineChanged(uint64_t timelineID);
 
   private:
-    CommonClockService(CommonTimeServer& timeServer)
+    explicit CommonClockService(CommonTimeServer& timeServer)
         : mTimeServer(timeServer) { };
 
     virtual void binderDied(const wp<IBinder>& who);

@@ -49,7 +49,7 @@ class CommonTimeConfigService : public BnCommonTimeConfig {
     virtual status_t forceNetworklessMasterMode();
 
   private:
-    CommonTimeConfigService(CommonTimeServer& timeServer)
+    explicit CommonTimeConfigService(CommonTimeServer& timeServer)
         : mTimeServer(timeServer) { }
     CommonTimeServer& mTimeServer;
 
