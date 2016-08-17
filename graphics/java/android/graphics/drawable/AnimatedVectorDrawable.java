@@ -244,10 +244,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
             // to UI thread animation for AVD.
             if (!mAnimatorSet.isRunning() &&
                     ((VectorDrawableAnimatorRT) mAnimatorSet).mPendingAnimationActions.size() > 0) {
-                VectorDrawableAnimatorRT oldAnim = (VectorDrawableAnimatorRT) mAnimatorSet;
-                mAnimatorSet = new VectorDrawableAnimatorUI(this);
-                mAnimatorSet.init(mAnimatorSetFromXml);
-                oldAnim.transferPendingActions(mAnimatorSet);
+                fallbackOntoUI();
             }
         }
         mAnimatorSet.onDraw(canvas);
@@ -490,10 +487,22 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
                 throw new UnsupportedOperationException("Cannot force Animated Vector Drawable to" +
                         " run on UI thread when the animation has started on RenderThread.");
             }
+            fallbackOntoUI();
+        }
+    }
+
+    private void fallbackOntoUI() {
+        if (mAnimatorSet instanceof VectorDrawableAnimatorRT) {
+            VectorDrawableAnimatorRT oldAnim = (VectorDrawableAnimatorRT) mAnimatorSet;
             mAnimatorSet = new VectorDrawableAnimatorUI(this);
             if (mAnimatorSetFromXml != null) {
                 mAnimatorSet.init(mAnimatorSetFromXml);
             }
+            // Transfer the listener from RT animator to UI animator
+            if (oldAnim.mListener != null) {
+                mAnimatorSet.setListener(oldAnim.mListener);
+            }
+            oldAnim.transferPendingActions(mAnimatorSet);
         }
     }
 
