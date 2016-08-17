@@ -26,6 +26,7 @@ import android.net.RouteInfo;
 import android.net.ip.RouterAdvertisementDaemon;
 import android.net.ip.RouterAdvertisementDaemon.RaParams;
 import android.os.INetworkManagementService;
+import android.os.ServiceSpecificException;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.Slog;
@@ -205,7 +206,7 @@ class IPv6TetheringInterfaceServices {
                 final String dnsString = dns.getHostAddress();
                 try {
                     netd.interfaceDelAddress(mIfName, dnsString, RFC7421_IP_PREFIX_LENGTH);
-                } catch (RemoteException e) {
+                } catch (ServiceSpecificException | RemoteException e) {
                     Log.e(TAG, "Failed to remove local dns IP: " + dnsString, e);
                 }
             }
@@ -222,7 +223,7 @@ class IPv6TetheringInterfaceServices {
                 final String dnsString = dns.getHostAddress();
                 try {
                     netd.interfaceAddAddress(mIfName, dnsString, RFC7421_IP_PREFIX_LENGTH);
-                } catch (RemoteException e) {
+                } catch (ServiceSpecificException | RemoteException e) {
                     Log.e(TAG, "Failed to add local dns IP: " + dnsString, e);
                     newDnses.remove(dns);
                 }
@@ -231,7 +232,7 @@ class IPv6TetheringInterfaceServices {
 
         try {
             netd.tetherApplyDnsInterfaces();
-        } catch (RemoteException e) {
+        } catch (ServiceSpecificException | RemoteException e) {
             Log.e(TAG, "Failed to update local DNS caching server");
             if (newDnses != null) newDnses.clear();
         }
