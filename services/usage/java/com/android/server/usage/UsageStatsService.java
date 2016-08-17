@@ -304,9 +304,9 @@ public class UsageStatsService extends SystemService implements
 
         @Override public void onDisplayChanged(int displayId) {
             if (displayId == Display.DEFAULT_DISPLAY) {
+                final boolean displayOn = isDisplayOn();
                 synchronized (UsageStatsService.this.mLock) {
-                    mAppIdleHistory.updateDisplayLocked(isDisplayOn(),
-                            SystemClock.elapsedRealtime());
+                    mAppIdleHistory.updateDisplayLocked(displayOn, SystemClock.elapsedRealtime());
                 }
             }
         }
@@ -1005,9 +1005,9 @@ public class UsageStatsService extends SystemService implements
             service.persistActiveStats();
             mAppIdleHistory.writeAppIdleTimesLocked(mUserState.keyAt(i));
         }
-        // Persist elapsed time periodically, in case screen doesn't get toggled
-        // until the next boot
-        mAppIdleHistory.writeElapsedTimeLocked();
+        // Persist elapsed and screen on time. If this fails for whatever reason, the apps will be
+        // considered not-idle, which is the safest outcome in such an event.
+        mAppIdleHistory.writeAppIdleDurationsLocked();
         mHandler.removeMessages(MSG_FLUSH_TO_DISK);
     }
 
