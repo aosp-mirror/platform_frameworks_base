@@ -379,9 +379,9 @@ public class TextureView extends View {
             if (createNewSurface) {
                 // Create a new SurfaceTexture for the layer.
                 mSurface = new SurfaceTexture(false);
-                mLayer.setSurfaceTexture(mSurface);
                 nCreateNativeWindow(mSurface);
             }
+            mLayer.setSurfaceTexture(mSurface);
             mSurface.setDefaultBufferSize(getWidth(), getHeight());
             mSurface.setOnFrameAvailableListener(mUpdateListener, mAttachInfo.mHandler);
 
