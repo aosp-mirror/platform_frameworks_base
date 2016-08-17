@@ -54,7 +54,7 @@ import java.io.PrintWriter;
 
 public class NavigationBarView extends LinearLayout {
     final static boolean DEBUG = false;
-    final static String TAG = "PhoneStatusBar/NavigationBarView";
+    final static String TAG = "StatusBar/NavBarView";
 
     // slippery nav bar when everything is disabled, e.g. during setup
     final static boolean SLIPPERY_WHEN_DISABLED = true;
@@ -527,8 +527,8 @@ public class NavigationBarView extends LinearLayout {
         updateCurrentView();
     }
 
-    public boolean needsReorient() {
-        return mCurrentRotation != mDisplay.getRotation();
+    public boolean needsReorient(int rotation) {
+        return mCurrentRotation != rotation;
     }
 
     private void updateCurrentView() {
@@ -567,7 +567,7 @@ public class NavigationBarView extends LinearLayout {
         setMenuVisibility(mShowMenu, true /* force */);
 
         if (DEBUG) {
-            Log.d(TAG, "reorient(): rot=" + mDisplay.getRotation());
+            Log.d(TAG, "reorient(): rot=" + mCurrentRotation);
         }
 
         updateTaskSwitchHelper();
