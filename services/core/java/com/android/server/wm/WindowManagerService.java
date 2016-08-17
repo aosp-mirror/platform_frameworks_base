@@ -4890,7 +4890,8 @@ public class WindowManagerService extends IWindowManager.Stub
             if (w.isDrawnLw()) {
                 if (w.mAttrs.type == TYPE_BOOT_PROGRESS) {
                     haveBootMsg = true;
-                } else if (w.mAttrs.type == TYPE_APPLICATION) {
+                } else if (w.mAttrs.type == TYPE_APPLICATION
+                        || w.mAttrs.type == TYPE_DRAWN_APPLICATION) {
                     haveApp = true;
                 } else if (w.mAttrs.type == TYPE_WALLPAPER) {
                     haveWallpaper = true;

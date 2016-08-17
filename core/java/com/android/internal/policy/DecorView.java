@@ -101,6 +101,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATIO
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_DRAWN_APPLICATION;
 import static com.android.internal.policy.PhoneWindow.FEATURE_OPTIONS_PANEL;
 
 /** @hide */
@@ -1860,7 +1861,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         }
         final WindowManager.LayoutParams attrs = mWindow.getAttributes();
         final boolean isApplication = attrs.type == TYPE_BASE_APPLICATION ||
-                attrs.type == TYPE_APPLICATION;
+                attrs.type == TYPE_APPLICATION || attrs.type == TYPE_DRAWN_APPLICATION;
         // Only a non floating application window on one of the allowed workspaces can get a caption
         if (!mWindow.isFloating() && isApplication && StackId.hasWindowDecor(mStackId)) {
             // Dependent on the brightness of the used title we either use the
