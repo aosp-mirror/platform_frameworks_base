@@ -716,6 +716,28 @@ public class TelephonyManager {
             "android.telephony.event.EVENT_HANDOVER_TO_WIFI_FAILED";
 
     /**
+     * {@link android.telecom.Connection} event used to indicate that a video call was downgraded to
+     * audio because the data limit was reached.
+     * <p>
+     * Sent via {@link android.telecom.Connection#sendConnectionEvent(String, Bundle)}.
+     * The {@link Bundle} parameter is expected to be null when this connection event is used.
+     * @hide
+     */
+    public static final String EVENT_DOWNGRADE_DATA_LIMIT_REACHED =
+            "android.telephony.event.EVENT_DOWNGRADE_DATA_LIMIT_REACHED";
+
+    /**
+     * {@link android.telecom.Connection} event used to indicate that a video call was downgraded to
+     * audio because the data was disabled.
+     * <p>
+     * Sent via {@link android.telecom.Connection#sendConnectionEvent(String, Bundle)}.
+     * The {@link Bundle} parameter is expected to be null when this connection event is used.
+     * @hide
+     */
+    public static final String EVENT_DOWNGRADE_DATA_DISABLED =
+            "android.telephony.event.EVENT_DOWNGRADE_DATA_DISABLED";
+
+    /**
      * Response codes for sim activation. Activation completed successfully.
      * @hide
      */
