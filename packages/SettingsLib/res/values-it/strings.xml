@@ -328,7 +328,7 @@
     <string name="disabled_by_admin" msgid="3669999613095206948">"Disattivata dall\'amministratore"</string>
     <string name="home" msgid="3256884684164448244">"Home page Impostazioni"</string>
   <string-array name="battery_labels">
-    <item msgid="8494684293649631252">"0%%"</item>
+    <item msgid="8494684293649631252">"0%"</item>
     <item msgid="8934126114226089439">"50%%"</item>
     <item msgid="1286113608943010849">"100%%"</item>
   </string-array>
