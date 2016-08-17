@@ -87,6 +87,7 @@ import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_DRAWN_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
@@ -1289,7 +1290,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         final boolean isViewVisible = (mAppToken == null || !mAppToken.clientHidden)
                 && (mViewVisibility == View.VISIBLE) && !mWindowRemovalAllowed;
         return (isOnScreenIgnoringKeyguard() && (!visibleOnly || isViewVisible)
-                || mWinAnimator.mAttrType == TYPE_BASE_APPLICATION)
+                || mWinAnimator.mAttrType == TYPE_BASE_APPLICATION
+                || mWinAnimator.mAttrType == TYPE_DRAWN_APPLICATION)
                 && !mAnimatingExit && !mDestroying;
     }
 
@@ -2925,12 +2927,13 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     // for only child windows (as the main window is handled by window preservation)
     // and the big surface.
     //
-    // Though windows of TYPE_APPLICATION (as opposed to TYPE_BASE_APPLICATION)
-    // are not children in the sense of an attached window, we also want to replace
-    // them at such phases, as they won't be covered by window preservation,
-    // and in general we expect them to return following relaunch.
+    // Though windows of TYPE_APPLICATION or TYPE_DRAWN_APPLICATION (as opposed to
+    // TYPE_BASE_APPLICATION) are not children in the sense of an attached window,
+    // we also want to replace them at such phases, as they won't be covered by window
+    // preservation, and in general we expect them to return following relaunch.
     boolean shouldBeReplacedWithChildren() {
-        return isChildWindow() || mAttrs.type == TYPE_APPLICATION;
+        return isChildWindow() || mAttrs.type == TYPE_APPLICATION
+                || mAttrs.type == TYPE_DRAWN_APPLICATION;
     }
 
     public int getRotationAnimationHint() {

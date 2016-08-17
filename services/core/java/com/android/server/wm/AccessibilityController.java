@@ -348,6 +348,7 @@ final class AccessibilityController {
                     }
                     switch (type) {
                         case WindowManager.LayoutParams.TYPE_APPLICATION:
+                        case WindowManager.LayoutParams.TYPE_DRAWN_APPLICATION:
                         case WindowManager.LayoutParams.TYPE_APPLICATION_PANEL:
                         case WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA:
                         case WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL:
