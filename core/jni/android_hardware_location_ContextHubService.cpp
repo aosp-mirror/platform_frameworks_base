@@ -584,7 +584,32 @@ static void passOnOsResponse(uint32_t hubHandle, uint32_t msgType,
     header[HEADER_FIELD_HUB_HANDLE] = hubHandle;
     header[HEADER_FIELD_APP_INSTANCE] = OS_APP_ID;
 
-    msg[0] = rsp->result;
+    // Due to API constraints, at the moment we can't change the fact that
+    // we're changing our 4-byte response to a 1-byte value.  But we can prevent
+    // the possible change in sign (and thus meaning) that would happen from
+    // a naive cast.  Further, we can log when we're losing part of the value.
+    // TODO(b/30918279): Don't truncate this result.
+    int8_t truncatedResult;
+    bool neededToTruncate;
+    if (rsp->result < INT8_MIN) {
+        neededToTruncate = true;
+        truncatedResult = INT8_MIN;
+    } else if (rsp->result > INT8_MAX) {
+        neededToTruncate = true;
+        truncatedResult = INT8_MAX;
+    } else {
+        neededToTruncate = false;
+        // Since this value fits within an int8_t, this is a safe cast which
+        // won't change the value or sign.
+        truncatedResult = static_cast<int8_t>(rsp->result);
+    }
+    if (neededToTruncate) {
+        ALOGW("Response from Context Hub truncated.  Value was %" PRId32
+              ", but giving Java layer %" PRId8,
+              rsp->result, (int)truncatedResult);
+    }
+
+    msg[0] = truncatedResult;
 
     if (additionalData) {
         memcpy(&msg[1], additionalData, additionalDataLen);
