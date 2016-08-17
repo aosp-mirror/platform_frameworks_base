@@ -3289,7 +3289,10 @@ public class AudioManager {
 
     /**
      * Used as a key for {@link #getProperty} to request the native or optimal output sample rate
-     * for this device's primary output stream, in decimal Hz.
+     * for this device's low latency output stream, in decimal Hz.  Latency-sensitive apps
+     * should use this value as a default, and offer the user the option to override it.
+     * The low latency output stream is typically either the device's primary output stream,
+     * or another output stream with smaller buffers.
      */
     // FIXME Deprecate
     public static final String PROPERTY_OUTPUT_SAMPLE_RATE =
@@ -3297,7 +3300,10 @@ public class AudioManager {
 
     /**
      * Used as a key for {@link #getProperty} to request the native or optimal output buffer size
-     * for this device's primary output stream, in decimal PCM frames.
+     * for this device's low latency output stream, in decimal PCM frames.  Latency-sensitive apps
+     * should use this value as a minimum, and offer the user the option to override it.
+     * The low latency output stream is typically either the device's primary output stream,
+     * or another output stream with smaller buffers.
      */
     // FIXME Deprecate
     public static final String PROPERTY_OUTPUT_FRAMES_PER_BUFFER =
