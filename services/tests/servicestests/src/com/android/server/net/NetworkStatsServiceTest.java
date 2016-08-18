@@ -40,7 +40,9 @@ import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static android.text.format.DateUtils.WEEK_IN_MILLIS;
+
 import static com.android.server.net.NetworkStatsService.ACTION_NETWORK_STATS_POLL;
+
 import static org.easymock.EasyMock.anyInt;
 import static org.easymock.EasyMock.anyLong;
 import static org.easymock.EasyMock.anyObject;
@@ -49,12 +51,12 @@ import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
-import static org.easymock.EasyMock.isA;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import android.app.AlarmManager;
-import android.app.IAlarmListener;
-import android.app.IAlarmManager;
-import android.app.PendingIntent;
 import android.app.usage.NetworkStatsManager;
 import android.content.Context;
 import android.content.Intent;
@@ -63,6 +65,7 @@ import android.net.IConnectivityManager;
 import android.net.INetworkManagementEventObserver;
 import android.net.INetworkStatsSession;
 import android.net.LinkProperties;
+import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkState;
@@ -80,11 +83,10 @@ import android.os.MessageQueue;
 import android.os.MessageQueue.IdleHandler;
 import android.os.Message;
 import android.os.PowerManager;
-import android.os.WorkSource;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.runner.AndroidJUnit4;
 import android.telephony.TelephonyManager;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.Suppress;
 import android.util.TrustedTime;
 
 import com.android.internal.net.VpnInfo;
@@ -97,6 +99,10 @@ import libcore.io.IoUtils;
 
 import org.easymock.Capture;
 import org.easymock.EasyMock;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -109,8 +115,8 @@ import java.util.List;
  * TODO: This test is really brittle, largely due to overly-strict use of Easymock.
  * Rewrite w/ Mockito.
  */
-@LargeTest
-public class NetworkStatsServiceTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+public class NetworkStatsServiceTest {
     private static final String TAG = "NetworkStatsServiceTest";
 
     private static final String TEST_IFACE = "test0";
@@ -148,12 +154,12 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
     private INetworkStatsSession mSession;
     private INetworkManagementEventObserver mNetworkObserver;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
-        super.setUp();
+        final Context context = InstrumentationRegistry.getContext();
 
-        mServiceContext = new BroadcastInterceptingContext(getContext());
-        mStatsDir = getContext().getFilesDir();
+        mServiceContext = new BroadcastInterceptingContext(context);
+        mStatsDir = context.getFilesDir();
         if (mStatsDir.exists()) {
             IoUtils.deleteContents(mStatsDir);
         }
@@ -205,7 +211,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
 
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         IoUtils.deleteContents(mStatsDir);
 
@@ -219,10 +225,9 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
 
         mSession.close();
         mService = null;
-
-        super.tearDown();
     }
 
+    @Test
     public void testNetworkStatsWifi() throws Exception {
         // pretend that wifi network comes online; service should ask about full
         // network state, and poll any existing interfaces before updating.
@@ -276,6 +281,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
 
     }
 
+    @Test
     public void testStatsRebootPersist() throws Exception {
         assertStatsFilesExist(false);
 
@@ -366,7 +372,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
     }
 
     // TODO: simulate reboot to test bucket resize
-    @Suppress
+    // @Test
     public void testStatsBucketResize() throws Exception {
         NetworkStatsHistory history = null;
 
@@ -425,6 +431,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
 
     }
 
+    @Test
     public void testUidStatsAcrossNetworks() throws Exception {
         // pretend first mobile network comes online
         expectCurrentTime();
@@ -515,6 +522,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
 
     }
 
+    @Test
     public void testUidRemovedIsMoved() throws Exception {
         // pretend that network comes online
         expectCurrentTime();
@@ -585,6 +593,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
 
     }
 
+    @Test
     public void testUid3g4gCombinedByTemplate() throws Exception {
         // pretend that network comes online
         expectCurrentTime();
@@ -658,6 +667,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         verifyAndReset();
     }
 
+    @Test
     public void testSummaryForAllUid() throws Exception {
         // pretend that network comes online
         expectCurrentTime();
@@ -729,6 +739,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         verifyAndReset();
     }
 
+    @Test
     public void testForegroundBackground() throws Exception {
         // pretend that network comes online
         expectCurrentTime();
@@ -799,6 +810,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         verifyAndReset();
     }
 
+    @Test
     public void testRoaming() throws Exception {
         // pretend that network comes online
         expectCurrentTime();
@@ -846,6 +858,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         verifyAndReset();
     }
 
+    @Test
     public void testTethering() throws Exception {
         // pretend first mobile network comes online
         expectCurrentTime();
@@ -887,6 +900,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
 
     }
 
+    @Test
     public void testRegisterUsageCallback() throws Exception {
         // pretend that wifi network comes online; service should ask about full
         // network state, and poll any existing interfaces before updating.
@@ -1005,6 +1019,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         EasyMock.verify(mockBinder);
     }
 
+    @Test
     public void testUnregisterUsageCallback_unknown_noop() throws Exception {
         String callingPackage = "the.calling.package";
         long thresholdInBytes = 10 * 1024 * 1024;  // 10 MB
@@ -1204,7 +1219,8 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         info.setDetailedState(DetailedState.CONNECTED, null, null);
         final LinkProperties prop = new LinkProperties();
         prop.setInterfaceName(TEST_IFACE);
-        return new NetworkState(info, prop, null, null, null, TEST_SSID);
+        final NetworkCapabilities capabilities = new NetworkCapabilities();
+        return new NetworkState(info, prop, capabilities, null, null, TEST_SSID);
     }
 
     private static NetworkState buildMobile3gState(String subscriberId) {
@@ -1218,7 +1234,8 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         info.setRoaming(isRoaming);
         final LinkProperties prop = new LinkProperties();
         prop.setInterfaceName(TEST_IFACE);
-        return new NetworkState(info, prop, null, null, subscriberId, null);
+        final NetworkCapabilities capabilities = new NetworkCapabilities();
+        return new NetworkState(info, prop, capabilities, null, subscriberId, null);
     }
 
     private static NetworkState buildMobile4gState(String iface) {
@@ -1226,7 +1243,8 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         info.setDetailedState(DetailedState.CONNECTED, null, null);
         final LinkProperties prop = new LinkProperties();
         prop.setInterfaceName(iface);
-        return new NetworkState(info, prop, null, null, null, null);
+        final NetworkCapabilities capabilities = new NetworkCapabilities();
+        return new NetworkState(info, prop, capabilities, null, null, null);
     }
 
     private NetworkStats buildEmptyStats() {
