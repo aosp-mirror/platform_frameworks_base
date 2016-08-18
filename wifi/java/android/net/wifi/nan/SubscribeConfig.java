@@ -38,6 +38,7 @@ import java.util.Arrays;
  * @hide PROPOSED_NAN_API
  */
 public class SubscribeConfig implements Parcelable {
+    /** @hide */
     @IntDef({
             SUBSCRIBE_TYPE_PASSIVE, SUBSCRIBE_TYPE_ACTIVE })
     @Retention(RetentionPolicy.SOURCE)
@@ -45,7 +46,7 @@ public class SubscribeConfig implements Parcelable {
     }
 
     /**
-     * Defines a passive subscribe session - i.e. a subscribe session where
+     * Defines a passive subscribe session - a subscribe session where
      * subscribe packets are not transmitted over-the-air and the device listens
      * and matches to transmitted publish packets. Configuration is done using
      * {@link SubscribeConfig.Builder#setSubscribeType(int)}.
@@ -53,12 +54,13 @@ public class SubscribeConfig implements Parcelable {
     public static final int SUBSCRIBE_TYPE_PASSIVE = 0;
 
     /**
-     * Defines an active subscribe session - i.e. a subscribe session where
+     * Defines an active subscribe session - a subscribe session where
      * subscribe packets are transmitted over-the-air. Configuration is done
      * using {@link SubscribeConfig.Builder#setSubscribeType(int)}.
      */
     public static final int SUBSCRIBE_TYPE_ACTIVE = 1;
 
+    /** @hide */
     @IntDef({
             MATCH_STYLE_FIRST_ONLY, MATCH_STYLE_ALL })
     @Retention(RetentionPolicy.SOURCE)
@@ -67,59 +69,43 @@ public class SubscribeConfig implements Parcelable {
 
     /**
      * Specifies that only the first match of a set of identical matches (same
-     * publish) will be reported to the subscriber.
+     * publish) will be reported to the subscriber. Configuration is done using
+     * {@link SubscribeConfig.Builder#setMatchStyle(int)}.
      */
     public static final int MATCH_STYLE_FIRST_ONLY = 0;
 
     /**
      * Specifies that all matches of a set of identical matches (same publish)
-     * will be reported to the subscriber.
+     * will be reported to the subscriber. Configuration is done using
+     * {@link SubscribeConfig.Builder#setMatchStyle(int)}.
      */
     public static final int MATCH_STYLE_ALL = 1;
 
-    /**
-     * @hide
-     */
+    /** @hide */
     public final byte[] mServiceName;
 
-    /**
-     * @hide
-     */
+    /** @hide */
     public final byte[] mServiceSpecificInfo;
 
-    /**
-     * @hide
-     */
+    /** @hide */
     public final byte[] mTxFilter;
 
-    /**
-     * @hide
-     */
+    /** @hide */
     public final byte[] mRxFilter;
 
-    /**
-     * @hide
-     */
+    /** @hide */
     public final int mSubscribeType;
 
-    /**
-     * @hide
-     */
+    /** @hide */
     public final int mSubscribeCount;
 
-    /**
-     * @hide
-     */
+    /** @hide */
     public final int mTtlSec;
 
-    /**
-     * @hide
-     */
+    /** @hide */
     public final int mMatchStyle;
 
-    /**
-     * @hide
-     */
+    /** @hide */
     public final boolean mEnableTerminateNotification;
 
     private SubscribeConfig(byte[] serviceName, byte[] serviceSpecificInfo, byte[] txFilter,
@@ -226,7 +212,7 @@ public class SubscribeConfig implements Parcelable {
     }
 
     /**
-     * Validates that the contents of the SubscribeConfig are valid. Otherwise
+     * Verifies that the contents of the SubscribeConfig are valid. Otherwise
      * throws an IllegalArgumentException.
      *
      * @hide
@@ -284,13 +270,16 @@ public class SubscribeConfig implements Parcelable {
         /**
          * Specify the service name of the subscribe session. The actual on-air
          * value is a 6 byte hashed representation of this string.
-         *
-         * Per spec: The Service Name is a UTF-8 encoded string from 1 to 255 bytes in length.
+         * <p>
+         * The Service Name is a UTF-8 encoded string from 1 to 255 bytes in length.
          * The only acceptable single-byte UTF-8 symbols for a Service Name are alphanumeric
          * values (A-Z, a-z, 0-9), the hyphen ('-'), and the period ('.'). All valid multi-byte
          * UTF-8 characters are acceptable in a Service Name.
+         * <p>
+         * Must be called - an empty ServiceName is not valid.
          *
          * @param serviceName The service name for the subscribe session.
+         *
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
@@ -303,14 +292,17 @@ public class SubscribeConfig implements Parcelable {
         }
 
         /**
-         * Specify service specific information for the subscribe session. This
-         * is a free-form byte array available to the application to send
+         * Specify service specific information for the subscribe session. This is
+         * a free-form byte array available to the application to send
          * additional information as part of the discovery operation - i.e. it
          * will not be used to determine whether a publish/subscribe match
          * occurs.
+         * <p>
+         *     Optional. Empty by default.
          *
          * @param serviceSpecificInfo A byte-array for the service-specific
          *            information field.
+         *
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
@@ -320,14 +312,16 @@ public class SubscribeConfig implements Parcelable {
         }
 
         /**
-         * Specify service specific information for the subscribe session - same
-         * as
-         * {@link SubscribeConfig.Builder#setServiceSpecificInfo(byte[])}
-         * but obtaining the data from a String.
+         * Specify service specific information for the subscribe session - a simple wrapper
+         * of {@link SubscribeConfig.Builder#setServiceSpecificInfo(byte[])}
+         * obtaining the data from a String.
+         * <p>
+         *     Optional. Empty by default.
          *
          * @param serviceSpecificInfoStr The service specific information string
          *            to be included (as a byte array) in the subscribe
          *            information.
+         *
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
@@ -344,11 +338,16 @@ public class SubscribeConfig implements Parcelable {
          * publishers) to determine whether they match - in addition to just
          * relying on the service name.
          * <p>
-         * Format is an LV byte array - the {@link LvBufferUtils} utility class
-         * is available to form and parse.
+         * Format is an LV byte array: a single byte Length field followed by L bytes (the value of
+         * the Length field) of a value blob.
+         * </p>
+         * <p>
+         *     Optional. Empty by default.
+         * </p>
          *
          * @param txFilter The byte-array containing the LV formatted transmit
          *            filter.
+         *
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
@@ -364,11 +363,14 @@ public class SubscribeConfig implements Parcelable {
          * subscriber to determine whether they match transmitted publish
          * packets - in addition to just relying on the service name.
          * <p>
-         * Format is an LV byte array - the {@link LvBufferUtils} utility class
-         * is available to form and parse.
+         * Format is an LV byte array: a single byte Length field followed by L bytes (the value of
+         * the Length field) of a value blob.
+         * <p>
+         *     Optional. Empty by default.
          *
          * @param rxFilter The byte-array containing the LV formatted receive
          *            filter.
+         *
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
@@ -383,9 +385,10 @@ public class SubscribeConfig implements Parcelable {
          * transmitted, a match is made against a solicited/active publish
          * session whose packets are transmitted over-the-air).
          *
-         * @param subscribeType Subscribe session type: active (
-         *            {@link SubscribeConfig#SUBSCRIBE_TYPE_ACTIVE}) or passive
-         *            ( {@link SubscribeConfig#SUBSCRIBE_TYPE_PASSIVE} ).
+         * @param subscribeType Subscribe session type:
+         *            {@link SubscribeConfig#SUBSCRIBE_TYPE_ACTIVE} or
+         *            {@link SubscribeConfig#SUBSCRIBE_TYPE_PASSIVE}.
+         *
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
@@ -399,13 +402,16 @@ public class SubscribeConfig implements Parcelable {
 
         /**
          * Sets the number of times an active (
-         * {@link SubscribeConfig.Builder#setSubscribeType(int)}) subscribe
-         * session will transmit a packet. When the count is reached an event
-         * will be generated for
-         * {@link WifiNanSessionCallback#onSessionTerminated(int)} with reason=
-         * {@link WifiNanSessionCallback#TERMINATE_REASON_DONE}.
+         * {@link SubscribeConfig.Builder#setSubscribeType(int)}) subscribe session
+         * will broadcast. When the count is reached an event will be
+         * generated for {@link WifiNanSessionCallback#onSessionTerminated(int)}
+         * with {@link WifiNanSessionCallback#TERMINATE_REASON_DONE}.
+         * <p>
+         *     Optional. 0 by default - indicating the session doesn't terminate on its own.
+         *     Session will be terminated when {@link WifiNanSession#terminate()} is called.
          *
-         * @param subscribeCount Number of subscribe packets to transmit.
+         * @param subscribeCount Number of subscribe packets to broadcast.
+         *
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
@@ -419,13 +425,17 @@ public class SubscribeConfig implements Parcelable {
 
         /**
          * Sets the time interval (in seconds) an active (
-         * {@link SubscribeConfig.Builder#setSubscribeType(int)}) subscribe
-         * session will be alive - i.e. transmitting a packet. When the TTL is
-         * reached an event will be generated for
-         * {@link WifiNanSessionCallback#onSessionTerminated(int)} with reason=
+         * {@link SubscribeConfig.Builder#setSubscribeType(int)}) subscribe session
+         * will be alive - i.e. broadcasting a packet. When the TTL is reached
+         * an event will be generated for
+         * {@link WifiNanSessionCallback#onSessionTerminated(int)} with
          * {@link WifiNanSessionCallback#TERMINATE_REASON_DONE}.
+         * <p>
+         *     Optional. 0 by default - indicating the session doesn't terminate on its own.
+         *     Session will be terminated when {@link WifiNanSession#terminate()} is called.
          *
          * @param ttlSec Lifetime of a subscribe session in seconds.
+         *
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
@@ -444,7 +454,7 @@ public class SubscribeConfig implements Parcelable {
          * {@link WifiNanSessionCallback#onMatch(int, byte[], byte[])}
          * ). The options are: only report the first match and ignore the rest
          * {@link SubscribeConfig#MATCH_STYLE_FIRST_ONLY} or report every single
-         * match {@link SubscribeConfig#MATCH_STYLE_ALL}.
+         * match {@link SubscribeConfig#MATCH_STYLE_ALL} (the default).
          *
          * @param matchStyle The reporting style for the discovery match.
          * @return The builder to facilitate chaining
@@ -466,6 +476,7 @@ public class SubscribeConfig implements Parcelable {
          *
          * @param enable If true the terminate callback will be called when the
          *            subscribe is terminated. Otherwise it will not be called.
+         *
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
