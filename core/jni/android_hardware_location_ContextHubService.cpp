@@ -386,23 +386,29 @@ static int add_app_instance(const hub_app_info *appInfo, uint32_t hubHandle,
 }
 
 int delete_app_instance(int id, JNIEnv *env) {
-    if (!db.appInstances.count(id)) {
-        ALOGW("Cannot find App id : %d", id);
-        return -1;
-    }
+    bool fullyDeleted = true;
 
+    if (db.appInstances.count(id)) {
+        db.appInstances.erase(id);
+    } else {
+        ALOGW("Cannot delete App id (%d) from the JNI C++ cache", id);
+        fullyDeleted = false;
+    }
     return_id(id);
-    db.appInstances.erase(id);
-    if (env->CallIntMethod(db.jniInfo.jContextHubService,
+
+    if ((env == nullptr) ||
+        (env->CallIntMethod(db.jniInfo.jContextHubService,
                        db.jniInfo.contextHubServiceDeleteAppInstance,
-                       id) != 0) {
-        ALOGW("Could not delete App id : %d", id);
-        return -1;
+                       id) != 0)) {
+        ALOGW("Cannot delete App id (%d) from Java cache", id);
+        fullyDeleted = false;
     }
 
-    ALOGI("Deleted App id : %d", id);
-
-    return 0;
+    if (fullyDeleted) {
+        ALOGI("Deleted App id : %d", id);
+        return 0;
+    }
+    return -1;
 }
 
 static int startLoadAppTxn(uint64_t appId, int hubHandle) {
@@ -613,7 +619,14 @@ void closeUnloadTxn(bool success) {
 
     if (success && fetchTxnData(&txnId, &txnData) == 0 &&
         txnId == CONTEXT_HUB_UNLOAD_APP) {
-        db.appInstances.erase(*(uint32_t *)txnData);
+        JNIEnv *env;
+        if ((db.jniInfo.vm)->AttachCurrentThread(&env, nullptr) != JNI_OK) {
+            ALOGW("Could not attach to JVM !");
+            env = nullptr;
+        }
+        // TODO(b/30806218): Stop treating 'int' and uint32_t as the same type.
+        int handle = *(uint32_t *)txnData;
+        delete_app_instance(handle, env);
     } else {
         ALOGW("Could not unload the app successfully ! success %d, txnData %p", success, txnData);
     }
@@ -668,6 +681,7 @@ static void invalidateNanoApps(uint32_t hubHandle) {
 
     if ((db.jniInfo.vm)->AttachCurrentThread(&env, nullptr) != JNI_OK) {
         ALOGW("Could not attach to JVM !");
+        env = nullptr;
     }
 
     auto end = db.appInstances.end();
