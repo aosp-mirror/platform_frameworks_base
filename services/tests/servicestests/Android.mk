@@ -17,7 +17,6 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     services.devicepolicy \
     services.net \
     services.usage \
-    easymocklib \
     guava \
     android-support-test \
     mockito-target \
