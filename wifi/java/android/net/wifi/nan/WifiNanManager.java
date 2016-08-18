@@ -254,7 +254,7 @@ public class WifiNanManager {
         try {
             mService.enableUsage();
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -269,7 +269,7 @@ public class WifiNanManager {
         try {
             mService.disableUsage();
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -283,10 +283,8 @@ public class WifiNanManager {
         try {
             return mService.isUsageEnabled();
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            throw e.rethrowFromSystemServer();
         }
-
-        return false;
     }
 
     /**
@@ -329,7 +327,7 @@ public class WifiNanManager {
             } catch (RemoteException e) {
                 mClientId = INVALID_CLIENT_ID;
                 mLooper = null;
-                e.rethrowFromSystemServer();
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -364,7 +362,7 @@ public class WifiNanManager {
         try {
             mService.disconnect(clientId, binder);
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -407,7 +405,7 @@ public class WifiNanManager {
             mService.publish(clientId, publishConfig,
                     new WifiNanSessionCallbackProxy(this, looper, true, callback));
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -429,7 +427,7 @@ public class WifiNanManager {
         try {
             mService.updatePublish(clientId, sessionId, publishConfig);
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -469,7 +467,7 @@ public class WifiNanManager {
             mService.subscribe(clientId, subscribeConfig,
                     new WifiNanSessionCallbackProxy(this, looper, false, callback));
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -495,7 +493,7 @@ public class WifiNanManager {
         try {
             mService.updateSubscribe(clientId, sessionId, subscribeConfig);
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -519,7 +517,7 @@ public class WifiNanManager {
         try {
             mService.terminateSession(clientId, sessionId);
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -546,7 +544,7 @@ public class WifiNanManager {
         try {
             mService.sendMessage(clientId, sessionId, peerId, message, messageId, retryCount);
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -575,7 +573,7 @@ public class WifiNanManager {
             rangingKey = mService.startRanging(clientId, sessionId,
                     new RttManager.ParcelableRttParams(params));
         } catch (RemoteException e) {
-            e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
 
         synchronized (mLock) {
