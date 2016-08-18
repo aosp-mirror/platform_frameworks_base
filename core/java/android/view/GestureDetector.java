@@ -583,10 +583,11 @@ public class GestureDetector {
 
             if (mIsLongpressEnabled) {
                 mHandler.removeMessages(LONG_PRESS);
-                mHandler.sendEmptyMessageAtTime(LONG_PRESS, mCurrentDownEvent.getDownTime()
-                        + TAP_TIMEOUT + LONGPRESS_TIMEOUT);
+                mHandler.sendEmptyMessageAtTime(LONG_PRESS,
+                        mCurrentDownEvent.getDownTime() + LONGPRESS_TIMEOUT);
             }
-            mHandler.sendEmptyMessageAtTime(SHOW_PRESS, mCurrentDownEvent.getDownTime() + TAP_TIMEOUT);
+            mHandler.sendEmptyMessageAtTime(SHOW_PRESS,
+                    mCurrentDownEvent.getDownTime() + TAP_TIMEOUT);
             handled |= mListener.onDown(ev);
             break;
 
