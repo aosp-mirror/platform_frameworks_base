@@ -1252,7 +1252,7 @@ redirects:
 - from: /preview/samples.html
   to: /about/versions/nougat/android-7.0-samples.html
 - from: /preview/guide.html
-  to: /about/versions/nougat/android-7.0-testing.html
+  to: /about/versions/nougat/index.html
 - from: /preview/api-overview.html
   to: /about/versions/nougat/android-7.0.html
 - from: /preview/index.html
