@@ -559,6 +559,15 @@ public class Process {
             ZygoteState zygoteState, ArrayList<String> args)
             throws ZygoteStartFailedEx {
         try {
+            // Throw early if any of the arguments are malformed. This means we can
+            // avoid writing a partial response to the zygote.
+            int sz = args.size();
+            for (int i = 0; i < sz; i++) {
+                if (args.get(i).indexOf('\n') >= 0) {
+                    throw new ZygoteStartFailedEx("embedded newlines not allowed");
+                }
+            }
+
             /**
              * See com.android.internal.os.ZygoteInit.readArgumentList()
              * Presently the wire format to the zygote process is:
@@ -575,13 +584,8 @@ public class Process {
             writer.write(Integer.toString(args.size()));
             writer.newLine();
 
-            int sz = args.size();
             for (int i = 0; i < sz; i++) {
                 String arg = args.get(i);
-                if (arg.indexOf('\n') >= 0) {
-                    throw new ZygoteStartFailedEx(
-                            "embedded newlines not allowed");
-                }
                 writer.write(arg);
                 writer.newLine();
             }
@@ -590,11 +594,16 @@ public class Process {
 
             // Should there be a timeout on this?
             ProcessStartResult result = new ProcessStartResult();
+
+            // Always read the entire result from the input stream to avoid leaving
+            // bytes in the stream for future process starts to accidentally stumble
+            // upon.
             result.pid = inputStream.readInt();
+            result.usingWrapper = inputStream.readBoolean();
+
             if (result.pid < 0) {
                 throw new ZygoteStartFailedEx("fork() failed");
             }
-            result.usingWrapper = inputStream.readBoolean();
             return result;
         } catch (IOException ex) {
             zygoteState.close();
