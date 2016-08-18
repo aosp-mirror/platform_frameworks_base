@@ -151,6 +151,8 @@ redirects:
   to: /google/play/billing/index.html
 - from: /guide/developing/tools/proguard.html
   to: /studio/build/shrink-code.html
+- from: /guide/developing/tools/aidl.html
+  to: /guide/components/aidl.html
 - from: /guide/developing/tools/...
   to: /studio/command-line/
 - from: /guide/developing/...
