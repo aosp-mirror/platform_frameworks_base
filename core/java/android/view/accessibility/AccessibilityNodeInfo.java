@@ -35,6 +35,7 @@ import com.android.internal.R;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * This class represents a node of the window content as well as actions that
@@ -552,6 +553,8 @@ public class AccessibilityNodeInfo implements Parcelable {
      * hierarchy and is only reported via the accessibility APIs.
      */
     private static final int VIRTUAL_DESCENDANT_ID_SHIFT = 32;
+
+    private static final AtomicInteger sNumInstancesInUse = new AtomicInteger();
 
     /**
      * Gets the accessibility view id which identifies a View in the view three.
@@ -2688,6 +2691,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public static AccessibilityNodeInfo obtain() {
         AccessibilityNodeInfo info = sPool.acquire();
+        sNumInstancesInUse.incrementAndGet();
         return (info != null) ? info : new AccessibilityNodeInfo();
     }
 
@@ -2715,6 +2719,16 @@ public class AccessibilityNodeInfo implements Parcelable {
     public void recycle() {
         clear();
         sPool.release(this);
+        sNumInstancesInUse.decrementAndGet();
+    }
+
+    /**
+     * @return The number of instances of this class that have been obtained but not recycled.
+     *
+     * @hide
+     */
+    public static int getNumInstancesInUse() {
+        return sNumInstancesInUse.get();
     }
 
     /**
