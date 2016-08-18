@@ -69,10 +69,7 @@ public class PublishConfig implements Parcelable {
     public final byte[] mServiceSpecificInfo;
 
     /** @hide */
-    public final byte[] mTxFilter;
-
-    /** @hide */
-    public final byte[] mRxFilter;
+    public final byte[] mMatchFilter;
 
     /** @hide */
     public final int mPublishType;
@@ -86,13 +83,11 @@ public class PublishConfig implements Parcelable {
     /** @hide */
     public final boolean mEnableTerminateNotification;
 
-    private PublishConfig(byte[] serviceName, byte[] serviceSpecificInfo,
-            byte[] txFilter, byte[] rxFilter, int publishType, int publichCount, int ttlSec,
-            boolean enableTerminateNotification) {
+    private PublishConfig(byte[] serviceName, byte[] serviceSpecificInfo, byte[] matchFilter,
+            int publishType, int publichCount, int ttlSec, boolean enableTerminateNotification) {
         mServiceName = serviceName;
         mServiceSpecificInfo = serviceSpecificInfo;
-        mTxFilter = txFilter;
-        mRxFilter = rxFilter;
+        mMatchFilter = matchFilter;
         mPublishType = publishType;
         mPublishCount = publichCount;
         mTtlSec = ttlSec;
@@ -103,8 +98,7 @@ public class PublishConfig implements Parcelable {
     public String toString() {
         return "PublishConfig [mServiceName='" + mServiceName + ", mServiceSpecificInfo='" + (
                 (mServiceSpecificInfo == null) ? "null" : HexEncoding.encode(mServiceSpecificInfo))
-                + ", mTxFilter=" + (new LvBufferUtils.LvIterable(1, mTxFilter)).toString()
-                + ", mRxFilter=" + (new LvBufferUtils.LvIterable(1, mRxFilter)).toString()
+                + ", mTxFilter=" + (new LvBufferUtils.LvIterable(1, mMatchFilter)).toString()
                 + ", mPublishType=" + mPublishType + ", mPublishCount=" + mPublishCount
                 + ", mTtlSec=" + mTtlSec + ", mEnableTerminateNotification="
                 + mEnableTerminateNotification + "]";
@@ -119,8 +113,7 @@ public class PublishConfig implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeByteArray(mServiceName);
         dest.writeByteArray(mServiceSpecificInfo);
-        dest.writeByteArray(mTxFilter);
-        dest.writeByteArray(mRxFilter);
+        dest.writeByteArray(mMatchFilter);
         dest.writeInt(mPublishType);
         dest.writeInt(mPublishCount);
         dest.writeInt(mTtlSec);
@@ -137,15 +130,14 @@ public class PublishConfig implements Parcelable {
         public PublishConfig createFromParcel(Parcel in) {
             byte[] serviceName = in.createByteArray();
             byte[] ssi = in.createByteArray();
-            byte[] txFilter = in.createByteArray();
-            byte[] rxFilter = in.createByteArray();
+            byte[] matchFilter = in.createByteArray();
             int publishType = in.readInt();
             int publishCount = in.readInt();
             int ttlSec = in.readInt();
             boolean enableTerminateNotification = in.readInt() != 0;
 
-            return new PublishConfig(serviceName, ssi, txFilter, rxFilter, publishType,
-                    publishCount, ttlSec, enableTerminateNotification);
+            return new PublishConfig(serviceName, ssi, matchFilter, publishType, publishCount,
+                    ttlSec, enableTerminateNotification);
         }
     };
 
@@ -162,9 +154,9 @@ public class PublishConfig implements Parcelable {
         PublishConfig lhs = (PublishConfig) o;
 
         return Arrays.equals(mServiceName, lhs.mServiceName) && Arrays.equals(mServiceSpecificInfo,
-                lhs.mServiceSpecificInfo) && Arrays.equals(mTxFilter, lhs.mTxFilter)
-                && Arrays.equals(mRxFilter, lhs.mRxFilter) && mPublishType == lhs.mPublishType
-                && mPublishCount == lhs.mPublishCount && mTtlSec == lhs.mTtlSec
+                lhs.mServiceSpecificInfo) && Arrays.equals(mMatchFilter, lhs.mMatchFilter)
+                && mPublishType == lhs.mPublishType && mPublishCount == lhs.mPublishCount
+                && mTtlSec == lhs.mTtlSec
                 && mEnableTerminateNotification == lhs.mEnableTerminateNotification;
     }
 
@@ -174,8 +166,7 @@ public class PublishConfig implements Parcelable {
 
         result = 31 * result + Arrays.hashCode(mServiceName);
         result = 31 * result + Arrays.hashCode(mServiceSpecificInfo);
-        result = 31 * result + Arrays.hashCode(mTxFilter);
-        result = 31 * result + Arrays.hashCode(mRxFilter);
+        result = 31 * result + Arrays.hashCode(mMatchFilter);
         result = 31 * result + mPublishType;
         result = 31 * result + mPublishCount;
         result = 31 * result + mTtlSec;
@@ -193,13 +184,9 @@ public class PublishConfig implements Parcelable {
     public void validate() throws IllegalArgumentException {
         WifiNanUtils.validateServiceName(mServiceName);
 
-        if (!LvBufferUtils.isValid(mTxFilter, 1)) {
+        if (!LvBufferUtils.isValid(mMatchFilter, 1)) {
             throw new IllegalArgumentException(
                     "Invalid txFilter configuration - LV fields do not match up to length");
-        }
-        if (!LvBufferUtils.isValid(mRxFilter, 1)) {
-            throw new IllegalArgumentException(
-                    "Invalid rxFilter configuration - LV fields do not match up to length");
         }
         if (mPublishType < PUBLISH_TYPE_UNSOLICITED || mPublishType > PUBLISH_TYPE_SOLICITED) {
             throw new IllegalArgumentException("Invalid publishType - " + mPublishType);
@@ -210,16 +197,6 @@ public class PublishConfig implements Parcelable {
         if (mTtlSec < 0) {
             throw new IllegalArgumentException("Invalid ttlSec - must be non-negative");
         }
-        if (mPublishType == PublishConfig.PUBLISH_TYPE_UNSOLICITED && mRxFilter != null
-                && mRxFilter.length != 0) {
-            throw new IllegalArgumentException("Invalid publish config: UNSOLICITED "
-                    + "publishes (active) can't have an Rx filter");
-        }
-        if (mPublishType == PublishConfig.PUBLISH_TYPE_SOLICITED && mTxFilter != null
-                && mTxFilter.length != 0) {
-            throw new IllegalArgumentException("Invalid publish config: SOLICITED "
-                    + "publishes (passive) can't have a Tx filter");
-        }
     }
 
     /**
@@ -228,8 +205,7 @@ public class PublishConfig implements Parcelable {
     public static final class Builder {
         private byte[] mServiceName;
         private byte[] mServiceSpecificInfo;
-        private byte[] mTxFilter;
-        private byte[] mRxFilter;
+        private byte[] mMatchFilter;
         private int mPublishType = PUBLISH_TYPE_UNSOLICITED;
         private int mPublishCount = 0;
         private int mTtlSec = 0;
@@ -299,47 +275,21 @@ public class PublishConfig implements Parcelable {
         }
 
         /**
-         * Specify the transmit filter for an active publish session
-         * {@link PublishConfig.Builder#setPublishType(int)} and
-         * {@link PublishConfig#PUBLISH_TYPE_UNSOLICITED}. Used to determine discovery - both
-         * Service Name and filters have to match for discovery to be triggered.
-         * <p>
-         * Format is an LV byte array: a single byte Length field followed by L bytes (the value of
-         * the Length field) of a value blob.
-         * </p>
-         * <p>
-         *     Optional. Empty by default.
-         * </p>
-         *
-         * @param txFilter The byte-array containing the LV formatted transmit filter.
-         *
-         * @return The builder to facilitate chaining
-         *         {@code builder.setXXX(..).setXXX(..)}.
-         */
-        public Builder setTxFilter(@Nullable byte[] txFilter) {
-            mTxFilter = txFilter;
-            return this;
-        }
-
-        /**
-         * Specify the receive filter for a passive publish session
-         * {@link PublishConfig.Builder#setPublishType(int)} and
-         * {@link PublishConfig#PUBLISH_TYPE_SOLICITED}. Used to determine discovery - both
-         * Service Name and filters have to match for discovery to be triggered.
+         * The match filter for a publish session. Used to determine whether a service
+         * discovery occurred - in addition to relying on the service name.
          * <p>
          * Format is an LV byte array: a single byte Length field followed by L bytes (the value of
          * the Length field) of a value blob.
          * <p>
          *     Optional. Empty by default.
          *
-         * @param rxFilter The byte-array containing the LV formatted receive
-         *            filter.
+         * @param matchFilter The byte-array containing the LV formatted match filter.
          *
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
-        public Builder setRxFilter(@Nullable byte[] rxFilter) {
-            mRxFilter = rxFilter;
+        public Builder setMatchFilter(@Nullable byte[] matchFilter) {
+            mMatchFilter = matchFilter;
             return this;
         }
 
@@ -434,8 +384,8 @@ public class PublishConfig implements Parcelable {
          * builder.
          */
         public PublishConfig build() {
-            return new PublishConfig(mServiceName, mServiceSpecificInfo, mTxFilter, mRxFilter,
-                    mPublishType, mPublishCount, mTtlSec, mEnableTerminateNotification);
+            return new PublishConfig(mServiceName, mServiceSpecificInfo, mMatchFilter, mPublishType,
+                    mPublishCount, mTtlSec, mEnableTerminateNotification);
         }
     }
 }
