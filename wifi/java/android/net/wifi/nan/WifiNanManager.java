@@ -52,17 +52,67 @@ import java.lang.ref.WeakReference;
 import java.util.Arrays;
 
 /**
- * This class provides the primary API for managing Wi-Fi NAN operation:
- * including discovery and data-links. Get an instance of this class by calling
+ * This class provides the primary API for managing Wi-Fi NAN operations:
+ * discovery and peer-to-peer data connections. Get an instance of this class by calling
  * {@link android.content.Context#getSystemService(String)
  * Context.getSystemService(Context.WIFI_NAN_SERVICE)}.
  * <p>
  * The class provides access to:
  * <ul>
- * <li>Configure a NAN connection and register for events.
- * <li>Create publish and subscribe sessions.
- * <li>Create NAN network specifier to be used to create a NAN network.
+ * <li>Initialize a NAN cluster (peer-to-peer synchronization). Refer to
+ * {@link #connect(Looper, WifiNanEventCallback)}.
+ * <li>Create discovery sessions (publish or subscribe sessions).
+ * Refer to {@link #publish(PublishConfig, WifiNanSessionCallback)} and
+ * {@link #subscribe(SubscribeConfig, WifiNanSessionCallback)}.
+ * <li>Create a NAN network specifier to be used with
+ * {@link ConnectivityManager#requestNetwork(NetworkRequest, ConnectivityManager.NetworkCallback)}
+ * to set-up a NAN connection with a peer. Refer to
+ * {@link WifiNanSession#createNetworkSpecifier(int, int, byte[])} and
+ * {@link #createNetworkSpecifier(int, byte[], byte[])}.
  * </ul>
+ * <p>
+ *     NAN may not be usable when Wi-Fi is disabled (and other conditions). To validate that
+ *     the functionality is available use the {@link #isUsageEnabled()} function. To track
+ *     changes in NAN usability register for the {@link #WIFI_NAN_STATE_CHANGED_ACTION} broadcast.
+ *     Note that this broadcast is not sticky - you should register for it and then check the
+ *     above API to avoid a race condition.
+ * <p>
+ *     An application must use {@link #connect(Looper, WifiNanEventCallback)} to initialize a NAN
+ *     cluster - before making any other NAN operation. NAN cluster membership is a device-wide
+ *     operation - the API guarantees that the device is in a cluster or joins a NAN cluster (or
+ *     starts one if none can be found). Information about connection success (or failure) are
+ *     returned in callbacks of {@link WifiNanEventCallback}. Proceed with NAN discovery or
+ *     connection setup only after receiving confirmation that NAN connection succeeded -
+ *     {@link WifiNanEventCallback#onConnectSuccess()}.
+ *     When an application is finished using NAN it <b>must</b> use the {@link #disconnect()} API
+ *     to indicate to the NAN service that the device may disconnect from the NAN cluster. The
+ *     device will actually disconnect from the NAN cluster once the last application disconnects.
+ * <p>
+ *     Once a NAN connection is confirmed use the
+ *     {@link #publish(PublishConfig, WifiNanSessionCallback)} or
+ *     {@link #subscribe(SubscribeConfig, WifiNanSessionCallback)} to create publish or subscribe
+ *     NAN discovery sessions. Events are called on the provided callback object
+ *     {@link WifiNanSessionCallback}. Specifically, the
+ *     {@link WifiNanSessionCallback#onPublishStarted(WifiNanPublishSession)} and
+ *     {@link WifiNanSessionCallback#onSubscribeStarted(WifiNanSubscribeSession)} return
+ *     {@link WifiNanPublishSession} and {@link WifiNanSubscribeSession} objects respectively on
+ *     which additional session operations can be performed, e.g. updating the session
+ *     {@link WifiNanPublishSession#updatePublish(PublishConfig)} and
+ *     {@link WifiNanSubscribeSession#updateSubscribe(SubscribeConfig)}. Sessions can also be
+ *     used to send messages using the {@link WifiNanSession#sendMessage(int, byte[], int)} APIs.
+ *     When an application is finished with a discovery session it <b>must</b> terminate it using
+ *     the {@link WifiNanSession#terminate()} API.
+ * <p>
+ *    Creating connections between NAN devices is managed by the standard
+ *    {@link ConnectivityManager#requestNetwork(NetworkRequest, ConnectivityManager.NetworkCallback)}.
+ *    The {@link NetworkRequest} object should be constructed with:
+ *    <ul>
+ *        <li>{@link NetworkRequest.Builder#addTransportType(int)} of
+ *        {@link android.net.NetworkCapabilities#TRANSPORT_WIFI_NAN}.
+ *        <li>{@link NetworkRequest.Builder#setNetworkSpecifier(String)} using
+ *        {@link #createNetworkSpecifier(int, byte[], byte[])} or
+ *        {@link WifiNanSession#createNetworkSpecifier(int, int, byte[])}.
+ *    </ul>
  *
  * @hide PROPOSED_NAN_API
  */
@@ -126,52 +176,37 @@ public class WifiNanManager {
      */
     public static final int NETWORK_SPECIFIER_TYPE_2D = 7;
 
-    /**
-     * @hide
-     */
+    /** @hide */
     public static final int NETWORK_SPECIFIER_TYPE_MAX_VALID = NETWORK_SPECIFIER_TYPE_2D;
 
-    /**
-     * @hide
-     */
-
+    /** @hide */
     public static final String NETWORK_SPECIFIER_KEY_TYPE = "type";
 
-    /**
-     * @hide
-     */
-
+    /** @hide */
     public static final String NETWORK_SPECIFIER_KEY_ROLE = "role";
 
-    /**
-     * @hide
-     */
-
+    /** @hide */
     public static final String NETWORK_SPECIFIER_KEY_CLIENT_ID = "client_id";
-    /**
-     * @hide
-     */
+
+    /** @hide */
     public static final String NETWORK_SPECIFIER_KEY_SESSION_ID = "session_id";
 
-    /**
-     * @hide
-     */
+    /** @hide */
     public static final String NETWORK_SPECIFIER_KEY_PEER_ID = "peer_id";
 
-    /**
-     * @hide
-     */
+    /** @hide */
     public static final String NETWORK_SPECIFIER_KEY_PEER_MAC = "peer_mac";
 
-    /**
-     * @hide
-     */
+    /** @hide */
     public static final String NETWORK_SPECIFIER_KEY_TOKEN = "token";
 
     /**
      * Broadcast intent action to indicate whether Wi-Fi NAN is enabled or
      * disabled. An extra {@link #EXTRA_WIFI_STATE} provides the state
-     * information as int.
+     * information as int using {@link #WIFI_NAN_STATE_DISABLED} and
+     * {@link #WIFI_NAN_STATE_ENABLED} constants. This broadcast is <b>not</b> sticky,
+     * use the {@link #isUsageEnabled()} API after registering the broadcast to check the current
+     * state of Wi-Fi NAN.
      *
      * @see #EXTRA_WIFI_STATE
      */
@@ -179,7 +214,7 @@ public class WifiNanManager {
     public static final String WIFI_NAN_STATE_CHANGED_ACTION = "android.net.wifi.nan.STATE_CHANGED";
 
     /**
-     * The lookup key for an int that indicates whether Wi-Fi NAN is enabled or
+     * The lookup key for an int value indicating whether Wi-Fi NAN is enabled or
      * disabled. Retrieve it with
      * {@link android.content.Intent#getIntExtra(String,int)}.
      *
@@ -202,6 +237,7 @@ public class WifiNanManager {
      */
     public static final int WIFI_NAN_STATE_ENABLED = 2;
 
+    /** @hide */
     @IntDef({
             WIFI_NAN_DATA_PATH_ROLE_INITIATOR, WIFI_NAN_DATA_PATH_ROLE_RESPONDER})
     @Retention(RetentionPolicy.SOURCE)
@@ -209,18 +245,21 @@ public class WifiNanManager {
     }
 
     /**
-     * Data-path creation role is that of INITIATOR. Used in
-     * {@link #createNetworkSpecifier(int, byte[], byte[])} and
-     * {@link WifiNanSession#createNetworkSpecifier(int, int, byte[])}.
+     * Connection creation role is that of INITIATOR. Used to create a network specifier string
+     * when requesting a NAN network.
+     *
+     * @see WifiNanSession#createNetworkSpecifier(int, int, byte[])
+     * @see #createNetworkSpecifier(int, byte[], byte[])
      */
     public static final int WIFI_NAN_DATA_PATH_ROLE_INITIATOR = 0;
 
     /**
-     * Data-path creation role is that of RESPONDER. Used in
-     * {@link #createNetworkSpecifier(int, byte[], byte[])} and
-     * {@link WifiNanSession#createNetworkSpecifier(int, int, byte[])}.
+     * Connection creation role is that of RESPONDER. Used to create a network specifier string
+     * when requesting a NAN network.
+     *
+     * @see WifiNanSession#createNetworkSpecifier(int, int, byte[])
+     * @see #createNetworkSpecifier(int, byte[], byte[])
      */
-
     public static final int WIFI_NAN_DATA_PATH_ROLE_RESPONDER = 1;
 
     private final Context mContext;
@@ -241,9 +280,7 @@ public class WifiNanManager {
     @GuardedBy("mLock")
     private SparseArray<RttManager.RttListener> mRangingListeners = new SparseArray<>();
 
-    /**
-     * {@hide}
-     */
+    /** @hide */
     public WifiNanManager(Context context, IWifiNanManager service) {
         mContext = context;
         mService = service;
@@ -254,7 +291,7 @@ public class WifiNanManager {
      * happens when a connection is made. {@link #WIFI_NAN_STATE_CHANGED_ACTION} broadcast will be
      * triggered.
      *
-     * @hide PROPOSED_NAN_SYSTEM_API
+     * @hide
      */
     public void enableUsage() {
         try {
@@ -269,7 +306,7 @@ public class WifiNanManager {
      * connections and sessions will be terminated. {@link #WIFI_NAN_STATE_CHANGED_ACTION} broadcast
      * will be triggered.
      *
-     * @hide PROPOSED_NAN_SYSTEM_API
+     * @hide
      */
     public void disableUsage() {
         try {
@@ -280,7 +317,8 @@ public class WifiNanManager {
     }
 
     /**
-     * Returns the current status of NAN API: whether or not usage is enabled.
+     * Returns the current status of NAN API: whether or not usage is enabled. To track changes
+     * in the state of NAN API register for the {@link #WIFI_NAN_STATE_CHANGED_ACTION} broadcast.
      *
      * @return A boolean indicating whether the app can use the NAN API (true)
      *         or not (false).
@@ -296,8 +334,15 @@ public class WifiNanManager {
     }
 
     /**
-     * Connect to the Wi-Fi NAN service - enabling the application to execute
-     * {@link WifiNanManager} APIs.
+     * Connect to the Wi-Fi NAN service - enabling the application to create discovery session or
+     * create connection to peers. The device will connect to an existing cluster if it can find
+     * one or create a new cluster (if it is the first to enable NAN in its vicinity). Results
+     * (e.g. successful connection to a cluster) are provided to the {@code callback} object.
+     * An application <b>must</b> call {@link #disconnect()} when done with the Wi-Fi NAN
+     * connection.
+     * <p>
+     * Note: a NAN cluster is a shared resource - if the device is already connected to a cluster
+     * than this function will simply indicate success immediately.
      *
      * @param looper The Looper on which to execute all callbacks related to the
      *            connection - including all sessions opened as part of this
@@ -309,9 +354,17 @@ public class WifiNanManager {
     }
 
     /**
-     * Connect to the Wi-Fi NAN service - enabling the application to execute
-     * {@link WifiNanManager} APIs. Allows requesting a specific configuration
-     * using {@link ConfigRequest} structure. Limited to privileged access.
+     * Connect to the Wi-Fi NAN service - enabling the application to create discovery session or
+     * create connection to peers. The device will connect to an existing cluster if it can find
+     * one or create a new cluster (if it is the first to enable NAN in its vicinity). Results
+     * (e.g. successful connection to a cluster) are provided to the {@code callback} object.
+     * An application <b>must</b> call {@link #disconnect()} when done with the Wi-Fi NAN
+     * connection. Allows requesting a specific configuration using {@link ConfigRequest}. If not
+     * necessary (default configuration should usually work) use the
+     * {@link #connect(Looper, WifiNanEventCallback)} method instead.
+     * <p>
+     * Note: a NAN cluster is a shared resource - if the device is already connected to a cluster
+     * than this function will simply indicate success immediately.
      *
      * @param looper The Looper on which to execute all callbacks related to the
      *            connection - including all sessions opened as part of this
@@ -343,12 +396,13 @@ public class WifiNanManager {
     }
 
     /**
-     * Disconnect from the Wi-Fi NAN service and destroy all outstanding
-     * operations - i.e. all publish and subscribes are terminated, any
-     * outstanding data-link is shut-down, and all requested NAN configurations
-     * are cancelled.
+     * Disconnect from the Wi-Fi NAN service and, if no other applications are connected to NAN,
+     * also disconnect from the NAN cluster. This method destroys all outstanding operations -
+     * i.e. all publish and subscribes are terminated, and any outstanding data-links are
+     * shut-down. However, it is good practice to terminate these discovery sessions and
+     * connections explicitly before a disconnect.
      * <p>
-     * An application may then re-connect using
+     * An application may re-connect after a disconnect using
      * {@link WifiNanManager#connect(Looper, WifiNanEventCallback)} .
      */
     public void disconnect() {
@@ -377,6 +431,7 @@ public class WifiNanManager {
         }
     }
 
+    /** @hide */
     @Override
     protected void finalize() throws Throwable {
         try {
@@ -388,17 +443,29 @@ public class WifiNanManager {
     }
 
     /**
-     * Request a NAN publish session. The actual publish session is provided by
-     * the
-     * {@link WifiNanSessionCallback#onPublishStarted(WifiNanPublishSession)}
-     * callback. Other results of the publish session operation will result in
-     * callbacks to the indicated callback: {@link WifiNanSessionCallback
-     * NanSessionCallback.on*}.
+     * Issue a request to the NAN service to create a new NAN publish discovery session, using
+     * the specified {@code publishConfig} configuration. The results of the publish operation
+     * are routed to the callbacks of {@link WifiNanSessionCallback}:
+     * <ul>
+     *     <li>{@link WifiNanSessionCallback#onPublishStarted(WifiNanPublishSession)} is called
+     *     when the publish session is created and provides a handle to the session. Further
+     *     operations on the publish session can be executed on that object.
+     *     <li>{@link WifiNanSessionCallback#onSessionConfigFail(int)} is called if the publish
+     *     operation failed.
+     * </ul>
+     * <p>
+     * Other results of the publish session operations will also be routed to callbacks
+     * on the {@code callback} object. The resulting publish session can be modified using
+     * {@link WifiNanPublishSession#updatePublish(PublishConfig)}.
+     * <p>
+     *      An application must use the {@link WifiNanSession#terminate()} to terminate the publish
+     *      discovery session once it isn't needed. This will free resources as well terminate
+     *      any on-air transmissions.
      *
      * @param publishConfig The {@link PublishConfig} specifying the
-     *            configuration of the publish session.
-     * @param callback The {@link WifiNanSessionCallback} derived objects to be
-     *            used for the event callbacks specified by {@code events}.
+     *            configuration of the requested publish session.
+     * @param callback A {@link WifiNanSessionCallback} derived object to be used for session
+     *                 event callbacks.
      */
     public void publish(@NonNull PublishConfig publishConfig,
             @NonNull WifiNanSessionCallback callback) {
@@ -424,9 +491,7 @@ public class WifiNanManager {
         }
     }
 
-    /**
-     * {@hide}
-     */
+    /** @hide */
     public void updatePublish(int sessionId, PublishConfig publishConfig) {
         if (VDBG) Log.v(TAG, "updatePublish(): config=" + publishConfig);
 
@@ -447,17 +512,29 @@ public class WifiNanManager {
     }
 
     /**
-     * Request a NAN subscribe session. The actual subscribe session is provided
-     * by the
-     * {@link WifiNanSessionCallback#onSubscribeStarted(WifiNanSubscribeSession)}
-     * callback. Other results of the subscribe session operation will result in
-     * callbacks to the indicated callback: {@link WifiNanSessionCallback
-     * NanSessionCallback.on*}
+     * Issue a request to the NAN service to create a new NAN subscribe discovery session, using
+     * the specified {@code subscribeConfig} configuration. The results of the subscribe
+     * operation are routed to the callbacks of {@link WifiNanSessionCallback}:
+     * <ul>
+     *     <li>{@link WifiNanSessionCallback#onSubscribeStarted(WifiNanSubscribeSession)} is called
+     *     when the subscribe session is created and provides a handle to the session. Further
+     *     operations on the subscribe session can be executed on that object.
+     *     <li>{@link WifiNanSessionCallback#onSessionConfigFail(int)} is called if the subscribe
+     *     operation failed.
+     * </ul>
+     * <p>
+     * Other results of the subscribe session operations will also be routed to callbacks
+     * on the {@code callback} object. The resulting subscribe session can be modified using
+     * {@link WifiNanSubscribeSession#updateSubscribe(SubscribeConfig)}.
+     * <p>
+     *      An application must use the {@link WifiNanSession#terminate()} to terminate the
+     *      subscribe discovery session once it isn't needed. This will free resources as well
+     *      terminate any on-air transmissions.
      *
      * @param subscribeConfig The {@link SubscribeConfig} specifying the
-     *            configuration of the subscribe session.
-     * @param callback The {@link WifiNanSessionCallback} derived objects to be
-     *            used for the event callbacks specified by {@code events}.
+     *            configuration of the requested subscribe session.
+     * @param callback A {@link WifiNanSessionCallback} derived object to be used for session
+     *                 event callbacks.
      */
     public void subscribe(@NonNull SubscribeConfig subscribeConfig,
             @NonNull WifiNanSessionCallback callback) {
@@ -486,9 +563,7 @@ public class WifiNanManager {
         }
     }
 
-    /**
-     * {@hide}
-     */
+    /** @hide */
     public void updateSubscribe(int sessionId, SubscribeConfig subscribeConfig) {
         if (VDBG) {
             Log.v(TAG, "subscribe(): config=" + subscribeConfig);
@@ -512,9 +587,7 @@ public class WifiNanManager {
         }
     }
 
-    /**
-     * {@hide}
-     */
+    /** @hide */
     public void terminateSession(int sessionId) {
         if (DBG) Log.d(TAG, "Terminate NAN session #" + sessionId);
 
@@ -536,9 +609,7 @@ public class WifiNanManager {
         }
     }
 
-    /**
-     * {@hide}
-     */
+    /** @hide */
     public void sendMessage(int sessionId, int peerId, byte[] message, int messageId,
             int retryCount) {
         if (VDBG) {
@@ -563,9 +634,7 @@ public class WifiNanManager {
         }
     }
 
-    /**
-     * {@hide}
-     */
+    /** @hide */
     public void startRanging(int sessionId, RttManager.RttParams[] params,
                              RttManager.RttListener listener) {
         if (VDBG) {
@@ -596,9 +665,7 @@ public class WifiNanManager {
         }
     }
 
-    /**
-     * {@hide}
-     */
+    /** @hide */
     public String createNetworkSpecifier(@DataPathRole int role, int sessionId, int peerId,
             byte[] token) {
         if (VDBG) {
@@ -669,20 +736,29 @@ public class WifiNanManager {
     }
 
     /**
-     * Create a {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(String)}  for a
-     * WiFi NAN data-path connection to the specified peer. The peer MAC cannot be obtained
-     * through {@link WifiNanManager} services - but could be obtained out-of-bound - it refers
-     * to the MAC address of the NAN discovery interface of the peer NAN device.
+     * Create a {@link NetworkRequest.Builder#setNetworkSpecifier(String)} for a
+     * WiFi NAN connection to the specified peer. The
+     * {@link NetworkRequest.Builder#addTransportType(int)} should be set to
+     * {@link android.net.NetworkCapabilities#TRANSPORT_WIFI_NAN}.
+     * <p>
+     *     This API is targeted for applications which can obtain the peer MAC address using OOB
+     *     (out-of-band) discovery. NAN discovery does not provide the MAC address of the peer -
+     *     when using NAN discovery use the alternative network specifier method -
+     *     {@link WifiNanSession#createNetworkSpecifier(int, int, byte[])}.
      *
      * @param role  The role of this device:
      *              {@link WifiNanManager#WIFI_NAN_DATA_PATH_ROLE_INITIATOR} or
      *              {@link WifiNanManager#WIFI_NAN_DATA_PATH_ROLE_RESPONDER}
-     * @param peer  The MAC address of the peer's NAN discovery interface. A null is permitted
-     *              for a RESPONDER - which implies that any peer can connect.
-     * @param token An arbitrary token (message) to be passed to the peer as part of the
-     *              data-path setup process. On the RESPONDER a null token is permitted and
-     *              matches any peer token - an empty token requires the peer token to be empty
-     *              as well.
+     * @param peer  The MAC address of the peer's NAN discovery interface. On a RESPONDER this
+     *              value is used to gate the acceptance of a connection request from only that
+     *              peer. A RESPONDER may specified a null - indicating that it will accept
+     *              connection requests from any device.
+     * @param token An arbitrary token (message) to be used to match connection initiation request
+     *              to a responder setup. A RESPONDER is set up with a {@code token} which must
+     *              be matched by the token provided by the INITIATOR. A null token is permitted
+     *              on the RESPONDER and matches any peer token. An empty ({@code ""}) token is
+     *              not the same as a null token and requires the peer token to be empty as well.
+     *
      * @return A string to be used to construct
      * {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(String)} to pass to {@link
      * android.net.ConnectivityManager#requestNetwork(NetworkRequest, ConnectivityManager.NetworkCallback)}
@@ -786,7 +862,7 @@ public class WifiNanManager {
 
         /**
          * Constructs a {@link WifiNanEventCallback} using the specified looper.
-         * I.e. all callbacks will delivered on the thread of the specified looper.
+         * All callbacks will delivered on the thread of the specified looper.
          *
          * @param looper The looper on which to execute the callbacks.
          */

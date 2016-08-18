@@ -20,30 +20,37 @@ import android.annotation.NonNull;
 import android.util.Log;
 
 /**
- * A representation of a NAN publish session. Created when
- * {@link WifiNanManager#publish(PublishConfig, WifiNanSessionCallback)} is
- * executed. The object can be used to stop and re-start (re-configure) the
- * publish session.
+ * A class representing a NAN publish session. Created when
+ * {@link WifiNanManager#publish(PublishConfig, WifiNanSessionCallback)} is called and a
+ * discovery session is created and returned in
+ * {@link WifiNanSessionCallback#onPublishStarted(WifiNanPublishSession)}. See baseline
+ * functionality of all discovery sessions in {@link WifiNanSession}. This object allows updating
+ * an existing/running publish discovery session using {@link #updatePublish(PublishConfig)}.
  *
  * @hide PROPOSED_NAN_API
  */
 public class WifiNanPublishSession extends WifiNanSession {
     private static final String TAG = "WifiNanPublishSession";
 
-    /**
-     * {@hide}
-     */
+    /** @hide */
     public WifiNanPublishSession(WifiNanManager manager, int sessionId) {
         super(manager, sessionId);
     }
 
     /**
-     * Re-configure the publish session. Note that the
+     * Re-configure the currently active publish session. The
      * {@link WifiNanSessionCallback} is not replaced - the same listener used
-     * at creation is still used.
+     * at creation is still used. The results of the configuration are returned using
+     * {@link WifiNanSessionCallback}:
+     * <ul>
+     *     <li>{@link WifiNanSessionCallback#onSessionConfigSuccess()}: configuration update
+     *     succeeded.
+     *     <li>{@link WifiNanSessionCallback#onSessionConfigFail(int)}: configuration update
+     *     failed. The publish discovery session is still running using its previous
+     *     configuration (i.e. update failure does not terminate the session).
+     * </ul>
      *
-     * @param publishConfig The configuration ({@link PublishConfig}) of the
-     *            publish session.
+     * @param publishConfig The new discovery publish session configuration ({@link PublishConfig}).
      */
     public void updatePublish(@NonNull PublishConfig publishConfig) {
         if (mTerminated) {

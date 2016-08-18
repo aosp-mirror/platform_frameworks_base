@@ -31,13 +31,14 @@ import java.util.Arrays;
 
 /**
  * Defines the configuration of a NAN publish session. Built using
- * {@link PublishConfig.Builder}. Publish is done using
- * {@link WifiNanManager#publish(PublishConfig, WifiNanSessionCallback)} or
+ * {@link PublishConfig.Builder}. A publish session is created using
+ * {@link WifiNanManager#publish(PublishConfig, WifiNanSessionCallback)} or updated using
  * {@link WifiNanPublishSession#updatePublish(PublishConfig)}.
  *
  * @hide PROPOSED_NAN_API
  */
 public class PublishConfig implements Parcelable {
+    /** @hide */
     @IntDef({
             PUBLISH_TYPE_UNSOLICITED, PUBLISH_TYPE_SOLICITED })
     @Retention(RetentionPolicy.SOURCE)
@@ -45,58 +46,44 @@ public class PublishConfig implements Parcelable {
     }
 
     /**
-     * Defines an unsolicited publish session - i.e. a publish session where
-     * publish packets are transmitted over-the-air. Configuration is done using
-     * {@link PublishConfig.Builder#setPublishType(int)}.
+     * Defines an unsolicited publish session - a publish session where the publisher is
+     * advertising itself by broadcasting on-the-air. An unsolicited publish session is paired
+     * with an passive subscribe session {@link SubscribeConfig#SUBSCRIBE_TYPE_PASSIVE}.
+     * Configuration is done using {@link PublishConfig.Builder#setPublishType(int)}.
      */
     public static final int PUBLISH_TYPE_UNSOLICITED = 0;
 
     /**
-     * Defines a solicited publish session - i.e. a publish session where
-     * publish packets are not transmitted over-the-air and the device listens
-     * and matches to transmitted subscribe packets. Configuration is done using
+     * Defines a solicited publish session - a publish session which is silent, waiting for a
+     * matching active subscribe session - and responding to it in unicast. A
+     * solicited publish session is paired with an active subscribe session
+     * {@link SubscribeConfig#SUBSCRIBE_TYPE_ACTIVE}. Configuration is done using
      * {@link PublishConfig.Builder#setPublishType(int)}.
      */
     public static final int PUBLISH_TYPE_SOLICITED = 1;
 
-    /**
-     * @hide
-     */
+    /** @hide */
     public final byte[] mServiceName;
 
-    /**
-     * @hide
-     */
+    /** @hide */
     public final byte[] mServiceSpecificInfo;
 
-    /**
-     * @hide
-     */
+    /** @hide */
     public final byte[] mTxFilter;
 
-    /**
-     * @hide
-     */
+    /** @hide */
     public final byte[] mRxFilter;
 
-    /**
-     * @hide
-     */
+    /** @hide */
     public final int mPublishType;
 
-    /**
-     * @hide
-     */
+    /** @hide */
     public final int mPublishCount;
 
-    /**
-     * @hide
-     */
+    /** @hide */
     public final int mTtlSec;
 
-    /**
-     * @hide
-     */
+    /** @hide */
     public final boolean mEnableTerminateNotification;
 
     private PublishConfig(byte[] serviceName, byte[] serviceSpecificInfo,
@@ -198,7 +185,7 @@ public class PublishConfig implements Parcelable {
     }
 
     /**
-     * Validates that the contents of the PublishConfig are valid. Otherwise
+     * Verifies that the contents of the PublishConfig are valid. Otherwise
      * throws an IllegalArgumentException.
      *
      * @hide
@@ -251,13 +238,16 @@ public class PublishConfig implements Parcelable {
         /**
          * Specify the service name of the publish session. The actual on-air
          * value is a 6 byte hashed representation of this string.
-         *
-         * Per spec: The Service Name is a UTF-8 encoded string from 1 to 255 bytes in length.
+         * <p>
+         * The Service Name is a UTF-8 encoded string from 1 to 255 bytes in length.
          * The only acceptable single-byte UTF-8 symbols for a Service Name are alphanumeric
          * values (A-Z, a-z, 0-9), the hyphen ('-'), and the period ('.'). All valid multi-byte
          * UTF-8 characters are acceptable in a Service Name.
+         * <p>
+         * Must be called - an empty ServiceName is not valid.
          *
          * @param serviceName The service name for the publish session.
+         *
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
@@ -272,12 +262,15 @@ public class PublishConfig implements Parcelable {
         /**
          * Specify service specific information for the publish session. This is
          * a free-form byte array available to the application to send
-         * additional information as part of the discovery operation - i.e. it
+         * additional information as part of the discovery operation - it
          * will not be used to determine whether a publish/subscribe match
          * occurs.
+         * <p>
+         *     Optional. Empty by default.
          *
          * @param serviceSpecificInfo A byte-array for the service-specific
          *            information field.
+         *
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
@@ -287,13 +280,16 @@ public class PublishConfig implements Parcelable {
         }
 
         /**
-         * Specify service specific information for the publish session - same
-         * as {@link PublishConfig.Builder#setServiceSpecificInfo(byte[])}
-         * but obtaining the data from a String.
+         * Specify service specific information for the publish session - a simple wrapper
+         * of {@link PublishConfig.Builder#setServiceSpecificInfo(byte[])}
+         * obtaining the data from a String.
+         * <p>
+         *     Optional. Empty by default.
          *
          * @param serviceSpecificInfoStr The service specific information string
          *            to be included (as a byte array) in the publish
          *            information.
+         *
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
@@ -303,18 +299,20 @@ public class PublishConfig implements Parcelable {
         }
 
         /**
-         * The transmit filter for an active publish session
+         * Specify the transmit filter for an active publish session
          * {@link PublishConfig.Builder#setPublishType(int)} and
-         * {@link PublishConfig#PUBLISH_TYPE_UNSOLICITED}. Included in
-         * transmitted publish packets and used by receivers (subscribers) to
-         * determine whether they match - in addition to just relying on the
-         * service name.
+         * {@link PublishConfig#PUBLISH_TYPE_UNSOLICITED}. Used to determine discovery - both
+         * Service Name and filters have to match for discovery to be triggered.
          * <p>
-         * Format is an LV byte array - the {@link LvBufferUtils} utility class
-         * is available to form and parse.
+         * Format is an LV byte array: a single byte Length field followed by L bytes (the value of
+         * the Length field) of a value blob.
+         * </p>
+         * <p>
+         *     Optional. Empty by default.
+         * </p>
          *
-         * @param txFilter The byte-array containing the LV formatted transmit
-         *            filter.
+         * @param txFilter The byte-array containing the LV formatted transmit filter.
+         *
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
@@ -324,18 +322,19 @@ public class PublishConfig implements Parcelable {
         }
 
         /**
-         * The transmit filter for a passive publish session
+         * Specify the receive filter for a passive publish session
          * {@link PublishConfig.Builder#setPublishType(int)} and
-         * {@link PublishConfig#PUBLISH_TYPE_SOLICITED}. Used by the publisher
-         * to determine whether they match transmitted subscriber packets
-         * (active subscribers) - in addition to just relying on the service
-         * name.
+         * {@link PublishConfig#PUBLISH_TYPE_SOLICITED}. Used to determine discovery - both
+         * Service Name and filters have to match for discovery to be triggered.
          * <p>
-         * Format is an LV byte array - the {@link LvBufferUtils} utility class
-         * is available to form and parse.
+         * Format is an LV byte array: a single byte Length field followed by L bytes (the value of
+         * the Length field) of a value blob.
+         * <p>
+         *     Optional. Empty by default.
          *
          * @param rxFilter The byte-array containing the LV formatted receive
          *            filter.
+         *
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
@@ -345,15 +344,15 @@ public class PublishConfig implements Parcelable {
         }
 
         /**
-         * Sets the type of the publish session: solicited (aka active - publish
+         * Specify the type of the publish session: solicited (aka active - publish
          * packets are transmitted over-the-air), or unsolicited (aka passive -
          * no publish packets are transmitted, a match is made against an active
          * subscribe session whose packets are transmitted over-the-air).
          *
-         * @param publishType Publish session type: solicited (
-         *            {@link PublishConfig#PUBLISH_TYPE_SOLICITED}) or
-         *            unsolicited (
-         *            {@link PublishConfig#PUBLISH_TYPE_UNSOLICITED}).
+         * @param publishType Publish session type:
+         *            {@link PublishConfig#PUBLISH_TYPE_SOLICITED} or
+         *            {@link PublishConfig#PUBLISH_TYPE_UNSOLICITED} (the default).
+         *
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
@@ -366,13 +365,18 @@ public class PublishConfig implements Parcelable {
         }
 
         /**
-         * Sets the number of times a solicited (
+         * Sets the number of times an unsolicited (configured using
          * {@link PublishConfig.Builder#setPublishType(int)}) publish session
-         * will transmit a packet. When the count is reached an event will be
+         * will be broadcast. When the count is reached an event will be
          * generated for {@link WifiNanSessionCallback#onSessionTerminated(int)}
-         * with reason={@link WifiNanSessionCallback#TERMINATE_REASON_DONE}.
+         * with {@link WifiNanSessionCallback#TERMINATE_REASON_DONE} [unless
+         * {@link #setEnableTerminateNotification(boolean)} disables the callback].
+         * <p>
+         *     Optional. 0 by default - indicating the session doesn't terminate on its own.
+         *     Session will be terminated when {@link WifiNanSession#terminate()} is called.
          *
-         * @param publishCount Number of publish packets to transmit.
+         * @param publishCount Number of publish packets to broadcast.
+         *
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
@@ -385,14 +389,19 @@ public class PublishConfig implements Parcelable {
         }
 
         /**
-         * Sets the time interval (in seconds) a solicited (
-         * {@link PublishConfig.Builder#setPublishCount(int)}) publish session
-         * will be alive - i.e. transmitting a packet. When the TTL is reached
+         * Sets the time interval (in seconds) an unsolicited (
+         * {@link PublishConfig.Builder#setPublishType(int)}) publish session
+         * will be alive - broadcasting a packet. When the TTL is reached
          * an event will be generated for
-         * {@link WifiNanSessionCallback#onSessionTerminated(int)} with reason=
-         * {@link WifiNanSessionCallback#TERMINATE_REASON_DONE}.
+         * {@link WifiNanSessionCallback#onSessionTerminated(int)} with
+         * {@link WifiNanSessionCallback#TERMINATE_REASON_DONE}  [unless
+         * {@link #setEnableTerminateNotification(boolean)} disables the callback].
+         * <p>
+         *     Optional. 0 by default - indicating the session doesn't terminate on its own.
+         *     Session will be terminated when {@link WifiNanSession#terminate()} is called.
          *
          * @param ttlSec Lifetime of a publish session in seconds.
+         *
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
@@ -411,6 +420,7 @@ public class PublishConfig implements Parcelable {
          *
          * @param enable If true the terminate callback will be called when the
          *            publish is terminated. Otherwise it will not be called.
+         *
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */

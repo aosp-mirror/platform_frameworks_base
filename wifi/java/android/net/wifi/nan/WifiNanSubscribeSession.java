@@ -20,10 +20,12 @@ import android.annotation.NonNull;
 import android.util.Log;
 
 /**
- * A representation of a NAN subscribe session. Created when
- * {@link WifiNanManager#subscribe(SubscribeConfig, WifiNanSessionCallback)} is
- * executed. The object can be used to stop and re-start (re-configure) the
- * subscribe session.
+ * A class representing a NAN subscribe session. Created when
+ * {@link WifiNanManager#subscribe(SubscribeConfig, WifiNanSessionCallback)} is called and a
+ * discovery session is created and returned in
+ * {@link WifiNanSessionCallback#onSubscribeStarted(WifiNanSubscribeSession)}. See baseline
+ * functionality of all discovery sessions in {@link WifiNanSession}. This object allows updating
+ * an existing/running subscribe discovery session using {@link #updateSubscribe(SubscribeConfig)}.
  *
  * @hide PROPOSED_NAN_API
  */
@@ -38,12 +40,20 @@ public class WifiNanSubscribeSession extends WifiNanSession {
     }
 
     /**
-     * Re-configure the subscribe session. Note that the
+     * Re-configure the currently active subscribe session. The
      * {@link WifiNanSessionCallback} is not replaced - the same listener used
-     * at creation is still used.
+     * at creation is still used. The results of the configuration are returned using
+     * {@link WifiNanSessionCallback}:
+     * <ul>
+     *     <li>{@link WifiNanSessionCallback#onSessionConfigSuccess()}: configuration update
+     *     succeeded.
+     *     <li>{@link WifiNanSessionCallback#onSessionConfigFail(int)}: configuration update
+     *     failed. The subscribe discovery session is still running using its previous
+     *     configuration (i.e. update failure does not terminate the session).
+     * </ul>
      *
-     * @param subscribeConfig The configuration ({@link SubscribeConfig}) of the
-     *            subscribe session.
+     * @param subscribeConfig The new discovery subscribe session configuration
+     *                        ({@link SubscribeConfig}).
      */
     public void updateSubscribe(@NonNull SubscribeConfig subscribeConfig) {
         if (mTerminated) {

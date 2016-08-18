@@ -2913,7 +2913,7 @@ public abstract class Context {
     /**
      * Use with {@link #getSystemService} to retrieve a
      * {@link android.net.wifi.nan.WifiNanManager} for handling management of
-     * Wi-Fi NAN discovery and connections.
+     * Wi-Fi NAN.
      *
      * @see #getSystemService
      * @see android.net.wifi.nan.WifiNanManager
