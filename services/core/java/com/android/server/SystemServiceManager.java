@@ -138,6 +138,7 @@ public class SystemServiceManager {
             final int serviceLen = mServices.size();
             for (int i = 0; i < serviceLen; i++) {
                 final SystemService service = mServices.get(i);
+                Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, service.getClass().getName());
                 try {
                     service.onBootPhase(mCurrentPhase);
                 } catch (Exception ex) {
@@ -146,6 +147,7 @@ public class SystemServiceManager {
                             + ": onBootPhase threw an exception during phase "
                             + mCurrentPhase, ex);
                 }
+                Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
             }
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
