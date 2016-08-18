@@ -1310,8 +1310,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             mConnector.execute("tether", "interface", "remove", iface);
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
+        } finally {
+            removeInterfaceFromLocalNetwork(iface);
         }
-        removeInterfaceFromLocalNetwork(iface);
     }
 
     @Override
