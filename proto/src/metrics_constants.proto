@@ -2270,6 +2270,15 @@ message MetricsEvent {
     //   SUBTYPE: sub settings classname
     ACTION_SETTING_HELP_AND_FEEDBACK = 513;
 
+    // OPEN: Settings > Language & input > Personal dictionary (single locale)
+    USER_DICTIONARY_SETTINGS = 514;
+
+    // OPEN: Settings > Date & time > Select time zone
+    ZONE_PICKER = 515;
+
+    // OPEN: Settings > Security > Device administrators
+    DEVICE_ADMIN_SETTINGS = 516;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
