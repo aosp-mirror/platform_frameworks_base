@@ -20,6 +20,7 @@ import com.android.ide.common.rendering.api.AdapterBinding;
 import com.android.ide.common.rendering.api.HardwareConfig;
 import com.android.ide.common.rendering.api.IAnimationListener;
 import com.android.ide.common.rendering.api.ILayoutPullParser;
+import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.ide.common.rendering.api.LayoutlibCallback;
 import com.android.ide.common.rendering.api.RenderResources;
 import com.android.ide.common.rendering.api.RenderSession;
@@ -303,6 +304,20 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             mContentRoot = ((Layout) mViewRoot).getContentRoot();
             SessionParams params = getParams();
             BridgeContext context = getContext();
+
+            if (Bridge.isLocaleRtl(params.getLocale())) {
+                if (!params.isRtlSupported()) {
+                    Bridge.getLog().warning(LayoutLog.TAG_RTL_NOT_ENABLED,
+                            "You are using a right-to-left " +
+                                    "(RTL) locale but RTL is not enabled", null);
+                } else if (params.getSimulatedPlatformVersion() < 17) {
+                    // This will render ok because we are using the latest layoutlib but at least
+                    // warn the user that this might fail in a real device.
+                    Bridge.getLog().warning(LayoutLog.TAG_RTL_NOT_SUPPORTED, "You are using a " +
+                            "right-to-left " +
+                            "(RTL) locale but RTL is not supported for API level < 17", null);
+                }
+            }
 
             // Sets the project callback (custom view loader) to the fragment delegate so that
             // it can instantiate the custom Fragment.
