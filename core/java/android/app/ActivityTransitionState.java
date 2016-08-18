@@ -337,11 +337,12 @@ class ActivityTransitionState {
     }
 
     public void startExitOutTransition(Activity activity, Bundle options) {
-        if (!activity.getWindow().hasFeature(Window.FEATURE_ACTIVITY_TRANSITIONS)) {
+        mEnterTransitionCoordinator = null;
+        if (!activity.getWindow().hasFeature(Window.FEATURE_ACTIVITY_TRANSITIONS) ||
+                mExitTransitionCoordinators == null) {
             return;
         }
         ActivityOptions activityOptions = new ActivityOptions(options);
-        mEnterTransitionCoordinator = null;
         if (activityOptions.getAnimationType() == ActivityOptions.ANIM_SCENE_TRANSITION) {
             int key = activityOptions.getExitCoordinatorKey();
             int index = mExitTransitionCoordinators.indexOfKey(key);
