@@ -180,8 +180,13 @@
     <protected-broadcast
         android:name="android.bluetooth.map.profile.action.CONNECTION_STATE_CHANGED" />
     <protected-broadcast
+        android:name="com.android.bluetooth.BluetoothMapContentObserver.action.MESSAGE_SENT" />
+    <protected-broadcast
+        android:name="com.android.bluetooth.BluetoothMapContentObserver.action.MESSAGE_DELIVERY" />
+    <protected-broadcast
         android:name="android.bluetooth.pan.profile.action.CONNECTION_STATE_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.pbap.intent.action.PBAP_STATE_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.sap.profile.action.CONNECTION_STATE_CHANGED" />
     <protected-broadcast android:name="android.btopp.intent.action.INCOMING_FILE_NOTIFICATION" />
     <protected-broadcast android:name="android.btopp.intent.action.USER_CONFIRMATION_TIMEOUT" />
     <protected-broadcast android:name="android.btopp.intent.action.LIST" />
@@ -197,6 +202,8 @@
     <protected-broadcast android:name="com.android.bluetooth.pbap.userconfirmtimeout" />
     <protected-broadcast android:name="com.android.bluetooth.pbap.authresponse" />
     <protected-broadcast android:name="com.android.bluetooth.pbap.authcancelled" />
+    <protected-broadcast android:name="com.android.bluetooth.sap.USER_CONFIRM_TIMEOUT" />
+    <protected-broadcast android:name="com.android.bluetooth.sap.action.DISCONNECT_ACTION" />
 
     <protected-broadcast android:name="android.hardware.display.action.WIFI_DISPLAY_STATUS_CHANGED" />
 
