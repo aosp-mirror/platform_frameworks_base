@@ -10766,7 +10766,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     // If permissions need a review before any of the app components can run,
                     // we return no provider and launch a review activity if the calling app
                     // is in the foreground.
-                    if (mPermissionReviewRequired || Build.PERMISSIONS_REVIEW_REQUIRED) {
+                    if (mPermissionReviewRequired) {
                         if (!requestTargetProviderPermissionsReviewIfNeededLocked(cpi, r, userId)) {
                             return null;
                         }

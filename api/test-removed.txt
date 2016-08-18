@@ -179,6 +179,10 @@ package android.os {
     ctor public BatteryManager();
   }
 
+  public class Build {
+    field public static final boolean PERMISSIONS_REVIEW_REQUIRED;
+  }
+
   public final class PowerManager {
     method public void goToSleep(long);
     method public deprecated void userActivity(long, boolean);
