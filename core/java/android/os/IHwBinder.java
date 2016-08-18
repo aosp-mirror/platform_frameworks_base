@@ -18,8 +18,9 @@ package android.os;
 
 /** @hide */
 public interface IHwBinder {
-    // MUST match libhwbinder/IBinder.h definition !!!
+    // These MUST match their corresponding libhwbinder/IBinder.h definition !!!
     public static final int FIRST_CALL_TRANSACTION = 1;
+    public static final int FLAG_ONEWAY = 1;
 
     public void transact(
             int code, HwParcel request, HwParcel reply, int flags);
