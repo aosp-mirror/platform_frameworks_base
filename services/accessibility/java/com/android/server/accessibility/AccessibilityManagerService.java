@@ -2281,7 +2281,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         @Override
         public boolean onKeyEvent(KeyEvent keyEvent, int sequenceNumber) {
-            if (!mRequestFilterKeyEvents) {
+            if (!mRequestFilterKeyEvents || (mServiceInterface == null)) {
                 return false;
             }
             if((mAccessibilityServiceInfo.getCapabilities()
