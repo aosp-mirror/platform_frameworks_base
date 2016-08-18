@@ -1616,6 +1616,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                         if (VDBG) Log.d(TAG, "Tether Mode requested by " + who);
                         if (mNotifyList.indexOf(who) < 0) {
                             mNotifyList.add(who);
+                            mIPv6TetheringCoordinator.addActiveDownstream(who);
                         }
                         transitionTo(mTetherModeAliveState);
                         break;
@@ -1623,6 +1624,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                         who = (TetherInterfaceStateMachine)message.obj;
                         if (VDBG) Log.d(TAG, "Tether Mode unrequested by " + who);
                         mNotifyList.remove(who);
+                        mIPv6TetheringCoordinator.removeActiveDownstream(who);
                         break;
                     default:
                         retValue = false;
@@ -1661,17 +1663,19 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                 maybeLogMessage(this, message.what);
                 boolean retValue = true;
                 switch (message.what) {
-                    case CMD_TETHER_MODE_REQUESTED:
+                    case CMD_TETHER_MODE_REQUESTED: {
                         TetherInterfaceStateMachine who = (TetherInterfaceStateMachine)message.obj;
                         if (VDBG) Log.d(TAG, "Tether Mode requested by " + who);
                         if (mNotifyList.indexOf(who) < 0) {
                             mNotifyList.add(who);
+                            mIPv6TetheringCoordinator.addActiveDownstream(who);
                         }
                         who.sendMessage(TetherInterfaceStateMachine.CMD_TETHER_CONNECTION_CHANGED,
                                 mCurrentUpstreamIface);
                         break;
-                    case CMD_TETHER_MODE_UNREQUESTED:
-                        who = (TetherInterfaceStateMachine)message.obj;
+                    }
+                    case CMD_TETHER_MODE_UNREQUESTED: {
+                        TetherInterfaceStateMachine who = (TetherInterfaceStateMachine)message.obj;
                         if (VDBG) Log.d(TAG, "Tether Mode unrequested by " + who);
                         if (mNotifyList.remove(who)) {
                             if (DBG) Log.d(TAG, "TetherModeAlive removing notifyee " + who);
@@ -1689,7 +1693,9 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                         } else {
                            Log.e(TAG, "TetherModeAliveState UNREQUESTED has unknown who: " + who);
                         }
+                        mIPv6TetheringCoordinator.removeActiveDownstream(who);
                         break;
+                    }
                     case CMD_UPSTREAM_CHANGED:
                         // need to try DUN immediately if Wifi goes down
                         mTryCell = true;
