@@ -93,38 +93,39 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         if (mDexoptCommands != null) {
             throw new IllegalStateException("already called prepare()");
         }
+        final List<PackageParser.Package> important;
+        final List<PackageParser.Package> others;
         synchronized (mPackageManagerService.mPackages) {
             // Important: the packages we need to run with ab-ota compiler-reason.
-            List<PackageParser.Package> important = PackageManagerServiceUtils.getPackagesForDexopt(
+            important = PackageManagerServiceUtils.getPackagesForDexopt(
                     mPackageManagerService.mPackages.values(), mPackageManagerService);
             // Others: we should optimize this with the (first-)boot compiler-reason.
-            List<PackageParser.Package> others =
-                    new ArrayList<>(mPackageManagerService.mPackages.values());
+            others = new ArrayList<>(mPackageManagerService.mPackages.values());
             others.removeAll(important);
 
             // Pre-size the array list by over-allocating by a factor of 1.5.
             mDexoptCommands = new ArrayList<>(3 * mPackageManagerService.mPackages.size() / 2);
+        }
 
-            for (PackageParser.Package p : important) {
-                // Make sure that core apps are optimized according to their own "reason".
-                // If the core apps are not preopted in the B OTA, and REASON_AB_OTA is not speed
-                // (by default is speed-profile) they will be interepreted/JITed. This in itself is
-                // not a problem as we will end up doing profile guided compilation. However, some
-                // core apps may be loaded by system server which doesn't JIT and we need to make
-                // sure we don't interpret-only
-                int compilationReason = p.coreApp
-                        ? PackageManagerService.REASON_CORE_APP
-                        : PackageManagerService.REASON_AB_OTA;
-                mDexoptCommands.addAll(generatePackageDexopts(p, compilationReason));
+        for (PackageParser.Package p : important) {
+            // Make sure that core apps are optimized according to their own "reason".
+            // If the core apps are not preopted in the B OTA, and REASON_AB_OTA is not speed
+            // (by default is speed-profile) they will be interepreted/JITed. This in itself is
+            // not a problem as we will end up doing profile guided compilation. However, some
+            // core apps may be loaded by system server which doesn't JIT and we need to make
+            // sure we don't interpret-only
+            int compilationReason = p.coreApp
+                    ? PackageManagerService.REASON_CORE_APP
+                    : PackageManagerService.REASON_AB_OTA;
+            mDexoptCommands.addAll(generatePackageDexopts(p, compilationReason));
+        }
+        for (PackageParser.Package p : others) {
+            // We assume here that there are no core apps left.
+            if (p.coreApp) {
+                throw new IllegalStateException("Found a core app that's not important");
             }
-            for (PackageParser.Package p : others) {
-                // We assume here that there are no core apps left.
-                if (p.coreApp) {
-                    throw new IllegalStateException("Found a core app that's not important");
-                }
-                mDexoptCommands.addAll(
-                        generatePackageDexopts(p, PackageManagerService.REASON_FIRST_BOOT));
-            }
+            mDexoptCommands.addAll(
+                    generatePackageDexopts(p, PackageManagerService.REASON_FIRST_BOOT));
         }
         completeSize = mDexoptCommands.size();
     }
