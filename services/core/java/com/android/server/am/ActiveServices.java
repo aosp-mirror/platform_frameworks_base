@@ -200,24 +200,24 @@ public final class ActiveServices {
             switch (msg.what) {
                 case MSG_BG_START_TIMEOUT: {
                     synchronized (mAm) {
-                        rescheduleDelayedStarts();
+                        rescheduleDelayedStartsLocked();
                     }
                 } break;
             }
         }
 
-        void ensureNotStartingBackground(ServiceRecord r) {
+        void ensureNotStartingBackgroundLocked(ServiceRecord r) {
             if (mStartingBackground.remove(r)) {
                 if (DEBUG_DELAYED_STARTS) Slog.v(TAG_SERVICE,
                         "No longer background starting: " + r);
-                rescheduleDelayedStarts();
+                rescheduleDelayedStartsLocked();
             }
             if (mDelayedStartList.remove(r)) {
                 if (DEBUG_DELAYED_STARTS) Slog.v(TAG_SERVICE, "No longer delaying start: " + r);
             }
         }
 
-        void rescheduleDelayedStarts() {
+        void rescheduleDelayedStartsLocked() {
             removeMessages(MSG_BG_START_TIMEOUT);
             final long now = SystemClock.uptimeMillis();
             for (int i=0, N=mStartingBackground.size(); i<N; i++) {
@@ -278,19 +278,19 @@ public final class ActiveServices {
                 ? maxBg : ActivityManager.isLowRamDeviceStatic() ? 1 : 8;
     }
 
-    ServiceRecord getServiceByName(ComponentName name, int callingUser) {
+    ServiceRecord getServiceByNameLocked(ComponentName name, int callingUser) {
         // TODO: Deal with global services
         if (DEBUG_MU)
-            Slog.v(TAG_MU, "getServiceByName(" + name + "), callingUser = " + callingUser);
-        return getServiceMap(callingUser).mServicesByName.get(name);
+            Slog.v(TAG_MU, "getServiceByNameLocked(" + name + "), callingUser = " + callingUser);
+        return getServiceMapLocked(callingUser).mServicesByName.get(name);
     }
 
-    boolean hasBackgroundServices(int callingUser) {
+    boolean hasBackgroundServicesLocked(int callingUser) {
         ServiceMap smap = mServiceMap.get(callingUser);
         return smap != null ? smap.mStartingBackground.size() >= mMaxStartingBackground : false;
     }
 
-    private ServiceMap getServiceMap(int callingUser) {
+    private ServiceMap getServiceMapLocked(int callingUser) {
         ServiceMap smap = mServiceMap.get(callingUser);
         if (smap == null) {
             smap = new ServiceMap(mAm.mHandler.getLooper(), callingUser);
@@ -299,8 +299,8 @@ public final class ActiveServices {
         return smap;
     }
 
-    ArrayMap<ComponentName, ServiceRecord> getServices(int callingUser) {
-        return getServiceMap(callingUser).mServicesByName;
+    ArrayMap<ComponentName, ServiceRecord> getServicesLocked(int callingUser) {
+        return getServiceMapLocked(callingUser).mServicesByName;
     }
 
     ComponentName startServiceLocked(IApplicationThread caller, Intent service, String resolvedType,
@@ -384,7 +384,7 @@ public final class ActiveServices {
         r.pendingStarts.add(new ServiceRecord.StartItem(r, false, r.makeNextStartId(),
                 service, neededGrants));
 
-        final ServiceMap smap = getServiceMap(r.userId);
+        final ServiceMap smap = getServiceMapLocked(r.userId);
         boolean addToStarting = false;
         if (!callerFg && r.app == null
                 && mAm.mUserController.hasStartedUserState(r.userId)) {
@@ -523,10 +523,10 @@ public final class ActiveServices {
                 Slog.v(TAG_SERVICE, "Starting background (first=" + first + "): " + r);
             }
             if (first) {
-                smap.rescheduleDelayedStarts();
+                smap.rescheduleDelayedStartsLocked();
             }
         } else if (callerFg) {
-            smap.ensureNotStartingBackground(r);
+            smap.ensureNotStartingBackgroundLocked(r);
         }
 
         return r.name;
@@ -607,7 +607,7 @@ public final class ActiveServices {
                 for (int i=stopping.size()-1; i>=0; i--) {
                     ServiceRecord service = stopping.get(i);
                     service.delayed = false;
-                    services.ensureNotStartingBackground(service);
+                    services.ensureNotStartingBackgroundLocked(service);
                     stopServiceLocked(service);
                 }
             }
@@ -709,7 +709,7 @@ public final class ActiveServices {
                     if (r.app != null) {
                         updateServiceForegroundLocked(r.app, true);
                     }
-                    getServiceMap(r.userId).ensureNotStartingBackground(r);
+                    getServiceMapLocked(r.userId).ensureNotStartingBackgroundLocked(r);
                     mAm.notifyPackageUse(r.serviceInfo.packageName,
                                          PackageManager.NOTIFY_PACKAGE_USE_FOREGROUND_SERVICE);
                 } else {
@@ -744,7 +744,7 @@ public final class ActiveServices {
             // with the same notification ID.  If so, we shouldn't actually cancel it,
             // because that would wipe away the notification that still needs to be shown
             // due the other service.
-            ServiceMap sm = getServiceMap(r.userId);
+            ServiceMap sm = getServiceMapLocked(r.userId);
             if (sm != null) {
                 for (int i = sm.mServicesByName.size()-1; i >= 0; i--) {
                     ServiceRecord other = sm.mServicesByName.valueAt(i);
@@ -1088,7 +1088,7 @@ public final class ActiveServices {
                 requestServiceBindingLocked(s, b.intent, callerFg, false);
             }
 
-            getServiceMap(s.userId).ensureNotStartingBackground(s);
+            getServiceMapLocked(s.userId).ensureNotStartingBackgroundLocked(s);
 
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -1230,7 +1230,7 @@ public final class ActiveServices {
 
     private final ServiceRecord findServiceLocked(ComponentName name,
             IBinder token, int userId) {
-        ServiceRecord r = getServiceByName(name, userId);
+        ServiceRecord r = getServiceByNameLocked(name, userId);
         return r == token ? r : null;
     }
 
@@ -1268,7 +1268,7 @@ public final class ActiveServices {
         userId = mAm.mUserController.handleIncomingUser(callingPid, callingUid, userId, false,
                 ActivityManagerService.ALLOW_NON_FULL_IN_PROFILE, "service", null);
 
-        ServiceMap smap = getServiceMap(userId);
+        ServiceMap smap = getServiceMapLocked(userId);
         final ComponentName comp = service.getComponent();
         if (comp != null) {
             r = smap.mServicesByName.get(comp);
@@ -1335,7 +1335,7 @@ public final class ActiveServices {
                             sInfo.name, sInfo.flags)
                             && mAm.isValidSingletonCall(callingUid, sInfo.applicationInfo.uid)) {
                         userId = 0;
-                        smap = getServiceMap(0);
+                        smap = getServiceMapLocked(0);
                     }
                     sInfo = new ServiceInfo(sInfo);
                     sInfo.applicationInfo = mAm.getAppInfoForUser(sInfo.applicationInfo, userId);
@@ -1470,8 +1470,7 @@ public final class ActiveServices {
         return true;
     }
 
-    private final boolean scheduleServiceRestartLocked(ServiceRecord r,
-            boolean allowCancel) {
+    private final boolean scheduleServiceRestartLocked(ServiceRecord r, boolean allowCancel) {
         boolean canceled = false;
 
         if (mAm.isShuttingDownLocked()) {
@@ -1480,7 +1479,7 @@ public final class ActiveServices {
             return false;
         }
 
-        ServiceMap smap = getServiceMap(r.userId);
+        ServiceMap smap = getServiceMapLocked(r.userId);
         if (smap.mServicesByName.get(r.name) != r) {
             ServiceRecord cur = smap.mServicesByName.get(r.name);
             Slog.wtf(TAG, "Attempting to schedule restart of " + r
@@ -1594,7 +1593,7 @@ public final class ActiveServices {
         if (!mRestartingServices.contains(r)) {
             return;
         }
-        if (!isServiceNeeded(r, false, false)) {
+        if (!isServiceNeededLocked(r, false, false)) {
             // Paranoia: is this service actually needed?  In theory a service that is not
             // needed should never remain on the restart list.  In practice...  well, there
             // have been bugs where this happens, and bad things happen because the process
@@ -1676,7 +1675,7 @@ public final class ActiveServices {
         // Make sure this service is no longer considered delayed, we are starting it now.
         if (r.delayed) {
             if (DEBUG_DELAYED_STARTS) Slog.v(TAG_SERVICE, "REM FR DELAY LIST (bring up): " + r);
-            getServiceMap(r.userId).mDelayedStartList.remove(r);
+            getServiceMapLocked(r.userId).mDelayedStartList.remove(r);
             r.delayed = false;
         }
 
@@ -1858,7 +1857,7 @@ public final class ActiveServices {
 
         if (r.delayed) {
             if (DEBUG_DELAYED_STARTS) Slog.v(TAG_SERVICE, "REM FR DELAY LIST (new proc): " + r);
-            getServiceMap(r.userId).mDelayedStartList.remove(r);
+            getServiceMapLocked(r.userId).mDelayedStartList.remove(r);
             r.delayed = false;
         }
 
@@ -1939,7 +1938,8 @@ public final class ActiveServices {
         }
     }
 
-    private final boolean isServiceNeeded(ServiceRecord r, boolean knowConn, boolean hasConn) {
+    private final boolean isServiceNeededLocked(ServiceRecord r, boolean knowConn,
+            boolean hasConn) {
         // Are we still explicitly being asked to run?
         if (r.startRequested) {
             return true;
@@ -1961,7 +1961,7 @@ public final class ActiveServices {
         //Slog.i(TAG, "Bring down service:");
         //r.dump("  ");
 
-        if (isServiceNeeded(r, knowConn, hasConn)) {
+        if (isServiceNeededLocked(r, knowConn, hasConn)) {
             return;
         }
 
@@ -2025,7 +2025,7 @@ public final class ActiveServices {
                     r.userId, System.identityHashCode(r), (r.app != null) ? r.app.pid : -1);
         }
 
-        final ServiceMap smap = getServiceMap(r.userId);
+        final ServiceMap smap = getServiceMapLocked(r.userId);
         smap.mServicesByName.remove(r.name);
         smap.mServicesByIntent.remove(r.intent);
         r.totalRestartCount = 0;
@@ -2097,7 +2097,7 @@ public final class ActiveServices {
             }
         }
 
-        smap.ensureNotStartingBackground(r);
+        smap.ensureNotStartingBackgroundLocked(r);
     }
 
     void removeConnectionLocked(
@@ -2359,7 +2359,7 @@ public final class ActiveServices {
                             mAm.mProcessStats);
                     realStartServiceLocked(sr, proc, sr.createdFromFg);
                     didSomething = true;
-                    if (!isServiceNeeded(sr, false, false)) {
+                    if (!isServiceNeededLocked(sr, false, false)) {
                         // We were waiting for this service to start, but it is actually no
                         // longer needed.  This could happen because bringDownServiceIfNeeded
                         // won't bring down a service that is pending...  so now the pending
@@ -2480,7 +2480,7 @@ public final class ActiveServices {
 
     void cleanUpRemovedTaskLocked(TaskRecord tr, ComponentName component, Intent baseIntent) {
         ArrayList<ServiceRecord> services = new ArrayList<>();
-        ArrayMap<ComponentName, ServiceRecord> alls = getServices(tr.userId);
+        ArrayMap<ComponentName, ServiceRecord> alls = getServicesLocked(tr.userId);
         for (int i = alls.size() - 1; i >= 0; i--) {
             ServiceRecord sr = alls.valueAt(i);
             if (sr.packageName.equals(component.getPackageName())) {
@@ -2612,7 +2612,7 @@ public final class ActiveServices {
             }
         }
 
-        ServiceMap smap = getServiceMap(app.userId);
+        ServiceMap smap = getServiceMapLocked(app.userId);
 
         // Now do remaining service cleanup.
         for (int i=app.services.size()-1; i>=0; i--) {
@@ -2747,8 +2747,7 @@ public final class ActiveServices {
         return info;
     }
 
-    List<ActivityManager.RunningServiceInfo> getRunningServiceInfoLocked(int maxNum,
-            int flags) {
+    List<ActivityManager.RunningServiceInfo> getRunningServiceInfoLocked(int maxNum, int flags) {
         ArrayList<ActivityManager.RunningServiceInfo> res
                 = new ArrayList<ActivityManager.RunningServiceInfo>();
 
@@ -2760,7 +2759,7 @@ public final class ActiveServices {
                     uid) == PackageManager.PERMISSION_GRANTED) {
                 int[] users = mAm.mUserController.getUsers();
                 for (int ui=0; ui<users.length && res.size() < maxNum; ui++) {
-                    ArrayMap<ComponentName, ServiceRecord> alls = getServices(users[ui]);
+                    ArrayMap<ComponentName, ServiceRecord> alls = getServicesLocked(users[ui]);
                     for (int i=0; i<alls.size() && res.size() < maxNum; i++) {
                         ServiceRecord sr = alls.valueAt(i);
                         res.add(makeRunningServiceInfoLocked(sr));
@@ -2776,7 +2775,7 @@ public final class ActiveServices {
                 }
             } else {
                 int userId = UserHandle.getUserId(uid);
-                ArrayMap<ComponentName, ServiceRecord> alls = getServices(userId);
+                ArrayMap<ComponentName, ServiceRecord> alls = getServicesLocked(userId);
                 for (int i=0; i<alls.size() && res.size() < maxNum; i++) {
                     ServiceRecord sr = alls.valueAt(i);
                     res.add(makeRunningServiceInfoLocked(sr));
@@ -2801,7 +2800,7 @@ public final class ActiveServices {
 
     public PendingIntent getRunningServiceControlPanelLocked(ComponentName name) {
         int userId = UserHandle.getUserId(Binder.getCallingUid());
-        ServiceRecord r = getServiceByName(name, userId);
+        ServiceRecord r = getServiceByNameLocked(name, userId);
         if (r != null) {
             for (int conni=r.connections.size()-1; conni>=0; conni--) {
                 ArrayList<ConnectionRecord> conn = r.connections.valueAt(conni);
@@ -2874,31 +2873,6 @@ public final class ActiveServices {
                 proc.execServicesFg ? (now+SERVICE_TIMEOUT) : (now+ SERVICE_BACKGROUND_TIMEOUT));
     }
 
-    /**
-     * Prints a list of ServiceRecords (dumpsys activity services)
-     */
-    List<ServiceRecord> collectServicesToDumpLocked(ItemMatcher matcher, String dumpPackage) {
-        final ArrayList<ServiceRecord> services = new ArrayList<>();
-        final int[] users = mAm.mUserController.getUsers();
-        for (int user : users) {
-            ServiceMap smap = getServiceMap(user);
-            if (smap.mServicesByName.size() > 0) {
-                for (int si=0; si<smap.mServicesByName.size(); si++) {
-                    ServiceRecord r = smap.mServicesByName.valueAt(si);
-                    if (!matcher.match(r, r.name)) {
-                        continue;
-                    }
-                    if (dumpPackage != null && !dumpPackage.equals(r.appInfo.packageName)) {
-                        continue;
-                    }
-                    services.add(r);
-                }
-            }
-        }
-
-        return services;
-    }
-
     final class ServiceDumper {
         private final FileDescriptor fd;
         private final PrintWriter pw;
@@ -2932,7 +2906,7 @@ public final class ActiveServices {
 
             final int[] users = mAm.mUserController.getUsers();
             for (int user : users) {
-                ServiceMap smap = getServiceMap(user);
+                ServiceMap smap = getServiceMapLocked(user);
                 if (smap.mServicesByName.size() > 0) {
                     for (int si=0; si<smap.mServicesByName.size(); si++) {
                         ServiceRecord r = smap.mServicesByName.valueAt(si);
@@ -3113,7 +3087,7 @@ public final class ActiveServices {
         }
 
         private void dumpUserRemainsLocked(int user) {
-            ServiceMap smap = getServiceMap(user);
+            ServiceMap smap = getServiceMapLocked(user);
             printed = false;
             for (int si=0, SN=smap.mDelayedStartList.size(); si<SN; si++) {
                 ServiceRecord r = smap.mDelayedStartList.get(si);
