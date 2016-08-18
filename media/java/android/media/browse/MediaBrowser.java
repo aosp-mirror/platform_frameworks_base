@@ -441,7 +441,7 @@ public final class MediaBrowser {
                     return;
                 }
                 Parcelable item = resultData.getParcelable(MediaBrowserService.KEY_MEDIA_ITEM);
-                if (!(item instanceof MediaItem)) {
+                if (item != null && !(item instanceof MediaItem)) {
                     cb.onError(mediaId);
                     return;
                 }

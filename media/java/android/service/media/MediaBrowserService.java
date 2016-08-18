@@ -91,10 +91,12 @@ public abstract class MediaBrowserService extends Service {
     public static final String KEY_MEDIA_ITEM = "media_item";
 
     private static final int RESULT_FLAG_OPTION_NOT_HANDLED = 0x00000001;
+    private static final int RESULT_FLAG_ON_LOAD_ITEM_NOT_IMPLEMENTED = 0x00000002;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag=true, value = { RESULT_FLAG_OPTION_NOT_HANDLED })
+    @IntDef(flag=true, value = { RESULT_FLAG_OPTION_NOT_HANDLED,
+            RESULT_FLAG_ON_LOAD_ITEM_NOT_IMPLEMENTED })
     private @interface ResultFlags { }
 
     private final ArrayMap<IBinder, ConnectionRecord> mConnections = new ArrayMap<>();
@@ -433,11 +435,9 @@ public abstract class MediaBrowserService extends Service {
      * been loaded.
      * </p><p>
      * When the given {@code itemId} is invalid, implementations must call
-     * {@link Result#sendResult result.sendResult} with {@code null}, which will
-     * invoke {@link MediaBrowser.ItemCallback#onError}.
+     * {@link Result#sendResult result.sendResult} with {@code null}.
      * </p><p>
-     * The default implementation calls {@link Result#sendResult result.sendResult}
-     * with {@code null}.
+     * The default implementation will invoke {@link MediaBrowser.ItemCallback#onError}.
      * </p>
      *
      * @param itemId The id for the specific
@@ -445,6 +445,7 @@ public abstract class MediaBrowserService extends Service {
      * @param result The Result to send the item to.
      */
     public void onLoadItem(String itemId, Result<MediaBrowser.MediaItem> result) {
+        result.setFlags(RESULT_FLAG_ON_LOAD_ITEM_NOT_IMPLEMENTED);
         result.sendResult(null);
     }
 
@@ -703,6 +704,10 @@ public abstract class MediaBrowserService extends Service {
                 new Result<MediaBrowser.MediaItem>(itemId) {
             @Override
             void onResultSent(MediaBrowser.MediaItem item, @ResultFlags int flag) {
+                if ((flag & RESULT_FLAG_ON_LOAD_ITEM_NOT_IMPLEMENTED) != 0) {
+                    receiver.send(-1, null);
+                    return;
+                }
                 Bundle bundle = new Bundle();
                 bundle.putParcelable(KEY_MEDIA_ITEM, item);
                 receiver.send(0, bundle);
