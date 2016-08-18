@@ -17,7 +17,6 @@
 #include <binder/ProcessState.h>
 #include <utils/Log.h>
 #include <cutils/memory.h>
-#include <cutils/process_name.h>
 #include <cutils/properties.h>
 #include <cutils/trace.h>
 #include <android_runtime/AndroidRuntime.h>
