@@ -307,4 +307,7 @@ interface IDevicePolicyManager {
     void setDeviceProvisioningConfigApplied();
 
     void forceUpdateUserSetupComplete();
+
+    void setBackupServiceEnabled(in ComponentName admin, boolean enabled);
+    boolean isBackupServiceEnabled(in ComponentName admin);
 }
