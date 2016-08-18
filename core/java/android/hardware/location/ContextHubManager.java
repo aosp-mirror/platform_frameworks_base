@@ -169,6 +169,24 @@ public final class ContextHubManager {
     /**
      * get information about the nano app instance
      *
+     * NOTE: The returned NanoAppInstanceInfo does _not_ contain correct
+     * information for several fields, specifically:
+     * - getName()
+     * - getPublisher()
+     * - getNeededExecMemBytes()
+     * - getNeededReadMemBytes()
+     * - getNeededWriteMemBytes()
+     *
+     * For example, say you call loadNanoApp() with a NanoApp that has
+     * getName() returning "My Name".  Later, if you call getNanoAppInstanceInfo
+     * for that nanoapp, the returned NanoAppInstanceInfo's getName()
+     * method will claim "Preloaded app, unknown", even though you would
+     * have expected "My Name".  For now, as the user, you'll need to
+     * separately track the above fields if they are of interest to you.
+     *
+     * TODO(b/30943489): Have the returned NanoAppInstanceInfo contain the
+     *     correct information.
+     *
      * @param nanoAppHandle handle of the nanoAppInstance
      * @return NanoAppInstanceInfo Information about the nano app instance.
      *
