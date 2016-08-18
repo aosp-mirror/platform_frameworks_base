@@ -44,7 +44,7 @@ interface IWallpaperManager {
      */
     ParcelFileDescriptor setWallpaper(String name, in String callingPackage,
             in Rect cropHint, boolean allowBackup, out Bundle extras, int which,
-            IWallpaperManagerCallback completion);
+            IWallpaperManagerCallback completion, int userId);
 
     /**
      * Set the live wallpaper. This only affects the system wallpaper.
