@@ -363,7 +363,7 @@ public class LauncherAppsService extends SystemService {
 
         private void ensureShortcutPermission(@NonNull String callingPackage, int userId) {
             verifyCallingPackage(callingPackage);
-            ensureInUserProfiles(userId, "Cannot start activity for unrelated profile " + userId);
+            ensureInUserProfiles(userId, "Cannot access shortcuts for unrelated profile " + userId);
 
             if (!mShortcutServiceInternal.hasShortcutHostPermission(getCallingUserId(),
                     callingPackage)) {
