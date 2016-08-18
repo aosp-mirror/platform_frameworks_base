@@ -34,4 +34,7 @@
 
     <!-- True if preference fragment should clip to padding. -->
     <bool name="config_preferenceFragmentClipToPadding">true</bool>
+
+    <!-- The amount to offset when scrolling to a selection in an AlertDialog -->
+    <dimen name="config_alertDialogSelectionScrollOffset">0dp</dimen>
 </resources>

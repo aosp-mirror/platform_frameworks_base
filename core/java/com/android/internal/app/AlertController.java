@@ -888,7 +888,8 @@ public class AlertController {
             final int checkedItem = mCheckedItem;
             if (checkedItem > -1) {
                 listView.setItemChecked(checkedItem, true);
-                listView.setSelection(checkedItem);
+                listView.setSelectionFromTop(checkedItem,
+                        a.getDimensionPixelSize(R.styleable.AlertDialog_selectionScrollOffset, 0));
             }
         }
     }
