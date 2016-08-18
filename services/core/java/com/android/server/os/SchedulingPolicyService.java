@@ -55,7 +55,8 @@ public class SchedulingPolicyService extends ISchedulingPolicyService.Stub {
             Process.setThreadGroup(tid, Binder.getCallingPid() == pid ?
                     Process.THREAD_GROUP_AUDIO_SYS : Process.THREAD_GROUP_AUDIO_APP);
             // must be in this order or it fails the schedulability constraint
-            Process.setThreadScheduler(tid, Process.SCHED_FIFO, prio);
+            Process.setThreadScheduler(tid, Process.SCHED_FIFO | Process.SCHED_RESET_ON_FORK,
+                prio);
         } catch (RuntimeException e) {
             return PackageManager.PERMISSION_DENIED;
         }
