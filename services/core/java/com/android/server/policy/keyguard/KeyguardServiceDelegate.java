@@ -210,6 +210,13 @@ public class KeyguardServiceDelegate {
         return false;
     }
 
+    public boolean hasLockscreenWallpaper() {
+        if (mKeyguardService != null) {
+            return mKeyguardService.hasLockscreenWallpaper();
+        }
+        return false;
+    }
+
     public boolean isInputRestricted() {
         if (mKeyguardService != null) {
             mKeyguardState.inputRestricted = mKeyguardService.isInputRestricted();
