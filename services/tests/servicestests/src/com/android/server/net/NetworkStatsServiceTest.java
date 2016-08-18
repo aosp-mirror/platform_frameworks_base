@@ -43,18 +43,16 @@ import static android.text.format.DateUtils.WEEK_IN_MILLIS;
 
 import static com.android.server.net.NetworkStatsService.ACTION_NETWORK_STATS_POLL;
 
-import static org.easymock.EasyMock.anyInt;
-import static org.easymock.EasyMock.anyLong;
-import static org.easymock.EasyMock.anyObject;
-import static org.easymock.EasyMock.capture;
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.eq;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.expectLastCall;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
 import android.app.AlarmManager;
 import android.app.usage.NetworkStatsManager;
@@ -97,12 +95,13 @@ import com.android.server.net.NetworkStatsService.NetworkStatsSettings.Config;
 
 import libcore.io.IoUtils;
 
-import org.easymock.Capture;
-import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -112,8 +111,8 @@ import java.util.List;
 /**
  * Tests for {@link NetworkStatsService}.
  *
- * TODO: This test is really brittle, largely due to overly-strict use of Easymock.
- * Rewrite w/ Mockito.
+ * TODO: This test used to be really brittle because it used Easymock - it uses Mockito now, but
+ * still uses the Easymock structure, which could be simplified.
  */
 @RunWith(AndroidJUnit4.class)
 public class NetworkStatsServiceTest {
@@ -143,10 +142,12 @@ public class NetworkStatsServiceTest {
     private BroadcastInterceptingContext mServiceContext;
     private File mStatsDir;
 
-    private INetworkManagementService mNetManager;
-    private TrustedTime mTime;
-    private NetworkStatsSettings mSettings;
-    private IConnectivityManager mConnManager;
+    private @Mock INetworkManagementService mNetManager;
+    private @Mock TrustedTime mTime;
+    private @Mock NetworkStatsSettings mSettings;
+    private @Mock IConnectivityManager mConnManager;
+    private @Mock IBinder mBinder;
+    private @Mock AlarmManager mAlarmManager;
     private IdleableHandlerThread mHandlerThread;
     private Handler mHandler;
 
@@ -156,6 +157,7 @@ public class NetworkStatsServiceTest {
 
     @Before
     public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
         final Context context = InstrumentationRegistry.getContext();
 
         mServiceContext = new BroadcastInterceptingContext(context);
@@ -164,22 +166,13 @@ public class NetworkStatsServiceTest {
             IoUtils.deleteContents(mStatsDir);
         }
 
-        mNetManager = createMock(INetworkManagementService.class);
-
-        // TODO: Mock AlarmManager when migrating this test to Mockito.
-        AlarmManager alarmManager = (AlarmManager) mServiceContext
-                .getSystemService(Context.ALARM_SERVICE);
-        mTime = createMock(TrustedTime.class);
-        mSettings = createMock(NetworkStatsSettings.class);
-        mConnManager = createMock(IConnectivityManager.class);
-
         PowerManager powerManager = (PowerManager) mServiceContext.getSystemService(
                 Context.POWER_SERVICE);
         PowerManager.WakeLock wakeLock =
                 powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
 
         mService = new NetworkStatsService(
-                mServiceContext, mNetManager, alarmManager, wakeLock, mTime,
+                mServiceContext, mNetManager, mAlarmManager, wakeLock, mTime,
                 TelephonyManager.getDefault(), mSettings, new NetworkStatsObservers(),
                 mStatsDir, getBaseDir(mStatsDir));
         mHandlerThread = new IdleableHandlerThread("HandlerThread");
@@ -196,17 +189,15 @@ public class NetworkStatsServiceTest {
         expectNetworkStatsUidDetail(buildEmptyStats());
         expectSystemReady();
 
-        // catch INetworkManagementEventObserver during systemReady()
-        final Capture<INetworkManagementEventObserver> networkObserver = new Capture<
-                INetworkManagementEventObserver>();
-        mNetManager.registerObserver(capture(networkObserver));
-        expectLastCall().atLeastOnce();
-
-        replay();
         mService.systemReady();
         mSession = mService.openSession();
-        verifyAndReset();
+        assertNotNull("openSession() failed", mSession);
 
+
+        // catch INetworkManagementEventObserver during systemReady()
+        ArgumentCaptor<INetworkManagementEventObserver> networkObserver =
+              ArgumentCaptor.forClass(INetworkManagementEventObserver.class);
+        verify(mNetManager).registerObserver(networkObserver.capture());
         mNetworkObserver = networkObserver.getValue();
 
     }
@@ -236,15 +227,13 @@ public class NetworkStatsServiceTest {
         expectNetworkState(buildWifiState());
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
-        expectNetworkStatsPoll();
         expectBandwidthControlCheck();
 
-        replay();
         mService.forceUpdateIfaces();
 
         // verify service has empty history for wifi
         assertNetworkTotal(sTemplateWifi, 0L, 0L, 0L, 0L, 0);
-        verifyAndReset();
+
 
         // modify some number on wifi, and trigger poll event
         incrementCurrentTime(HOUR_IN_MILLIS);
@@ -253,14 +242,11 @@ public class NetworkStatsServiceTest {
         expectNetworkStatsSummary(new NetworkStats(getElapsedRealtime(), 1)
                 .addIfaceValues(TEST_IFACE, 1024L, 1L, 2048L, 2L));
         expectNetworkStatsUidDetail(buildEmptyStats());
-        expectNetworkStatsPoll();
-
-        replay();
         forcePollAndWaitForIdle();
 
         // verify service recorded history
         assertNetworkTotal(sTemplateWifi, 1024L, 1L, 2048L, 2L, 0);
-        verifyAndReset();
+
 
         // and bump forward again, with counters going higher. this is
         // important, since polling should correctly subtract last snapshot.
@@ -270,14 +256,10 @@ public class NetworkStatsServiceTest {
         expectNetworkStatsSummary(new NetworkStats(getElapsedRealtime(), 1)
                 .addIfaceValues(TEST_IFACE, 4096L, 4L, 8192L, 8L));
         expectNetworkStatsUidDetail(buildEmptyStats());
-        expectNetworkStatsPoll();
-
-        replay();
         forcePollAndWaitForIdle();
 
         // verify service recorded history
         assertNetworkTotal(sTemplateWifi, 4096L, 4L, 8192L, 8L, 0);
-        verifyAndReset();
 
     }
 
@@ -292,15 +274,13 @@ public class NetworkStatsServiceTest {
         expectNetworkState(buildWifiState());
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
-        expectNetworkStatsPoll();
         expectBandwidthControlCheck();
 
-        replay();
         mService.forceUpdateIfaces();
 
         // verify service has empty history for wifi
         assertNetworkTotal(sTemplateWifi, 0L, 0L, 0L, 0L, 0);
-        verifyAndReset();
+
 
         // modify some number on wifi, and trigger poll event
         incrementCurrentTime(HOUR_IN_MILLIS);
@@ -314,14 +294,11 @@ public class NetworkStatsServiceTest {
                 .addValues(TEST_IFACE, UID_RED, SET_FOREGROUND, TAG_NONE, 512L, 4L, 256L, 2L, 0L)
                 .addValues(TEST_IFACE, UID_RED, SET_FOREGROUND, 0xFAAD, 256L, 2L, 128L, 1L, 0L)
                 .addValues(TEST_IFACE, UID_BLUE, SET_DEFAULT, TAG_NONE, 128L, 1L, 128L, 1L, 0L));
-        expectNetworkStatsPoll();
-
         mService.setUidForeground(UID_RED, false);
         mService.incrementOperationCount(UID_RED, 0xFAAD, 4);
         mService.setUidForeground(UID_RED, true);
         mService.incrementOperationCount(UID_RED, 0xFAAD, 6);
 
-        replay();
         forcePollAndWaitForIdle();
 
         // verify service recorded history
@@ -331,16 +308,13 @@ public class NetworkStatsServiceTest {
         assertUidTotal(sTemplateWifi, UID_RED, SET_FOREGROUND, ROAMING_NO, 512L, 4L, 256L, 2L,
                 6);
         assertUidTotal(sTemplateWifi, UID_BLUE, 128L, 1L, 128L, 1L, 0);
-        verifyAndReset();
+
 
         // graceful shutdown system, which should trigger persist of stats, and
         // clear any values in memory.
         expectCurrentTime();
         expectDefaultSettings();
-        replay();
         mServiceContext.sendBroadcast(new Intent(Intent.ACTION_SHUTDOWN));
-        verifyAndReset();
-
         assertStatsFilesExist(true);
 
         // boot through serviceReady() again
@@ -349,16 +323,7 @@ public class NetworkStatsServiceTest {
         expectNetworkStatsUidDetail(buildEmptyStats());
         expectSystemReady();
 
-        // catch INetworkManagementEventObserver during systemReady()
-        final Capture<INetworkManagementEventObserver> networkObserver = new Capture<
-                INetworkManagementEventObserver>();
-        mNetManager.registerObserver(capture(networkObserver));
-        expectLastCall().atLeastOnce();
-
-        replay();
         mService.systemReady();
-
-        mNetworkObserver = networkObserver.getValue();
 
         // after systemReady(), we should have historical stats loaded again
         assertNetworkTotal(sTemplateWifi, 1024L, 8L, 2048L, 16L, 0);
@@ -367,7 +332,6 @@ public class NetworkStatsServiceTest {
         assertUidTotal(sTemplateWifi, UID_RED, SET_FOREGROUND, ROAMING_NO, 512L, 4L, 256L, 2L,
                 6);
         assertUidTotal(sTemplateWifi, UID_BLUE, 128L, 1L, 128L, 1L, 0);
-        verifyAndReset();
 
     }
 
@@ -385,12 +349,10 @@ public class NetworkStatsServiceTest {
         expectNetworkState(buildWifiState());
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
-        expectNetworkStatsPoll();
         expectBandwidthControlCheck();
 
-        replay();
         mService.forceUpdateIfaces();
-        verifyAndReset();
+
 
         // modify some number on wifi, and trigger poll event
         incrementCurrentTime(2 * HOUR_IN_MILLIS);
@@ -399,9 +361,6 @@ public class NetworkStatsServiceTest {
         expectNetworkStatsSummary(new NetworkStats(getElapsedRealtime(), 1)
                 .addIfaceValues(TEST_IFACE, 512L, 4L, 512L, 4L));
         expectNetworkStatsUidDetail(buildEmptyStats());
-        expectNetworkStatsPoll();
-
-        replay();
         forcePollAndWaitForIdle();
 
         // verify service recorded history
@@ -409,7 +368,7 @@ public class NetworkStatsServiceTest {
         assertValues(history, Long.MIN_VALUE, Long.MAX_VALUE, 512L, 4L, 512L, 4L, 0);
         assertEquals(HOUR_IN_MILLIS, history.getBucketDuration());
         assertEquals(2, history.size());
-        verifyAndReset();
+
 
         // now change bucket duration setting and trigger another poll with
         // exact same values, which should resize existing buckets.
@@ -417,9 +376,6 @@ public class NetworkStatsServiceTest {
         expectSettings(0L, 30 * MINUTE_IN_MILLIS, WEEK_IN_MILLIS);
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
-        expectNetworkStatsPoll();
-
-        replay();
         forcePollAndWaitForIdle();
 
         // verify identical stats, but spread across 4 buckets now
@@ -427,7 +383,6 @@ public class NetworkStatsServiceTest {
         assertValues(history, Long.MIN_VALUE, Long.MAX_VALUE, 512L, 4L, 512L, 4L, 0);
         assertEquals(30 * MINUTE_IN_MILLIS, history.getBucketDuration());
         assertEquals(4, history.size());
-        verifyAndReset();
 
     }
 
@@ -439,12 +394,10 @@ public class NetworkStatsServiceTest {
         expectNetworkState(buildMobile3gState(IMSI_1));
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
-        expectNetworkStatsPoll();
         expectBandwidthControlCheck();
 
-        replay();
         mService.forceUpdateIfaces();
-        verifyAndReset();
+
 
         // create some traffic on first network
         incrementCurrentTime(HOUR_IN_MILLIS);
@@ -456,11 +409,8 @@ public class NetworkStatsServiceTest {
                 .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, 1536L, 12L, 512L, 4L, 0L)
                 .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, 0xF00D, 512L, 4L, 512L, 4L, 0L)
                 .addValues(TEST_IFACE, UID_BLUE, SET_DEFAULT, TAG_NONE, 512L, 4L, 0L, 0L, 0L));
-        expectNetworkStatsPoll();
-
         mService.incrementOperationCount(UID_RED, 0xF00D, 10);
 
-        replay();
         forcePollAndWaitForIdle();
 
         // verify service recorded history
@@ -468,7 +418,7 @@ public class NetworkStatsServiceTest {
         assertNetworkTotal(sTemplateWifi, 0L, 0L, 0L, 0L, 0);
         assertUidTotal(sTemplateImsi1, UID_RED, 1536L, 12L, 512L, 4L, 10);
         assertUidTotal(sTemplateImsi1, UID_BLUE, 512L, 4L, 0L, 0L, 0);
-        verifyAndReset();
+
 
         // now switch networks; this also tests that we're okay with interfaces
         // disappearing, to verify we don't count backwards.
@@ -482,13 +432,11 @@ public class NetworkStatsServiceTest {
                 .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, 1536L, 12L, 512L, 4L, 0L)
                 .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, 0xF00D, 512L, 4L, 512L, 4L, 0L)
                 .addValues(TEST_IFACE, UID_BLUE, SET_DEFAULT, TAG_NONE, 512L, 4L, 0L, 0L, 0L));
-        expectNetworkStatsPoll();
         expectBandwidthControlCheck();
 
-        replay();
         mService.forceUpdateIfaces();
         forcePollAndWaitForIdle();
-        verifyAndReset();
+
 
         // create traffic on second network
         incrementCurrentTime(HOUR_IN_MILLIS);
@@ -501,11 +449,8 @@ public class NetworkStatsServiceTest {
                 .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, 0xF00D, 512L, 4L, 512L, 4L, 0L)
                 .addValues(TEST_IFACE, UID_BLUE, SET_DEFAULT, TAG_NONE, 640L, 5L, 1024L, 8L, 0L)
                 .addValues(TEST_IFACE, UID_BLUE, SET_DEFAULT, 0xFAAD, 128L, 1L, 1024L, 8L, 0L));
-        expectNetworkStatsPoll();
-
         mService.incrementOperationCount(UID_BLUE, 0xFAAD, 10);
 
-        replay();
         forcePollAndWaitForIdle();
 
         // verify original history still intact
@@ -518,7 +463,6 @@ public class NetworkStatsServiceTest {
         assertNetworkTotal(sTemplateImsi2, 128L, 1L, 1024L, 8L, 0);
         assertNetworkTotal(sTemplateWifi, 0L, 0L, 0L, 0L, 0);
         assertUidTotal(sTemplateImsi2, UID_BLUE, 128L, 1L, 1024L, 8L, 10);
-        verifyAndReset();
 
     }
 
@@ -530,12 +474,10 @@ public class NetworkStatsServiceTest {
         expectNetworkState(buildWifiState());
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
-        expectNetworkStatsPoll();
         expectBandwidthControlCheck();
 
-        replay();
         mService.forceUpdateIfaces();
-        verifyAndReset();
+
 
         // create some traffic
         incrementCurrentTime(HOUR_IN_MILLIS);
@@ -548,11 +490,8 @@ public class NetworkStatsServiceTest {
                 .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, 0xFAAD, 16L, 1L, 16L, 1L, 0L)
                 .addValues(TEST_IFACE, UID_BLUE, SET_DEFAULT, TAG_NONE, 4096L, 258L, 512L, 32L, 0L)
                 .addValues(TEST_IFACE, UID_GREEN, SET_DEFAULT, TAG_NONE, 16L, 1L, 16L, 1L, 0L));
-        expectNetworkStatsPoll();
-
         mService.incrementOperationCount(UID_RED, 0xFAAD, 10);
 
-        replay();
         forcePollAndWaitForIdle();
 
         // verify service recorded history
@@ -560,7 +499,7 @@ public class NetworkStatsServiceTest {
         assertUidTotal(sTemplateWifi, UID_RED, 16L, 1L, 16L, 1L, 10);
         assertUidTotal(sTemplateWifi, UID_BLUE, 4096L, 258L, 512L, 32L, 0);
         assertUidTotal(sTemplateWifi, UID_GREEN, 16L, 1L, 16L, 1L, 0);
-        verifyAndReset();
+
 
         // now pretend two UIDs are uninstalled, which should migrate stats to
         // special "removed" bucket.
@@ -573,9 +512,6 @@ public class NetworkStatsServiceTest {
                 .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, 0xFAAD, 16L, 1L, 16L, 1L, 0L)
                 .addValues(TEST_IFACE, UID_BLUE, SET_DEFAULT, TAG_NONE, 4096L, 258L, 512L, 32L, 0L)
                 .addValues(TEST_IFACE, UID_GREEN, SET_DEFAULT, TAG_NONE, 16L, 1L, 16L, 1L, 0L));
-        expectNetworkStatsPoll();
-
-        replay();
         final Intent intent = new Intent(ACTION_UID_REMOVED);
         intent.putExtra(EXTRA_UID, UID_BLUE);
         mServiceContext.sendBroadcast(intent);
@@ -589,7 +525,6 @@ public class NetworkStatsServiceTest {
         assertUidTotal(sTemplateWifi, UID_BLUE, 0L, 0L, 0L, 0L, 0);
         assertUidTotal(sTemplateWifi, UID_GREEN, 16L, 1L, 16L, 1L, 0);
         assertUidTotal(sTemplateWifi, UID_REMOVED, 4112L, 259L, 528L, 33L, 10);
-        verifyAndReset();
 
     }
 
@@ -601,12 +536,10 @@ public class NetworkStatsServiceTest {
         expectNetworkState(buildMobile3gState(IMSI_1));
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
-        expectNetworkStatsPoll();
         expectBandwidthControlCheck();
 
-        replay();
         mService.forceUpdateIfaces();
-        verifyAndReset();
+
 
         // create some traffic
         incrementCurrentTime(HOUR_IN_MILLIS);
@@ -616,16 +549,13 @@ public class NetworkStatsServiceTest {
         expectNetworkStatsUidDetail(new NetworkStats(getElapsedRealtime(), 1)
                 .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, 1024L, 8L, 1024L, 8L, 0L)
                 .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, 0xF00D, 512L, 4L, 512L, 4L, 0L));
-        expectNetworkStatsPoll();
-
         mService.incrementOperationCount(UID_RED, 0xF00D, 5);
 
-        replay();
         forcePollAndWaitForIdle();
 
         // verify service recorded history
         assertUidTotal(sTemplateImsi1, UID_RED, 1024L, 8L, 1024L, 8L, 5);
-        verifyAndReset();
+
 
         // now switch over to 4g network
         incrementCurrentTime(HOUR_IN_MILLIS);
@@ -636,13 +566,11 @@ public class NetworkStatsServiceTest {
         expectNetworkStatsUidDetail(new NetworkStats(getElapsedRealtime(), 1)
                 .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, 1024L, 8L, 1024L, 8L, 0L)
                 .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, 0xF00D, 512L, 4L, 512L, 4L, 0L));
-        expectNetworkStatsPoll();
         expectBandwidthControlCheck();
 
-        replay();
         mService.forceUpdateIfaces();
         forcePollAndWaitForIdle();
-        verifyAndReset();
+
 
         // create traffic on second network
         incrementCurrentTime(HOUR_IN_MILLIS);
@@ -654,17 +582,12 @@ public class NetworkStatsServiceTest {
                 .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, 0xF00D, 512L, 4L, 512L, 4L, 0L)
                 .addValues(TEST_IFACE2, UID_RED, SET_DEFAULT, TAG_NONE, 512L, 4L, 256L, 2L, 0L)
                 .addValues(TEST_IFACE2, UID_RED, SET_DEFAULT, 0xFAAD, 512L, 4L, 256L, 2L, 0L));
-        expectNetworkStatsPoll();
-
         mService.incrementOperationCount(UID_RED, 0xFAAD, 5);
 
-        replay();
         forcePollAndWaitForIdle();
 
         // verify that ALL_MOBILE template combines both
         assertUidTotal(sTemplateImsi1, UID_RED, 1536L, 12L, 1280L, 10L, 10);
-
-        verifyAndReset();
     }
 
     @Test
@@ -675,12 +598,10 @@ public class NetworkStatsServiceTest {
         expectNetworkState(buildWifiState());
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
-        expectNetworkStatsPoll();
         expectBandwidthControlCheck();
 
-        replay();
         mService.forceUpdateIfaces();
-        verifyAndReset();
+
 
         // create some traffic for two apps
         incrementCurrentTime(HOUR_IN_MILLIS);
@@ -691,17 +612,14 @@ public class NetworkStatsServiceTest {
                 .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, 50L, 5L, 50L, 5L, 0L)
                 .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, 0xF00D, 10L, 1L, 10L, 1L, 0L)
                 .addValues(TEST_IFACE, UID_BLUE, SET_DEFAULT, TAG_NONE, 1024L, 8L, 512L, 4L, 0L));
-        expectNetworkStatsPoll();
-
         mService.incrementOperationCount(UID_RED, 0xF00D, 1);
 
-        replay();
         forcePollAndWaitForIdle();
 
         // verify service recorded history
         assertUidTotal(sTemplateWifi, UID_RED, 50L, 5L, 50L, 5L, 1);
         assertUidTotal(sTemplateWifi, UID_BLUE, 1024L, 8L, 512L, 4L, 0);
-        verifyAndReset();
+
 
         // now create more traffic in next hour, but only for one app
         incrementCurrentTime(HOUR_IN_MILLIS);
@@ -712,9 +630,6 @@ public class NetworkStatsServiceTest {
                 .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, 50L, 5L, 50L, 5L, 0L)
                 .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, 0xF00D, 10L, 1L, 10L, 1L, 0L)
                 .addValues(TEST_IFACE, UID_BLUE, SET_DEFAULT, TAG_NONE, 2048L, 16L, 1024L, 8L, 0L));
-        expectNetworkStatsPoll();
-
-        replay();
         forcePollAndWaitForIdle();
 
         // first verify entire history present
@@ -735,8 +650,6 @@ public class NetworkStatsServiceTest {
         assertEquals(1, stats.size());
         assertValues(stats, IFACE_ALL, UID_BLUE, SET_DEFAULT, TAG_NONE, ROAMING_NO, 1024L, 8L,
                 512L, 4L, 0);
-
-        verifyAndReset();
     }
 
     @Test
@@ -747,12 +660,10 @@ public class NetworkStatsServiceTest {
         expectNetworkState(buildWifiState());
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
-        expectNetworkStatsPoll();
         expectBandwidthControlCheck();
 
-        replay();
         mService.forceUpdateIfaces();
-        verifyAndReset();
+
 
         // create some initial traffic
         incrementCurrentTime(HOUR_IN_MILLIS);
@@ -762,16 +673,13 @@ public class NetworkStatsServiceTest {
         expectNetworkStatsUidDetail(new NetworkStats(getElapsedRealtime(), 1)
                 .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, 128L, 2L, 128L, 2L, 0L)
                 .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, 0xF00D, 64L, 1L, 64L, 1L, 0L));
-        expectNetworkStatsPoll();
-
         mService.incrementOperationCount(UID_RED, 0xF00D, 1);
 
-        replay();
         forcePollAndWaitForIdle();
 
         // verify service recorded history
         assertUidTotal(sTemplateWifi, UID_RED, 128L, 2L, 128L, 2L, 1);
-        verifyAndReset();
+
 
         // now switch to foreground
         incrementCurrentTime(HOUR_IN_MILLIS);
@@ -783,12 +691,9 @@ public class NetworkStatsServiceTest {
                 .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, 0xF00D, 64L, 1L, 64L, 1L, 0L)
                 .addValues(TEST_IFACE, UID_RED, SET_FOREGROUND, TAG_NONE, 32L, 2L, 32L, 2L, 0L)
                 .addValues(TEST_IFACE, UID_RED, SET_FOREGROUND, 0xFAAD, 1L, 1L, 1L, 1L, 0L));
-        expectNetworkStatsPoll();
-
         mService.setUidForeground(UID_RED, true);
         mService.incrementOperationCount(UID_RED, 0xFAAD, 1);
 
-        replay();
         forcePollAndWaitForIdle();
 
         // test that we combined correctly
@@ -806,8 +711,6 @@ public class NetworkStatsServiceTest {
                 32L, 2L, 1);
         assertValues(stats, IFACE_ALL, UID_RED, SET_FOREGROUND, 0xFAAD, ROAMING_NO, 1L, 1L, 1L,
                 1L, 1);
-
-        verifyAndReset();
     }
 
     @Test
@@ -818,12 +721,10 @@ public class NetworkStatsServiceTest {
         expectNetworkState(buildMobile3gState(IMSI_1, true /* isRoaming */));
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
-        expectNetworkStatsPoll();
         expectBandwidthControlCheck();
 
-        replay();
         mService.forceUpdateIfaces();
-        verifyAndReset();
+
 
         // Create some traffic
         incrementCurrentTime(HOUR_IN_MILLIS);
@@ -838,9 +739,6 @@ public class NetworkStatsServiceTest {
                         128L, 2L, 0L)
                 .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, 0xF00D, ROAMING_NO, 64L, 1L, 64L,
                         1L, 0L));
-        expectNetworkStatsPoll();
-
-        replay();
         forcePollAndWaitForIdle();
 
         // verify service recorded history
@@ -854,8 +752,6 @@ public class NetworkStatsServiceTest {
                 128L, 2L, 0);
         assertValues(stats, IFACE_ALL, UID_RED, SET_DEFAULT, 0xF00D, ROAMING_YES, 64L, 1L, 64L,
                 1L, 0);
-
-        verifyAndReset();
     }
 
     @Test
@@ -866,12 +762,10 @@ public class NetworkStatsServiceTest {
         expectNetworkState(buildMobile3gState(IMSI_1));
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
-        expectNetworkStatsPoll();
         expectBandwidthControlCheck();
 
-        replay();
         mService.forceUpdateIfaces();
-        verifyAndReset();
+
 
         // create some tethering traffic
         incrementCurrentTime(HOUR_IN_MILLIS);
@@ -887,16 +781,12 @@ public class NetworkStatsServiceTest {
                 .addValues(TEST_IFACE, UID_TETHERING, SET_DEFAULT, TAG_NONE, 1920L, 14L, 384L, 2L, 0L);
 
         expectNetworkStatsUidDetail(uidStats, tetherIfacePairs, tetherStats);
-        expectNetworkStatsPoll();
-
-        replay();
         forcePollAndWaitForIdle();
 
         // verify service recorded history
         assertNetworkTotal(sTemplateImsi1, 2048L, 16L, 512L, 4L, 0);
         assertUidTotal(sTemplateImsi1, UID_RED, 128L, 2L, 128L, 2L, 0);
         assertUidTotal(sTemplateImsi1, UID_TETHERING, 1920L, 14L, 384L, 2L, 0);
-        verifyAndReset();
 
     }
 
@@ -909,16 +799,12 @@ public class NetworkStatsServiceTest {
         expectNetworkState(buildWifiState());
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
-        expectNetworkStatsPoll();
         expectBandwidthControlCheck();
 
-        replay();
         mService.forceUpdateIfaces();
 
         // verify service has empty history for wifi
         assertNetworkTotal(sTemplateWifi, 0L, 0L, 0L, 0L, 0);
-        verifyAndReset();
-
         String callingPackage = "the.calling.package";
         long thresholdInBytes = 1L;  // very small; should be overriden by framework
         DataUsageRequest inputRequest = new DataUsageRequest(
@@ -929,23 +815,18 @@ public class NetworkStatsServiceTest {
         LatchedHandler latchedHandler = new LatchedHandler(Looper.getMainLooper(), cv);
         Messenger messenger = new Messenger(latchedHandler);
 
-        // Allow binder to connect
-        IBinder mockBinder = createMock(IBinder.class);
-        mockBinder.linkToDeath((IBinder.DeathRecipient) anyObject(), anyInt());
-        EasyMock.replay(mockBinder);
-
         // Force poll
         expectCurrentTime();
         expectDefaultSettings();
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
-        expectNetworkStatsPoll();
-        replay();
+
+
 
         // Register and verify request and that binder was called
         DataUsageRequest request =
                 mService.registerUsageCallback(callingPackage, inputRequest,
-                        messenger, mockBinder);
+                        messenger, mBinder);
         assertTrue(request.requestId > 0);
         assertTrue(Objects.equals(sTemplateWifi, request.template));
         long minThresholdInBytes = 2 * 1024 * 1024; // 2 MB
@@ -955,11 +836,11 @@ public class NetworkStatsServiceTest {
         mHandler.sendMessage(mHandler.obtainMessage(-1));
         mHandlerThread.waitForIdle(WAIT_TIMEOUT);
 
-        verifyAndReset();
+
 
         // Make sure that the caller binder gets connected
-        EasyMock.verify(mockBinder);
-        EasyMock.reset(mockBinder);
+        verify(mBinder).linkToDeath(any(IBinder.DeathRecipient.class), anyInt());
+
 
         // modify some number on wifi, and trigger poll event
         // not enough traffic to call data usage callback
@@ -969,13 +850,9 @@ public class NetworkStatsServiceTest {
         expectNetworkStatsSummary(new NetworkStats(getElapsedRealtime(), 1)
                 .addIfaceValues(TEST_IFACE, 1024L, 1L, 2048L, 2L));
         expectNetworkStatsUidDetail(buildEmptyStats());
-        expectNetworkStatsPoll();
-
-        replay();
         forcePollAndWaitForIdle();
 
         // verify service recorded history
-        verifyAndReset();
         assertNetworkTotal(sTemplateWifi, 1024L, 1L, 2048L, 2L, 0);
 
         // make sure callback has not being called
@@ -989,14 +866,11 @@ public class NetworkStatsServiceTest {
         expectNetworkStatsSummary(new NetworkStats(getElapsedRealtime(), 1)
                 .addIfaceValues(TEST_IFACE, 4096000L, 4L, 8192000L, 8L));
         expectNetworkStatsUidDetail(buildEmptyStats());
-        expectNetworkStatsPoll();
-
-        replay();
         forcePollAndWaitForIdle();
 
         // verify service recorded history
         assertNetworkTotal(sTemplateWifi, 4096000L, 4L, 8192000L, 8L, 0);
-        verifyAndReset();
+
 
         // Wait for the caller to ack receipt of CALLBACK_LIMIT_REACHED
         assertTrue(cv.block(WAIT_TIMEOUT));
@@ -1004,9 +878,7 @@ public class NetworkStatsServiceTest {
         cv.close();
 
         // Allow binder to disconnect
-        expect(mockBinder.unlinkToDeath((IBinder.DeathRecipient) anyObject(), anyInt()))
-                .andReturn(true);
-        EasyMock.replay(mockBinder);
+        when(mBinder.unlinkToDeath(any(IBinder.DeathRecipient.class), anyInt())).thenReturn(true);
 
         // Unregister request
         mService.unregisterUsageRequest(request);
@@ -1016,7 +888,7 @@ public class NetworkStatsServiceTest {
         assertEquals(NetworkStatsManager.CALLBACK_RELEASED, latchedHandler.mLastMessageType);
 
         // Make sure that the caller binder gets disconnected
-        EasyMock.verify(mockBinder);
+        verify(mBinder).unlinkToDeath(any(IBinder.DeathRecipient.class), anyInt());
     }
 
     @Test
@@ -1076,33 +948,30 @@ public class NetworkStatsServiceTest {
     }
 
     private void expectSystemReady() throws Exception {
-        mNetManager.setGlobalAlert(anyLong());
-        expectLastCall().atLeastOnce();
-
         expectNetworkStatsSummary(buildEmptyStats());
         expectBandwidthControlCheck();
     }
 
     private void expectNetworkState(NetworkState... state) throws Exception {
-        expect(mConnManager.getAllNetworkState()).andReturn(state).atLeastOnce();
+        when(mConnManager.getAllNetworkState()).thenReturn(state);
 
         final LinkProperties linkProp = state.length > 0 ? state[0].linkProperties : null;
-        expect(mConnManager.getActiveLinkProperties()).andReturn(linkProp).atLeastOnce();
+        when(mConnManager.getActiveLinkProperties()).thenReturn(linkProp);
     }
 
     private void expectNetworkStatsSummary(NetworkStats summary) throws Exception {
-        expect(mConnManager.getAllVpnInfo()).andReturn(new VpnInfo[0]).atLeastOnce();
+        when(mConnManager.getAllVpnInfo()).thenReturn(new VpnInfo[0]);
 
         expectNetworkStatsSummaryDev(summary);
         expectNetworkStatsSummaryXt(summary);
     }
 
     private void expectNetworkStatsSummaryDev(NetworkStats summary) throws Exception {
-        expect(mNetManager.getNetworkStatsSummaryDev()).andReturn(summary).atLeastOnce();
+        when(mNetManager.getNetworkStatsSummaryDev()).thenReturn(summary);
     }
 
     private void expectNetworkStatsSummaryXt(NetworkStats summary) throws Exception {
-        expect(mNetManager.getNetworkStatsSummaryXt()).andReturn(summary).atLeastOnce();
+        when(mNetManager.getNetworkStatsSummaryXt()).thenReturn(summary);
     }
 
     private void expectNetworkStatsUidDetail(NetworkStats detail) throws Exception {
@@ -1112,11 +981,10 @@ public class NetworkStatsServiceTest {
     private void expectNetworkStatsUidDetail(
             NetworkStats detail, String[] tetherIfacePairs, NetworkStats tetherStats)
             throws Exception {
-        expect(mNetManager.getNetworkStatsUidDetail(eq(UID_ALL))).andReturn(detail).atLeastOnce();
+        when(mNetManager.getNetworkStatsUidDetail(UID_ALL)).thenReturn(detail);
 
         // also include tethering details, since they are folded into UID
-        expect(mNetManager.getNetworkStatsTethering())
-                .andReturn(tetherStats).atLeastOnce();
+        when(mNetManager.getNetworkStatsTethering()).thenReturn(tetherStats);
     }
 
     private void expectDefaultSettings() throws Exception {
@@ -1125,38 +993,33 @@ public class NetworkStatsServiceTest {
 
     private void expectSettings(long persistBytes, long bucketDuration, long deleteAge)
             throws Exception {
-        expect(mSettings.getPollInterval()).andReturn(HOUR_IN_MILLIS).anyTimes();
-        expect(mSettings.getTimeCacheMaxAge()).andReturn(DAY_IN_MILLIS).anyTimes();
-        expect(mSettings.getSampleEnabled()).andReturn(true).anyTimes();
+        when(mSettings.getPollInterval()).thenReturn(HOUR_IN_MILLIS);
+        when(mSettings.getTimeCacheMaxAge()).thenReturn(DAY_IN_MILLIS);
+        when(mSettings.getSampleEnabled()).thenReturn(true);
 
         final Config config = new Config(bucketDuration, deleteAge, deleteAge);
-        expect(mSettings.getDevConfig()).andReturn(config).anyTimes();
-        expect(mSettings.getXtConfig()).andReturn(config).anyTimes();
-        expect(mSettings.getUidConfig()).andReturn(config).anyTimes();
-        expect(mSettings.getUidTagConfig()).andReturn(config).anyTimes();
+        when(mSettings.getDevConfig()).thenReturn(config);
+        when(mSettings.getXtConfig()).thenReturn(config);
+        when(mSettings.getUidConfig()).thenReturn(config);
+        when(mSettings.getUidTagConfig()).thenReturn(config);
 
-        expect(mSettings.getGlobalAlertBytes(anyLong())).andReturn(MB_IN_BYTES).anyTimes();
-        expect(mSettings.getDevPersistBytes(anyLong())).andReturn(MB_IN_BYTES).anyTimes();
-        expect(mSettings.getXtPersistBytes(anyLong())).andReturn(MB_IN_BYTES).anyTimes();
-        expect(mSettings.getUidPersistBytes(anyLong())).andReturn(MB_IN_BYTES).anyTimes();
-        expect(mSettings.getUidTagPersistBytes(anyLong())).andReturn(MB_IN_BYTES).anyTimes();
+        when(mSettings.getGlobalAlertBytes(anyLong())).thenReturn(MB_IN_BYTES);
+        when(mSettings.getDevPersistBytes(anyLong())).thenReturn(MB_IN_BYTES);
+        when(mSettings.getXtPersistBytes(anyLong())).thenReturn(MB_IN_BYTES);
+        when(mSettings.getUidPersistBytes(anyLong())).thenReturn(MB_IN_BYTES);
+        when(mSettings.getUidTagPersistBytes(anyLong())).thenReturn(MB_IN_BYTES);
     }
 
     private void expectCurrentTime() throws Exception {
-        expect(mTime.forceRefresh()).andReturn(false).anyTimes();
-        expect(mTime.hasCache()).andReturn(true).anyTimes();
-        expect(mTime.currentTimeMillis()).andReturn(currentTimeMillis()).anyTimes();
-        expect(mTime.getCacheAge()).andReturn(0L).anyTimes();
-        expect(mTime.getCacheCertainty()).andReturn(0L).anyTimes();
-    }
-
-    private void expectNetworkStatsPoll() throws Exception {
-        mNetManager.setGlobalAlert(anyLong());
-        expectLastCall().anyTimes();
+        when(mTime.forceRefresh()).thenReturn(false);
+        when(mTime.hasCache()).thenReturn(true);
+        when(mTime.currentTimeMillis()).thenReturn(currentTimeMillis());
+        when(mTime.getCacheAge()).thenReturn(0L);
+        when(mTime.getCacheCertainty()).thenReturn(0L);
     }
 
     private void expectBandwidthControlCheck() throws Exception {
-        expect(mNetManager.isBandwidthControlEnabled()).andReturn(true).atLeastOnce();
+        when(mNetManager.isBandwidthControlEnabled()).thenReturn(true);
     }
 
     private void assertStatsFilesExist(boolean exist) {
@@ -1265,15 +1128,6 @@ public class NetworkStatsServiceTest {
 
     private void incrementCurrentTime(long duration) {
         mElapsedRealtime += duration;
-    }
-
-    private void replay() {
-        EasyMock.replay(mNetManager, mTime, mSettings, mConnManager);
-    }
-
-    private void verifyAndReset() {
-        EasyMock.verify(mNetManager, mTime, mSettings, mConnManager);
-        EasyMock.reset(mNetManager, mTime, mSettings, mConnManager);
     }
 
     private void forcePollAndWaitForIdle() {
