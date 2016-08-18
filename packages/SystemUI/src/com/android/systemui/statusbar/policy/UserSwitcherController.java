@@ -50,15 +50,14 @@ import android.widget.BaseAdapter;
 
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.internal.util.UserIcons;
-import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.RestrictedLockUtils;
 import com.android.systemui.GuestResumeSessionReceiver;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.SystemUISecondaryUserService;
-import com.android.systemui.qs.QSTile;
+import com.android.systemui.plugins.qs.QSContainer.DetailAdapter;
 import com.android.systemui.qs.tiles.UserDetailView;
-import com.android.systemui.statusbar.phone.ActivityStarter;
+import com.android.systemui.plugins.qs.QSContainer.ActivityStarter;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 
 import java.io.FileDescriptor;
@@ -793,7 +792,7 @@ public class UserSwitcherController {
         }
     }
 
-    public final QSTile.DetailAdapter userDetailAdapter = new QSTile.DetailAdapter() {
+    public final DetailAdapter userDetailAdapter = new DetailAdapter() {
         private final Intent USER_SETTINGS_INTENT = new Intent(Settings.ACTION_USER_SETTINGS);
 
         @Override

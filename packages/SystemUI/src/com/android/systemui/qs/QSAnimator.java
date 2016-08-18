@@ -14,13 +14,13 @@
 
 package com.android.systemui.qs;
 
-import android.graphics.Path;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.View.OnLayoutChangeListener;
 import android.widget.TextView;
 
+import com.android.systemui.plugins.qs.QSContainer;
 import com.android.systemui.qs.PagedTileLayout.PageListener;
 import com.android.systemui.qs.QSPanel.QSTileLayout;
 import com.android.systemui.qs.QSTile.Host.Callback;

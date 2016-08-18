@@ -27,12 +27,11 @@ import android.os.Message;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.View;
-import android.view.ViewGroup;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.settingslib.RestrictedLockUtils;
+import com.android.systemui.plugins.qs.QSContainer.DetailAdapter;
 import com.android.systemui.qs.QSTile.State;
 import com.android.systemui.qs.external.TileServices;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
@@ -42,7 +41,6 @@ import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
-import com.android.systemui.statusbar.policy.Listenable;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.RotationLockController;
@@ -145,29 +143,6 @@ public abstract class QSTile<TState extends State> {
      */
     public boolean isAvailable() {
         return true;
-    }
-
-    public interface DetailAdapter {
-        CharSequence getTitle();
-        Boolean getToggleState();
-        default boolean getToggleEnabled() {
-            return true;
-        }
-        View createDetailView(Context context, View convertView, ViewGroup parent);
-        Intent getSettingsIntent();
-        void setToggleState(boolean state);
-        int getMetricsCategory();
-
-        /**
-         * @return the height in px the content of the detail view should take.
-         */
-        default int getDetailViewHeight() { throw new UnsupportedOperationException(); };
-
-        /**
-         * Indicates whether the detail view wants to have its header (back button, title and
-         * toggle) shown.
-         */
-        default boolean hasHeader() { return true; }
     }
 
     // safe to call from any thread

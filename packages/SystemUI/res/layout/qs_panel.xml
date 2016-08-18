@@ -13,7 +13,7 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<com.android.systemui.qs.QSContainer
+<com.android.systemui.qs.QSContainerImpl
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/quick_settings_container"
         android:layout_width="match_parent"
@@ -38,4 +38,4 @@
     <include android:id="@+id/qs_customize" layout="@layout/qs_customize_panel"
         android:visibility="gone" />
 
-</com.android.systemui.qs.QSContainer>
+</com.android.systemui.qs.QSContainerImpl>

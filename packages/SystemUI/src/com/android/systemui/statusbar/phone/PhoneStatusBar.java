@@ -141,7 +141,10 @@ import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.keyguard.KeyguardViewMediator;
-import com.android.systemui.qs.QSContainer;
+import com.android.systemui.plugins.qs.QSContainer.ActivityStarter;
+import com.android.systemui.plugins.qs.QSContainer.BaseStatusBarHeader;
+import com.android.systemui.plugins.qs.QSContainer;
+import com.android.systemui.qs.QSContainerImpl;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.recents.events.EventBus;
@@ -933,10 +936,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 public void onInflated(View v) {
                     QSContainer qsContainer = (QSContainer) v.findViewById(
                             R.id.quick_settings_container);
-                    qsContainer.setHost(qsh);
-                    mQSPanel = qsContainer.getQsPanel();
-                    mQSPanel.setBrightnessMirror(mBrightnessMirrorController);
-                    mKeyguardStatusBar.setQSPanel(mQSPanel);
+                    if (qsContainer instanceof QSContainerImpl) {
+                        ((QSContainerImpl) qsContainer).setHost(qsh);
+                        mQSPanel = ((QSContainerImpl) qsContainer).getQsPanel();
+                        mQSPanel.setBrightnessMirror(mBrightnessMirrorController);
+                        mKeyguardStatusBar.setQSPanel(mQSPanel);
+                    }
                     mHeader = qsContainer.getHeader();
                     initSignalCluster(mHeader);
                     mHeader.setActivityStarter(PhoneStatusBar.this);

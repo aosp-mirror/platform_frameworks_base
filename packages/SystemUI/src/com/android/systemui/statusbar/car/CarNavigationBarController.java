@@ -15,17 +15,14 @@
  */
 package com.android.systemui.statusbar.car;
 
-import android.app.ActivityManager;
 import android.app.ActivityManager.StackId;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
-import android.os.Handler;
 import android.support.v4.util.SimpleArrayMap;
 import android.util.Log;
 import android.util.SparseBooleanArray;
@@ -33,7 +30,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 
 import com.android.systemui.R;
-import com.android.systemui.statusbar.phone.ActivityStarter;
+import com.android.systemui.plugins.qs.QSContainer.ActivityStarter;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;

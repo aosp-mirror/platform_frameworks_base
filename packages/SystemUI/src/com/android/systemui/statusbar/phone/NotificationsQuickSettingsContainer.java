@@ -24,10 +24,10 @@ import android.view.View;
 import android.view.ViewStub;
 import android.view.WindowInsets;
 import android.widget.FrameLayout;
+
 import com.android.systemui.AutoReinflateContainer;
 import com.android.systemui.R;
-import com.android.systemui.qs.QSContainer;
-import com.android.systemui.qs.customize.QSCustomizer;
+import com.android.systemui.plugins.qs.QSContainer;
 
 /**
  * The container with notification stack scroller and quick settings inside.
@@ -130,8 +130,8 @@ public class NotificationsQuickSettingsContainer extends FrameLayout
 
     @Override
     public void onInflated(View v) {
-        QSCustomizer customizer = ((QSContainer) v).getCustomizer();
-        customizer.setContainer(this);
+        QSContainer container = (QSContainer) v;
+        container.setContainer(this);
     }
 
     public void setQsExpanded(boolean expanded) {

@@ -37,12 +37,15 @@ import com.android.internal.logging.MetricsProto;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
+import com.android.systemui.plugins.qs.QSContainer.ActivityStarter;
+import com.android.systemui.plugins.qs.QSContainer.BaseStatusBarHeader;
 import com.android.systemui.qs.QSPanel;
-import com.android.systemui.qs.QSPanel.Callback;
+import com.android.systemui.plugins.qs.QSContainer.Callback;
 import com.android.systemui.qs.QuickQSPanel;
 import com.android.systemui.qs.TouchAnimator;
 import com.android.systemui.qs.TouchAnimator.Builder;
 import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.NetworkController.EmergencyListener;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.NextAlarmController.NextAlarmChangeCallback;
 import com.android.systemui.statusbar.policy.UserInfoController;
@@ -50,7 +53,7 @@ import com.android.systemui.statusbar.policy.UserInfoController.OnUserInfoChange
 import com.android.systemui.tuner.TunerService;
 
 public class QuickStatusBarHeader extends BaseStatusBarHeader implements
-        NextAlarmChangeCallback, OnClickListener, OnUserInfoChangedListener {
+        NextAlarmChangeCallback, OnClickListener, OnUserInfoChangedListener, EmergencyListener {
 
     private static final String TAG = "QuickStatusBarHeader";
 
@@ -255,6 +258,11 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     }
 
     @Override
+    public View getExpandView() {
+        return findViewById(R.id.expand_indicator);
+    }
+
+    @Override
     public void updateEverything() {
         post(() -> {
             updateVisibilities();
@@ -293,7 +301,6 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         mActivityStarter = activityStarter;
     }
 
-    @Override
     public void setQSPanel(final QSPanel qsPanel) {
         mQsPanel = qsPanel;
         setupHost(qsPanel.getHost());
@@ -354,17 +361,14 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
                 true /* dismissShade */);
     }
 
-    @Override
     public void setNextAlarmController(NextAlarmController nextAlarmController) {
         mNextAlarmController = nextAlarmController;
     }
 
-    @Override
     public void setBatteryController(BatteryController batteryController) {
         // Don't care
     }
 
-    @Override
     public void setUserInfoController(UserInfoController userInfoController) {
         userInfoController.addListener(this);
     }

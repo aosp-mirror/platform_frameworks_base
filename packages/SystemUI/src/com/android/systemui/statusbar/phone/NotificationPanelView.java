@@ -50,7 +50,7 @@ import com.android.systemui.EventLogTags;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingManager;
-import com.android.systemui.qs.QSContainer;
+import com.android.systemui.plugins.qs.QSContainer;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.FlingAnimationUtils;
@@ -70,7 +70,7 @@ public class NotificationPanelView extends PanelView implements
         ExpandableView.OnHeightChangedListener,
         View.OnClickListener, NotificationStackScrollLayout.OnOverscrollTopChangedListener,
         KeyguardAffordanceHelper.Callback, NotificationStackScrollLayout.OnEmptySpaceClickListener,
-        HeadsUpManager.OnHeadsUpChangedListener {
+        HeadsUpManager.OnHeadsUpChangedListener, QSContainer.HeightListener {
 
     private static final boolean DEBUG = false;
 
@@ -242,7 +242,7 @@ public class NotificationPanelView extends PanelView implements
             public void onInflated(View v) {
                 mQsContainer = (QSContainer) v.findViewById(R.id.quick_settings_container);
                 mQsContainer.setPanelView(NotificationPanelView.this);
-                mQsContainer.getHeader().findViewById(R.id.expand_indicator)
+                mQsContainer.getHeader().getExpandView()
                         .setOnClickListener(NotificationPanelView.this);
 
                 // recompute internal state when qspanel height changes
@@ -2011,7 +2011,7 @@ public class NotificationPanelView extends PanelView implements
     }
 
     public void closeQsDetail() {
-        mQsContainer.getQsPanel().closeDetail();
+        mQsContainer.closeDetail();
     }
 
     @Override

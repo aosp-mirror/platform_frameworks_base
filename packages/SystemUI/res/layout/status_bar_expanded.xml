@@ -19,7 +19,7 @@
 
 <com.android.systemui.statusbar.phone.NotificationPanelView 
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
+    xmlns:systemui="http://schemas.android.com/apk/res-auto"
     android:id="@+id/notification_panel"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -39,14 +39,15 @@
         android:clipToPadding="false"
         android:clipChildren="false">
 
-        <com.android.systemui.AutoReinflateContainer
+        <com.android.systemui.PluginInflateContainer
             android:id="@+id/qs_auto_reinflate_container"
             android:layout="@layout/qs_panel"
             android:layout_width="@dimen/notification_panel_width"
             android:layout_height="match_parent"
             android:layout_gravity="@integer/notification_panel_layout_gravity"
             android:clipToPadding="false"
-            android:clipChildren="false" />
+            android:clipChildren="false"
+            systemui:viewType="com.android.systemui.plugins.qs.QSContainer" />
 
         <com.android.systemui.statusbar.stack.NotificationStackScrollLayout
             android:id="@+id/notification_stack_scroller"

@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
@@ -31,8 +30,8 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 
 import com.android.systemui.R;
+import com.android.systemui.plugins.qs.QSContainer.DetailAdapter;
 import com.android.systemui.qs.QSPanel;
-import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 
@@ -183,7 +182,7 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
         return false;
     }
 
-    protected QSTile.DetailAdapter getUserDetailAdapter() {
+    protected DetailAdapter getUserDetailAdapter() {
         return mUserSwitcherController.userDetailAdapter;
     }
 }

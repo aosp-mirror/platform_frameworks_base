@@ -35,8 +35,9 @@ import android.widget.TextView;
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
-import com.android.systemui.qs.QSTile.DetailAdapter;
-import com.android.systemui.statusbar.phone.BaseStatusBarHeader;
+import com.android.systemui.plugins.qs.QSContainer.BaseStatusBarHeader;
+import com.android.systemui.plugins.qs.QSContainer.Callback;
+import com.android.systemui.plugins.qs.QSContainer.DetailAdapter;
 import com.android.systemui.statusbar.phone.QSTileHost;
 
 public class QSDetail extends LinearLayout {
@@ -151,7 +152,7 @@ public class QSDetail extends LinearLayout {
 
 
 
-    public void handleShowingDetail(final QSTile.DetailAdapter adapter, int x, int y,
+    public void handleShowingDetail(final DetailAdapter adapter, int x, int y,
             boolean toggleQs) {
         final boolean showingDetail = adapter != null;
         setClickable(showingDetail);
@@ -287,7 +288,7 @@ public class QSDetail extends LinearLayout {
                             mDetailAdapter != null && mDetailAdapter.getToggleEnabled());
     }
 
-    protected QSPanel.Callback mQsPanelCallback = new QSPanel.Callback() {
+    protected Callback mQsPanelCallback = new Callback() {
         @Override
         public void onToggleStateChanged(final boolean state) {
             post(new Runnable() {
