@@ -181,6 +181,10 @@
     <protected-broadcast
         android:name="android.bluetooth.map.profile.action.CONNECTION_STATE_CHANGED" />
     <protected-broadcast
+        android:name="com.android.bluetooth.BluetoothMapContentObserver.action.MESSAGE_SENT" />
+    <protected-broadcast
+        android:name="com.android.bluetooth.BluetoothMapContentObserver.action.MESSAGE_DELIVERY" />
+    <protected-broadcast
         android:name="android.bluetooth.pan.profile.action.CONNECTION_STATE_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.pbap.intent.action.PBAP_STATE_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.sap.profile.action.CONNECTION_STATE_CHANGED" />
