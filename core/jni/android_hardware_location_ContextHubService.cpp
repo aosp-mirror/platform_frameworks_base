@@ -305,7 +305,7 @@ static void query_hub_for_apps(uint64_t appId, uint32_t hubHandle) {
     hub_message_t msg;
     query_apps_request_t queryMsg;
 
-    queryMsg.app_name.id = NANOAPP_VENDOR_ALL_APPS;
+    queryMsg.app_name.id = appId;
 
     msg.message_type = CONTEXT_HUB_QUERY_APPS;
     msg.message_len  = sizeof(queryMsg);
