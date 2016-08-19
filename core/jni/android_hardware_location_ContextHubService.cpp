@@ -357,7 +357,9 @@ static jint add_app_instance(const hub_app_info *appInfo, uint32_t hubHandle,
     app_instance_info_s entry;
     assert(appInfo);
 
+    const char *action = "Updated";
     if (db.appInstances.count(appInstanceHandle) == 0) {
+        action = "Added";
         appInstanceHandle = generate_id();
         if (appInstanceHandle < 0) {
             ALOGE("Cannot find resources to add app instance %" PRId32,
@@ -380,8 +382,8 @@ static jint add_app_instance(const hub_app_info *appInfo, uint32_t hubHandle,
                        hubHandle, entry.instanceId, entry.truncName,
                        entry.appInfo.version);
 
-    ALOGW("Added App 0x%" PRIx64 " on hub Handle %" PRId32
-          " as appInstance %" PRId32, entry.truncName,
+    ALOGW("%s App 0x%" PRIx64 " on hub Handle %" PRId32
+          " as appInstance %" PRId32, action, entry.truncName,
           entry.hubHandle, appInstanceHandle);
 
     return appInstanceHandle;
