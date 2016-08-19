@@ -258,6 +258,7 @@ public class FingerprintManager {
     public static class AuthenticationResult {
         private Fingerprint mFingerprint;
         private CryptoObject mCryptoObject;
+        private int mUserId;
 
         /**
          * Authentication result
@@ -266,9 +267,10 @@ public class FingerprintManager {
          * @param fingerprint the recognized fingerprint data, if allowed.
          * @hide
          */
-        public AuthenticationResult(CryptoObject crypto, Fingerprint fingerprint) {
+        public AuthenticationResult(CryptoObject crypto, Fingerprint fingerprint, int userId) {
             mCryptoObject = crypto;
             mFingerprint = fingerprint;
+            mUserId = userId;
         }
 
         /**
@@ -285,6 +287,12 @@ public class FingerprintManager {
          * @hide
          */
         public Fingerprint getFingerprint() { return mFingerprint; }
+
+        /**
+         * Obtain the userId for which this fingerprint was authenticated.
+         * @hide
+         */
+        public int getUserId() { return mUserId; }
     };
 
     /**
@@ -754,7 +762,7 @@ public class FingerprintManager {
                     sendAcquiredResult((Long) msg.obj /* deviceId */, msg.arg1 /* acquire info */);
                     break;
                 case MSG_AUTHENTICATION_SUCCEEDED:
-                    sendAuthenticatedSucceeded((Fingerprint) msg.obj);
+                    sendAuthenticatedSucceeded((Fingerprint) msg.obj, msg.arg1 /* userId */);
                     break;
                 case MSG_AUTHENTICATION_FAILED:
                     sendAuthenticatedFailed();
@@ -799,9 +807,10 @@ public class FingerprintManager {
             }
         }
 
-        private void sendAuthenticatedSucceeded(Fingerprint fp) {
+        private void sendAuthenticatedSucceeded(Fingerprint fp, int userId) {
             if (mAuthenticationCallback != null) {
-                final AuthenticationResult result = new AuthenticationResult(mCryptoObject, fp);
+                final AuthenticationResult result =
+                        new AuthenticationResult(mCryptoObject, fp, userId);
                 mAuthenticationCallback.onAuthenticationSucceeded(result);
             }
         }
@@ -941,8 +950,8 @@ public class FingerprintManager {
         }
 
         @Override // binder call
-        public void onAuthenticationSucceeded(long deviceId, Fingerprint fp) {
-            mHandler.obtainMessage(MSG_AUTHENTICATION_SUCCEEDED, fp).sendToTarget();
+        public void onAuthenticationSucceeded(long deviceId, Fingerprint fp, int userId) {
+            mHandler.obtainMessage(MSG_AUTHENTICATION_SUCCEEDED, userId, 0, fp).sendToTarget();
         }
 
         @Override // binder call
