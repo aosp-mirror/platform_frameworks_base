@@ -131,18 +131,10 @@ public class AccessibilityManagerTest extends AndroidTestCase {
     public void testSendAccessibilityEvent_AccessibilityEnabled() throws Exception {
         AccessibilityEvent sentEvent = AccessibilityEvent.obtain();
 
-        when(mMockService.sendAccessibilityEvent(eq(sentEvent), anyInt()))
-                .thenReturn(true  /* should recycle event object */)
-                .thenReturn(false /* should not recycle event object */);
-
         AccessibilityManager manager = createManager(true);
         manager.sendAccessibilityEvent(sentEvent);
 
         assertSame("The event should be recycled.", sentEvent, AccessibilityEvent.obtain());
-
-        manager.sendAccessibilityEvent(sentEvent);
-
-        assertNotSame("The event should not be recycled.", sentEvent, AccessibilityEvent.obtain());
     }
 
     @MediumTest
