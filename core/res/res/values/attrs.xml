@@ -5312,6 +5312,21 @@ i
         <attr name="alpha" />
     </declare-styleable>
 
+    <!-- Drawable used to render according to the animation scale. Esp. when it is 0 due to battery
+         saver mode. It should contain one animatable drawable and one static drawable.
+         @hide -->
+    <declare-styleable name="AnimationScaleListDrawable">
+    </declare-styleable>
+
+    <!-- Attributes that can be assigned to a AnimationScaleListDrawable item.
+         @hide -->
+    <declare-styleable name="AnimationScaleListDrawableItem">
+        <!-- Reference to a drawable resource to use for the state. If not
+             given, the drawable must be defined by the first child tag. -->
+        <attr name="drawable" />
+    </declare-styleable>
+
+
     <!-- Drawable used to render a geometric shape, with a gradient or a solid color. -->
     <declare-styleable name="GradientDrawable">
         <!-- Indicates whether the drawable should intially be visible. -->

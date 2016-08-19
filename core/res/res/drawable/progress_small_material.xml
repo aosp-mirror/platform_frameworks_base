@@ -13,16 +13,17 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-
-<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:drawable="@drawable/vector_drawable_progress_bar_small" >
-
-    <target
-        android:name="progressBar"
-        android:animation="@anim/progress_indeterminate_material" />
-
-    <target
-        android:name="root"
-        android:animation="@anim/progress_indeterminate_rotation_material" />
-
-</animated-vector>
+<com.android.internal.graphics.drawable.AnimationScaleListDrawable
+        xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/progress_static_material" />
+    <item>
+        <animated-vector android:drawable="@drawable/vector_drawable_progress_bar_small" >
+            <target
+                    android:name="progressBar"
+                    android:animation="@anim/progress_indeterminate_material" />
+            <target
+                    android:name="root"
+                    android:animation="@anim/progress_indeterminate_rotation_material" />
+        </animated-vector>
+    </item>
+</com.android.internal.graphics.drawable.AnimationScaleListDrawable>

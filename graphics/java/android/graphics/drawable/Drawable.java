@@ -1422,9 +1422,10 @@ public abstract class Drawable {
     /**
      * Obtains styled attributes from the theme, if available, or unstyled
      * resources if the theme is null.
+     * @hide
      */
-    static @NonNull TypedArray obtainAttributes(@NonNull Resources res, @Nullable Theme theme,
-            @NonNull AttributeSet set, @NonNull int[] attrs) {
+    protected static @NonNull TypedArray obtainAttributes(@NonNull Resources res,
+            @Nullable Theme theme, @NonNull AttributeSet set, @NonNull int[] attrs) {
         if (theme == null) {
             return res.obtainAttributes(set, attrs);
         }
