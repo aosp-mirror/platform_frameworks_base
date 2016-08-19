@@ -3817,6 +3817,26 @@ public final class Settings {
         }
 
         /**
+         * These entries should be cloned from this profile's parent only if the dependency's
+         * value is true ("1")
+         *
+         * Note: the dependencies must be Secure settings
+         *
+         * @hide
+         */
+        public static final Map<String, String> CLONE_FROM_PARENT_ON_VALUE = new ArrayMap<>();
+        static {
+            CLONE_FROM_PARENT_ON_VALUE.put(RINGTONE, Secure.SYNC_PARENT_SOUNDS);
+            CLONE_FROM_PARENT_ON_VALUE.put(NOTIFICATION_SOUND, Secure.SYNC_PARENT_SOUNDS);
+            CLONE_FROM_PARENT_ON_VALUE.put(ALARM_ALERT, Secure.SYNC_PARENT_SOUNDS);
+        }
+
+        /** @hide */
+        public static void getCloneFromParentOnValueSettings(Map<String, String> outMap) {
+            outMap.putAll(CLONE_FROM_PARENT_ON_VALUE);
+        }
+
+        /**
          * When to use Wi-Fi calling
          *
          * @see android.telephony.TelephonyManager.WifiCallingChoices
@@ -6061,6 +6081,17 @@ public final class Settings {
         public static final String VOLUME_CONTROLLER_SERVICE_COMPONENT
                 = "volume_controller_service_component";
 
+        /**
+         * Defines whether managed profile ringtones should be synced from it's parent profile
+         * <p>
+         * 0 = ringtones are not synced
+         * 1 = ringtones are synced from the profile's parent (default)
+         * <p>
+         * This value is only used for managed profiles.
+         * @hide
+         */
+        public static final String SYNC_PARENT_SOUNDS = "sync_parent_sounds";
+
         /** @hide */
         public static final String IMMERSIVE_MODE_CONFIRMATIONS = "immersive_mode_confirmations";
 
@@ -6432,7 +6463,8 @@ public final class Settings {
             NIGHT_DISPLAY_CUSTOM_START_TIME,
             NIGHT_DISPLAY_CUSTOM_END_TIME,
             NIGHT_DISPLAY_AUTO_MODE,
-            NIGHT_DISPLAY_ACTIVATED
+            NIGHT_DISPLAY_ACTIVATED,
+            SYNC_PARENT_SOUNDS
         };
 
         /**

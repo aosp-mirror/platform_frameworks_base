@@ -16,18 +16,24 @@
 
 package android.media;
 
+import android.Manifest;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.app.Activity;
+import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.pm.UserInfo;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
+import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.provider.Settings.System;
@@ -42,6 +48,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import static android.content.ContentProvider.maybeAddUserId;
+import static android.content.pm.PackageManager.NameNotFoundException;
 
 /**
  * RingtoneManager provides access to ringtones, notification, and other types
@@ -82,6 +91,10 @@ public class RingtoneManager {
      * All types of sounds.
      */
     public static final int TYPE_ALL = TYPE_RINGTONE | TYPE_NOTIFICATION | TYPE_ALARM;
+
+    private static final int[] RINGTONE_TYPES = {
+            TYPE_RINGTONE, TYPE_NOTIFICATION, TYPE_ALARM
+    };
     
     // </attr>
     
@@ -629,6 +642,48 @@ public class RingtoneManager {
     }
     
     /**
+     * Disables Settings.System.SYNC_PARENT_SOUNDS, copying the parent's ringtones to the current
+     * profile
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    public static void disableSyncFromParent(Context userContext) {
+        // Must disable sync first so that ringtone copy below doesn't get redirected to parent
+        Settings.Secure.putIntForUser(userContext.getContentResolver(),
+                Settings.Secure.SYNC_PARENT_SOUNDS, 0 /* false */, userContext.getUserId());
+
+        // Copy ringtones from parent profile
+        UserManager um = UserManager.get(userContext);
+        UserInfo parentInfo = um.getProfileParent(userContext.getUserId());
+        if (parentInfo != null) {
+            try {
+                Context targetContext = userContext.createPackageContextAsUser(
+                        userContext.getPackageName(), 0 /* flags */, UserHandle.of(parentInfo.id));
+                for (int ringtoneType : RINGTONE_TYPES) {
+                    Uri ringtoneUri = getActualDefaultRingtoneUri(targetContext, ringtoneType);
+                    // Add user id of parent so that custom ringtones can be read and played
+                    RingtoneManager.setActualDefaultRingtoneUri(userContext, ringtoneType,
+                            maybeAddUserId(ringtoneUri, parentInfo.id));
+                }
+            } catch (NameNotFoundException e) {
+                Log.e(TAG, "Unable to create parent context", e);
+            }
+        }
+    }
+
+    /**
+     * Enables Settings.System.SYNC_PARENT_SOUNDS for the content's user
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    public static void enableSyncFromParent(Context userContext) {
+        Settings.Secure.putIntForUser(userContext.getContentResolver(),
+                Settings.Secure.SYNC_PARENT_SOUNDS, 1 /* true */, userContext.getUserId());
+    }
+
+    /**
      * Gets the current default sound's {@link Uri}. This will give the actual
      * sound {@link Uri}, instead of using this, most clients can use
      * {@link System#DEFAULT_RINGTONE_URI}.
@@ -645,7 +700,16 @@ public class RingtoneManager {
         if (setting == null) return null;
         final String uriString = Settings.System.getStringForUser(context.getContentResolver(),
                 setting, context.getUserId());
-        return uriString != null ? Uri.parse(uriString) : null;
+        Uri ringtoneUri = uriString != null ? Uri.parse(uriString) : null;
+
+        // If this doesn't verify, the user id must be kept in the uri to ensure it resolves in the
+        // correct user storage
+        if (ringtoneUri != null
+                && ContentProvider.getUserIdFromUri(ringtoneUri) == context.getUserId()) {
+            ringtoneUri = ContentProvider.getUriWithoutUserId(ringtoneUri);
+        }
+
+        return ringtoneUri;
     }
     
     /**
@@ -663,13 +727,14 @@ public class RingtoneManager {
 
         String setting = getSettingForType(type);
         if (setting == null) return;
+        ringtoneUri = ContentProvider.maybeAddUserId(ringtoneUri, context.getUserId());
         Settings.System.putStringForUser(resolver, setting,
                 ringtoneUri != null ? ringtoneUri.toString() : null, context.getUserId());
 
         // Stream selected ringtone into cache so it's available for playback
         // when CE storage is still locked
         if (ringtoneUri != null) {
-            final Uri cacheUri = getCacheForType(type);
+            final Uri cacheUri = getCacheForType(type, context.getUserId());
             try (InputStream in = openRingtone(context, ringtoneUri);
                     OutputStream out = resolver.openOutputStream(cacheUri)) {
                 Streams.copy(in, out);
@@ -715,15 +780,20 @@ public class RingtoneManager {
 
     /** {@hide} */
     public static Uri getCacheForType(int type) {
+        return getCacheForType(type, UserHandle.getCallingUserId());
+    }
+
+    /** {@hide} */
+    public static Uri getCacheForType(int type, int userId) {
         if ((type & TYPE_RINGTONE) != 0) {
-            return Settings.System.RINGTONE_CACHE_URI;
+            return ContentProvider.maybeAddUserId(Settings.System.RINGTONE_CACHE_URI, userId);
         } else if ((type & TYPE_NOTIFICATION) != 0) {
-            return Settings.System.NOTIFICATION_SOUND_CACHE_URI;
+            return ContentProvider.maybeAddUserId(Settings.System.NOTIFICATION_SOUND_CACHE_URI,
+                    userId);
         } else if ((type & TYPE_ALARM) != 0) {
-            return Settings.System.ALARM_ALERT_CACHE_URI;
-        } else {
-            return null;
+            return ContentProvider.maybeAddUserId(Settings.System.ALARM_ALERT_CACHE_URI, userId);
         }
+        return null;
     }
 
     /**
