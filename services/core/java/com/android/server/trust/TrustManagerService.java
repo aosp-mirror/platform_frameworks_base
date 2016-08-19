@@ -860,16 +860,21 @@ public class TrustManagerService extends SystemService {
         @Override
         public void setDeviceLockedForUser(int userId, boolean locked) {
             enforceReportPermission();
-            if (mLockPatternUtils.isSeparateProfileChallengeEnabled(userId)) {
-                synchronized (mDeviceLockedForUser) {
-                    mDeviceLockedForUser.put(userId, locked);
-                }
-                if (locked) {
-                    try {
-                        ActivityManagerNative.getDefault().notifyLockedProfile(userId);
-                    } catch (RemoteException e) {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                if (mLockPatternUtils.isSeparateProfileChallengeEnabled(userId)) {
+                    synchronized (mDeviceLockedForUser) {
+                        mDeviceLockedForUser.put(userId, locked);
+                    }
+                    if (locked) {
+                        try {
+                            ActivityManagerNative.getDefault().notifyLockedProfile(userId);
+                        } catch (RemoteException e) {
+                        }
                     }
                 }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
             }
         }
 
