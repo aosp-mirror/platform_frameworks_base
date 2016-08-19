@@ -20,6 +20,7 @@ import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.NetworkPolicy.LIMIT_DISABLED;
 import static android.net.NetworkPolicy.WARNING_DISABLED;
+import static android.net.NetworkPolicyManager.POLICY_ALLOW_METERED_BACKGROUND;
 import static android.net.NetworkPolicyManager.POLICY_NONE;
 import static android.net.NetworkPolicyManager.POLICY_REJECT_METERED_BACKGROUND;
 import static android.net.NetworkPolicyManager.computeLastCycleBoundary;
@@ -72,6 +73,7 @@ import android.net.INetworkPolicyListener;
 import android.net.INetworkStatsService;
 import android.net.LinkProperties;
 import android.net.NetworkInfo;
+import android.net.NetworkPolicyManager;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkPolicy;
 import android.net.NetworkState;
@@ -296,19 +298,56 @@ public class NetworkPolicyManagerServiceTest {
     @Test
     @NetPolicyXml("restrict-background-lists-whitelist-format.xml")
     public void testRestrictBackgroundLists_whitelistFormat() throws Exception {
+        restrictBackgroundListsTest();
+    }
+
+    @Test
+    @NetPolicyXml("restrict-background-lists-uid-policy-format.xml")
+    public void testRestrictBackgroundLists_uidPolicyFormat() throws Exception {
+        restrictBackgroundListsTest();
+    }
+
+    private void restrictBackgroundListsTest() throws Exception {
         // UIds that are whitelisted.
-        final int[] whitelisted = mService.getRestrictBackgroundWhitelistedUids();
-        assertContainsInAnyOrder(whitelisted, UID_A, UID_B, UID_C);
-        assertUidPolicy(UID_A, POLICY_NONE);
-        assertUidPolicy(UID_B, POLICY_NONE);
-        assertUidPolicy(UID_C, POLICY_NONE);
+        assertWhitelistUids(UID_A, UID_B, UID_C);
+        assertUidPolicy(UID_A, POLICY_ALLOW_METERED_BACKGROUND);
+        assertUidPolicy(UID_B, POLICY_ALLOW_METERED_BACKGROUND);
+        assertUidPolicy(UID_C, POLICY_ALLOW_METERED_BACKGROUND);
 
         // UIDs that are blacklisted.
         assertUidPolicy(UID_D, POLICY_NONE);
         assertUidPolicy(UID_E, POLICY_REJECT_METERED_BACKGROUND);
 
         // UIDS that have legacy policies.
-        assertUidPolicy(UID_F, 2);
+        assertUidPolicy(UID_F, 2); // POLICY_ALLOW_BACKGROUND_BATTERY_SAVE
+
+        // Remove whitelist.
+        mService.removeRestrictBackgroundWhitelistedUid(UID_A);
+        assertUidPolicy(UID_A, POLICY_NONE);
+        assertWhitelistUids(UID_B, UID_C);
+
+        // Add whitelist when blacklisted.
+        mService.addRestrictBackgroundWhitelistedUid(UID_E);
+        assertUidPolicy(UID_E, POLICY_ALLOW_METERED_BACKGROUND);
+        assertWhitelistUids(UID_B, UID_C, UID_E);
+
+        // Add blacklist when whitelisted.
+        mService.setUidPolicy(UID_B, POLICY_REJECT_METERED_BACKGROUND);
+        assertUidPolicy(UID_B, POLICY_REJECT_METERED_BACKGROUND);
+        assertWhitelistUids(UID_C, UID_E);
+    }
+
+    /**
+     * Tests scenario where an UID had {@code restrict-background} and {@code uid-policy} tags.
+     */
+    @Test
+    @NetPolicyXml("restrict-background-lists-mixed-format.xml")
+    public void testRestrictBackgroundLists_mixedFormat() throws Exception {
+        assertWhitelistUids(UID_A, UID_C, UID_D);
+        assertUidPolicy(UID_A, POLICY_ALLOW_METERED_BACKGROUND);
+        assertUidPolicy(UID_B, POLICY_REJECT_METERED_BACKGROUND);
+        assertUidPolicy(UID_C, (POLICY_ALLOW_METERED_BACKGROUND | 2));
+        assertUidPolicy(UID_D, POLICY_ALLOW_METERED_BACKGROUND);
     }
 
     // NOTE: testPolicyChangeTriggersListener() and testUidForeground() are too superficial, they
@@ -799,6 +838,10 @@ public class NetworkPolicyManagerServiceTest {
             fail("Wrong policy for UID " + uid + ": expected " + uidPoliciesToString(expected)
                     + ", actual " + uidPoliciesToString(actual));
         }
+    }
+
+    private void assertWhitelistUids(int... uids) {
+        assertContainsInAnyOrder(mService.getRestrictBackgroundWhitelistedUids(), uids);
     }
 
     // TODO: replace by Truth, Hamcrest, or a similar tool.
