@@ -220,6 +220,13 @@ page.image=/distribute/images/billions-guidelines.png
    Android training on <a
    href="{@docRoot}training/basics/network-ops/managing.html">Managing Network
    Usage</a>.</li>
+  <li>On devices powered by Android 7.0 (API level 24) and higher,
+  users can turn on the
+  <strong>Data Saver</strong> setting, which helps minimize data usage. Android 7.0
+  extends {@link android.net.ConnectivityManager} to detect <strong>Data Saver</strong>
+  settings. For more information about this feature, see
+  <a href="/training/basics/network-ops/data-saver.html">Data Saver.</a>
+  </li>
  </ul>
 <h4 id="network-behavior">Detect network changes, then change app behavior</h4>
  <ul>
@@ -257,9 +264,11 @@ page.image=/distribute/images/billions-guidelines.png
    <code>registerReceiver</code></a> to receive this broadcast. After receiving
    the broadcast, you should reevaluate the current network state and adjust
    your UI and network usage appropriately. You should not declare this receiver
-   in your manifest, as it will no longer function beginning with Android N.
-   For more details see <a href="{@docRoot}preview/behavior-changes.html">
-   Android N behavior changes</a>.</li>
+   in your manifest, as that feature is unavailable in Android 7.0 (API level 24)
+   and higher.
+   For more information about this and other changes in Android 7.0,
+   see <a href="/about/versions/nougat/android-7.0-changes.html">
+   Android 7.0 Changes</a>.</li>
  </ul>
 
 <h3 class="rel-resources clearfloat">Related resources</h3>
@@ -490,14 +499,18 @@ page.image=/distribute/images/billions-guidelines.png
    smaller file sizes than its PNG and JPG counterparts, with at least the
    same image quality. Even at lossy settings, WebP can produce a nearly
    identical image. Android has had lossy WebP support since Android 4.0 (API
-   level 14: Ice Cream Sandwich) and support for lossless / transparent WebP since Android 4.2 (API level 17: Jelly Bean).</li>
+   level 14: Ice Cream Sandwich) and support for lossless / transparent WebP
+   since Android 4.2 (API level 17: Jelly Bean).</li>
   <li>If you have many large images across multiple densities, consider
    using <a href="{@docRoot}google/play/publishing/multiple-apks.html">Multiple
    APK support</a> to split your APK by density. This results in builds
    targeted for specific densities, meaning users with low-density devices
    won’t have to incur the penalty of unused high-density assets.</li>
-  <li>A detailed guide on reducing your APK size can be found in <a
-   class="external-link" href="https://medium.com/@wkalicinski/smallerapk-part-4-multi-apk-through-abi-and-density-splits-477083989006">
+  <li>For more information about reducing APK size, see
+  <a href="/topic/performance/reduce-apk-size.html">Reduce APK Size</a> and
+  <a href="/studio/build/shrink-code.html">Shrink Your Code and Resources</a>. In addition, you can
+  find a detailed guide on reducing APK size in this <a class="external-link"
+  href="https://medium.com/@wkalicinski/smallerapk-part-4-multi-apk-through-abi-and-density-splits-477083989006">
    series of Medium posts</a>.</li>
  </ul>
 <h4 id="appsize-code">Reduce code size</h4>
@@ -607,6 +620,19 @@ requests.</p>
  <ul>
   <li>Your app should do minimal activity when in the background and when the
    device is running on battery power.</li>
+   <li>Sensors, like GPS, can also significantly drain your battery. For this
+   reason, we recommend that you use the <a
+   href="https://developers.google.com/android/reference/com/google/android/gms/location/FusedLocationProviderApi">
+   <code>FusedLocationProvider</code></a> API. The
+   <code>FusedLocationProvider</code> API manages the
+   underlying location technology and provides a simple API so that you can
+   specify requirements&mdash;like high accuracy or low power&mdash;at a high
+   level. It also optimizes the device's use of battery power by caching
+   locations and batching requests across apps. For more information about the
+   ideal ways to request location, see the <a
+   href="{@docRoot}training/location/retrieve-current.html">Getting the Last
+   Known Location</a> training guide.
+  </li>
   <li><a href="{@docRoot}reference/android/os/PowerManager.WakeLock.html">Wake
    locks</a> are mechanisms to keep devices on so that they can perform
    background activities. Avoid using wake locks because they prevent the
@@ -623,18 +649,9 @@ requests.</p>
    network connectivity, device charging state, retries, and backoff. Use
    <code>GcmNetworkManager</code> to perform non-essential background activity
    when the device is charging and is connected to an unmetered network.</li>
-  <li>Sensors, like GPS, can also have a significant drain on the battery. The
-   recommended way to request location is to use the FusedLocationProvider API.
-   The <a
-   href="https://developers.google.com/android/reference/com/google/android/gms/location/FusedLocationProviderApi">FusedLocationProvider</a> API manages the
-   underlying location technology and provides a simple API so that you can
-   specify requirements&mdash;like high accuracy or low power&mdash;at a high
-   level. It also optimizes the device's use of battery power by caching
-   locations and batching requests across apps. For  more information on the
-   ideal ways to request location, see the <a
-   href="{@docRoot}training/location/retrieve-current.html">Getting the Last
-   Known Location</a> training guide.
-  </li>
+  <li>For more information on how network activity can drain the battery, and
+  how to tackle this issue, see <a
+  href="/topic/performance/power/network/index.html">Reducing Network Battery Drain</a>.
  </ul>
 <h3 id="consumption-benchmark">Benchmark battery usage</h3>
  <ul>
@@ -735,9 +752,12 @@ requests.</p>
    the device’s CPU and GPU.  For more information, see the Android training on
    <a href="{@docRoot}training/improving-layouts/index.html">Improving Layout
    Performance</a>. </li>
+  <li>An efficient view hierarchy can speed up your app without increasing the
+      app's memory footprint. For more information, see
+  <a href="/topic/performance/optimizing-view-hierarchies.html">Performance
+  and View Hierarchies.</a>
  </ul>
-<h4 id="content-firstload">If anticipated start speed is low, use launch screen
-on first load</h4>
+<h4 id="content-firstload">If anticipated start speed is low, use launch screen on first load</h4>
  <ul>
   <li>The launch screen is a user’s first experience of your application.
    Launching your app while displaying a blank canvas increases its perceived
@@ -753,6 +773,9 @@ on first load</h4>
   <li>For more information on implementing splash screens, see the <a
    href="https://www.google.com/design/spec/patterns/launch-screens.html">
    Launch screens</a> section of the Material Design spec.</li>
+  <li>The best way to deal with slow start speeds is not to have them. <a
+  href="/topic/performance/launch-time.html">Launch-Time Performance</a> provides
+  information that may help you speed up your app's launch time.</li>
  </ul>
 <h3 id="ui">UI best practices</h3>
  <ul>
@@ -778,6 +801,12 @@ on first load</h4>
   <li>To learn more, visit the Android training on <a
  href="{@docRoot}training/basics/supporting-devices/languages.html">
  Supporting Different Languages</a>.</li>
+  <li>Starting from Android 7.0 (API level 24), the Android framework
+  makes available a subset of the <a class="external-link"
+  href="http://userguide.icu-project.org/">ICU4J APIs</a>, which can
+  help you localize your app into multiple languages. For more
+  information, see <a href="/guide/topics/resources/icu4j-framework.html"> 
+  ICU4J Android Framework APIs.</a>
  </ul>
 
 <h3 class="rel-resources clearfloat">Related resources</h3>
