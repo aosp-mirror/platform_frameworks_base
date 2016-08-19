@@ -38,6 +38,8 @@ import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 
+import dalvik.system.CloseGuard;
+
 import libcore.util.HexEncoding;
 
 import org.json.JSONException;
@@ -221,6 +223,7 @@ public class WifiNanManager {
     public static final int WIFI_NAN_DATA_PATH_ROLE_RESPONDER = 1;
 
     private final IWifiNanManager mService;
+    private final CloseGuard mCloseGuard = CloseGuard.get();
 
     private final Object mLock = new Object(); // lock access to the following vars
 
@@ -332,6 +335,8 @@ public class WifiNanManager {
                 e.rethrowAsRuntimeException();
             }
         }
+
+        mCloseGuard.open("disconnect");
     }
 
     /**
@@ -361,6 +366,7 @@ public class WifiNanManager {
             mClientId = INVALID_CLIENT_ID;
         }
 
+        mCloseGuard.close();
         try {
             mService.disconnect(clientId, binder);
         } catch (RemoteException e) {
@@ -370,8 +376,12 @@ public class WifiNanManager {
 
     @Override
     protected void finalize() throws Throwable {
-        disconnect();
-        super.finalize();
+        try {
+            mCloseGuard.warnIfOpen();
+            disconnect();
+        } finally {
+            super.finalize();
+        }
     }
 
     /**
