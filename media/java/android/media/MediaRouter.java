@@ -66,7 +66,7 @@ public class MediaRouter {
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     static class Static implements DisplayManager.DisplayListener {
-        final Context mAppContext;
+        final String mPackageName;
         final Resources mResources;
         final IAudioService mAudioService;
         final DisplayManager mDisplayService;
@@ -110,8 +110,8 @@ public class MediaRouter {
         };
 
         Static(Context appContext) {
-            mAppContext = appContext;
-            mResources = Resources.getSystem();
+            mPackageName = appContext.getPackageName();
+            mResources = appContext.getResources();
             mHandler = new Handler(appContext.getMainLooper());
 
             IBinder b = ServiceManager.getService(Context.AUDIO_SERVICE);
@@ -357,8 +357,7 @@ public class MediaRouter {
 
                 try {
                     Client client = new Client();
-                    mMediaRouterService.registerClientAsUser(client,
-                            mAppContext.getPackageName(), userId);
+                    mMediaRouterService.registerClientAsUser(client, mPackageName, userId);
                     mClient = client;
                 } catch (RemoteException ex) {
                     Log.e(TAG, "Unable to register media router client.", ex);
@@ -1627,7 +1626,7 @@ public class MediaRouter {
 
         CharSequence getName(Resources res) {
             if (mNameResId != 0) {
-                return mName = res.getText(mNameResId);
+                return res.getText(mNameResId);
             }
             return mName;
         }
@@ -2079,6 +2078,7 @@ public class MediaRouter {
          * @param name Name to display to the user to describe this route
          */
         public void setName(CharSequence name) {
+            mNameResId = 0;
             mName = name;
             routeUpdated();
         }
@@ -2275,7 +2275,7 @@ public class MediaRouter {
         private void configureSessionVolume() {
             if (mRcc == null) {
                 if (DEBUG) {
-                    Log.d(TAG, "No Rcc to configure volume for route " + mName);
+                    Log.d(TAG, "No Rcc to configure volume for route " + getName());
                 }
                 return;
             }
@@ -2590,8 +2590,10 @@ public class MediaRouter {
             for (int i = 0; i < count; i++) {
                 final RouteInfo info = mRoutes.get(i);
                 // TODO: There's probably a much more correct way to localize this.
-                if (i > 0) sb.append(", ");
-                sb.append(info.mName);
+                if (i > 0) {
+                    sb.append(", ");
+                }
+                sb.append(info.getName());
             }
             mName = sb.toString();
             mUpdateName = false;
@@ -2716,7 +2718,7 @@ public class MediaRouter {
 
         @Override
         public String toString() {
-            return "RouteCategory{ name=" + mName + " types=" + typesToString(mTypes) +
+            return "RouteCategory{ name=" + getName() + " types=" + typesToString(mTypes) +
                     " groupable=" + mGroupable + " }";
         }
     }
