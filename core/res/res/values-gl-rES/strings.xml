@@ -598,7 +598,7 @@
     <string name="phoneTypeCallback" msgid="2712175203065678206">"Devolver chamada"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"Coche"</string>
     <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Empresa (ppal.)"</string>
-    <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
+    <string name="phoneTypeIsdn" msgid="8022453193171370337">"RDSI"</string>
     <string name="phoneTypeMain" msgid="6766137010628326916">"Principal"</string>
     <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Outro fax"</string>
     <string name="phoneTypeRadio" msgid="4093738079908667513">"Radio"</string>
