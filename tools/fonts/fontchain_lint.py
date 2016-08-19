@@ -256,8 +256,8 @@ def parse_fonts_xml(fonts_xml_path):
 
 
 def check_emoji_coverage(all_emoji, equivalent_emoji):
-  emoji_font = get_emoji_font()
-  check_emoji_font_coverage(emoji_font, all_emoji, equivalent_emoji)
+    emoji_font = get_emoji_font()
+    check_emoji_font_coverage(emoji_font, all_emoji, equivalent_emoji)
 
 
 def get_emoji_font():
@@ -274,15 +274,12 @@ def check_emoji_font_coverage(emoji_font, all_emoji, equivalent_emoji):
         assert sequence in coverage, (
             '%s is not supported in the emoji font.' % printable(sequence))
 
-    # disable temporarily - we cover more than this
-    """
     for sequence in coverage:
         if sequence in {0x0000, 0x000D, 0x0020}:
             # The font needs to support a few extra characters, which is OK
             continue
         assert sequence in all_emoji, (
             'Emoji font should not support %s.' % printable(sequence))
-    """
 
     for first, second in sorted(equivalent_emoji.items()):
         assert coverage[first] == coverage[second], (
@@ -290,8 +287,6 @@ def check_emoji_font_coverage(emoji_font, all_emoji, equivalent_emoji):
                 printable(first),
                 printable(second)))
 
-    # disable temporarily - some equivalent sequences we don't even know about
-    """
     for glyph in set(coverage.values()):
         maps_to_glyph = [seq for seq in coverage if coverage[seq] == glyph]
         if len(maps_to_glyph) > 1:
@@ -307,7 +302,7 @@ def check_emoji_font_coverage(emoji_font, all_emoji, equivalent_emoji):
                 'The sequences %s should not result in the same glyph %s' % (
                     printable(equivalent_seqs),
                     glyph))
-    """
+
 
 def check_emoji_defaults(default_emoji):
     missing_text_chars = _emoji_properties['Emoji'] - default_emoji
@@ -335,7 +330,8 @@ def check_emoji_defaults(default_emoji):
     # webdings yet.
     missing_text_chars -= _chars_by_age['7.0']
     assert missing_text_chars == set(), (
-        'Text style version of some emoji characters are missing: ' + repr(missing_text_chars))
+        'Text style version of some emoji characters are missing: ' +
+            repr(missing_text_chars))
 
 
 # Setting reverse to true returns a dictionary that maps the values to sets of
@@ -355,7 +351,7 @@ def parse_unicode_datafile(file_path, reverse=False):
             if not line:
                 continue
 
-            chars, prop = line.split(';')
+            chars, prop = line.split(';')[:2]
             chars = chars.strip()
             prop = prop.strip()
 
@@ -416,26 +412,6 @@ def parse_ucd(ucd_path):
     _emoji_zwj_sequences = parse_unicode_datafile(
         path.join(ucd_path, 'emoji-zwj-sequences.txt'))
 
-    # filter modern pentathlon, as it seems likely to be removed from final spec
-    # also filter rifle
-    def is_excluded(n):
-        return n in [0x1f93b, 0x1f946]
-
-    def contains_excluded(t):
-        if type(t) == int:
-            return is_excluded(t)
-        return any(is_excluded(cp) for cp in t)
-
-    # filter modern pentathlon, as it seems likely to be removed from final spec
-    _emoji_properties['Emoji'] = set(
-        t for t in _emoji_properties['Emoji'] if not contains_excluded(t))
-    _emoji_sequences = dict(
-        (t, v) for (t, v) in _emoji_sequences.items() if not contains_excluded(t))
-
-    # add in UN flag
-    UN_seq = flag_sequence('UN')
-    _emoji_sequences[UN_seq] = 'Emoji_Flag_Sequence'
-
 
 def flag_sequence(territory_code):
     return tuple(0x1F1E6 + ord(ch) - ord('A') for ch in territory_code)
@@ -447,7 +423,8 @@ UNSUPPORTED_FLAGS = frozenset({
     flag_sequence('GF'), flag_sequence('GP'), flag_sequence('GS'),
     flag_sequence('MF'), flag_sequence('MQ'), flag_sequence('NC'),
     flag_sequence('PM'), flag_sequence('RE'), flag_sequence('TF'),
-    flag_sequence('WF'), flag_sequence('XK'), flag_sequence('YT'),
+    flag_sequence('UN'), flag_sequence('WF'), flag_sequence('XK'),
+    flag_sequence('YT'),
 })
 
 EQUIVALENT_FLAGS = {
@@ -511,7 +488,17 @@ ZWJ_IDENTICALS = {
 
 
 def is_fitzpatrick_modifier(cp):
-  return 0x1f3fb <= cp <= 0x1f3ff
+    return 0x1F3FB <= cp <= 0x1F3FF
+
+
+def reverse_emoji(seq):
+    rev = list(reversed(seq))
+    # if there are fitzpatrick modifiers in the sequence, keep them after
+    # the emoji they modify
+    for i in xrange(1, len(rev)):
+        if is_fitzpatrick_modifier(rev[i-1]):
+            rev[i], rev[i-1] = rev[i-1], rev[i]
+    return tuple(rev)
 
 
 def compute_expected_emoji():
@@ -531,15 +518,7 @@ def compute_expected_emoji():
         sequence_pieces.update(sequence)
         # Add reverse of all emoji ZWJ sequences, which are added to the fonts
         # as a workaround to get the sequences work in RTL text.
-        reversed_seq = list(reversed(sequence))
-        # if there are fitzpatrick modifiers in the sequence, keep them after
-        # the emoji they modify
-        for i in xrange(1, len(reversed_seq)):
-          if is_fitzpatrick_modifier(reversed_seq[i - 1]):
-            tmp = reversed_seq[i]
-            reversed_seq[i] = reversed_seq[i-1]
-            reversed_seq[i-1] = tmp
-        reversed_seq = tuple(reversed_seq)
+        reversed_seq = reverse_emoji(sequence)
         all_sequences.add(reversed_seq)
         equivalent_emoji[reversed_seq] = sequence
 
