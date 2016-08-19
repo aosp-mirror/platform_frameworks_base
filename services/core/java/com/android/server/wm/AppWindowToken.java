@@ -22,6 +22,8 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
+import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
@@ -64,7 +66,7 @@ class AppTokenList extends ArrayList<AppWindowToken> {
  * Version of WindowToken that is specifically for a particular application (or
  * really activity) that is displaying windows.
  */
-class AppWindowToken extends WindowToken {
+class AppWindowToken extends WindowToken implements WindowManagerService.AppFreezeListener {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "AppWindowToken" : TAG_WM;
 
     // Non-null only for application tokens.
@@ -373,6 +375,14 @@ class AppWindowToken extends WindowToken {
         if (mTask != null) {
             mTask.detachChild(this);
         }
+    }
+
+    @Override
+    boolean checkCompleteDeferredRemoval() {
+        if (mIsExiting) {
+            removeIfPossible();
+        }
+        return super.checkCompleteDeferredRemoval();
     }
 
     void clearAnimatingFlags() {
@@ -830,6 +840,7 @@ class AppWindowToken extends WindowToken {
         if (!hiddenRequested) {
             if (!mAppAnimator.freezingScreen) {
                 mAppAnimator.freezingScreen = true;
+                mService.registerAppFreezeListener(this);
                 mAppAnimator.lastFreezeDuration = 0;
                 mService.mAppsFreezingScreen++;
                 if (mService.mAppsFreezingScreen == 1) {
@@ -860,6 +871,7 @@ class AppWindowToken extends WindowToken {
         if (force || unfrozeWindows) {
             if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "No longer freezing: " + this);
             mAppAnimator.freezingScreen = false;
+            mService.unregisterAppFreezeListener(this);
             mAppAnimator.lastFreezeDuration =
                     (int)(SystemClock.elapsedRealtime() - mService.mDisplayFreezeTime);
             mService.mAppsFreezingScreen--;
@@ -871,6 +883,12 @@ class AppWindowToken extends WindowToken {
             }
             mService.stopFreezingDisplayLocked();
         }
+    }
+
+    @Override
+    public void onAppFreezeTimeout() {
+        Slog.w(TAG_WM, "Force clearing freeze: " + this);
+        stopFreezingScreen(true, true);
     }
 
     boolean transferStartingWindow(IBinder transferFrom) {
@@ -999,6 +1017,84 @@ class AppWindowToken extends WindowToken {
             return SCREEN_ORIENTATION_UNSET;
         }
         return mOrientation;
+    }
+
+    @Override
+    void checkAppWindowsReadyToShow(int displayId) {
+        if (allDrawn == mAppAnimator.allDrawn) {
+            return;
+        }
+
+        mAppAnimator.allDrawn = allDrawn;
+        if (!allDrawn) {
+            return;
+        }
+
+        // The token has now changed state to having all windows shown...  what to do, what to do?
+        if (mAppAnimator.freezingScreen) {
+            mAppAnimator.showAllWindowsLocked();
+            stopFreezingScreen(false, true);
+            if (DEBUG_ORIENTATION) Slog.i(TAG,
+                    "Setting mOrientationChangeComplete=true because wtoken " + this
+                    + " numInteresting=" + numInterestingWindows + " numDrawn=" + numDrawnWindows);
+            // This will set mOrientationChangeComplete and cause a pass through layout.
+            setAppLayoutChanges(FINISH_LAYOUT_REDO_WALLPAPER,
+                    "checkAppWindowsReadyToShow: freezingScreen", displayId);
+        } else {
+            setAppLayoutChanges(FINISH_LAYOUT_REDO_ANIM, "checkAppWindowsReadyToShow", displayId);
+
+            // We can now show all of the drawn windows!
+            if (!mService.mOpeningApps.contains(this)) {
+                mService.mAnimator.orAnimating(mAppAnimator.showAllWindowsLocked());
+            }
+        }
+    }
+
+    @Override
+    void updateAllDrawn(int displayId) {
+        final DisplayContent displayContent = mService.getDisplayContentLocked(displayId);
+
+        if (!allDrawn) {
+            final int numInteresting = numInterestingWindows;
+            if (numInteresting > 0 && numDrawnWindows >= numInteresting) {
+                if (DEBUG_VISIBILITY) Slog.v(TAG, "allDrawn: " + this
+                        + " interesting=" + numInteresting + " drawn=" + numDrawnWindows);
+                allDrawn = true;
+                // Force an additional layout pass where
+                // WindowStateAnimator#commitFinishDrawingLocked() will call performShowLocked().
+                displayContent.layoutNeeded = true;
+                mService.mH.obtainMessage(NOTIFY_ACTIVITY_DRAWN, token).sendToTarget();
+            }
+        }
+        if (!allDrawnExcludingSaved) {
+            int numInteresting = numInterestingWindowsExcludingSaved;
+            if (numInteresting > 0 && numDrawnWindowsExcludingSaved >= numInteresting) {
+                if (DEBUG_VISIBILITY) Slog.v(TAG, "allDrawnExcludingSaved: " + this
+                        + " interesting=" + numInteresting
+                        + " drawn=" + numDrawnWindowsExcludingSaved);
+                allDrawnExcludingSaved = true;
+                displayContent.layoutNeeded = true;
+                if (isAnimatingInvisibleWithSavedSurface()
+                        && !mService.mFinishedEarlyAnim.contains(this)) {
+                    mService.mFinishedEarlyAnim.add(this);
+                }
+            }
+        }
+    }
+
+    @Override
+    void stepAppWindowsAnimation(long currentTime, int displayId) {
+        mAppAnimator.wasAnimating = mAppAnimator.animating;
+        if (mAppAnimator.stepAnimationLocked(currentTime, displayId)) {
+            mAppAnimator.animating = true;
+            mService.mAnimator.setAnimating(true);
+            mService.mAnimator.mAppWindowAnimating = true;
+        } else if (mAppAnimator.wasAnimating) {
+            // stopped animating, do one more pass through the layout
+            setAppLayoutChanges(
+                    FINISH_LAYOUT_REDO_WALLPAPER, "appToken " + this + " done", displayId);
+            if (DEBUG_ANIM) Slog.v(TAG, "updateWindowsApps...: done animating " + this);
+        }
     }
 
     @Override

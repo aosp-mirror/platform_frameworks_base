@@ -37,7 +37,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_KEEP_SCREEN_ON;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.DO_TRAVERSAL;
-import static com.android.server.wm.WindowManagerService.H.NOTIFY_ACTIVITY_DRAWN;
 import static com.android.server.wm.WindowManagerService.H.NOTIFY_APP_TRANSITION_STARTING;
 import static com.android.server.wm.WindowManagerService.H.NOTIFY_STARTING_WINDOW_DRAWN;
 import static com.android.server.wm.WindowManagerService.H.REPORT_LOSING_FOCUS;
@@ -560,7 +559,7 @@ class WindowSurfacePlacer {
 
         // Remove all deferred displays stacks, tasks, and activities.
         for (int displayNdx = mService.mDisplayContents.size() - 1; displayNdx >= 0; --displayNdx) {
-            mService.mDisplayContents.valueAt(displayNdx).onCompleteDeferredRemoval();
+            mService.mDisplayContents.valueAt(displayNdx).checkCompleteDeferredRemoval();
         }
 
         if (updateInputWindowsNeeded) {
@@ -865,7 +864,9 @@ class WindowSurfacePlacer {
             displayContent.stopDimmingIfNeeded();
 
             if (updateAllDrawn) {
-                updateAllDrawnLocked(displayContent);
+                // See if any windows have been drawn, so they (and others associated with them)
+                // can now be shown.
+                displayContent.updateAllDrawn();
             }
         }
 
@@ -1512,52 +1513,6 @@ class WindowSurfacePlacer {
             }
             if ((privateflags & PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE) != 0) {
                 mSustainedPerformanceModeCurrent = true;
-            }
-        }
-    }
-
-    private void updateAllDrawnLocked(DisplayContent displayContent) {
-        // See if any windows have been drawn, so they (and others
-        // associated with them) can now be shown.
-        ArrayList<TaskStack> stacks = displayContent.getStacks();
-        for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
-            final ArrayList<Task> tasks = stacks.get(stackNdx).getTasks();
-            for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
-                final AppTokenList tokens = tasks.get(taskNdx).mAppTokens;
-                for (int tokenNdx = tokens.size() - 1; tokenNdx >= 0; --tokenNdx) {
-                    final AppWindowToken wtoken = tokens.get(tokenNdx);
-                    if (!wtoken.allDrawn) {
-                        int numInteresting = wtoken.numInterestingWindows;
-                        if (numInteresting > 0 && wtoken.numDrawnWindows >= numInteresting) {
-                            if (DEBUG_VISIBILITY)
-                                Slog.v(TAG, "allDrawn: " + wtoken
-                                    + " interesting=" + numInteresting
-                                    + " drawn=" + wtoken.numDrawnWindows);
-                            wtoken.allDrawn = true;
-                            // Force an additional layout pass where WindowStateAnimator#
-                            // commitFinishDrawingLocked() will call performShowLocked().
-                            displayContent.layoutNeeded = true;
-                            mService.mH.obtainMessage(NOTIFY_ACTIVITY_DRAWN,
-                                    wtoken.token).sendToTarget();
-                        }
-                    }
-                    if (!wtoken.allDrawnExcludingSaved) {
-                        int numInteresting = wtoken.numInterestingWindowsExcludingSaved;
-                        if (numInteresting > 0
-                                && wtoken.numDrawnWindowsExcludingSaved >= numInteresting) {
-                            if (DEBUG_VISIBILITY)
-                                Slog.v(TAG, "allDrawnExcludingSaved: " + wtoken
-                                    + " interesting=" + numInteresting
-                                    + " drawn=" + wtoken.numDrawnWindowsExcludingSaved);
-                            wtoken.allDrawnExcludingSaved = true;
-                            displayContent.layoutNeeded = true;
-                            if (wtoken.isAnimatingInvisibleWithSavedSurface()
-                                    && !mService.mFinishedEarlyAnim.contains(wtoken)) {
-                                mService.mFinishedEarlyAnim.add(wtoken);
-                            }
-                        }
-                    }
-                }
             }
         }
     }

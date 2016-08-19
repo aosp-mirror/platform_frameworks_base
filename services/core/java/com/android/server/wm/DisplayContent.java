@@ -120,9 +120,6 @@ class DisplayContent {
     private final Rect mTmpRect2 = new Rect();
     private final Region mTmpRegion = new Region();
 
-    /** For gathering Task objects in order. */
-    private final ArrayList<Task> mTmpTaskHistory = new ArrayList<Task>();
-
     final WindowManagerService mService;
 
     /** Remove this display when animation on it has completed. */
@@ -136,6 +133,11 @@ class DisplayContent {
 
     /** Used when rebuilding window list to keep track of windows that have been removed. */
     private WindowState[] mRebuildTmp = new WindowState[20];
+
+    private final TaskForResizePointSearchResult mTmpTaskForResizePointSearchResult =
+            new TaskForResizePointSearchResult();
+    private final GetWindowOnDisplaySearchResult mTmpGetWindowOnDisplaySearchResult =
+            new GetWindowOnDisplaySearchResult();
 
     /**
      * @param display May not be null.
@@ -192,19 +194,6 @@ class DisplayContent {
         return mStacks;
     }
 
-    /**
-     * Retrieve the tasks on this display in stack order from the bottommost TaskStack up.
-     * @return All the Tasks, in order, on this display.
-     */
-    ArrayList<Task> getTasks() {
-        mTmpTaskHistory.clear();
-        final int numStacks = mStacks.size();
-        for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
-            mTmpTaskHistory.addAll(mStacks.get(stackNdx).getTasks());
-        }
-        return mTmpTaskHistory;
-    }
-
     TaskStack getHomeStack() {
         if (mHomeStack == null && mDisplayId == Display.DEFAULT_DISPLAY) {
             Slog.e(TAG_WM, "getHomeStack: Returning null from this=" + this);
@@ -220,6 +209,27 @@ class DisplayContent {
             }
         }
         return null;
+    }
+
+    void checkAppWindowsReadyToShow() {
+        for (int i = mStacks.size() - 1; i >= 0; --i) {
+            final TaskStack stack = mStacks.get(i);
+            stack.checkAppWindowsReadyToShow(mDisplayId);
+        }
+    }
+
+    void updateAllDrawn() {
+        for (int i = mStacks.size() - 1; i >= 0; --i) {
+            final TaskStack stack = mStacks.get(i);
+            stack.updateAllDrawn(mDisplayId);
+        }
+    }
+
+    void stepAppWindowsAnimation(long currentTime) {
+        for (int i = mStacks.size() - 1; i >= 0; --i) {
+            final TaskStack stack = mStacks.get(i);
+            stack.stepAppWindowsAnimation(currentTime, mDisplayId);
+        }
     }
 
     void onAppTransitionDone() {
@@ -360,6 +370,19 @@ class DisplayContent {
         mStacks.add(addIndex, stack);
     }
 
+    // TODO: Don't forget to switch to WC.detachChild
+    void detachChild(TaskStack stack) {
+        detachStack(stack);
+        if (stack.detachFromDisplay()) {
+            mService.mWindowPlacerLocked.requestTraversal();
+        }
+        if (stack.mStackId == DOCKED_STACK_ID) {
+            mService.getDefaultDisplayContentLocked().mDividerControllerLocked
+                    .notifyDockedStackExistsChanged(false);
+        }
+    }
+
+    // TODO: See about removing this by untangling the use case in WMS.attachStack()
     void detachStack(TaskStack stack) {
         mDimLayerController.removeDimLayerUser(stack);
         mStacks.remove(stack);
@@ -375,27 +398,10 @@ class DisplayContent {
 
     int taskIdFromPoint(int x, int y) {
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
-            TaskStack stack = mStacks.get(stackNdx);
-            stack.getBounds(mTmpRect);
-            if (!mTmpRect.contains(x, y) || stack.isAdjustedForMinimizedDockedStack()) {
-                continue;
-            }
-            final ArrayList<Task> tasks = stack.getTasks();
-            for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
-                final Task task = tasks.get(taskNdx);
-                final WindowState win = task.getTopVisibleAppMainWindow();
-                if (win == null) {
-                    continue;
-                }
-                // We need to use the task's dim bounds (which is derived from the visible
-                // bounds of its apps windows) for any touch-related tests. Can't use
-                // the task's original bounds because it might be adjusted to fit the
-                // content frame. For example, the presence of the IME adjusting the
-                // windows frames when the app window is the IME target.
-                task.getDimBounds(mTmpRect);
-                if (mTmpRect.contains(x, y)) {
-                    return task.mTaskId;
-                }
+            final TaskStack stack = mStacks.get(stackNdx);
+            final int taskId = stack.taskIdFromPoint(x, y);
+            if (taskId != -1) {
+                return taskId;
             }
         }
         return -1;
@@ -407,35 +413,16 @@ class DisplayContent {
      */
     Task findTaskForResizePoint(int x, int y) {
         final int delta = mService.dipToPixel(RESIZE_HANDLE_WIDTH_IN_DP, mDisplayMetrics);
+        mTmpTaskForResizePointSearchResult.reset();
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             TaskStack stack = mStacks.get(stackNdx);
             if (!StackId.isTaskResizeAllowed(stack.mStackId)) {
-                break;
+                return null;
             }
-            final ArrayList<Task> tasks = stack.getTasks();
-            for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
-                final Task task = tasks.get(taskNdx);
-                if (task.isFullscreen()) {
-                    return null;
-                }
 
-                // We need to use the task's dim bounds (which is derived from the visible
-                // bounds of its apps windows) for any touch-related tests. Can't use
-                // the task's original bounds because it might be adjusted to fit the
-                // content frame. One example is when the task is put to top-left quadrant,
-                // the actual visible area would not start at (0,0) after it's adjusted
-                // for the status bar.
-                task.getDimBounds(mTmpRect);
-                mTmpRect.inset(-delta, -delta);
-                if (mTmpRect.contains(x, y)) {
-                    mTmpRect.inset(delta, delta);
-                    if (!mTmpRect.contains(x, y)) {
-                        return task;
-                    }
-                    // User touched inside the task. No need to look further,
-                    // focus transfer will be handled in ACTION_UP.
-                    return null;
-                }
+            stack.findTaskForResizePoint(x, y, delta, mTmpTaskForResizePointSearchResult);
+            if (mTmpTaskForResizePointSearchResult.searchDone) {
+                return mTmpTaskForResizePointSearchResult.taskForResize;
             }
         }
         return null;
@@ -444,54 +431,16 @@ class DisplayContent {
     void setTouchExcludeRegion(Task focusedTask) {
         mTouchExcludeRegion.set(mBaseDisplayRect);
         final int delta = mService.dipToPixel(RESIZE_HANDLE_WIDTH_IN_DP, mDisplayMetrics);
-        boolean addBackFocusedTask = false;
+        mTmpRect2.setEmpty();
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
-            TaskStack stack = mStacks.get(stackNdx);
-            final ArrayList<Task> tasks = stack.getTasks();
-            for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
-                final Task task = tasks.get(taskNdx);
-                AppWindowToken token = task.getTopVisibleAppToken();
-                if (token == null || !token.isVisible()) {
-                    continue;
-                }
-
-                /**
-                 * Exclusion region is the region that TapDetector doesn't care about.
-                 * Here we want to remove all non-focused tasks from the exclusion region.
-                 * We also remove the outside touch area for resizing for all freeform
-                 * tasks (including the focused).
-                 *
-                 * We save the focused task region once we find it, and add it back at the end.
-                 */
-
-                task.getDimBounds(mTmpRect);
-
-                if (task == focusedTask) {
-                    addBackFocusedTask = true;
-                    mTmpRect2.set(mTmpRect);
-                }
-
-                final boolean isFreeformed = task.inFreeformWorkspace();
-                if (task != focusedTask || isFreeformed) {
-                    if (isFreeformed) {
-                        // If the task is freeformed, enlarge the area to account for outside
-                        // touch area for resize.
-                        mTmpRect.inset(-delta, -delta);
-                        // Intersect with display content rect. If we have system decor (status bar/
-                        // navigation bar), we want to exclude that from the tap detection.
-                        // Otherwise, if the app is partially placed under some system button (eg.
-                        // Recents, Home), pressing that button would cause a full series of
-                        // unwanted transfer focus/resume/pause, before we could go home.
-                        mTmpRect.intersect(mContentRect);
-                    }
-                    mTouchExcludeRegion.op(mTmpRect, Region.Op.DIFFERENCE);
-                }
-            }
+            final TaskStack stack = mStacks.get(stackNdx);
+            stack.setTouchExcludeRegion(
+                    focusedTask, delta, mTouchExcludeRegion, mContentRect, mTmpRect2);
         }
         // If we removed the focused task above, add it back and only leave its
         // outside touch area in the exclusion. TapDectector is not interested in
         // any touch inside the focused task itself.
-        if (addBackFocusedTask) {
+        if (!mTmpRect2.isEmpty()) {
             mTouchExcludeRegion.op(mTmpRect2, Region.Op.UNION);
         }
         final WindowState inputMethod = mService.mInputMethodWindow;
@@ -574,32 +523,18 @@ class DisplayContent {
         return false;
     }
 
-    void onCompleteDeferredRemoval() {
-        boolean animating = false;
+    /** Returns true if a removal action is still being deferred. */
+    boolean checkCompleteDeferredRemoval() {
+        boolean stillDeferringRemoval = false;
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             final TaskStack stack = mStacks.get(stackNdx);
-            if (stack.isAnimating()) {
-                animating = true;
-            } else {
-                if (stack.mDeferDetach) {
-                    mService.detachStackLocked(this, stack);
-                }
-                final ArrayList<Task> tasks = stack.getTasks();
-                for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
-                    final Task task = tasks.get(taskNdx);
-                    AppTokenList tokens = task.mAppTokens;
-                    for (int tokenNdx = tokens.size() - 1; tokenNdx >= 0; --tokenNdx) {
-                        AppWindowToken wtoken = tokens.get(tokenNdx);
-                        if (wtoken.mIsExiting) {
-                            wtoken.removeIfPossible();
-                        }
-                    }
-                }
-            }
+            stillDeferringRemoval |= stack.checkCompleteDeferredRemoval();
         }
-        if (!animating && mDeferredRemoval) {
+        if (!stillDeferringRemoval && mDeferredRemoval) {
             mService.onDisplayRemoved(mDisplayId);
+            return false;
         }
+        return true;
     }
 
     void rotateBounds(int oldRotation, int newRotation, Rect bounds) {
@@ -870,17 +805,17 @@ class DisplayContent {
         final WindowToken wToken = win.mToken;
 
         // Figure out where the window should go, based on the order of applications.
-        final GetWindowOnDisplaySearchResults result = new GetWindowOnDisplaySearchResults();
+        mTmpGetWindowOnDisplaySearchResult.reset();
         for (int i = mStacks.size() - 1; i >= 0; --i) {
             final TaskStack stack = mStacks.get(i);
-            stack.getWindowOnDisplayBeforeToken(this, wToken, result);
-            if (result.reachedToken) {
+            stack.getWindowOnDisplayBeforeToken(this, wToken, mTmpGetWindowOnDisplaySearchResult);
+            if (mTmpGetWindowOnDisplaySearchResult.reachedToken) {
                 // We have reach the token we are interested in. End search.
                 break;
             }
         }
 
-        WindowState pos = result.foundWindow;
+        WindowState pos = mTmpGetWindowOnDisplaySearchResult.foundWindow;
 
         // We now know the index into the apps. If we found an app window above, that gives us the
         // position; else we need to look some more.
@@ -902,17 +837,17 @@ class DisplayContent {
         }
 
         // Continue looking down until we find the first token that has windows on this display.
-        result.reset();
+        mTmpGetWindowOnDisplaySearchResult.reset();
         for (int i = mStacks.size() - 1; i >= 0; --i) {
             final TaskStack stack = mStacks.get(i);
-            stack.getWindowOnDisplayAfterToken(this, wToken, result);
-            if (result.foundWindow != null) {
+            stack.getWindowOnDisplayAfterToken(this, wToken, mTmpGetWindowOnDisplaySearchResult);
+            if (mTmpGetWindowOnDisplaySearchResult.foundWindow != null) {
                 // We have found a window after the token. End search.
                 break;
             }
         }
 
-        pos = result.foundWindow;
+        pos = mTmpGetWindowOnDisplaySearchResult.foundWindow;
 
         if (pos != null) {
             // Move in front of any windows attached to this one.
@@ -1224,13 +1159,23 @@ class DisplayContent {
         }
     }
 
-    static final class GetWindowOnDisplaySearchResults {
+    static final class GetWindowOnDisplaySearchResult {
         boolean reachedToken;
         WindowState foundWindow;
 
         void reset() {
             reachedToken = false;
             foundWindow = null;
+        }
+    }
+
+    static final class TaskForResizePointSearchResult {
+        boolean searchDone;
+        Task taskForResize;
+
+        void reset() {
+            searchDone = false;
+            taskForResize = null;
         }
     }
 }
