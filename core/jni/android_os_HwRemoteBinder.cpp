@@ -24,7 +24,7 @@
 
 #include <JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
-#include <hwbinder/IServiceManager.h>
+#include <hidl/IServiceManager.h>
 #include <hwbinder/Status.h>
 #include <nativehelper/ScopedLocalRef.h>
 

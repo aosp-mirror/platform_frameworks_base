@@ -19,7 +19,7 @@
 #define EPHEMERAL_STORAGE_H_
 
 #include <android-base/macros.h>
-#include <hwbinder/HidlSupport.h>
+#include <hidl/HidlSupport.h>
 #include <jni.h>
 #include <utils/Vector.h>
 
