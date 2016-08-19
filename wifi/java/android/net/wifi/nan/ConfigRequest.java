@@ -173,6 +173,18 @@ public class ConfigRequest implements Parcelable {
                 && mClusterLow == lhs.mClusterLow && mClusterHigh == lhs.mClusterHigh;
     }
 
+    /**
+     * Checks whether the configuration's settings which impact on-air behavior are non-default.
+     *
+     * @return true if any of the on-air-impacting settings are non-default.
+     *
+     * @hide
+     */
+    public boolean isNonDefaultOnTheAir() {
+        return mSupport5gBand || mMasterPreference != 0 || mClusterLow != CLUSTER_ID_MIN
+                || mClusterHigh != CLUSTER_ID_MAX;
+    }
+
     @Override
     public int hashCode() {
         int result = 17;
