@@ -97,6 +97,15 @@ public class AnyMotionDetector {
     /** True if an orientation measurement is in progress. */
     private boolean mMeasurementInProgress;
 
+    /** True if sendMessageDelayed() for the mMeasurementTimeout callback has been scheduled */
+    private boolean mMeasurementTimeoutIsActive;
+
+    /** True if sendMessageDelayed() for the mWakelockTimeout callback has been scheduled */
+    private boolean mWakelockTimeoutIsActive;
+
+    /** True if sendMessageDelayed() for the mSensorRestart callback has been scheduled */
+    private boolean mSensorRestartIsActive;
+
     /** The most recent gravity vector. */
     private Vector3 mCurrentGravityVector = null;
 
@@ -118,6 +127,9 @@ public class AnyMotionDetector {
             mSensorManager = sm;
             mAccelSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
             mMeasurementInProgress = false;
+            mMeasurementTimeoutIsActive = false;
+            mWakelockTimeoutIsActive = false;
+            mSensorRestartIsActive = false;
             mState = STATE_INACTIVE;
             mCallback = callback;
             mThresholdAngle = thresholdAngle;
@@ -146,6 +158,7 @@ public class AnyMotionDetector {
                 mWakeLock.acquire();
                 Message wakelockTimeoutMsg = Message.obtain(mHandler, mWakelockTimeout);
                 mHandler.sendMessageDelayed(wakelockTimeoutMsg, WAKELOCK_TIMEOUT_MILLIS);
+                mWakelockTimeoutIsActive = true;
                 startOrientationMeasurementLocked();
             }
         }
@@ -157,17 +170,20 @@ public class AnyMotionDetector {
                 mState = STATE_INACTIVE;
                 if (DEBUG) Slog.d(TAG, "Moved from STATE_ACTIVE to STATE_INACTIVE.");
             }
+            mHandler.removeCallbacks(mMeasurementTimeout);
+            mHandler.removeCallbacks(mSensorRestart);
+            mMeasurementTimeoutIsActive = false;
+            mSensorRestartIsActive = false;
             if (mMeasurementInProgress) {
                 mMeasurementInProgress = false;
                 mSensorManager.unregisterListener(mListener);
             }
-            mHandler.removeCallbacks(mMeasurementTimeout);
-            mHandler.removeCallbacks(mSensorRestart);
             mCurrentGravityVector = null;
             mPreviousGravityVector = null;
             if (mWakeLock.isHeld()) {
-                mWakeLock.release();
                 mHandler.removeCallbacks(mWakelockTimeout);
+                mWakelockTimeoutIsActive = false;
+                mWakeLock.release();
             }
         }
     }
@@ -183,6 +199,7 @@ public class AnyMotionDetector {
             }
             Message measurementTimeoutMsg = Message.obtain(mHandler, mMeasurementTimeout);
             mHandler.sendMessageDelayed(measurementTimeoutMsg, ACCELEROMETER_DATA_TIMEOUT_MILLIS);
+            mMeasurementTimeoutIsActive = true;
         }
     }
 
@@ -191,8 +208,9 @@ public class AnyMotionDetector {
                 mMeasurementInProgress);
         int status = RESULT_UNKNOWN;
         if (mMeasurementInProgress) {
-            mSensorManager.unregisterListener(mListener);
             mHandler.removeCallbacks(mMeasurementTimeout);
+            mMeasurementTimeoutIsActive = false;
+            mSensorManager.unregisterListener(mListener);
             mMeasurementInProgress = false;
             mPreviousGravityVector = mCurrentGravityVector;
             mCurrentGravityVector = mRunningStats.getRunningAverage();
@@ -213,8 +231,9 @@ public class AnyMotionDetector {
             if (DEBUG) Slog.d(TAG, "getStationaryStatus() returned " + status);
             if (status != RESULT_UNKNOWN) {
                 if (mWakeLock.isHeld()) {
-                    mWakeLock.release();
                     mHandler.removeCallbacks(mWakelockTimeout);
+                    mWakelockTimeoutIsActive = false;
+                    mWakeLock.release();
                 }
                 if (DEBUG) {
                     Slog.d(TAG, "Moved from STATE_ACTIVE to STATE_INACTIVE. status = " + status);
@@ -230,6 +249,7 @@ public class AnyMotionDetector {
                         " milliseconds.");
                 Message msg = Message.obtain(mHandler, mSensorRestart);
                 mHandler.sendMessageDelayed(msg, ORIENTATION_MEASUREMENT_INTERVAL_MILLIS);
+                mSensorRestartIsActive = true;
             }
         }
         return status;
@@ -283,6 +303,7 @@ public class AnyMotionDetector {
             }
             if (status != RESULT_UNKNOWN) {
                 mHandler.removeCallbacks(mWakelockTimeout);
+                mWakelockTimeoutIsActive = false;
                 mCallback.onAnyMotionResult(status);
             }
         }
@@ -296,7 +317,10 @@ public class AnyMotionDetector {
         @Override
         public void run() {
             synchronized (mLock) {
-                startOrientationMeasurementLocked();
+                if (mSensorRestartIsActive == true) {
+                    mSensorRestartIsActive = false;
+                    startOrientationMeasurementLocked();
+                }
             }
         }
     };
@@ -306,14 +330,18 @@ public class AnyMotionDetector {
         public void run() {
             int status = RESULT_UNKNOWN;
             synchronized (mLock) {
-                if (DEBUG) Slog.i(TAG, "mMeasurementTimeout. Failed to collect sufficient accel " +
-                      "data within " + ACCELEROMETER_DATA_TIMEOUT_MILLIS + " ms. Stopping " +
-                      "orientation measurement.");
-                status = stopOrientationMeasurementLocked();
-            }
-            if (status != RESULT_UNKNOWN) {
-                mHandler.removeCallbacks(mWakelockTimeout);
-                mCallback.onAnyMotionResult(status);
+                if (mMeasurementTimeoutIsActive == true) {
+                    mMeasurementTimeoutIsActive = false;
+                    if (DEBUG) Slog.i(TAG, "mMeasurementTimeout. Failed to collect sufficient accel " +
+                          "data within " + ACCELEROMETER_DATA_TIMEOUT_MILLIS + " ms. Stopping " +
+                          "orientation measurement.");
+                    status = stopOrientationMeasurementLocked();
+                    if (status != RESULT_UNKNOWN) {
+                        mHandler.removeCallbacks(mWakelockTimeout);
+                        mWakelockTimeoutIsActive = false;
+                        mCallback.onAnyMotionResult(status);
+                    }
+                }
             }
         }
     };
@@ -322,7 +350,10 @@ public class AnyMotionDetector {
         @Override
         public void run() {
             synchronized (mLock) {
-                stop();
+                if (mWakelockTimeoutIsActive == true) {
+                    mWakelockTimeoutIsActive = false;
+                    stop();
+                }
             }
         }
     };
