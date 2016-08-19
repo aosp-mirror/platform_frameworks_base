@@ -203,11 +203,38 @@ std::vector<ResourceConfigValue*> ResourceEntry::findValuesIf(
 /**
  * The default handler for collisions. A return value of -1 means keep the
  * existing value, 0 means fail, and +1 means take the incoming value.
+ *
+ * Typically, a weak value will be overridden by a strong value. An existing weak
+ * value will not be overridden by an incoming weak value.
+ *
+ * There are some exceptions:
+ *
+ * Attributes: There are two types of Attribute values: USE and DECL.
+ *
+ * USE is anywhere an Attribute is declared without a format, and in a place that would
+ * be legal to declare if the Attribute already existed. This is typically in a
+ * <declare-styleable> tag. Attributes defined in a <declare-styleable> are also weak.
+ *
+ * DECL is an absolute declaration of an Attribute and specifies an explicit format.
+ *
+ * A DECL will override a USE without error. Two DECLs must match in their format for there to be
+ * no error.
+ *
+ * Styleables: Styleables are not actual resources, but they are treated as such during the
+ * compilation phase. Styleables are allowed to override each other, and their definitions merge
+ * and accumulate. If both values are Styleables, we just merge them into the existing value.
  */
 int ResourceTable::resolveValueCollision(Value* existing, Value* incoming) {
+    if (Styleable* existingStyleable = valueCast<Styleable>(existing)) {
+        if (Styleable* incomingStyleable = valueCast<Styleable>(incoming)) {
+            // Styleables get merged.
+            existingStyleable->mergeWith(incomingStyleable);
+            return -1;
+        }
+    }
+
     Attribute* existingAttr = valueCast<Attribute>(existing);
     Attribute* incomingAttr = valueCast<Attribute>(incoming);
-
     if (!incomingAttr) {
         if (incoming->isWeak()) {
             // We're trying to add a weak resource but a resource

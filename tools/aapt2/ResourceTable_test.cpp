@@ -118,6 +118,39 @@ TEST(ResourceTableTest, OverrideWeakResourceValue) {
     EXPECT_FALSE(attr->isWeak());
 }
 
+TEST(ResourceTable, MergeStyleables) {
+    ResourceTable table;
+
+    ASSERT_TRUE(table.addResource(
+            test::parseNameOrDie("android:styleable/Foo"),
+            ConfigDescription{}, "",
+            test::StyleableBuilder()
+                    .addItem("android:attr/bar")
+                    .addItem("android:attr/foo")
+                    .build(),
+            test::getDiagnostics()));
+
+    ASSERT_TRUE(table.addResource(
+            test::parseNameOrDie("android:styleable/Foo"),
+            ConfigDescription{}, "",
+            test::StyleableBuilder()
+                    .addItem("android:attr/bat")
+                    .addItem("android:attr/foo")
+                    .build(),
+            test::getDiagnostics()));
+
+    Styleable* styleable = test::getValue<Styleable>(&table, "android:styleable/Foo");
+    ASSERT_NE(nullptr, styleable);
+
+    std::vector<Reference> expectedRefs = {
+            Reference(test::parseNameOrDie("android:attr/bar")),
+            Reference(test::parseNameOrDie("android:attr/bat")),
+            Reference(test::parseNameOrDie("android:attr/foo")),
+    };
+
+    EXPECT_EQ(expectedRefs, styleable->entries);
+}
+
 TEST(ResourceTableTest, ProductVaryingValues) {
     ResourceTable table;
 

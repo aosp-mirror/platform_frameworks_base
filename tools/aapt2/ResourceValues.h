@@ -179,6 +179,9 @@ struct Reference : public BaseItem<Reference> {
     void print(std::ostream* out) const override;
 };
 
+bool operator<(const Reference&, const Reference&);
+bool operator==(const Reference&, const Reference&);
+
 /**
  * An ID resource. Has no real value, just a place holder.
  */
@@ -334,6 +337,7 @@ struct Styleable : public BaseValue<Styleable> {
     bool equals(const Value* value) const override;
     Styleable* clone(StringPool* newPool) const override;
     void print(std::ostream* out) const override;
+    void mergeWith(Styleable* styleable);
 };
 
 /**

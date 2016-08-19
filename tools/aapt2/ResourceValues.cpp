@@ -24,6 +24,7 @@
 #include <algorithm>
 #include <androidfw/ResourceTypes.h>
 #include <limits>
+#include <set>
 
 namespace aapt {
 
@@ -730,6 +731,29 @@ void Styleable::print(std::ostream* out) const {
     *out << "(styleable) " << " ["
         << util::joiner(entries, ", ")
         << "]";
+}
+
+bool operator<(const Reference& a, const Reference& b) {
+    int cmp = a.name.valueOrDefault({}).compare(b.name.valueOrDefault({}));
+    if (cmp != 0) return cmp < 0;
+    return a.id < b.id;
+}
+
+bool operator==(const Reference& a, const Reference& b) {
+    return a.name == b.name && a.id == b.id;
+}
+
+bool operator!=(const Reference& a, const Reference& b) {
+    return a.name != b.name || a.id != b.id;
+}
+
+void Styleable::mergeWith(Styleable* other) {
+    std::set<Reference> references;
+    references.insert(entries.begin(), entries.end());
+    references.insert(other->entries.begin(), other->entries.end());
+    entries.clear();
+    entries.reserve(references.size());
+    entries.insert(entries.end(), references.begin(), references.end());
 }
 
 } // namespace aapt
