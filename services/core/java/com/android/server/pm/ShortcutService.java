@@ -324,9 +324,29 @@ public class ShortcutService extends IShortcutService.Stub {
         int CHECK_LAUNCHER_ACTIVITY = 12;
         int IS_ACTIVITY_ENABLED = 13;
         int PACKAGE_UPDATE_CHECK = 14;
+        int ASYNC_PRELOAD_USER_DELAY = 15;
 
-        int COUNT = PACKAGE_UPDATE_CHECK + 1;
+        int COUNT = ASYNC_PRELOAD_USER_DELAY + 1;
     }
+
+    private static final String[] STAT_LABELS = {
+            "getHomeActivities()",
+            "Launcher permission check",
+            "getPackageInfo()",
+            "getPackageInfo(SIG)",
+            "getApplicationInfo",
+            "cleanupDanglingBitmaps",
+            "getActivity+metadata",
+            "getInstalledPackages",
+            "checkPackageChanges",
+            "getApplicationResources",
+            "resourceNameLookup",
+            "getLauncherActivity",
+            "checkLauncherActivity",
+            "isActivityEnabled",
+            "packageUpdateCheck",
+            "asyncPreloadUserDelay"
+    };
 
     final Object mStatLock = new Object();
 
@@ -533,19 +553,26 @@ public class ShortcutService extends IShortcutService.Stub {
     /** lifecycle event */
     void handleUnlockUser(int userId) {
         if (DEBUG) {
-            Slog.d(TAG, "handleUnlockUser: user=" + userId);
+        Slog.d(TAG, "handleUnlockUser: user=" + userId);
         }
         synchronized (mLock) {
             mUnlockedUsers.put(userId, true);
-
-            // Preload the user's shortcuts.
-            // Also see if the locale has changed.
-            // Note as of nyc, the locale is per-user, so the locale shouldn't change
-            // when the user is locked.  However due to b/30119489 it still happens.
-            getUserShortcutsLocked(userId).detectLocaleChange();
-
-            checkPackageChanges(userId);
         }
+
+        // Preload the user data.
+        // Note, we don't use mHandler here but instead just start a new thread.
+        // This is because mHandler (which uses com.android.internal.os.BackgroundThread) is very
+        // busy at this point and this could take hundreds of milliseconds, which would be too
+        // late since the launcher would already have started.
+        // So we just create a new thread.  This code runs rarely, so we don't use a thread pool
+        // or anything.
+        final long start = injectElapsedRealtime();
+        injectRunOnNewThread(() -> {
+            synchronized (mLock) {
+                logDurationStat(Stats.ASYNC_PRELOAD_USER_DELAY, start);
+                getUserShortcutsLocked(userId);
+            }
+        });
     }
 
     /** lifecycle event */
@@ -1110,6 +1137,9 @@ public class ShortcutService extends IShortcutService.Stub {
                 userPackages = new ShortcutUser(this, userId);
             }
             mUsers.put(userId, userPackages);
+
+            // Also when a user's data is first accessed, scan all packages.
+            checkPackageChanges(userId);
         }
         return userPackages;
     }
@@ -1466,6 +1496,10 @@ public class ShortcutService extends IShortcutService.Stub {
     // Overridden in unit tests to execute r synchronously.
     void injectPostToHandler(Runnable r) {
         mHandler.post(r);
+    }
+
+    void injectRunOnNewThread(Runnable r) {
+        new Thread(r).start();
     }
 
     /**
@@ -3218,23 +3252,9 @@ public class ShortcutService extends IShortcutService.Stub {
 
             pw.println("  Stats:");
             synchronized (mStatLock) {
-                final String p = "    ";
-                dumpStatLS(pw, p, Stats.GET_DEFAULT_HOME, "getHomeActivities()");
-                dumpStatLS(pw, p, Stats.LAUNCHER_PERMISSION_CHECK, "Launcher permission check");
-
-                dumpStatLS(pw, p, Stats.GET_PACKAGE_INFO, "getPackageInfo()");
-                dumpStatLS(pw, p, Stats.GET_PACKAGE_INFO_WITH_SIG, "getPackageInfo(SIG)");
-                dumpStatLS(pw, p, Stats.GET_APPLICATION_INFO, "getApplicationInfo");
-                dumpStatLS(pw, p, Stats.CLEANUP_DANGLING_BITMAPS, "cleanupDanglingBitmaps");
-                dumpStatLS(pw, p, Stats.GET_ACTIVITY_WITH_METADATA, "getActivity+metadata");
-                dumpStatLS(pw, p, Stats.GET_INSTALLED_PACKAGES, "getInstalledPackages");
-                dumpStatLS(pw, p, Stats.CHECK_PACKAGE_CHANGES, "checkPackageChanges");
-                dumpStatLS(pw, p, Stats.GET_APPLICATION_RESOURCES, "getApplicationResources");
-                dumpStatLS(pw, p, Stats.RESOURCE_NAME_LOOKUP, "resourceNameLookup");
-                dumpStatLS(pw, p, Stats.GET_LAUNCHER_ACTIVITY, "getLauncherActivity");
-                dumpStatLS(pw, p, Stats.CHECK_LAUNCHER_ACTIVITY, "checkLauncherActivity");
-                dumpStatLS(pw, p, Stats.IS_ACTIVITY_ENABLED, "isActivityEnabled");
-                dumpStatLS(pw, p, Stats.PACKAGE_UPDATE_CHECK, "packageUpdateCheck");
+                for (int i = 0; i < Stats.COUNT; i++) {
+                    dumpStatLS(pw, "    ", i);
+                }
             }
 
             pw.println();
@@ -3277,12 +3297,12 @@ public class ShortcutService extends IShortcutService.Stub {
         return tobj.format("%Y-%m-%d %H:%M:%S");
     }
 
-    private void dumpStatLS(PrintWriter pw, String prefix, int statId, String label) {
+    private void dumpStatLS(PrintWriter pw, String prefix, int statId) {
         pw.print(prefix);
         final int count = mCountStats[statId];
         final long dur = mDurationStats[statId];
         pw.println(String.format("%s: count=%d, total=%dms, avg=%.1fms",
-                label, count, dur,
+                STAT_LABELS[statId], count, dur,
                 (count == 0 ? 0 : ((double) dur) / count)));
     }
 

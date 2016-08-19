@@ -156,11 +156,10 @@ public class ShortcutManagerTestUtils {
         return result;
     }
 
-    public static List<String> runCommand(Instrumentation instrumentation, String command) {
+    private static List<String> runCommand(Instrumentation instrumentation, String command) {
         return runCommand(instrumentation, command, null);
     }
-
-    public static List<String> runCommand(Instrumentation instrumentation, String command,
+    private static List<String> runCommand(Instrumentation instrumentation, String command,
             Predicate<List<String>> resultAsserter) {
         Log.d(TAG, "Running command: " + command);
         final List<String> result;
@@ -176,11 +175,11 @@ public class ShortcutManagerTestUtils {
         return result;
     }
 
-    public static void runCommandForNoOutput(Instrumentation instrumentation, String command) {
+    private static void runCommandForNoOutput(Instrumentation instrumentation, String command) {
         runCommand(instrumentation, command, result -> result.size() == 0);
     }
 
-    public static List<String> runShortcutCommand(Instrumentation instrumentation, String command,
+    private static List<String> runShortcutCommand(Instrumentation instrumentation, String command,
             Predicate<List<String>> resultAsserter) {
         return runCommand(instrumentation, "cmd shortcut " + command, resultAsserter);
     }
@@ -205,8 +204,7 @@ public class ShortcutManagerTestUtils {
     }
 
     public static void setDefaultLauncher(Instrumentation instrumentation, String component) {
-        runCommand(instrumentation, "cmd package set-home-activity --user "
-                        + instrumentation.getContext().getUserId() + " " + component,
+        runCommand(instrumentation, "cmd package set-home-activity " + component,
                 result -> result.contains("Success"));
     }
 
