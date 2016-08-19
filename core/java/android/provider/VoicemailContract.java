@@ -30,7 +30,6 @@ import android.provider.CallLog.Calls;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
 import android.telecom.Voicemail;
-
 import java.util.List;
 
 /**
@@ -123,20 +122,34 @@ public class VoicemailContract {
             "android.intent.action.VOICEMAIL_SMS_RECEIVED";
 
     /**
-     * Extra included in {@link #ACTION_VOICEMAIL_SMS_RECEIVED} broadcast intents to indicate the
-     * event type of the SMS. Common values are "SYNC" or "STATUS"
+     * Optional extra included in {@link #ACTION_VOICEMAIL_SMS_RECEIVED} broadcast intents to
+     * indicate the event type of the SMS. Common values are "SYNC" or "STATUS". The extra will not
+     * exist if the framework cannot parse the SMS as voicemail but the carrier pattern indicates
+     * it is.
      */
     /** @hide */
     public static final String EXTRA_VOICEMAIL_SMS_PREFIX =
             "com.android.voicemail.extra.VOICEMAIL_SMS_PREFIX";
 
     /**
-     * Extra included in {@link #ACTION_VOICEMAIL_SMS_RECEIVED} broadcast intents to indicate the
-     * fields sent by the SMS
+     * Optional extra included in {@link #ACTION_VOICEMAIL_SMS_RECEIVED} broadcast intents to
+     * indicate the fields sent by the SMS. The extra will not exist if the framework cannot
+     * parse the SMS as voicemail but the carrier pattern indicates it is.
      */
     /** @hide */
     public static final String EXTRA_VOICEMAIL_SMS_FIELDS =
             "com.android.voicemail.extra.VOICEMAIL_SMS_FIELDS";
+
+    /**
+     * Extra included in {@link #ACTION_VOICEMAIL_SMS_RECEIVED} broadcast intents to indicate the
+     * message body of the SMS. This extra is included if the framework cannot
+     * parse the SMS as voicemail but the carrier pattern indicates it is.
+     */
+    /**
+     * @hide
+     */
+    public static final String EXTRA_VOICEMAIL_SMS_MESSAGE_BODY =
+        "com.android.voicemail.extra.VOICEMAIL_SMS_MESSAGE_BODY";
 
     /**
      * Extra included in {@link #ACTION_VOICEMAIL_SMS_RECEIVED} broadcast intents to indicate he
