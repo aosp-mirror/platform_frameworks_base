@@ -23,9 +23,9 @@ import android.os.Parcelable;
 /**
  * Defines a request object to configure a Wi-Fi NAN network. Built using
  * {@link ConfigRequest.Builder}. Configuration is requested using
- * {@link WifiNanManager#connect(android.os.Looper, WifiNanEventCallback, ConfigRequest)}
- * . Note that the actual achieved configuration may be different from the
- * requested configuration - since multiple applications may request different
+ * {@link WifiNanManager#connect(android.os.Looper, WifiNanEventCallback, ConfigRequest)}.
+ * Note that the actual achieved configuration may be different from the
+ * requested configuration - since different applications may request different
  * configurations.
  *
  * @hide PROPOSED_NAN_API
@@ -155,6 +155,7 @@ public class ConfigRequest implements Parcelable {
      * @param o Object to compare to.
      * @return true if configuration objects have the same on-the-air
      *         configuration, false otherwise.
+     *
      * @hide
      */
     public boolean equalsOnTheAir(Object o) {
@@ -186,7 +187,7 @@ public class ConfigRequest implements Parcelable {
     }
 
     /**
-     * Validates that the contents of the ConfigRequest are valid. Otherwise
+     * Verifies that the contents of the ConfigRequest are valid. Otherwise
      * throws an IllegalArgumentException.
      *
      * @hide
@@ -229,11 +230,13 @@ public class ConfigRequest implements Parcelable {
         private boolean mEnableIdentityChangeCallback = false;
 
         /**
-         * Specify whether 5G band support is required in this request.
+         * Specify whether 5G band support is required in this request. Disabled by default.
          *
          * @param support5gBand Support for 5G band is required.
+         *
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
+         *
          * @hide PROPOSED_NAN_SYSTEM_API
          */
         public Builder setSupport5gBand(boolean support5gBand) {
@@ -242,12 +245,14 @@ public class ConfigRequest implements Parcelable {
         }
 
         /**
-         * Specify the Master Preference requested. The permitted range is 0 to
+         * Specify the Master Preference requested. The permitted range is 0 (the default) to
          * 255 with 1 and 255 excluded (reserved).
          *
          * @param masterPreference The requested master preference
+         *
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
+         *
          * @hide PROPOSED_NAN_SYSTEM_API
          */
         public Builder setMasterPreference(int masterPreference) {
@@ -268,13 +273,15 @@ public class ConfigRequest implements Parcelable {
          * The Cluster ID is generated randomly for new NAN networks. Specify
          * the lower range of the cluster ID. The upper range is specified using
          * the {@link ConfigRequest.Builder#setClusterHigh(int)}. The permitted
-         * range is 0 to the value specified by
-         * {@link ConfigRequest.Builder#setClusterHigh(int)}. Equality is
+         * range is 0 (the default) to the value specified by
+         * {@link ConfigRequest.Builder#setClusterHigh(int)}. Equality of Low and High is
          * permitted which restricts the Cluster ID to the specified value.
          *
          * @param clusterLow The lower range of the generated cluster ID.
+         *
          * @return The builder to facilitate chaining
          *         {@code builder.setClusterLow(..).setClusterHigh(..)}.
+         *
          * @hide PROPOSED_NAN_SYSTEM_API
          */
         public Builder setClusterLow(int clusterLow) {
@@ -294,12 +301,14 @@ public class ConfigRequest implements Parcelable {
          * the lower upper of the cluster ID. The lower range is specified using
          * the {@link ConfigRequest.Builder#setClusterLow(int)}. The permitted
          * range is the value specified by
-         * {@link ConfigRequest.Builder#setClusterLow(int)} to 0xFFFF. Equality
-         * is permitted which restricts the Cluster ID to the specified value.
+         * {@link ConfigRequest.Builder#setClusterLow(int)} to 0xFFFF (the default). Equality of
+         * Low and High is permitted which restricts the Cluster ID to the specified value.
          *
          * @param clusterHigh The upper range of the generated cluster ID.
+         *
          * @return The builder to facilitate chaining
          *         {@code builder.setClusterLow(..).setClusterHigh(..)}.
+         *
          * @hide PROPOSED_NAN_SYSTEM_API
          */
         public Builder setClusterHigh(int clusterHigh) {
@@ -315,13 +324,15 @@ public class ConfigRequest implements Parcelable {
         }
 
         /**
-         * Indicate whether or not we want to enable the callback to the
-         * listener on the event when the NAN device identity is changed. A
-         * device identity is it's Discovery MAC address. Depending on use-case
-         * we may want to perform some activity (e.g. re-publish). In other
-         * use-cases (typically where we're silent) there's no reason to be
-         * woken up repeatedly. Note that the MAC address is randomized at
-         * regular intervals - so do not enable unless specifically required.
+         * Indicate whether or not we want to enable the
+         * {@link WifiNanEventCallback#onIdentityChanged(byte[])} callback. A
+         * device identity is its Discovery MAC address which is randomized at regular intervals.
+         * An application may need to know the MAC address, e.g. when using OOB (out-of-band)
+         * discovery together with NAN connections.
+         * <p>
+         *     The callbacks are disabled by default since it may result in additional wake-ups
+         *     of the host -
+         *     increasing power.
          *
          * @param enableIdentityChangeCallback Enable the callback informing
          *            listener when identity is changed.

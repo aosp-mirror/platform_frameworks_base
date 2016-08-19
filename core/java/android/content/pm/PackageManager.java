@@ -2040,8 +2040,7 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
-     * {@link #hasSystemFeature}: The device supports Wi-Fi Aware (NAN)
-     * networking.
+     * {@link #hasSystemFeature}: The device supports Wi-Fi NAN.
      *
      * @hide PROPOSED_NAN_API
      */
