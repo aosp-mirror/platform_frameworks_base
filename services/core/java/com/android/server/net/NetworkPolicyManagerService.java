@@ -57,6 +57,7 @@ import static android.net.NetworkPolicyManager.RULE_REJECT_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 import static android.net.NetworkPolicyManager.RULE_TEMPORARY_ALLOW_METERED;
 import static android.net.NetworkPolicyManager.computeLastCycleBoundary;
+import static android.net.NetworkPolicyManager.uidPoliciesToString;
 import static android.net.NetworkPolicyManager.uidRulesToString;
 import static android.net.NetworkTemplate.MATCH_MOBILE_3G_LOWER;
 import static android.net.NetworkTemplate.MATCH_MOBILE_4G;
@@ -152,7 +153,6 @@ import android.text.format.Time;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
-import android.util.DebugUtils;
 import android.util.Log;
 import android.util.NtpTrustedTime;
 import android.util.Pair;
@@ -2352,7 +2352,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     fout.print("UID=");
                     fout.print(uid);
                     fout.print(" policy=");
-                    fout.print(DebugUtils.flagsToString(NetworkPolicyManager.class, "POLICY_", policy));
+                    fout.print(uidPoliciesToString(policy));
                     fout.println();
                 }
                 fout.decreaseIndent();
