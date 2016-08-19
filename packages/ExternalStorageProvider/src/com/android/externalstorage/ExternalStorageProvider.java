@@ -566,6 +566,7 @@ public class ExternalStorageProvider extends DocumentsProvider {
             throws FileNotFoundException {
         final MatrixCursor result = new MatrixCursor(resolveDocumentProjection(projection));
 
+        query = query.toLowerCase();
         final File parent;
         synchronized (mRootsLock) {
             parent = mRoots.get(rootId).path;
