@@ -21,6 +21,8 @@ import android.annotation.SystemApi;
 import android.net.wifi.RttManager;
 import android.util.Log;
 
+import dalvik.system.CloseGuard;
+
 import java.lang.ref.WeakReference;
 
 /**
@@ -52,6 +54,8 @@ public class WifiNanSession {
      */
     protected boolean mTerminated = false;
 
+    private final CloseGuard mCloseGuard = CloseGuard.get();
+
     /**
      * {@hide}
      */
@@ -60,6 +64,8 @@ public class WifiNanSession {
 
         mMgr = new WeakReference<>(manager);
         mSessionId = sessionId;
+
+        mCloseGuard.open("terminate");
     }
 
     /**
@@ -77,6 +83,7 @@ public class WifiNanSession {
         mgr.terminateSession(mSessionId);
         mTerminated = true;
         mMgr.clear();
+        mCloseGuard.close();
     }
 
     /**
@@ -92,17 +99,19 @@ public class WifiNanSession {
         }
         mTerminated = true;
         mMgr.clear();
+        mCloseGuard.close();
     }
 
     @Override
     protected void finalize() throws Throwable {
-        if (!mTerminated) {
-            Log.w(TAG, "WifiNanSession mSessionId=" + mSessionId
-                    + " was not explicitly terminated. The session may use resources until "
-                    + "terminated so step should be done explicitly");
-            terminate();
+        try {
+            if (!mTerminated) {
+                mCloseGuard.warnIfOpen();
+                terminate();
+            }
+        } finally {
+            super.finalize();
         }
-        super.finalize();
     }
 
     /**
