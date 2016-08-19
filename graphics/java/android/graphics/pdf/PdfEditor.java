@@ -79,8 +79,12 @@ public final class PdfEditor {
         }
 
         mInput = input;
-        mNativeDocument = nativeOpen(mInput.getFd(), size);
-        mPageCount = nativeGetPageCount(mNativeDocument);
+
+        synchronized (PdfRenderer.sPdfiumLock) {
+            mNativeDocument = nativeOpen(mInput.getFd(), size);
+            mPageCount = nativeGetPageCount(mNativeDocument);
+        }
+
         mCloseGuard.open("close");
     }
 
@@ -102,7 +106,10 @@ public final class PdfEditor {
     public void removePage(int pageIndex) {
         throwIfClosed();
         throwIfPageNotInDocument(pageIndex);
-        mPageCount = nativeRemovePage(mNativeDocument, pageIndex);
+
+        synchronized (PdfRenderer.sPdfiumLock) {
+            mPageCount = nativeRemovePage(mNativeDocument, pageIndex);
+        }
     }
 
     /**
@@ -125,11 +132,16 @@ public final class PdfEditor {
         if (clip == null) {
             Point size = new Point();
             getPageSize(pageIndex, size);
-            nativeSetTransformAndClip(mNativeDocument, pageIndex, transform.native_instance,
-                    0, 0, size.x, size.y);
+
+            synchronized (PdfRenderer.sPdfiumLock) {
+                nativeSetTransformAndClip(mNativeDocument, pageIndex, transform.native_instance,
+                        0, 0, size.x, size.y);
+            }
         } else {
-            nativeSetTransformAndClip(mNativeDocument, pageIndex, transform.native_instance,
-                    clip.left, clip.top, clip.right, clip.bottom);
+            synchronized (PdfRenderer.sPdfiumLock) {
+                nativeSetTransformAndClip(mNativeDocument, pageIndex, transform.native_instance,
+                        clip.left, clip.top, clip.right, clip.bottom);
+            }
         }
     }
 
@@ -143,7 +155,10 @@ public final class PdfEditor {
         throwIfClosed();
         throwIfOutSizeNull(outSize);
         throwIfPageNotInDocument(pageIndex);
-        nativeGetPageSize(mNativeDocument, pageIndex, outSize);
+
+        synchronized (PdfRenderer.sPdfiumLock) {
+            nativeGetPageSize(mNativeDocument, pageIndex, outSize);
+        }
     }
 
     /**
@@ -156,7 +171,10 @@ public final class PdfEditor {
         throwIfClosed();
         throwIfOutMediaBoxNull(outMediaBox);
         throwIfPageNotInDocument(pageIndex);
-        return nativeGetPageMediaBox(mNativeDocument, pageIndex, outMediaBox);
+
+        synchronized (PdfRenderer.sPdfiumLock) {
+            return nativeGetPageMediaBox(mNativeDocument, pageIndex, outMediaBox);
+        }
     }
 
     /**
@@ -169,7 +187,10 @@ public final class PdfEditor {
         throwIfClosed();
         throwIfMediaBoxNull(mediaBox);
         throwIfPageNotInDocument(pageIndex);
-        nativeSetPageMediaBox(mNativeDocument, pageIndex, mediaBox);
+
+        synchronized (PdfRenderer.sPdfiumLock) {
+            nativeSetPageMediaBox(mNativeDocument, pageIndex, mediaBox);
+        }
     }
 
     /**
@@ -182,7 +203,10 @@ public final class PdfEditor {
         throwIfClosed();
         throwIfOutCropBoxNull(outCropBox);
         throwIfPageNotInDocument(pageIndex);
-        return nativeGetPageCropBox(mNativeDocument, pageIndex, outCropBox);
+
+        synchronized (PdfRenderer.sPdfiumLock) {
+            return nativeGetPageCropBox(mNativeDocument, pageIndex, outCropBox);
+        }
     }
 
     /**
@@ -195,7 +219,10 @@ public final class PdfEditor {
         throwIfClosed();
         throwIfCropBoxNull(cropBox);
         throwIfPageNotInDocument(pageIndex);
-        nativeSetPageCropBox(mNativeDocument, pageIndex, cropBox);
+
+        synchronized (PdfRenderer.sPdfiumLock) {
+            nativeSetPageCropBox(mNativeDocument, pageIndex, cropBox);
+        }
     }
 
     /**
@@ -205,7 +232,10 @@ public final class PdfEditor {
      */
     public boolean shouldScaleForPrinting() {
         throwIfClosed();
-        return nativeScaleForPrinting(mNativeDocument);
+
+        synchronized (PdfRenderer.sPdfiumLock) {
+            return nativeScaleForPrinting(mNativeDocument);
+        }
     }
 
     /**
@@ -219,7 +249,10 @@ public final class PdfEditor {
     public void write(ParcelFileDescriptor output) throws IOException {
         try {
             throwIfClosed();
-            nativeWrite(mNativeDocument, output.getFd());
+
+            synchronized (PdfRenderer.sPdfiumLock) {
+                nativeWrite(mNativeDocument, output.getFd());
+            }
         } finally {
             IoUtils.closeQuietly(output);
         }
@@ -247,7 +280,9 @@ public final class PdfEditor {
     }
 
     private void doClose() {
-        nativeClose(mNativeDocument);
+        synchronized (PdfRenderer.sPdfiumLock) {
+            nativeClose(mNativeDocument);
+        }
         IoUtils.closeQuietly(mInput);
         mInput = null;
         mCloseGuard.close();
