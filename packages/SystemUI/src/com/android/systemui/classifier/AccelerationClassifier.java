@@ -62,36 +62,36 @@ public class AccelerationClassifier extends StrokeClassifier {
     @Override
     public float getFalseTouchEvaluation(int type, Stroke stroke) {
         Data data = mStrokeMap.get(stroke);
-        return SpeedRatioEvaluator.evaluate(data.maxSpeedRatio)
-                + DistanceRatioEvaluator.evaluate(data.maxDistanceRatio);
+        return 2 * SpeedRatioEvaluator.evaluate(data.maxSpeedRatio);
     }
 
     private static class Data {
-        public Point previousPoint;
-        public float previousSpeed;
-        public float previousDistance;
-        public float maxSpeedRatio;
-        public float maxDistanceRatio;
+
+        static final float MILLIS_TO_NANOS = 1e6f;
+
+        Point previousPoint;
+        float previousSpeed = 0;
+        float maxSpeedRatio = 0;
 
         public Data(Point point) {
             previousPoint = point;
-            previousSpeed = previousDistance = 0.0f;
-            maxDistanceRatio = maxSpeedRatio = 0.0f;
         }
 
         public void addPoint(Point point) {
             float distance = previousPoint.dist(point);
             float duration = (float) (point.timeOffsetNano - previousPoint.timeOffsetNano + 1);
             float speed = distance / duration;
-            if (previousDistance != 0.0f) {
-                maxDistanceRatio = Math.max(maxDistanceRatio, distance / previousDistance);
-            }
 
+            if (duration > 20 * MILLIS_TO_NANOS || duration < 5 * MILLIS_TO_NANOS) {
+                // reject this segment and ensure we won't use data about it in the next round.
+                previousSpeed = 0;
+                previousPoint = point;
+                return;
+            }
             if (previousSpeed != 0.0f) {
                 maxSpeedRatio = Math.max(maxSpeedRatio, speed / previousSpeed);
             }
 
-            previousDistance = distance;
             previousSpeed = speed;
             previousPoint = point;
         }
