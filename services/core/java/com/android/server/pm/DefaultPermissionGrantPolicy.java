@@ -17,6 +17,7 @@
 package com.android.server.pm;
 
 import android.Manifest;
+import android.annotation.NonNull;
 import android.app.DownloadManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.Intent;
@@ -30,6 +31,9 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.print.PrintManager;
@@ -39,12 +43,23 @@ import android.provider.MediaStore;
 import android.provider.Telephony.Sms.Intents;
 import android.telephony.TelephonyManager;
 import android.security.Credentials;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.Slog;
+import android.util.Xml;
+import com.android.internal.util.XmlUtils;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static android.os.Process.FIRST_APPLICATION_UID;
@@ -64,6 +79,13 @@ final class DefaultPermissionGrantPolicy {
             | PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 
     private static final String AUDIO_MIME_TYPE = "audio/mpeg";
+
+    private static final String TAG_EXCEPTIONS = "exceptions";
+    private static final String TAG_EXCEPTION = "exception";
+    private static final String TAG_PERMISSION = "permission";
+    private static final String ATTR_PACKAGE = "package";
+    private static final String ATTR_NAME = "name";
+    private static final String ATTR_FIXED = "fixed";
 
     private static final Set<String> PHONE_PERMISSIONS = new ArraySet<>();
     static {
@@ -126,7 +148,10 @@ final class DefaultPermissionGrantPolicy {
         STORAGE_PERMISSIONS.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
     }
 
+    private static final int MSG_READ_DEFAULT_PERMISSION_EXCEPTIONS = 1;
+
     private final PackageManagerService mService;
+    private final Handler mHandler;
 
     private PackagesProvider mLocationPackagesProvider;
     private PackagesProvider mVoiceInteractionPackagesProvider;
@@ -135,8 +160,22 @@ final class DefaultPermissionGrantPolicy {
     private PackagesProvider mSimCallManagerPackagesProvider;
     private SyncAdapterPackagesProvider mSyncAdapterPackagesProvider;
 
+    private ArrayMap<String, List<DefaultPermissionGrant>> mGrantExceptions;
+
     public DefaultPermissionGrantPolicy(PackageManagerService service) {
         mService = service;
+        mHandler = new Handler(mService.mHandlerThread.getLooper()) {
+            @Override
+            public void handleMessage(Message msg) {
+                if (msg.what == MSG_READ_DEFAULT_PERMISSION_EXCEPTIONS) {
+                    synchronized (mService.mPackages) {
+                        if (mGrantExceptions == null) {
+                            mGrantExceptions = readDefaultPermissionExceptionsLPw();
+                        }
+                    }
+                }
+            }
+        };
     }
 
     public void setLocationPackagesProviderLPw(PackagesProvider provider) {
@@ -166,6 +205,11 @@ final class DefaultPermissionGrantPolicy {
     public void grantDefaultPermissions(int userId) {
         grantPermissionsToSysComponentsAndPrivApps(userId);
         grantDefaultSystemHandlerPermissions(userId);
+        grantDefaultPermissionExceptions(userId);
+    }
+
+    public void scheduleReadDefaultPermissionExceptions() {
+        mHandler.sendEmptyMessage(MSG_READ_DEFAULT_PERMISSION_EXCEPTIONS);
     }
 
     private void grantPermissionsToSysComponentsAndPrivApps(int userId) {
@@ -916,7 +960,175 @@ final class DefaultPermissionGrantPolicy {
                 pkg.mSignatures) == PackageManager.SIGNATURE_MATCH;
     }
 
+    private void grantDefaultPermissionExceptions(int userId) {
+        synchronized (mService.mPackages) {
+            mHandler.removeMessages(MSG_READ_DEFAULT_PERMISSION_EXCEPTIONS);
+
+            if (mGrantExceptions == null) {
+                mGrantExceptions = readDefaultPermissionExceptionsLPw();
+            }
+
+            // mGrantExceptions is null only before the first read and then
+            // it serves as a cache of the default grants that should be
+            // performed for every user. If there is an entry then the app
+            // is on the system image and supports runtime permissions.
+            Set<String> permissions = null;
+            final int exceptionCount = mGrantExceptions.size();
+            for (int i = 0; i < exceptionCount; i++) {
+                String packageName = mGrantExceptions.keyAt(i);
+                PackageParser.Package pkg = getSystemPackageLPr(packageName);
+                List<DefaultPermissionGrant> permissionGrants = mGrantExceptions.valueAt(i);
+                final int permissionGrantCount = permissionGrants.size();
+                for (int j = 0; j < permissionGrantCount; j++) {
+                    DefaultPermissionGrant permissionGrant = permissionGrants.get(j);
+                    if (permissions == null) {
+                        permissions = new ArraySet<>();
+                    } else {
+                        permissions.clear();
+                    }
+                    permissions.add(permissionGrant.name);
+                    grantRuntimePermissionsLPw(pkg, permissions, false,
+                            permissionGrant.fixed, userId);
+                }
+            }
+        }
+    }
+
+    private @NonNull ArrayMap<String, List<DefaultPermissionGrant>>
+            readDefaultPermissionExceptionsLPw() {
+        File dir = new File(Environment.getRootDirectory(), "etc/default-permissions");
+        if (!dir.exists() || !dir.isDirectory() || !dir.canRead()) {
+            return new ArrayMap<>(0);
+        }
+
+        File[] files = dir.listFiles();
+        if (files == null) {
+            return new ArrayMap<>(0);
+        }
+
+        ArrayMap<String, List<DefaultPermissionGrant>> grantExceptions = new ArrayMap<>();
+
+        // Iterate over the files in the directory and scan .xml files
+        for (File file : files) {
+            if (!file.getPath().endsWith(".xml")) {
+                Slog.i(TAG, "Non-xml file " + file + " in " + dir + " directory, ignoring");
+                continue;
+            }
+            if (!file.canRead()) {
+                Slog.w(TAG, "Default permissions file " + file + " cannot be read");
+                continue;
+            }
+            try (
+                InputStream str = new BufferedInputStream(new FileInputStream(file))
+            ) {
+                XmlPullParser parser = Xml.newPullParser();
+                parser.setInput(str, null);
+                parse(parser, grantExceptions);
+            } catch (XmlPullParserException | IOException e) {
+                Slog.w(TAG, "Error reading default permissions file " + file, e);
+            }
+        }
+
+        return grantExceptions;
+    }
+
+    private void parse(XmlPullParser parser, Map<String, List<DefaultPermissionGrant>>
+            outGrantExceptions) throws IOException, XmlPullParserException {
+        final int outerDepth = parser.getDepth();
+        int type;
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                continue;
+            }
+            if (TAG_EXCEPTIONS.equals(parser.getName())) {
+                parseExceptions(parser, outGrantExceptions);
+            } else {
+                Log.e(TAG, "Unknown tag " + parser.getName());
+            }
+        }
+    }
+
+    private void parseExceptions(XmlPullParser parser, Map<String, List<DefaultPermissionGrant>>
+            outGrantExceptions) throws IOException, XmlPullParserException {
+        final int outerDepth = parser.getDepth();
+        int type;
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                continue;
+            }
+            if (TAG_EXCEPTION.equals(parser.getName())) {
+                String packageName = parser.getAttributeValue(null, ATTR_PACKAGE);
+
+                List<DefaultPermissionGrant> packageExceptions =
+                        outGrantExceptions.get(packageName);
+                if (packageExceptions == null) {
+                    // The package must be on the system image
+                    PackageParser.Package pkg = getSystemPackageLPr(packageName);
+                    if (pkg == null) {
+                        Log.w(TAG, "Unknown package:" + packageName);
+                        XmlUtils.skipCurrentTag(parser);
+                        return;
+                    }
+
+                    // The package must support runtime permissions
+                    if (!doesPackageSupportRuntimePermissions(pkg)) {
+                        Log.w(TAG, "Skipping non supporting runtime permissions package:"
+                                + packageName);
+                        XmlUtils.skipCurrentTag(parser);
+                        return;
+                    }
+                    packageExceptions = new ArrayList<>();
+                    outGrantExceptions.put(packageName, packageExceptions);
+                }
+
+                parsePermission(parser, packageExceptions);
+            } else {
+                Log.e(TAG, "Unknown tag " + parser.getName() + "under <exceptions>");
+            }
+        }
+    }
+
+    private void parsePermission(XmlPullParser parser, List<DefaultPermissionGrant>
+            outPackageExceptions) throws IOException, XmlPullParserException {
+        final int outerDepth = parser.getDepth();
+        int type;
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                continue;
+            }
+
+            if (TAG_PERMISSION.contains(parser.getName())) {
+                String name = parser.getAttributeValue(null, ATTR_NAME);
+                if (name == null) {
+                    Log.w(TAG, "Mandatory name attribute missing for permission tag");
+                    XmlUtils.skipCurrentTag(parser);
+                    continue;
+                }
+
+                final boolean fixed = XmlUtils.readBooleanAttribute(parser, ATTR_FIXED);
+
+                DefaultPermissionGrant exception = new DefaultPermissionGrant(name, fixed);
+                outPackageExceptions.add(exception);
+            } else {
+                Log.e(TAG, "Unknown tag " + parser.getName() + "under <exception>");
+            }
+        }
+    }
+
     private static boolean doesPackageSupportRuntimePermissions(PackageParser.Package pkg) {
         return pkg.applicationInfo.targetSdkVersion > Build.VERSION_CODES.LOLLIPOP_MR1;
+    }
+
+    private static final class DefaultPermissionGrant {
+        final String name;
+        final boolean fixed;
+
+        public DefaultPermissionGrant(String name, boolean fixed) {
+            this.name = name;
+            this.fixed = fixed;
+        }
     }
 }
