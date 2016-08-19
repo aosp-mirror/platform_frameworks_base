@@ -3140,6 +3140,18 @@ public class ExifInterface {
         swapBasedOnImageSize(IFD_TYPE_PRIMARY, IFD_TYPE_THUMBNAIL);
         swapBasedOnImageSize(IFD_TYPE_PREVIEW, IFD_TYPE_THUMBNAIL);
 
+        // Check if image has PixelXDimension/PixelYDimension tags, which contain valid image
+        // sizes, excluding padding at the right end or bottom end of the image to make sure that
+        // the values are multiples of 64. See JEITA CP-3451C Table 5 and Section 4.8.1. B.
+        ExifAttribute pixelXDimAttribute =
+                (ExifAttribute) mAttributes[IFD_TYPE_EXIF].get(TAG_PIXEL_X_DIMENSION);
+        ExifAttribute pixelYDimAttribute =
+                (ExifAttribute) mAttributes[IFD_TYPE_EXIF].get(TAG_PIXEL_Y_DIMENSION);
+        if (pixelXDimAttribute != null && pixelYDimAttribute != null) {
+            mAttributes[IFD_TYPE_PRIMARY].put(TAG_IMAGE_WIDTH, pixelXDimAttribute);
+            mAttributes[IFD_TYPE_PRIMARY].put(TAG_IMAGE_LENGTH, pixelYDimAttribute);
+        }
+
         // Check whether thumbnail image exists and whether preview image satisfies the thumbnail
         // image requirements
         if (mAttributes[IFD_TYPE_THUMBNAIL].isEmpty()) {
@@ -3161,13 +3173,6 @@ public class ExifInterface {
      * which results in larger values for TAG_IMAGE_WIDTH and TAG_IMAGE_LENGTH tags.
      * This method corrects those tag values by checking first the values of TAG_DEFAULT_CROP_SIZE
      * See DNG Specification 1.4.0.0. Section 4. (DefaultCropSize)
-     *
-     * If image is JPEG compressed, PixelXDimension/PixelYDimension tags are used for size info.
-     * However, an image may have padding at the right end or bottom end of the image to make sure
-     * that the values are multiples of 64. If so, the increased value will be saved in the
-     * SOF(Start of Frame). In order to assure that valid image size values are stored, this method
-     * checks TAG_PIXEL_X_DIMENSION & TAG_PIXEL_Y_DIMENSION and updates values if necessary.
-     * See JEITA CP-3451C Table 5 and Section 4.8.1. B.
      *
      * If image is a RW2 file, valid image sizes are stored in SensorBorder tags.
      * See tiff_parser.cc GetFullDimension32()
@@ -3224,27 +3229,6 @@ public class ExifInterface {
                 mAttributes[imageType].put(TAG_IMAGE_WIDTH, imageWidthAttribute);
             }
         } else {
-            // Update for JPEG image
-            ExifAttribute newSubfileTypeAttribute =
-                    (ExifAttribute) mAttributes[imageType].get(TAG_NEW_SUBFILE_TYPE);
-
-            if (newSubfileTypeAttribute != null) {
-                int newSubfileTypeValue = newSubfileTypeAttribute.getIntValue(mExifByteOrder);
-
-                if (newSubfileTypeValue == ORIGINAL_RESOLUTION_IMAGE) {
-                    // Update only for the primary image (OriginalResolutionImage)
-                    ExifAttribute pixelXDimAttribute =
-                            (ExifAttribute) mAttributes[IFD_TYPE_EXIF].get(TAG_PIXEL_X_DIMENSION);
-                    ExifAttribute pixelYDimAttribute =
-                            (ExifAttribute) mAttributes[IFD_TYPE_EXIF].get(TAG_PIXEL_Y_DIMENSION);
-
-                    if (pixelXDimAttribute != null && pixelYDimAttribute != null) {
-                        mAttributes[imageType].put(TAG_IMAGE_WIDTH, pixelXDimAttribute);
-                        mAttributes[imageType].put(TAG_IMAGE_LENGTH, pixelYDimAttribute);
-                        return;
-                    }
-                }
-            }
             retrieveJpegImageSize(in, imageType);
         }
     }
