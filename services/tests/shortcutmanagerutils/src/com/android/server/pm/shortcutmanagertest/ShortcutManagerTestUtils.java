@@ -156,10 +156,10 @@ public class ShortcutManagerTestUtils {
         return result;
     }
 
-    private static List<String> runCommand(Instrumentation instrumentation, String command) {
+    public static List<String> runCommand(Instrumentation instrumentation, String command) {
         return runCommand(instrumentation, command, null);
     }
-    private static List<String> runCommand(Instrumentation instrumentation, String command,
+    public static List<String> runCommand(Instrumentation instrumentation, String command,
             Predicate<List<String>> resultAsserter) {
         Log.d(TAG, "Running command: " + command);
         final List<String> result;
@@ -175,11 +175,11 @@ public class ShortcutManagerTestUtils {
         return result;
     }
 
-    private static void runCommandForNoOutput(Instrumentation instrumentation, String command) {
+    public static void runCommandForNoOutput(Instrumentation instrumentation, String command) {
         runCommand(instrumentation, command, result -> result.size() == 0);
     }
 
-    private static List<String> runShortcutCommand(Instrumentation instrumentation, String command,
+    public static List<String> runShortcutCommand(Instrumentation instrumentation, String command,
             Predicate<List<String>> resultAsserter) {
         return runCommand(instrumentation, "cmd shortcut " + command, resultAsserter);
     }
