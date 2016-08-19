@@ -88,10 +88,7 @@ public class SubscribeConfig implements Parcelable {
     public final byte[] mServiceSpecificInfo;
 
     /** @hide */
-    public final byte[] mTxFilter;
-
-    /** @hide */
-    public final byte[] mRxFilter;
+    public final byte[] mMatchFilter;
 
     /** @hide */
     public final int mSubscribeType;
@@ -108,13 +105,12 @@ public class SubscribeConfig implements Parcelable {
     /** @hide */
     public final boolean mEnableTerminateNotification;
 
-    private SubscribeConfig(byte[] serviceName, byte[] serviceSpecificInfo, byte[] txFilter,
-            byte[] rxFilter, int subscribeType, int publichCount, int ttlSec, int matchStyle,
+    private SubscribeConfig(byte[] serviceName, byte[] serviceSpecificInfo, byte[] matchFilter,
+            int subscribeType, int publichCount, int ttlSec, int matchStyle,
             boolean enableTerminateNotification) {
         mServiceName = serviceName;
         mServiceSpecificInfo = serviceSpecificInfo;
-        mTxFilter = txFilter;
-        mRxFilter = rxFilter;
+        mMatchFilter = matchFilter;
         mSubscribeType = subscribeType;
         mSubscribeCount = publichCount;
         mTtlSec = ttlSec;
@@ -126,8 +122,7 @@ public class SubscribeConfig implements Parcelable {
     public String toString() {
         return "SubscribeConfig [mServiceName='" + mServiceName + ", mServiceSpecificInfo='" + (
                 (mServiceSpecificInfo == null) ? "null" : HexEncoding.encode(mServiceSpecificInfo))
-                + ", mTxFilter=" + (new LvBufferUtils.LvIterable(1, mTxFilter)).toString()
-                + ", mRxFilter=" + (new LvBufferUtils.LvIterable(1, mRxFilter)).toString()
+                + ", mMatchFilter=" + (new LvBufferUtils.LvIterable(1, mMatchFilter)).toString()
                 + ", mSubscribeType=" + mSubscribeType + ", mSubscribeCount=" + mSubscribeCount
                 + ", mTtlSec=" + mTtlSec + ", mMatchType=" + mMatchStyle
                 + ", mEnableTerminateNotification=" + mEnableTerminateNotification + "]";
@@ -142,8 +137,7 @@ public class SubscribeConfig implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeByteArray(mServiceName);
         dest.writeByteArray(mServiceSpecificInfo);
-        dest.writeByteArray(mTxFilter);
-        dest.writeByteArray(mRxFilter);
+        dest.writeByteArray(mMatchFilter);
         dest.writeInt(mSubscribeType);
         dest.writeInt(mSubscribeCount);
         dest.writeInt(mTtlSec);
@@ -161,16 +155,15 @@ public class SubscribeConfig implements Parcelable {
         public SubscribeConfig createFromParcel(Parcel in) {
             byte[] serviceName = in.createByteArray();
             byte[] ssi = in.createByteArray();
-            byte[] txFilter = in.createByteArray();
-            byte[] rxFilter = in.createByteArray();
+            byte[] matchFilter = in.createByteArray();
             int subscribeType = in.readInt();
             int subscribeCount = in.readInt();
             int ttlSec = in.readInt();
             int matchStyle = in.readInt();
             boolean enableTerminateNotification = in.readInt() != 0;
 
-            return new SubscribeConfig(serviceName, ssi, txFilter, rxFilter, subscribeType,
-                    subscribeCount, ttlSec, matchStyle, enableTerminateNotification);
+            return new SubscribeConfig(serviceName, ssi, matchFilter, subscribeType, subscribeCount,
+                    ttlSec, matchStyle, enableTerminateNotification);
         }
     };
 
@@ -187,10 +180,9 @@ public class SubscribeConfig implements Parcelable {
         SubscribeConfig lhs = (SubscribeConfig) o;
 
         return Arrays.equals(mServiceName, lhs.mServiceName) && Arrays.equals(mServiceSpecificInfo,
-                lhs.mServiceSpecificInfo) && Arrays.equals(mTxFilter, lhs.mTxFilter)
-                && Arrays.equals(mRxFilter, lhs.mRxFilter) && mSubscribeType == lhs.mSubscribeType
-                && mSubscribeCount == lhs.mSubscribeCount && mTtlSec == lhs.mTtlSec
-                && mMatchStyle == lhs.mMatchStyle
+                lhs.mServiceSpecificInfo) && Arrays.equals(mMatchFilter, lhs.mMatchFilter)
+                && mSubscribeType == lhs.mSubscribeType && mSubscribeCount == lhs.mSubscribeCount
+                && mTtlSec == lhs.mTtlSec && mMatchStyle == lhs.mMatchStyle
                 && mEnableTerminateNotification == lhs.mEnableTerminateNotification;
     }
 
@@ -200,8 +192,7 @@ public class SubscribeConfig implements Parcelable {
 
         result = 31 * result + Arrays.hashCode(mServiceName);
         result = 31 * result + Arrays.hashCode(mServiceSpecificInfo);
-        result = 31 * result + Arrays.hashCode(mTxFilter);
-        result = 31 * result + Arrays.hashCode(mRxFilter);
+        result = 31 * result + Arrays.hashCode(mMatchFilter);
         result = 31 * result + mSubscribeType;
         result = 31 * result + mSubscribeCount;
         result = 31 * result + mTtlSec;
@@ -220,13 +211,9 @@ public class SubscribeConfig implements Parcelable {
     public void validate() throws IllegalArgumentException {
         WifiNanUtils.validateServiceName(mServiceName);
 
-        if (!LvBufferUtils.isValid(mTxFilter, 1)) {
+        if (!LvBufferUtils.isValid(mMatchFilter, 1)) {
             throw new IllegalArgumentException(
-                    "Invalid txFilter configuration - LV fields do not match up to length");
-        }
-        if (!LvBufferUtils.isValid(mRxFilter, 1)) {
-            throw new IllegalArgumentException(
-                    "Invalid rxFilter configuration - LV fields do not match up to length");
+                    "Invalid matchFilter configuration - LV fields do not match up to length");
         }
         if (mSubscribeType < SUBSCRIBE_TYPE_PASSIVE || mSubscribeType > SUBSCRIBE_TYPE_ACTIVE) {
             throw new IllegalArgumentException("Invalid subscribeType - " + mSubscribeType);
@@ -241,16 +228,6 @@ public class SubscribeConfig implements Parcelable {
             throw new IllegalArgumentException(
                     "Invalid matchType - must be MATCH_FIRST_ONLY or MATCH_ALL");
         }
-        if (mSubscribeType == SubscribeConfig.SUBSCRIBE_TYPE_ACTIVE && mRxFilter != null
-                && mRxFilter.length != 0) {
-            throw new IllegalArgumentException(
-                    "Invalid subscribe config: ACTIVE subscribes can't have an Rx filter");
-        }
-        if (mSubscribeType == SubscribeConfig.SUBSCRIBE_TYPE_PASSIVE && mTxFilter != null
-                && mTxFilter.length != 0) {
-            throw new IllegalArgumentException(
-                    "Invalid subscribe config: PASSIVE subscribes can't have a Tx filter");
-        }
     }
 
     /**
@@ -259,8 +236,7 @@ public class SubscribeConfig implements Parcelable {
     public static final class Builder {
         private byte[] mServiceName;
         private byte[] mServiceSpecificInfo;
-        private byte[] mTxFilter;
-        private byte[] mRxFilter;
+        private byte[] mMatchFilter;
         private int mSubscribeType = SUBSCRIBE_TYPE_PASSIVE;
         private int mSubscribeCount = 0;
         private int mTtlSec = 0;
@@ -331,51 +307,21 @@ public class SubscribeConfig implements Parcelable {
         }
 
         /**
-         * The transmit filter for an active subscribe session
-         * {@link SubscribeConfig.Builder#setSubscribeType(int)} and
-         * {@link SubscribeConfig#SUBSCRIBE_TYPE_ACTIVE}. Included in
-         * transmitted subscribe packets and used by receivers (passive
-         * publishers) to determine whether they match - in addition to just
-         * relying on the service name.
-         * <p>
-         * Format is an LV byte array: a single byte Length field followed by L bytes (the value of
-         * the Length field) of a value blob.
-         * </p>
-         * <p>
-         *     Optional. Empty by default.
-         * </p>
-         *
-         * @param txFilter The byte-array containing the LV formatted transmit
-         *            filter.
-         *
-         * @return The builder to facilitate chaining
-         *         {@code builder.setXXX(..).setXXX(..)}.
-         */
-        public Builder setTxFilter(@Nullable byte[] txFilter) {
-            mTxFilter = txFilter;
-            return this;
-        }
-
-        /**
-         * The transmit filter for a passive subsribe session
-         * {@link SubscribeConfig.Builder#setSubscribeType(int)} and
-         * {@link SubscribeConfig#SUBSCRIBE_TYPE_PASSIVE}. Used by the
-         * subscriber to determine whether they match transmitted publish
-         * packets - in addition to just relying on the service name.
+         * The match filter for a subscribe session. Used to determine whether a service
+         * discovery occurred - in addition to relying on the service name.
          * <p>
          * Format is an LV byte array: a single byte Length field followed by L bytes (the value of
          * the Length field) of a value blob.
          * <p>
          *     Optional. Empty by default.
          *
-         * @param rxFilter The byte-array containing the LV formatted receive
-         *            filter.
+         * @param matchFilter The byte-array containing the LV formatted match filter.
          *
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
-        public Builder setRxFilter(@Nullable byte[] rxFilter) {
-            mRxFilter = rxFilter;
+        public Builder setMatchFilter(@Nullable byte[] matchFilter) {
+            mMatchFilter = matchFilter;
             return this;
         }
 
@@ -490,7 +436,7 @@ public class SubscribeConfig implements Parcelable {
          * builder.
          */
         public SubscribeConfig build() {
-            return new SubscribeConfig(mServiceName, mServiceSpecificInfo, mTxFilter, mRxFilter,
+            return new SubscribeConfig(mServiceName, mServiceSpecificInfo, mMatchFilter,
                     mSubscribeType, mSubscribeCount, mTtlSec, mMatchStyle,
                     mEnableTerminateNotification);
         }
