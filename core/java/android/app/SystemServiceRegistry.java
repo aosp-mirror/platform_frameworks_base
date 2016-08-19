@@ -511,12 +511,15 @@ final class SystemServiceRegistry {
             }});
 
         registerService(Context.WIFI_NAN_SERVICE, WifiNanManager.class,
-                new StaticServiceFetcher<WifiNanManager>() {
+                new CachedServiceFetcher<WifiNanManager>() {
             @Override
-            public WifiNanManager createService() throws ServiceNotFoundException {
-                IBinder b = ServiceManager.getServiceOrThrow(Context.WIFI_NAN_SERVICE);
+            public WifiNanManager createService(ContextImpl ctx) throws ServiceNotFoundException {
+                IBinder b = ServiceManager.getService(Context.WIFI_NAN_SERVICE);
                 IWifiNanManager service = IWifiNanManager.Stub.asInterface(b);
-                return new WifiNanManager(service);
+                if (service == null) {
+                    return null;
+                }
+                return new WifiNanManager(ctx.getOuterContext(), service);
             }});
 
         registerService(Context.WIFI_SCANNING_SERVICE, WifiScanner.class,
