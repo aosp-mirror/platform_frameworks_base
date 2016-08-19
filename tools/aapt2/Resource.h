@@ -82,6 +82,8 @@ struct ResourceName {
     ResourceName() : type(ResourceType::kRaw) {}
     ResourceName(const StringPiece& p, ResourceType t, const StringPiece& e);
 
+    int compare(const ResourceName& other) const;
+
     bool isValid() const;
     std::string toString() const;
 };
@@ -256,6 +258,15 @@ inline ::std::ostream& operator<<(::std::ostream& out, const ResourceType& val) 
 
 inline ResourceName::ResourceName(const StringPiece& p, ResourceType t, const StringPiece& e) :
         package(p.toString()), type(t), entry(e.toString()) {
+}
+
+inline int ResourceName::compare(const ResourceName& other) const {
+    int cmp = package.compare(other.package);
+    if (cmp != 0) return cmp;
+    cmp = static_cast<int>(type) - static_cast<int>(other.type);
+    if (cmp != 0) return cmp;
+    cmp = entry.compare(other.entry);
+    return cmp;
 }
 
 inline bool ResourceName::isValid() const {
