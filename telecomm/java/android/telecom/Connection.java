@@ -461,6 +461,32 @@ public abstract class Connection extends Conferenceable {
      */
     public static final String EVENT_CALL_MERGE_FAILED = "android.telecom.event.CALL_MERGE_FAILED";
 
+    /**
+     * Connection event used to inform {@link InCallService}s when a call has been put on hold by
+     * the remote party.
+     * <p>
+     * This is different than the {@link Connection#STATE_HOLDING} state which indicates that the
+     * call is being held locally on the device.  When a capable {@link ConnectionService} receives
+     * signalling to indicate that the remote party has put the call on hold, it can send this
+     * connection event.
+     * @hide
+     */
+    public static final String EVENT_CALL_REMOTELY_HELD =
+            "android.telecom.event.CALL_REMOTELY_HELD";
+
+    /**
+     * Connection event used to inform {@link InCallService}s when a call which was remotely held
+     * (see {@link #EVENT_CALL_REMOTELY_HELD}) has been un-held by the remote party.
+     * <p>
+     * This is different than the {@link Connection#STATE_HOLDING} state which indicates that the
+     * call is being held locally on the device.  When a capable {@link ConnectionService} receives
+     * signalling to indicate that the remote party has taken the call off hold, it can send this
+     * connection event.
+     * @hide
+     */
+    public static final String EVENT_CALL_REMOTELY_UNHELD =
+            "android.telecom.event.CALL_REMOTELY_UNHELD";
+
     // Flag controlling whether PII is emitted into the logs
     private static final boolean PII_DEBUG = Log.isLoggable(android.util.Log.DEBUG);
 
