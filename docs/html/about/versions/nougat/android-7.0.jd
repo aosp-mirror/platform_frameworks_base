@@ -1,6 +1,6 @@
-page.title=Android 7.0 APIs
-meta.tags="Android 7.0", "android n", "Nougat"
-page.tags="Android 7.0", "Nougat", "android n", "developer preview"
+page.title=Android 7.0 for Developers
+meta.tags="Nougat", "android n"
+page.tags="Android 7.0", "Nougat", "android n"
 page.image=images/cards/card-n-apis_2x.png
 @jd:body
 
@@ -52,15 +52,19 @@ page.image=images/cards/card-n-apis_2x.png
 
 
 <p>
-Android 7.0
-(<a href="{@docRoot}reference/android/os/Build.VERSION_CODES.html#N">N</a>) 
-offers new features for users and app developers. This document provides
-an introduction to the most notable APIs. Make sure, also,
-to check out the <href="{@docRoot}about/versions/nougat/behavior.changes.html">
-Behavior Changes</a> to learn about areas where platform changes
-may affect your apps. In addition, the various developer guides
-can provide more information about key features.
+Android 7.0 Nougat introduces a variety of
+new features and capabilities for users and developers.
+This document highlights what's new for developers. </p>
+
+<p>Make sure check out the
+<href="{@docRoot}about/versions/nougat/android-7.0-changes.html">
+Android 7.0 behavior changes</a> to learn about areas where platform changes
+may affect your apps.
 </p>
+
+<p>To learn more about
+the consumer features of Android 7.0, visit <a
+href="http://www.android.com">www.android.com</a>.</p>
 
 <h2 id="multi-window_support">Multi-window Support</h2>
 
