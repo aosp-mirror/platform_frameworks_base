@@ -401,8 +401,13 @@ public class FilesActivity extends BaseActivity {
                 return true;
             }
 
-            // Open the Close drawer if it is closed and we're at the top of a root.
-            if (size <= 1) {
+            final Intent intent = getIntent();
+            final boolean launchedExternally = intent != null && intent.getData() != null
+                    && mState.action == State.ACTION_BROWSE;
+
+            // Open the Close drawer if it is closed and we're at the top of a root, but only when
+            // not launched by another app.
+            if (size <= 1 && !launchedExternally) {
                 mDrawer.setOpen(true);
                 // Remember so we don't just close it again if back is pressed again.
                 mDrawerLastFiddled = System.currentTimeMillis();
