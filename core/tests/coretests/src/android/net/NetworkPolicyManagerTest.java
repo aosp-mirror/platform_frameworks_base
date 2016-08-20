@@ -38,6 +38,7 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class NetworkPolicyManagerTest {
 
+    @Test
     public void testUidRulesToString() {
         uidRulesToStringTest(RULE_NONE, "0 (NONE)");
         uidRulesToStringTest(RULE_ALLOW_METERED, "1 (ALLOW_METERED)");
