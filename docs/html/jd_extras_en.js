@@ -5559,13 +5559,13 @@ METADATA['en'].collections = {
   "nougat/landing/resources": {
     "title": "",
     "resources": [
-      "about/versions/nougat/api-overview.html",
-      "about/versions/nougat/behavior-changes.html",
-      "about/versions/nougat/samples.html",
+      "about/versions/nougat/android-7.0.html",
+      "about/versions/nougat/android-7.0-changes.html",
+      "about/versions/nougat/android-7.0-samples.html",
     ]
   },
 
-  "preview/landing/videos/first": {
+  "nougat/landing/videos/first": {
     "title": "",
     "resources": [
     "https://www.youtube.com/watch?v=CsulIu3UaUM"
@@ -5583,21 +5583,20 @@ METADATA['en'].collections = {
       "training/articles/memory.html",
     ]
   },
-
-  "preview/landing/more": {
+  "nougat/landing/more": {
     "title": "",
     "resources": [
-      "preview/features/multi-window.html",
-      "preview/features/notification-updates.html",
-      "preview/features/background-optimization.html",
-      "preview/features/data-saver.html",
-      "preview/features/direct-boot.html",
-      "preview/features/icu4j-framework.html",
-      "preview/features/multilingual-support.html",
-      "preview/features/scoped-folder-access.html",
-      "preview/features/security-config.html",
-      "preview/features/picture-in-picture.html",
-      "preview/features/tv-recording-api.html"
+      "guide/topics/ui/multi-window.html",
+      "guide/topics/ui/notifiers/notifications.html",
+      "topic/performance/background-optimization.html",
+      "training/basics/network-ops/data-saver.html",
+      "training/articles/direct-boot.html",
+      "guide/topics/resources/icu4j-framework.html",
+      "guide/topics/resources/multilingual-support.html",
+      "training/articles/scoped-directory-access.html",
+      "training/articles/security-config.html",
+      "training/tv/playback/picture-in-picture.html",
+      "training/tv/tif/content-recording.html"
     ]
   },
   "work/landing/primary": {
