@@ -1,7 +1,7 @@
-page.title=Android 7.0 Changes
+page.title=Android 7.0 Behavior Changes
 page.keywords=preview,sdk,compatibility
-meta.tags="Android 7.0", "Nougat", "android n", "compatibility"
-page.tags="Android 7.0", "Nougat", "android n", "developer preview"
+meta.tags="Nougat", "android n", "compatibility"
+page.tags="Android 7.0", "Nougat", "android n"
 page.image=images/cards/card-n-changes_2x.png
 @jd:body
 
@@ -35,16 +35,14 @@ page.image=images/cards/card-n-changes_2x.png
 
 <h2>API Differences</h2>
 <ol>
-  <li><a href="{@docRoot}sdk/api_diff/n-preview-4-incr/changes.html">
-    Preview 3 to API 24</a></li>
   <li><a href="{@docRoot}sdk/api_diff/24/changes.html">
     API 23 to API 24</a></li>
 </ol>
 
 <h2>See Also</h2>
 <ol>
-  <li><a href="{@docRoot}preview/api-overview.html">
-    Android 7.0 APIs</a></li>
+  <li><a href="{@docRoot}about/versions/nougat/android-7.0.html">
+    Android 7.0 for Developers</a></li>
 </ol>
 
 </div>
