@@ -344,7 +344,7 @@ public class NetworkPolicyManager {
         return true;
     }
 
-    /*
+    /**
      * @hide
      */
     public static String uidRulesToString(int uidRules) {
@@ -353,6 +353,21 @@ public class NetworkPolicyManager {
             string.append("NONE");
         } else {
             string.append(DebugUtils.flagsToString(NetworkPolicyManager.class, "RULE_", uidRules));
+        }
+        string.append(")");
+        return string.toString();
+    }
+
+    /**
+     * @hide
+     */
+    public static String uidPoliciesToString(int uidPolicies) {
+        final StringBuilder string = new StringBuilder().append(uidPolicies).append(" (");
+        if (uidPolicies == POLICY_NONE) {
+            string.append("NONE");
+        } else {
+            string.append(DebugUtils.flagsToString(NetworkPolicyManager.class,
+                    "POLICY_", uidPolicies));
         }
         string.append(")");
         return string.toString();
