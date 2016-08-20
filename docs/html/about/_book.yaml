@@ -2,14 +2,12 @@ toc:
 - title: Nougat
   path: /about/versions/nougat/index.html
   section:
-  - title: Android 7.0 APIs
+  - title: Android 7.0 for Developers
     path: /about/versions/nougat/android-7.0.html
-  - title: Android 7.0 Changes
+  - title: Android 7.0 Behavior Changes
     path: /about/versions/nougat/android-7.0-changes.html
   - title: Android 7.0 Samples
     path: /about/versions/nougat/android-7.0-samples.html
-  - title: Android 7.0 Testing
-    path: /about/versions/nougat/android-7.0-testing.html
 
 - title: Marshmallow
   path: /about/versions/marshmallow/index.html

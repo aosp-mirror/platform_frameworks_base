@@ -1,10 +1,11 @@
 page.title=Android 7.0 Samples
 page.tags="Android 7.0", "nougat", "samples", "android"
+meta.tags="android n", "Nougat", "android 7.0"
 page.image=images/cards/card-n-samples_2x.png
 @jd:body
 
 <p>
-  The following code samples are provided for Android 7.0. To
+  Use the code samples below to learn about Android 7.0 capabilities and APIs. To
   download the samples in Android Studio, select the <b>File &gt; Import
   Samples</b> menu option.
 </p>
