@@ -669,10 +669,9 @@ final class BackStackRecord extends FragmentTransaction implements
         bumpBackStackNesting(1);
 
         if (mManager.mCurState >= Fragment.CREATED) {
-            SparseArray<Fragment> firstOutFragments = new SparseArray<Fragment>();
-            SparseArray<Fragment> lastInFragments = new SparseArray<Fragment>();
-            calculateFragments(firstOutFragments, lastInFragments);
-            beginTransition(firstOutFragments, lastInFragments, false);
+            SparseArray<FragmentContainerTransition> transitioningFragments = new SparseArray<>();
+            calculateFragments(transitioningFragments);
+            beginTransition(transitioningFragments);
         }
 
         final int numOps = mOps.size();
@@ -783,32 +782,44 @@ final class BackStackRecord extends FragmentTransaction implements
         }
     }
 
-    private static void setFirstOut(SparseArray<Fragment> firstOutFragments,
-                            SparseArray<Fragment> lastInFragments, Fragment fragment) {
+    private static void setFirstOut(SparseArray<FragmentContainerTransition> transitioningFragments,
+                            Fragment fragment, boolean isPop) {
         if (fragment != null) {
             int containerId = fragment.mContainerId;
             if (containerId != 0 && !fragment.isHidden()) {
-                if (fragment.isAdded() && fragment.getView() != null
-                        && firstOutFragments.get(containerId) == null) {
-                    firstOutFragments.put(containerId, fragment);
+                FragmentContainerTransition fragments = transitioningFragments.get(containerId);
+                if (fragment.isAdded() && fragment.getView() != null && (fragments == null ||
+                        fragments.firstOut == null)) {
+                    if (fragments == null) {
+                        fragments = new FragmentContainerTransition();
+                        transitioningFragments.put(containerId, fragments);
+                    }
+                    fragments.firstOut = fragment;
+                    fragments.firstOutIsPop = isPop;
                 }
-                if (lastInFragments.get(containerId) == fragment) {
-                    lastInFragments.remove(containerId);
+                if (fragments != null && fragments.lastIn == fragment) {
+                    fragments.lastIn = null;
                 }
             }
         }
     }
 
-    private void setLastIn(SparseArray<Fragment> firstOutFragments,
-            SparseArray<Fragment> lastInFragments, Fragment fragment) {
+    private void setLastIn(SparseArray<FragmentContainerTransition> transitioningFragments,
+            Fragment fragment, boolean isPop) {
         if (fragment != null) {
             int containerId = fragment.mContainerId;
             if (containerId != 0) {
+                FragmentContainerTransition fragments = transitioningFragments.get(containerId);
                 if (!fragment.isAdded()) {
-                    lastInFragments.put(containerId, fragment);
+                    if (fragments == null) {
+                        fragments = new FragmentContainerTransition();
+                        transitioningFragments.put(containerId, fragments);
+                    }
+                    fragments.lastIn = fragment;
+                    fragments.lastInIsPop = isPop;
                 }
-                if (firstOutFragments.get(containerId) == fragment) {
-                    firstOutFragments.remove(containerId);
+                if (fragments != null && fragments.firstOut == fragment) {
+                    fragments.firstOut = null;
                 }
             }
             /**
@@ -828,13 +839,12 @@ final class BackStackRecord extends FragmentTransaction implements
      * Finds the first removed fragment and last added fragments when going forward.
      * If none of the fragments have transitions, then both lists will be empty.
      *
-     * @param firstOutFragments The list of first fragments to be removed, keyed on the
-     *                          container ID. This list will be modified by the method.
-     * @param lastInFragments The list of last fragments to be added, keyed on the
-     *                        container ID. This list will be modified by the method.
+     * @param transitioningFragments Keyed on the container ID, the first fragments to be removed,
+     *                               and last fragments to be added. This will be modified by
+     *                               this method.
      */
-    private void calculateFragments(SparseArray<Fragment> firstOutFragments,
-            SparseArray<Fragment> lastInFragments) {
+    private void calculateFragments(
+            SparseArray<FragmentContainerTransition> transitioningFragments) {
         if (!mManager.mContainer.onHasView()) {
             return; // nothing to see, so no transitions
         }
@@ -843,22 +853,14 @@ final class BackStackRecord extends FragmentTransaction implements
             final Op op = mOps.get(opNum);
             switch (op.cmd) {
                 case OP_ADD:
-                    setLastIn(firstOutFragments, lastInFragments, op.fragment);
+                case OP_SHOW:
+                case OP_ATTACH:
+                    setLastIn(transitioningFragments, op.fragment, false);
                     break;
                 case OP_REMOVE:
-                    setFirstOut(firstOutFragments, lastInFragments, op.fragment);
-                    break;
                 case OP_HIDE:
-                    setFirstOut(firstOutFragments, lastInFragments, op.fragment);
-                    break;
-                case OP_SHOW:
-                    setLastIn(firstOutFragments, lastInFragments, op.fragment);
-                    break;
                 case OP_DETACH:
-                    setFirstOut(firstOutFragments, lastInFragments, op.fragment);
-                    break;
-                case OP_ATTACH:
-                    setLastIn(firstOutFragments, lastInFragments, op.fragment);
+                    setFirstOut(transitioningFragments, op.fragment, false);
                     break;
             }
         }
@@ -868,13 +870,12 @@ final class BackStackRecord extends FragmentTransaction implements
      * Finds the first removed fragment and last added fragments when popping the back stack.
      * If none of the fragments have transitions, then both lists will be empty.
      *
-     * @param firstOutFragments The list of first fragments to be removed, keyed on the
-     *                          container ID. This list will be modified by the method.
-     * @param lastInFragments The list of last fragments to be added, keyed on the
-     *                        container ID. This list will be modified by the method.
+     * @param transitioningFragments Keyed on the container ID, the first fragments to be removed,
+     *                               and last fragments to be added. This will be modified by
+     *                               this method.
      */
-    public void calculateBackFragments(SparseArray<Fragment> firstOutFragments,
-            SparseArray<Fragment> lastInFragments) {
+    public void calculateBackFragments(
+            SparseArray<FragmentContainerTransition> transitioningFragments) {
         if (!mManager.mContainer.onHasView()) {
             return; // nothing to see, so no transitions
         }
@@ -883,22 +884,14 @@ final class BackStackRecord extends FragmentTransaction implements
             final Op op = mOps.get(opNum);
             switch (op.cmd) {
                 case OP_ADD:
-                    setFirstOut(firstOutFragments, lastInFragments, op.fragment);
+                case OP_SHOW:
+                case OP_ATTACH:
+                    setFirstOut(transitioningFragments, op.fragment, true);
                     break;
                 case OP_REMOVE:
-                    setLastIn(firstOutFragments, lastInFragments, op.fragment);
-                    break;
                 case OP_HIDE:
-                    setLastIn(firstOutFragments, lastInFragments, op.fragment);
-                    break;
-                case OP_SHOW:
-                    setFirstOut(firstOutFragments, lastInFragments, op.fragment);
-                    break;
                 case OP_DETACH:
-                    setLastIn(firstOutFragments, lastInFragments, op.fragment);
-                    break;
-                case OP_ATTACH:
-                    setFirstOut(firstOutFragments, lastInFragments, op.fragment);
+                    setLastIn(transitioningFragments, op.fragment, true);
                     break;
             }
         }
@@ -925,18 +918,12 @@ final class BackStackRecord extends FragmentTransaction implements
      * outgoing fragment's return shared element transition is used. Shared element
      * transitions only operate if there is both an incoming and outgoing fragment.</p>
      *
-     * @param firstOutFragments The list of first fragments to be removed, keyed on the
-     *                          container ID.
-     * @param lastInFragments The list of last fragments to be added, keyed on the
-     *                        container ID.
-     * @param isBack true if this is popping the back stack or false if this is a
-     *               forward operation.
+     * @param containers The first in and last out fragments that are transitioning.
      * @return The TransitionState used to complete the operation of the transition
      * in {@link #setNameOverrides(android.app.BackStackRecord.TransitionState, java.util.ArrayList,
      * java.util.ArrayList)}.
      */
-    private TransitionState beginTransition(SparseArray<Fragment> firstOutFragments,
-            SparseArray<Fragment> lastInFragments, boolean isBack) {
+    private TransitionState beginTransition(SparseArray<FragmentContainerTransition> containers) {
         TransitionState state = new TransitionState();
 
         // Adding a non-existent target view makes sure that the transitions don't target
@@ -944,20 +931,11 @@ final class BackStackRecord extends FragmentTransaction implements
         // add any, then no views will be targeted.
         state.nonExistentView = new View(mManager.mHost.getContext());
 
-        // Go over all leaving fragments.
-        for (int i = 0; i < firstOutFragments.size(); i++) {
-            int containerId = firstOutFragments.keyAt(i);
-            configureTransitions(containerId, state, isBack, firstOutFragments,
-                    lastInFragments);
-        }
-
-        // Now go over all entering fragments that didn't have a leaving fragment.
-        for (int i = 0; i < lastInFragments.size(); i++) {
-            int containerId = lastInFragments.keyAt(i);
-            if (firstOutFragments.get(containerId) == null) {
-                configureTransitions(containerId, state, isBack, firstOutFragments,
-                        lastInFragments);
-            }
+        final int numContainers = containers.size();
+        for (int i = 0; i < numContainers; i++) {
+            int containerId = containers.keyAt(i);
+            FragmentContainerTransition containerTransition = containers.valueAt(i);
+            configureTransitions(containerId, state, containerTransition);
         }
         return state;
     }
@@ -1225,24 +1203,21 @@ final class BackStackRecord extends FragmentTransaction implements
      *
      * @param containerId The container ID of the fragments to configure the transition for.
      * @param state The Transition State keeping track of the executing transitions.
-     * @param firstOutFragments The list of first fragments to be removed, keyed on the
-     *                          container ID.
-     * @param lastInFragments The list of last fragments to be added, keyed on the
-     *                        container ID.
-     * @param isBack true if this is popping the back stack or false if this is a
-     *               forward operation.
+     * @param transitioningFragments The first out and last in fragments for the fragment container.
      */
-    private void configureTransitions(int containerId, TransitionState state, boolean isBack,
-            SparseArray<Fragment> firstOutFragments, SparseArray<Fragment> lastInFragments) {
+    private void configureTransitions(int containerId, TransitionState state,
+            FragmentContainerTransition transitioningFragments) {
         ViewGroup sceneRoot = (ViewGroup) mManager.mContainer.onFindViewById(containerId);
         if (sceneRoot != null) {
-            Fragment inFragment = lastInFragments.get(containerId);
-            Fragment outFragment = firstOutFragments.get(containerId);
+            final Fragment inFragment = transitioningFragments.lastIn;
+            final Fragment outFragment = transitioningFragments.firstOut;
 
-            Transition enterTransition = getEnterTransition(inFragment, isBack);
-            TransitionSet sharedElementTransition =
-                    getSharedElementTransition(inFragment, outFragment, isBack);
-            Transition exitTransition = getExitTransition(outFragment, isBack);
+            Transition enterTransition =
+                    getEnterTransition(inFragment, transitioningFragments.lastInIsPop);
+            TransitionSet sharedElementTransition = getSharedElementTransition(inFragment,
+                    outFragment, transitioningFragments.lastInIsPop);
+            Transition exitTransition =
+                    getExitTransition(outFragment, transitioningFragments.firstOutIsPop);
 
             if (enterTransition == null && sharedElementTransition == null &&
                     exitTransition == null) {
@@ -1254,12 +1229,13 @@ final class BackStackRecord extends FragmentTransaction implements
             ArrayMap<String, View> namedViews = null;
             ArrayList<View> sharedElementTargets = new ArrayList<View>();
             if (sharedElementTransition != null) {
-                namedViews = remapSharedElements(state, outFragment, isBack);
+                namedViews = remapSharedElements(state, outFragment,
+                        transitioningFragments.firstOutIsPop);
                 setSharedElementTargets(sharedElementTransition,
                         state.nonExistentView, namedViews, sharedElementTargets);
 
                 // Notify the start of the transition.
-                SharedElementCallback callback = isBack ?
+                SharedElementCallback callback = transitioningFragments.lastInIsPop ?
                         outFragment.mEnterTransitionCallback :
                         inFragment.mEnterTransitionCallback;
                 ArrayList<String> names = new ArrayList<String>(namedViews.keySet());
@@ -1290,13 +1266,14 @@ final class BackStackRecord extends FragmentTransaction implements
             }
 
             Transition transition = mergeTransitions(enterTransition, exitTransition,
-                    sharedElementTransition, inFragment, isBack);
+                    sharedElementTransition, inFragment, transitioningFragments.lastInIsPop);
 
             if (transition != null) {
                 ArrayList<View> hiddenFragments = new ArrayList<View>();
                 ArrayList<View> enteringViews = addTransitionTargets(state, enterTransition,
                         sharedElementTransition, exitTransition, transition, sceneRoot, inFragment,
-                        outFragment, hiddenFragments, isBack, sharedElementTargets);
+                        outFragment, hiddenFragments, transitioningFragments.lastInIsPop,
+                        sharedElementTargets);
 
                 transition.setNameOverrides(state.nameOverrides);
                 // We want to exclude hidden views later, so we need a non-null list in the
@@ -1589,7 +1566,7 @@ final class BackStackRecord extends FragmentTransaction implements
     }
 
     public TransitionState popFromBackStack(boolean doStateMove, TransitionState state,
-            SparseArray<Fragment> firstOutFragments, SparseArray<Fragment> lastInFragments) {
+            SparseArray<FragmentContainerTransition> transitioningFragments) {
         if (FragmentManagerImpl.DEBUG) {
             Log.v(TAG, "popFromBackStack: " + this);
             LogWriter logw = new LogWriter(Log.VERBOSE, TAG);
@@ -1600,8 +1577,8 @@ final class BackStackRecord extends FragmentTransaction implements
 
         if (mManager.mCurState >= Fragment.CREATED) {
             if (state == null) {
-                if (firstOutFragments.size() != 0 || lastInFragments.size() != 0) {
-                    state = beginTransition(firstOutFragments, lastInFragments, true);
+                if (transitioningFragments.size() != 0) {
+                    state = beginTransition(transitioningFragments);
                 }
             } else if (!doStateMove) {
                 setNameOverrides(state, mSharedElementTargetNames, mSharedElementSourceNames);
@@ -1741,5 +1718,31 @@ final class BackStackRecord extends FragmentTransaction implements
         public ArrayMap<String, String> nameOverrides = new ArrayMap<String, String>();
         public View enteringEpicenterView;
         public View nonExistentView;
+    }
+
+    /**
+     * Tracks the last fragment added and first fragment removed for fragment transitions.
+     * This also tracks which fragments are changed by push or pop transactions.
+     */
+    public static class FragmentContainerTransition {
+        /**
+         * The last fragment added/attached/shown in its container
+         */
+        public Fragment lastIn;
+
+        /**
+         * true when lastIn was added during a pop transaction or false if added with a push
+         */
+        public boolean lastInIsPop;
+
+        /**
+         * The first fragment with a View that was removed/detached/hidden in its container.
+         */
+        public Fragment firstOut;
+
+        /**
+         * true when firstOut was removed during a pop transaction or false otherwise
+         */
+        public boolean firstOutIsPop;
     }
 }
