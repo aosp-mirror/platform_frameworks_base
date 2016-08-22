@@ -60,7 +60,7 @@
       <item quantity="one">找到 <xliff:g id="COUNT_0">%1$s</xliff:g> 台打印机</item>
     </plurals>
     <string name="printer_extended_description_template" msgid="1366699227703381874">"<xliff:g id="PRINT_SERVICE_LABEL">%1$s</xliff:g> - <xliff:g id="PRINTER_DESCRIPTION">%2$s</xliff:g>"</string>
-    <string name="printer_info_desc" msgid="7181988788991581654">"关于此打印机的更多信息"</string>
+    <string name="printer_info_desc" msgid="7181988788991581654">"此打印机的详细信息"</string>
     <string name="could_not_create_file" msgid="3425025039427448443">"无法创建文件"</string>
     <string name="print_services_disabled_toast" msgid="9089060734685174685">"部分打印服务已停用"</string>
     <string name="print_searching_for_printers" msgid="6550424555079932867">"正在搜索打印机"</string>
