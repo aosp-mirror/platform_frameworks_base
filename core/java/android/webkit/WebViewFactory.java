@@ -42,6 +42,7 @@ import com.android.server.LocalServices;
 
 import dalvik.system.VMRuntime;
 
+import java.lang.reflect.Method;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -58,6 +59,8 @@ public final class WebViewFactory {
 
     private static final String CHROMIUM_WEBVIEW_FACTORY =
             "com.android.webview.chromium.WebViewChromiumFactoryProvider";
+
+    private static final String CHROMIUM_WEBVIEW_FACTORY_METHOD = "create";
 
     private static final String NULL_WEBVIEW_FACTORY =
             "com.android.webview.nullwebview.NullWebViewFactoryProvider";
@@ -192,11 +195,25 @@ public final class WebViewFactory {
             Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactory.getProvider()");
             try {
                 Class<WebViewFactoryProvider> providerClass = getProviderClass();
+                Method staticFactory = null;
+                try {
+                    staticFactory = providerClass.getMethod(
+                        CHROMIUM_WEBVIEW_FACTORY_METHOD, WebViewDelegate.class);
+                } catch (Exception e) {
+                    if (DEBUG) {
+                        Log.w(LOGTAG, "error instantiating provider with static factory method", e);
+                    }
+                }
 
                 Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "providerClass.newInstance()");
                 try {
-                    sProviderInstance = providerClass.getConstructor(WebViewDelegate.class)
-                            .newInstance(new WebViewDelegate());
+                    if (staticFactory != null) {
+                        sProviderInstance = (WebViewFactoryProvider)
+                                staticFactory.invoke(null, new WebViewDelegate());
+                    } else {
+                        sProviderInstance = providerClass.getConstructor(WebViewDelegate.class)
+                                .newInstance(new WebViewDelegate());
+                    }
                     if (DEBUG) Log.v(LOGTAG, "Loaded provider: " + sProviderInstance);
                     return sProviderInstance;
                 } catch (Exception e) {
