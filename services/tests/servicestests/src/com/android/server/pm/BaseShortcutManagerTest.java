@@ -390,6 +390,11 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
 
         @Override
+        void injectRunOnNewThread(Runnable r) {
+            runOnHandler(r);
+        }
+
+        @Override
         void injectEnforceCallingPermission(String permission, String message) {
             if (!mCallerPermissions.contains(permission)) {
                 throw new SecurityException("Missing permission: " + permission);
@@ -918,6 +923,12 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected void updatePackageLastUpdateTime(String packageName, long increment) {
         updatePackageInfo(packageName, pi -> {
             pi.lastUpdateTime += increment;
+        });
+    }
+
+    protected void setPackageLastUpdateTime(String packageName, long value) {
+        updatePackageInfo(packageName, pi -> {
+            pi.lastUpdateTime = value;
         });
     }
 

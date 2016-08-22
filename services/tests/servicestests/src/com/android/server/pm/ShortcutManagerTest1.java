@@ -3945,11 +3945,11 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         mInjectedPackages.remove(CALLING_PACKAGE_1);
         mInjectedPackages.remove(CALLING_PACKAGE_3);
 
-        mService.handleUnlockUser(USER_0);
+        mService.checkPackageChanges(USER_0);
 
         assertNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "s1", USER_0));
         assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_2, "s1", USER_0));
-        assertNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_3, "s1", USER_0));
+        assertNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_3, "s1", USER_0));  // ---------------
         assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "s1", USER_10));
         assertNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_2, "s1", USER_10));
         assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_3, "s1", USER_10));
@@ -3961,7 +3961,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertFalse(bitmapDirectoryExists(CALLING_PACKAGE_2, USER_10));
         assertTrue(bitmapDirectoryExists(CALLING_PACKAGE_3, USER_10));
 
-        mService.handleUnlockUser(USER_10);
+        mService.checkPackageChanges(USER_10);
 
         assertNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "s1", USER_0));
         assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_2, "s1", USER_0));
@@ -4154,7 +4154,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         updatePackageVersion(CALLING_PACKAGE_1, 1);
 
         // Then send the broadcast, to only user-0.
-                mService.mPackageMonitor.onReceive(getTestContext(),
+        mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageUpdateIntent(CALLING_PACKAGE_1, USER_0));
 
         waitOnMainThread();
@@ -4186,10 +4186,13 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         mInjectedCurrentTimeMillis = START_TIME + 200;
 
         mRunningUsers.put(USER_10, true);
+        mUnlockedUsers.put(USER_10, true);
 
         reset(c0);
         reset(c10);
+        setPackageLastUpdateTime(CALLING_PACKAGE_1, mInjectedCurrentTimeMillis);
         mService.handleUnlockUser(USER_10);
+        mService.checkPackageChanges(USER_10);
 
         waitOnMainThread();
 
@@ -4221,7 +4224,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         // Then send the broadcast, to only user-0.
                 mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageUpdateIntent(CALLING_PACKAGE_2, USER_0));
-        mService.handleUnlockUser(USER_10);
+        mService.checkPackageChanges(USER_10);
 
         waitOnMainThread();
 
@@ -4243,9 +4246,9 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         updatePackageVersion(CALLING_PACKAGE_3, 100);
 
         // Then send the broadcast, to only user-0.
-                mService.mPackageMonitor.onReceive(getTestContext(),
+        mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageUpdateIntent(CALLING_PACKAGE_3, USER_0));
-        mService.handleUnlockUser(USER_10);
+        mService.checkPackageChanges(USER_10);
 
         waitOnMainThread();
 
