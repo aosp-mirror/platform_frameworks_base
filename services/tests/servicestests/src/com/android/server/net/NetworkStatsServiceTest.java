@@ -101,6 +101,7 @@ import org.easymock.Capture;
 import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -372,7 +373,8 @@ public class NetworkStatsServiceTest {
     }
 
     // TODO: simulate reboot to test bucket resize
-    // @Test
+    @Test
+    @Ignore
     public void testStatsBucketResize() throws Exception {
         NetworkStatsHistory history = null;
 
