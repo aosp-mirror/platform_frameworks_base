@@ -96,9 +96,6 @@ public final class DocumentsContract {
     public static final String EXTRA_SHOW_ADVANCED = "android.content.extra.SHOW_ADVANCED";
 
     /** {@hide} */
-    public static final String EXTRA_SHOW_FILESIZE = "android.content.extra.SHOW_FILESIZE";
-
-    /** {@hide} */
     public static final String EXTRA_FANCY_FEATURES = "android.content.extra.FANCY";
 
     /** {@hide} */
