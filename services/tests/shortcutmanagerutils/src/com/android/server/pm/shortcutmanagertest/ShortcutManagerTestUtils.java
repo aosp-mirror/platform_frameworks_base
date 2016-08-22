@@ -204,7 +204,8 @@ public class ShortcutManagerTestUtils {
     }
 
     public static void setDefaultLauncher(Instrumentation instrumentation, String component) {
-        runCommand(instrumentation, "cmd package set-home-activity " + component,
+        runCommand(instrumentation, "cmd package set-home-activity --user "
+                + instrumentation.getContext().getUserId() + " " + component,
                 result -> result.contains("Success"));
     }
 
