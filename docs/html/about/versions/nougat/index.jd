@@ -1,6 +1,6 @@
 page.title=Android 7.0 Nougat
-page.tags="preview","developer"
-meta.tags="preview", "android"
+page.tags="androidn","versions"
+meta.tags="android n", "nougat", "android 7.0"
 fullpage=true
 forcelocalnav=true
 header.hide=1
@@ -108,7 +108,6 @@ footer.hide=1
     data-initial-results="3"></div>
 </div></section>
 
-
 <section class="dac-section dac-gray" id="videos"><div class="wrap">
   <h1 class="dac-section-title">Videos</h1>
   <div class="dac-section-subtitle">
@@ -125,11 +124,10 @@ footer.hide=1
   </div>
 </div></section>
 
-
 <section class="dac-section dac-light" id="resources"><div class="wrap">
   <h1 class="dac-section-title">Resources</h1>
   <div class="dac-section-subtitle">
-    Essential information to help you get your apps ready for Android N.
+    Essential information to help you get your apps ready for Android Nougat.
   </div>
 
   <div class="resource-widget resource-flow-layout col-16"
@@ -138,7 +136,5 @@ footer.hide=1
        data-items-per-page="6"
        data-maxResults="15"
        data-initial-results="6"></div>
-
   </div>
 </section>
-

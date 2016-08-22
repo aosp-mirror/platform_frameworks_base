@@ -802,13 +802,13 @@ redirects:
 - from: /preview/dev-community
   to: https://plus.google.com/communities/103655397235276743411
 - from: /preview/bug
-  to: https://code.google.com/p/android/issues/entry?template=Developer%20preview%20report
+  to: https://source.android.com/source/report-bugs.html
 - from: /preview/bug/
-  to: https://code.google.com/p/android/issues/entry?template=Developer%20preview%20report
+  to: https://source.android.com/source/report-bugs.html
 - from: /preview/bugreport
-  to: https://code.google.com/p/android/issues/entry?template=Developer%20preview%20report
+  to: https://source.android.com/source/report-bugs.html
 - from: /preview/bugreport/
-  to: https://code.google.com/p/android/issues/entry?template=Developer%20preview%20report
+  to: https://source.android.com/source/report-bugs.html
 - from: /preview/bugs
   to: https://code.google.com/p/android/issues/list?can=2&q=label%3ADevPreview-N
 - from: /preview/bugs/

@@ -15,33 +15,30 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
   })
 </script>
 
-<section class="dac-expand dac-hero dac-invert" style="background-color:#455A64">
-  <div class="wrap" style="max-width:1100px;margin-top:0">
-    <div class="col-7of16 col-push-9of16" style="padding-left:2em;">
-      <a href="{@docRoot}preview/index.html">
-        <h1 class="dac-hero-title">Android N Developer Preview</h1>
-        <p class="dac-hero-description">
-          Get ready for the next version of Android!
-          <strong>Test your apps</strong> on Nexus and other devices. Support new system
-          behaviors to <strong>save power and memory</strong>.
+<section class="dac-expand dac-hero" style="background-color:#b2dfdb;">
+  <div class="wrap" style="max-width:1000px;margin-top:0">
+    <div class="col-7of16 col-push-8of16">
+      <a href="{@docRoot}about/versions/nougat/index.html">
+        <h1 class="dac-hero-title" style="color:#004d40">Android 7.0 Nougat!</h1>
+        <p class="dac-hero-description" style="color:#004d40">
+          <strong>Android 7.0 Nougat is here!</strong>
+          Get your apps ready for the latest version of Android, with new system
+          behaviors to <strong>save battery and memory</strong>.
           Extend your apps with <strong>multi-window UI</strong>,
           <strong>direct reply notifications</strong> and more.
         </p>
-        <a class="dac-hero-cta" href="/preview/index.html">
-          <span class="dac-sprite dac-auto-chevron"></span>
+        <a class="dac-hero-cta" href="{@docRoot}about/versions/nougat/index.html" style="color:#004d40">
+          <span class="dac-sprite dac-auto-chevron" style="background-color:#b2dfdb"></span>
           Learn more
-        </a><!--<br>
-        <a class="dac-hero-cta" href="/preview/support.html">
-          <span class="dac-sprite dac-auto-chevron"></span>
-          Update to Developer Preview (final SDK)
-        </a><br>-->
+        </a>
+        </a>
       </a>
     </div>
-    <div class="col-9of16 col-pull-7of16 dac-hero-figure" style="margin-top:0em;padding-right:1.5em;">
-      <a href="{@docRoot}preview/index.html">
-        <img style="" class="dac-hero-image" src="/images/home/n-preview-hero.png"
-             srcset="/images/home/n-preview-hero.png 1x,
-             /images/home/n-preview-hero_2x.png 2x">
+    <div class="col-6of16 col-pull-6of16 dac-hero-figure" style="padding-left:1em;padding-top:1em;">
+      <a href="{@docRoot}about/versions/nougat/index.html">
+        <img class="dac-hero-image" src="{@docRoot}images/home/nougat_bg.jpg"
+             srcset="{@docRoot}images/home/nougat_bg.jpg 1x,
+             {@docRoot}images/home/nougat_bg_2x.jpg 2x">
         </a>
     </div>
   </div>
