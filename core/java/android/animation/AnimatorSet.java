@@ -635,12 +635,12 @@ public final class AnimatorSet extends Animator {
         boolean setIsEmpty = false;
         if (mStartDelay > 0) {
             start(mRootNode);
-        } else if (mNodes.size() > 1) {
+        } else if (isEmptySet(this)) {
+            // Set is empty or contains only empty animator sets. Skip to end in this case.
+            setIsEmpty = true;
+        } else {
             // No delay, but there are other animators in the set
             onChildAnimatorEnded(mDelayAnim);
-        } else {
-            // Set is empty, no delay, no other animation. Skip to end in this case
-            setIsEmpty = true;
         }
 
         if (mListeners != null) {
@@ -655,6 +655,25 @@ public final class AnimatorSet extends Animator {
             // In the case of empty AnimatorSet, we will trigger the onAnimationEnd() right away.
             onChildAnimatorEnded(mDelayAnim);
         }
+    }
+
+    // Returns true if set is empty or contains nothing but animator sets with no start delay.
+    private static boolean isEmptySet(AnimatorSet set) {
+        if (set.getStartDelay() > 0) {
+            return false;
+        }
+        for (int i = 0; i < set.getChildAnimations().size(); i++) {
+            Animator anim = set.getChildAnimations().get(i);
+            if (!(anim instanceof AnimatorSet)) {
+                // Contains non-AnimatorSet, not empty.
+                return false;
+            } else {
+                if (!isEmptySet((AnimatorSet) anim)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     private void updateAnimatorsDuration() {
