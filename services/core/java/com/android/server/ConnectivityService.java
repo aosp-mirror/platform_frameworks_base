@@ -38,8 +38,6 @@ import static android.net.NetworkPolicyManager.uidRulesToString;
 
 import android.annotation.Nullable;
 import android.app.BroadcastOptions;
-import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -135,6 +133,8 @@ import com.android.server.connectivity.Nat464Xlat;
 import com.android.server.connectivity.NetworkAgentInfo;
 import com.android.server.connectivity.NetworkDiagnostics;
 import com.android.server.connectivity.NetworkMonitor;
+import com.android.server.connectivity.NetworkNotificationManager;
+import com.android.server.connectivity.NetworkNotificationManager.NotificationType;
 import com.android.server.connectivity.PacManager;
 import com.android.server.connectivity.PermissionMonitor;
 import com.android.server.connectivity.Tethering;
@@ -436,6 +436,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     TelephonyManager mTelephonyManager;
 
     private KeepaliveTracker mKeepaliveTracker;
+    private NetworkNotificationManager mNotifier;
 
     // sequence number for Networks; keep in sync with system/netd/NetworkController.cpp
     private final static int MIN_NET_ID = 100; // some reserved marks
@@ -832,6 +833,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
 
         mKeepaliveTracker = new KeepaliveTracker(mHandler);
+        mNotifier = new NetworkNotificationManager(mContext, mTelephonyManager);
     }
 
     private NetworkRequest createInternetRequestForTransport(int transportType) {
@@ -2230,14 +2232,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
                         updateCapabilities(nai, nai.networkCapabilities);
                     }
                     if (!visible) {
-                        setProvNotificationVisibleIntent(false, netId, null, 0, null, null, false);
+                        mNotifier.setProvNotificationVisibleIntent(false, netId, null, 0, null,
+                                null, false);
                     } else {
                         if (nai == null) {
                             loge("EVENT_PROVISIONING_NOTIFICATION from unknown NetworkMonitor");
                             break;
                         }
                         if (!nai.networkMisc.provisioningNotificationDisabled) {
-                            setProvNotificationVisibleIntent(true, netId, NotificationType.SIGN_IN,
+                            mNotifier.setProvNotificationVisibleIntent(true, netId,
+                                    NotificationType.SIGN_IN,
                                     nai.networkInfo.getType(), nai.networkInfo.getExtraInfo(),
                                     (PendingIntent)msg.obj, nai.networkMisc.explicitlySelected);
                         }
@@ -2710,8 +2714,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         PendingIntent pendingIntent = PendingIntent.getActivityAsUser(
                 mContext, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
 
-        setProvNotificationVisibleIntent(true, nai.network.netId, NotificationType.NO_INTERNET,
-                nai.networkInfo.getType(), nai.networkInfo.getExtraInfo(), pendingIntent, true);
+        mNotifier.setProvNotificationVisibleIntent(true, nai.network.netId,
+                NotificationType.NO_INTERNET, nai.networkInfo.getType(),
+                nai.networkInfo.getExtraInfo(), pendingIntent, true);
     }
 
     private class InternalHandler extends Handler {
@@ -3617,118 +3622,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return -1;
     }
 
-    private static final String NOTIFICATION_ID = "CaptivePortal.Notification";
-    private static enum NotificationType { SIGN_IN, NO_INTERNET; };
-
-    private void setProvNotificationVisible(boolean visible, int networkType, String action) {
-        Intent intent = new Intent(action);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0, intent, 0);
-        // Concatenate the range of types onto the range of NetIDs.
-        int id = MAX_NET_ID + 1 + (networkType - ConnectivityManager.TYPE_NONE);
-        setProvNotificationVisibleIntent(visible, id, NotificationType.SIGN_IN,
-                networkType, null, pendingIntent, false);
-    }
-
-    /**
-     * Show or hide network provisioning notifications.
-     *
-     * We use notifications for two purposes: to notify that a network requires sign in
-     * (NotificationType.SIGN_IN), or to notify that a network does not have Internet access
-     * (NotificationType.NO_INTERNET). We display at most one notification per ID, so on a
-     * particular network we can display the notification type that was most recently requested.
-     * So for example if a captive portal fails to reply within a few seconds of connecting, we
-     * might first display NO_INTERNET, and then when the captive portal check completes, display
-     * SIGN_IN.
-     *
-     * @param id an identifier that uniquely identifies this notification.  This must match
-     *         between show and hide calls.  We use the NetID value but for legacy callers
-     *         we concatenate the range of types with the range of NetIDs.
-     */
-    private void setProvNotificationVisibleIntent(boolean visible, int id,
-            NotificationType notifyType, int networkType, String extraInfo, PendingIntent intent,
-            boolean highPriority) {
-        if (VDBG || (DBG && visible)) {
-            log("setProvNotificationVisibleIntent " + notifyType + " visible=" + visible
-                    + " networkType=" + getNetworkTypeName(networkType)
-                    + " extraInfo=" + extraInfo + " highPriority=" + highPriority);
-        }
-
-        Resources r = Resources.getSystem();
-        NotificationManager notificationManager = (NotificationManager) mContext
-            .getSystemService(Context.NOTIFICATION_SERVICE);
-
-        if (visible) {
-            CharSequence title;
-            CharSequence details;
-            int icon;
-            if (notifyType == NotificationType.NO_INTERNET &&
-                    networkType == ConnectivityManager.TYPE_WIFI) {
-                title = r.getString(R.string.wifi_no_internet, 0);
-                details = r.getString(R.string.wifi_no_internet_detailed);
-                icon = R.drawable.stat_notify_wifi_in_range;  // TODO: Need new icon.
-            } else if (notifyType == NotificationType.SIGN_IN) {
-                switch (networkType) {
-                    case ConnectivityManager.TYPE_WIFI:
-                        title = r.getString(R.string.wifi_available_sign_in, 0);
-                        details = r.getString(R.string.network_available_sign_in_detailed,
-                                extraInfo);
-                        icon = R.drawable.stat_notify_wifi_in_range;
-                        break;
-                    case ConnectivityManager.TYPE_MOBILE:
-                    case ConnectivityManager.TYPE_MOBILE_HIPRI:
-                        title = r.getString(R.string.network_available_sign_in, 0);
-                        // TODO: Change this to pull from NetworkInfo once a printable
-                        // name has been added to it
-                        details = mTelephonyManager.getNetworkOperatorName();
-                        icon = R.drawable.stat_notify_rssi_in_range;
-                        break;
-                    default:
-                        title = r.getString(R.string.network_available_sign_in, 0);
-                        details = r.getString(R.string.network_available_sign_in_detailed,
-                                extraInfo);
-                        icon = R.drawable.stat_notify_rssi_in_range;
-                        break;
-                }
-            } else {
-                Slog.wtf(TAG, "Unknown notification type " + notifyType + "on network type "
-                        + getNetworkTypeName(networkType));
-                return;
-            }
-
-            Notification notification = new Notification.Builder(mContext)
-                    .setWhen(0)
-                    .setSmallIcon(icon)
-                    .setAutoCancel(true)
-                    .setTicker(title)
-                    .setColor(mContext.getColor(
-                            com.android.internal.R.color.system_notification_accent_color))
-                    .setContentTitle(title)
-                    .setContentText(details)
-                    .setContentIntent(intent)
-                    .setLocalOnly(true)
-                    .setPriority(highPriority ?
-                            Notification.PRIORITY_HIGH :
-                            Notification.PRIORITY_DEFAULT)
-                    .setDefaults(highPriority ? Notification.DEFAULT_ALL : 0)
-                    .setOnlyAlertOnce(true)
-                    .build();
-
-            try {
-                notificationManager.notifyAsUser(NOTIFICATION_ID, id, notification, UserHandle.ALL);
-            } catch (NullPointerException npe) {
-                loge("setNotificationVisible: visible notificationManager npe=" + npe);
-                npe.printStackTrace();
-            }
-        } else {
-            try {
-                notificationManager.cancelAsUser(NOTIFICATION_ID, id, UserHandle.ALL);
-            } catch (NullPointerException npe) {
-                loge("setNotificationVisible: cancel notificationManager npe=" + npe);
-                npe.printStackTrace();
-            }
-        }
-    }
-
     /** Location to an updatable file listing carrier provisioning urls.
      *  An example:
      *
@@ -3832,7 +3725,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         enforceConnectivityInternalPermission();
         final long ident = Binder.clearCallingIdentity();
         try {
-            setProvNotificationVisible(visible, networkType, action);
+            mNotifier.setProvNotificationVisible(visible, networkType, action);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
