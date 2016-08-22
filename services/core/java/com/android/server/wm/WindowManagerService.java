@@ -2908,12 +2908,11 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                     result |= RELAYOUT_RES_SURFACE_CHANGED;
                 }
-                final WindowSurfaceController surfaceController = winAnimator.mSurfaceController;
-                if (viewVisibility == View.VISIBLE && surfaceController != null) {
+                if (viewVisibility == View.VISIBLE && winAnimator.hasSurface()) {
                     // We already told the client to go invisible, but the message may not be
                     // handled yet, or it might want to draw a last frame. If we already have a
                     // surface, let the client use that, but don't create new surface at this point.
-                    surfaceController.getSurface(outSurface);
+                    winAnimator.mSurfaceController.getSurface(outSurface);
                 } else {
                     if (DEBUG_VISIBILITY) Slog.i(TAG_WM, "Releasing surface in: " + win);
 
