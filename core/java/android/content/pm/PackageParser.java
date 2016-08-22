@@ -2290,11 +2290,7 @@ public class PackageParser {
             b.append(cls);
             return b.toString().intern();
         }
-        if (c >= 'a' && c <= 'z') {
-            return cls.intern();
-        }
-        outError[0] = "Bad class name " + cls + " in package " + pkg;
-        return null;
+        return cls.intern();
     }
 
     private static String buildCompoundName(String pkg,
@@ -2755,12 +2751,7 @@ public class PackageParser {
         }
 
         if (ai.name != null) {
-            ai.className = buildClassName(pkgName, ai.name, outError);
-            if (ai.className == null) {
-                sa.recycle();
-                mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
-                return false;
-            }
+            ai.className = ai.name;
         }
 
         String manageSpaceActivity = sa.getNonConfigurationString(
