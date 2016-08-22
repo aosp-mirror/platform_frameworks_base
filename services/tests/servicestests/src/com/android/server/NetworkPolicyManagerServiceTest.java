@@ -20,10 +20,12 @@ import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.NetworkPolicy.LIMIT_DISABLED;
 import static android.net.NetworkPolicy.WARNING_DISABLED;
+import static android.net.NetworkPolicyManager.POLICY_ALLOW_BACKGROUND_BATTERY_SAVE;
 import static android.net.NetworkPolicyManager.POLICY_NONE;
 import static android.net.NetworkPolicyManager.POLICY_REJECT_METERED_BACKGROUND;
 import static android.net.NetworkPolicyManager.computeLastCycleBoundary;
 import static android.net.NetworkPolicyManager.computeNextCycleBoundary;
+import static android.net.NetworkPolicyManager.uidPoliciesToString;
 import static android.net.TrafficStats.KB_IN_BYTES;
 import static android.net.TrafficStats.MB_IN_BYTES;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
@@ -82,6 +84,7 @@ import android.os.PowerManagerInternal;
 import android.os.UserHandle;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
+import android.text.TextUtils;
 import android.text.format.Time;
 import android.util.Log;
 import android.util.TrustedTime;
@@ -90,14 +93,19 @@ import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.net.NetworkPolicyManagerService;
 
 import libcore.io.IoUtils;
+import libcore.io.Streams;
 
 import com.google.common.util.concurrent.AbstractFuture;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.MethodRule;
 import org.junit.runner.RunWith;
+import org.junit.runners.model.FrameworkMethod;
+import org.junit.runners.model.Statement;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -105,7 +113,15 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.annotation.Annotation;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -113,6 +129,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 /**
  * Tests for {@link NetworkPolicyManagerService}.
@@ -127,8 +144,21 @@ public class NetworkPolicyManagerServiceTest {
 
     private static NetworkTemplate sTemplateWifi = NetworkTemplate.buildTemplateWifi(TEST_SSID);
 
+    /**
+     * Path on assets where files used by {@link NetPolicyXml} are located.
+     */
+    private static final String NETPOLICY_DIR = "NetworkPolicyManagerServiceTest/netpolicy";
+
     private BroadcastInterceptingContext mServiceContext;
     private File mPolicyDir;
+
+    /**
+     * Relative path of the XML file that will be used as {@code netpolicy.xml}.
+     *
+     * <p>Typically set through a {@link NetPolicyXml} annotation in the test method.
+     */
+    private String mNetpolicyXml;
+
 
     private @Mock IActivityManager mActivityManager;
     private @Mock INetworkStatsService mStatsService;
@@ -149,13 +179,23 @@ public class NetworkPolicyManagerServiceTest {
 
     private static final int USER_ID = 0;
 
-    private static final int APP_ID_A = android.os.Process.FIRST_APPLICATION_UID + 800;
-    private static final int APP_ID_B = android.os.Process.FIRST_APPLICATION_UID + 801;
+    private static final int APP_ID_A = android.os.Process.FIRST_APPLICATION_UID + 4;
+    private static final int APP_ID_B = android.os.Process.FIRST_APPLICATION_UID + 8;
+    private static final int APP_ID_C = android.os.Process.FIRST_APPLICATION_UID + 15;
+    private static final int APP_ID_D = android.os.Process.FIRST_APPLICATION_UID + 16;
+    private static final int APP_ID_E = android.os.Process.FIRST_APPLICATION_UID + 23;
+    private static final int APP_ID_F = android.os.Process.FIRST_APPLICATION_UID + 42;
 
     private static final int UID_A = UserHandle.getUid(USER_ID, APP_ID_A);
     private static final int UID_B = UserHandle.getUid(USER_ID, APP_ID_B);
+    private static final int UID_C = UserHandle.getUid(USER_ID, APP_ID_C);
+    private static final int UID_D = UserHandle.getUid(USER_ID, APP_ID_D);
+    private static final int UID_E = UserHandle.getUid(USER_ID, APP_ID_E);
+    private static final int UID_F = UserHandle.getUid(USER_ID, APP_ID_F);
 
     private static final String PKG_NAME_A = "name.is.A,pkg.A";
+
+    public final @Rule NetPolicyMethodRule mNetPolicyXmlRule = new NetPolicyMethodRule();
 
     @BeforeClass
     public static void registerLocalServices() {
@@ -187,10 +227,7 @@ public class NetworkPolicyManagerServiceTest {
             }
         };
 
-        mPolicyDir = context.getFilesDir();
-        if (mPolicyDir.exists()) {
-            IoUtils.deleteContents(mPolicyDir);
-        }
+        setNetpolicyXml(context);
 
         doAnswer(new Answer<Void>() {
 
@@ -255,6 +292,22 @@ public class NetworkPolicyManagerServiceTest {
     public void unregisterLocalServices() throws Exception {
         // Registered by NetworkPolicyManagerService's constructor.
         LocalServices.removeServiceForTest(NetworkPolicyManagerInternal.class);
+    }
+
+    @Test
+    @NetPolicyXml("restrict-background-lists-whitelist-format.xml")
+    public void testRestrictBackgroundLists_whitelistFormat() throws Exception {
+        // UIds that are whitelisted
+        final int[] whitelisted = mService.getRestrictBackgroundWhitelistedUids();
+        assertContainsInAnyOrder(whitelisted, UID_A, UID_B, UID_C);
+        assertUidPolicy(UID_A, POLICY_NONE);
+        assertUidPolicy(UID_B, POLICY_NONE);
+        assertUidPolicy(UID_C, POLICY_NONE);
+
+        // UIDs that are blacklisted
+        assertUidPolicy(UID_D, POLICY_NONE);
+        assertUidPolicy(UID_E, POLICY_REJECT_METERED_BACKGROUND);
+        assertUidPolicy(UID_F, POLICY_ALLOW_BACKGROUND_BATTERY_SAVE);
     }
 
     // NOTE: testPolicyChangeTriggersListener() and testUidForeground() are too superficial, they
@@ -739,6 +792,36 @@ public class NetworkPolicyManagerServiceTest {
                 Integer.toString(expected), actualTag.substring(actualTag.lastIndexOf(':') + 1));
     }
 
+    private void assertUidPolicy(int uid, int expected) {
+        final int actual = mService.getUidPolicy(uid);
+        if (expected != actual) {
+            fail("Wrong policy for UID " + uid + ": expected " + uidPoliciesToString(expected)
+                    + ", actual " + uidPoliciesToString(actual));
+        }
+    }
+
+    // TODO: replace by Truth, Hamcrest, or a similar tool.
+    private void assertContainsInAnyOrder(int[] actual, int...expected) {
+        final StringBuilder errors = new StringBuilder();
+        if (actual.length != expected.length) {
+            errors.append("\tsize does not match\n");
+        }
+        final List<Integer> actualList =
+                Arrays.stream(actual).boxed().collect(Collectors.<Integer>toList());
+        final List<Integer> expectedList =
+                Arrays.stream(expected).boxed().collect(Collectors.<Integer>toList());
+        if (!actualList.containsAll(expectedList)) {
+            errors.append("\tmissing elements on actual list\n");
+        }
+        if (!expectedList.containsAll(actualList)) {
+            errors.append("\tmissing elements on expected list\n");
+        }
+        if (errors.length() > 0) {
+            fail("assertContainsInAnyOrder(expected=" + Arrays.toString(expected)
+                    + ", actual=" + Arrays.toString(actual) +") failed: \n" + errors);
+        }
+    }
+
     private long getElapsedRealtime() {
         return mElapsedRealtime;
     }
@@ -809,6 +892,53 @@ public class NetworkPolicyManagerServiceTest {
                 latch = null;
             }
             return verify(listener, atLeastOnce());
+        }
+    }
+
+    private void setNetpolicyXml(Context context) throws Exception {
+        mPolicyDir = context.getFilesDir();
+        if (mPolicyDir.exists()) {
+            IoUtils.deleteContents(mPolicyDir);
+        }
+        if (!TextUtils.isEmpty(mNetpolicyXml)) {
+            final String assetPath = NETPOLICY_DIR + "/" + mNetpolicyXml;
+            final File netConfigFile = new File(mPolicyDir, "netpolicy.xml");
+            Log.d(TAG, "Creating " + netConfigFile + " from asset " + assetPath);
+            try (final InputStream in = context.getResources().getAssets().open(assetPath);
+                    final OutputStream out = new FileOutputStream(netConfigFile)) {
+                Streams.copy(in, out);
+            }
+        }
+    }
+
+    /**
+     * Annotation used to define the relative path of the {@code netpolicy.xml} file.
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
+    public @interface NetPolicyXml {
+
+        public String value() default "";
+
+    }
+
+    /**
+     * Rule used to set {@code mNetPolicyXml} according to the {@link NetPolicyXml} annotation.
+     */
+    public static class NetPolicyMethodRule implements MethodRule {
+
+        @Override
+        public Statement apply(Statement base, FrameworkMethod method, Object target) {
+            for (Annotation annotation : method.getAnnotations()) {
+                if ((annotation instanceof NetPolicyXml)) {
+                    final String path = ((NetPolicyXml) annotation).value();
+                    if (!path.isEmpty()) {
+                        ((NetworkPolicyManagerServiceTest) target).mNetpolicyXml = path;
+                        break;
+                    }
+                }
+            }
+            return base;
         }
     }
 }

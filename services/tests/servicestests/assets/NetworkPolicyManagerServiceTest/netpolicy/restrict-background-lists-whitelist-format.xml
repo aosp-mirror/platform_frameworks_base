@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<whitelist>
+  <restrict-background uid="10004" />
+  <restrict-background uid="10008" />
+  <restrict-background uid="10015" />
+</whitelist>
+<policy-list version="10">
+  <uid-policy uid="10016" policy="0" />
+  <uid-policy uid="10023" policy="1" />
+  <uid-policy uid="10042" policy="2" />
+</policy-list>
