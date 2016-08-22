@@ -202,7 +202,7 @@
 
     <!-- The threshold angle for any motion detection in auto-power save modes.
          In hundreths of a degree. -->
-    <integer name="config_autoPowerModeThresholdAngle">200</integer>
+    <integer name="config_autoPowerModeThresholdAngle">10</integer>
 
     <!-- The sensor id of an "any motion" sensor used in auto-power save modes.
          0 indicates this sensor is not available. -->
