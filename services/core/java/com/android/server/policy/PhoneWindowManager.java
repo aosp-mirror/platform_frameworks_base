@@ -5318,15 +5318,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         boolean showing = mKeyguardDelegate.isShowing();
         if (wasOccluded && !isOccluded && showing) {
             mKeyguardOccluded = false;
-            mKeyguardDelegate.setOccluded(false);
+            mKeyguardDelegate.setOccluded(false, true /* animate */);
             mStatusBar.getAttrs().privateFlags |= PRIVATE_FLAG_KEYGUARD;
             if (!mKeyguardDelegate.hasLockscreenWallpaper()) {
                 mStatusBar.getAttrs().flags |= FLAG_SHOW_WALLPAPER;
             }
+            Animation anim = AnimationUtils.loadAnimation(mContext,
+                    com.android.internal.R.anim.wallpaper_open_exit);
+            mWindowManagerFuncs.overridePlayingAppAnimationsLw(anim);
             return true;
         } else if (!wasOccluded && isOccluded && showing) {
             mKeyguardOccluded = true;
-            mKeyguardDelegate.setOccluded(true);
+            mKeyguardDelegate.setOccluded(true, false /* animate */);
             mStatusBar.getAttrs().privateFlags &= ~PRIVATE_FLAG_KEYGUARD;
             mStatusBar.getAttrs().flags &= ~FLAG_SHOW_WALLPAPER;
             return true;

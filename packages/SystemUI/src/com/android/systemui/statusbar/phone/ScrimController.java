@@ -196,6 +196,14 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         }
     }
 
+    public void animateKeyguardUnoccluding(long duration) {
+        mAnimateChange = false;
+        setScrimBehindColor(0f);
+        mAnimateChange = true;
+        scheduleUpdate();
+        mDurationOverride = duration;
+    }
+
     public void animateGoingToFullShade(long delay, long duration) {
         mDurationOverride = duration;
         mAnimationDelay = delay;
