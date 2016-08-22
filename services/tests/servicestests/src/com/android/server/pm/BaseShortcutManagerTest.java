@@ -407,6 +407,11 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
 
         @Override
+        String injectBuildFingerprint() {
+            return mInjectedBuildFingerprint;
+        }
+
+        @Override
         void wtf(String message, Throwable th) {
             // During tests, WTF is fatal.
             fail(message + "  exception: " + th + "\n" + Log.getStackTraceString(th));
@@ -528,6 +533,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected Map<String, PackageInfo> mInjectedPackages;
 
     protected Set<PackageWithUser> mUninstalledPackages;
+    protected Set<String> mSystemPackages;
 
     protected PackageManager mMockPackageManager;
     protected PackageManagerInternal mMockPackageManagerInternal;
@@ -628,6 +634,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected static final String PACKAGE_FALLBACK_LAUNCHER_NAME = "fallback";
     protected static final int PACKAGE_FALLBACK_LAUNCHER_PRIORITY = -999;
 
+    protected String mInjectedBuildFingerprint = "build1";
+
     static {
         QUERY_ALL.setQueryFlags(
                 ShortcutQuery.FLAG_GET_ALL_KINDS);
@@ -677,6 +685,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                 pi -> pi.applicationInfo.flags &= ~ApplicationInfo.FLAG_ALLOW_BACKUP);
 
         mUninstalledPackages = new HashSet<>();
+        mSystemPackages = new HashSet<>();
 
         mInjectedFilePathRoot = new File(getTestContext().getCacheDir(), "test-files");
 
@@ -962,6 +971,9 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
         if (mUninstalledPackages.contains(PackageWithUser.of(userId, packageName))) {
             ret.applicationInfo.flags &= ~ApplicationInfo.FLAG_INSTALLED;
+        }
+        if (mSystemPackages.contains(packageName)) {
+            ret.applicationInfo.flags |= ApplicationInfo.FLAG_SYSTEM;
         }
 
         if (getSignatures) {

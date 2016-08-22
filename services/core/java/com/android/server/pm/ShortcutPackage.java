@@ -667,6 +667,12 @@ class ShortcutPackage extends ShortcutPackageItem {
                 // - version code hasn't change
                 // - lastUpdateTime hasn't change
                 // - all target activities are still enabled.
+
+                // Note, system apps timestamps do *not* change after OTAs.  (But they do
+                // after an adb sync or a local flash.)
+                // This means if a system app's version code doesn't change on an OTA,
+                // we don't notice it's updated.  But that's fine since their version code *should*
+                // really change on OTAs.
                 if ((getPackageInfo().getVersionCode() == pi.versionCode)
                         && (getPackageInfo().getLastUpdateTime() == pi.lastUpdateTime)
                         && areAllActivitiesStillEnabled()) {
