@@ -131,6 +131,7 @@ import com.android.server.am.BatteryStatsService;
 import com.android.server.connectivity.DataConnectionStats;
 import com.android.server.connectivity.KeepaliveTracker;
 import com.android.server.connectivity.Nat464Xlat;
+import com.android.server.connectivity.LingerMonitor;
 import com.android.server.connectivity.NetworkAgentInfo;
 import com.android.server.connectivity.NetworkDiagnostics;
 import com.android.server.connectivity.NetworkMonitor;
@@ -438,6 +439,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private KeepaliveTracker mKeepaliveTracker;
     private NetworkNotificationManager mNotifier;
+    private LingerMonitor mLingerMonitor;
 
     // sequence number for Networks; keep in sync with system/netd/NetworkController.cpp
     private final static int MIN_NET_ID = 100; // some reserved marks
@@ -836,6 +838,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mKeepaliveTracker = new KeepaliveTracker(mHandler);
         mNotifier = new NetworkNotificationManager(mContext, mTelephonyManager,
                 mContext.getSystemService(NotificationManager.class));
+        mLingerMonitor = new LingerMonitor(mContext, mNotifier);
     }
 
     private NetworkRequest createInternetRequestForTransport(int transportType) {
@@ -2241,7 +2244,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                             break;
                         }
                         if (!nai.networkMisc.provisioningNotificationDisabled) {
-                            mNotifier.showNotification(netId, NotificationType.SIGN_IN, nai,
+                            mNotifier.showNotification(netId, NotificationType.SIGN_IN, nai, null,
                                     (PendingIntent) msg.obj, nai.networkMisc.explicitlySelected);
                         }
                     }
@@ -2392,6 +2395,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
             mLegacyTypeTracker.remove(nai, wasDefault);
             rematchAllNetworksAndRequests(null, 0);
+            mLingerMonitor.noteDisconnect(nai);
             if (nai.created) {
                 // Tell netd to clean up the configuration for this network
                 // (routing rules, DNS, etc).
@@ -2713,7 +2717,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         PendingIntent pendingIntent = PendingIntent.getActivityAsUser(
                 mContext, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
 
-        mNotifier.showNotification(nai.network.netId, NotificationType.NO_INTERNET, nai,
+        mNotifier.showNotification(nai.network.netId, NotificationType.NO_INTERNET, nai, null,
                 pendingIntent, true);
     }
 
@@ -4249,6 +4253,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return nai == getDefaultNetwork();
     }
 
+    private boolean isDefaultRequest(NetworkRequestInfo nri) {
+        return nri.request.requestId == mDefaultRequest.requestId;
+    }
+
     public int registerNetworkAgent(Messenger messenger, NetworkInfo networkInfo,
             LinkProperties linkProperties, NetworkCapabilities networkCapabilities,
             int currentScore, NetworkMisc networkMisc) {
@@ -4691,6 +4699,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
                         if (VDBG) log("   accepting network in place of " + currentNetwork.name());
                         currentNetwork.removeRequest(nri.request.requestId);
                         currentNetwork.lingerRequest(nri.request, now, mLingerDelayMs);
+                        if (isDefaultRequest(nri)) {
+                            mLingerMonitor.noteLingerDefaultNetwork(currentNetwork, newNetwork);
+                        }
                         affectedNetworks.add(currentNetwork);
                     } else {
                         if (VDBG) log("   accepting network in place of null");
@@ -4708,7 +4719,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     // network.  Think about if there is a way to reduce this.  Push
                     // netid->request mapping to each factory?
                     sendUpdatedScoreToFactories(nri.request, newNetwork.getCurrentScore());
-                    if (mDefaultRequest.requestId == nri.request.requestId) {
+                    if (isDefaultRequest(nri)) {
                         isNewDefault = true;
                         oldDefaultNetwork = currentNetwork;
                     }
