@@ -46,7 +46,7 @@ public class WifiNanEventCallback {
 
     /**
      * Indicates that a {@link ConfigRequest} passed in
-     * {@link WifiNanManager#connect(android.os.Looper, WifiNanEventCallback, ConfigRequest)}
+     * {@link WifiNanManager#connect(android.os.Looper, ConfigRequest, WifiNanEventCallback)}
      * couldn't be applied since other connections already exist with an incompatible
      * configurations. Failure reason flag for {@link WifiNanEventCallback#onConnectFail(int)}.
      */
@@ -91,7 +91,7 @@ public class WifiNanEventCallback {
      * <p>
      *     This callback is only called if the NAN connection enables it using
      *     {@link ConfigRequest.Builder#setEnableIdentityChangeCallback(boolean)} in
-     *     {@link WifiNanManager#connect(android.os.Looper, WifiNanEventCallback, ConfigRequest)}
+     *     {@link WifiNanManager#connect(android.os.Looper, ConfigRequest, WifiNanEventCallback)}
      *     . It is disabled by default since it may result in additional wake-ups of the host -
      *     increasing power.
      *

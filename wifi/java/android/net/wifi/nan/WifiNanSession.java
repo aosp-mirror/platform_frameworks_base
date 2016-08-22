@@ -46,11 +46,7 @@ public class WifiNanSession {
     private static final boolean DBG = false;
     private static final boolean VDBG = false; // STOPSHIP if true
 
-    /**
-     * The maximum permitted retry count when sending messages using
-     * {@link #sendMessage(int, byte[], int, int)}.
-     */
-    public static final int MAX_SEND_RETRY_COUNT = 5;
+    private static final int MAX_SEND_RETRY_COUNT = 5;
 
     /** @hide */
     protected WeakReference<WifiNanManager> mMgr;
@@ -60,6 +56,16 @@ public class WifiNanSession {
     protected boolean mTerminated = false;
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
+
+    /**
+     * Return the maximum permitted retry count when sending messages using
+     * {@link #sendMessage(int, byte[], int, int)}.
+     *
+     * @return Maximum retry count when sending messages.
+     */
+    public static int getMaxSendRetryCount() {
+        return MAX_SEND_RETRY_COUNT;
+    }
 
     /** @hide */
     public WifiNanSession(WifiNanManager manager, int sessionId) {
@@ -148,7 +154,7 @@ public class WifiNanSession {
      * @param retryCount An integer specifying how many additional service-level (as opposed to PHY
      *            or MAC level) retries should be attempted if there is no ACK from the receiver
      *            (note: no retransmissions are attempted in other failure cases). A value of 0
-     *            indicates no retries. Max permitted value is {@link #MAX_SEND_RETRY_COUNT}.
+     *            indicates no retries. Max permitted value is {@link #getMaxSendRetryCount()}.
      */
     public void sendMessage(int peerId, @Nullable byte[] message, int messageId, int retryCount) {
         if (mTerminated) {
