@@ -48,6 +48,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
@@ -939,7 +940,8 @@ public class WallpaperManager {
             /* Set the wallpaper to the default values */
             ParcelFileDescriptor fd = sGlobals.mService.setWallpaper(
                     "res:" + resources.getResourceName(resid),
-                    mContext.getOpPackageName(), null, false, result, which, completion);
+                    mContext.getOpPackageName(), null, false, result, which, completion,
+                    UserHandle.myUserId());
             if (fd != null) {
                 FileOutputStream fos = null;
                 boolean ok = false;
@@ -1040,6 +1042,19 @@ public class WallpaperManager {
     public int setBitmap(Bitmap fullImage, Rect visibleCropHint,
             boolean allowBackup, @SetWallpaperFlags int which)
             throws IOException {
+        return setBitmap(fullImage, visibleCropHint, allowBackup, which,
+                UserHandle.myUserId());
+    }
+
+    /**
+     * Like {@link #setBitmap(Bitmap, Rect, boolean, int)}, but allows to pass in an explicit user
+     * id. If the user id doesn't match the user id the process is running under, calling this
+     * requires permission {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL}.
+     * @hide
+     */
+    public int setBitmap(Bitmap fullImage, Rect visibleCropHint,
+            boolean allowBackup, @SetWallpaperFlags int which, int userId)
+            throws IOException {
         validateRect(visibleCropHint);
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
@@ -1050,7 +1065,7 @@ public class WallpaperManager {
         try {
             ParcelFileDescriptor fd = sGlobals.mService.setWallpaper(null,
                     mContext.getOpPackageName(), visibleCropHint, allowBackup,
-                    result, which, completion);
+                    result, which, completion, userId);
             if (fd != null) {
                 FileOutputStream fos = null;
                 try {
@@ -1176,7 +1191,7 @@ public class WallpaperManager {
         try {
             ParcelFileDescriptor fd = sGlobals.mService.setWallpaper(null,
                     mContext.getOpPackageName(), visibleCropHint, allowBackup,
-                    result, which, completion);
+                    result, which, completion, UserHandle.myUserId());
             if (fd != null) {
                 FileOutputStream fos = null;
                 try {
