@@ -38,8 +38,6 @@ public class DozeParameters {
 
     private final Context mContext;
 
-    private static PulseSchedule sPulseSchedule;
-
     private static IntInOutMatcher sPickupSubtypePerformsProxMatcher;
 
     public DozeParameters(Context context) {
@@ -61,8 +59,6 @@ public class DozeParameters {
         pw.print("    getVibrateOnPickup(): "); pw.println(getVibrateOnPickup());
         pw.print("    getProxCheckBeforePulse(): "); pw.println(getProxCheckBeforePulse());
         pw.print("    getPulseOnNotifications(): "); pw.println(getPulseOnNotifications());
-        pw.print("    getPulseSchedule(): "); pw.println(getPulseSchedule());
-        pw.print("    getPulseScheduleResets(): "); pw.println(getPulseScheduleResets());
         pw.print("    getPickupVibrationThreshold(): "); pw.println(getPickupVibrationThreshold());
         pw.print("    getPickupSubtypePerformsProxCheck(): ");pw.println(
                 dumpPickupSubtypePerformsProxCheck());
@@ -124,18 +120,6 @@ public class DozeParameters {
 
     public boolean getPulseOnNotifications() {
         return getBoolean("doze.pulse.notifications", R.bool.doze_pulse_on_notifications);
-    }
-
-    public PulseSchedule getPulseSchedule() {
-        final String spec = getString("doze.pulse.schedule", R.string.doze_pulse_schedule);
-        if (sPulseSchedule == null || !sPulseSchedule.mSpec.equals(spec)) {
-            sPulseSchedule = PulseSchedule.parse(spec);
-        }
-        return sPulseSchedule;
-    }
-
-    public int getPulseScheduleResets() {
-        return getInt("doze.pulse.schedule.resets", R.integer.doze_pulse_schedule_resets);
     }
 
     public int getPickupVibrationThreshold() {
@@ -247,46 +231,6 @@ public class DozeParameters {
 
         public boolean isIn(int value) {
             return (mIsIn.get(value, mDefaultIsIn));
-        }
-    }
-
-    public static class PulseSchedule {
-        private static final Pattern PATTERN = Pattern.compile("(\\d+?)s", 0);
-
-        private String mSpec;
-        private int[] mSchedule;
-
-        public static PulseSchedule parse(String spec) {
-            if (TextUtils.isEmpty(spec)) return null;
-            try {
-                final PulseSchedule rt = new PulseSchedule();
-                rt.mSpec = spec;
-                final String[] tokens = spec.split(",");
-                rt.mSchedule = new int[tokens.length];
-                for (int i = 0; i < tokens.length; i++) {
-                    final Matcher m = PATTERN.matcher(tokens[i]);
-                    if (!m.matches()) throw new IllegalArgumentException("Bad token: " + tokens[i]);
-                    rt.mSchedule[i] = Integer.parseInt(m.group(1));
-                }
-                if (DEBUG) Log.d(TAG, "Parsed spec [" + spec + "] as: " + rt);
-                return rt;
-            } catch (RuntimeException e) {
-                Log.w(TAG, "Error parsing spec: " + spec, e);
-                return null;
-            }
-        }
-
-        @Override
-        public String toString() {
-            return Arrays.toString(mSchedule);
-        }
-
-        public long getNextTime(long now, long notificationTime) {
-            for (int i = 0; i < mSchedule.length; i++) {
-                final long time = notificationTime + mSchedule[i] * 1000;
-                if (time > now) return time;
-            }
-            return 0;
         }
     }
 }
