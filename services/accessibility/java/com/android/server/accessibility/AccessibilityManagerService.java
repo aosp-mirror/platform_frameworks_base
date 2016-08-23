@@ -451,7 +451,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     }
 
     @Override
-    public boolean sendAccessibilityEvent(AccessibilityEvent event, int userId) {
+    public void sendAccessibilityEvent(AccessibilityEvent event, int userId) {
         boolean dispatchEvent = false;
 
         synchronized (mLock) {
@@ -461,18 +461,19 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             final int resolvedUserId = mSecurityPolicy
                     .resolveCallingUserIdEnforcingPermissionsLocked(userId);
             // This method does nothing for a background user.
-            if (resolvedUserId != mCurrentUserId) {
-                return true; // yes, recycle the event
-            }
-            if (mSecurityPolicy.canDispatchAccessibilityEventLocked(event)) {
-                mSecurityPolicy.updateActiveAndAccessibilityFocusedWindowLocked(event.getWindowId(),
-                        event.getSourceNodeId(), event.getEventType(), event.getAction());
-                mSecurityPolicy.updateEventSourceLocked(event);
-                dispatchEvent = true;
-            }
-            if (mHasInputFilter && mInputFilter != null) {
-                mMainHandler.obtainMessage(MainHandler.MSG_SEND_ACCESSIBILITY_EVENT_TO_INPUT_FILTER,
-                        AccessibilityEvent.obtain(event)).sendToTarget();
+            if (resolvedUserId == mCurrentUserId) {
+                if (mSecurityPolicy.canDispatchAccessibilityEventLocked(event)) {
+                    mSecurityPolicy.updateActiveAndAccessibilityFocusedWindowLocked(
+                            event.getWindowId(), event.getSourceNodeId(),
+                            event.getEventType(), event.getAction());
+                    mSecurityPolicy.updateEventSourceLocked(event);
+                    dispatchEvent = true;
+                }
+                if (mHasInputFilter && mInputFilter != null) {
+                    mMainHandler.obtainMessage(
+                            MainHandler.MSG_SEND_ACCESSIBILITY_EVENT_TO_INPUT_FILTER,
+                            AccessibilityEvent.obtain(event)).sendToTarget();
+                }
             }
         }
 
@@ -491,9 +492,23 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             }
         }
 
-        event.recycle();
+        if (OWN_PROCESS_ID != Binder.getCallingPid()) {
+            event.recycle();
+        }
+    }
 
-        return (OWN_PROCESS_ID != Binder.getCallingPid());
+    @Override
+    public void sendAccessibilityEvents(ParceledListSlice events, int userId) {
+        List<AccessibilityEvent> a11yEvents = events.getList();
+        // Grab the lock once for the entire batch
+        synchronized (mLock) {
+            int numEventsToProcess = Math.min(a11yEvents.size(),
+                    AccessibilityManager.MAX_A11Y_EVENTS_PER_SERVICE_CALL);
+            for (int i = 0; i < numEventsToProcess; i++) {
+                AccessibilityEvent event = a11yEvents.get(i);
+                sendAccessibilityEvent(event, userId);
+            }
+        }
     }
 
     @Override

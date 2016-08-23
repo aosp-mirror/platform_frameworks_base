@@ -21,6 +21,7 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.ServiceInfo;
 import android.os.Binder;
 import android.os.Handler;
@@ -91,6 +92,9 @@ public final class AccessibilityManager {
     /** @hide */
     public static final int AUTOCLICK_DELAY_DEFAULT = 600;
 
+    /** @hide */
+    public static final int MAX_A11Y_EVENTS_PER_SERVICE_CALL = 20;
+
     static final Object sInstanceSync = new Object();
 
     private static AccessibilityManager sInstance;
@@ -98,6 +102,8 @@ public final class AccessibilityManager {
     private final Object mLock = new Object();
 
     private IAccessibilityManager mService;
+
+    private EventDispatchThread mEventDispatchThread;
 
     final int mUserId;
 
@@ -170,7 +176,7 @@ public final class AccessibilityManager {
     private final IAccessibilityManagerClient.Stub mClient =
             new IAccessibilityManagerClient.Stub() {
         public void setState(int state) {
-            // We do not want to change this immediately as the applicatoin may
+            // We do not want to change this immediately as the application may
             // have already checked that accessibility is on and fired an event,
             // that is now propagating up the view tree, Hence, if accessibility
             // is now off an exception will be thrown. We want to have the exception
@@ -297,47 +303,32 @@ public final class AccessibilityManager {
      * their descendants.
      */
     public void sendAccessibilityEvent(AccessibilityEvent event) {
-        final IAccessibilityManager service;
-        final int userId;
-        synchronized (mLock) {
-            service = getServiceLocked();
-            if (service == null) {
+        if (!isEnabled()) {
+            Looper myLooper = Looper.myLooper();
+            if (myLooper == Looper.getMainLooper()) {
+                throw new IllegalStateException(
+                        "Accessibility off. Did you forget to check that?");
+            } else {
+                // If we're not running on the thread with the main looper, it's possible for
+                // the state of accessibility to change between checking isEnabled and
+                // calling this method. So just log the error rather than throwing the
+                // exception.
+                Log.e(LOG_TAG, "AccessibilityEvent sent with accessibility disabled");
                 return;
             }
-            if (!mIsEnabled) {
-                Looper myLooper = Looper.myLooper();
-                if (myLooper == Looper.getMainLooper()) {
-                    throw new IllegalStateException(
-                            "Accessibility off. Did you forget to check that?");
-                } else {
-                    // If we're not running on the thread with the main looper, it's possible for
-                    // the state of accessibility to change between checking isEnabled and
-                    // calling this method. So just log the error rather than throwing the
-                    // exception.
-                    Log.e(LOG_TAG, "AccessibilityEvent sent with accessibility disabled");
-                    return;
-                }
-            }
-            userId = mUserId;
         }
-        boolean doRecycle = false;
-        try {
-            event.setEventTime(SystemClock.uptimeMillis());
-            // it is possible that this manager is in the same process as the service but
-            // client using it is called through Binder from another process. Example: MMS
-            // app adds a SMS notification and the NotificationManagerService calls this method
-            long identityToken = Binder.clearCallingIdentity();
-            doRecycle = service.sendAccessibilityEvent(event, userId);
-            Binder.restoreCallingIdentity(identityToken);
-            if (DEBUG) {
-                Log.i(LOG_TAG, event + " sent");
+        event.setEventTime(SystemClock.uptimeMillis());
+
+        getEventDispatchThread().scheduleEvent(event);
+    }
+
+    private EventDispatchThread getEventDispatchThread() {
+        synchronized (mLock) {
+            if (mEventDispatchThread == null) {
+                mEventDispatchThread = new EventDispatchThread(mService, mUserId);
+                mEventDispatchThread.start();
             }
-        } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error during sending " + event + " ", re);
-        } finally {
-            if (doRecycle) {
-                event.recycle();
-            }
+            return mEventDispatchThread;
         }
     }
 
@@ -620,7 +611,7 @@ public final class AccessibilityManager {
         }
     }
 
-    private  IAccessibilityManager getServiceLocked() {
+    private IAccessibilityManager getServiceLocked() {
         if (mService == null) {
             tryConnectToServiceLocked(null);
         }
@@ -719,6 +710,101 @@ public final class AccessibilityManager {
                         setStateLocked(state);
                     }
                 } break;
+            }
+        }
+    }
+
+    private static class EventDispatchThread extends Thread {
+        // Second lock used to keep UI thread performant. Never try to grab mLock when holding
+        // this one, or the UI thread will block in send AccessibilityEvent.
+        private final Object mEventQueueLock = new Object();
+
+        // Two lists to hold events. The app thread fills one while we empty the other.
+        private final ArrayList<AccessibilityEvent> mEventLists0 =
+                new ArrayList<>(MAX_A11Y_EVENTS_PER_SERVICE_CALL);
+        private final ArrayList<AccessibilityEvent> mEventLists1 =
+                new ArrayList<>(MAX_A11Y_EVENTS_PER_SERVICE_CALL);
+
+        private boolean mPingPongListToggle;
+
+        private final IAccessibilityManager mService;
+
+        private final int mUserId;
+
+        EventDispatchThread(IAccessibilityManager service, int userId) {
+            mService = service;
+            mUserId = userId;
+        }
+
+        @Override
+        public void run() {
+            while (true) {
+                ArrayList<AccessibilityEvent> listBeingDrained;
+                synchronized (mEventQueueLock) {
+                    ArrayList<AccessibilityEvent> listBeingFilled = getListBeingFilledLocked();
+                    if (listBeingFilled.isEmpty()) {
+                        try {
+                            mEventQueueLock.wait();
+                        } catch (InterruptedException e) {
+                            // Treat as a notify
+                        }
+                    }
+                    // Swap buffers
+                    mPingPongListToggle = !mPingPongListToggle;
+                    listBeingDrained = listBeingFilled;
+                }
+                dispatchEvents(listBeingDrained);
+            }
+        }
+
+        public void scheduleEvent(AccessibilityEvent event) {
+            synchronized (mEventQueueLock) {
+                getListBeingFilledLocked().add(event);
+                mEventQueueLock.notifyAll();
+            }
+        }
+
+        private ArrayList<AccessibilityEvent> getListBeingFilledLocked() {
+            return (mPingPongListToggle) ? mEventLists0 : mEventLists1;
+        }
+
+        private void dispatchEvents(ArrayList<AccessibilityEvent> events) {
+            int eventListCapacityLowerBound = events.size();
+            while (events.size() > 0) {
+                // We don't want to consume extra memory if an app sends a lot of events in a
+                // one-off event. Cap the list length at double the max events per call.
+                // We'll end up with extra GC for apps that send huge numbers of events, but
+                // sending that many events will lead to bad performance in any case.
+                if ((eventListCapacityLowerBound > 2 * MAX_A11Y_EVENTS_PER_SERVICE_CALL)
+                        && (events.size() <= 2 * MAX_A11Y_EVENTS_PER_SERVICE_CALL)) {
+                    events.trimToSize();
+                    eventListCapacityLowerBound = events.size();
+                }
+                // We only expect this loop to run once, as the app shouldn't be sending
+                // huge numbers of events.
+                // The clear in the called method will remove the sent events
+                dispatchOneBatchOfEvents(events.subList(0,
+                        Math.min(events.size(), MAX_A11Y_EVENTS_PER_SERVICE_CALL)));
+            }
+        }
+
+        private void dispatchOneBatchOfEvents(List<AccessibilityEvent> events) {
+            if (events.isEmpty()) {
+                return;
+            }
+            long identityToken = Binder.clearCallingIdentity();
+            try {
+                mService.sendAccessibilityEvents(new ParceledListSlice<>(events),
+                        mUserId);
+            } catch (RemoteException re) {
+                Log.e(LOG_TAG, "Error sending multiple events");
+            }
+            Binder.restoreCallingIdentity(identityToken);
+            if (DEBUG) {
+                Log.i(LOG_TAG, events.size() + " events sent");
+            }
+            for (int i = events.size() - 1; i >= 0; i--) {
+                events.remove(i).recycle();
             }
         }
     }
