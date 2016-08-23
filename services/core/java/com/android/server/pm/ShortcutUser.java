@@ -60,6 +60,7 @@ class ShortcutUser {
 
     // Suffix "2" was added to force rescan all packages after the next OTA.
     private static final String ATTR_LAST_APP_SCAN_TIME = "last-app-scan-time2";
+    private static final String ATTR_LAST_APP_SCAN_OS_FINGERPRINT = "last-app-scan-fp";
     private static final String KEY_USER_ID = "userId";
     private static final String KEY_LAUNCHERS = "launchers";
     private static final String KEY_PACKAGES = "packages";
@@ -125,6 +126,8 @@ class ShortcutUser {
 
     private long mLastAppScanTime;
 
+    private String mLastAppScanOsFingerprint;
+
     public ShortcutUser(ShortcutService service, int userId) {
         mService = service;
         mUserId = userId;
@@ -140,6 +143,14 @@ class ShortcutUser {
 
     public void setLastAppScanTime(long lastAppScanTime) {
         mLastAppScanTime = lastAppScanTime;
+    }
+
+    public String getLastAppScanOsFingerprint() {
+        return mLastAppScanOsFingerprint;
+    }
+
+    public void setLastAppScanOsFingerprint(String lastAppScanOsFingerprint) {
+        mLastAppScanOsFingerprint = lastAppScanOsFingerprint;
     }
 
     // We don't expose this directly to non-test code because only ShortcutUser should add to/
@@ -318,6 +329,8 @@ class ShortcutUser {
         ShortcutService.writeAttr(out, ATTR_KNOWN_LOCALES, mKnownLocales);
         ShortcutService.writeAttr(out, ATTR_LAST_APP_SCAN_TIME,
                 mLastAppScanTime);
+        ShortcutService.writeAttr(out, ATTR_LAST_APP_SCAN_OS_FINGERPRINT,
+                mLastAppScanOsFingerprint);
 
         ShortcutService.writeTagValue(out, TAG_LAUNCHER, mLastKnownLauncher);
 
@@ -364,7 +377,8 @@ class ShortcutUser {
                 ATTR_LAST_APP_SCAN_TIME);
         final long currentTime = s.injectCurrentTimeMillis();
         ret.mLastAppScanTime = lastAppScanTime < currentTime ? lastAppScanTime : 0;
-
+        ret.mLastAppScanOsFingerprint = ShortcutService.parseStringAttribute(parser,
+                ATTR_LAST_APP_SCAN_OS_FINGERPRINT);
         final int outerDepth = parser.getDepth();
         int type;
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
@@ -457,6 +471,8 @@ class ShortcutUser {
         pw.print(mLastAppScanTime);
         pw.print("] ");
         pw.print(ShortcutService.formatTime(mLastAppScanTime));
+        pw.print("  Last app scan FP: ");
+        pw.print(mLastAppScanOsFingerprint);
         pw.println();
 
         prefix += prefix + "  ";

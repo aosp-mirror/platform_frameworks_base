@@ -4347,6 +4347,128 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         });
     }
 
+    public void testHandlePackageUpdate_systemAppUpdate() {
+
+        // Package1 is a system app.  Package 2 is not a system app, so it's not scanned
+        // in this test at all.
+        mSystemPackages.add(CALLING_PACKAGE_1);
+
+        // Initial state: no shortcuts.
+        mService.checkPackageChanges(USER_0);
+
+        assertEquals(mInjectedCurrentTimeMillis,
+                mService.getUserShortcutsLocked(USER_0).getLastAppScanTime());
+        assertEquals(mInjectedBuildFingerprint,
+                mService.getUserShortcutsLocked(USER_0).getLastAppScanOsFingerprint());
+
+        // They have no shortcuts.
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertWith(getCallerShortcuts())
+                    .isEmpty();
+        });
+
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            assertWith(getCallerShortcuts())
+                    .isEmpty();
+        });
+
+        // Next.
+        // Update the packages -- now they have 1 manifest shortcut.
+        // But checkPackageChanges() don't notice it, since their version code / timestamp haven't
+        // changed.
+        addManifestShortcutResource(
+                new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
+                R.xml.shortcut_1);
+        addManifestShortcutResource(
+                new ComponentName(CALLING_PACKAGE_2, ShortcutActivity.class.getName()),
+                R.xml.shortcut_1);
+        mInjectedCurrentTimeMillis += 1000;
+        mService.checkPackageChanges(USER_0);
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertWith(getCallerShortcuts())
+                    .isEmpty();
+        });
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            assertWith(getCallerShortcuts())
+                    .isEmpty();
+        });
+
+        // Next.
+        // Update the build finger print.  All system apps will be scanned now.
+        mInjectedBuildFingerprint = "update1";
+        mInjectedCurrentTimeMillis += 1000;
+        mService.checkPackageChanges(USER_0);
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertWith(getCallerShortcuts())
+                    .haveIds("ms1");
+        });
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            assertWith(getCallerShortcuts())
+                    .isEmpty();
+        });
+
+        // Next.
+        // Update manifest shortcuts.
+        mInjectedBuildFingerprint = "update2";
+        addManifestShortcutResource(
+                new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
+                R.xml.shortcut_2);
+        addManifestShortcutResource(
+                new ComponentName(CALLING_PACKAGE_2, ShortcutActivity.class.getName()),
+                R.xml.shortcut_2);
+        mInjectedCurrentTimeMillis += 1000;
+        mService.checkPackageChanges(USER_0);
+
+        // Fingerprint hasn't changed, so CALLING_PACKAGE_1 wasn't scanned.
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertWith(getCallerShortcuts())
+                    .haveIds("ms1");
+        });
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            assertWith(getCallerShortcuts())
+                    .isEmpty();
+        });
+
+        // Update the fingerprint, but CALLING_PACKAGE_1's version code hasn't changed, so
+        // still not scanned.
+        mInjectedBuildFingerprint = "update2";
+        mInjectedCurrentTimeMillis += 1000;
+        mService.checkPackageChanges(USER_0);
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertWith(getCallerShortcuts())
+                    .haveIds("ms1");
+        });
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            assertWith(getCallerShortcuts())
+                    .isEmpty();
+        });
+
+        // Now update the version code, so CALLING_PACKAGE_1 is scanned again.
+        mInjectedBuildFingerprint = "update3";
+        mInjectedCurrentTimeMillis += 1000;
+        updatePackageVersion(CALLING_PACKAGE_1, 1);
+        mService.checkPackageChanges(USER_0);
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertWith(getCallerShortcuts())
+                    .haveIds("ms1", "ms2");
+        });
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            assertWith(getCallerShortcuts())
+                    .isEmpty();
+        });
+
+        // Make sure getLastAppScanTime / getLastAppScanOsFingerprint are persisted.
+        initService();
+        assertEquals(mInjectedCurrentTimeMillis,
+                mService.getUserShortcutsLocked(USER_0).getLastAppScanTime());
+        assertEquals(mInjectedBuildFingerprint,
+                mService.getUserShortcutsLocked(USER_0).getLastAppScanOsFingerprint());
+    }
+
     public void testHandlePackageChanged() {
         final ComponentName ACTIVITY1 = new ComponentName(CALLING_PACKAGE_1, "act1");
         final ComponentName ACTIVITY2 = new ComponentName(CALLING_PACKAGE_1, "act2");
