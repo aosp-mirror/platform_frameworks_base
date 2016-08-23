@@ -30,10 +30,13 @@ import static android.net.NetworkPolicyManager.uidPoliciesToString;
 import static android.net.NetworkPolicyManager.uidRulesToString;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+
+import java.util.Arrays;
 
 @RunWith(JUnit4.class)
 public class NetworkPolicyManagerTest {
@@ -48,22 +51,27 @@ public class NetworkPolicyManagerTest {
         uidRulesToStringTest(RULE_REJECT_ALL, "64 (REJECT_ALL)");
 
         uidRulesToStringTest(RULE_ALLOW_METERED | RULE_ALLOW_ALL,
-                "33 (ALLOW_METERED|ALLOW_ALL)");
+                "33 (ALLOW_METERED|ALLOW_ALL)",
+                "33 (ALLOW_ALL|ALLOW_METERED)");
         uidRulesToStringTest(RULE_ALLOW_METERED | RULE_REJECT_ALL,
-                "65 (ALLOW_METERED|REJECT_ALL)");
+                "65 (ALLOW_METERED|REJECT_ALL)",
+                "65 (REJECT_ALL|ALLOW_METERED)");
         uidRulesToStringTest(RULE_TEMPORARY_ALLOW_METERED | RULE_ALLOW_ALL,
-                "34 (TEMPORARY_ALLOW_METERED|ALLOW_ALL)");
+                "34 (TEMPORARY_ALLOW_METERED|ALLOW_ALL)",
+                "34 (ALLOW_ALL|TEMPORARY_ALLOW_METERED)");
         uidRulesToStringTest(RULE_TEMPORARY_ALLOW_METERED | RULE_REJECT_ALL,
-                "66 (TEMPORARY_ALLOW_METERED|REJECT_ALL)");
+                "66 (TEMPORARY_ALLOW_METERED|REJECT_ALL)",
+                "66 (REJECT_ALL|TEMPORARY_ALLOW_METERED)");
         uidRulesToStringTest(RULE_REJECT_METERED | RULE_ALLOW_ALL,
-                "36 (REJECT_METERED|ALLOW_ALL)");
+                "36 (REJECT_METERED|ALLOW_ALL)",
+                "36 (ALLOW_ALL|REJECT_METERED)");
         uidRulesToStringTest(RULE_REJECT_METERED | RULE_REJECT_ALL,
-                "68 (REJECT_METERED|REJECT_ALL)");
+                "68 (REJECT_METERED|REJECT_ALL)",
+                "68 (REJECT_ALL|REJECT_METERED)");
     }
 
-    private void uidRulesToStringTest(int uidRules, String expected) {
-        final String actual = uidRulesToString(uidRules);
-        assertEquals("Wrong string for uidRules " + uidRules, expected, actual);
+    private void uidRulesToStringTest(int uidRules, String... expectedOptions) {
+        assertContains(uidRulesToString(uidRules), expectedOptions);
     }
 
     @Test
@@ -75,9 +83,8 @@ public class NetworkPolicyManagerTest {
                 "2 (ALLOW_BACKGROUND_BATTERY_SAVE)");
     }
 
-    private void uidPoliciesToStringTest(int policyRules, String expected) {
-        final String actual = uidPoliciesToString(policyRules);
-        assertEquals("Wrong string for policyRules " + policyRules, expected, actual);
+    private void uidPoliciesToStringTest(int policyRules, String... expectedOptions) {
+        assertContains(uidPoliciesToString(policyRules), expectedOptions);
     }
 
     @Test
@@ -129,5 +136,13 @@ public class NetworkPolicyManagerTest {
                 & (RULE_REJECT_ALL | RULE_TEMPORARY_ALLOW_METERED));
         assertEquals(RULE_REJECT_ALL, MASK_ALL_NETWORKS
                 & (RULE_REJECT_ALL | RULE_REJECT_METERED));
+    }
+
+    // TODO: use Truth or Hamcrest
+    private void assertContains(String actual, String...expectedOptions) {
+        for (String expected : expectedOptions) {
+            if (expected.equals(actual)) return;
+        }
+        fail(actual + " not in " + Arrays.toString(expectedOptions));
     }
 }
