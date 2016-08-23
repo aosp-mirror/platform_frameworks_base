@@ -216,7 +216,6 @@ public class NotificationStackScrollLayout extends ViewGroup
     private float mTopPaddingOverflow;
     private boolean mDontReportNextOverScroll;
     private boolean mDontClampNextScroll;
-    private boolean mRequestViewResizeAnimationOnLayout;
     private boolean mNeedViewResizeAnimation;
     private View mExpandedGroupView;
     private boolean mEverythingNeedsAnimation;
@@ -518,10 +517,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         setMaxLayoutHeight(getHeight());
         updateContentHeight();
         clampScrollPosition();
-        if (mRequestViewResizeAnimationOnLayout) {
-            requestAnimationOnViewResize(null);
-            mRequestViewResizeAnimationOnLayout = false;
-        }
         requestChildrenUpdate();
         updateFirstAndLastBackgroundViews();
     }
@@ -3104,9 +3099,6 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     @Override
     public void onReset(ExpandableView view) {
-        if (mIsExpanded && mAnimationsEnabled) {
-            mRequestViewResizeAnimationOnLayout = true;
-        }
         updateAnimationState(view);
         updateChronometerForChild(view);
     }
