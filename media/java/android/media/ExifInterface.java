@@ -679,14 +679,14 @@ public class ExifInterface {
             if (value instanceof long[]) {
                 long[] array = (long[]) value;
                 if (array.length == 1) {
-                    return (double) array[0];
+                    return array[0];
                 }
                 throw new NumberFormatException("There are more than one component");
             }
             if (value instanceof int[]) {
                 int[] array = (int[]) value;
                 if (array.length == 1) {
-                    return (double) array[0];
+                    return array[0];
                 }
                 throw new NumberFormatException("There are more than one component");
             }
@@ -1083,6 +1083,7 @@ public class ExifInterface {
     private int mThumbnailOffset;
     private int mThumbnailLength;
     private byte[] mThumbnailBytes;
+    private boolean mIsSupportedFile;
 
     // Pattern to check non zero timestamp
     private static final Pattern sNonZeroTimePattern = Pattern.compile(".*[1-9].*");
@@ -1472,9 +1473,11 @@ public class ExifInterface {
 
             // Process JPEG input stream
             getJpegAttributes(in);
+            mIsSupportedFile = true;
         } catch (IOException e) {
             // Ignore exceptions in order to keep the compatibility with the old versions of
             // ExifInterface.
+            mIsSupportedFile = false;
             Log.w(TAG, "Invalid image: ExifInterface got an unsupported image format file"
                     + "(ExifInterface supports JPEG and some RAW image formats only) "
                     + "or a corrupted JPEG file to ExifInterface.", e);
@@ -1553,9 +1556,9 @@ public class ExifInterface {
      * and make a single call rather than multiple calls for each attribute.
      */
     public void saveAttributes() throws IOException {
-        if (mIsRaw) {
+        if (!mIsSupportedFile || mIsRaw) {
             throw new UnsupportedOperationException(
-                    "ExifInterface does not support saving attributes on RAW formats.");
+                    "ExifInterface only supports saving attributes on JPEG formats.");
         }
         if (mIsInputStream || (mSeekableFileDescriptor == null && mFilename == null)) {
             throw new UnsupportedOperationException(
@@ -2352,7 +2355,7 @@ public class ExifInterface {
         for (int i = 0; i < EXIF_TAGS.length; ++i) {
             int sum = 0;
             for (Map.Entry entry : (Set<Map.Entry>) mAttributes[i].entrySet()) {
-                final ExifAttribute exifAttribute = (ExifAttribute) ((Map.Entry) entry).getValue();
+                final ExifAttribute exifAttribute = (ExifAttribute) entry.getValue();
                 final int size = exifAttribute.size();
                 if (size > 4) {
                     sum += size;
