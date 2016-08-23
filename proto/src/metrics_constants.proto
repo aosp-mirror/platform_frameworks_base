@@ -2286,6 +2286,9 @@ message MetricsEvent {
     // ACTION: Managed provisioning installed DPC from play or other source.
     PROVISIONING_DPC_INSTALLED_FROM_PLAY = 518;
 
+    // OPEN: Settings Support > Phone/Chat -> Disclaimer
+    DIALOG_SUPPORT_DISCLAIMER = 519;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
