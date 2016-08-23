@@ -390,7 +390,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     /** @return List of SubscriptionInfo records, maybe empty but never null */
-    List<SubscriptionInfo> getSubscriptionInfo(boolean forceReload) {
+    public List<SubscriptionInfo> getSubscriptionInfo(boolean forceReload) {
         List<SubscriptionInfo> sil = mSubscriptionInfo;
         if (sil == null || forceReload) {
             sil = mSubscriptionManager.getActiveSubscriptionInfoList();
