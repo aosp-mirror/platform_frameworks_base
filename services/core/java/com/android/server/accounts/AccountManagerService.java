@@ -3142,10 +3142,9 @@ public class AccountManagerService
         boolean isPasswordForwardingAllowed = isPermitted(
                 callerPkg, uid, Manifest.permission.GET_PASSWORD);
 
-        int usrId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
         try {
-            UserAccounts accounts = getUserAccounts(usrId);
+            UserAccounts accounts = getUserAccounts(userId);
             logRecordWithUid(accounts, DebugDbHelper.ACTION_CALLED_START_ACCOUNT_ADD,
                     TABLE_ACCOUNTS, uid);
             new StartAccountSession(
@@ -3206,10 +3205,6 @@ public class AccountManagerService
                 checkKeyIntent(
                         Binder.getCallingUid(),
                         intent);
-                // Omit passwords if the caller isn't permitted to see them.
-                if (!mIsPasswordForwardingAllowed) {
-                    result.remove(AccountManager.KEY_PASSWORD);
-                }
             }
             IAccountManagerResponse response;
             if (mExpectActivityLaunch && result != null
@@ -3237,6 +3232,11 @@ public class AccountManagerService
                 sendErrorResponse(response, result.getInt(AccountManager.KEY_ERROR_CODE),
                         result.getString(AccountManager.KEY_ERROR_MESSAGE));
                 return;
+            }
+
+            // Omit passwords if the caller isn't permitted to see them.
+            if (!mIsPasswordForwardingAllowed) {
+                result.remove(AccountManager.KEY_PASSWORD);
             }
 
             // Strip auth token from result.
