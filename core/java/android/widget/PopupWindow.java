@@ -193,6 +193,8 @@ public class PopupWindow {
 
     private int mAnimationStyle = ANIMATION_STYLE_DEFAULT;
 
+    private int mGravity = Gravity.NO_GRAVITY;
+
     private static final int[] ABOVE_ANCHOR_STATE_SET = new int[] {
         com.android.internal.R.attr.state_above_anchor
     };
@@ -1141,14 +1143,10 @@ public class PopupWindow {
 
         mIsShowing = true;
         mIsDropdown = false;
+        mGravity = gravity;
 
         final WindowManager.LayoutParams p = createPopupLayoutParams(token);
         preparePopup(p);
-
-        // Only override the default if some gravity was specified.
-        if (gravity != Gravity.NO_GRAVITY) {
-            p.gravity = gravity;
-        }
 
         p.x = x;
         p.y = y;
@@ -1394,8 +1392,8 @@ public class PopupWindow {
     }
 
     private int computeGravity() {
-        int gravity = Gravity.START | Gravity.TOP;
-        if (mClipToScreen || mClippingEnabled) {
+        int gravity = mGravity == Gravity.NO_GRAVITY ?  Gravity.START | Gravity.TOP : mGravity;
+        if (mIsDropdown && (mClipToScreen || mClippingEnabled)) {
             gravity |= Gravity.DISPLAY_CLIP_VERTICAL;
         }
         return gravity;
