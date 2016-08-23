@@ -498,6 +498,9 @@ public final class SystemServer {
      * Starts some essential services that are not tangled up in the bootstrap process.
      */
     private void startCoreServices() {
+        // Records errors and logs, for example wtf()
+        mSystemServiceManager.startService(DropBoxManagerService.class);
+
         // Tracks the battery level.  Requires LightService.
         mSystemServiceManager.startService(BatteryService.class);
 
@@ -929,8 +932,6 @@ public final class SystemServer {
                 }
                 Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
             }
-
-            mSystemServiceManager.startService(DropBoxManagerService.class);
 
             if (!disableNonCoreServices && context.getResources().getBoolean(
                         R.bool.config_enableWallpaperService)) {

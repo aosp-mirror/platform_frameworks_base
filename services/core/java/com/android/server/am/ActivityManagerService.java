@@ -13734,11 +13734,12 @@ public final class ActivityManagerService extends ActivityManagerNative
         // NOTE -- this must never acquire the ActivityManagerService lock,
         // otherwise the watchdog may be prevented from resetting the system.
 
-        final String dropboxTag = processClass(process) + "_" + eventType;
-        final DropBoxManager dbox = (DropBoxManager)
-                mContext.getSystemService(Context.DROPBOX_SERVICE);
+        // Bail early if not published yet
+        if (ServiceManager.getService(Context.DROPBOX_SERVICE) == null) return;
+        final DropBoxManager dbox = mContext.getSystemService(DropBoxManager.class);
 
         // Exit early if the dropbox isn't configured to accept this report type.
+        final String dropboxTag = processClass(process) + "_" + eventType;
         if (dbox == null || !dbox.isTagEnabled(dropboxTag)) return;
 
         // Rate-limit how often we're willing to do the heavy lifting below to
