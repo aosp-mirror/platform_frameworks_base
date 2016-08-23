@@ -93,8 +93,10 @@ public class KeyguardIndicationController {
                 ServiceManager.getService(BatteryStats.SERVICE_NAME));
 
         KeyguardUpdateMonitor.getInstance(context).registerCallback(mUpdateMonitor);
-        context.registerReceiverAsUser(mReceiver, UserHandle.SYSTEM,
+        context.registerReceiverAsUser(mTickReceiver, UserHandle.SYSTEM,
                 new IntentFilter(Intent.ACTION_TIME_TICK), null, null);
+        context.registerReceiverAsUser(mUnlockReceiver, UserHandle.ALL,
+                new IntentFilter(Intent.ACTION_USER_UNLOCKED), null, null);
     }
 
     public void setVisible(boolean visible) {
@@ -322,7 +324,16 @@ public class KeyguardIndicationController {
         }
     };
 
-    BroadcastReceiver mReceiver = new BroadcastReceiver() {
+    BroadcastReceiver mTickReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (mVisible) {
+                updateIndication();
+            }
+        }
+    };
+
+    BroadcastReceiver mUnlockReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (mVisible) {
