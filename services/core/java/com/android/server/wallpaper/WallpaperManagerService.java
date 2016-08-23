@@ -1350,7 +1350,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     @Override
     public ParcelFileDescriptor setWallpaper(String name, String callingPackage,
             Rect cropHint, boolean allowBackup, Bundle extras, int which,
-            IWallpaperManagerCallback completion) {
+            IWallpaperManagerCallback completion, int userId) {
+        userId = ActivityManager.handleIncomingUser(getCallingPid(), getCallingUid(), userId,
+                false /* all */, true /* full */, "changing wallpaper", null /* pkg */);
         checkPermission(android.Manifest.permission.SET_WALLPAPER);
 
         if ((which & (FLAG_LOCK|FLAG_SYSTEM)) == 0) {
@@ -1373,8 +1375,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                 throw new IllegalArgumentException("Invalid crop rect supplied: " + cropHint);
             }
         }
-
-        final int userId = UserHandle.getCallingUserId();
 
         synchronized (mLock) {
             if (DEBUG) Slog.v(TAG, "setWallpaper which=0x" + Integer.toHexString(which));
