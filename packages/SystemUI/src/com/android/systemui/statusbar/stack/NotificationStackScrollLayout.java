@@ -1961,9 +1961,9 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void applyCurrentBackgroundBounds() {
-        if (!mFadingOut) {
-            mScrimController.setExcludedBackgroundArea(mCurrentBounds);
-        }
+        mScrimController.setExcludedBackgroundArea(
+                mFadingOut || mParentFadingOut || mAmbientState.isDark() ? null
+                        : mCurrentBounds);
         invalidate();
     }
 
@@ -3839,11 +3839,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void updateFadingState() {
-        if (mFadingOut || mParentFadingOut || mAmbientState.isDark()) {
-            mScrimController.setExcludedBackgroundArea(null);
-        } else {
-            applyCurrentBackgroundBounds();
-        }
+        applyCurrentBackgroundBounds();
         updateSrcDrawing();
     }
 
