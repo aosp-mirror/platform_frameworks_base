@@ -575,6 +575,8 @@ class AppErrors {
     boolean handleAppCrashLocked(ProcessRecord app, String reason,
             String shortMsg, String longMsg, String stackTrace, AppErrorDialog.Data data) {
         long now = SystemClock.uptimeMillis();
+        boolean showBackground = Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.ANR_SHOW_BACKGROUND, 0) != 0;
 
         Long crashTime;
         Long crashTimePersistent;
@@ -612,7 +614,9 @@ class AppErrors {
                 // processes run critical code.
                 mService.removeProcessLocked(app, false, false, "crash");
                 mService.mStackSupervisor.resumeFocusedStackTopActivityLocked();
-                return false;
+                if (!showBackground) {
+                    return false;
+                }
             }
             mService.mStackSupervisor.resumeFocusedStackTopActivityLocked();
         } else {
@@ -705,7 +709,7 @@ class AppErrors {
             }
             final boolean crashSilenced = mAppsNotReportingCrashes != null &&
                     mAppsNotReportingCrashes.contains(proc.info.packageName);
-            if (mService.canShowErrorDialogs() && !crashSilenced) {
+            if ((mService.canShowErrorDialogs() || showBackground) && !crashSilenced) {
                 proc.crashDialog = new AppErrorDialog(mContext, mService, data);
             } else {
                 // The device is asleep, so just pretend that the user
@@ -942,7 +946,9 @@ class AppErrors {
                     null, null, 0, null, null, null, AppOpsManager.OP_NONE,
                     null, false, false, MY_PID, Process.SYSTEM_UID, 0 /* TODO: Verify */);
 
-            if (mService.canShowErrorDialogs()) {
+            boolean showBackground = Settings.Secure.getInt(mContext.getContentResolver(),
+                    Settings.Secure.ANR_SHOW_BACKGROUND, 0) != 0;
+            if (mService.canShowErrorDialogs() || showBackground) {
                 d = new AppNotRespondingDialog(mService,
                         mContext, proc, (ActivityRecord)data.get("activity"),
                         msg.arg1 != 0);
