@@ -17772,6 +17772,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 || Intent.ACTION_MEDIA_BUTTON.equals(action)
                 || Intent.ACTION_MEDIA_SCANNER_SCAN_FILE.equals(action)
                 || Intent.ACTION_SHOW_KEYBOARD_SHORTCUTS.equals(action)
+                || Intent.ACTION_MASTER_CLEAR.equals(action)
                 || AppWidgetManager.ACTION_APPWIDGET_CONFIGURE.equals(action)
                 || AppWidgetManager.ACTION_APPWIDGET_UPDATE.equals(action)
                 || LocationManager.HIGH_POWER_REQUEST_CHANGE_ACTION.equals(action)
