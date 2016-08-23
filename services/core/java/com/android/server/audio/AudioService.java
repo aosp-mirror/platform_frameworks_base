@@ -209,7 +209,6 @@ public class AudioService extends IAudioService.Stub {
     private static final int MSG_BT_HEADSET_CNCT_FAILED = 9;
     private static final int MSG_SET_ALL_VOLUMES = 10;
     private static final int MSG_REPORT_NEW_ROUTES = 12;
-    private static final int MSG_SET_FORCE_BT_A2DP_USE = 13;
     private static final int MSG_CHECK_MUSIC_ACTIVE = 14;
     private static final int MSG_BROADCAST_AUDIO_BECOMING_NOISY = 15;
     private static final int MSG_CONFIGURE_SAFE_MEDIA_VOLUME = 16;
@@ -514,6 +513,7 @@ public class AudioService extends IAudioService.Stub {
     private int mDeviceOrientation = Configuration.ORIENTATION_UNDEFINED;
 
     // Request to override default use of A2DP for media.
+    // FIXME: remove when MediaRouter does not use setBluetoothA2dpOn() anymore
     private boolean mBluetoothA2dpEnabled;
     private final Object mBluetoothA2dpEnabledLock = new Object();
 
@@ -846,12 +846,6 @@ public class AudioService extends IAudioService.Stub {
         }
         if (mMonitorRotation) {
             RotationHelper.updateOrientation();
-        }
-
-        synchronized (mBluetoothA2dpEnabledLock) {
-            AudioSystem.setForceUse(AudioSystem.FOR_MEDIA,
-                    mBluetoothA2dpEnabled ?
-                            AudioSystem.FORCE_NONE : AudioSystem.FORCE_NO_BT_A2DP);
         }
 
         synchronized (mSettingsLock) {
@@ -2715,22 +2709,23 @@ public class AudioService extends IAudioService.Stub {
         return (mForcedUseForComm == AudioSystem.FORCE_BT_SCO);
     }
 
-    /** @see AudioManager#setBluetoothA2dpOn(boolean) */
+    /**
+     * Deprecated.
+     * Keep stub implementation until MediaRouter stops using it.
+     * @deprecated
+     * */
     public void setBluetoothA2dpOn(boolean on) {
-        synchronized (mBluetoothA2dpEnabledLock) {
-            mBluetoothA2dpEnabled = on;
-            sendMsg(mAudioHandler, MSG_SET_FORCE_BT_A2DP_USE, SENDMSG_QUEUE,
-                    AudioSystem.FOR_MEDIA,
-                    mBluetoothA2dpEnabled ? AudioSystem.FORCE_NONE : AudioSystem.FORCE_NO_BT_A2DP,
-                    null, 0);
-        }
+        mBluetoothA2dpEnabled = on;
+        Log.e(TAG, "setBluetoothA2dpOn() is deprecated, now a no-op",
+                new Exception("Deprecated use of setBluetoothA2dpOn()"));
     }
 
-    /** @see AudioManager#isBluetoothA2dpOn() */
+    /** Deprecated.
+     * Keep stub implementation until MediaRouter stops using it
+     * @deprecated
+     * */
     public boolean isBluetoothA2dpOn() {
-        synchronized (mBluetoothA2dpEnabledLock) {
-            return mBluetoothA2dpEnabled;
-        }
+        return mBluetoothA2dpEnabled;
     }
 
     /** @see AudioManager#startBluetoothSco() */
@@ -4610,7 +4605,6 @@ public class AudioService extends IAudioService.Stub {
                     break;
 
                 case MSG_SET_FORCE_USE:
-                case MSG_SET_FORCE_BT_A2DP_USE:
                     setForceUse(msg.arg1, msg.arg2);
                     break;
 
@@ -4780,7 +4774,6 @@ public class AudioService extends IAudioService.Stub {
         VolumeStreamState streamState = mStreamStates[AudioSystem.STREAM_MUSIC];
         sendMsg(mAudioHandler, MSG_SET_DEVICE_VOLUME, SENDMSG_QUEUE,
                 AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, 0, streamState, 0);
-        setBluetoothA2dpOnInt(true);
         AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
                 AudioSystem.DEVICE_STATE_AVAILABLE, address, name);
         // Reset A2DP suspend state each time a new sink is connected
@@ -5113,11 +5106,6 @@ public class AudioService extends IAudioService.Stub {
         }
 
         synchronized (mConnectedDevices) {
-            if ((state == 0) && ((device == AudioSystem.DEVICE_OUT_WIRED_HEADSET) ||
-                    (device == AudioSystem.DEVICE_OUT_WIRED_HEADPHONE) ||
-                    (device == AudioSystem.DEVICE_OUT_LINE))) {
-                setBluetoothA2dpOnInt(true);
-            }
             boolean isUsb = ((device & ~AudioSystem.DEVICE_OUT_ALL_USB) == 0) ||
                             (((device & AudioSystem.DEVICE_BIT_IN) != 0) &&
                              ((device & ~AudioSystem.DEVICE_IN_ALL_USB) == 0));
@@ -5126,11 +5114,6 @@ public class AudioService extends IAudioService.Stub {
                 return;
             }
             if (state != 0) {
-                if ((device == AudioSystem.DEVICE_OUT_WIRED_HEADSET) ||
-                    (device == AudioSystem.DEVICE_OUT_WIRED_HEADPHONE) ||
-                    (device == AudioSystem.DEVICE_OUT_LINE)) {
-                    setBluetoothA2dpOnInt(false);
-                }
                 if ((device & mSafeMediaVolumeDevices) != 0) {
                     sendMsg(mAudioHandler,
                             MSG_CHECK_MUSIC_ACTIVE,
@@ -5596,27 +5579,9 @@ public class AudioService extends IAudioService.Stub {
         }
     }
 
-    // Handles request to override default use of A2DP for media.
-    // Must be called synchronized on mConnectedDevices
-    public void setBluetoothA2dpOnInt(boolean on) {
-        synchronized (mBluetoothA2dpEnabledLock) {
-            mBluetoothA2dpEnabled = on;
-            mAudioHandler.removeMessages(MSG_SET_FORCE_BT_A2DP_USE);
-            setForceUseInt_SyncDevices(AudioSystem.FOR_MEDIA,
-                    mBluetoothA2dpEnabled ? AudioSystem.FORCE_NONE : AudioSystem.FORCE_NO_BT_A2DP);
-        }
-    }
-
     // Must be called synchronized on mConnectedDevices
     private void setForceUseInt_SyncDevices(int usage, int config) {
         switch (usage) {
-            case AudioSystem.FOR_MEDIA:
-                if (config == AudioSystem.FORCE_NO_BT_A2DP) {
-                    mBecomingNoisyIntentDevices &= ~AudioSystem.DEVICE_OUT_ALL_A2DP;
-                } else { // config == AudioSystem.FORCE_NONE
-                    mBecomingNoisyIntentDevices |= AudioSystem.DEVICE_OUT_ALL_A2DP;
-                }
-                break;
             case AudioSystem.FOR_DOCK:
                 if (config == AudioSystem.FORCE_ANALOG_DOCK) {
                     mBecomingNoisyIntentDevices |= AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET;
