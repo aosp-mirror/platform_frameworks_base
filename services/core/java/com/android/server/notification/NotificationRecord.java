@@ -203,6 +203,7 @@ public final class NotificationRecord {
         pw.println(prefix + "  key=" + sbn.getKey());
         pw.println(prefix + "  seen=" + mIsSeen);
         pw.println(prefix + "  groupKey=" + getGroupKey());
+        pw.println(prefix + "  fullscreenIntent=" + notification.fullScreenIntent);
         pw.println(prefix + "  contentIntent=" + notification.contentIntent);
         pw.println(prefix + "  deleteIntent=" + notification.deleteIntent);
         pw.println(prefix + "  tickerText=" + notification.tickerText);
