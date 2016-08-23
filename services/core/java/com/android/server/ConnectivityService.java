@@ -38,6 +38,7 @@ import static android.net.NetworkPolicyManager.uidRulesToString;
 
 import android.annotation.Nullable;
 import android.app.BroadcastOptions;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -833,7 +834,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
 
         mKeepaliveTracker = new KeepaliveTracker(mHandler);
-        mNotifier = new NetworkNotificationManager(mContext, mTelephonyManager);
+        mNotifier = new NetworkNotificationManager(mContext, mTelephonyManager,
+                mContext.getSystemService(NotificationManager.class));
     }
 
     private NetworkRequest createInternetRequestForTransport(int transportType) {
@@ -2232,18 +2234,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
                         updateCapabilities(nai, nai.networkCapabilities);
                     }
                     if (!visible) {
-                        mNotifier.setProvNotificationVisibleIntent(false, netId, null, 0, null,
-                                null, false);
+                        mNotifier.clearNotification(netId);
                     } else {
                         if (nai == null) {
                             loge("EVENT_PROVISIONING_NOTIFICATION from unknown NetworkMonitor");
                             break;
                         }
                         if (!nai.networkMisc.provisioningNotificationDisabled) {
-                            mNotifier.setProvNotificationVisibleIntent(true, netId,
-                                    NotificationType.SIGN_IN,
-                                    nai.networkInfo.getType(), nai.networkInfo.getExtraInfo(),
-                                    (PendingIntent)msg.obj, nai.networkMisc.explicitlySelected);
+                            mNotifier.showNotification(netId, NotificationType.SIGN_IN, nai,
+                                    (PendingIntent) msg.obj, nai.networkMisc.explicitlySelected);
                         }
                     }
                     break;
@@ -2714,9 +2713,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         PendingIntent pendingIntent = PendingIntent.getActivityAsUser(
                 mContext, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
 
-        mNotifier.setProvNotificationVisibleIntent(true, nai.network.netId,
-                NotificationType.NO_INTERNET, nai.networkInfo.getType(),
-                nai.networkInfo.getExtraInfo(), pendingIntent, true);
+        mNotifier.showNotification(nai.network.netId, NotificationType.NO_INTERNET, nai,
+                pendingIntent, true);
     }
 
     private class InternalHandler extends Handler {
@@ -3725,7 +3723,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         enforceConnectivityInternalPermission();
         final long ident = Binder.clearCallingIdentity();
         try {
-            mNotifier.setProvNotificationVisible(visible, networkType, action);
+            // Concatenate the range of types onto the range of NetIDs.
+            int id = MAX_NET_ID + 1 + (networkType - ConnectivityManager.TYPE_NONE);
+            mNotifier.setProvNotificationVisible(visible, id, action);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
