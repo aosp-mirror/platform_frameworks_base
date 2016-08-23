@@ -48,7 +48,6 @@ public class BenchmarkState {
     private static final int RUNNING = 2;  // The benchmark is running.
     private static final int RUNNING_PAUSED = 3;  // The benchmark is temporary paused.
     private static final int FINISHED = 4;  // The benchmark has stopped.
-    private static final int MIN_REPEAT_TIMES = 16;
 
     private int mState = NOT_STARTED;  // Current benchmark state.
 
@@ -64,8 +63,18 @@ public class BenchmarkState {
     private double mMean = 0.0;
     private double mStandardDeviation = 0.0;
 
+    // Number of iterations needed for calculating the stats.
+    private int mMinRepeatTimes = 16;
+
     // Individual duration in nano seconds.
     private ArrayList<Long> mResults = new ArrayList<>();
+
+    /**
+     * Sets the number of iterations needed for calculating the stats. Default is 16.
+     */
+    public void setMinRepeatTimes(int minRepeatTimes) {
+        mMinRepeatTimes = minRepeatTimes;
+    }
 
     /**
      * Calculates statistics.
@@ -133,7 +142,7 @@ public class BenchmarkState {
                 mNanoPausedDuration = 0;
 
                 // To calculate statistics, needs two or more samples.
-                if (mResults.size() > MIN_REPEAT_TIMES && currentTime > mNanoFinishTime) {
+                if (mResults.size() > mMinRepeatTimes && currentTime > mNanoFinishTime) {
                     calculateSatistics();
                     mState = FINISHED;
                     return false;
@@ -181,7 +190,7 @@ public class BenchmarkState {
         sb.append("sigma=").append(standardDeviation()).append(", ");
         sb.append("iteration=").append(mResults.size()).append(", ");
         // print out the first few iterations' number for double checking.
-        int sampleNumber = Math.min(mResults.size(), MIN_REPEAT_TIMES);
+        int sampleNumber = Math.min(mResults.size(), mMinRepeatTimes);
         for (int i = 0; i < sampleNumber; i++) {
             sb.append("No ").append(i).append(" result is ").append(mResults.get(i)).append(", ");
         }
