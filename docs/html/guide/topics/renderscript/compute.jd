@@ -10,12 +10,13 @@ parent.link=index.html
 
     <ol>
       <li><a href="#writing-an-rs-kernel">Writing a RenderScript Kernel</a></li>
-      <li><a href="#access-rs-apis">Accessing RenderScript APIs</a>
+      <li><a href="#access-rs-apis">Accessing RenderScript APIs from Java</a>
         <ol>
           <li><a href="#ide-setup">Setting Up Your Development Environment</a></li>
         </ol>
       </li>
       <li><a href="#using-rs-from-java">Using RenderScript from Java Code</a></li>
+      <li><a href="#single-source-rs">Single-Source RenderScript</a></li>
       <li><a href="#reduction-in-depth">Reduction Kernels in Depth</a>
         <ol>
           <li><a href="#writing-reduction-kernel">Writing a reduction kernel</a></li>
@@ -45,12 +46,16 @@ computer vision.</p>
 <p>To begin with RenderScript, there are two main concepts you should understand:</p>
 <ul>
 
-<li>High-performance compute kernels are written in a C99-derived language. A <i>compute
-    kernel</i> is a function or collection of functions that you can direct the RenderScript runtime
-    to execute in parallel across a collection of data.</li>
+<li>The <em>language</em> itself is a C99-derived language for writing high-performance compute
+code. <a href="#writing-an-rs-kernel">Writing a RenderScript Kernel</a> describes
+how to use it to write compute kernels.</li>
 
-<li>A Java API is used for managing the lifetime of RenderScript resources and controlling kernel
-execution.</li>
+<li>The <em>control API</em> is used for managing the lifetime of RenderScript resources and
+controlling kernel execution. It is available in three different languages: Java, C++ in Android
+NDK, and the C99-derived kernel language itself.
+<a href="#using-rs-from-java">Using RenderScript from Java Code</a> and
+<a href=#single-source-rs>Single-Source RenderScript</a> describe the first and the third
+options, respectively.</li>
 </ul>
 
 <h2 id="writing-an-rs-kernel">Writing a RenderScript Kernel</h2>
@@ -77,7 +82,9 @@ initial setup or serial computations within a larger processing pipeline.</li>
 access script globals from Java code, and these are often used for parameter passing to RenderScript
 kernels.</p></li>
 
-<li><p>Zero or more <strong><i>compute kernels</i></strong>. There are two kinds of compute
+<li><p>Zero or more <strong><i>compute kernels</i></strong>. A compute kernel is a function
+or collection of functions that you can direct the RenderScript runtime to execute in parallel
+across a collection of data. There are two kinds of compute
 kernels: <i>mapping</i> kernels (also called <i>foreach</i> kernels)
 and <i>reduction</i> kernels.</p>
 
@@ -243,9 +250,9 @@ beneficial on some architectures due to additional optimizations only available 
 precision (such as SIMD CPU instructions).</p>
 
 
-<h2 id="access-rs-apis">Accessing RenderScript APIs</h2>
+<h2 id="access-rs-apis">Accessing RenderScript APIs from Java</h2>
 
-<p>When developing an Android application that uses RenderScript, you can access its API in
+<p>When developing an Android application that uses RenderScript, you can access its API from Java in
   one of two ways:</p>
 
 <ul>
@@ -377,7 +384,7 @@ to you when using RenderScript:
 <ul>
 
 <li><strong>ScriptC</strong>: These are the user-defined scripts as described in <a
-href="#writing-an-rs-kernel">Writing a RenderScript Kernel</a> above. Every script has a Java class
+href="#writing-an-rs-kernel"><i>Writing a RenderScript Kernel</i></a> above. Every script has a Java class
 reflected by the RenderScript compiler in order to make it easy to access the script from Java code;
 this class has the name <code>ScriptC_<i>filename</i></code>. For example, if the mapping kernel
 above were located in <code>invert.rs</code> and a RenderScript context were already located in
@@ -447,6 +454,116 @@ context to throw an exception.</li> </ol>
 <p>The reflected <i><a href="#javaFutureType">javaFutureType</a></i> classes provide
   a <code>get()</code> method to obtain the result of a reduction. <code>get()</code> is
   synchronous, and is serialized with respect to the reduction (which is asynchronous).</p>
+
+<h2 id="single-source-rs">Single-Source RenderScript</h2>
+
+<p>Android 7.0 (API level 24) introduces a new programming feature called <em>Single-Source
+RenderScript</em>, in which kernels are launched from the script where they are defined, rather than
+from Java. This approach is currently limited to mapping kernels, which are simply referred to as "kernels"
+in this section for conciseness. This new feature also supports creating allocations of type
+<a href={@docRoot}guide/topics/renderscript/reference/rs_object_types.html#android_rs:rs_allocation>
+<code>rs_allocation</code></a> from inside the script. It is now possible to
+implement a whole algorithm solely within a script, even if multiple kernel launches are required.
+The benefit is twofold: more readable code, because it keeps the implementation of an algorithm in
+one language; and potentially faster code, because of fewer transitions between Java and
+RenderScript across multiple kernel launches.</p>
+
+<p>In Single-Source RenderScript, you write kernels as described in <a href="#writing-an-rs-kernel">
+Writing a RenderScript Kernel</a>. You then write an invokable function that calls
+<a href="{@docRoot}guide/topics/renderscript/reference/rs_for_each.html#android_rs:rsForEach">
+<code>rsForEach()</code></a> to launch them. That API takes a kernel function as the first
+parameter, followed by input and output allocations. A similar API
+<a href="{@docRoot}guide/topics/renderscript/reference/rs_for_each.html#android_rs:rsForEachWithOptions">
+<code>rsForEachWithOptions()</code></a> takes an extra argument of type
+<a href="{@docRoot}guide/topics/renderscript/reference/rs_for_each.html#android_rs:rs_script_call_t">
+<code>rs_script_call_t</code></a>, which specifies a subset of the elements from the input and
+output allocations for the kernel function to process.</p>
+
+<p>To start RenderScript computation, you call the invokable function from Java.
+Follow the steps in <a href="#using-rs-from-java">Using RenderScript from Java Code</a>.
+In the step <a href="#launching_kernels">launch the appropriate kernels</a>, call
+the invokable function using <code>invoke_<i>function_name</i>()</code>, which will start the
+whole computation, including launching kernels.</p>
+
+<p>Allocations are often needed to save and pass
+intermediate results from one kernel launch to another. You can create them using
+<a href="{@docRoot}guide/topics/renderscript/reference/rs_allocation_create.html#android_rs:rsCreateAllocation">
+rsCreateAllocation()</a>. One easy-to-use form of that API is <code>
+rsCreateAllocation_&ltT&gt&ltW&gt(&hellip;)</code>, where <i>T</i> is the data type for an
+element, and <i>W</i> is the vector width for the element. The API takes the sizes in
+dimensions X, Y, and Z as arguments. For 1D or 2D allocations, the size for dimension Y or Z can
+be omitted. For example, <code>rsCreateAllocation_uchar4(16384)</code> creates a 1D allocation of
+16384 elements, each of which is of type <code>uchar4</code>.</p>
+
+<p>Allocations are managed by the system automatically. You
+do not have to explicitly release or free them. However, you can call
+<a href="{@docRoot}guide/topics/renderscript/reference/rs_object_info.html#android_rs:rsClearObject">
+<code>rsClearObject(rs_allocation* alloc)</code></a> to indicate you no longer need the handle
+<code>alloc</code> to the underlying allocation,
+so that the system can free up resources as early as possible.</p>
+
+<p>The <a href="#writing-an-rs-kernel">Writing a RenderScript Kernel</a> section contains an example
+kernel that inverts an image. The example below expands that to apply more than one effect to an image,
+using Single-Source RenderScript. It includes another kernel, <code>greyscale</code>, which turns a
+color image into black-and-white. An invokable function <code>process()</code> then applies those two kernels
+consecutively to an input image, and produces an output image. Allocations for both the input and
+the output are passed in as arguments of type
+<a href={@docRoot}guide/topics/renderscript/reference/rs_object_types.html#android_rs:rs_allocation>
+<code>rs_allocation</code></a>.</p>
+
+<pre>
+// File: singlesource.rs
+
+#pragma version(1)
+#pragma rs java_package_name(com.android.rssample)
+
+static const float4 weight = {0.299f, 0.587f, 0.114f, 0.0f};
+
+uchar4 RS_KERNEL invert(uchar4 in, uint32_t x, uint32_t y) {
+  uchar4 out = in;
+  out.r = 255 - in.r;
+  out.g = 255 - in.g;
+  out.b = 255 - in.b;
+  return out;
+}
+
+uchar4 RS_KERNEL greyscale(uchar4 in) {
+  const float4 inF = rsUnpackColor8888(in);
+  const float4 outF = (float4){ dot(inF, weight) };
+  return rsPackColorTo8888(outF);
+}
+
+void process(rs_allocation inputImage, rs_allocation outputImage) {
+  const uint32_t imageWidth = rsAllocationGetDimX(inputImage);
+  const uint32_t imageHeight = rsAllocationGetDimY(inputImage);
+  rs_allocation tmp = rsCreateAllocation_uchar4(imageWidth, imageHeight);
+  rsForEach(invert, inputImage, tmp);
+  rsForEach(greyscale, tmp, outputImage);
+}
+</pre>
+
+<p>You can call the <code>process()</code> function from Java as follows:</p>
+
+<pre>
+// File SingleSource.java
+
+RenderScript RS = RenderScript.create(context);
+ScriptC_singlesource script = new ScriptC_singlesource(RS);
+Allocation inputAllocation = Allocation.createFromBitmapResource(
+    RS, getResources(), R.drawable.image);
+Allocation outputAllocation = Allocation.createTyped(
+    RS, inputAllocation.getType(),
+    Allocation.USAGE_SCRIPT | Allocation.USAGE_IO_OUTPUT);
+script.invoke_process(inputAllocation, outputAllocation);
+</pre>
+
+<p>This example shows how an algorithm that involves two kernel launches can be implemented completely
+in the RenderScript language itself. Without Single-Source
+RenderScript, you would have to launch both kernels from the Java code, separating kernel launches
+from kernel definitions and making it harder to understand the whole algorithm. Not only is the
+Single-Source RenderScript code easier to read, it also eliminates the transitioning
+between Java and the script across kernel launches. Some iterative algorithms may launch kernels
+hundreds of times, making the overhead of such transitioning considerable.</p>
 
 <h2 id="reduction-in-depth">Reduction Kernels in Depth</h2>
 
