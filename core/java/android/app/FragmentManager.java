@@ -1635,12 +1635,12 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                 return false;
             }
             final BackStackRecord bss = mBackStack.remove(last);
-            SparseArray<Fragment> firstOutFragments = new SparseArray<Fragment>();
-            SparseArray<Fragment> lastInFragments = new SparseArray<Fragment>();
+            SparseArray<BackStackRecord.FragmentContainerTransition> transitioningFragments =
+                    new SparseArray<>();
             if (mCurState >= Fragment.CREATED) {
-                bss.calculateBackFragments(firstOutFragments, lastInFragments);
+                bss.calculateBackFragments(transitioningFragments);
             }
-            bss.popFromBackStack(true, null, firstOutFragments, lastInFragments);
+            bss.popFromBackStack(true, null, transitioningFragments);
             reportBackStackChanged();
         } else {
             int index = -1;
@@ -1684,18 +1684,17 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                 states.add(mBackStack.remove(i));
             }
             final int LAST = states.size()-1;
-            SparseArray<Fragment> firstOutFragments = new SparseArray<Fragment>();
-            SparseArray<Fragment> lastInFragments = new SparseArray<Fragment>();
+            SparseArray<BackStackRecord.FragmentContainerTransition> transitioningFragments =
+                    new SparseArray<>();
             if (mCurState >= Fragment.CREATED) {
                 for (int i = 0; i <= LAST; i++) {
-                    states.get(i).calculateBackFragments(firstOutFragments, lastInFragments);
+                    states.get(i).calculateBackFragments(transitioningFragments);
                 }
             }
             BackStackRecord.TransitionState state = null;
             for (int i=0; i<=LAST; i++) {
                 if (DEBUG) Log.v(TAG, "Popping back stack state: " + states.get(i));
-                state = states.get(i).popFromBackStack(i == LAST, state,
-                        firstOutFragments, lastInFragments);
+                state = states.get(i).popFromBackStack(i == LAST, state, transitioningFragments);
             }
             reportBackStackChanged();
         }
