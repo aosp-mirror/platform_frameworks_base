@@ -8649,13 +8649,18 @@ public class PackageManagerService extends IPackageManager.Stub {
             for (i=0; i<N; i++) {
                 PackageParser.PermissionGroup pg = pkg.permissionGroups.get(i);
                 PackageParser.PermissionGroup cur = mPermissionGroups.get(pg.info.name);
-                if (cur == null) {
+                final String curPackageName = cur == null ? null : cur.info.packageName;
+                final boolean isPackageUpdate = pg.info.packageName.equals(curPackageName);
+                if (cur == null || isPackageUpdate) {
                     mPermissionGroups.put(pg.info.name, pg);
                     if ((policyFlags&PackageParser.PARSE_CHATTY) != 0) {
                         if (r == null) {
                             r = new StringBuilder(256);
                         } else {
                             r.append(' ');
+                        }
+                        if (isPackageUpdate) {
+                            r.append("UPD:");
                         }
                         r.append(pg.info.name);
                     }
