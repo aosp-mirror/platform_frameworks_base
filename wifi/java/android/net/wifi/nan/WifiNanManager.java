@@ -73,7 +73,7 @@ import java.util.Arrays;
  * <p>
  *     NAN may not be usable when Wi-Fi is disabled (and other conditions). To validate that
  *     the functionality is available use the {@link #isUsageEnabled()} function. To track
- *     changes in NAN usability register for the {@link #WIFI_NAN_STATE_CHANGED_ACTION} broadcast.
+ *     changes in NAN usability register for the {@link #ACTION_WIFI_NAN_STATE_CHANGED} broadcast.
  *     Note that this broadcast is not sticky - you should register for it and then check the
  *     above API to avoid a race condition.
  * <p>
@@ -211,7 +211,8 @@ public class WifiNanManager {
      * @see #EXTRA_WIFI_STATE
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String WIFI_NAN_STATE_CHANGED_ACTION = "android.net.wifi.nan.STATE_CHANGED";
+    public static final String ACTION_WIFI_NAN_STATE_CHANGED =
+            "android.net.wifi.nan.action.WIFI_NAN_STATE_CHANGED";
 
     /**
      * The lookup key for an int value indicating whether Wi-Fi NAN is enabled or
@@ -221,19 +222,19 @@ public class WifiNanManager {
      * @see #WIFI_NAN_STATE_DISABLED
      * @see #WIFI_NAN_STATE_ENABLED
      */
-    public static final String EXTRA_WIFI_STATE = "wifi_nan_state";
+    public static final String EXTRA_WIFI_STATE = "android.net.wifi.nan.extra.WIFI_STATE";
 
     /**
      * Wi-Fi NAN is disabled.
      *
-     * @see #WIFI_NAN_STATE_CHANGED_ACTION
+     * @see #ACTION_WIFI_NAN_STATE_CHANGED
      */
     public static final int WIFI_NAN_STATE_DISABLED = 1;
 
     /**
      * Wi-Fi NAN is enabled.
      *
-     * @see #WIFI_NAN_STATE_CHANGED_ACTION
+     * @see #ACTION_WIFI_NAN_STATE_CHANGED
      */
     public static final int WIFI_NAN_STATE_ENABLED = 2;
 
@@ -288,7 +289,7 @@ public class WifiNanManager {
 
     /**
      * Enable the usage of the NAN API. Doesn't actually turn on NAN cluster formation - that only
-     * happens when a connection is made. {@link #WIFI_NAN_STATE_CHANGED_ACTION} broadcast will be
+     * happens when a connection is made. {@link #ACTION_WIFI_NAN_STATE_CHANGED} broadcast will be
      * triggered.
      *
      * @hide
@@ -303,7 +304,7 @@ public class WifiNanManager {
 
     /**
      * Disable the usage of the NAN API. All attempts to connect() will be rejected. All open
-     * connections and sessions will be terminated. {@link #WIFI_NAN_STATE_CHANGED_ACTION} broadcast
+     * connections and sessions will be terminated. {@link #ACTION_WIFI_NAN_STATE_CHANGED} broadcast
      * will be triggered.
      *
      * @hide
@@ -318,7 +319,7 @@ public class WifiNanManager {
 
     /**
      * Returns the current status of NAN API: whether or not usage is enabled. To track changes
-     * in the state of NAN API register for the {@link #WIFI_NAN_STATE_CHANGED_ACTION} broadcast.
+     * in the state of NAN API register for the {@link #ACTION_WIFI_NAN_STATE_CHANGED} broadcast.
      *
      * @return A boolean indicating whether the app can use the NAN API (true)
      *         or not (false).
@@ -348,7 +349,7 @@ public class WifiNanManager {
      * @param callback A callback extended from {@link WifiNanEventCallback}.
      */
     public void connect(@NonNull Looper looper, @NonNull WifiNanEventCallback callback) {
-        connect(looper, callback, null);
+        connect(looper, null, callback);
     }
 
     /**
@@ -367,11 +368,11 @@ public class WifiNanManager {
      * @param looper The Looper on which to execute all callbacks related to the
      *            connection - including all sessions opened as part of this
      *            connection.
-     * @param callback A callback extended from {@link WifiNanEventCallback}.
      * @param configRequest The requested NAN configuration.
+     * @param callback A callback extended from {@link WifiNanEventCallback}.
      */
-    public void connect(@NonNull Looper looper, @NonNull WifiNanEventCallback callback,
-            @Nullable ConfigRequest configRequest) {
+    public void connect(@NonNull Looper looper, @Nullable ConfigRequest configRequest,
+            @NonNull WifiNanEventCallback callback) {
         if (VDBG) {
             Log.v(TAG, "connect(): looper=" + looper + ", callback=" + callback + ", configRequest="
                     + configRequest);
