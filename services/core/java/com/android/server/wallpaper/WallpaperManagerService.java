@@ -1757,8 +1757,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         }
 
         WallpaperData wallpaper = (which == FLAG_LOCK)
-                ? mWallpaperMap.get(userId)
-                : mLockWallpaperMap.get(userId);
+                ? mLockWallpaperMap.get(userId)
+                : mWallpaperMap.get(userId);
         return (wallpaper != null) ? wallpaper.allowBackup : false;
     }
 
