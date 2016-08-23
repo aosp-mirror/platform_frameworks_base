@@ -651,7 +651,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     private Editor mEditor;
 
-    private final GestureDetector mClickableSpanOnClickGestureDetector;
+    private GestureDetector mClickableSpanOnClickGestureDetector;
 
     private static final int DEVICE_PROVISIONED_UNKNOWN = 0;
     private static final int DEVICE_PROVISIONED_NO = 1;
@@ -1491,24 +1491,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (getImportantForAccessibility() == IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
             setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
         }
-
-        mClickableSpanOnClickGestureDetector = new GestureDetector(context,
-                new GestureDetector.SimpleOnGestureListener() {
-                    @Override
-                    public boolean onSingleTapConfirmed(MotionEvent e) {
-                        if (mLinksClickable && (mMovement != null) &&
-                                (mMovement instanceof LinkMovementMethod
-                                || (mAutoLinkMask != 0 && isTextSelectable()))) {
-                            ClickableSpan[] links = ((Spannable) mText).getSpans(
-                                    getSelectionStart(), getSelectionEnd(), ClickableSpan.class);
-                            if (links.length > 0) {
-                                links[0].onClick(TextView.this);
-                                return true;
-                            }
-                        }
-                        return false;
-                    }
-                });
     }
 
     private int[] parseDimensionArray(TypedArray dimens) {
@@ -8536,7 +8518,23 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (mMovement != null) {
                 handled |= mMovement.onTouchEvent(this, (Spannable) mText, event);
             }
-            handled |= mClickableSpanOnClickGestureDetector.onTouchEvent(event);
+
+            // Lazily create the clickable span gesture detector only if it looks like it
+            // might be useful.
+            if (action == MotionEvent.ACTION_DOWN && mClickableSpanOnClickGestureDetector == null
+                    && shouldUseClickableSpanOnClickGestureDetector()) {
+                ClickableSpan[] links = ((Spannable) mText).getSpans(
+                        getSelectionStart(), getSelectionEnd(),
+                        ClickableSpan.class);
+                if (links.length > 0) {
+                    mClickableSpanOnClickGestureDetector =
+                            createClickableSpanOnClickGestureDetector();
+                }
+            }
+
+            if (mClickableSpanOnClickGestureDetector != null) {
+                handled |= mClickableSpanOnClickGestureDetector.onTouchEvent(event);
+            }
 
             final boolean textIsSelectable = isTextSelectable();
             if (touchIsFinished && (isTextEditable() || textIsSelectable)) {
@@ -8935,6 +8933,31 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     void onLocaleChanged() {
         mEditor.onLocaleChanged();
+    }
+
+    private GestureDetector createClickableSpanOnClickGestureDetector() {
+        return new GestureDetector(mContext,
+                new GestureDetector.SimpleOnGestureListener() {
+                    @Override
+                    public boolean onSingleTapConfirmed(MotionEvent e) {
+                        if (shouldUseClickableSpanOnClickGestureDetector()) {
+                            ClickableSpan[] links = ((Spannable) mText).getSpans(
+                                    getSelectionStart(), getSelectionEnd(),
+                                    ClickableSpan.class);
+                            if (links.length > 0) {
+                                links[0].onClick(TextView.this);
+                                return true;
+                            }
+                        }
+                        return false;
+                    }
+                });
+    }
+
+    private boolean shouldUseClickableSpanOnClickGestureDetector() {
+        return mLinksClickable && (mMovement != null) &&
+                (mMovement instanceof LinkMovementMethod
+                        || (mAutoLinkMask != 0 && isTextSelectable()));
     }
 
     /**
