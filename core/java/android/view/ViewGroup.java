@@ -6406,16 +6406,28 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             return true;
         }
         super.gatherTransparentRegion(region);
-        final View[] children = mChildren;
-        final int count = mChildrenCount;
+        // Instead of naively traversing the view tree, we have to traverse according to the Z
+        // order here. We need to go with the same order as dispatchDraw().
+        // One example is that after surfaceView punch a hole, we will still allow other views drawn
+        // on top of that hole. In this case, those other views should be able to cut the
+        // transparent region into smaller area.
+        final int childrenCount = mChildrenCount;
         boolean noneOfTheChildrenAreTransparent = true;
-        for (int i = 0; i < count; i++) {
-            final View child = children[i];
-            if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE || child.getAnimation() != null) {
-                if (!child.gatherTransparentRegion(region)) {
-                    noneOfTheChildrenAreTransparent = false;
+        if (childrenCount > 0) {
+            final ArrayList<View> preorderedList = buildOrderedChildList();
+            final boolean customOrder = preorderedList == null
+                    && isChildrenDrawingOrderEnabled();
+            final View[] children = mChildren;
+            for (int i = 0; i < childrenCount; i++) {
+                final int childIndex = getAndVerifyPreorderedIndex(childrenCount, i, customOrder);
+                final View child = getAndVerifyPreorderedView(preorderedList, children, childIndex);
+                if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE || child.getAnimation() != null) {
+                    if (!child.gatherTransparentRegion(region)) {
+                        noneOfTheChildrenAreTransparent = false;
+                    }
                 }
             }
+            if (preorderedList != null) preorderedList.clear();
         }
         return meOpaque || noneOfTheChildrenAreTransparent;
     }
