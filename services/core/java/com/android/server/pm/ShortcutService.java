@@ -54,6 +54,7 @@ import android.graphics.RectF;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
@@ -2659,10 +2660,14 @@ public class ShortcutService extends IShortcutService.Stub {
             boolean forceRescan) {
         final ShortcutUser user = getUserShortcutsLocked(userId);
 
+        // Note after each OTA, we'll need to rescan all system apps, as their lastUpdateTime
+        // is not reliable.
         final long now = injectCurrentTimeMillis();
+        final boolean afterOta =
+                !injectBuildFingerprint().equals(user.getLastAppScanOsFingerprint());
 
         // Then for each installed app, publish manifest shortcuts when needed.
-        forUpdatedPackages(userId, lastScanTime, ai -> {
+        forUpdatedPackages(userId, lastScanTime, afterOta, ai -> {
             user.attemptToRestoreIfNeededAndSave(this, ai.packageName, userId);
             user.rescanPackageIfNeeded(ai.packageName, forceRescan);
         });
@@ -2670,6 +2675,7 @@ public class ShortcutService extends IShortcutService.Stub {
         // Write the time just before the scan, because there may be apps that have just
         // been updated, and we want to catch them in the next time.
         user.setLastAppScanTime(now);
+        user.setLastAppScanOsFingerprint(injectBuildFingerprint());
         scheduleSaveUser(userId);
     }
 
@@ -2908,7 +2914,7 @@ public class ShortcutService extends IShortcutService.Stub {
         return parceledList.getList();
     }
 
-    private void forUpdatedPackages(@UserIdInt int userId, long lastScanTime,
+    private void forUpdatedPackages(@UserIdInt int userId, long lastScanTime, boolean afterOta,
             Consumer<ApplicationInfo> callback) {
         if (DEBUG) {
             Slog.d(TAG, "forUpdatedPackages for user " + userId + ", lastScanTime=" + lastScanTime);
@@ -2920,7 +2926,8 @@ public class ShortcutService extends IShortcutService.Stub {
             // If the package has been updated since the last scan time, then scan it.
             // Also if it's a system app with no update, lastUpdateTime is not reliable, so
             // just scan it.
-            if (pi.lastUpdateTime >= lastScanTime || isPureSystemApp(pi.applicationInfo)) {
+            if (pi.lastUpdateTime >= lastScanTime
+                    || (afterOta && isPureSystemApp(pi.applicationInfo))) {
                 if (DEBUG) {
                     Slog.d(TAG, "Found updated package " + pi.packageName);
                 }
@@ -3596,6 +3603,12 @@ public class ShortcutService extends IShortcutService.Stub {
     @VisibleForTesting
     void injectRestoreCallingIdentity(long token) {
         Binder.restoreCallingIdentity(token);
+    }
+
+    // Injection point.
+    @VisibleForTesting
+    String injectBuildFingerprint() {
+        return Build.FINGERPRINT;
     }
 
     final void wtf(String message) {
