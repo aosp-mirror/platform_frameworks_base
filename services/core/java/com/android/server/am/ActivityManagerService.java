@@ -182,6 +182,7 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
+import android.os.ShellCallback;
 import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -14024,9 +14025,10 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public void onShellCommand(FileDescriptor in, FileDescriptor out,
-            FileDescriptor err, String[] args, ResultReceiver resultReceiver) {
+            FileDescriptor err, String[] args, ShellCallback callback,
+            ResultReceiver resultReceiver) {
         (new ActivityManagerShellCommand(this, false)).exec(
-                this, in, out, err, args, resultReceiver);
+                this, in, out, err, args, callback, resultReceiver);
     }
 
     @Override
@@ -14249,7 +14251,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // Dumping a single activity?
                 if (!dumpActivity(fd, pw, cmd, args, opti, dumpAll, dumpVisibleStacks)) {
                     ActivityManagerShellCommand shell = new ActivityManagerShellCommand(this, true);
-                    int res = shell.exec(this, null, fd, null, args, new ResultReceiver(null));
+                    int res = shell.exec(this, null, fd, null, args, null,
+                            new ResultReceiver(null));
                     if (res < 0) {
                         pw.println("Bad activity command, or no activities match: " + cmd);
                         pw.println("Use -h for help.");

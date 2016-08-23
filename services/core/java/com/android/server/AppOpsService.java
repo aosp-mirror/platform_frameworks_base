@@ -51,6 +51,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
+import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.UserHandle;
 import android.os.storage.MountServiceInternal;
@@ -1787,8 +1788,9 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     @Override public void onShellCommand(FileDescriptor in, FileDescriptor out,
-            FileDescriptor err, String[] args, ResultReceiver resultReceiver) {
-        (new Shell(this, this)).exec(this, in, out, err, args, resultReceiver);
+            FileDescriptor err, String[] args, ShellCallback callback,
+            ResultReceiver resultReceiver) {
+        (new Shell(this, this)).exec(this, in, out, err, args, callback, resultReceiver);
     }
 
     static void dumpCommandHelp(PrintWriter pw) {

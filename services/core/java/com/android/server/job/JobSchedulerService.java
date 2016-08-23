@@ -44,9 +44,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -62,6 +60,7 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
+import android.os.ShellCallback;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -1718,9 +1717,9 @@ public final class JobSchedulerService extends com.android.server.SystemService
 
         @Override
         public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
-                String[] args, ResultReceiver resultReceiver) throws RemoteException {
+                String[] args, ShellCallback callback, ResultReceiver resultReceiver) {
                 (new JobSchedulerShellCommand(JobSchedulerService.this)).exec(
-                        this, in, out, err, args, resultReceiver);
+                        this, in, out, err, args, callback, resultReceiver);
         }
     };
 

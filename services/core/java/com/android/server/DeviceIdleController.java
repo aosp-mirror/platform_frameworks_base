@@ -60,6 +60,7 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
+import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -1232,8 +1233,8 @@ public class DeviceIdleController extends SystemService
         }
 
         @Override public void onShellCommand(FileDescriptor in, FileDescriptor out,
-                FileDescriptor err, String[] args, ResultReceiver resultReceiver) {
-            (new Shell()).exec(this, in, out, err, args, resultReceiver);
+                FileDescriptor err, String[] args, ShellCallback callback, ResultReceiver resultReceiver) {
+            (new Shell()).exec(this, in, out, err, args, callback, resultReceiver);
         }
     }
 
@@ -2838,7 +2839,8 @@ public class DeviceIdleController extends SystemService
                     shell.userId = userId;
                     String[] newArgs = new String[args.length-i];
                     System.arraycopy(args, i, newArgs, 0, args.length-i);
-                    shell.exec(mBinderService, null, fd, null, newArgs, new ResultReceiver(null));
+                    shell.exec(mBinderService, null, fd, null, newArgs, null,
+                            new ResultReceiver(null));
                     return;
                 }
             }

@@ -23,7 +23,6 @@ import libcore.io.IoUtils;
 
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Modifier;
@@ -361,13 +360,14 @@ public class Binder implements IBinder {
             ParcelFileDescriptor out = data.readFileDescriptor();
             ParcelFileDescriptor err = data.readFileDescriptor();
             String[] args = data.readStringArray();
+            ShellCallback shellCallback = ShellCallback.CREATOR.createFromParcel(data);
             ResultReceiver resultReceiver = ResultReceiver.CREATOR.createFromParcel(data);
             try {
                 if (out != null) {
                     shellCommand(in != null ? in.getFileDescriptor() : null,
                             out.getFileDescriptor(),
                             err != null ? err.getFileDescriptor() : out.getFileDescriptor(),
-                            args, resultReceiver);
+                            args, shellCallback, resultReceiver);
                 }
             } finally {
                 IoUtils.closeQuietly(in);
@@ -459,13 +459,15 @@ public class Binder implements IBinder {
      * @param out The raw file descriptor that normal command messages should be written to.
      * @param err The raw file descriptor that command error messages should be written to.
      * @param args Command-line arguments.
+     * @param callback Callback through which to interact with the invoking shell.
      * @param resultReceiver Called when the command has finished executing, with the result code.
      * @throws RemoteException
      * @hide
      */
     public void shellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
-            String[] args, ResultReceiver resultReceiver) throws RemoteException {
-        onShellCommand(in, out, err, args, resultReceiver);
+            String[] args, ShellCallback callback,
+            ResultReceiver resultReceiver) throws RemoteException {
+        onShellCommand(in, out, err, args, callback, resultReceiver);
     }
 
     /**
@@ -477,7 +479,7 @@ public class Binder implements IBinder {
      * @hide
      */
     public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
-            String[] args, ResultReceiver resultReceiver) throws RemoteException {
+            String[] args, ShellCallback callback, ResultReceiver resultReceiver) throws RemoteException {
         FileOutputStream fout = new FileOutputStream(err != null ? err : out);
         PrintWriter pw = new FastPrintWriter(fout);
         pw.println("No shell command implementation.");
@@ -650,13 +652,15 @@ final class BinderProxy implements IBinder {
     }
 
     public void shellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
-            String[] args, ResultReceiver resultReceiver) throws RemoteException {
+            String[] args, ShellCallback callback,
+            ResultReceiver resultReceiver) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeFileDescriptor(in);
         data.writeFileDescriptor(out);
         data.writeFileDescriptor(err);
         data.writeStringArray(args);
+        ShellCallback.writeToParcel(callback, data);
         resultReceiver.writeToParcel(data, 0);
         try {
             transact(SHELL_COMMAND_TRANSACTION, data, reply, 0);

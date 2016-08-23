@@ -76,6 +76,7 @@ import android.os.Parcel;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.os.ShellCallback;
 import android.os.UserHandle;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -1180,7 +1181,7 @@ public final class BridgeContext extends Context {
 
                 @Override
                 public void shellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
-                  String[] args, ResultReceiver resultReceiver) {
+                  String[] args, ShellCallback shellCallback, ResultReceiver resultReceiver) {
                 }
             };
         }

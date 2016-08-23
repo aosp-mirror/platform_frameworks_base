@@ -62,6 +62,7 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.SELinux;
 import android.os.ServiceManager;
+import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -3209,8 +3210,9 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public void onShellCommand(FileDescriptor in, FileDescriptor out,
-            FileDescriptor err, String[] args, ResultReceiver resultReceiver) {
-        (new Shell()).exec(this, in, out, err, args, resultReceiver);
+            FileDescriptor err, String[] args, ShellCallback callback,
+            ResultReceiver resultReceiver) {
+        (new Shell()).exec(this, in, out, err, args, callback, resultReceiver);
     }
 
     int onShellCommand(Shell shell, String cmd) {
