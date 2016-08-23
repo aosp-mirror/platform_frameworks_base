@@ -150,9 +150,6 @@
     <!-- DevicePolicyManager get user restrictions -->
     <uses-permission android:name="android.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS" />
 
-    <!-- Needed for passing extras with intent ACTION_SHOW_ADMIN_SUPPORT_DETAILS -->
-    <uses-permission android:name="android.permission.MANAGE_DEVICE_ADMINS" />
-
     <!-- TV picture-in-picture -->
     <uses-permission android:name="android.permission.RECEIVE_MEDIA_RESOURCE_USAGE" />
 
