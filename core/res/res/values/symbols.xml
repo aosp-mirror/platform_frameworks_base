@@ -2275,6 +2275,8 @@
   <java-symbol type="string" name="prohibit_manual_network_selection_in_gobal_mode" />
   <java-symbol type="id" name="profile_button" />
 
+  <java-symbol type="array" name="config_vvmSmsFilterRegexes" />
+
   <!-- Cascading submenus -->
   <java-symbol type="dimen" name="cascading_menus_min_smallest_width" />
 
