@@ -1313,6 +1313,7 @@
         android:protectionLevel="dangerous"
         android:description="@string/permdesc_getAccounts"
         android:label="@string/permlab_getAccounts" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
 
     <!-- @SystemApi Allows applications to call into AccountAuthenticators.
     <p>Not for use by third-party applications. -->
