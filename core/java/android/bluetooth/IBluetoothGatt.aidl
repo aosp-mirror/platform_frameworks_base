@@ -24,6 +24,7 @@ import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanSettings;
 import android.bluetooth.le.ResultStorageDescriptor;
 import android.os.ParcelUuid;
+import android.os.WorkSource;
 
 import android.bluetooth.IBluetoothGattCallback;
 import android.bluetooth.IBluetoothGattServerCallback;
@@ -36,8 +37,8 @@ interface IBluetoothGatt {
     List<BluetoothDevice> getDevicesMatchingConnectionStates(in int[] states);
 
     void startScan(in int appIf, in boolean isServer, in ScanSettings settings,
-                   in List<ScanFilter> filters,
-                   in List scanStorages, in String callingPackage);
+                   in List<ScanFilter> filters, in WorkSource workSource, in List scanStorages,
+                   in String callingPackage);
     void stopScan(in int appIf, in boolean isServer);
     void flushPendingBatchResults(in int appIf, in boolean isServer);
     void startMultiAdvertising(in int appIf,
