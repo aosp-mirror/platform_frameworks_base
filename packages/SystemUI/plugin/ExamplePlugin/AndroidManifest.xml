@@ -21,7 +21,15 @@
     <uses-permission android:name="com.android.systemui.permission.PLUGIN" />
 
     <application>
-        <service android:name=".SampleOverlayPlugin">
+        <activity android:name=".PluginSettings"
+            android:label="@string/plugin_label">
+            <intent-filter>
+                <action android:name="com.android.systemui.action.PLUGIN_SETTINGS" />
+            </intent-filter>
+        </activity>
+
+        <service android:name=".SampleOverlayPlugin"
+            android:label="@string/plugin_label">
             <intent-filter>
                 <action android:name="com.android.systemui.action.PLUGIN_OVERLAY" />
             </intent-filter>

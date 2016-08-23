@@ -37,6 +37,7 @@ public class PluginManager {
     private final Context mContext;
     private final PluginInstanceManagerFactory mFactory;
     private final boolean isDebuggable;
+    private final PluginPrefs mPluginPrefs;
 
     private PluginManager(Context context) {
         this(context, new PluginInstanceManagerFactory(), Build.IS_DEBUGGABLE,
@@ -51,6 +52,7 @@ public class PluginManager {
         mBackgroundThread = new HandlerThread("Plugins");
         mBackgroundThread.start();
         isDebuggable = debuggable;
+        mPluginPrefs = new PluginPrefs(mContext);
 
         PluginExceptionHandler uncaughtExceptionHandler = new PluginExceptionHandler(
                 defaultHandler);
@@ -68,6 +70,7 @@ public class PluginManager {
             // Never ever ever allow these on production builds, they are only for prototyping.
             return;
         }
+        mPluginPrefs.addAction(action);
         PluginInstanceManager p = mFactory.createPluginInstanceManager(mContext, action, listener,
                 allowMultiple, mBackgroundThread.getLooper(), version);
         p.startListening();
