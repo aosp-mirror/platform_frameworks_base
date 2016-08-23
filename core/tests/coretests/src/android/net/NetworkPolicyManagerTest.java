@@ -17,7 +17,6 @@ package android.net;
 
 import static android.net.NetworkPolicyManager.MASK_ALL_NETWORKS;
 import static android.net.NetworkPolicyManager.MASK_METERED_NETWORKS;
-import static android.net.NetworkPolicyManager.POLICY_ALLOW_BACKGROUND_BATTERY_SAVE;
 import static android.net.NetworkPolicyManager.POLICY_NONE;
 import static android.net.NetworkPolicyManager.POLICY_REJECT_METERED_BACKGROUND;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
@@ -79,8 +78,6 @@ public class NetworkPolicyManagerTest {
         uidPoliciesToStringTest(POLICY_NONE, "0 (NONE)");
         uidPoliciesToStringTest(POLICY_REJECT_METERED_BACKGROUND,
                 "1 (REJECT_METERED_BACKGROUND)");
-        uidPoliciesToStringTest(POLICY_ALLOW_BACKGROUND_BATTERY_SAVE,
-                "2 (ALLOW_BACKGROUND_BATTERY_SAVE)");
     }
 
     private void uidPoliciesToStringTest(int policyRules, String... expectedOptions) {

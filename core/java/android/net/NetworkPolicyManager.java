@@ -46,8 +46,6 @@ public class NetworkPolicyManager {
     public static final int POLICY_NONE = 0x0;
     /** Reject network usage on metered networks when application in background. */
     public static final int POLICY_REJECT_METERED_BACKGROUND = 0x1;
-    /** Allow network use (metered or not) in the background in battery save mode. */
-    public static final int POLICY_ALLOW_BACKGROUND_BATTERY_SAVE = 0x2;
 
     /*
      * Rules defining whether an uid has access to a network given its type (metered / non-metered).
@@ -126,8 +124,8 @@ public class NetworkPolicyManager {
     /**
      * Set policy flags for specific UID.
      *
-     * @param policy {@link #POLICY_NONE} or combination of flags like
-     * {@link #POLICY_REJECT_METERED_BACKGROUND} or {@link #POLICY_ALLOW_BACKGROUND_BATTERY_SAVE}.
+     * @param policy should be {@link #POLICY_NONE} or any combination of {@code POLICY_} flags,
+     *     although it is not validated.
      */
     public void setUidPolicy(int uid, int policy) {
         try {
@@ -138,9 +136,12 @@ public class NetworkPolicyManager {
     }
 
     /**
-     * Add policy flags for specific UID.  The given policy bits will be set for
-     * the uid.  Policy flags may be either
-     * {@link #POLICY_REJECT_METERED_BACKGROUND} or {@link #POLICY_ALLOW_BACKGROUND_BATTERY_SAVE}.
+     * Add policy flags for specific UID.
+     *
+     * <p>The given policy bits will be set for the uid.
+     *
+     * @param policy should be {@link #POLICY_NONE} or any combination of {@code POLICY_} flags,
+     *     although it is not validated.
      */
     public void addUidPolicy(int uid, int policy) {
         try {
@@ -151,9 +152,12 @@ public class NetworkPolicyManager {
     }
 
     /**
-     * Clear/remove policy flags for specific UID.  The given policy bits will be set for
-     * the uid.  Policy flags may be either
-     * {@link #POLICY_REJECT_METERED_BACKGROUND} or {@link #POLICY_ALLOW_BACKGROUND_BATTERY_SAVE}.
+     * Clear/remove policy flags for specific UID.
+     *
+     * <p>The given policy bits will be set for the uid.
+     *
+     * @param policy should be {@link #POLICY_NONE} or any combination of {@code POLICY_} flags,
+     *     although it is not validated.
      */
     public void removeUidPolicy(int uid, int policy) {
         try {

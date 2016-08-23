@@ -20,7 +20,6 @@ import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.NetworkPolicy.LIMIT_DISABLED;
 import static android.net.NetworkPolicy.WARNING_DISABLED;
-import static android.net.NetworkPolicyManager.POLICY_ALLOW_BACKGROUND_BATTERY_SAVE;
 import static android.net.NetworkPolicyManager.POLICY_NONE;
 import static android.net.NetworkPolicyManager.POLICY_REJECT_METERED_BACKGROUND;
 import static android.net.NetworkPolicyManager.computeLastCycleBoundary;
@@ -297,17 +296,19 @@ public class NetworkPolicyManagerServiceTest {
     @Test
     @NetPolicyXml("restrict-background-lists-whitelist-format.xml")
     public void testRestrictBackgroundLists_whitelistFormat() throws Exception {
-        // UIds that are whitelisted
+        // UIds that are whitelisted.
         final int[] whitelisted = mService.getRestrictBackgroundWhitelistedUids();
         assertContainsInAnyOrder(whitelisted, UID_A, UID_B, UID_C);
         assertUidPolicy(UID_A, POLICY_NONE);
         assertUidPolicy(UID_B, POLICY_NONE);
         assertUidPolicy(UID_C, POLICY_NONE);
 
-        // UIDs that are blacklisted
+        // UIDs that are blacklisted.
         assertUidPolicy(UID_D, POLICY_NONE);
         assertUidPolicy(UID_E, POLICY_REJECT_METERED_BACKGROUND);
-        assertUidPolicy(UID_F, POLICY_ALLOW_BACKGROUND_BATTERY_SAVE);
+
+        // UIDS that have legacy policies.
+        assertUidPolicy(UID_F, 2);
     }
 
     // NOTE: testPolicyChangeTriggersListener() and testUidForeground() are too superficial, they
