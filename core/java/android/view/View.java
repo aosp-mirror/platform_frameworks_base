@@ -20280,8 +20280,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 // remove it from the transparent region.
                 final int[] location = attachInfo.mTransparentLocation;
                 getLocationInWindow(location);
-                region.op(location[0], location[1], location[0] + mRight - mLeft,
-                        location[1] + mBottom - mTop, Region.Op.DIFFERENCE);
+                // When a view has Z value, then it will be better to leave some area below the view
+                // for drawing shadow. The shadow outset is proportional to the Z value. Note that
+                // the bottom part needs more offset than the left, top and right parts due to the
+                // spot light effects.
+                int shadowOffset = getZ() > 0 ? (int) getZ() : 0;
+                region.op(location[0] - shadowOffset, location[1] - shadowOffset,
+                        location[0] + mRight - mLeft + shadowOffset,
+                        location[1] + mBottom - mTop + (shadowOffset * 3), Region.Op.DIFFERENCE);
             } else {
                 if (mBackground != null && mBackground.getOpacity() != PixelFormat.TRANSPARENT) {
                     // The SKIP_DRAW flag IS set and the background drawable exists, we remove
