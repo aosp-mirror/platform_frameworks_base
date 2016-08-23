@@ -179,20 +179,6 @@ public final class DropBoxManagerService extends SystemService {
 
     @Override
     public void onStart() {
-        // Set up intent receivers
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_DEVICE_STORAGE_LOW);
-        getContext().registerReceiver(mReceiver, filter);
-
-        mContentResolver.registerContentObserver(
-            Settings.Global.CONTENT_URI, true,
-            new ContentObserver(new Handler()) {
-                @Override
-                public void onChange(boolean selfChange) {
-                    mReceiver.onReceive(getContext(), (Intent) null);
-                }
-            });
-
         publishBinderService(Context.DROPBOX_SERVICE, mStub);
 
         // The real work gets done lazily in init() -- that way service creation always
@@ -202,6 +188,21 @@ public final class DropBoxManagerService extends SystemService {
     @Override
     public void onBootPhase(int phase) {
         switch (phase) {
+            case PHASE_SYSTEM_SERVICES_READY:
+                IntentFilter filter = new IntentFilter();
+                filter.addAction(Intent.ACTION_DEVICE_STORAGE_LOW);
+                getContext().registerReceiver(mReceiver, filter);
+
+                mContentResolver.registerContentObserver(
+                    Settings.Global.CONTENT_URI, true,
+                    new ContentObserver(new Handler()) {
+                        @Override
+                        public void onChange(boolean selfChange) {
+                            mReceiver.onReceive(getContext(), (Intent) null);
+                        }
+                    });
+                break;
+
             case PHASE_BOOT_COMPLETED:
                 mBooted = true;
                 break;
