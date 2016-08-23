@@ -683,7 +683,7 @@ final class TaskRecord {
         if (stack != null) {
             for (int activityNdx = mActivities.size() - 1; activityNdx >= 0; --activityNdx) {
                 ActivityRecord r = mActivities.get(activityNdx);
-                if (!r.finishing && stack.okToShowLocked(r)) {
+                if (!r.finishing && r.okToShowLocked()) {
                     return r;
                 }
             }
@@ -696,13 +696,20 @@ final class TaskRecord {
             for (int activityNdx = mActivities.size() - 1; activityNdx >= 0; --activityNdx) {
                 ActivityRecord r = mActivities.get(activityNdx);
                 if (r.mStartingWindowState != STARTING_WINDOW_SHOWN
-                        || r.finishing || !stack.okToShowLocked(r)) {
+                        || r.finishing || !r.okToShowLocked()) {
                     continue;
                 }
                 return r;
             }
         }
         return null;
+    }
+
+    boolean okToShowLocked() {
+        // NOTE: If {@link TaskRecord#topRunningActivityLocked} return is not null then it is
+        // okay to show the activity when locked.
+        return mService.mStackSupervisor.isCurrentProfileLocked(userId)
+                || topRunningActivityLocked() != null;
     }
 
     void setFrontOfTask() {

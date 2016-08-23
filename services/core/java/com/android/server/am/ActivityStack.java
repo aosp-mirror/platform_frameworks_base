@@ -544,10 +544,6 @@ final class ActivityStack {
         }
     }
 
-    boolean okToShowLocked(ActivityRecord r) {
-        return mStackSupervisor.okToShowLocked(r);
-    }
-
     final ActivityRecord topRunningActivityLocked() {
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             ActivityRecord r = mTaskHistory.get(taskNdx).topRunningActivityLocked();
@@ -564,7 +560,7 @@ final class ActivityStack {
             final ArrayList<ActivityRecord> activities = task.mActivities;
             for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
                 ActivityRecord r = activities.get(activityNdx);
-                if (!r.finishing && !r.delayedResume && r != notTop && okToShowLocked(r)) {
+                if (!r.finishing && !r.delayedResume && r != notTop && r.okToShowLocked()) {
                     return r;
                 }
             }
@@ -591,7 +587,7 @@ final class ActivityStack {
             for (int i = activities.size() - 1; i >= 0; --i) {
                 final ActivityRecord r = activities.get(i);
                 // Note: the taskId check depends on real taskId fields being non-zero
-                if (!r.finishing && (token != r.appToken) && okToShowLocked(r)) {
+                if (!r.finishing && (token != r.appToken) && r.okToShowLocked()) {
                     return r;
                 }
             }
@@ -854,13 +850,11 @@ final class ActivityStack {
 
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final TaskRecord task = mTaskHistory.get(taskNdx);
-            final boolean notCurrentUserTask =
-                    !mStackSupervisor.isCurrentProfileLocked(task.userId);
             final ArrayList<ActivityRecord> activities = task.mActivities;
 
             for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
                 ActivityRecord r = activities.get(activityNdx);
-                if (notCurrentUserTask && (r.info.flags & FLAG_SHOW_FOR_ALL_USERS) == 0) {
+                if (!r.okToShowLocked()) {
                     continue;
                 }
                 if (!r.finishing && r.userId == userId) {
@@ -894,10 +888,7 @@ final class ActivityStack {
         for (int i = 0; i < index; ) {
             final TaskRecord task = mTaskHistory.get(i);
 
-            // NOTE: If {@link TaskRecord#topRunningActivityLocked} return is not null then it is
-            // okay to show the activity when locked.
-            if (mStackSupervisor.isCurrentProfileLocked(task.userId)
-                    || task.topRunningActivityLocked() != null) {
+            if (task.okToShowLocked()) {
                 if (DEBUG_TASKS) Slog.d(TAG_TASKS, "switchUserLocked: stack=" + getStackId() +
                         " moving " + task + " to top");
                 mTaskHistory.remove(i);
@@ -1898,7 +1889,7 @@ final class ActivityStack {
             boolean stackVisibleBehind, ActivityRecord visibleBehind,
             boolean behindFullscreenActivity) {
 
-        if (!okToShowLocked(r)) {
+        if (r == null || !r.okToShowLocked()) {
             return false;
         }
 
@@ -2655,8 +2646,7 @@ final class ActivityStack {
         }
         // Calculate maximum possible position for this task.
         int maxPosition = mTaskHistory.size();
-        if (!mStackSupervisor.isCurrentProfileLocked(task.userId)
-                && task.topRunningActivityLocked() == null) {
+        if (!task.okToShowLocked()) {
             // Put non-current user tasks below current user tasks.
             while (maxPosition > 0) {
                 final TaskRecord tmpTask = mTaskHistory.get(maxPosition - 1);
@@ -2717,9 +2707,9 @@ final class ActivityStack {
         // Now put task at top.
         int taskNdx = mTaskHistory.size();
         final boolean notShownWhenLocked =
-                (newActivity != null && (newActivity.info.flags & FLAG_SHOW_FOR_ALL_USERS) == 0)
-                || (newActivity == null && task.topRunningActivityLocked() == null);
-        if (!mStackSupervisor.isCurrentProfileLocked(task.userId) && notShownWhenLocked) {
+                (newActivity != null && !newActivity.okToShowLocked())
+                || (newActivity == null && !task.okToShowLocked());
+        if (notShownWhenLocked) {
             // Put non-current user tasks below current user tasks.
             while (--taskNdx >= 0) {
                 final TaskRecord tmpTask = mTaskHistory.get(taskNdx);
@@ -4375,7 +4365,7 @@ final class ActivityStack {
 
         // Don't refocus if invisible to current user
         ActivityRecord top = tr.getTopActivity();
-        if (!okToShowLocked(top)) {
+        if (top == null || !top.okToShowLocked()) {
             addRecentActivityLocked(top);
             ActivityOptions.abort(options);
             return;

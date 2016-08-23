@@ -123,7 +123,6 @@ import static android.app.ActivityManager.StackId.LAST_STATIC_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
@@ -3078,13 +3077,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
     boolean isCurrentProfileLocked(int userId) {
         if (userId == mCurrentUser) return true;
         return mService.mUserController.isCurrentProfileLocked(userId);
-    }
-
-    /** Checks whether the activity should be shown for current user. */
-    boolean okToShowLocked(ActivityRecord r) {
-        return r != null && ((r.info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0
-                || (isCurrentProfileLocked(r.userId)
-                && !mService.mUserController.isUserStoppingOrShuttingDownLocked(r.userId)));
     }
 
     final ArrayList<ActivityRecord> processStoppingActivitiesLocked(boolean remove) {

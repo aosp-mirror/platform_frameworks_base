@@ -20,6 +20,7 @@ import static android.app.ActivityManager.StackId;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.content.pm.ActivityInfo.FLAG_ON_TOP_LAUNCHER;
+import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_CROP_WINDOWS;
 import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
@@ -1288,6 +1289,13 @@ final class ActivityRecord {
             }
         }
         return this;
+    }
+
+    /** Checks whether the activity should be shown for current user. */
+    public boolean okToShowLocked() {
+        return (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0
+                || (mStackSupervisor.isCurrentProfileLocked(userId)
+                && !service.mUserController.isUserStoppingOrShuttingDownLocked(userId));
     }
 
     /**
