@@ -72,7 +72,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private static final String TAG = "DisplayPowerController";
     private static final String SCREEN_ON_BLOCKED_TRACE_NAME = "Screen on blocked";
 
-    private static boolean DEBUG = false;
+    private static final boolean DEBUG = false;
     private static final boolean DEBUG_PRETEND_PROXIMITY_SENSOR_ABSENT = false;
 
     // If true, uses the color fade on animation.
@@ -322,6 +322,15 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 com.android.internal.R.fraction.config_autoBrightnessAdjustmentMaxGamma,
                 1, 1);
 
+        int[] brightLevels = resources.getIntArray(
+                com.android.internal.R.array.config_dynamicHysteresisBrightLevels);
+        int[] darkLevels = resources.getIntArray(
+                com.android.internal.R.array.config_dynamicHysteresisDarkLevels);
+        int[] luxLevels = resources.getIntArray(
+                com.android.internal.R.array.config_dynamicHysteresisLuxLevels);
+        HysteresisLevels dynamicHysteresis = new HysteresisLevels(
+                brightLevels, darkLevels, luxLevels);
+
         if (mUseSoftwareAutoBrightnessConfig) {
             int[] lux = resources.getIntArray(
                     com.android.internal.R.array.config_autoBrightnessLevels);
@@ -358,8 +367,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                         lightSensorWarmUpTimeConfig, screenBrightnessRangeMinimum,
                         mScreenBrightnessRangeMaximum, dozeScaleFactor, lightSensorRate,
                         brighteningLightDebounce, darkeningLightDebounce,
-                        autoBrightnessResetAmbientLuxAfterWarmUp,
-                        ambientLightHorizon, autoBrightnessAdjustmentMaxGamma);
+                        autoBrightnessResetAmbientLuxAfterWarmUp, ambientLightHorizon,
+                        autoBrightnessAdjustmentMaxGamma, dynamicHysteresis);
             }
         }
 
