@@ -372,6 +372,14 @@ public class Environment {
     }
 
     /**
+     * @see #getDataPreloadsDirectory()
+     * {@hide}
+     */
+    public static File getDataPreloadsMediaDirectory() {
+        return new File(getDataPreloadsDirectory(), "media");
+    }
+
+    /**
      * Return the primary shared/external storage directory. This directory may
      * not currently be accessible if it has been mounted by the user on their
      * computer, has been removed from the device, or some other problem has
