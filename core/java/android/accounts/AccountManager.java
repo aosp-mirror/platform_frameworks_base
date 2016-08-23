@@ -18,6 +18,7 @@ package android.accounts;
 
 import static android.Manifest.permission.GET_ACCOUNTS;
 
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.Size;
@@ -28,6 +29,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IntentSender;
 import android.content.res.Resources;
 import android.database.SQLException;
 import android.os.Build;
@@ -264,6 +266,15 @@ public class AccountManager {
     public static final String AUTHENTICATOR_META_DATA_NAME =
             "android.accounts.AccountAuthenticator";
     public static final String AUTHENTICATOR_ATTRIBUTES_NAME = "account-authenticator";
+
+    /**
+     * Token for the special case where a UID has access only to an account
+     * but no authenticator specific auth tokens.
+     *
+     * @hide
+     */
+    public static final String ACCOUNT_ACCESS_TOKEN =
+            "com.android.abbfd278-af8b-415d-af8b-7571d5dab133";
 
     private final Context mContext;
     private final IAccountManager mService;
@@ -2959,5 +2970,50 @@ public class AccountManager {
                 return bundle.getBoolean(KEY_BOOLEAN_RESULT);
             }
         }.start();
+    }
+
+    /**
+     * Gets whether a given package under a user has access to an account.
+     * Can be called only from the system UID.
+     *
+     * @param account The account for which to check.
+     * @param packageName The package for which to check.
+     * @param userHandle The user for which to check.
+     * @return True if the package can access the account.
+     *
+     * @hide
+     */
+    public boolean hasAccountAccess(@NonNull Account account, @NonNull String packageName,
+            @NonNull UserHandle userHandle) {
+        try {
+            return mService.hasAccountAccess(account, packageName, userHandle);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Creates an intent to request access to a given account for a UID.
+     * The returned intent should be stated for a result where {@link
+     * Activity#RESULT_OK} result means access was granted whereas {@link
+     * Activity#RESULT_CANCELED} result means access wasn't granted. Can
+     * be called only from the system UID.
+     *
+     * @param account The account for which to request.
+     * @param packageName The package name which to request.
+     * @param userHandle The user for which to request.
+     * @return The intent to request account access or null if the package
+     *     doesn't exist.
+     *
+     * @hide
+     */
+    public IntentSender createRequestAccountAccessIntentSenderAsUser(@NonNull Account account,
+            @NonNull String packageName, @NonNull UserHandle userHandle) {
+        try {
+            return mService.createRequestAccountAccessIntentSenderAsUser(account, packageName,
+                    userHandle);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 }
