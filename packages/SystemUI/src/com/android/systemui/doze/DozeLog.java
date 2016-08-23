@@ -33,7 +33,7 @@ public class DozeLog {
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final boolean ENABLED = true;
     private static final int SIZE = Build.IS_DEBUGGABLE ? 400 : 50;
-    private static final SimpleDateFormat FORMAT = new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
+    static final SimpleDateFormat FORMAT = new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
 
     private static final int PULSE_REASONS = 4;
 
