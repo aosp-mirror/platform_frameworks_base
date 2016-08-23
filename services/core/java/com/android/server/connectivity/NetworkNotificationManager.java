@@ -20,15 +20,16 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
-import android.net.ConnectivityManager;
+import android.net.NetworkCapabilities;
 import android.os.UserHandle;
 import android.telephony.TelephonyManager;
 import android.util.Slog;
 
 import com.android.internal.R;
 
-import static android.net.ConnectivityManager.getNetworkTypeName;
+import static android.net.NetworkCapabilities.*;
 
 
 public class NetworkNotificationManager {
@@ -43,10 +44,36 @@ public class NetworkNotificationManager {
 
     private final Context mContext;
     private final TelephonyManager mTelephonyManager;
+    private final NotificationManager mNotificationManager;
 
-    public NetworkNotificationManager(Context context, TelephonyManager telephonyManager) {
-        mContext = context;
-        mTelephonyManager = telephonyManager;
+    public NetworkNotificationManager(Context c, TelephonyManager t, NotificationManager n) {
+        mContext = c;
+        mTelephonyManager = t;
+        mNotificationManager = n;
+    }
+
+    // TODO: deal more gracefully with multi-transport networks.
+    private static int getFirstTransportType(NetworkAgentInfo nai) {
+        for (int i = 0; i < 64; i++) {
+            if (nai.networkCapabilities.hasTransport(i)) return i;
+        }
+        return -1;
+    }
+
+    private static String getTransportName(int transportType) {
+        Resources r = Resources.getSystem();
+        String[] networkTypes = r.getStringArray(R.array.network_switch_type_name);
+        try {
+            return networkTypes[transportType];
+        } catch (IndexOutOfBoundsException e) {
+            return r.getString(R.string.network_switch_type_name_unknown);
+        }
+    }
+
+    private static int getIcon(int transportType) {
+        return (transportType == TRANSPORT_WIFI) ?
+                R.drawable.stat_notify_wifi_in_range :  // TODO: Distinguish ! from ?.
+                R.drawable.stat_notify_rssi_in_range;
     }
 
     /**
@@ -64,98 +91,103 @@ public class NetworkNotificationManager {
      *         between show and hide calls.  We use the NetID value but for legacy callers
      *         we concatenate the range of types with the range of NetIDs.
      */
-    public void setProvNotificationVisibleIntent(boolean visible, int id,
-            NotificationType notifyType, int networkType, String extraInfo, PendingIntent intent,
-            boolean highPriority) {
-        if (VDBG || (DBG && visible)) {
-            Slog.d(TAG, "setProvNotificationVisibleIntent " + notifyType + " visible=" + visible
-                    + " networkType=" + getNetworkTypeName(networkType)
+    public void showNotification(int id, NotificationType notifyType,
+            NetworkAgentInfo nai, PendingIntent intent, boolean highPriority) {
+        int transportType;
+        String extraInfo;
+        if (nai != null) {
+            transportType = getFirstTransportType(nai);
+            extraInfo = nai.networkInfo.getExtraInfo();
+            // Only notify for Internet-capable networks.
+            if (!nai.networkCapabilities.hasCapability(NET_CAPABILITY_INTERNET)) return;
+        } else {
+            // Legacy notifications.
+            transportType = TRANSPORT_CELLULAR;
+            extraInfo = null;
+        }
+
+        if (DBG) {
+            Slog.d(TAG, "showNotification " + notifyType
+                    + " transportType=" + getTransportName(transportType)
                     + " extraInfo=" + extraInfo + " highPriority=" + highPriority);
         }
 
         Resources r = Resources.getSystem();
-        NotificationManager notificationManager = (NotificationManager) mContext
-            .getSystemService(Context.NOTIFICATION_SERVICE);
-
-        if (visible) {
-            CharSequence title;
-            CharSequence details;
-            int icon;
-            if (notifyType == NotificationType.NO_INTERNET &&
-                    networkType == ConnectivityManager.TYPE_WIFI) {
-                title = r.getString(R.string.wifi_no_internet, 0);
-                details = r.getString(R.string.wifi_no_internet_detailed);
-                icon = R.drawable.stat_notify_wifi_in_range;  // TODO: Need new icon.
-            } else if (notifyType == NotificationType.SIGN_IN) {
-                switch (networkType) {
-                    case ConnectivityManager.TYPE_WIFI:
-                        title = r.getString(R.string.wifi_available_sign_in, 0);
-                        details = r.getString(R.string.network_available_sign_in_detailed,
-                                extraInfo);
-                        icon = R.drawable.stat_notify_wifi_in_range;
-                        break;
-                    case ConnectivityManager.TYPE_MOBILE:
-                    case ConnectivityManager.TYPE_MOBILE_HIPRI:
-                        title = r.getString(R.string.network_available_sign_in, 0);
-                        // TODO: Change this to pull from NetworkInfo once a printable
-                        // name has been added to it
-                        details = mTelephonyManager.getNetworkOperatorName();
-                        icon = R.drawable.stat_notify_rssi_in_range;
-                        break;
-                    default:
-                        title = r.getString(R.string.network_available_sign_in, 0);
-                        details = r.getString(R.string.network_available_sign_in_detailed,
-                                extraInfo);
-                        icon = R.drawable.stat_notify_rssi_in_range;
-                        break;
-                }
-            } else {
-                Slog.wtf(TAG, "Unknown notification type " + notifyType + "on network type "
-                        + getNetworkTypeName(networkType));
-                return;
-            }
-
-            Notification notification = new Notification.Builder(mContext)
-                    .setWhen(0)
-                    .setSmallIcon(icon)
-                    .setAutoCancel(true)
-                    .setTicker(title)
-                    .setColor(mContext.getColor(
-                            com.android.internal.R.color.system_notification_accent_color))
-                    .setContentTitle(title)
-                    .setContentText(details)
-                    .setContentIntent(intent)
-                    .setLocalOnly(true)
-                    .setPriority(highPriority ?
-                            Notification.PRIORITY_HIGH :
-                            Notification.PRIORITY_DEFAULT)
-                    .setDefaults(highPriority ? Notification.DEFAULT_ALL : 0)
-                    .setOnlyAlertOnce(true)
-                    .build();
-
-            try {
-                notificationManager.notifyAsUser(NOTIFICATION_ID, id, notification, UserHandle.ALL);
-            } catch (NullPointerException npe) {
-                Slog.d(TAG, "setNotificationVisible: visible notificationManager npe=" + npe);
+        CharSequence title;
+        CharSequence details;
+        int icon = getIcon(transportType);
+        if (notifyType == NotificationType.NO_INTERNET && transportType == TRANSPORT_WIFI) {
+            title = r.getString(R.string.wifi_no_internet, 0);
+            details = r.getString(R.string.wifi_no_internet_detailed);
+        } else if (notifyType == NotificationType.SIGN_IN) {
+            switch (transportType) {
+                case TRANSPORT_WIFI:
+                    title = r.getString(R.string.wifi_available_sign_in, 0);
+                    details = r.getString(R.string.network_available_sign_in_detailed, extraInfo);
+                    break;
+                case TRANSPORT_CELLULAR:
+                    title = r.getString(R.string.network_available_sign_in, 0);
+                    // TODO: Change this to pull from NetworkInfo once a printable
+                    // name has been added to it
+                    details = mTelephonyManager.getNetworkOperatorName();
+                    break;
+                default:
+                    title = r.getString(R.string.network_available_sign_in, 0);
+                    details = r.getString(R.string.network_available_sign_in_detailed, extraInfo);
+                    break;
             }
         } else {
-            try {
-                notificationManager.cancelAsUser(NOTIFICATION_ID, id, UserHandle.ALL);
-            } catch (NullPointerException npe) {
-                Slog.d(TAG, "setNotificationVisible: cancel notificationManager npe=" + npe);
-            }
+            Slog.wtf(TAG, "Unknown notification type " + notifyType + "on network transport "
+                    + getTransportName(transportType));
+            return;
+        }
+
+        Notification notification = new Notification.Builder(mContext)
+                .setWhen(0)
+                .setSmallIcon(icon)
+                .setAutoCancel(true)
+                .setTicker(title)
+                .setColor(mContext.getColor(
+                        com.android.internal.R.color.system_notification_accent_color))
+                .setContentTitle(title)
+                .setContentText(details)
+                .setContentIntent(intent)
+                .setLocalOnly(true)
+                .setPriority(highPriority ?
+                        Notification.PRIORITY_HIGH :
+                        Notification.PRIORITY_DEFAULT)
+                .setDefaults(highPriority ? Notification.DEFAULT_ALL : 0)
+                .setOnlyAlertOnce(true)
+                .build();
+
+        try {
+            mNotificationManager.notifyAsUser(NOTIFICATION_ID, id, notification, UserHandle.ALL);
+        } catch (NullPointerException npe) {
+            Slog.d(TAG, "setNotificationVisible: visible notificationManager npe=" + npe);
+        }
+    }
+
+    public void clearNotification(int id) {
+        if (DBG) {
+            Slog.d(TAG, "clearNotification id=" + id);
+        }
+        try {
+            mNotificationManager.cancelAsUser(NOTIFICATION_ID, id, UserHandle.ALL);
+        } catch (NullPointerException npe) {
+            Slog.d(TAG, "setNotificationVisible: cancel notificationManager npe=" + npe);
         }
     }
 
     /**
      * Legacy provisioning notifications coming directly from DcTracker.
      */
-    public void setProvNotificationVisible(boolean visible, int networkType, String action) {
-        Intent intent = new Intent(action);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0, intent, 0);
-        // Concatenate the range of types onto the range of NetIDs.
-        int id = MAX_NET_ID + 1 + (networkType - ConnectivityManager.TYPE_NONE);
-        mNotifier.setProvNotificationVisibleIntent(visible, id, NotificationType.SIGN_IN,
-                networkType, null, pendingIntent, false);
+    public void setProvNotificationVisible(boolean visible, int id, String action) {
+        if (visible) {
+            Intent intent = new Intent(action);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0, intent, 0);
+            showNotification(id, NotificationType.SIGN_IN, null, pendingIntent, false);
+        } else {
+            clearNotification(id);
+        }
     }
 }
