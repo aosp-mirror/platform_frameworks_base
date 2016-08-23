@@ -95,6 +95,19 @@ dependencies {
 }
 </pre>
 
+<div class="caution">
+<p><strong>Caution:</strong> If your build configuration includes a
+<code>compile</code> dependency for the <code>support-annotations</code>
+library <b>and</b> an <code>androidTestCompile</code> dependency for the
+<code>espresso-core</code> library, your build might fail due to a dependency
+conflict. To resolve, update your dependency for <code>espresso-core</code>
+as follows:</p>
+<pre>
+androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+    exclude group: 'com.android.support', module: 'support-annotations'
+})
+</pre>
+</div>
 
 <p>
   To use JUnit 4 test classes, make sure to specify <a href=
