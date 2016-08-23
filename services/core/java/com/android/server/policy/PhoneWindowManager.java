@@ -7834,6 +7834,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         final WindowState w = mTopFullscreenOpaqueWindowState;
+        if (w != mFocusedWindow) {
+            return false;
+        }
 
         // We only enable seamless rotation if the top window has requested
         // it and is in the fullscreen opaque state. Seamless rotation
