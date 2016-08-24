@@ -760,6 +760,31 @@ class UsbSettingsManager {
         resolveActivity(intent, matches, defaultPackage, device, null);
     }
 
+    public void deviceAttachedForFixedHandler(UsbDevice device, ComponentName component) {
+        final Intent intent = createDeviceAttachedIntent(device);
+
+        // Send broadcast to running activity with registered intent
+        mUserContext.sendBroadcast(intent);
+
+        ApplicationInfo appInfo;
+        try {
+            appInfo = mPackageManager.getApplicationInfo(component.getPackageName(), 0);
+        } catch (NameNotFoundException e) {
+            Slog.e(TAG, "Default USB handling package not found: " + component.getPackageName());
+            return;
+        }
+
+        grantDevicePermission(device, appInfo.uid);
+
+        Intent activityIntent = new Intent(intent);
+        activityIntent.setComponent(component);
+        try {
+            mUserContext.startActivityAsUser(activityIntent, mUser);
+        } catch (ActivityNotFoundException e) {
+            Slog.e(TAG, "unable to start activity " + activityIntent);
+        }
+    }
+
     public void deviceDetached(UsbDevice device) {
         // clear temporary permissions for the device
         mDevicePermissionMap.remove(device.getDeviceName());

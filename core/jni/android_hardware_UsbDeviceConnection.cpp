@@ -246,6 +246,18 @@ android_hardware_UsbDeviceConnection_get_serial(JNIEnv *env, jobject thiz)
     return result;
 }
 
+static jboolean
+android_hardware_UsbDeviceConnection_reset_device(JNIEnv *env, jobject thiz)
+{
+    struct usb_device* device = get_device_from_object(env, thiz);
+    if (!device) {
+        ALOGE("device is closed in native_reset_device");
+        return JNI_FALSE;
+    }
+    int ret = usb_device_reset(device);
+    return (ret == 0) ? JNI_TRUE : JNI_FALSE;
+}
+
 static const JNINativeMethod method_table[] = {
     {"native_open",             "(Ljava/lang/String;Ljava/io/FileDescriptor;)Z",
                                         (void *)android_hardware_UsbDeviceConnection_open},
@@ -264,6 +276,7 @@ static const JNINativeMethod method_table[] = {
                                         (void *)android_hardware_UsbDeviceConnection_request_wait},
     { "native_get_serial",      "()Ljava/lang/String;",
                                         (void*)android_hardware_UsbDeviceConnection_get_serial },
+    {"native_reset_device","()Z", (void *)android_hardware_UsbDeviceConnection_reset_device},
 };
 
 int register_android_hardware_UsbDeviceConnection(JNIEnv *env)

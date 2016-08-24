@@ -16,6 +16,7 @@
 
 package android.hardware.usb;
 
+import android.annotation.SystemApi;
 import android.os.ParcelFileDescriptor;
 
 import java.io.FileDescriptor;
@@ -215,8 +216,20 @@ public class UsbDeviceConnection {
     }
 
     /**
+     * Reset USB port for the connected device.
+     *
+     * @return true if reset succeeds.
+     *
+     * @hide
+     */
+    @SystemApi
+    public boolean resetDevice() {
+        return native_reset_device();
+    }
+
+    /**
      * Waits for the result of a {@link android.hardware.usb.UsbRequest#queue} operation
-     * Note that this may return requests queued on multiple 
+     * Note that this may return requests queued on multiple
      * {@link android.hardware.usb.UsbEndpoint}s.
      * When multiple endpoints are in use, {@link android.hardware.usb.UsbRequest#getEndpoint} and
      * {@link android.hardware.usb.UsbRequest#getClientData} can be useful in determining
@@ -263,4 +276,5 @@ public class UsbDeviceConnection {
             int offset, int length, int timeout);
     private native UsbRequest native_request_wait();
     private native String native_get_serial();
+    private native boolean native_reset_device();
 }

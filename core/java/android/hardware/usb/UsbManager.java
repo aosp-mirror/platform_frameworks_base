@@ -19,7 +19,9 @@ package android.hardware.usb;
 
 import com.android.internal.util.Preconditions;
 
+import android.annotation.Nullable;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
@@ -469,8 +471,20 @@ public class UsbManager {
      * {@hide}
      */
     public void grantPermission(UsbDevice device) {
+        grantPermission(device, Process.myUid());
+    }
+
+    /**
+     * Grants permission for USB device to given uid without showing system dialog.
+     * Only system components can call this function.
+     * @param device to request permissions for
+     * @uid uid to give permission
+     *
+     * {@hide}
+     */
+    public void grantPermission(UsbDevice device, int uid) {
         try {
-            mService.grantDevicePermission(device, Process.myUid());
+            mService.grantDevicePermission(device, uid);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -488,11 +502,9 @@ public class UsbManager {
         try {
             int uid = mContext.getPackageManager()
                 .getPackageUidAsUser(packageName, mContext.getUserId());
-            mService.grantDevicePermission(device, uid);
+            grantPermission(device, uid);
         } catch (NameNotFoundException e) {
             Log.e(TAG, "Package " + packageName + " not found.", e);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -626,6 +638,26 @@ public class UsbManager {
 
         try {
             mService.setPortRoles(port.getId(), powerRole, dataRole);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets the component that will handle USB device connection.
+     * <p>
+     * Setting component allows to specify external USB host manager to handle use cases, where
+     * selection dialog for an activity that will handle USB device is undesirable.
+     * Only system components can call this function, as it requires the MANAGE_USB permission.
+     *
+     * @param usbDeviceConnectionHandler The component to handle usb connections,
+     * {@code null} to unset.
+     *
+     * {@hide}
+     */
+    public void setUsbDeviceConnectionHandler(@Nullable ComponentName usbDeviceConnectionHandler) {
+        try {
+            mService.setUsbDeviceConnectionHandler(usbDeviceConnectionHandler);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
