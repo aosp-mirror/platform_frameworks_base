@@ -1243,11 +1243,6 @@
     <!-- Option to use new paging layout in quick settings [CHAR LIMIT=60] -->
     <string name="qs_paging" translatable="false">Use the new Quick Settings</string>
 
-    <!-- Toggle to enable the gesture to enter split-screen by swiping up from the Overview button. [CHAR LIMIT=60]-->
-    <string name="overview_nav_bar_gesture">Enable split-screen swipe-up gesture</string>
-    <!-- Description for the toggle to enable the gesture to enter split-screen by swiping up from the Overview button. [CHAR LIMIT=NONE]-->
-    <string name="overview_nav_bar_gesture_desc">Enable gesture to enter split-screen by swiping up from the Overview button</string>
-
     <!-- Category in the System UI Tuner settings, where new/experimental
          settings are -->
     <string name="experimental">Experimental</string>
