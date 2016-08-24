@@ -1258,7 +1258,7 @@ public class TaskStackLayoutAlgorithm {
         String innerPrefix = prefix + "  ";
 
         writer.print(prefix); writer.print(TAG);
-        writer.write(" numStackTasks="); writer.write(mNumStackTasks);
+        writer.write(" numStackTasks="); writer.print(mNumStackTasks);
         writer.println();
 
         writer.print(innerPrefix);

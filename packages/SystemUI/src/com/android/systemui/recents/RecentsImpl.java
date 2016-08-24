@@ -40,6 +40,7 @@ import android.view.LayoutInflater;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
 
+import android.widget.Toast;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.policy.DockedDividerUtils;
 import com.android.systemui.R;
@@ -394,6 +395,10 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
 
     public void onDraggingInRecentsEnded(float velocity) {
         EventBus.getDefault().sendOntoMainThread(new DraggingInRecentsEndedEvent(velocity));
+    }
+
+    public void onShowCurrentUserToast(int msgResId, int msgLength) {
+        Toast.makeText(mContext, msgResId, msgLength).show();
     }
 
     /**
