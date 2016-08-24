@@ -70,19 +70,22 @@ import java.util.Vector;
  */
 public class VideoView extends SurfaceView
         implements MediaPlayerControl, SubtitleController.Anchor {
-    private String TAG = "VideoView";
-    // settable by the client
-    private Uri         mUri;
-    private Map<String, String> mHeaders;
+    private static final String TAG = "VideoView";
 
     // all possible internal states
-    private static final int STATE_ERROR              = -1;
-    private static final int STATE_IDLE               = 0;
-    private static final int STATE_PREPARING          = 1;
-    private static final int STATE_PREPARED           = 2;
-    private static final int STATE_PLAYING            = 3;
-    private static final int STATE_PAUSED             = 4;
+    private static final int STATE_ERROR = -1;
+    private static final int STATE_IDLE = 0;
+    private static final int STATE_PREPARING = 1;
+    private static final int STATE_PREPARED = 2;
+    private static final int STATE_PLAYING = 3;
+    private static final int STATE_PAUSED = 4;
     private static final int STATE_PLAYBACK_COMPLETED = 5;
+
+    private final Vector<Pair<InputStream, MediaFormat>> mPendingSubtitleTracks = new Vector<>();
+
+    // settable by the client
+    private Uri mUri;
+    private Map<String, String> mHeaders;
 
     // mCurrentState is a VideoView object's current state.
     // mTargetState is the state that a method caller intends to reach.
@@ -90,26 +93,26 @@ public class VideoView extends SurfaceView
     // calling pause() intends to bring the object to a target state
     // of STATE_PAUSED.
     private int mCurrentState = STATE_IDLE;
-    private int mTargetState  = STATE_IDLE;
+    private int mTargetState = STATE_IDLE;
 
     // All the stuff we need for playing and showing a video
     private SurfaceHolder mSurfaceHolder = null;
     private MediaPlayer mMediaPlayer = null;
-    private int         mAudioSession;
-    private int         mVideoWidth;
-    private int         mVideoHeight;
-    private int         mSurfaceWidth;
-    private int         mSurfaceHeight;
+    private int mAudioSession;
+    private int mVideoWidth;
+    private int mVideoHeight;
+    private int mSurfaceWidth;
+    private int mSurfaceHeight;
     private MediaController mMediaController;
     private OnCompletionListener mOnCompletionListener;
     private MediaPlayer.OnPreparedListener mOnPreparedListener;
-    private int         mCurrentBufferPercentage;
+    private int mCurrentBufferPercentage;
     private OnErrorListener mOnErrorListener;
-    private OnInfoListener  mOnInfoListener;
-    private int         mSeekWhenPrepared;  // recording the seek position while preparing
-    private boolean     mCanPause;
-    private boolean     mCanSeekBack;
-    private boolean     mCanSeekForward;
+    private OnInfoListener mOnInfoListener;
+    private int mSeekWhenPrepared;  // recording the seek position while preparing
+    private boolean mCanPause;
+    private boolean mCanSeekBack;
+    private boolean mCanSeekForward;
 
     /** Subtitle rendering widget overlaid on top of the video. */
     private RenderingWidget mSubtitleWidget;
@@ -118,13 +121,11 @@ public class VideoView extends SurfaceView
     private RenderingWidget.OnChangedListener mSubtitlesChangedListener;
 
     public VideoView(Context context) {
-        super(context);
-        initVideoView();
+        this(context, null);
     }
 
     public VideoView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
-        initVideoView();
     }
 
     public VideoView(Context context, AttributeSet attrs, int defStyleAttr) {
@@ -133,7 +134,19 @@ public class VideoView extends SurfaceView
 
     public VideoView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        initVideoView();
+
+        mVideoWidth = 0;
+        mVideoHeight = 0;
+
+        getHolder().addCallback(mSHCallback);
+        getHolder().setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+
+        setFocusable(true);
+        setFocusableInTouchMode(true);
+        requestFocus();
+
+        mCurrentState = STATE_IDLE;
+        mTargetState = STATE_IDLE;
     }
 
     @Override
@@ -209,19 +222,6 @@ public class VideoView extends SurfaceView
         return getDefaultSize(desiredSize, measureSpec);
     }
 
-    private void initVideoView() {
-        mVideoWidth = 0;
-        mVideoHeight = 0;
-        getHolder().addCallback(mSHCallback);
-        getHolder().setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-        setFocusable(true);
-        setFocusableInTouchMode(true);
-        requestFocus();
-        mPendingSubtitleTracks = new Vector<Pair<InputStream, MediaFormat>>();
-        mCurrentState = STATE_IDLE;
-        mTargetState  = STATE_IDLE;
-    }
-
     /**
      * Sets video path.
      *
@@ -293,8 +293,6 @@ public class VideoView extends SurfaceView
             }
         }
     }
-
-    private Vector<Pair<InputStream, MediaFormat>> mPendingSubtitleTracks;
 
     public void stopPlayback() {
         if (mMediaPlayer != null) {
