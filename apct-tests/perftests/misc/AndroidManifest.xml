@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="android.graphics.perftests">
-
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    package="android.misc.perftests">
 
     <application>
         <uses-library android:name="android.test.runner" />
@@ -16,6 +14,6 @@
     </application>
 
     <instrumentation android:name="android.support.test.runner.AndroidJUnitRunner"
-        android:targetPackage="android.graphics.perftests"/>
+        android:targetPackage="android.misc.perftests"/>
 
 </manifest>
