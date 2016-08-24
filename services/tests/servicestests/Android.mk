@@ -21,7 +21,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     services.usage \
     guava \
     android-support-test \
-    mockito-target \
+    mockito-target-minus-junit4 \
     ShortcutManagerTestUtils
 
 LOCAL_JAVA_LIBRARIES := android.test.runner
