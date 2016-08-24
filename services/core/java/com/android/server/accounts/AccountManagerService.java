@@ -22,6 +22,7 @@ import android.accounts.Account;
 import android.accounts.AccountAndUser;
 import android.accounts.AccountAuthenticatorResponse;
 import android.accounts.AccountManager;
+import android.accounts.AccountManagerInternal;
 import android.accounts.AuthenticatorDescription;
 import android.accounts.CantAddAccountActivity;
 import android.accounts.GrantCredentialsPermissionActivity;
@@ -29,11 +30,14 @@ import android.accounts.IAccountAuthenticator;
 import android.accounts.IAccountAuthenticatorResponse;
 import android.accounts.IAccountManager;
 import android.accounts.IAccountManagerResponse;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
+import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
+import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -46,9 +50,11 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IntentSender;
 import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -72,11 +78,14 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.Process;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
+import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -86,6 +95,7 @@ import android.util.SparseBooleanArray;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
@@ -242,6 +252,13 @@ public class AccountManagerService
             + " WHERE " + GRANTS_ACCOUNTS_ID + "=" + ACCOUNTS_ID
             + " AND " + GRANTS_GRANTEE_UID + "=?"
             + " AND " + GRANTS_AUTH_TOKEN_TYPE + "=?"
+            + " AND " + ACCOUNTS_NAME + "=?"
+            + " AND " + ACCOUNTS_TYPE + "=?";
+
+    private static final String COUNT_OF_MATCHING_GRANTS_ANY_TOKEN = ""
+            + "SELECT COUNT(*) FROM " + TABLE_GRANTS + ", " + TABLE_ACCOUNTS
+            + " WHERE " + GRANTS_ACCOUNTS_ID + "=" + ACCOUNTS_ID
+            + " AND " + GRANTS_GRANTEE_UID + "=?"
             + " AND " + ACCOUNTS_NAME + "=?"
             + " AND " + ACCOUNTS_TYPE + "=?";
 
@@ -439,6 +456,118 @@ public class AccountManagerService
                 }
             }
         }, UserHandle.ALL, userFilter, null, null);
+
+        LocalServices.addService(AccountManagerInternal.class, new AccountManagerInternalImpl());
+
+        // Need to cancel account request notifications if the update/install can access the account
+        new PackageMonitor() {
+            @Override
+            public void onPackageAdded(String packageName, int uid) {
+                // Called on a handler, and running as the system
+                cancelAccountAccessRequestNotificationIfNeeded(uid, true);
+            }
+
+            @Override
+            public void onPackageUpdateFinished(String packageName, int uid) {
+                // Called on a handler, and running as the system
+                cancelAccountAccessRequestNotificationIfNeeded(uid, true);
+            }
+        }.register(mContext, mMessageHandler.getLooper(), UserHandle.ALL, true);
+
+        // Cancel account request notification if an app op was preventing the account access
+        mAppOpsManager.startWatchingMode(AppOpsManager.OP_GET_ACCOUNTS, null,
+                new AppOpsManager.OnOpChangedInternalListener() {
+            @Override
+            public void onOpChanged(int op, String packageName) {
+                try {
+                    final int userId = ActivityManager.getCurrentUser();
+                    final int uid = mPackageManager.getPackageUidAsUser(packageName, userId);
+                    final int mode = mAppOpsManager.checkOpNoThrow(
+                            AppOpsManager.OP_GET_ACCOUNTS, uid, packageName);
+                    if (mode == AppOpsManager.MODE_ALLOWED) {
+                        final long identity = Binder.clearCallingIdentity();
+                        try {
+                            cancelAccountAccessRequestNotificationIfNeeded(packageName, uid, true);
+                        } finally {
+                            Binder.restoreCallingIdentity(identity);
+                        }
+                    }
+                } catch (NameNotFoundException e) {
+                    /* ignore */
+                }
+            }
+        });
+
+        // Cancel account request notification if a permission was preventing the account access
+        mPackageManager.addOnPermissionsChangeListener(
+                (int uid) -> {
+            Account[] accounts = null;
+            String[] packageNames = mPackageManager.getPackagesForUid(uid);
+            if (packageNames != null) {
+                final int userId = UserHandle.getUserId(uid);
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    for (String packageName : packageNames) {
+                        if (mContext.getPackageManager().checkPermission(
+                                Manifest.permission.GET_ACCOUNTS, packageName)
+                                        != PackageManager.PERMISSION_GRANTED) {
+                            continue;
+                        }
+
+                        if (accounts == null) {
+                            accounts = getAccountsAsUser(null, userId, "android");
+                            if (ArrayUtils.isEmpty(accounts)) {
+                                return;
+                            }
+                        }
+
+                        for (Account account : accounts) {
+                            cancelAccountAccessRequestNotificationIfNeeded(
+                                    account, uid, packageName, true);
+                        }
+                    }
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            }
+        });
+    }
+
+    private void cancelAccountAccessRequestNotificationIfNeeded(int uid,
+            boolean checkAccess) {
+        Account[] accounts = getAccountsAsUser(null, UserHandle.getUserId(uid), "android");
+        for (Account account : accounts) {
+            cancelAccountAccessRequestNotificationIfNeeded(account, uid, checkAccess);
+        }
+    }
+
+    private void cancelAccountAccessRequestNotificationIfNeeded(String packageName, int uid,
+            boolean checkAccess) {
+        Account[] accounts = getAccountsAsUser(null, UserHandle.getUserId(uid), "android");
+        for (Account account : accounts) {
+            cancelAccountAccessRequestNotificationIfNeeded(account, uid, packageName, checkAccess);
+        }
+    }
+
+    private void cancelAccountAccessRequestNotificationIfNeeded(Account account, int uid,
+            boolean checkAccess) {
+        String[] packageNames = mPackageManager.getPackagesForUid(uid);
+        if (packageNames != null) {
+            for (String packageName : packageNames) {
+                cancelAccountAccessRequestNotificationIfNeeded(account, uid,
+                        packageName, checkAccess);
+            }
+        }
+    }
+
+    private void cancelAccountAccessRequestNotificationIfNeeded(Account account,
+            int uid, String packageName, boolean checkAccess) {
+        if (!checkAccess || hasAccountAccess(account, packageName,
+                UserHandle.getUserHandleForUid(uid))) {
+            cancelNotification(getCredentialPermissionNotificationId(account,
+                    AccountManager.ACCOUNT_ACCESS_TOKEN, uid), packageName,
+                    UserHandle.getUserHandleForUid(uid));
+        }
     }
 
     @Override
@@ -2193,6 +2322,21 @@ public class AccountManagerService
         } finally {
             Binder.restoreCallingIdentity(id);
         }
+
+        if (isChanged) {
+            synchronized (accounts.credentialsPermissionNotificationIds) {
+                for (Pair<Pair<Account, String>, Integer> key
+                        : accounts.credentialsPermissionNotificationIds.keySet()) {
+                    if (account.equals(key.first.first)
+                            && AccountManager.ACCOUNT_ACCESS_TOKEN.equals(key.first.second)) {
+                        final int uid = (Integer) key.second;
+                        mMessageHandler.post(() -> cancelAccountAccessRequestNotificationIfNeeded(
+                                account, uid, false));
+                    }
+                }
+            }
+        }
+
         return isChanged;
     }
 
@@ -2764,9 +2908,11 @@ public class AccountManagerService
                         if (result.containsKey(AccountManager.KEY_AUTH_TOKEN_LABEL)) {
                             Intent intent = newGrantCredentialsPermissionIntent(
                                     account,
+                                    null,
                                     callerUid,
                                     new AccountAuthenticatorResponse(this),
-                                    authTokenType);
+                                    authTokenType,
+                                    true);
                             Bundle bundle = new Bundle();
                             bundle.putParcelable(AccountManager.KEY_INTENT, intent);
                             onResult(bundle);
@@ -2817,7 +2963,7 @@ public class AccountManagerService
                                     intent);
                             doNotification(mAccounts,
                                     account, result.getString(AccountManager.KEY_AUTH_FAILED_MESSAGE),
-                                    intent, accounts.userId);
+                                    intent, "android", accounts.userId);
                         }
                     }
                     super.onResult(result);
@@ -2848,7 +2994,7 @@ public class AccountManagerService
     }
 
     private void createNoCredentialsPermissionNotification(Account account, Intent intent,
-            int userId) {
+            String packageName, int userId) {
         int uid = intent.getIntExtra(
                 GrantCredentialsPermissionActivity.EXTRAS_REQUESTING_UID, -1);
         String authTokenType = intent.getStringExtra(
@@ -2876,20 +3022,23 @@ public class AccountManagerService
                         PendingIntent.FLAG_CANCEL_CURRENT, null, user))
                 .build();
         installNotification(getCredentialPermissionNotificationId(
-                account, authTokenType, uid), n, user);
+                account, authTokenType, uid), n, packageName, user.getIdentifier());
     }
 
-    private Intent newGrantCredentialsPermissionIntent(Account account, int uid,
-            AccountAuthenticatorResponse response, String authTokenType) {
+    private Intent newGrantCredentialsPermissionIntent(Account account, String packageName,
+            int uid, AccountAuthenticatorResponse response, String authTokenType,
+            boolean startInNewTask) {
 
         Intent intent = new Intent(mContext, GrantCredentialsPermissionActivity.class);
-        // See FLAG_ACTIVITY_NEW_TASK docs for limitations and benefits of the flag.
-        // Since it was set in Eclair+ we can't change it without breaking apps using
-        // the intent from a non-Activity context.
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.addCategory(
-                String.valueOf(getCredentialPermissionNotificationId(account, authTokenType, uid)));
 
+        if (startInNewTask) {
+            // See FLAG_ACTIVITY_NEW_TASK docs for limitations and benefits of the flag.
+            // Since it was set in Eclair+ we can't change it without breaking apps using
+            // the intent from a non-Activity context. This is the default behavior.
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        }
+        intent.addCategory(String.valueOf(getCredentialPermissionNotificationId(account,
+                authTokenType, uid) + (packageName != null ? packageName : "")));
         intent.putExtra(GrantCredentialsPermissionActivity.EXTRAS_ACCOUNT, account);
         intent.putExtra(GrantCredentialsPermissionActivity.EXTRAS_AUTH_TOKEN_TYPE, authTokenType);
         intent.putExtra(GrantCredentialsPermissionActivity.EXTRAS_RESPONSE, response);
@@ -3723,6 +3872,118 @@ public class AccountManagerService
         } finally {
             restoreCallingIdentity(identityToken);
         }
+    }
+
+    @Override
+    public boolean hasAccountAccess(@NonNull Account account,  @NonNull String packageName,
+            @NonNull UserHandle userHandle) {
+        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+            throw new SecurityException("Can be called only by system UID");
+        }
+        Preconditions.checkNotNull(account, "account cannot be null");
+        Preconditions.checkNotNull(packageName, "packageName cannot be null");
+        Preconditions.checkNotNull(userHandle, "userHandle cannot be null");
+
+        final int userId = userHandle.getIdentifier();
+
+        Preconditions.checkArgumentInRange(userId, 0, Integer.MAX_VALUE, "user must be concrete");
+
+        try {
+
+            final int uid = mPackageManager.getPackageUidAsUser(packageName, userId);
+            // Use null token which means any token. Having a token means the package
+            // is trusted by the authenticator, hence it is fine to access the account.
+            if (permissionIsGranted(account, null, uid, userId)) {
+                return true;
+            }
+            // In addition to the permissions required to get an auth token we also allow
+            // the account to be accessed by holders of the get accounts permissions.
+            return checkUidPermission(Manifest.permission.GET_ACCOUNTS_PRIVILEGED, uid, packageName)
+                    || checkUidPermission(Manifest.permission.GET_ACCOUNTS, uid, packageName);
+        } catch (NameNotFoundException e) {
+            return false;
+        }
+    }
+
+    private boolean checkUidPermission(String permission, int uid, String opPackageName) {
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            IPackageManager pm = ActivityThread.getPackageManager();
+            if (pm.checkUidPermission(permission, uid) != PackageManager.PERMISSION_GRANTED) {
+                return false;
+            }
+            final int opCode = AppOpsManager.permissionToOpCode(permission);
+            return (opCode == AppOpsManager.OP_NONE || mAppOpsManager.noteOpNoThrow(
+                    opCode, uid, opPackageName) == AppOpsManager.MODE_ALLOWED);
+        } catch (RemoteException e) {
+            /* ignore - local call */
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+        return false;
+    }
+
+    @Override
+    public IntentSender createRequestAccountAccessIntentSenderAsUser(@NonNull Account account,
+            @NonNull String packageName, @NonNull UserHandle userHandle) {
+        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+            throw new SecurityException("Can be called only by system UID");
+        }
+
+        Preconditions.checkNotNull(account, "account cannot be null");
+        Preconditions.checkNotNull(packageName, "packageName cannot be null");
+        Preconditions.checkNotNull(userHandle, "userHandle cannot be null");
+
+        final int userId = userHandle.getIdentifier();
+
+        Preconditions.checkArgumentInRange(userId, 0, Integer.MAX_VALUE, "user must be concrete");
+
+        final int uid;
+        try {
+            uid = mPackageManager.getPackageUidAsUser(packageName, userId);
+        } catch (NameNotFoundException e) {
+            Slog.e(TAG, "Unknown package " + packageName);
+            return null;
+        }
+
+        Intent intent = newRequestAccountAccessIntent(account, packageName, uid, null);
+
+        return PendingIntent.getActivityAsUser(
+                mContext, 0, intent, PendingIntent.FLAG_ONE_SHOT
+                        | PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
+                null, new UserHandle(userId)).getIntentSender();
+    }
+
+    private Intent newRequestAccountAccessIntent(Account account, String packageName,
+            int uid, RemoteCallback callback) {
+        return newGrantCredentialsPermissionIntent(account, packageName, uid,
+                new AccountAuthenticatorResponse(new IAccountAuthenticatorResponse.Stub() {
+            @Override
+            public void onResult(Bundle value) throws RemoteException {
+                handleAuthenticatorResponse(true);
+            }
+
+            @Override
+            public void onRequestContinued() {
+                /* ignore */
+            }
+
+            @Override
+            public void onError(int errorCode, String errorMessage) throws RemoteException {
+                handleAuthenticatorResponse(false);
+            }
+
+            private void handleAuthenticatorResponse(boolean accessGranted) throws RemoteException {
+                cancelNotification(getCredentialPermissionNotificationId(account,
+                        AccountManager.ACCOUNT_ACCESS_TOKEN, uid), packageName,
+                        UserHandle.getUserHandleForUid(uid));
+                if (callback != null) {
+                    Bundle result = new Bundle();
+                    result.putBoolean(AccountManager.KEY_BOOLEAN_RESULT, accessGranted);
+                    callback.sendResult(result);
+                }
+            }
+        }), AccountManager.ACCOUNT_ACCESS_TOKEN, false);
     }
 
     @Override
@@ -5286,7 +5547,7 @@ public class AccountManagerService
     }
 
     private void doNotification(UserAccounts accounts, Account account, CharSequence message,
-            Intent intent, int userId) {
+            Intent intent, String packageName, final int userId) {
         long identityToken = clearCallingIdentity();
         try {
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -5296,12 +5557,12 @@ public class AccountManagerService
             if (intent.getComponent() != null &&
                     GrantCredentialsPermissionActivity.class.getName().equals(
                             intent.getComponent().getClassName())) {
-                createNoCredentialsPermissionNotification(account, intent, userId);
+                createNoCredentialsPermissionNotification(account, intent, packageName, userId);
             } else {
+                Context contextForUser = getContextForUser(new UserHandle(userId));
                 final Integer notificationId = getSigninRequiredNotificationId(accounts, account);
                 intent.addCategory(String.valueOf(notificationId));
-                UserHandle user = new UserHandle(userId);
-                Context contextForUser = getContextForUser(user);
+
                 final String notificationTitleFormat =
                         contextForUser.getText(R.string.notification_title).toString();
                 Notification n = new Notification.Builder(contextForUser)
@@ -5313,9 +5574,9 @@ public class AccountManagerService
                         .setContentText(message)
                         .setContentIntent(PendingIntent.getActivityAsUser(
                                 mContext, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT,
-                                null, user))
+                                null, new UserHandle(userId)))
                         .build();
-                installNotification(notificationId, n, user);
+                installNotification(notificationId, n, packageName, userId);
             }
         } finally {
             restoreCallingIdentity(identityToken);
@@ -5323,18 +5584,40 @@ public class AccountManagerService
     }
 
     @VisibleForTesting
-    protected void installNotification(final int notificationId, final Notification n,
+    protected void installNotification(int notificationId, final Notification notification,
             UserHandle user) {
-        ((NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE))
-                .notifyAsUser(null, notificationId, n, user);
+        installNotification(notificationId, notification, "android", user.getIdentifier());
+    }
+
+    private void installNotification(int notificationId, final Notification notification,
+            String packageName, int userId) {
+        final long token = clearCallingIdentity();
+        try {
+            INotificationManager notificationManager = NotificationManager.getService();
+            try {
+                notificationManager.enqueueNotificationWithTag(packageName, packageName, null,
+                        notificationId, notification, new int[1], userId);
+            } catch (RemoteException e) {
+                /* ignore - local call */
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     @VisibleForTesting
     protected void cancelNotification(int id, UserHandle user) {
+        cancelNotification(id, mContext.getPackageName(), user);
+    }
+
+    protected void cancelNotification(int id, String packageName, UserHandle user) {
         long identityToken = clearCallingIdentity();
         try {
-            ((NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE))
-                .cancelAsUser(null, id, user);
+            INotificationManager service = INotificationManager.Stub.asInterface(
+                    ServiceManager.getService(Context.NOTIFICATION_SERVICE));
+            service.cancelNotificationWithTag(packageName, null, id, user.getIdentifier());
+        } catch (RemoteException e) {
+            /* ignore - local call */
         } finally {
             restoreCallingIdentity(identityToken);
         }
@@ -5395,18 +5678,40 @@ public class AccountManagerService
 
     private boolean permissionIsGranted(
             Account account, String authTokenType, int callerUid, int userId) {
-        final boolean isPrivileged = isPrivileged(callerUid);
-        final boolean fromAuthenticator = account != null
-                && isAccountManagedByCaller(account.type, callerUid, userId);
-        final boolean hasExplicitGrants = account != null
-                && hasExplicitlyGrantedPermission(account, authTokenType, callerUid);
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Log.v(TAG, "checkGrantsOrCallingUidAgainstAuthenticator: caller uid "
-                    + callerUid + ", " + account
-                    + ": is authenticator? " + fromAuthenticator
-                    + ", has explicit permission? " + hasExplicitGrants);
+        if (UserHandle.getAppId(callerUid) == Process.SYSTEM_UID) {
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "Access to " + account + " granted calling uid is system");
+            }
+            return true;
         }
-        return fromAuthenticator || hasExplicitGrants || isPrivileged;
+
+        if (isPrivileged(callerUid)) {
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "Access to " + account + " granted calling uid "
+                        + callerUid + " privileged");
+            }
+            return true;
+        }
+        if (account != null && isAccountManagedByCaller(account.type, callerUid, userId)) {
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "Access to " + account + " granted calling uid "
+                        + callerUid + " manages the account");
+            }
+            return true;
+        }
+        if (account != null && hasExplicitlyGrantedPermission(account, authTokenType, callerUid)) {
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "Access to " + account + " granted calling uid "
+                        + callerUid + " user granted access");
+            }
+            return true;
+        }
+
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "Access to " + account + " not granted for uid " + callerUid);
+        }
+
+        return false;
     }
 
     private boolean isAccountVisibleToCaller(String accountType, int callingUid, int userId,
@@ -5496,8 +5801,20 @@ public class AccountManagerService
         UserAccounts accounts = getUserAccountsForCaller();
         synchronized (accounts.cacheLock) {
             final SQLiteDatabase db = accounts.openHelper.getReadableDatabase();
-            final boolean permissionGranted = AccountsDbUtils.findMatchingGrantsCount(db, callerUid,
-                    authTokenType, account) != 0;
+            final String query;
+            final String[] args;
+
+            if (authTokenType != null) {
+                query = COUNT_OF_MATCHING_GRANTS;
+                args = new String[] {String.valueOf(callerUid), authTokenType,
+                        account.name, account.type};
+            } else {
+                query = COUNT_OF_MATCHING_GRANTS_ANY_TOKEN;
+                args = new String[] {String.valueOf(callerUid), account.name,
+                        account.type};
+            }
+            final boolean permissionGranted = DatabaseUtils.longForQuery(db, query, args) != 0;
+
             if (!permissionGranted && ActivityManager.isRunningInTestHarness()) {
                 // TODO: Skip this check when running automated tests. Replace this
                 // with a more general solution.
@@ -5628,6 +5945,8 @@ public class AccountManagerService
             }
             cancelNotification(getCredentialPermissionNotificationId(account, authTokenType, uid),
                     UserHandle.of(accounts.userId));
+
+            cancelAccountAccessRequestNotificationIfNeeded(account, uid, true);
         }
     }
 
@@ -6314,6 +6633,46 @@ public class AccountManagerService
                 cursor.close();
             }
         }
+    }
 
+    private final class AccountManagerInternalImpl extends AccountManagerInternal {
+        @Override
+        public void requestAccountAccess(@NonNull Account account, @NonNull String packageName,
+                @IntRange(from = 0) int userId, @NonNull RemoteCallback callback) {
+            if (account == null) {
+                Slog.w(TAG, "account cannot be null");
+                return;
+            }
+            if (packageName == null) {
+                Slog.w(TAG, "packageName cannot be null");
+                return;
+            }
+            if (userId < UserHandle.USER_SYSTEM) {
+                Slog.w(TAG, "user id must be concrete");
+                return;
+            }
+            if (callback == null) {
+                Slog.w(TAG, "callback cannot be null");
+                return;
+            }
+
+            if (hasAccountAccess(account, packageName, new UserHandle(userId))) {
+                Bundle result = new Bundle();
+                result.putBoolean(AccountManager.KEY_BOOLEAN_RESULT, true);
+                callback.sendResult(result);
+                return;
+            }
+
+            final int uid;
+            try {
+                uid = mPackageManager.getPackageUidAsUser(packageName, userId);
+            } catch (NameNotFoundException e) {
+                Slog.e(TAG, "Unknown package " + packageName);
+                return;
+            }
+
+            Intent intent = newRequestAccountAccessIntent(account, packageName, uid, callback);
+            doNotification(mUsers.get(userId), account, null, intent, packageName, userId);
+        }
     }
 }

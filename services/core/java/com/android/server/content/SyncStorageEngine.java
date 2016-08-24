@@ -234,6 +234,12 @@ public class SyncStorageEngine extends Handler {
          */
         public static final int SYNCABLE_NOT_INITIALIZED = 2;
 
+        /**
+         * The adapter is syncable but does not have access to the synced account and needs a
+         * user access approval.
+         */
+        public static final int SYNCABLE_NO_ACCOUNT_ACCESS = 3;
+
         final EndPoint target;
         final int ident;
         boolean enabled;
