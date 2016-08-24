@@ -3420,7 +3420,9 @@ public class AccountManagerService
         final DevicePolicyManagerInternal dpmi =
                 LocalServices.getService(DevicePolicyManagerInternal.class);
         Intent intent = null;
-        if (errorCode == AccountManager.ERROR_CODE_USER_RESTRICTED) {
+        if (dpmi == null) {
+            intent = getDefaultCantAddAccountIntent(errorCode);
+        } else if (errorCode == AccountManager.ERROR_CODE_USER_RESTRICTED) {
             intent = dpmi.createUserRestrictionSupportIntent(userId,
                     UserManager.DISALLOW_MODIFY_ACCOUNTS);
         } else if (errorCode == AccountManager.ERROR_CODE_MANAGEMENT_DISABLED_FOR_ACCOUNT_TYPE) {
