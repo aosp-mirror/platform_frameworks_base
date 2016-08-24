@@ -28,6 +28,8 @@ import android.content.pm.PackageManager;
 import android.content.res.TypedArray;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.support.v4.widget.DrawerLayout;
 import android.util.ArraySet;
@@ -73,6 +75,7 @@ public class SettingsDrawerActivity extends Activity {
     private FrameLayout mContentHeaderContainer;
     private DrawerLayout mDrawerLayout;
     private boolean mShowingMenu;
+    private UserManager mUserManager;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -110,6 +113,8 @@ public class SettingsDrawerActivity extends Activity {
                 onTileClicked(mDrawerAdapter.getTile(position));
             };
         });
+
+        mUserManager = UserManager.get(this);
         if (DEBUG_TIMING) Log.d(TAG, "onCreate took " + (System.currentTimeMillis() - startTime)
                 + " ms");
     }
@@ -257,6 +262,7 @@ public class SettingsDrawerActivity extends Activity {
             return true;
         }
         try {
+            updateUserHandlesIfNeeded(tile);
             int numUserHandles = tile.userHandle.size();
             if (numUserHandles > 1) {
                 ProfileSelectDialog.show(getFragmentManager(), tile);
@@ -276,6 +282,19 @@ public class SettingsDrawerActivity extends Activity {
             Log.w(TAG, "Couldn't find tile " + tile.intent, e);
         }
         return true;
+    }
+
+    private void updateUserHandlesIfNeeded(Tile tile) {
+        List<UserHandle> userHandles = tile.userHandle;
+
+        for (int i = userHandles.size()-1; i >= 0; i--) {
+            if (mUserManager.getUserInfo(userHandles.get(i).getIdentifier()) == null) {
+                if (DEBUG_TIMING) {
+                    Log.d(TAG, "Delete the user: " + userHandles.get(i).getIdentifier());
+                }
+                userHandles.remove(i);
+            }
+        }
     }
 
     protected void onTileClicked(Tile tile) {
