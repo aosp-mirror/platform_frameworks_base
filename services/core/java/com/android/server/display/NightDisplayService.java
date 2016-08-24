@@ -182,6 +182,8 @@ public final class NightDisplayService extends SystemService
     }
 
     private void setUp() {
+        Slog.d(TAG, "setUp: currentUser=" + mCurrentUser);
+
         // Create a new controller for the current user and start listening for changes.
         mController = new NightDisplayController(getContext(), mCurrentUser);
         mController.setListener(this);
@@ -196,6 +198,8 @@ public final class NightDisplayService extends SystemService
     }
 
     private void tearDown() {
+        Slog.d(TAG, "tearDown: currentUser=" + mCurrentUser);
+
         if (mController != null) {
             mController.setListener(null);
             mController = null;
@@ -273,6 +277,8 @@ public final class NightDisplayService extends SystemService
 
     @Override
     public void onAutoModeChanged(int autoMode) {
+        Slog.d(TAG, "onAutoModeChanged: autoMode=" + autoMode);
+
         if (mAutoMode != null) {
             mAutoMode.onStop();
             mAutoMode = null;
@@ -291,6 +297,8 @@ public final class NightDisplayService extends SystemService
 
     @Override
     public void onCustomStartTimeChanged(NightDisplayController.LocalTime startTime) {
+        Slog.d(TAG, "onCustomStartTimeChanged: startTime=" + startTime);
+
         if (mAutoMode != null) {
             mAutoMode.onCustomStartTimeChanged(startTime);
         }
@@ -298,6 +306,8 @@ public final class NightDisplayService extends SystemService
 
     @Override
     public void onCustomEndTimeChanged(NightDisplayController.LocalTime endTime) {
+        Slog.d(TAG, "onCustomEndTimeChanged: endTime=" + endTime);
+
         if (mAutoMode != null) {
             mAutoMode.onCustomEndTimeChanged(endTime);
         }
@@ -419,7 +429,7 @@ public final class NightDisplayService extends SystemService
 
         @Override
         public void onAlarm() {
-            if (DEBUG) Slog.d(TAG, "onAlarm");
+            Slog.d(TAG, "onAlarm");
             updateActivated();
         }
     }
@@ -477,7 +487,8 @@ public final class NightDisplayService extends SystemService
 
         @Override
         public void onTwilightStateChanged(@Nullable TwilightState state) {
-            if (DEBUG) Slog.d(TAG, "onTwilightStateChanged");
+            Slog.d(TAG, "onTwilightStateChanged: isNight="
+                    + (state == null ? null : state.isNight()));
             updateActivated(state);
         }
     }

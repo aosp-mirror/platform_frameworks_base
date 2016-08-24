@@ -151,7 +151,7 @@ public final class TwilightService extends SystemService
     }
 
     private void startListening() {
-        if (DEBUG) Slog.d(TAG, "startListening");
+        Slog.d(TAG, "startListening");
 
         // Start listening for location updates (default: low power, max 1h, min 10m).
         mLocationManager.requestLocationUpdates(
@@ -173,7 +173,7 @@ public final class TwilightService extends SystemService
             mTimeChangedReceiver = new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
-                    if (DEBUG) Slog.d(TAG, "onReceive: " + intent);
+                    Slog.d(TAG, "onReceive: " + intent);
                     updateTwilightState();
                 }
             };
@@ -188,7 +188,7 @@ public final class TwilightService extends SystemService
     }
 
     private void stopListening() {
-        if (DEBUG) Slog.d(TAG, "stopListening");
+        Slog.d(TAG, "stopListening");
 
         if (mTimeChangedReceiver != null) {
             getContext().unregisterReceiver(mTimeChangedReceiver);
@@ -241,15 +241,20 @@ public final class TwilightService extends SystemService
 
     @Override
     public void onAlarm() {
-        if (DEBUG) Slog.d(TAG, "onAlarm");
+        Slog.d(TAG, "onAlarm");
         updateTwilightState();
     }
 
     @Override
     public void onLocationChanged(Location location) {
-        if (DEBUG) Slog.d(TAG, "onLocationChanged: " + location);
-        mLastLocation = location;
-        updateTwilightState();
+        if (location != null) {
+            Slog.d(TAG, "onLocationChanged:"
+                    + " provider=" + location.getProvider()
+                    + " accuracy=" + location.getAccuracy()
+                    + " time=" + location.getTime());
+            mLastLocation = location;
+            updateTwilightState();
+        }
     }
 
     @Override
