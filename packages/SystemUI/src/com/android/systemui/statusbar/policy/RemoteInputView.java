@@ -348,7 +348,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     }
 
     public boolean isActive() {
-        return mEditText.isFocused();
+        return mEditText.isFocused() && mEditText.isEnabled();
     }
 
     public void stealFocusFrom(RemoteInputView other) {
