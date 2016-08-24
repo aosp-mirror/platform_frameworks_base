@@ -24,6 +24,10 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.AnimatedVectorDrawable;
 
+import dalvik.annotation.optimization.FastNative;
+
+import libcore.util.NativeAllocationRegistry;
+
 /**
  * <p>A display list records a series of graphics related operations and can replay
  * them later. Display lists are usually built by recording operations on a
@@ -128,6 +132,12 @@ import android.graphics.drawable.AnimatedVectorDrawable;
  */
 public class RenderNode {
 
+ // Use a Holder to allow static initialization in the boot image.
+    private static class NoImagePreloadHolder {
+        public static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
+            RenderNode.class.getClassLoader(), nGetNativeFinalizer(), 1024);
+    }
+
     private boolean mValid;
     // Do not access directly unless you are ThreadedRenderer
     final long mNativeRenderNode;
@@ -135,6 +145,7 @@ public class RenderNode {
 
     private RenderNode(String name, View owningView) {
         mNativeRenderNode = nCreate(name);
+        NoImagePreloadHolder.sRegistry.registerNativeAllocation(this, mNativeRenderNode);
         mOwningView = owningView;
         if (mOwningView instanceof SurfaceView) {
             nRequestPositionUpdates(mNativeRenderNode, (SurfaceView) mOwningView);
@@ -145,6 +156,7 @@ public class RenderNode {
      * @see RenderNode#adopt(long)
      */
     private RenderNode(long nativePtr) {
+        NoImagePreloadHolder.sRegistry.registerNativeAllocation(this, nativePtr);
         mNativeRenderNode = nativePtr;
         mOwningView = null;
     }
@@ -812,99 +824,143 @@ public class RenderNode {
     // Intentionally not static because it acquires a reference to 'this'
     private native long nCreate(String name);
 
-    private static native void nDestroyRenderNode(long renderNode);
+    private static native long nGetNativeFinalizer();
     private static native void nSetDisplayList(long renderNode, long newData);
-
-    // Matrix
-
-    private static native void nGetTransformMatrix(long renderNode, long nativeMatrix);
-    private static native void nGetInverseTransformMatrix(long renderNode, long nativeMatrix);
-    private static native boolean nHasIdentityMatrix(long renderNode);
-
-    // Properties
-
-    private static native boolean nOffsetTopAndBottom(long renderNode, int offset);
-    private static native boolean nOffsetLeftAndRight(long renderNode, int offset);
-    private static native boolean nSetLeftTopRightBottom(long renderNode, int left, int top,
-            int right, int bottom);
-    private static native boolean nSetBottom(long renderNode, int bottom);
-    private static native boolean nSetRight(long renderNode, int right);
-    private static native boolean nSetTop(long renderNode, int top);
-    private static native boolean nSetLeft(long renderNode, int left);
-    private static native boolean nSetCameraDistance(long renderNode, float distance);
-    private static native boolean nSetPivotY(long renderNode, float pivotY);
-    private static native boolean nSetPivotX(long renderNode, float pivotX);
-    private static native boolean nSetLayerType(long renderNode, int layerType);
-    private static native boolean nSetLayerPaint(long renderNode, long paint);
-    private static native boolean nSetClipToBounds(long renderNode, boolean clipToBounds);
-    private static native boolean nSetClipBounds(long renderNode, int left, int top,
-            int right, int bottom);
-    private static native boolean nSetClipBoundsEmpty(long renderNode);
-    private static native boolean nSetProjectBackwards(long renderNode, boolean shouldProject);
-    private static native boolean nSetProjectionReceiver(long renderNode, boolean shouldRecieve);
-    private static native boolean nSetOutlineRoundRect(long renderNode, int left, int top,
-            int right, int bottom, float radius, float alpha);
-    private static native boolean nSetOutlineConvexPath(long renderNode, long nativePath,
-            float alpha);
-    private static native boolean nSetOutlineEmpty(long renderNode);
-    private static native boolean nSetOutlineNone(long renderNode);
-    private static native boolean nHasShadow(long renderNode);
-    private static native boolean nSetClipToOutline(long renderNode, boolean clipToOutline);
-    private static native boolean nSetRevealClip(long renderNode,
-            boolean shouldClip, float x, float y, float radius);
-    private static native boolean nSetAlpha(long renderNode, float alpha);
-    private static native boolean nSetHasOverlappingRendering(long renderNode,
-            boolean hasOverlappingRendering);
-    private static native boolean nSetElevation(long renderNode, float lift);
-    private static native boolean nSetTranslationX(long renderNode, float translationX);
-    private static native boolean nSetTranslationY(long renderNode, float translationY);
-    private static native boolean nSetTranslationZ(long renderNode, float translationZ);
-    private static native boolean nSetRotation(long renderNode, float rotation);
-    private static native boolean nSetRotationX(long renderNode, float rotationX);
-    private static native boolean nSetRotationY(long renderNode, float rotationY);
-    private static native boolean nSetScaleX(long renderNode, float scaleX);
-    private static native boolean nSetScaleY(long renderNode, float scaleY);
-    private static native boolean nSetStaticMatrix(long renderNode, long nativeMatrix);
-    private static native boolean nSetAnimationMatrix(long renderNode, long animationMatrix);
-
-    private static native boolean nHasOverlappingRendering(long renderNode);
-    private static native boolean nGetClipToOutline(long renderNode);
-    private static native float nGetAlpha(long renderNode);
-    private static native float nGetCameraDistance(long renderNode);
-    private static native float nGetScaleX(long renderNode);
-    private static native float nGetScaleY(long renderNode);
-    private static native float nGetElevation(long renderNode);
-    private static native float nGetTranslationX(long renderNode);
-    private static native float nGetTranslationY(long renderNode);
-    private static native float nGetTranslationZ(long renderNode);
-    private static native float nGetRotation(long renderNode);
-    private static native float nGetRotationX(long renderNode);
-    private static native float nGetRotationY(long renderNode);
-    private static native boolean nIsPivotExplicitlySet(long renderNode);
-    private static native float nGetPivotX(long renderNode);
-    private static native float nGetPivotY(long renderNode);
     private static native void nOutput(long renderNode);
     private static native int nGetDebugSize(long renderNode);
-
     private static native void nRequestPositionUpdates(long renderNode, SurfaceView callback);
 
-    ///////////////////////////////////////////////////////////////////////////
     // Animations
-    ///////////////////////////////////////////////////////////////////////////
 
     private static native void nAddAnimator(long renderNode, long animatorPtr);
     private static native void nEndAllAnimators(long renderNode);
 
     ///////////////////////////////////////////////////////////////////////////
-    // Finalization
+    // Fast native methods
     ///////////////////////////////////////////////////////////////////////////
 
-    @Override
-    protected void finalize() throws Throwable {
-        try {
-            nDestroyRenderNode(mNativeRenderNode);
-        } finally {
-            super.finalize();
-        }
-    }
+    // Matrix
+
+    @FastNative
+    private static native void nGetTransformMatrix(long renderNode, long nativeMatrix);
+    @FastNative
+    private static native void nGetInverseTransformMatrix(long renderNode, long nativeMatrix);
+    @FastNative
+    private static native boolean nHasIdentityMatrix(long renderNode);
+
+    // Properties
+
+    @FastNative
+    private static native boolean nOffsetTopAndBottom(long renderNode, int offset);
+    @FastNative
+    private static native boolean nOffsetLeftAndRight(long renderNode, int offset);
+    @FastNative
+    private static native boolean nSetLeftTopRightBottom(long renderNode, int left, int top,
+            int right, int bottom);
+    @FastNative
+    private static native boolean nSetBottom(long renderNode, int bottom);
+    @FastNative
+    private static native boolean nSetRight(long renderNode, int right);
+    @FastNative
+    private static native boolean nSetTop(long renderNode, int top);
+    @FastNative
+    private static native boolean nSetLeft(long renderNode, int left);
+    @FastNative
+    private static native boolean nSetCameraDistance(long renderNode, float distance);
+    @FastNative
+    private static native boolean nSetPivotY(long renderNode, float pivotY);
+    @FastNative
+    private static native boolean nSetPivotX(long renderNode, float pivotX);
+    @FastNative
+    private static native boolean nSetLayerType(long renderNode, int layerType);
+    @FastNative
+    private static native boolean nSetLayerPaint(long renderNode, long paint);
+    @FastNative
+    private static native boolean nSetClipToBounds(long renderNode, boolean clipToBounds);
+    @FastNative
+    private static native boolean nSetClipBounds(long renderNode, int left, int top,
+            int right, int bottom);
+    @FastNative
+    private static native boolean nSetClipBoundsEmpty(long renderNode);
+    @FastNative
+    private static native boolean nSetProjectBackwards(long renderNode, boolean shouldProject);
+    @FastNative
+    private static native boolean nSetProjectionReceiver(long renderNode, boolean shouldRecieve);
+    @FastNative
+    private static native boolean nSetOutlineRoundRect(long renderNode, int left, int top,
+            int right, int bottom, float radius, float alpha);
+    @FastNative
+    private static native boolean nSetOutlineConvexPath(long renderNode, long nativePath,
+            float alpha);
+    @FastNative
+    private static native boolean nSetOutlineEmpty(long renderNode);
+    @FastNative
+    private static native boolean nSetOutlineNone(long renderNode);
+    @FastNative
+    private static native boolean nHasShadow(long renderNode);
+    @FastNative
+    private static native boolean nSetClipToOutline(long renderNode, boolean clipToOutline);
+    @FastNative
+    private static native boolean nSetRevealClip(long renderNode,
+            boolean shouldClip, float x, float y, float radius);
+    @FastNative
+    private static native boolean nSetAlpha(long renderNode, float alpha);
+    @FastNative
+    private static native boolean nSetHasOverlappingRendering(long renderNode,
+            boolean hasOverlappingRendering);
+    @FastNative
+    private static native boolean nSetElevation(long renderNode, float lift);
+    @FastNative
+    private static native boolean nSetTranslationX(long renderNode, float translationX);
+    @FastNative
+    private static native boolean nSetTranslationY(long renderNode, float translationY);
+    @FastNative
+    private static native boolean nSetTranslationZ(long renderNode, float translationZ);
+    @FastNative
+    private static native boolean nSetRotation(long renderNode, float rotation);
+    @FastNative
+    private static native boolean nSetRotationX(long renderNode, float rotationX);
+    @FastNative
+    private static native boolean nSetRotationY(long renderNode, float rotationY);
+    @FastNative
+    private static native boolean nSetScaleX(long renderNode, float scaleX);
+    @FastNative
+    private static native boolean nSetScaleY(long renderNode, float scaleY);
+    @FastNative
+    private static native boolean nSetStaticMatrix(long renderNode, long nativeMatrix);
+    @FastNative
+    private static native boolean nSetAnimationMatrix(long renderNode, long animationMatrix);
+
+    @FastNative
+    private static native boolean nHasOverlappingRendering(long renderNode);
+    @FastNative
+    private static native boolean nGetClipToOutline(long renderNode);
+    @FastNative
+    private static native float nGetAlpha(long renderNode);
+    @FastNative
+    private static native float nGetCameraDistance(long renderNode);
+    @FastNative
+    private static native float nGetScaleX(long renderNode);
+    @FastNative
+    private static native float nGetScaleY(long renderNode);
+    @FastNative
+    private static native float nGetElevation(long renderNode);
+    @FastNative
+    private static native float nGetTranslationX(long renderNode);
+    @FastNative
+    private static native float nGetTranslationY(long renderNode);
+    @FastNative
+    private static native float nGetTranslationZ(long renderNode);
+    @FastNative
+    private static native float nGetRotation(long renderNode);
+    @FastNative
+    private static native float nGetRotationX(long renderNode);
+    @FastNative
+    private static native float nGetRotationY(long renderNode);
+    @FastNative
+    private static native boolean nIsPivotExplicitlySet(long renderNode);
+    @FastNative
+    private static native float nGetPivotX(long renderNode);
+    @FastNative
+    private static native float nGetPivotY(long renderNode);
 }
