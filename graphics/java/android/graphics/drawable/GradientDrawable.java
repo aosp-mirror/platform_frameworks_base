@@ -475,16 +475,17 @@ public class GradientDrawable extends Drawable {
     }
 
     /**
-     * Sets the center location in pixels of the gradient. The radius is
-     * honored only when the gradient type is set to {@link #RADIAL_GRADIENT}
-     * or {@link #SWEEP_GRADIENT}.
+     * Sets the position of the center of the gradient as a fraction of the
+     * width and height.
+     * <p>
+     * The default value is (0.5, 0.5).
      * <p>
      * <strong>Note</strong>: changing this property will affect all instances
      * of a drawable loaded from a resource. It is recommended to invoke
      * {@link #mutate()} before changing this property.
      *
-     * @param x the x coordinate of the gradient's center in pixels
-     * @param y the y coordinate of the gradient's center in pixels
+     * @param x the X-position of the center of the gradient
+     * @param y the Y-position of the center of the gradient
      *
      * @see #mutate()
      * @see #setGradientType(int)
@@ -498,9 +499,10 @@ public class GradientDrawable extends Drawable {
     }
 
     /**
-     * Returns the center X location of this gradient in pixels.
+     * Returns the X-position of the center of the gradient as a fraction of
+     * the width.
      *
-     * @return the center X location of this gradient in pixels
+     * @return the X-position of the center of the gradient
      * @see #setGradientCenter(float, float)
      */
     public float getGradientCenterX() {
@@ -508,9 +510,10 @@ public class GradientDrawable extends Drawable {
     }
 
     /**
-     * Returns the center Y location of this gradient in pixels.
+     * Returns the Y-position of the center of this gradient as a fraction of
+     * the height.
      *
-     * @return the center Y location of this gradient in pixels
+     * @return the Y-position of the center of the gradient
      * @see #setGradientCenter(float, float)
      */
     public float getGradientCenterY() {
@@ -554,19 +557,43 @@ public class GradientDrawable extends Drawable {
     }
 
     /**
-     * Sets whether or not this drawable will honor its {@code level} property.
+     * Sets whether this drawable's {@code level} property will be used to
+     * scale the gradient. If a gradient is not used, this property has no
+     * effect.
      * <p>
-     * <strong>Note</strong>: changing this property will affect all instances
+     * Scaling behavior varies based on gradient type:
+     * <ul>
+     *     <li>{@link #LINEAR_GRADIENT} adjusts the ending position along the
+     *         gradient's axis of orientation (see {@link #getOrientation()})
+     *     <li>{@link #RADIAL_GRADIENT} adjusts the outer radius
+     *     <li>{@link #SWEEP_GRADIENT} adjusts the ending angle
+     * <ul>
+     * <p>
+     * The default value for this property is {@code false}.
+     * <p>
+     * <strong>Note</strong>: This property corresponds to the
+     * {@code android:useLevel} attribute on the inner {@code &lt;gradient&gt;}
+     * tag, NOT the {@code android:useLevel} attribute on the outer
+     * {@code &lt;shape&gt;} tag. For example,
+     * <pre>{@code
+     * <shape ...>
+     *     <gradient
+     *         ...
+     *         android:useLevel="true" />
+     * </shape>
+     * }</pre><p>
+     * <strong>Note</strong>: Changing this property will affect all instances
      * of a drawable loaded from a resource. It is recommended to invoke
      * {@link #mutate()} before changing this property.
      *
-     * @param useLevel {@code true} if this drawable should honor its level,
-     *                 {@code false} otherwise
+     * @param useLevel {@code true} if the gradient should be scaled based on
+     *                 level, {@code false} otherwise
      *
      * @see #mutate()
      * @see #setLevel(int)
      * @see #getLevel()
      * @see #getUseLevel()
+     * @attr ref android.R.styleable#GradientDrawableGradient_useLevel
      */
     public void setUseLevel(boolean useLevel) {
         mGradientState.mUseLevel = useLevel;
@@ -575,12 +602,13 @@ public class GradientDrawable extends Drawable {
     }
 
     /**
-     * Returns whether or not this drawable will honor its {@code level}
-     * property.
+     * Returns whether this drawable's {@code level} property will be used to
+     * scale the gradient.
      *
-     * @return {@code true} if this drawable should honor its level,
+     * @return {@code true} if the gradient should be scaled based on level,
      *         {@code false} otherwise
      * @see #setUseLevel(boolean)
+     * @attr ref android.R.styleable#GradientDrawableGradient_useLevel
      */
     public boolean getUseLevel() {
         return mGradientState.mUseLevel;
