@@ -248,6 +248,11 @@ public class CarStatusBar extends PhoneStatusBar implements
         }
     }
 
+    @Override
+    public void updateMediaMetaData(boolean metaDataChanged, boolean allowEnterAnimation) {
+        // Do nothing, we don't want to display media art in the lock screen for a car.
+    }
+
     private int startActivityWithOptions(Intent intent, Bundle options) {
         int result = ActivityManager.START_CANCELED;
         try {
