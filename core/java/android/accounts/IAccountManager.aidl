@@ -19,7 +19,10 @@ package android.accounts;
 import android.accounts.IAccountManagerResponse;
 import android.accounts.Account;
 import android.accounts.AuthenticatorDescription;
+import android.content.IntentSender;
 import android.os.Bundle;
+import android.os.RemoteCallback;
+import android.os.UserHandle;
 
 /**
  * Central application service that provides account management.
@@ -115,4 +118,10 @@ interface IAccountManager {
     boolean removeAccountVisibility(in Account a, in int uid);
     boolean makeAccountVisible(in Account a, in int uid);
     boolean isAccountVisible(in Account a, in int uid);
+
+    /* Check if the package in a user can access an account */
+    boolean hasAccountAccess(in Account account, String packageName, in UserHandle userHandle);
+    /* Crate an intent to request account access for package and a given user id */
+    IntentSender createRequestAccountAccessIntentSenderAsUser(in Account account,
+        String packageName, in UserHandle userHandle);
 }
