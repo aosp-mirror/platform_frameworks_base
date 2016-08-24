@@ -19,6 +19,7 @@ package com.android.server.content;
 import android.accounts.Account;
 import android.accounts.AccountAndUser;
 import android.accounts.AccountManager;
+import android.accounts.AccountManagerInternal;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
@@ -64,6 +65,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.PowerManager;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -79,6 +81,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerInternal;
 import com.google.android.collect.Lists;
@@ -132,6 +135,8 @@ import java.util.Set;
  */
 public class SyncManager {
     static final String TAG = "SyncManager";
+
+    private static final boolean DEBUG_ACCOUNT_ACCESS = false;
 
     /** Delay a sync due to local changes this long. In milliseconds */
     private static final long LOCAL_SYNC_DELAY;
@@ -193,6 +198,11 @@ public class SyncManager {
     private static final String SYNC_WAKE_LOCK_PREFIX = "*sync*/";
     private static final String HANDLE_SYNC_ALARM_WAKE_LOCK = "SyncManagerHandleSyncAlarm";
     private static final String SYNC_LOOP_WAKE_LOCK = "SyncLoopWakeLock";
+
+
+    private static final int SYNC_OP_STATE_VALID = 0;
+    private static final int SYNC_OP_STATE_INVALID = 1;
+    private static final int SYNC_OP_STATE_INVALID_NO_ACCOUNT_ACCESS = 2;
 
     private Context mContext;
 
@@ -309,6 +319,10 @@ public class SyncManager {
     private final PowerManager mPowerManager;
 
     private final UserManager mUserManager;
+
+    private final AccountManager mAccountManager;
+
+    private final AccountManagerInternal mAccountManagerInternal;
 
     private List<UserInfo> getAllUsers() {
         return mUserManager.getUsers();
@@ -490,8 +504,6 @@ public class SyncManager {
             @Override
             public void onSyncRequest(SyncStorageEngine.EndPoint info, int reason, Bundle extras) {
                 scheduleSync(info.account, info.userId, reason, info.provider, extras,
-                        0 /* no flexMillis */,
-                        0 /* run immediately */,
                         false);
             }
         });
@@ -522,8 +534,7 @@ public class SyncManager {
                 if (!removed) {
                     scheduleSync(null, UserHandle.USER_ALL,
                             SyncOperation.REASON_SERVICE_CHANGED,
-                            type.authority, null, 0 /* no delay */, 0 /* no delay */,
-                            false /* onlyThoseWithUnkownSyncableState */);
+                            type.authority, null, false /* onlyThoseWithUnkownSyncableState */);
                 }
             }
         }, mSyncHandler);
@@ -562,6 +573,9 @@ public class SyncManager {
         }
         mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        mAccountManager = (AccountManager) mContext.getSystemService(Context.ACCOUNT_SERVICE);
+        mAccountManagerInternal = LocalServices.getService(AccountManagerInternal.class);
+
         mBatteryStats = IBatteryStats.Stub.asInterface(ServiceManager.getService(
                 BatteryStats.SERVICE_NAME));
 
@@ -655,7 +669,7 @@ public class SyncManager {
         return mSyncStorageEngine;
     }
 
-    public int getIsSyncable(Account account, int userId, String providerName) {
+    private int getIsSyncable(Account account, int userId, String providerName) {
         int isSyncable = mSyncStorageEngine.getIsSyncable(account, userId, providerName);
         UserInfo userInfo = UserManager.get(mContext).getUserInfo(userId);
 
@@ -666,22 +680,22 @@ public class SyncManager {
         RegisteredServicesCache.ServiceInfo<SyncAdapterType> syncAdapterInfo =
                 mSyncAdapters.getServiceInfo(
                         SyncAdapterType.newKey(providerName, account.type), userId);
-        if (syncAdapterInfo == null) return isSyncable;
+        if (syncAdapterInfo == null) return AuthorityInfo.NOT_SYNCABLE;
 
         PackageInfo pInfo = null;
         try {
             pInfo = AppGlobals.getPackageManager().getPackageInfo(
                     syncAdapterInfo.componentName.getPackageName(), 0, userId);
-            if (pInfo == null) return isSyncable;
+            if (pInfo == null) return AuthorityInfo.NOT_SYNCABLE;
         } catch (RemoteException re) {
             // Shouldn't happen.
-            return isSyncable;
+            return AuthorityInfo.NOT_SYNCABLE;
         }
         if (pInfo.restrictedAccountType != null
                 && pInfo.restrictedAccountType.equals(account.type)) {
             return isSyncable;
         } else {
-            return 0;
+            return AuthorityInfo.NOT_SYNCABLE;
         }
     }
 
@@ -733,13 +747,10 @@ public class SyncManager {
      * @param extras a Map of SyncAdapter-specific information to control
      *          syncs of a specific provider. Can be null. Is ignored
      *          if the url is null.
-     * @param beforeRuntimeMillis milliseconds before runtimeMillis that this sync can run.
-     * @param runtimeMillis maximum milliseconds in the future to wait before performing sync.
      * @param onlyThoseWithUnkownSyncableState Only sync authorities that have unknown state.
      */
     public void scheduleSync(Account requestedAccount, int userId, int reason,
-            String requestedAuthority, Bundle extras, long beforeRuntimeMillis,
-            long runtimeMillis, boolean onlyThoseWithUnkownSyncableState) {
+            String requestedAuthority, Bundle extras, boolean onlyThoseWithUnkownSyncableState) {
         final boolean isLoggable = Log.isLoggable(TAG, Log.VERBOSE);
         if (extras == null) {
             extras = new Bundle();
@@ -749,17 +760,27 @@ public class SyncManager {
                     + requestedAuthority);
         }
 
-        AccountAndUser[] accounts;
-        if (requestedAccount != null && userId != UserHandle.USER_ALL) {
-            accounts = new AccountAndUser[] { new AccountAndUser(requestedAccount, userId) };
+        AccountAndUser[] accounts = null;
+        if (requestedAccount != null) {
+            if (userId != UserHandle.USER_ALL) {
+                accounts = new AccountAndUser[]{new AccountAndUser(requestedAccount, userId)};
+            } else {
+                for (AccountAndUser runningAccount : mRunningAccounts) {
+                    if (requestedAccount.equals(runningAccount.account)) {
+                        accounts = ArrayUtils.appendElement(AccountAndUser.class,
+                                accounts, runningAccount);
+                    }
+                }
+            }
         } else {
             accounts = mRunningAccounts;
-            if (accounts.length == 0) {
-                if (isLoggable) {
-                    Slog.v(TAG, "scheduleSync: no accounts configured, dropping");
-                }
-                return;
+        }
+
+        if (ArrayUtils.isEmpty(accounts)) {
+            if (isLoggable) {
+                Slog.v(TAG, "scheduleSync: no accounts configured, dropping");
             }
+            return;
         }
 
         final boolean uploadOnly = extras.getBoolean(ContentResolver.SYNC_EXTRAS_UPLOAD, false);
@@ -808,29 +829,41 @@ public class SyncManager {
             }
 
             for (String authority : syncableAuthorities) {
-                int isSyncable = getIsSyncable(account.account, account.userId,
-                        authority);
+                int isSyncable = computeSyncable(account.account, account.userId, authority);
+
                 if (isSyncable == AuthorityInfo.NOT_SYNCABLE) {
                     continue;
                 }
-                final RegisteredServicesCache.ServiceInfo<SyncAdapterType> syncAdapterInfo;
-                syncAdapterInfo = mSyncAdapters.getServiceInfo(
-                        SyncAdapterType.newKey(authority, account.account.type), account.userId);
+
+                final RegisteredServicesCache.ServiceInfo<SyncAdapterType> syncAdapterInfo =
+                        mSyncAdapters.getServiceInfo(SyncAdapterType.newKey(authority,
+                                account.account.type), account.userId);
                 if (syncAdapterInfo == null) {
                     continue;
                 }
+
                 final int owningUid = syncAdapterInfo.uid;
-                final String owningPackage = syncAdapterInfo.componentName.getPackageName();
-                try {
-                    if (ActivityManagerNative.getDefault().getAppStartMode(owningUid,
-                            owningPackage) == ActivityManager.APP_START_MODE_DISABLED) {
-                        Slog.w(TAG, "Not scheduling job " + syncAdapterInfo.uid + ":"
-                                + syncAdapterInfo.componentName
-                                + " -- package not allowed to start");
-                        continue;
+
+                if (isSyncable == AuthorityInfo.SYNCABLE_NO_ACCOUNT_ACCESS) {
+                    if (isLoggable) {
+                        Slog.v(TAG, "    Not scheduling sync operation: "
+                                + "isSyncable == SYNCABLE_NO_ACCOUNT_ACCESS");
                     }
-                } catch (RemoteException e) {
+                    Bundle finalExtras = new Bundle(extras);
+                    mAccountManagerInternal.requestAccountAccess(account.account,
+                            syncAdapterInfo.componentName.getPackageName(),
+                            UserHandle.getUserId(owningUid),
+                            new RemoteCallback((Bundle result) -> {
+                                if (result != null
+                                        && result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT)) {
+                                    scheduleSync(account.account, userId, reason, authority,
+                                            finalExtras, onlyThoseWithUnkownSyncableState);
+                                }
+                            }
+                        ));
+                    continue;
                 }
+
                 final boolean allowParallelSyncs = syncAdapterInfo.type.allowParallelSyncs();
                 final boolean isAlwaysSyncable = syncAdapterInfo.type.isAlwaysSyncable();
                 if (isSyncable < 0 && isAlwaysSyncable) {
@@ -838,6 +871,7 @@ public class SyncManager {
                             account.account, account.userId, authority, AuthorityInfo.SYNCABLE);
                     isSyncable = AuthorityInfo.SYNCABLE;
                 }
+
                 if (onlyThoseWithUnkownSyncableState && isSyncable >= 0) {
                     continue;
                 }
@@ -863,6 +897,9 @@ public class SyncManager {
                                 account.account, authority, account.userId);
                 long delayUntil =
                         mSyncStorageEngine.getDelayUntilTime(info);
+
+                final String owningPackage = syncAdapterInfo.componentName.getPackageName();
+
                 if (isSyncable < 0) {
                     // Initialisation sync.
                     Bundle newExtras = new Bundle();
@@ -887,8 +924,6 @@ public class SyncManager {
                     if (isLoggable) {
                         Slog.v(TAG, "scheduleSync:"
                                 + " delay until " + delayUntil
-                                + " run by " + runtimeMillis
-                                + " flexMillis " + beforeRuntimeMillis
                                 + ", source " + source
                                 + ", account " + account
                                 + ", authority " + authority
@@ -901,6 +936,56 @@ public class SyncManager {
                     );
                 }
             }
+        }
+    }
+
+    public int computeSyncable(Account account, int userId, String authority) {
+        final int status = getIsSyncable(account, userId, authority);
+        if (status == AuthorityInfo.NOT_SYNCABLE) {
+            return AuthorityInfo.NOT_SYNCABLE;
+        }
+        final SyncAdapterType type = SyncAdapterType.newKey(authority, account.type);
+        final RegisteredServicesCache.ServiceInfo<SyncAdapterType> syncAdapterInfo =
+                mSyncAdapters.getServiceInfo(type, userId);
+        if (syncAdapterInfo == null) {
+            return AuthorityInfo.NOT_SYNCABLE;
+        }
+        final int owningUid = syncAdapterInfo.uid;
+        final String owningPackage = syncAdapterInfo.componentName.getPackageName();
+        try {
+            if (ActivityManagerNative.getDefault().getAppStartMode(owningUid,
+                    owningPackage) == ActivityManager.APP_START_MODE_DISABLED) {
+                Slog.w(TAG, "Not scheduling job " + syncAdapterInfo.uid + ":"
+                        + syncAdapterInfo.componentName
+                        + " -- package not allowed to start");
+                return AuthorityInfo.NOT_SYNCABLE;
+            }
+        } catch (RemoteException e) {
+            /* ignore - local call */
+        }
+        if (!canAccessAccount(account, owningPackage, owningUid)) {
+            Log.w(TAG, "Access to " + account + " denied for package "
+                    + owningPackage + " in UID " + syncAdapterInfo.uid);
+            return AuthorityInfo.SYNCABLE_NO_ACCOUNT_ACCESS;
+        }
+
+        return status;
+    }
+
+    private boolean canAccessAccount(Account account, String packageName, int uid) {
+        if (mAccountManager.hasAccountAccess(account, packageName,
+                UserHandle.getUserHandleForUid(uid))) {
+            return true;
+        }
+        // We relax the account access rule to also include the system apps as
+        // they are trusted and we want to minimize the cases where the user
+        // involvement is required to grant access to the synced account.
+        try {
+            mContext.getPackageManager().getApplicationInfoAsUser(packageName,
+                    PackageManager.MATCH_SYSTEM_ONLY, UserHandle.getUserId(uid));
+            return true;
+        } catch (NameNotFoundException e) {
+            return false;
         }
     }
 
@@ -960,8 +1045,6 @@ public class SyncManager {
         final Bundle extras = new Bundle();
         extras.putBoolean(ContentResolver.SYNC_EXTRAS_UPLOAD, true);
         scheduleSync(account, userId, reason, authority, extras,
-                LOCAL_SYNC_DELAY /* earliest run time */,
-                2 * LOCAL_SYNC_DELAY /* latest sync time. */,
                 false /* onlyThoseWithUnkownSyncableState */);
     }
 
@@ -1421,7 +1504,6 @@ public class SyncManager {
                 mContext.getOpPackageName());
         for (Account account : accounts) {
             scheduleSync(account, userId, SyncOperation.REASON_USER_START, null, null,
-                    0 /* no delay */, 0 /* No flexMillis */,
                     true /* onlyThoseWithUnknownSyncableState */);
         }
     }
@@ -2530,13 +2612,18 @@ public class SyncManager {
                 }
             }
 
-            if (isOperationValid(op)) {
-                if (!dispatchSyncOperation(op)) {
+            final int syncOpState = computeSyncOpState(op);
+            switch (syncOpState) {
+                case SYNC_OP_STATE_INVALID_NO_ACCOUNT_ACCESS:
+                case SYNC_OP_STATE_INVALID: {
                     mSyncJobService.callJobFinished(op.jobId, false);
-                }
-            } else {
+                } return;
+            }
+
+            if (!dispatchSyncOperation(op)) {
                 mSyncJobService.callJobFinished(op.jobId, false);
             }
+
             setAuthorityPendingState(op.target);
         }
 
@@ -2596,8 +2683,7 @@ public class SyncManager {
 
             if (syncTargets != null) {
                 scheduleSync(syncTargets.account, syncTargets.userId,
-                        SyncOperation.REASON_ACCOUNTS_UPDATED, syncTargets.provider, null, 0, 0,
-                        true);
+                        SyncOperation.REASON_ACCOUNTS_UPDATED, syncTargets.provider, null, true);
             }
         }
 
@@ -2665,6 +2751,26 @@ public class SyncManager {
                     SyncStorageEngine.SOURCE_PERIODIC, extras,
                     syncAdapterInfo.type.allowParallelSyncs(), true, SyncOperation.NO_JOB_ID,
                     pollFrequencyMillis, flexMillis);
+
+            final int syncOpState = computeSyncOpState(op);
+            switch (syncOpState) {
+                case SYNC_OP_STATE_INVALID_NO_ACCOUNT_ACCESS: {
+                    mAccountManagerInternal.requestAccountAccess(op.target.account,
+                            op.owningPackage, UserHandle.getUserId(op.owningUid),
+                            new RemoteCallback((Bundle result) -> {
+                                if (result != null
+                                        && result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT)) {
+                                    updateOrAddPeriodicSync(target, pollFrequency, flex, extras);
+                                }
+                            }
+                        ));
+                } return;
+
+                case SYNC_OP_STATE_INVALID: {
+                    return;
+                }
+            }
+
             scheduleSyncOperationH(op);
             mSyncStorageEngine.reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
         }
@@ -2725,29 +2831,38 @@ public class SyncManager {
         /**
          * Determine if a sync is no longer valid and should be dropped.
          */
-        private boolean isOperationValid(SyncOperation op) {
+        private int computeSyncOpState(SyncOperation op) {
             final boolean isLoggable = Log.isLoggable(TAG, Log.VERBOSE);
             int state;
             final EndPoint target = op.target;
-            boolean syncEnabled = mSyncStorageEngine.getMasterSyncAutomatically(target.userId);
+
             // Drop the sync if the account of this operation no longer exists.
             AccountAndUser[] accounts = mRunningAccounts;
             if (!containsAccountAndUser(accounts, target.account, target.userId)) {
                 if (isLoggable) {
                     Slog.v(TAG, "    Dropping sync operation: account doesn't exist.");
                 }
-                return false;
+                return SYNC_OP_STATE_INVALID;
             }
             // Drop this sync request if it isn't syncable.
-            state = getIsSyncable(target.account, target.userId, target.provider);
-            if (state == 0) {
+            state = computeSyncable(target.account, target.userId, target.provider);
+            if (state == AuthorityInfo.SYNCABLE_NO_ACCOUNT_ACCESS) {
                 if (isLoggable) {
-                    Slog.v(TAG, "    Dropping sync operation: isSyncable == 0.");
+                    Slog.v(TAG, "    Dropping sync operation: "
+                            + "isSyncable == SYNCABLE_NO_ACCOUNT_ACCESS");
                 }
-                return false;
+                return SYNC_OP_STATE_INVALID_NO_ACCOUNT_ACCESS;
             }
-            syncEnabled = syncEnabled && mSyncStorageEngine.getSyncAutomatically(
-                    target.account, target.userId, target.provider);
+            if (state != AuthorityInfo.SYNCABLE) {
+                if (isLoggable) {
+                    Slog.v(TAG, "    Dropping sync operation: isSyncable != SYNCABLE");
+                }
+                return SYNC_OP_STATE_INVALID;
+            }
+
+            final boolean syncEnabled = mSyncStorageEngine.getMasterSyncAutomatically(target.userId)
+                    && mSyncStorageEngine.getSyncAutomatically(target.account,
+                            target.userId, target.provider);
 
             // We ignore system settings that specify the sync is invalid if:
             // 1) It's manual - we try it anyway. When/if it fails it will be rescheduled.
@@ -2760,9 +2875,9 @@ public class SyncManager {
                 if (isLoggable) {
                     Slog.v(TAG, "    Dropping sync operation: disallowed by settings/network.");
                 }
-                return false;
+                return SYNC_OP_STATE_INVALID;
             }
-            return true;
+            return SYNC_OP_STATE_VALID;
         }
 
         private boolean dispatchSyncOperation(SyncOperation op) {
