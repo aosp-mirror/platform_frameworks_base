@@ -57,6 +57,9 @@ import java.util.concurrent.TimeoutException;
  * spooler if needed, to make the timed remote calls, to handle
  * remote exceptions, and to bind/unbind to the remote instance as
  * needed.
+ *
+ * The calls might be blocking and need the main thread of to be unblocked to finish. Hence do not
+ * call this while holding any monitors that might need to be acquired the main thread.
  */
 final class RemotePrintSpooler {
 
