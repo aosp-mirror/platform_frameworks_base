@@ -53813,6 +53813,7 @@ package java.security.spec {
     ctor public MGF1ParameterSpec(java.lang.String);
     method public java.lang.String getDigestAlgorithm();
     field public static final java.security.spec.MGF1ParameterSpec SHA1;
+    field public static final java.security.spec.MGF1ParameterSpec SHA224;
     field public static final java.security.spec.MGF1ParameterSpec SHA256;
     field public static final java.security.spec.MGF1ParameterSpec SHA384;
     field public static final java.security.spec.MGF1ParameterSpec SHA512;
