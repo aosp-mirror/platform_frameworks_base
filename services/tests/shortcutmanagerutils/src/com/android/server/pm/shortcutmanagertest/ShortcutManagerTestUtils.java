@@ -156,10 +156,10 @@ public class ShortcutManagerTestUtils {
         return result;
     }
 
-    private static List<String> runCommand(Instrumentation instrumentation, String command) {
+    public static List<String> runCommand(Instrumentation instrumentation, String command) {
         return runCommand(instrumentation, command, null);
     }
-    private static List<String> runCommand(Instrumentation instrumentation, String command,
+    public static List<String> runCommand(Instrumentation instrumentation, String command,
             Predicate<List<String>> resultAsserter) {
         Log.d(TAG, "Running command: " + command);
         final List<String> result;
@@ -175,11 +175,11 @@ public class ShortcutManagerTestUtils {
         return result;
     }
 
-    private static void runCommandForNoOutput(Instrumentation instrumentation, String command) {
+    public static void runCommandForNoOutput(Instrumentation instrumentation, String command) {
         runCommand(instrumentation, command, result -> result.size() == 0);
     }
 
-    private static List<String> runShortcutCommand(Instrumentation instrumentation, String command,
+    public static List<String> runShortcutCommand(Instrumentation instrumentation, String command,
             Predicate<List<String>> resultAsserter) {
         return runCommand(instrumentation, "cmd shortcut " + command, resultAsserter);
     }
@@ -204,7 +204,8 @@ public class ShortcutManagerTestUtils {
     }
 
     public static void setDefaultLauncher(Instrumentation instrumentation, String component) {
-        runCommand(instrumentation, "cmd package set-home-activity " + component,
+        runCommand(instrumentation, "cmd package set-home-activity --user "
+                + instrumentation.getContext().getUserId() + " " + component,
                 result -> result.contains("Success"));
     }
 
@@ -1053,7 +1054,11 @@ public class ShortcutManagerTestUtils {
     }
 
     public static void retryUntil(BooleanSupplier checker, String message) {
-        final long timeOut = System.currentTimeMillis() + 30 * 1000; // wait for 30 seconds.
+        retryUntil(checker, message, 30);
+    }
+
+    public static void retryUntil(BooleanSupplier checker, String message, long timeoutSeconds) {
+        final long timeOut = System.currentTimeMillis() + timeoutSeconds * 1000;
         while (!checker.getAsBoolean()) {
             if (System.currentTimeMillis() > timeOut) {
                 break;
