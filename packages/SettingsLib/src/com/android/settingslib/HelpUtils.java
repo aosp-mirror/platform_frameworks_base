@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
 import android.net.Uri;
@@ -140,7 +141,7 @@ public class HelpUtils {
         try {
             Intent intent = Intent.parseUri(helpUriString,
                     Intent.URI_ANDROID_APP_SCHEME | Intent.URI_INTENT_SCHEME);
-            addIntentParameters(context, intent, backupContext);
+            addIntentParameters(context, intent, backupContext, true /* sendPackageName */);
             ComponentName component = intent.resolveActivity(context.getPackageManager());
             if (component != null) {
                 return intent;
@@ -164,10 +165,27 @@ public class HelpUtils {
         return intent;
     }
 
-    public static void addIntentParameters(Context context, Intent intent, String backupContext) {
+    public static void addIntentParameters(Context context, Intent intent, String backupContext,
+            boolean sendPackageName) {
         if (!intent.hasExtra(EXTRA_CONTEXT)) {
             // Insert some context if none exists.
             intent.putExtra(EXTRA_CONTEXT, backupContext);
+        }
+
+        Resources resources = context.getResources();
+        boolean includePackageName = resources.getBoolean(R.bool.config_sendPackageName);
+
+        if (sendPackageName && includePackageName) {
+            String[] packageNameKey =
+                    {resources.getString(R.string.config_helpPackageNameKey)};
+            String[] packageNameValue =
+                    {resources.getString(R.string.config_helpPackageNameValue)};
+            String intentExtraKey =
+                    resources.getString(R.string.config_helpIntentExtraKey);
+            String intentNameKey =
+                    resources.getString(R.string.config_helpIntentNameKey);
+            intent.putExtra(intentExtraKey, packageNameKey);
+            intent.putExtra(intentNameKey, packageNameValue);
         }
         intent.putExtra(EXTRA_THEME, 1 /* Light, dark action bar */);
         TypedArray array = context.obtainStyledAttributes(new int[]{android.R.attr.colorPrimary});
