@@ -951,6 +951,11 @@ public class CarrierConfigManager {
      */
     public static final String FILTERED_CNAP_NAMES_STRING_ARRAY = "filtered_cnap_names_string_array";
 
+    /**
+     * The RCS configuration server URL. This URL is used to initiate RCS provisioning.
+     */
+    public static final String KEY_RCS_CONFIG_SERVER_URL_STRING = "rcs_config_server_url_string";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -1097,6 +1102,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_USE_RCS_PRESENCE_BOOL, false);
         sDefaults.putBoolean(KEY_FORCE_IMEI_BOOL, false);
         sDefaults.putInt(KEY_CDMA_ROAMING_MODE_INT, CDMA_ROAMING_MODE_RADIO_DEFAULT);
+        sDefaults.putString(KEY_RCS_CONFIG_SERVER_URL_STRING, "");
 
         // Carrier Signalling Receivers
         sDefaults.putStringArray(KEY_SIGNAL_REDIRECTION_RECEIVER_STRING_ARRAY, null);
