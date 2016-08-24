@@ -2263,7 +2263,7 @@ public class AccountManagerService
 
         final int callingUid = getCallingUid();
         clearCallingIdentity();
-        if (callingUid != Process.SYSTEM_UID) {
+        if (UserHandle.getAppId(callingUid) != Process.SYSTEM_UID) {
             throw new SecurityException("can only call from system");
         }
         int userId = UserHandle.getUserId(callingUid);
@@ -3446,7 +3446,7 @@ public class AccountManagerService
     @Override
     public boolean hasAccountAccess(@NonNull Account account,  @NonNull String packageName,
             @NonNull UserHandle userHandle) {
-        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+        if (UserHandle.getAppId(Binder.getCallingUid()) != Process.SYSTEM_UID) {
             throw new SecurityException("Can be called only by system UID");
         }
         Preconditions.checkNotNull(account, "account cannot be null");
@@ -3495,7 +3495,7 @@ public class AccountManagerService
     @Override
     public IntentSender createRequestAccountAccessIntentSenderAsUser(@NonNull Account account,
             @NonNull String packageName, @NonNull UserHandle userHandle) {
-        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+        if (UserHandle.getAppId(Binder.getCallingUid()) != Process.SYSTEM_UID) {
             throw new SecurityException("Can be called only by system UID");
         }
 
@@ -3517,10 +3517,15 @@ public class AccountManagerService
 
         Intent intent = newRequestAccountAccessIntent(account, packageName, uid, null);
 
-        return PendingIntent.getActivityAsUser(
-                mContext, 0, intent, PendingIntent.FLAG_ONE_SHOT
-                        | PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
-                null, new UserHandle(userId)).getIntentSender();
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return PendingIntent.getActivityAsUser(
+                    mContext, 0, intent, PendingIntent.FLAG_ONE_SHOT
+                            | PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
+                    null, new UserHandle(userId)).getIntentSender();
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     private Intent newRequestAccountAccessIntent(Account account, String packageName,
@@ -5443,10 +5448,10 @@ public class AccountManagerService
 
     private boolean hasExplicitlyGrantedPermission(Account account, String authTokenType,
             int callerUid) {
-        if (callerUid == Process.SYSTEM_UID) {
+        if (UserHandle.getAppId(callerUid) == Process.SYSTEM_UID) {
             return true;
         }
-        UserAccounts accounts = getUserAccountsForCaller();
+        UserAccounts accounts = getUserAccounts(UserHandle.getUserId(callerUid));
         synchronized (accounts.cacheLock) {
             final SQLiteDatabase db = accounts.openHelper.getReadableDatabase();
 
@@ -5561,7 +5566,7 @@ public class AccountManagerService
             throws RemoteException {
         final int callingUid = getCallingUid();
 
-        if (callingUid != Process.SYSTEM_UID) {
+        if (UserHandle.getAppId(callingUid) != Process.SYSTEM_UID) {
             throw new SecurityException();
         }
 
