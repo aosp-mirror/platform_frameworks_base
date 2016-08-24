@@ -753,63 +753,57 @@ public class DirectoryFragment extends Fragment
     private void openDocuments(final Selection selected) {
         Metrics.logUserAction(getContext(), Metrics.USER_ACTION_OPEN);
 
-        new GetDocumentsTask() {
-            @Override
-            void onDocumentsReady(List<DocumentInfo> docs) {
-                // TODO: Implement support in Files activity for opening multiple docs.
-                BaseActivity.get(DirectoryFragment.this).onDocumentsPicked(docs);
-            }
-        }.execute(selected);
+        // Model must be accessed in UI thread, since underlying cursor is not threadsafe.
+        List<DocumentInfo> docs = mModel.getDocuments(selected);
+        // TODO: Implement support in Files activity for opening multiple docs.
+        BaseActivity.get(DirectoryFragment.this).onDocumentsPicked(docs);
     }
 
     private void shareDocuments(final Selection selected) {
         Metrics.logUserAction(getContext(), Metrics.USER_ACTION_SHARE);
 
-        new GetDocumentsTask() {
-            @Override
-            void onDocumentsReady(List<DocumentInfo> docs) {
-                Intent intent;
+        // Model must be accessed in UI thread, since underlying cursor is not threadsafe.
+        List<DocumentInfo> docs = mModel.getDocuments(selected);
+        Intent intent;
 
-                // Filter out directories and virtual files - those can't be shared.
-                List<DocumentInfo> docsForSend = new ArrayList<>();
-                for (DocumentInfo doc: docs) {
-                    if (!doc.isDirectory() && !doc.isVirtualDocument()) {
-                        docsForSend.add(doc);
-                    }
-                }
-
-                if (docsForSend.size() == 1) {
-                    final DocumentInfo doc = docsForSend.get(0);
-
-                    intent = new Intent(Intent.ACTION_SEND);
-                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                    intent.addCategory(Intent.CATEGORY_DEFAULT);
-                    intent.setType(doc.mimeType);
-                    intent.putExtra(Intent.EXTRA_STREAM, doc.derivedUri);
-
-                } else if (docsForSend.size() > 1) {
-                    intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
-                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                    intent.addCategory(Intent.CATEGORY_DEFAULT);
-
-                    final ArrayList<String> mimeTypes = new ArrayList<>();
-                    final ArrayList<Uri> uris = new ArrayList<>();
-                    for (DocumentInfo doc : docsForSend) {
-                        mimeTypes.add(doc.mimeType);
-                        uris.add(doc.derivedUri);
-                    }
-
-                    intent.setType(findCommonMimeType(mimeTypes));
-                    intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
-
-                } else {
-                    return;
-                }
-
-                intent = Intent.createChooser(intent, getActivity().getText(R.string.share_via));
-                startActivity(intent);
+        // Filter out directories and virtual files - those can't be shared.
+        List<DocumentInfo> docsForSend = new ArrayList<>();
+        for (DocumentInfo doc: docs) {
+            if (!doc.isDirectory() && !doc.isVirtualDocument()) {
+                docsForSend.add(doc);
             }
-        }.execute(selected);
+        }
+
+        if (docsForSend.size() == 1) {
+            final DocumentInfo doc = docsForSend.get(0);
+
+            intent = new Intent(Intent.ACTION_SEND);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            intent.addCategory(Intent.CATEGORY_DEFAULT);
+            intent.setType(doc.mimeType);
+            intent.putExtra(Intent.EXTRA_STREAM, doc.derivedUri);
+
+        } else if (docsForSend.size() > 1) {
+            intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            intent.addCategory(Intent.CATEGORY_DEFAULT);
+
+            final ArrayList<String> mimeTypes = new ArrayList<>();
+            final ArrayList<Uri> uris = new ArrayList<>();
+            for (DocumentInfo doc : docsForSend) {
+                mimeTypes.add(doc.mimeType);
+                uris.add(doc.derivedUri);
+            }
+
+            intent.setType(findCommonMimeType(mimeTypes));
+            intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
+
+        } else {
+            return;
+        }
+
+        intent = Intent.createChooser(intent, getActivity().getText(R.string.share_via));
+        startActivity(intent);
     }
 
     private String generateDeleteMessage(final List<DocumentInfo> docs) {
@@ -855,52 +849,51 @@ public class DirectoryFragment extends Fragment
         assert(!selected.isEmpty());
 
         final DocumentInfo srcParent = getDisplayState().stack.peek();
-        new GetDocumentsTask() {
-            @Override
-            void onDocumentsReady(final List<DocumentInfo> docs) {
 
-                TextView message =
-                        (TextView) mInflater.inflate(R.layout.dialog_delete_confirmation, null);
-                message.setText(generateDeleteMessage(docs));
+        // Model must be accessed in UI thread, since underlying cursor is not threadsafe.
+        List<DocumentInfo> docs = mModel.getDocuments(selected);
 
-                // This "insta-hides" files that are being deleted, because
-                // the delete operation may be not execute immediately (it
-                // may be queued up on the FileOperationService.)
-                // To hide the files locally, we call the hide method on the adapter
-                // ...which a live object...cannot be parceled.
-                // For that reason, for now, we implement this dialog NOT
-                // as a fragment (which can survive rotation and have its own state),
-                // but as a simple runtime dialog. So rotating a device with an
-                // active delete dialog...results in that dialog disappearing.
-                // We can do better, but don't have cycles for it now.
-                new AlertDialog.Builder(getActivity())
-                    .setView(message)
-                    .setPositiveButton(
-                         android.R.string.yes,
-                         new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                // Finish selection mode first which clears selection so we
-                                // don't end up trying to deselect deleted documents.
-                                // This is done here, rather in the onActionItemClicked
-                                // so we can avoid de-selecting items in the case where
-                                // the user cancels the delete.
-                                if (mActionMode != null) {
-                                    mActionMode.finish();
-                                } else {
-                                    Log.w(TAG, "Action mode is null before deleting documents.");
-                                }
-                                // Hide the files in the UI...since the operation
-                                // might be queued up on FileOperationService.
-                                // We're walking a line here.
-                                mAdapter.hide(selected.getAll());
-                                FileOperations.delete(
-                                        getActivity(), docs, srcParent, getDisplayState().stack);
-                            }
-                        })
-                    .setNegativeButton(android.R.string.no, null)
-                    .show();
-            }
-        }.execute(selected);
+        TextView message =
+                (TextView) mInflater.inflate(R.layout.dialog_delete_confirmation, null);
+        message.setText(generateDeleteMessage(docs));
+
+        // This "insta-hides" files that are being deleted, because
+        // the delete operation may be not execute immediately (it
+        // may be queued up on the FileOperationService.)
+        // To hide the files locally, we call the hide method on the adapter
+        // ...which a live object...cannot be parceled.
+        // For that reason, for now, we implement this dialog NOT
+        // as a fragment (which can survive rotation and have its own state),
+        // but as a simple runtime dialog. So rotating a device with an
+        // active delete dialog...results in that dialog disappearing.
+        // We can do better, but don't have cycles for it now.
+        new AlertDialog.Builder(getActivity())
+            .setView(message)
+            .setPositiveButton(
+                 android.R.string.yes,
+                 new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        // Finish selection mode first which clears selection so we
+                        // don't end up trying to deselect deleted documents.
+                        // This is done here, rather in the onActionItemClicked
+                        // so we can avoid de-selecting items in the case where
+                        // the user cancels the delete.
+                        if (mActionMode != null) {
+                            mActionMode.finish();
+                        } else {
+                            Log.w(TAG, "Action mode is null before deleting documents.");
+                        }
+                        // Hide the files in the UI...since the operation
+                        // might be queued up on FileOperationService.
+                        // We're walking a line here.
+                        mAdapter.hide(selected.getAll());
+                        FileOperations.delete(
+                                getActivity(), docs, srcParent, getDisplayState().stack);
+                    }
+                })
+            .setNegativeButton(android.R.string.no, null)
+            .show();
     }
 
     private void transferDocuments(final Selection selected, final @OpType int mode) {
@@ -934,25 +927,21 @@ public class DirectoryFragment extends Fragment
                 ? R.string.menu_move : R.string.menu_copy;
         intent.putExtra(DocumentsContract.EXTRA_PROMPT, getResources().getString(drawerTitleId));
 
-        new GetDocumentsTask() {
-            @Override
-            void onDocumentsReady(List<DocumentInfo> docs) {
-                // TODO: Can this move to Fragment bundle state?
-                getDisplayState().selectedDocumentsForCopy = docs;
+        // Model must be accessed in UI thread, since underlying cursor is not threadsafe.
+        List<DocumentInfo> docs = mModel.getDocuments(selected);
+        // TODO: Can this move to Fragment bundle state?
+        getDisplayState().selectedDocumentsForCopy = docs;
 
-                // Determine if there is a directory in the set of documents
-                // to be copied? Why? Directory creation isn't supported by some roots
-                // (like Downloads). This informs DocumentsActivity (the "picker")
-                // to restrict available roots to just those with support.
-                intent.putExtra(Shared.EXTRA_DIRECTORY_COPY, hasDirectory(docs));
-                intent.putExtra(FileOperationService.EXTRA_OPERATION, mode);
+        // Determine if there is a directory in the set of documents
+        // to be copied? Why? Directory creation isn't supported by some roots
+        // (like Downloads). This informs DocumentsActivity (the "picker")
+        // to restrict available roots to just those with support.
+        intent.putExtra(Shared.EXTRA_DIRECTORY_COPY, hasDirectory(docs));
+        intent.putExtra(FileOperationService.EXTRA_OPERATION, mode);
 
-                // This just identifies the type of request...we'll check it
-                // when we reveive a response.
-                startActivityForResult(intent, REQUEST_COPY_DESTINATION);
-            }
-
-        }.execute(selected);
+        // This just identifies the type of request...we'll check it
+        // when we reveive a response.
+        startActivityForResult(intent, REQUEST_COPY_DESTINATION);
     }
 
     private static boolean hasDirectory(List<DocumentInfo> docs) {
@@ -971,12 +960,9 @@ public class DirectoryFragment extends Fragment
         // Rename option is only available in menu when 1 document selected
         assert(selected.size() == 1);
 
-        new GetDocumentsTask() {
-            @Override
-            void onDocumentsReady(List<DocumentInfo> docs) {
-                RenameDocumentFragment.show(getFragmentManager(), docs.get(0));
-            }
-        }.execute(selected);
+        // Model must be accessed in UI thread, since underlying cursor is not threadsafe.
+        List<DocumentInfo> docs = mModel.getDocuments(selected);
+        RenameDocumentFragment.show(getFragmentManager(), docs.get(0));
     }
 
     @Override
@@ -1135,19 +1121,17 @@ public class DirectoryFragment extends Fragment
         }
     }
 
-    void copySelectionToClipboard(Selection selection) {
-        assert(!selection.isEmpty());
-        new GetDocumentsTask() {
-            @Override
-            void onDocumentsReady(List<DocumentInfo> docs) {
-                mClipper.clipDocuments(docs);
-                Activity activity = getActivity();
-                Snackbars.makeSnackbar(activity,
-                        activity.getResources().getQuantityString(
-                                R.plurals.clipboard_files_clipped, docs.size(), docs.size()),
-                        Snackbar.LENGTH_SHORT).show();
-            }
-        }.execute(selection);
+    void copySelectionToClipboard(Selection selected) {
+        assert(!selected.isEmpty());
+
+        // Model must be accessed in UI thread, since underlying cursor is not threadsafe.
+        List<DocumentInfo> docs = mModel.getDocuments(selected);
+        mClipper.clipDocuments(docs);
+        Activity activity = getActivity();
+        Snackbars.makeSnackbar(activity,
+                activity.getResources().getQuantityString(
+                        R.plurals.clipboard_files_clipped, docs.size(), docs.size()),
+                Snackbar.LENGTH_SHORT).show();
     }
 
     public void pasteFromClipboard() {
@@ -1455,25 +1439,6 @@ public class DirectoryFragment extends Fragment
             mShadowView.layout(r.left, r.top, r.right, r.bottom);
             mShadowView.draw(canvas);
         }
-    }
-    /**
-     * Abstract task providing support for loading documents *off*
-     * the main thread. And if it isn't obvious, creating a list
-     * of documents (especially large lists) can be pretty expensive.
-     */
-    private abstract class GetDocumentsTask
-            extends AsyncTask<Selection, Void, List<DocumentInfo>> {
-        @Override
-        protected final List<DocumentInfo> doInBackground(Selection... selected) {
-            return mModel.getDocuments(selected[0]);
-        }
-
-        @Override
-        protected final void onPostExecute(List<DocumentInfo> docs) {
-            onDocumentsReady(docs);
-        }
-
-        abstract void onDocumentsReady(List<DocumentInfo> docs);
     }
 
     @Override
