@@ -61019,7 +61019,9 @@ package javax.crypto.spec {
 
   public class PBEParameterSpec implements java.security.spec.AlgorithmParameterSpec {
     ctor public PBEParameterSpec(byte[], int);
+    ctor public PBEParameterSpec(byte[], int, java.security.spec.AlgorithmParameterSpec);
     method public int getIterationCount();
+    method public java.security.spec.AlgorithmParameterSpec getParameterSpec();
     method public byte[] getSalt();
   }
 
